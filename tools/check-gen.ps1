@@ -18,5 +18,11 @@ if ($LASTEXITCODE -ne 0) { exit 1 }
 & obj\tools\layout_dump.exe tools\layout.txt
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# --- generator and diff are added in Task 4 ---
-Write-Host "tables regenerated"
+$python = "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe"
+if (-not (Test-Path $python)) { $python = "python" }
+& $python tools\gen.py
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+git diff --exit-code --stat -- tools\fields.txt tools\layout.txt tools\refs.txt src\gen tests\gen
+if ($LASTEXITCODE -ne 0) { Write-Host "generated files are out of date: run tools\check-gen.ps1 and commit"; exit 1 }
+Write-Host "generated files are up to date"
