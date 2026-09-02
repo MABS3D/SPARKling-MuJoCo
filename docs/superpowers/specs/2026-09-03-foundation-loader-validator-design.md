@@ -58,14 +58,14 @@ This document covers 1 and 2 together because the validator's needs drive the ty
     operation produces infinity or NaN. `-fassociative-math` is off by default and may be enabled
     per unit in sub-project 9 when the differential tests permit.
   - `validation`: `-O2 -gnata -gnato -gnatVa` with all checks on. Used for tests and the corpus run.
-  - `development`: `-O0 -g -gnata -gnatwa -gnatyg`.
+  - `development`: `-O0 -g -gnata -gnatwa` (style checks are off so that generated units stay quiet).
 
 ### 2.2 Proof levels
 
 | Level | Where | Meaning |
 |---|---|---|
 | Stone | everything in SPARK_Mode | valid SPARK subset |
-| Bronze | everything in SPARK_Mode, including `MJ.Vis` | flow analysis: no uninitialized reads, no aliasing, explicit `Global` and `Depends` on every subprogram |
+| Bronze | everything in SPARK_Mode, including `MJ.Vis` | flow analysis: no uninitialized reads, no aliasing, explicit `Global` on every subprogram and `Depends` wherever the flow is not the obvious one |
 | Silver | all physics units | absence of runtime errors: index, range, overflow (integer and float), division by zero, elementary function domains, discriminant and null checks |
 | Gold | listed clauses | validator soundness; CSR well-formedness preserved by every sparse kernel; `ncon <= Contact_Cap`; `nefc <= Efc_Cap`; `nJ <= NJ_Cap`; every solver and line-search loop has a `Loop_Variant`; island partition well-formed |
 
@@ -383,6 +383,14 @@ procedure Validate (M : in out Model; Options : Validate_Options; Result : out L
 modified. Soundness (a true result implies `Is_Valid`) is proven. Completeness (every model
 `Is_Valid` accepts is also accepted) is tested through the corpus, not proven.
 
+Implementation strategy: every clause of `Is_Valid` is an executable expression function, so
+`Validate` first fills `Caps` and `Flg_Adhesion`, then evaluates `Is_Valid (M)` itself. A true
+result is the `OK` case and soundness is immediate. On a false result a separate `Diagnose`
+procedure re-walks the clauses in order with element loops and reports the first failing field and
+index; only its absence of runtime errors is proven, its reporting is covered by the mutation tests.
+The proof effort therefore concentrates where it matters: the clause functions must be free of
+runtime errors, which is exactly the statement that every index they compute is in range.
+
 ```ada
 type Validate_Options is record
    Contact_Cap : Cap_Type := 0;   -- 0 selects the automatic rule of Section 5.11
@@ -434,7 +442,8 @@ The full per-field table is generated from the C reference macro and reviewed by
 - `Body_Treeid (I) = -1` when `Body_Dofnum (Body_Weldid (I)) = 0` (the world and every body
   welded to it), otherwise `Body_Treeid (I) = Dof_Treeid (Body_Dofadr (Body_Weldid (I)))`.
   The bodies with `Body_Treeid = T` are contiguous, and `Tree_Bodyadr (T)` and
-  `Tree_Bodynum (T)` delimit exactly that range. `Tree_Sleep_Policy (T) in 0 .. 3`.
+  `Tree_Bodynum (T)` delimit exactly that range. `Tree_Sleep_Policy (T) in 0 .. 5` (the six
+  values of `mjtSleepPolicy`).
 - `Body_Simple`, `Jnt_Limited`, `Jnt_Actfrclimited`, `Jnt_Actgravcomp`, and every other
   `mjtByte`/`mjtBool` flag array holds only 0 or 1; `Body_Sameframe` holds values of
   `mjtSameFrame` (0 .. 4).
@@ -527,8 +536,8 @@ every `colind` in `0 .. ncols - 1`; and `colind` strictly increasing within each
 
 ### 5.8 Actuators and sensors
 
-- `Actuator_Trntype (A) in 0 .. 7`, `Actuator_Dyntype in 0 .. 7`, `Actuator_Gaintype in 0 .. 6`,
-  `Actuator_Biastype in 0 .. 5`; `Actuator_Trnid` per type as in C.
+- `Actuator_Trntype (A) in 0 .. 6` or equal to 1000 (`mjTRN_UNDEFINED`), `Actuator_Dyntype in 0 .. 7`,
+  `Actuator_Gaintype in 0 .. 6`, `Actuator_Biastype in 0 .. 5`; `Actuator_Trnid` per type as in C.
 - `Actuator_Actadr`/`Actuator_Actnum` contiguous within `0 .. Na - 1` for actuators with
   `Dyntype /= None`, `-1`/`0` otherwise; `Actuator_Ctrladr`/`Actuator_Ctrlnum` and
   `Actuator_Outadr`/`Actuator_Outnum` contiguous within `0 .. Nu - 1` and `0 .. Nout - 1`.
@@ -578,8 +587,12 @@ sub-project needs a new fact, and each addition is recorded in that sub-project'
 
 ### 5.11 Capacities
 
-`Validate` computes `M.Caps`, and `Is_Valid` includes the clause that `M.Caps` equals the value
-of these formulas:
+`Validate` computes `M.Caps` with these formulas. `Is_Valid` includes only the consistency clause
+that downstream proofs use: `Efc_Cap = Ne_Max + Nf_Max + Nl_Max + 10 * Contact_Cap`,
+`NJ_Cap = Efc_Cap * Nv`, `NIsland_Cap = Ntree`, `NIdof_Cap = Nv`, all within their types. The
+exact counts are not part of the predicate because no proof needs them: the constraint assembler
+in sub-project 6 checks capacity dynamically and warns exactly as C does when its arena is full.
+The formulas matter for completeness, which the corpus tests cover.
 
 ```
 Contact_Cap = clamp (if Options.Contact_Cap > 0 then Options.Contact_Cap
@@ -625,7 +638,7 @@ The file must end exactly after the last array; extra bytes are `Trailing_Bytes`
 
 ### 6.2 Layers
 
-- `MJ.MJB.IO` (`SPARK_Mode => Off`): reads a whole file into a heap `Byte_Array`, returning
+- `MJ.File_IO` (`SPARK_Mode => Off`): reads a whole file into a heap `Byte_Array`, returning
   `File_Error` on any failure. Also writes a `Byte_Array` to a file (used by tests).
 - `MJ.MJB` (SPARK): `procedure Parse (Bytes : Byte_Array; Options : Validate_Options;
   M : out Model; Result : out Load_Result)`. On `OK`, `M` is allocated and validated
@@ -694,12 +707,16 @@ is therefore always a `Valid_Model` when the status is `OK`.
 ```
 alire.toml, sparkling_mujoco.gpr, prove.ps1
 src/mj.ads
-src/mj-types.ads
-src/mj-model.ads / .adb               (hand-written parts: record, Allocate/Free declarations)
+src/mj-types.ads                      (scalars, tiers, arrays, access types, enums, Load_Status, Capacities)
 src/mj-model-validity.ads             (clause functions, Is_Valid, Valid_Model)
-src/mj-validate.ads / .adb
-src/mj-mjb.ads / .adb, src/mj-mjb-io.ads / .adb
-src/gen/*                             (generated, checked in)
+src/mj-validate.ads / .adb            (Compute_Caps, Validate, Diagnose)
+src/mj-mjb.ads / .adb                 (Parse_Raw, Parse, Load), src/mj-mjb-bytes.ads / .adb, src/mj-file_io.ads / .adb
+src/gen/mj-fields.ads                 (Field_Id, Load_Result)
+src/gen/mj-fixed.ads                  (Option, Visual, Statistic, layout constants)
+src/gen/mj-model.ads / .adb           (Sizes, group records, Model, Valid_Layout, All_Null, Allocate, Free; fully generated)
+src/gen/mj-model-gen_clauses.ads      (Refs_OK, Reals_In_Tier0, Bools_OK)
+src/gen/mj-mjb-read_*.adb             (subunits: sizes, fixed blocks, one per array group)
+src/gen/mj-validate-diagnose_*.adb    (subunits: reference, real, and flag diagnostics)
 tools/xmacro_dump.c, tools/layout_dump.c, tools/gen.py, tools/check-gen.ps1, tools/oracle.py
 tools/mjinfo.adb, tools/tools.gpr
 tests/*.adb, tests/tests.gpr, tests/run.ps1, tests/corpus_expected.txt
