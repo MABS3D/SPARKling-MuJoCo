@@ -73,6 +73,17 @@ This document covers 1 and 2 together because the validator's needs drive the ty
 limitations. Each one needs a written rationale in `docs/proof-justifications.md`, which starts
 empty. The prove script fails if a justification appears without an entry there.
 
+Contracts that are proven are not evaluated at run time in the proof-heavy units (`MJ.Models.Validity`,
+`MJ.Models.Gen_Clauses`, `MJ.Validation`, `MJ.MJB.Readers`): those units carry
+`pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore, Loop_Variant => Ignore, Assert => Check)`.
+GNATprove proves them regardless of the policy. Evaluating them was never useful (they are proven)
+and it was harmful: with `-O2 -gnata` the GCC optimiser inlined whole-model invariants at every
+call site of an element predicate, `gnat1` grew past 60 GB and crashed the development machine on
+2026-09-03. Two rules follow: element-level expression functions carry only O(1) preconditions
+(non-null and index-range facts), and whole-model clause functions carry `pragma No_Inline`. Every
+build and proof runs under `tools/guarded.ps1`, which kills the tool tree when any compiler or
+prover process exceeds a memory cap, and gnatprove runs with bounded parallelism (`-j4`), not `-j0`.
+
 ### 2.3 Numeric model
 
 - `Real` is `Long_Float`, IEEE binary64, the same as `mjtNum` in the default double build.
@@ -84,14 +95,16 @@ empty. The prove script fails if a justification appears without an entry there.
   |---|---|---|
   | `Tier0_Real` | 1e10 | state, controls, applied forces, model parameters (this is `mjMAXVAL`) |
   | `Tier1_Real` | 1e30 | products of two Tier0 values, sums over any array of Tier0 values |
-  | `Tier2_Real` | 1e60 | products of Tier1 values |
-  | `Tier3_Real` | 1e120 | products of Tier2 values |
-  | `Tier4_Real` | 1e240 | products of Tier3 values; nothing may multiply two Tier4 values |
+  | `Tier2_Real` | 1e61 | products of Tier1 values |
+  | `Tier3_Real` | 1e123 | products of Tier2 values |
+  | `Tier4_Real` | 1e247 | products of Tier3 values; nothing may multiply two Tier4 values |
 
   Rules: a product of two values in tier k is in tier k+1. A division whose denominator is at
   least `Min_Val = 1e-15` (`mjMINVAL`) takes tier k to tier k+1. A sum of at most 2^31 values in
   tier k is in tier k+1. Each kernel's contract names its input and output tiers. Where a kernel
-  needs a tighter bound than the ladder gives, it states it explicitly.
+  needs a tighter bound than the ladder gives, it states it explicitly. The upper bounds carry a
+  factor of ten of slack over the exact squares because bounds are rounded to doubles: the square
+  of the double nearest 1e30 is above the double nearest 1e60, so 1e60 would not have worked.
 - Every denominator is either proven at least `Min_Val` or explicitly guarded, matching the C
   code's `mjMINVAL` guards.
 - Elementary functions come from `Ada.Numerics.Long_Elementary_Functions`, whose SPARK contracts
@@ -104,7 +117,8 @@ empty. The prove script fails if a justification appears without an entry there.
   integration can grow values past 1e10; they reset and count a warning exactly as C does.
 - Integer arithmetic uses 32-bit `Integer`. Sizes are capped at `Max_Size = 2**27 - 1` so that
   small constant multiples (up to 11, the largest fixed column count in `mjModel`) fit in
-  `Integer`. Products of two sizes are computed in `Long_Integer` and checked against `Max_Size`.
+  `Integer`. Products of two sizes are computed in `Int64` (a subtype of `Long_Long_Integer`,
+  because `Long_Integer` is only 32 bits on Windows GNAT) and checked against `Max_Size`.
   C's own limit is `INT_MAX`; ours is stricter and is documented as a version-one limitation.
   Runtime capacities (contacts, constraint rows) are capped at `Max_Cap = 2**24 - 1` so that
   36 times a capacity fits in `Integer`.
@@ -210,9 +224,9 @@ Max_Val : constant := 1.0e10;          -- mjMAXVAL
 Min_Val : constant := 1.0e-15;         -- mjMINVAL
 subtype Tier0_Real is Real range -1.0e10  .. 1.0e10;
 subtype Tier1_Real is Real range -1.0e30  .. 1.0e30;
-subtype Tier2_Real is Real range -1.0e60  .. 1.0e60;
-subtype Tier3_Real is Real range -1.0e120 .. 1.0e120;
-subtype Tier4_Real is Real range -1.0e240 .. 1.0e240;
+subtype Tier2_Real is Real range -1.0e61  .. 1.0e61;
+subtype Tier3_Real is Real range -1.0e123 .. 1.0e123;
+subtype Tier4_Real is Real range -1.0e247 .. 1.0e247;
 subtype Nonneg_Tier0 is Tier0_Real range 0.0 .. 1.0e10;
 Max_Size : constant := 2**27 - 1;
 Max_Cap  : constant := 2**24 - 1;

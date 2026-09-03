@@ -400,36 +400,95 @@ READ_CALL = {   # reader tag -> (getter, bytes)
 
 
 def emit_element_loop(out, indent, arr, f, field_lit, layout_pred):
-    """Emit the loop filling access array `arr` (e.g. 'G.Body_Pos') for field f."""
+    """Emit the call filling access array `arr` (e.g. 'G.Body_Pos') for field f.
+
+    The element loops live in the small helper procedures Read_*_Array below,
+    so a group reader is a flat sequence of calls: no loop invariant has to
+    restate the group layout at every array, which kept gnatwhy3 and the
+    optimiser from blowing up on the 83-array flex group.
+    """
     sp = " " * indent
-    n = f.nbytes
-    out.append(f"{sp}for I in 0 .. Integer (Count) - 1 loop")
-    out.append(f"{sp}   pragma Loop_Invariant ({layout_pred});")
-    if f.reader == "F64":
-        out.append(f"{sp}   declare")
-        out.append(f"{sp}      U : constant Unsigned_64 := Get_U64 (B, Pos + 8 * I);")
-        out.append(f"{sp}   begin")
-        out.append(f"{sp}      if not Is_Finite_F64 (U) then")
-        out.append(f"{sp}         Result := (Non_Finite_Value, {field_lit}, I);")
-        out.append(f"{sp}         return;")
-        out.append(f"{sp}      end if;")
-        out.append(f"{sp}      {arr} (I) := Bits_To_Real (U);")
-        out.append(f"{sp}   end;")
-    elif f.reader == "F32":
-        out.append(f"{sp}   declare")
-        out.append(f"{sp}      U : constant Unsigned_32 := Get_U32 (B, Pos + 4 * I);")
-        out.append(f"{sp}   begin")
-        out.append(f"{sp}      if not Is_Finite_F32 (U) then")
-        out.append(f"{sp}         Result := (Non_Finite_Value, {field_lit}, I);")
-        out.append(f"{sp}         return;")
-        out.append(f"{sp}      end if;")
-        out.append(f"{sp}      {arr} (I) := Bits_To_Float (U);")
-        out.append(f"{sp}   end;")
+    if f.reader in ("F64", "F32"):
+        out.append(f"{sp}Read_{f.reader}_Array (B, Pos, {arr}.all, Bad);")
+        out.append(f"{sp}if Bad >= 0 then")
+        out.append(f"{sp}   Result := (Non_Finite_Value, {field_lit}, Bad);")
+        out.append(f"{sp}   return;")
+        out.append(f"{sp}end if;")
     else:
-        getter, _ = READ_CALL[f.reader]
-        step = f"{n} * I" if n > 1 else "I"
-        out.append(f"{sp}   {arr} (I) := {getter} (B, Pos + {step});")
-    out.append(f"{sp}end loop;")
+        out.append(f"{sp}Read_{f.reader}_Array (B, Pos, {arr}.all);")
+
+
+HELPERS = """
+   --  One element loop per element kind. B'First = 0 and A'First = 0 always;
+   --  the caller has checked that the bytes for the whole array are present.
+
+   procedure Read_I32_Array (B : Byte_Array; Pos : Natural; A : in out Int_Array) with
+     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+            and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length)
+   is
+   begin
+      for I in A'Range loop
+         A (I) := Get_I32 (B, Pos + 4 * I);
+      end loop;
+   end Read_I32_Array;
+
+   procedure Read_I64_Array (B : Byte_Array; Pos : Natural; A : in out Int64_Array) with
+     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+            and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length)
+   is
+   begin
+      for I in A'Range loop
+         A (I) := Get_I64 (B, Pos + 8 * I);
+      end loop;
+   end Read_I64_Array;
+
+   procedure Read_U8_Array (B : Byte_Array; Pos : Natural; A : in out Byte_Array) with
+     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+            and then Int64 (B'Length) - Int64 (Pos) >= Int64 (A'Length)
+   is
+   begin
+      for I in A'Range loop
+         A (I) := Get_U8 (B, Pos + I);
+      end loop;
+   end Read_U8_Array;
+
+   --  Bad is -1 when every value is finite, else the index of the first that is not.
+   procedure Read_F64_Array (B : Byte_Array; Pos : Natural; A : in out Real_Array; Bad : out Integer) with
+     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+             and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length),
+     Post => Bad in -1 .. A'Last
+   is
+      U : Unsigned_64;
+   begin
+      Bad := -1;
+      for I in A'Range loop
+         U := Get_U64 (B, Pos + 8 * I);
+         if not Is_Finite_F64 (U) then
+            Bad := I;
+            return;
+         end if;
+         A (I) := Bits_To_Real (U);
+      end loop;
+   end Read_F64_Array;
+
+   procedure Read_F32_Array (B : Byte_Array; Pos : Natural; A : in out Float32_Array; Bad : out Integer) with
+     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+             and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length),
+     Post => Bad in -1 .. A'Last
+   is
+      U : Unsigned_32;
+   begin
+      Bad := -1;
+      for I in A'Range loop
+         U := Get_U32 (B, Pos + 4 * I);
+         if not Is_Finite_F32 (U) then
+            Bad := I;
+            return;
+         end if;
+         A (I) := Bits_To_Float (U);
+      end loop;
+   end Read_F32_Array;
+"""
 
 
 def fixed_members(t: Tables):
@@ -513,8 +572,8 @@ def emit_readers(t: Tables) -> None:
     spec.append("end MJ.MJB.Readers;")
     write(GEN / "mj-mjb-readers.ads", "\n".join(spec) + "\n")
 
-    body = ["with Interfaces; use Interfaces;", "with MJ.Bytes;   use MJ.Bytes;", "",
-            "package body MJ.MJB.Readers with SPARK_Mode is", ""]
+    body = [POLICY_PRAGMA, "with Interfaces; use Interfaces;", "with MJ.Bytes;   use MJ.Bytes;", "",
+            "package body MJ.MJB.Readers with SPARK_Mode is", HELPERS]
     # Read_Sizes
     body.append("   procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) is")
     body.append("      P : constant Natural := Pos;")
@@ -568,6 +627,8 @@ def emit_readers(t: Tables) -> None:
         body.append(f"   procedure Read_{P} (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out {T}; Result : out Load_Result) is")
         body.append("      Count  : Int64;")
         body.append("      Nbytes : Int64;")
+        if any(f.reader in ("F64", "F32") for f in fs):
+            body.append("      Bad    : Integer;")
         body.append("   begin")
         body.append("      Result := OK_Result;")
         for f in fs:
@@ -700,17 +761,145 @@ end MJB_Serialize;
     write(TGEN / "mjb_serialize.adb", "\n".join(out) + "\n")
 
 
+# ----------------------------------------------------------------------------- generated clauses
+
+ENGINE_IO = ROOT / "mujoco" / "src" / "engine" / "engine_io.c"
+REFS = ROOT / "tools" / "refs.txt"
+
+# id arrays that may legitimately hold -1 (spec 5.2); every other reference is >= 0
+ALLOW_MINUS_ONE = {
+    "body_mocapid", "body_plugin", "geom_matid", "geom_dataid", "site_matid", "skin_matid",
+    "tendon_matid", "cam_targetbodyid", "light_targetbodyid", "jnt_actuatorid", "mesh_graphadr",
+    "mesh_texcoordadr", "flex_texcoordadr", "skin_texcoordadr", "actuator_plugin", "sensor_plugin",
+    "hfield_pathadr", "mesh_pathadr", "skin_pathadr", "tex_pathadr", "tendon_treeid", "dof_parentid",
+}
+
+
+def extract_refs() -> list:
+    """Rows (adr, ntarget, num) of the MJMODEL_REFERENCES table in engine_io.c."""
+    text = ENGINE_IO.read_text()
+    start = text.index("#define MJMODEL_REFERENCES")
+    end = text.index("#define X(adrarray", start)
+    rows = []
+    for m in re.finditer(r"X\(\s*(\w+)\s*,\s*([\w*]+)\s*,\s*(\w+)\s*,\s*(?:m->)?(\w+)\s*\)", text[start:end]):
+        adr, _nadrs, target, num = m.groups()
+        rows.append((adr, target, None if num == "0" else num))
+    if len(rows) < 90:
+        sys.exit(f"reference table extraction found only {len(rows)} rows")
+    REFS.write_text("".join(f"{a} {t} {n or '-'}\n" for a, t, n in rows), newline="\n")
+    return rows
+
+
+def field_path(t: Tables, cname: str) -> str:
+    f = next(f for f in t.fields if f.name == cname)
+    return f"M.{GROUP_FIELD[f.group]}.{f.ada}"
+
+
+POLICY_PRAGMA = (
+    "--  Contracts and loop invariants in this unit are proven by GNATprove and are\n"
+    "--  not evaluated at run time: evaluating them made the GCC optimiser inline\n"
+    "--  whole-model invariants at every call site (gnat1 reached 65 GB on 2026-09-03).\n"
+    "pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore,\n"
+    "                         Loop_Variant => Ignore, Assert => Check);\n")
+
+
+def emit_gen_clauses(t: Tables, refs: list) -> None:
+    out = [POLICY_PRAGMA, "with Interfaces; use type Interfaces.Unsigned_8;", "",
+           "package MJ.Models.Gen_Clauses with SPARK_Mode is", "",
+           "   --  Spec 5.2: every reference of the C MJMODEL_REFERENCES table is in range.",
+           "   --  Pairs (adr, num): num in 0 .. target, adr = -1 allowed only when num = 0.",
+           "   --  Plain ids: in -1 .. target - 1 when -1 is meaningful for that field, else 0 .. target - 1.",
+           "   --  Element preconditions are deliberately O(1): only the non-null and range",
+           "   --  facts the body needs, never a whole-model invariant.", ""]
+    for adr, target, num in refs:
+        a = field_path(t, adr)
+        tgt = f"M.S.{ada_name(target)}"
+        if num:
+            n = field_path(t, num)
+            body = (f"{n} (I) in 0 .. {tgt}\n"
+                    f"      and then (if {n} (I) = 0 then {a} (I) in -1 .. {tgt}\n"
+                    f"                else {a} (I) in 0 .. {tgt} - {n} (I))")
+            pre = (f"{a} /= null and then {n} /= null and then {n}'First = {a}'First\n"
+                   f"               and then {n}'Length = {a}'Length and then I in {a}'Range")
+        else:
+            lo = "-1" if adr in ALLOW_MINUS_ONE else "0"
+            body = f"{a} (I) in {lo} .. {tgt} - 1"
+            pre = f"{a} /= null and then I in {a}'Range"
+        out.append(f"   function Ref_{ada_name(adr)}_At (M : Model; I : Integer) return Boolean is")
+        out.append(f"     ({body})")
+        out.append(f"   with Pre => {pre};\n")
+    out.append("   function Refs_OK (M : Model) return Boolean is")
+    out.append("     (" + "\n      and then ".join(
+        f"(for all I in {field_path(t, adr)}'Range => Ref_{ada_name(adr)}_At (M, I))" for adr, _, _ in refs) + ")")
+    out.append("   with Pre => Valid_Layout (M);")
+    out.append("   pragma No_Inline (Refs_OK);\n")
+    reals = [f for f in t.fields if f.ctype == "mjtNum"]
+    out.append("   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0).")
+    out.append("   function Reals_In_Tier0 (M : Model) return Boolean is")
+    out.append("     (" + "\n      and then ".join(
+        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) in Tier0_Real)" for f in reals) + ")")
+    out.append("   with Pre => Valid_Layout (M);")
+    out.append("   pragma No_Inline (Reals_In_Tier0);\n")
+    bools = [f for f in t.fields if f.ctype == "mjtBool"]
+    out.append("   --  Spec 5.3: every mjtBool array holds only 0 or 1.")
+    out.append("   function Bools_OK (M : Model) return Boolean is")
+    out.append("     (" + "\n      and then ".join(
+        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) <= 1)" for f in bools) + ")")
+    out.append("   with Pre => Valid_Layout (M);")
+    out.append("   pragma No_Inline (Bools_OK);\n")
+    out.append("end MJ.Models.Gen_Clauses;")
+    write(GEN / "mj-models-gen_clauses.ads", "\n".join(out) + "\n")
+
+
+def emit_diagnose(t: Tables, refs: list) -> None:
+    def loop(out, arr, pred, status, lit):
+        out.append(f"   for I in {arr}'Range loop")
+        out.append(f"      if not ({pred}) then")
+        out.append(f"         Result := ({status}, {lit}, I);")
+        out.append("         return;")
+        out.append("      end if;")
+        inv = pred.replace("(I)", "(K)").replace(", I)", ", K)")
+        out.append(f"      pragma Loop_Invariant (for all K in {arr}'First .. I => {inv});")
+        out.append("   end loop;")
+
+    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Refs (M : Model; Result : out Load_Result) is", "begin",
+           "   Result := OK_Result;"]
+    for adr, _, _ in refs:
+        loop(out, field_path(t, adr), f"Ref_{ada_name(adr)}_At (M, I)", "Invalid_Reference", ada_name(adr))
+    out.append("end Diagnose_Refs;")
+    write(GEN / "mj-validation-diagnose_refs.adb", "\n".join(out) + "\n")
+
+    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Reals (M : Model; Result : out Load_Result) is", "begin",
+           "   Result := OK_Result;"]
+    for f in (f for f in t.fields if f.ctype == "mjtNum"):
+        arr = f"M.{GROUP_FIELD[f.group]}.{f.ada}"
+        loop(out, arr, f"{arr} (I) in Tier0_Real", "Invalid_Parameter", f.ada)
+    out.append("end Diagnose_Reals;")
+    write(GEN / "mj-validation-diagnose_reals.adb", "\n".join(out) + "\n")
+
+    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Bools (M : Model; Result : out Load_Result) is", "begin",
+           "   Result := OK_Result;"]
+    for f in (f for f in t.fields if f.ctype == "mjtBool"):
+        arr = f"M.{GROUP_FIELD[f.group]}.{f.ada}"
+        loop(out, arr, f"{arr} (I) <= 1", "Invalid_Parameter", f.ada)
+    out.append("end Diagnose_Bools;")
+    write(GEN / "mj-validation-diagnose_bools.adb", "\n".join(out) + "\n")
+
+
 # ----------------------------------------------------------------------------- main
 
 
 def main() -> None:
     t = load_tables()
+    refs = extract_refs()
     emit_fields(t)
     emit_fixed(t)
     emit_model(t)
     emit_readers(t)
     emit_serialize(t)
-    print(f"generated {len(t.fields)} fields in {len(GROUP_ORDER)} groups")
+    emit_gen_clauses(t, refs)
+    emit_diagnose(t, refs)
+    print(f"generated {len(t.fields)} fields in {len(GROUP_ORDER)} groups, {len(refs)} reference rows")
 
 
 if __name__ == "__main__":
