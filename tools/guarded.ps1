@@ -8,11 +8,12 @@
 # the script exits 99. Otherwise it reports peak memory and elapsed time and
 # returns the command's exit code. This exists because gnat1.exe reached 65 GB on
 # 2026-09-03 and took the machine down (fixed 4 GB pagefile).
+[CmdletBinding(PositionalBinding = $false)]
 param(
     [int]$CapMB = 6000,
     [int]$TimeoutSec = 900,
     [int]$MinFreeMB = 12000,   # abort when the system's free commit (RAM + pagefile) drops below this
-    [Parameter(ValueFromRemainingArguments = $true)][string[]]$Command
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)][string[]]$Command
 )
 $ErrorActionPreference = "Continue"
 $env:Path += ";$env:LOCALAPPDATA\Programs\alr\bin"
