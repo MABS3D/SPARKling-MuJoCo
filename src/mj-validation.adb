@@ -548,6 +548,161 @@ package body MJ.Validation with SPARK_Mode is
       end if;
    end Diagnose_Assets;
 
+   procedure Diagnose_Objects (M : Model; Result : out Load_Result) with
+     Pre  => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M),
+     Post => (if Result.Status = OK then
+                Pairs_OK (M) and then Excludes_OK (M) and then Eq_Types_OK (M) and then Eq_Objs_OK (M)
+                and then Wraps_OK (M) and then Tendons_OK (M)
+                and then Actuator_Types_OK (M) and then Actuator_Trnids_OK (M)
+                and then Actuator_Acts_OK (M) and then Actuator_Ranges_OK (M)
+                and then Sensor_Types_OK (M) and then Sensor_Objs_OK (M) and then Sensor_Dims_OK (M)
+                and then Sensor_Adrs_OK (M)
+                and then Tuples_OK (M) and then Names_OK (M) and then Paths_OK (M))
+   is
+   begin
+      Result := OK_Result;
+      for P in 0 .. M.S.Npair - 1 loop
+         if not Pair_Dim_At (M, P) then
+            Result := (Invalid_Enum, Pair_Dim, P);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. P => Pair_Dim_At (M, K));
+      end loop;
+      for P in 0 .. M.S.Npair - 1 loop
+         if not Pair_Signature_At (M, P) then
+            Result := (Invalid_Signature, Pair_Signature, P);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. P => Pair_Signature_At (M, K));
+      end loop;
+      for E in 0 .. M.S.Nexclude - 1 loop
+         if not Exclude_At (M, E) then
+            Result := (Invalid_Signature, Exclude_Signature, E);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. E => Exclude_At (M, K));
+      end loop;
+      for E in 0 .. M.S.Neq - 1 loop
+         if M.Equalities.Eq_Type (E) not in 0 .. 3 then
+            Result := ((if M.Equalities.Eq_Type (E) in 4 .. 6 then Unsupported_Flex else Invalid_Enum), Eq_Type, E);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. E => M.Equalities.Eq_Type (K) in 0 .. 3);
+      end loop;
+      for E in 0 .. M.S.Neq - 1 loop
+         if not Eq_Obj_At (M, E) then
+            Result := (Invalid_Reference, Eq_Obj1id, E);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. E => Eq_Obj_At (M, K));
+      end loop;
+      for W in 0 .. M.S.Nwrap - 1 loop
+         if not Wrap_At (M, W) then
+            Result := ((if M.Wraps.Wrap_Type (W) in 0 .. 5 then Invalid_Reference else Invalid_Enum),
+                       (if M.Wraps.Wrap_Type (W) in 0 .. 5 then Wrap_Objid else Wrap_Type), W);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. W => Wrap_At (M, K));
+      end loop;
+      for T in 0 .. M.S.Ntendon - 1 loop
+         if not Tendon_At (M, T) then
+            Result := (Invalid_Reference, Tendon_Adr, T);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. T => Tendon_At (M, K));
+      end loop;
+      for A in 0 .. M.S.Nactuator - 1 loop
+         if not Actuator_Type_At (M, A) then
+            Result := (Invalid_Enum, Actuator_Trntype, A);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. A => Actuator_Type_At (M, K));
+      end loop;
+      for A in 0 .. M.S.Nactuator - 1 loop
+         if not Actuator_Trnid_At (M, A) then
+            Result := (Invalid_Reference, Actuator_Trnid, A);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. A => Actuator_Trnid_At (M, K));
+      end loop;
+      for A in 0 .. M.S.Nactuator - 1 loop
+         if not Actuator_Act_At (M, A) then
+            Result := (Invalid_Reference, Actuator_Actadr, A);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. A => Actuator_Act_At (M, K));
+      end loop;
+      for A in 0 .. M.S.Nactuator - 1 loop
+         if not Actuator_Range_At (M, A) then
+            Result := (Invalid_Parameter, Actuator_Ctrlrange, A);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. A => Actuator_Range_At (M, K));
+      end loop;
+      for S in 0 .. M.S.Nsensor - 1 loop
+         if not Sensor_Type_At (M, S) then
+            Result := ((if M.Sensors.Sensor_Type (S) = 47 then Unsupported_Plugins else Invalid_Enum), Sensor_Type, S);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. S => Sensor_Type_At (M, K));
+      end loop;
+      for S in 0 .. M.S.Nsensor - 1 loop
+         if not Sensor_Obj_At (M, S) then
+            Result := (Invalid_Reference, Sensor_Objid, S);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. S => Sensor_Obj_At (M, K));
+      end loop;
+      for S in 0 .. M.S.Nsensor - 1 loop
+         if M.Sensors.Sensor_Dim (S) not in 0 .. M.S.Nsensordata
+           or else M.Sensors.Sensor_Dim (S) /= Sensor_Size (M.Sensors.Sensor_Type (S), M.Sensors.Sensor_Dim (S))
+         then
+            Result := (Invalid_Parameter, Sensor_Dim, S);
+            return;
+         end if;
+         pragma Loop_Invariant
+           (for all K in 0 .. S => M.Sensors.Sensor_Dim (K) in 0 .. M.S.Nsensordata
+              and then M.Sensors.Sensor_Dim (K) = Sensor_Size (M.Sensors.Sensor_Type (K), M.Sensors.Sensor_Dim (K)));
+      end loop;
+      for S in 0 .. M.S.Nsensor - 1 loop
+         if not Sensor_Adr_At (M, S) then
+            Result := (Invalid_Parameter, Sensor_Adr, S);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. S => Sensor_Adr_At (M, K));
+      end loop;
+      if M.S.Nsensor = 0 then
+         if M.S.Nsensordata /= 0 then
+            Result := (Invalid_Parameter, Sensor_Adr, -1);
+            return;
+         end if;
+      elsif M.Sensors.Sensor_Adr (M.S.Nsensor - 1) + M.Sensors.Sensor_Dim (M.S.Nsensor - 1) /= M.S.Nsensordata then
+         Result := (Invalid_Parameter, Sensor_Adr, M.S.Nsensor - 1);
+         return;
+      end if;
+      for K in 0 .. M.S.Ntupledata - 1 loop
+         if Num_Objects (M, M.Tuples.Tuple_Objtype (K)) = -2
+           or else (Num_Objects (M, M.Tuples.Tuple_Objtype (K)) /= -1
+                    and then M.Tuples.Tuple_Objid (K) not in 0 .. Num_Objects (M, M.Tuples.Tuple_Objtype (K)) - 1)
+         then
+            Result := (Invalid_Reference, Tuple_Objid, K);
+            return;
+         end if;
+         pragma Loop_Invariant
+           (for all J in 0 .. K => Num_Objects (M, M.Tuples.Tuple_Objtype (J)) /= -2
+              and then (if Num_Objects (M, M.Tuples.Tuple_Objtype (J)) /= -1 then
+                          M.Tuples.Tuple_Objid (J) in 0 .. Num_Objects (M, M.Tuples.Tuple_Objtype (J)) - 1));
+      end loop;
+      if not Names_OK (M) then
+         Result := (Invalid_Parameter, Names, M.S.Nnames - 1);
+         return;
+      end if;
+      if not Paths_OK (M) then
+         Result := (Invalid_Parameter, Paths, M.S.Npaths - 1);
+         return;
+      end if;
+   end Diagnose_Objects;
+
    --  Size ordinals in the .mjb size table (position in MJMODEL_SIZES).
    Size_Nbody   : constant := 6;
    Size_Nbvh    : constant := 7;
@@ -606,7 +761,11 @@ package body MJ.Validation with SPARK_Mode is
       if Result.Status /= OK then
          return;
       end if;
-      --  Tasks 8c and 8d insert their Diagnose_* calls here, in Is_Valid order.
+      Diagnose_Objects (M, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      --  Task 8d inserts Diagnose_Params here.
 
       --  Unreachable when Is_Valid (M) is false; keeps Result well defined.
       Result := (Invalid_Parameter, None, -1);

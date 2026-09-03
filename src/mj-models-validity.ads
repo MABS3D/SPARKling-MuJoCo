@@ -552,7 +552,254 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
-   --  Conjunction. Tasks 8c and 8d append clauses here, before Valid_Model.
+   --  5.7 Pairs, excludes, equalities, tendons, wraps
+   ----------------------------------------------------------------------------
+
+   function Pair_Dim_At (M : Model; P : Integer) return Boolean is
+     (M.Pairs.Pair_Dim (P) in 1 | 3 | 4 | 6)
+   with Pre => Valid_Layout (M) and then P in 0 .. M.S.Npair - 1;
+
+   --  The compiler forms the signature as body(geom1) << 16 | body(geom2).
+   function Pair_Signature_At (M : Model; P : Integer) return Boolean is
+     (M.Pairs.Pair_Signature (P) =
+        M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P)) * 2**16 + M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P)))
+   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M)
+               and then P in 0 .. M.S.Npair - 1;
+
+   function Pairs_OK (M : Model) return Boolean is
+     ((for all P in 0 .. M.S.Npair - 1 => Pair_Dim_At (M, P))
+      and then (for all P in 0 .. M.S.Npair - 1 => Pair_Signature_At (M, P)))
+   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M);
+
+   function Exclude_At (M : Model; E : Integer) return Boolean is
+     (M.Excludes.Exclude_Signature (E) >= 0
+      and then M.Excludes.Exclude_Signature (E) / 2**16 in 0 .. M.S.Nbody - 1
+      and then M.Excludes.Exclude_Signature (E) mod 2**16 in 0 .. M.S.Nbody - 1
+      and then M.Excludes.Exclude_Signature (E) / 2**16 /= M.Excludes.Exclude_Signature (E) mod 2**16)
+   with Pre => Valid_Layout (M) and then E in 0 .. M.S.Nexclude - 1;
+
+   function Excludes_OK (M : Model) return Boolean is
+     (for all E in 0 .. M.S.Nexclude - 1 => Exclude_At (M, E))
+   with Pre => Valid_Layout (M);
+
+   function Eq_Types_OK (M : Model) return Boolean is
+     (for all E in 0 .. M.S.Neq - 1 => M.Equalities.Eq_Type (E) in 0 .. 3)   --  flex kinds need nflex > 0
+   with Pre => Valid_Layout (M);
+
+   function Eq_Obj_At (M : Model; E : Integer) return Boolean is
+     (case M.Equalities.Eq_Type (E) is
+        when 0 | 1 =>
+          (M.Equalities.Eq_Objtype (E) = 1
+             and then M.Equalities.Eq_Obj1id (E) in 0 .. M.S.Nbody - 1
+             and then M.Equalities.Eq_Obj2id (E) in 0 .. M.S.Nbody - 1)
+          or else
+          (M.Equalities.Eq_Objtype (E) = 6
+             and then M.Equalities.Eq_Obj1id (E) in 0 .. M.S.Nsite - 1
+             and then M.Equalities.Eq_Obj2id (E) in 0 .. M.S.Nsite - 1),
+        when 2 =>
+          M.Equalities.Eq_Obj1id (E) in 0 .. M.S.Njnt - 1
+          and then M.Equalities.Eq_Obj2id (E) in -1 .. M.S.Njnt - 1,
+        when others =>
+          M.Equalities.Eq_Obj1id (E) in 0 .. M.S.Ntendon - 1
+          and then M.Equalities.Eq_Obj2id (E) in -1 .. M.S.Ntendon - 1)
+   with Pre => Valid_Layout (M) and then Eq_Types_OK (M) and then E in 0 .. M.S.Neq - 1;
+
+   function Eq_Objs_OK (M : Model) return Boolean is
+     (for all E in 0 .. M.S.Neq - 1 => Eq_Obj_At (M, E))
+   with Pre => Valid_Layout (M) and then Eq_Types_OK (M);
+
+   function Wrap_At (M : Model; W : Integer) return Boolean is
+     (M.Wraps.Wrap_Type (W) in 0 .. 5
+      and then (case M.Wraps.Wrap_Type (W) is
+                  when 1      => M.Wraps.Wrap_Objid (W) in 0 .. M.S.Njnt - 1,
+                  when 3      => M.Wraps.Wrap_Objid (W) in 0 .. M.S.Nsite - 1,
+                  when 4 | 5  => M.Wraps.Wrap_Objid (W) in 0 .. M.S.Ngeom - 1,
+                  when others => True))
+   with Pre => Valid_Layout (M) and then W in 0 .. M.S.Nwrap - 1;
+
+   function Wraps_OK (M : Model) return Boolean is
+     (for all W in 0 .. M.S.Nwrap - 1 => Wrap_At (M, W))
+   with Pre => Valid_Layout (M);
+
+   --  A tendon is spatial (site and geom wraps, pulleys allowed) or fixed
+   --  (joint wraps only), decided by its first wrap.
+   function Tendon_At (M : Model; T : Integer) return Boolean is
+     (M.Tendons.Tendon_Num (T) >= 1
+      and then M.Tendons.Tendon_Actuatorid (T) in -1 .. M.S.Nactuator - 1
+      and then M.Tendons.Tendon_Treenum (T) in 0 .. 2
+      and then (if M.Wraps.Wrap_Type (M.Tendons.Tendon_Adr (T)) = 3 then
+                  (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
+                     M.Wraps.Wrap_Type (W) in 2 .. 5)
+                else
+                  (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
+                     M.Wraps.Wrap_Type (W) = 1)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then Wraps_OK (M) and then T in 0 .. M.S.Ntendon - 1;
+
+   function Tendons_OK (M : Model) return Boolean is
+     (for all T in 0 .. M.S.Ntendon - 1 => Tendon_At (M, T))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then Wraps_OK (M);
+
+   ----------------------------------------------------------------------------
+   --  5.8 Actuators and sensors
+   ----------------------------------------------------------------------------
+
+   function Actuator_Type_At (M : Model; A : Integer) return Boolean is
+     ((M.Actuators.Actuator_Trntype (A) in 0 .. 6 or else M.Actuators.Actuator_Trntype (A) = 1000)
+      and then M.Actuators.Actuator_Dyntype (A) in 0 .. 7
+      and then M.Actuators.Actuator_Gaintype (A) in 0 .. 6
+      and then M.Actuators.Actuator_Biastype (A) in 0 .. 5)
+   with Pre => Valid_Layout (M) and then A in 0 .. M.S.Nactuator - 1;
+
+   function Actuator_Types_OK (M : Model) return Boolean is
+     (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Type_At (M, A))
+   with Pre => Valid_Layout (M);
+
+   function Actuator_Trnid_At (M : Model; A : Integer) return Boolean is
+     (case M.Actuators.Actuator_Trntype (A) is
+        when 0 | 1 => M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Njnt - 1,
+        when 2     => M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Nsite - 1
+                      and then M.Actuators.Actuator_Trnid (2 * A + 1) in 0 .. M.S.Nsite - 1,
+        when 3     => M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Ntendon - 1,
+        when 4     => M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Nsite - 1,
+        when 5     => M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Nbody - 1,
+        when 6     => (if M.Actuators.Actuator_Trnid (2 * A + 1) = -1
+                       then M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Njnt - 1
+                       else M.Actuators.Actuator_Trnid (2 * A) in 0 .. M.S.Nsite - 1
+                            and then M.Actuators.Actuator_Trnid (2 * A + 1) in 0 .. M.S.Nsite - 1),
+        when others => True)
+   with Pre => Valid_Layout (M) and then Actuator_Types_OK (M) and then A in 0 .. M.S.Nactuator - 1;
+
+   function Actuator_Trnids_OK (M : Model) return Boolean is
+     (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Trnid_At (M, A))
+   with Pre => Valid_Layout (M) and then Actuator_Types_OK (M);
+
+   --  Stateless actuators have no activation slot; every actuator has at least
+   --  one control and one force output.
+   function Actuator_Act_At (M : Model; A : Integer) return Boolean is
+     ((M.Actuators.Actuator_Actnum (A) > 0) = (M.Actuators.Actuator_Dyntype (A) /= 0)
+      and then M.Actuators.Actuator_Ctrlnum (A) >= 1
+      and then M.Actuators.Actuator_Outnum (A) >= 1)
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then A in 0 .. M.S.Nactuator - 1;
+
+   function Actuator_Acts_OK (M : Model) return Boolean is
+     (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Act_At (M, A))
+   with Pre => Valid_Layout (M) and then Refs_OK (M);
+
+   function Actuator_Range_At (M : Model; A : Integer) return Boolean is
+     ((if M.Actuators.Actuator_Ctrllimited (A) /= 0 then
+         M.Actuators.Actuator_Ctrlrange (2 * A) <= M.Actuators.Actuator_Ctrlrange (2 * A + 1))
+      and then (if M.Actuators.Actuator_Forcelimited (A) /= 0 then
+                  M.Actuators.Actuator_Forcerange (2 * A) <= M.Actuators.Actuator_Forcerange (2 * A + 1))
+      and then (if M.Actuators.Actuator_Actlimited (A) /= 0 then
+                  M.Actuators.Actuator_Actrange (2 * A) <= M.Actuators.Actuator_Actrange (2 * A + 1)))
+   with Pre => Valid_Layout (M) and then A in 0 .. M.S.Nactuator - 1;
+
+   function Actuator_Ranges_OK (M : Model) return Boolean is
+     (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Range_At (M, A))
+   with Pre => Valid_Layout (M);
+
+   --  sensorSize in engine_io.c, by mjtSensor code.
+   function Sensor_Size (Sensor_Type, Dim : Integer) return Integer is
+     (case Sensor_Type is
+        when 0 | 7 | 9 .. 17 | 20 .. 25 | 38 | 39 | 43 .. 45 => 1,
+        when 8                                               => 2,
+        when 1 .. 6 | 19 | 26 | 28 .. 37 | 40                => 3,
+        when 18 | 27                                         => 4,
+        when 41                                              => 6,
+        when 42 | 46 | 48                                    => Dim,
+        when others                                          => -1);
+
+   --  numObjects in engine_io.c: -1 means "no object check", -2 an invalid type.
+   function Num_Objects (M : Model; Obj_Type : Integer) return Integer is
+     (case Obj_Type is
+        when 0 | 100 | 101 | 102 => -1,
+        when 1 | 2 => M.S.Nbody,   when 3  => M.S.Njnt,      when 4  => M.S.Nv,
+        when 5  => M.S.Ngeom,      when 6  => M.S.Nsite,     when 7  => M.S.Ncam,
+        when 8  => M.S.Nlight,     when 9  => M.S.Nflex,     when 10 => M.S.Nmesh,
+        when 11 => M.S.Nskin,      when 12 => M.S.Nhfield,   when 13 => M.S.Ntex,
+        when 14 => M.S.Nmat,       when 15 => M.S.Npair,     when 16 => M.S.Nexclude,
+        when 17 => M.S.Neq,        when 18 => M.S.Ntendon,   when 19 => M.S.Nactuator,
+        when 20 => M.S.Nsensor,    when 21 => M.S.Nnumeric,  when 22 => M.S.Ntext,
+        when 23 => M.S.Ntuple,     when 24 => M.S.Nkey,      when 25 => M.S.Nplugin,
+        when others => -2);
+
+   function Sensor_Type_At (M : Model; S : Integer) return Boolean is
+     ((M.Sensors.Sensor_Type (S) in 0 .. 46 or else M.Sensors.Sensor_Type (S) = 48)   --  47 = plugin
+      and then M.Sensors.Sensor_Datatype (S) in 0 .. 3
+      and then M.Sensors.Sensor_Needstage (S) in 0 .. 3)
+   with Pre => Valid_Layout (M) and then S in 0 .. M.S.Nsensor - 1;
+
+   function Sensor_Types_OK (M : Model) return Boolean is
+     (for all S in 0 .. M.S.Nsensor - 1 => Sensor_Type_At (M, S))
+   with Pre => Valid_Layout (M);
+
+   function Sensor_Obj_At (M : Model; S : Integer) return Boolean is
+     (Num_Objects (M, M.Sensors.Sensor_Objtype (S)) /= -2
+      and then (if Num_Objects (M, M.Sensors.Sensor_Objtype (S)) /= -1 then
+                  M.Sensors.Sensor_Objid (S) in 0 .. Num_Objects (M, M.Sensors.Sensor_Objtype (S)) - 1)
+      and then Num_Objects (M, M.Sensors.Sensor_Reftype (S)) /= -2
+      and then (if Num_Objects (M, M.Sensors.Sensor_Reftype (S)) /= -1 then
+                  M.Sensors.Sensor_Refid (S) in -1 .. Num_Objects (M, M.Sensors.Sensor_Reftype (S)) - 1)
+      --  tactile sensors reference a geom whose body has a collision geom
+      and then (if M.Sensors.Sensor_Type (S) = 46 then
+                  M.Sensors.Sensor_Reftype (S) = 5
+                  and then M.Sensors.Sensor_Refid (S) in 0 .. M.S.Ngeom - 1
+                  and then (declare
+                              B : constant Integer := M.Geoms.Geom_Bodyid (M.Sensors.Sensor_Refid (S));
+                            begin
+                              (for some K in M.Bodies.Body_Geomadr (B) ..
+                                             M.Bodies.Body_Geomadr (B) + M.Bodies.Body_Geomnum (B) - 1 =>
+                                 M.Geoms.Geom_Contype (K) /= 0 or else M.Geoms.Geom_Conaffinity (K) /= 0))))
+   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Body_Geoms_OK (M)
+               and then S in 0 .. M.S.Nsensor - 1;
+
+   function Sensor_Objs_OK (M : Model) return Boolean is
+     (for all S in 0 .. M.S.Nsensor - 1 => Sensor_Obj_At (M, S))
+   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Body_Geoms_OK (M);
+
+   function Sensor_Dims_OK (M : Model) return Boolean is
+     (for all S in 0 .. M.S.Nsensor - 1 =>
+        M.Sensors.Sensor_Dim (S) in 0 .. M.S.Nsensordata
+        and then M.Sensors.Sensor_Dim (S) = Sensor_Size (M.Sensors.Sensor_Type (S), M.Sensors.Sensor_Dim (S)))
+   with Pre => Valid_Layout (M) and then Sensor_Types_OK (M);
+
+   function Sensor_Adr_At (M : Model; S : Integer) return Boolean is
+     (M.Sensors.Sensor_Adr (S) in 0 .. M.S.Nsensordata
+      and then (if S = 0 then M.Sensors.Sensor_Adr (0) = 0
+                else M.Sensors.Sensor_Adr (S - 1) in 0 .. M.S.Nsensordata
+                     and then M.Sensors.Sensor_Adr (S) = M.Sensors.Sensor_Adr (S - 1) + M.Sensors.Sensor_Dim (S - 1)))
+   with Pre => Valid_Layout (M) and then Sensor_Types_OK (M) and then Sensor_Dims_OK (M)
+               and then S in 0 .. M.S.Nsensor - 1;
+
+   function Sensor_Adrs_OK (M : Model) return Boolean is
+     ((for all S in 0 .. M.S.Nsensor - 1 => Sensor_Adr_At (M, S))
+      and then (if M.S.Nsensor = 0 then M.S.Nsensordata = 0
+                else M.Sensors.Sensor_Adr (M.S.Nsensor - 1) + M.Sensors.Sensor_Dim (M.S.Nsensor - 1) = M.S.Nsensordata))
+   with Pre => Valid_Layout (M) and then Sensor_Types_OK (M) and then Sensor_Dims_OK (M);
+
+   ----------------------------------------------------------------------------
+   --  5.9 Tuples, names, paths (numeric and text blocks are covered by Refs_OK)
+   ----------------------------------------------------------------------------
+
+   function Tuples_OK (M : Model) return Boolean is
+     (for all K in 0 .. M.S.Ntupledata - 1 =>
+        Num_Objects (M, M.Tuples.Tuple_Objtype (K)) /= -2
+        and then (if Num_Objects (M, M.Tuples.Tuple_Objtype (K)) /= -1 then
+                    M.Tuples.Tuple_Objid (K) in 0 .. Num_Objects (M, M.Tuples.Tuple_Objtype (K)) - 1))
+   with Pre => Valid_Layout (M);
+
+   --  names is a sequence of NUL-terminated strings ending with NUL, so every
+   --  address the reference table allows (0 .. nnames - 1) reaches a NUL.
+   function Names_OK (M : Model) return Boolean is
+     (M.S.Nnames >= 1 and then M.Names.Names (M.S.Nnames - 1) = 0)
+   with Pre => Valid_Layout (M);
+
+   function Paths_OK (M : Model) return Boolean is
+     (M.S.Npaths = 0 or else M.Names.Paths (M.S.Npaths - 1) = 0)
+   with Pre => Valid_Layout (M);
+
+   ----------------------------------------------------------------------------
+   --  Conjunction. Task 8d appends clauses here, before Valid_Model.
    ----------------------------------------------------------------------------
 
    function Is_Valid (M : Model) return Boolean is
@@ -569,7 +816,14 @@ package MJ.Models.Validity with SPARK_Mode is
       and then D_Diags_OK (M) and then Maps_OK (M)
       and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Sameframes_OK (M)
       and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M) and then Texids_OK (M)
-      and then Bvhs_OK (M) and then Octs_OK (M))
+      and then Bvhs_OK (M) and then Octs_OK (M)
+      and then Pairs_OK (M) and then Excludes_OK (M) and then Eq_Types_OK (M) and then Eq_Objs_OK (M)
+      and then Wraps_OK (M) and then Tendons_OK (M)
+      and then Actuator_Types_OK (M) and then Actuator_Trnids_OK (M) and then Actuator_Acts_OK (M)
+      and then Actuator_Ranges_OK (M)
+      and then Sensor_Types_OK (M) and then Sensor_Objs_OK (M) and then Sensor_Dims_OK (M)
+      and then Sensor_Adrs_OK (M)
+      and then Tuples_OK (M) and then Names_OK (M) and then Paths_OK (M))
    with Pre => Valid_Layout (M);
 
    subtype Valid_Model is Model
@@ -581,6 +835,10 @@ package MJ.Models.Validity with SPARK_Mode is
                      Dof_Parent_Ranges_OK, Madr_Range_OK, Madrs_OK, Simplenums_OK,
                      CSR_OK, Sparse_M_OK, Sparse_B_OK, Sparse_D_OK, Sparse_Ten_J_OK, M_Rownnz_OK,
                      M_Rows_OK, D_Diags_OK, Maps_OK, Geom_Types_OK, Geom_Datas_OK, Sameframes_OK,
-                     Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK, Is_Valid);
+                     Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK,
+                     Pairs_OK, Excludes_OK, Eq_Types_OK, Eq_Objs_OK, Wraps_OK, Tendons_OK,
+                     Actuator_Types_OK, Actuator_Trnids_OK, Actuator_Acts_OK, Actuator_Ranges_OK,
+                     Sensor_Types_OK, Sensor_Objs_OK, Sensor_Dims_OK, Sensor_Adrs_OK,
+                     Tuples_OK, Names_OK, Paths_OK, Is_Valid);
 
 end MJ.Models.Validity;

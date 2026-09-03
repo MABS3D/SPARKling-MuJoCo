@@ -148,6 +148,25 @@ begin
       Expect (Invalid_BVH, Body_Bvhadr, -1, "bvh child pointing at itself");
    end if;
 
+   --  actuators (humanoid has motors on joints)
+   Assert (M.S.Nactuator > 0, "humanoid has actuators");
+   M.Actuators.Actuator_Trntype (0) := 7;
+   Expect (Invalid_Enum, Actuator_Trntype, 0, "transmission type 7");
+   M.Actuators.Actuator_Trntype (0) := 1000;
+   Expect (OK, None, -1, "undefined transmission is allowed");
+   M.Actuators.Actuator_Trnid (0) := M.S.Njnt;
+   Expect (Invalid_Reference, Actuator_Trnid, 0, "joint transmission past njnt");
+   M.Actuators.Actuator_Ctrlnum (0) := 0;
+   Expect (Invalid_Reference, Actuator_Actadr, 0, "actuator without controls");
+   M.Actuators.Actuator_Ctrllimited (0) := 1;
+   M.Actuators.Actuator_Ctrlrange (0) := 2.0;
+   M.Actuators.Actuator_Ctrlrange (1) := 1.0;
+   Expect (Invalid_Parameter, Actuator_Ctrlrange, 0, "inverted control range");
+
+   --  equality-free, tendon-free humanoid: corrupt the names buffer instead
+   M.Names.Names (M.S.Nnames - 1) := Character'Pos ('x');
+   Expect (Invalid_Parameter, Names, M.S.Nnames - 1, "names not NUL-terminated");
+
    Free (M);
    Free_Byte (Bytes);
 
@@ -202,6 +221,34 @@ begin
             M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (0) + M.Meshes.Mesh_Bvhnum (0) - 1) := M.Meshes.Mesh_Facenum (0);
             Expect (Invalid_BVH, Mesh_Bvhadr, 0, "mesh bvh leaf past facenum");
          end if;
+         if M.S.Nsensor > 0 then
+            M.Sensors.Sensor_Type (0) := 47;
+            Expect (Unsupported_Plugins, Sensor_Type, 0, "plugin sensor");
+            M.Sensors.Sensor_Type (0) := 49;
+            Expect (Invalid_Enum, Sensor_Type, 0, "sensor type 49");
+            M.Sensors.Sensor_Adr (0) := 1;
+            Expect (Invalid_Parameter, Sensor_Adr, 0, "first sensor not at address 0");
+            M.Sensors.Sensor_Objtype (0) := 26;
+            Expect (Invalid_Reference, Sensor_Objid, 0, "sensor object type mjNOBJECT");
+         end if;
+         if M.S.Ntendon > 0 then
+            M.Tendons.Tendon_Num (0) := 0;
+            Expect (Invalid_Reference, Tendon_Adr, 0, "empty tendon");
+            M.Wraps.Wrap_Type (M.Tendons.Tendon_Adr (0)) := 6;
+            Expect (Invalid_Enum, Wrap_Type, M.Tendons.Tendon_Adr (0), "wrap type 6");
+         end if;
+         if M.S.Npair > 0 then
+            M.Pairs.Pair_Signature (0) := M.Pairs.Pair_Signature (0) + 1;
+            Expect (Invalid_Signature, Pair_Signature, 0, "pair signature mismatch");
+         end if;
+         if M.S.Neq > 0 then
+            M.Equalities.Eq_Type (0) := 7;
+            Expect (Invalid_Enum, Eq_Type, 0, "distance equality");
+            M.Equalities.Eq_Type (0) := 5;
+            Expect (Unsupported_Flex, Eq_Type, 0, "flex equality");
+         end if;
+         Put_Line ("mesh model features: sensors" & M.S.Nsensor'Image & " tendons" & M.S.Ntendon'Image
+                   & " pairs" & M.S.Npair'Image & " equalities" & M.S.Neq'Image);
          Free (M);
          Free_Byte (Bytes);
       else
