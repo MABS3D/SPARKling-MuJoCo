@@ -38,3 +38,6 @@ Rules:
 - `python tools/prove_report.py` reads the per-unit `.spark` results, because the guard's log
   only contains the watchdog lines.
 - A new large unit is compiled alone at `-O0` and `-O2` under the guard before it joins a full build.
+- Never run two gnatprove invocations on the same object directory at once: they corrupt each
+  other's `.ali` files ("GG data after GG end marker") and every later unit fails in seconds.
+  Recover with `alr exec -- gnatprove -P sparkling_mujoco.gpr --clean`.
