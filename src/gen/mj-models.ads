@@ -110,6 +110,21 @@ package MJ.Models with SPARK_Mode is
       Nbuffer          : Int64 := 0;
    end record;
 
+   function I32_OK (P : Int_Array_Access; N : Int64) return Boolean is
+     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);
+
+   function F64_OK (P : Real_Array_Access; N : Int64) return Boolean is
+     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);
+
+   function U8_OK (P : Byte_Array_Access; N : Int64) return Boolean is
+     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);
+
+   function F32_OK (P : Float32_Array_Access; N : Int64) return Boolean is
+     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);
+
+   function I64_OK (P : Int64_Array_Access; N : Int64) return Boolean is
+     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);
+
    ---- BODY (29 arrays)
 
    type Body_Arrays is record
@@ -151,64 +166,35 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nbody) * (Int64 (S.Nuser_Body)) <= Int64 (Max_Size));
 
    function Body_Layout_OK (S : Sizes; G : Body_Arrays) return Boolean is
-     (G.Body_Parentid /= null and then G.Body_Parentid'First = 0
-      and then Int64 (G.Body_Parentid'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Rootid /= null and then G.Body_Rootid'First = 0
-      and then Int64 (G.Body_Rootid'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Weldid /= null and then G.Body_Weldid'First = 0
-      and then Int64 (G.Body_Weldid'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Mocapid /= null and then G.Body_Mocapid'First = 0
-      and then Int64 (G.Body_Mocapid'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Jntnum /= null and then G.Body_Jntnum'First = 0
-      and then Int64 (G.Body_Jntnum'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Jntadr /= null and then G.Body_Jntadr'First = 0
-      and then Int64 (G.Body_Jntadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Dofnum /= null and then G.Body_Dofnum'First = 0
-      and then Int64 (G.Body_Dofnum'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Dofadr /= null and then G.Body_Dofadr'First = 0
-      and then Int64 (G.Body_Dofadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Treeid /= null and then G.Body_Treeid'First = 0
-      and then Int64 (G.Body_Treeid'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Geomnum /= null and then G.Body_Geomnum'First = 0
-      and then Int64 (G.Body_Geomnum'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Geomadr /= null and then G.Body_Geomadr'First = 0
-      and then Int64 (G.Body_Geomadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Simple /= null and then G.Body_Simple'First = 0
-      and then Int64 (G.Body_Simple'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Sameframe /= null and then G.Body_Sameframe'First = 0
-      and then Int64 (G.Body_Sameframe'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Pos /= null and then G.Body_Pos'First = 0
-      and then Int64 (G.Body_Pos'Length) = Int64 (S.Nbody) * (3)
-      and then G.Body_Quat /= null and then G.Body_Quat'First = 0
-      and then Int64 (G.Body_Quat'Length) = Int64 (S.Nbody) * (4)
-      and then G.Body_Ipos /= null and then G.Body_Ipos'First = 0
-      and then Int64 (G.Body_Ipos'Length) = Int64 (S.Nbody) * (3)
-      and then G.Body_Iquat /= null and then G.Body_Iquat'First = 0
-      and then Int64 (G.Body_Iquat'Length) = Int64 (S.Nbody) * (4)
-      and then G.Body_Mass /= null and then G.Body_Mass'First = 0
-      and then Int64 (G.Body_Mass'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Subtreemass /= null and then G.Body_Subtreemass'First = 0
-      and then Int64 (G.Body_Subtreemass'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Inertia /= null and then G.Body_Inertia'First = 0
-      and then Int64 (G.Body_Inertia'Length) = Int64 (S.Nbody) * (3)
-      and then G.Body_Invweight0 /= null and then G.Body_Invweight0'First = 0
-      and then Int64 (G.Body_Invweight0'Length) = Int64 (S.Nbody) * (2)
-      and then G.Body_Gravcomp /= null and then G.Body_Gravcomp'First = 0
-      and then Int64 (G.Body_Gravcomp'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Margin /= null and then G.Body_Margin'First = 0
-      and then Int64 (G.Body_Margin'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_User /= null and then G.Body_User'First = 0
-      and then Int64 (G.Body_User'Length) = Int64 (S.Nbody) * (Int64 (S.Nuser_Body))
-      and then G.Body_Plugin /= null and then G.Body_Plugin'First = 0
-      and then Int64 (G.Body_Plugin'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Contype /= null and then G.Body_Contype'First = 0
-      and then Int64 (G.Body_Contype'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Conaffinity /= null and then G.Body_Conaffinity'First = 0
-      and then Int64 (G.Body_Conaffinity'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Bvhadr /= null and then G.Body_Bvhadr'First = 0
-      and then Int64 (G.Body_Bvhadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.Body_Bvhnum /= null and then G.Body_Bvhnum'First = 0
-      and then Int64 (G.Body_Bvhnum'Length) = Int64 (S.Nbody) * (1));
+     (I32_OK (G.Body_Parentid, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Rootid, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Weldid, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Mocapid, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Jntnum, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Jntadr, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Dofnum, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Dofadr, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Treeid, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Geomnum, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Geomadr, Int64 (S.Nbody) * (1))
+      and then U8_OK (G.Body_Simple, Int64 (S.Nbody) * (1))
+      and then U8_OK (G.Body_Sameframe, Int64 (S.Nbody) * (1))
+      and then F64_OK (G.Body_Pos, Int64 (S.Nbody) * (3))
+      and then F64_OK (G.Body_Quat, Int64 (S.Nbody) * (4))
+      and then F64_OK (G.Body_Ipos, Int64 (S.Nbody) * (3))
+      and then F64_OK (G.Body_Iquat, Int64 (S.Nbody) * (4))
+      and then F64_OK (G.Body_Mass, Int64 (S.Nbody) * (1))
+      and then F64_OK (G.Body_Subtreemass, Int64 (S.Nbody) * (1))
+      and then F64_OK (G.Body_Inertia, Int64 (S.Nbody) * (3))
+      and then F64_OK (G.Body_Invweight0, Int64 (S.Nbody) * (2))
+      and then F64_OK (G.Body_Gravcomp, Int64 (S.Nbody) * (1))
+      and then F64_OK (G.Body_Margin, Int64 (S.Nbody) * (1))
+      and then F64_OK (G.Body_User, Int64 (S.Nbody) * (Int64 (S.Nuser_Body)))
+      and then I32_OK (G.Body_Plugin, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Contype, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Conaffinity, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Bvhadr, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Body_Bvhnum, Int64 (S.Nbody) * (1)));
 
    function Body_All_Null (G : Body_Arrays) return Boolean is
      (G.Body_Parentid = null
@@ -272,44 +258,25 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt)) <= Int64 (Max_Size));
 
    function Joint_Layout_OK (S : Sizes; G : Joint_Arrays) return Boolean is
-     (G.Jnt_Type /= null and then G.Jnt_Type'First = 0
-      and then Int64 (G.Jnt_Type'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Qposadr /= null and then G.Jnt_Qposadr'First = 0
-      and then Int64 (G.Jnt_Qposadr'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Dofadr /= null and then G.Jnt_Dofadr'First = 0
-      and then Int64 (G.Jnt_Dofadr'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Bodyid /= null and then G.Jnt_Bodyid'First = 0
-      and then Int64 (G.Jnt_Bodyid'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Actuatorid /= null and then G.Jnt_Actuatorid'First = 0
-      and then Int64 (G.Jnt_Actuatorid'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Group /= null and then G.Jnt_Group'First = 0
-      and then Int64 (G.Jnt_Group'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Limited /= null and then G.Jnt_Limited'First = 0
-      and then Int64 (G.Jnt_Limited'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Actfrclimited /= null and then G.Jnt_Actfrclimited'First = 0
-      and then Int64 (G.Jnt_Actfrclimited'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Actgravcomp /= null and then G.Jnt_Actgravcomp'First = 0
-      and then Int64 (G.Jnt_Actgravcomp'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Solref /= null and then G.Jnt_Solref'First = 0
-      and then Int64 (G.Jnt_Solref'Length) = Int64 (S.Njnt) * (2)
-      and then G.Jnt_Solimp /= null and then G.Jnt_Solimp'First = 0
-      and then Int64 (G.Jnt_Solimp'Length) = Int64 (S.Njnt) * (5)
-      and then G.Jnt_Pos /= null and then G.Jnt_Pos'First = 0
-      and then Int64 (G.Jnt_Pos'Length) = Int64 (S.Njnt) * (3)
-      and then G.Jnt_Axis /= null and then G.Jnt_Axis'First = 0
-      and then Int64 (G.Jnt_Axis'Length) = Int64 (S.Njnt) * (3)
-      and then G.Jnt_Stiffness /= null and then G.Jnt_Stiffness'First = 0
-      and then Int64 (G.Jnt_Stiffness'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_Stiffnesspoly /= null and then G.Jnt_Stiffnesspoly'First = 0
-      and then Int64 (G.Jnt_Stiffnesspoly'Length) = Int64 (S.Njnt) * (2)
-      and then G.Jnt_Range /= null and then G.Jnt_Range'First = 0
-      and then Int64 (G.Jnt_Range'Length) = Int64 (S.Njnt) * (2)
-      and then G.Jnt_Actfrcrange /= null and then G.Jnt_Actfrcrange'First = 0
-      and then Int64 (G.Jnt_Actfrcrange'Length) = Int64 (S.Njnt) * (2)
-      and then G.Jnt_Margin /= null and then G.Jnt_Margin'First = 0
-      and then Int64 (G.Jnt_Margin'Length) = Int64 (S.Njnt) * (1)
-      and then G.Jnt_User /= null and then G.Jnt_User'First = 0
-      and then Int64 (G.Jnt_User'Length) = Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt)));
+     (I32_OK (G.Jnt_Type, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Jnt_Qposadr, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Jnt_Dofadr, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Jnt_Bodyid, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Jnt_Actuatorid, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Jnt_Group, Int64 (S.Njnt) * (1))
+      and then U8_OK (G.Jnt_Limited, Int64 (S.Njnt) * (1))
+      and then U8_OK (G.Jnt_Actfrclimited, Int64 (S.Njnt) * (1))
+      and then U8_OK (G.Jnt_Actgravcomp, Int64 (S.Njnt) * (1))
+      and then F64_OK (G.Jnt_Solref, Int64 (S.Njnt) * (2))
+      and then F64_OK (G.Jnt_Solimp, Int64 (S.Njnt) * (5))
+      and then F64_OK (G.Jnt_Pos, Int64 (S.Njnt) * (3))
+      and then F64_OK (G.Jnt_Axis, Int64 (S.Njnt) * (3))
+      and then F64_OK (G.Jnt_Stiffness, Int64 (S.Njnt) * (1))
+      and then F64_OK (G.Jnt_Stiffnesspoly, Int64 (S.Njnt) * (2))
+      and then F64_OK (G.Jnt_Range, Int64 (S.Njnt) * (2))
+      and then F64_OK (G.Jnt_Actfrcrange, Int64 (S.Njnt) * (2))
+      and then F64_OK (G.Jnt_Margin, Int64 (S.Njnt) * (1))
+      and then F64_OK (G.Jnt_User, Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt))));
 
    function Joint_All_Null (G : Joint_Arrays) return Boolean is
      (G.Jnt_Type = null
@@ -357,36 +324,21 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nv) * (5) <= Int64 (Max_Size));
 
    function Dof_Layout_OK (S : Sizes; G : Dof_Arrays) return Boolean is
-     (G.Dof_Bodyid /= null and then G.Dof_Bodyid'First = 0
-      and then Int64 (G.Dof_Bodyid'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Jntid /= null and then G.Dof_Jntid'First = 0
-      and then Int64 (G.Dof_Jntid'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Parentid /= null and then G.Dof_Parentid'First = 0
-      and then Int64 (G.Dof_Parentid'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Treeid /= null and then G.Dof_Treeid'First = 0
-      and then Int64 (G.Dof_Treeid'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Madr /= null and then G.Dof_Madr'First = 0
-      and then Int64 (G.Dof_Madr'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Simplenum /= null and then G.Dof_Simplenum'First = 0
-      and then Int64 (G.Dof_Simplenum'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Solref /= null and then G.Dof_Solref'First = 0
-      and then Int64 (G.Dof_Solref'Length) = Int64 (S.Nv) * (2)
-      and then G.Dof_Solimp /= null and then G.Dof_Solimp'First = 0
-      and then Int64 (G.Dof_Solimp'Length) = Int64 (S.Nv) * (5)
-      and then G.Dof_Frictionloss /= null and then G.Dof_Frictionloss'First = 0
-      and then Int64 (G.Dof_Frictionloss'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Armature /= null and then G.Dof_Armature'First = 0
-      and then Int64 (G.Dof_Armature'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Damping /= null and then G.Dof_Damping'First = 0
-      and then Int64 (G.Dof_Damping'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Dampingpoly /= null and then G.Dof_Dampingpoly'First = 0
-      and then Int64 (G.Dof_Dampingpoly'Length) = Int64 (S.Nv) * (2)
-      and then G.Dof_Invweight0 /= null and then G.Dof_Invweight0'First = 0
-      and then Int64 (G.Dof_Invweight0'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_M0 /= null and then G.Dof_M0'First = 0
-      and then Int64 (G.Dof_M0'Length) = Int64 (S.Nv) * (1)
-      and then G.Dof_Length /= null and then G.Dof_Length'First = 0
-      and then Int64 (G.Dof_Length'Length) = Int64 (S.Nv) * (1));
+     (I32_OK (G.Dof_Bodyid, Int64 (S.Nv) * (1))
+      and then I32_OK (G.Dof_Jntid, Int64 (S.Nv) * (1))
+      and then I32_OK (G.Dof_Parentid, Int64 (S.Nv) * (1))
+      and then I32_OK (G.Dof_Treeid, Int64 (S.Nv) * (1))
+      and then I32_OK (G.Dof_Madr, Int64 (S.Nv) * (1))
+      and then I32_OK (G.Dof_Simplenum, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_Solref, Int64 (S.Nv) * (2))
+      and then F64_OK (G.Dof_Solimp, Int64 (S.Nv) * (5))
+      and then F64_OK (G.Dof_Frictionloss, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_Armature, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_Damping, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_Dampingpoly, Int64 (S.Nv) * (2))
+      and then F64_OK (G.Dof_Invweight0, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_M0, Int64 (S.Nv) * (1))
+      and then F64_OK (G.Dof_Length, Int64 (S.Nv) * (1)));
 
    function Dof_All_Null (G : Dof_Arrays) return Boolean is
      (G.Dof_Bodyid = null
@@ -418,16 +370,11 @@ package MJ.Models with SPARK_Mode is
    function Tree_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Tree_Layout_OK (S : Sizes; G : Tree_Arrays) return Boolean is
-     (G.Tree_Bodyadr /= null and then G.Tree_Bodyadr'First = 0
-      and then Int64 (G.Tree_Bodyadr'Length) = Int64 (S.Ntree) * (1)
-      and then G.Tree_Bodynum /= null and then G.Tree_Bodynum'First = 0
-      and then Int64 (G.Tree_Bodynum'Length) = Int64 (S.Ntree) * (1)
-      and then G.Tree_Dofadr /= null and then G.Tree_Dofadr'First = 0
-      and then Int64 (G.Tree_Dofadr'Length) = Int64 (S.Ntree) * (1)
-      and then G.Tree_Dofnum /= null and then G.Tree_Dofnum'First = 0
-      and then Int64 (G.Tree_Dofnum'Length) = Int64 (S.Ntree) * (1)
-      and then G.Tree_Sleep_Policy /= null and then G.Tree_Sleep_Policy'First = 0
-      and then Int64 (G.Tree_Sleep_Policy'Length) = Int64 (S.Ntree) * (1));
+     (I32_OK (G.Tree_Bodyadr, Int64 (S.Ntree) * (1))
+      and then I32_OK (G.Tree_Bodynum, Int64 (S.Ntree) * (1))
+      and then I32_OK (G.Tree_Dofadr, Int64 (S.Ntree) * (1))
+      and then I32_OK (G.Tree_Dofnum, Int64 (S.Ntree) * (1))
+      and then I32_OK (G.Tree_Sleep_Policy, Int64 (S.Ntree) * (1)));
 
    function Tree_All_Null (G : Tree_Arrays) return Boolean is
      (G.Tree_Bodyadr = null
@@ -478,60 +425,33 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom)) <= Int64 (Max_Size));
 
    function Geom_Layout_OK (S : Sizes; G : Geom_Arrays) return Boolean is
-     (G.Geom_Type /= null and then G.Geom_Type'First = 0
-      and then Int64 (G.Geom_Type'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Contype /= null and then G.Geom_Contype'First = 0
-      and then Int64 (G.Geom_Contype'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Conaffinity /= null and then G.Geom_Conaffinity'First = 0
-      and then Int64 (G.Geom_Conaffinity'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Condim /= null and then G.Geom_Condim'First = 0
-      and then Int64 (G.Geom_Condim'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Bodyid /= null and then G.Geom_Bodyid'First = 0
-      and then Int64 (G.Geom_Bodyid'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Dataid /= null and then G.Geom_Dataid'First = 0
-      and then Int64 (G.Geom_Dataid'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Matid /= null and then G.Geom_Matid'First = 0
-      and then Int64 (G.Geom_Matid'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Group /= null and then G.Geom_Group'First = 0
-      and then Int64 (G.Geom_Group'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Priority /= null and then G.Geom_Priority'First = 0
-      and then Int64 (G.Geom_Priority'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Plugin /= null and then G.Geom_Plugin'First = 0
-      and then Int64 (G.Geom_Plugin'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Sameframe /= null and then G.Geom_Sameframe'First = 0
-      and then Int64 (G.Geom_Sameframe'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Solmix /= null and then G.Geom_Solmix'First = 0
-      and then Int64 (G.Geom_Solmix'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Solref /= null and then G.Geom_Solref'First = 0
-      and then Int64 (G.Geom_Solref'Length) = Int64 (S.Ngeom) * (2)
-      and then G.Geom_Solimp /= null and then G.Geom_Solimp'First = 0
-      and then Int64 (G.Geom_Solimp'Length) = Int64 (S.Ngeom) * (5)
-      and then G.Geom_Size /= null and then G.Geom_Size'First = 0
-      and then Int64 (G.Geom_Size'Length) = Int64 (S.Ngeom) * (3)
-      and then G.Geom_Aabb /= null and then G.Geom_Aabb'First = 0
-      and then Int64 (G.Geom_Aabb'Length) = Int64 (S.Ngeom) * (6)
-      and then G.Geom_Rbound /= null and then G.Geom_Rbound'First = 0
-      and then Int64 (G.Geom_Rbound'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Pos /= null and then G.Geom_Pos'First = 0
-      and then Int64 (G.Geom_Pos'Length) = Int64 (S.Ngeom) * (3)
-      and then G.Geom_Quat /= null and then G.Geom_Quat'First = 0
-      and then Int64 (G.Geom_Quat'Length) = Int64 (S.Ngeom) * (4)
-      and then G.Geom_Friction /= null and then G.Geom_Friction'First = 0
-      and then Int64 (G.Geom_Friction'Length) = Int64 (S.Ngeom) * (3)
-      and then G.Geom_Margin /= null and then G.Geom_Margin'First = 0
-      and then Int64 (G.Geom_Margin'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Gap /= null and then G.Geom_Gap'First = 0
-      and then Int64 (G.Geom_Gap'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Surfacevel /= null and then G.Geom_Surfacevel'First = 0
-      and then Int64 (G.Geom_Surfacevel'Length) = Int64 (S.Ngeom) * (6)
-      and then G.Geom_Adhesion /= null and then G.Geom_Adhesion'First = 0
-      and then Int64 (G.Geom_Adhesion'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Geom_Fluid /= null and then G.Geom_Fluid'First = 0
-      and then Int64 (G.Geom_Fluid'Length) = Int64 (S.Ngeom) * (12)
-      and then G.Geom_User /= null and then G.Geom_User'First = 0
-      and then Int64 (G.Geom_User'Length) = Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom))
-      and then G.Geom_Rgba /= null and then G.Geom_Rgba'First = 0
-      and then Int64 (G.Geom_Rgba'Length) = Int64 (S.Ngeom) * (4));
+     (I32_OK (G.Geom_Type, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Contype, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Conaffinity, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Condim, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Bodyid, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Dataid, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Matid, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Group, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Priority, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Geom_Plugin, Int64 (S.Ngeom) * (1))
+      and then U8_OK (G.Geom_Sameframe, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Solmix, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Solref, Int64 (S.Ngeom) * (2))
+      and then F64_OK (G.Geom_Solimp, Int64 (S.Ngeom) * (5))
+      and then F64_OK (G.Geom_Size, Int64 (S.Ngeom) * (3))
+      and then F64_OK (G.Geom_Aabb, Int64 (S.Ngeom) * (6))
+      and then F64_OK (G.Geom_Rbound, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Pos, Int64 (S.Ngeom) * (3))
+      and then F64_OK (G.Geom_Quat, Int64 (S.Ngeom) * (4))
+      and then F64_OK (G.Geom_Friction, Int64 (S.Ngeom) * (3))
+      and then F64_OK (G.Geom_Margin, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Gap, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Surfacevel, Int64 (S.Ngeom) * (6))
+      and then F64_OK (G.Geom_Adhesion, Int64 (S.Ngeom) * (1))
+      and then F64_OK (G.Geom_Fluid, Int64 (S.Ngeom) * (12))
+      and then F64_OK (G.Geom_User, Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom)))
+      and then F32_OK (G.Geom_Rgba, Int64 (S.Ngeom) * (4)));
 
    function Geom_All_Null (G : Geom_Arrays) return Boolean is
      (G.Geom_Type = null
@@ -583,26 +503,16 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nsite) * (Int64 (S.Nuser_Site)) <= Int64 (Max_Size));
 
    function Site_Layout_OK (S : Sizes; G : Site_Arrays) return Boolean is
-     (G.Site_Type /= null and then G.Site_Type'First = 0
-      and then Int64 (G.Site_Type'Length) = Int64 (S.Nsite) * (1)
-      and then G.Site_Bodyid /= null and then G.Site_Bodyid'First = 0
-      and then Int64 (G.Site_Bodyid'Length) = Int64 (S.Nsite) * (1)
-      and then G.Site_Matid /= null and then G.Site_Matid'First = 0
-      and then Int64 (G.Site_Matid'Length) = Int64 (S.Nsite) * (1)
-      and then G.Site_Group /= null and then G.Site_Group'First = 0
-      and then Int64 (G.Site_Group'Length) = Int64 (S.Nsite) * (1)
-      and then G.Site_Sameframe /= null and then G.Site_Sameframe'First = 0
-      and then Int64 (G.Site_Sameframe'Length) = Int64 (S.Nsite) * (1)
-      and then G.Site_Size /= null and then G.Site_Size'First = 0
-      and then Int64 (G.Site_Size'Length) = Int64 (S.Nsite) * (3)
-      and then G.Site_Pos /= null and then G.Site_Pos'First = 0
-      and then Int64 (G.Site_Pos'Length) = Int64 (S.Nsite) * (3)
-      and then G.Site_Quat /= null and then G.Site_Quat'First = 0
-      and then Int64 (G.Site_Quat'Length) = Int64 (S.Nsite) * (4)
-      and then G.Site_User /= null and then G.Site_User'First = 0
-      and then Int64 (G.Site_User'Length) = Int64 (S.Nsite) * (Int64 (S.Nuser_Site))
-      and then G.Site_Rgba /= null and then G.Site_Rgba'First = 0
-      and then Int64 (G.Site_Rgba'Length) = Int64 (S.Nsite) * (4));
+     (I32_OK (G.Site_Type, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Site_Bodyid, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Site_Matid, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Site_Group, Int64 (S.Nsite) * (1))
+      and then U8_OK (G.Site_Sameframe, Int64 (S.Nsite) * (1))
+      and then F64_OK (G.Site_Size, Int64 (S.Nsite) * (3))
+      and then F64_OK (G.Site_Pos, Int64 (S.Nsite) * (3))
+      and then F64_OK (G.Site_Quat, Int64 (S.Nsite) * (4))
+      and then F64_OK (G.Site_User, Int64 (S.Nsite) * (Int64 (S.Nuser_Site)))
+      and then F32_OK (G.Site_Rgba, Int64 (S.Nsite) * (4)));
 
    function Site_All_Null (G : Site_Arrays) return Boolean is
      (G.Site_Type = null
@@ -645,38 +555,22 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Ncam) * (Int64 (S.Nuser_Cam)) <= Int64 (Max_Size));
 
    function Camera_Layout_OK (S : Sizes; G : Camera_Arrays) return Boolean is
-     (G.Cam_Mode /= null and then G.Cam_Mode'First = 0
-      and then Int64 (G.Cam_Mode'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Bodyid /= null and then G.Cam_Bodyid'First = 0
-      and then Int64 (G.Cam_Bodyid'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Targetbodyid /= null and then G.Cam_Targetbodyid'First = 0
-      and then Int64 (G.Cam_Targetbodyid'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Pos /= null and then G.Cam_Pos'First = 0
-      and then Int64 (G.Cam_Pos'Length) = Int64 (S.Ncam) * (3)
-      and then G.Cam_Quat /= null and then G.Cam_Quat'First = 0
-      and then Int64 (G.Cam_Quat'Length) = Int64 (S.Ncam) * (4)
-      and then G.Cam_Poscom0 /= null and then G.Cam_Poscom0'First = 0
-      and then Int64 (G.Cam_Poscom0'Length) = Int64 (S.Ncam) * (3)
-      and then G.Cam_Pos0 /= null and then G.Cam_Pos0'First = 0
-      and then Int64 (G.Cam_Pos0'Length) = Int64 (S.Ncam) * (3)
-      and then G.Cam_Mat0 /= null and then G.Cam_Mat0'First = 0
-      and then Int64 (G.Cam_Mat0'Length) = Int64 (S.Ncam) * (9)
-      and then G.Cam_Projection /= null and then G.Cam_Projection'First = 0
-      and then Int64 (G.Cam_Projection'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Fovy /= null and then G.Cam_Fovy'First = 0
-      and then Int64 (G.Cam_Fovy'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Ipd /= null and then G.Cam_Ipd'First = 0
-      and then Int64 (G.Cam_Ipd'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Resolution /= null and then G.Cam_Resolution'First = 0
-      and then Int64 (G.Cam_Resolution'Length) = Int64 (S.Ncam) * (2)
-      and then G.Cam_Output /= null and then G.Cam_Output'First = 0
-      and then Int64 (G.Cam_Output'Length) = Int64 (S.Ncam) * (1)
-      and then G.Cam_Sensorsize /= null and then G.Cam_Sensorsize'First = 0
-      and then Int64 (G.Cam_Sensorsize'Length) = Int64 (S.Ncam) * (2)
-      and then G.Cam_Intrinsic /= null and then G.Cam_Intrinsic'First = 0
-      and then Int64 (G.Cam_Intrinsic'Length) = Int64 (S.Ncam) * (4)
-      and then G.Cam_User /= null and then G.Cam_User'First = 0
-      and then Int64 (G.Cam_User'Length) = Int64 (S.Ncam) * (Int64 (S.Nuser_Cam)));
+     (I32_OK (G.Cam_Mode, Int64 (S.Ncam) * (1))
+      and then I32_OK (G.Cam_Bodyid, Int64 (S.Ncam) * (1))
+      and then I32_OK (G.Cam_Targetbodyid, Int64 (S.Ncam) * (1))
+      and then F64_OK (G.Cam_Pos, Int64 (S.Ncam) * (3))
+      and then F64_OK (G.Cam_Quat, Int64 (S.Ncam) * (4))
+      and then F64_OK (G.Cam_Poscom0, Int64 (S.Ncam) * (3))
+      and then F64_OK (G.Cam_Pos0, Int64 (S.Ncam) * (3))
+      and then F64_OK (G.Cam_Mat0, Int64 (S.Ncam) * (9))
+      and then I32_OK (G.Cam_Projection, Int64 (S.Ncam) * (1))
+      and then F64_OK (G.Cam_Fovy, Int64 (S.Ncam) * (1))
+      and then F64_OK (G.Cam_Ipd, Int64 (S.Ncam) * (1))
+      and then I32_OK (G.Cam_Resolution, Int64 (S.Ncam) * (2))
+      and then I32_OK (G.Cam_Output, Int64 (S.Ncam) * (1))
+      and then F32_OK (G.Cam_Sensorsize, Int64 (S.Ncam) * (2))
+      and then F32_OK (G.Cam_Intrinsic, Int64 (S.Ncam) * (4))
+      and then F64_OK (G.Cam_User, Int64 (S.Ncam) * (Int64 (S.Nuser_Cam))));
 
    function Camera_All_Null (G : Camera_Arrays) return Boolean is
      (G.Cam_Mode = null
@@ -727,50 +621,28 @@ package MJ.Models with SPARK_Mode is
      (Int64 (S.Nlight) * (3) <= Int64 (Max_Size));
 
    function Light_Layout_OK (S : Sizes; G : Light_Arrays) return Boolean is
-     (G.Light_Mode /= null and then G.Light_Mode'First = 0
-      and then Int64 (G.Light_Mode'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Bodyid /= null and then G.Light_Bodyid'First = 0
-      and then Int64 (G.Light_Bodyid'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Targetbodyid /= null and then G.Light_Targetbodyid'First = 0
-      and then Int64 (G.Light_Targetbodyid'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Type /= null and then G.Light_Type'First = 0
-      and then Int64 (G.Light_Type'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Texid /= null and then G.Light_Texid'First = 0
-      and then Int64 (G.Light_Texid'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Castshadow /= null and then G.Light_Castshadow'First = 0
-      and then Int64 (G.Light_Castshadow'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Bulbradius /= null and then G.Light_Bulbradius'First = 0
-      and then Int64 (G.Light_Bulbradius'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Intensity /= null and then G.Light_Intensity'First = 0
-      and then Int64 (G.Light_Intensity'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Range /= null and then G.Light_Range'First = 0
-      and then Int64 (G.Light_Range'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Active /= null and then G.Light_Active'First = 0
-      and then Int64 (G.Light_Active'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Pos /= null and then G.Light_Pos'First = 0
-      and then Int64 (G.Light_Pos'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Dir /= null and then G.Light_Dir'First = 0
-      and then Int64 (G.Light_Dir'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Poscom0 /= null and then G.Light_Poscom0'First = 0
-      and then Int64 (G.Light_Poscom0'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Pos0 /= null and then G.Light_Pos0'First = 0
-      and then Int64 (G.Light_Pos0'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Dir0 /= null and then G.Light_Dir0'First = 0
-      and then Int64 (G.Light_Dir0'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Attenuation /= null and then G.Light_Attenuation'First = 0
-      and then Int64 (G.Light_Attenuation'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Cutoff /= null and then G.Light_Cutoff'First = 0
-      and then Int64 (G.Light_Cutoff'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Softness /= null and then G.Light_Softness'First = 0
-      and then Int64 (G.Light_Softness'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Exponent /= null and then G.Light_Exponent'First = 0
-      and then Int64 (G.Light_Exponent'Length) = Int64 (S.Nlight) * (1)
-      and then G.Light_Ambient /= null and then G.Light_Ambient'First = 0
-      and then Int64 (G.Light_Ambient'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Diffuse /= null and then G.Light_Diffuse'First = 0
-      and then Int64 (G.Light_Diffuse'Length) = Int64 (S.Nlight) * (3)
-      and then G.Light_Specular /= null and then G.Light_Specular'First = 0
-      and then Int64 (G.Light_Specular'Length) = Int64 (S.Nlight) * (3));
+     (I32_OK (G.Light_Mode, Int64 (S.Nlight) * (1))
+      and then I32_OK (G.Light_Bodyid, Int64 (S.Nlight) * (1))
+      and then I32_OK (G.Light_Targetbodyid, Int64 (S.Nlight) * (1))
+      and then I32_OK (G.Light_Type, Int64 (S.Nlight) * (1))
+      and then I32_OK (G.Light_Texid, Int64 (S.Nlight) * (1))
+      and then U8_OK (G.Light_Castshadow, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Bulbradius, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Intensity, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Range, Int64 (S.Nlight) * (1))
+      and then U8_OK (G.Light_Active, Int64 (S.Nlight) * (1))
+      and then F64_OK (G.Light_Pos, Int64 (S.Nlight) * (3))
+      and then F64_OK (G.Light_Dir, Int64 (S.Nlight) * (3))
+      and then F64_OK (G.Light_Poscom0, Int64 (S.Nlight) * (3))
+      and then F64_OK (G.Light_Pos0, Int64 (S.Nlight) * (3))
+      and then F64_OK (G.Light_Dir0, Int64 (S.Nlight) * (3))
+      and then F32_OK (G.Light_Attenuation, Int64 (S.Nlight) * (3))
+      and then F32_OK (G.Light_Cutoff, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Softness, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Exponent, Int64 (S.Nlight) * (1))
+      and then F32_OK (G.Light_Ambient, Int64 (S.Nlight) * (3))
+      and then F32_OK (G.Light_Diffuse, Int64 (S.Nlight) * (3))
+      and then F32_OK (G.Light_Specular, Int64 (S.Nlight) * (3)));
 
    function Light_All_Null (G : Light_Arrays) return Boolean is
      (G.Light_Mode = null
@@ -899,172 +771,89 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nflextexcoord) * (2) <= Int64 (Max_Size));
 
    function Flex_Layout_OK (S : Sizes; G : Flex_Arrays) return Boolean is
-     (G.Flex_Contype /= null and then G.Flex_Contype'First = 0
-      and then Int64 (G.Flex_Contype'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Conaffinity /= null and then G.Flex_Conaffinity'First = 0
-      and then Int64 (G.Flex_Conaffinity'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Condim /= null and then G.Flex_Condim'First = 0
-      and then Int64 (G.Flex_Condim'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Priority /= null and then G.Flex_Priority'First = 0
-      and then Int64 (G.Flex_Priority'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Solmix /= null and then G.Flex_Solmix'First = 0
-      and then Int64 (G.Flex_Solmix'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Solref /= null and then G.Flex_Solref'First = 0
-      and then Int64 (G.Flex_Solref'Length) = Int64 (S.Nflex) * (2)
-      and then G.Flex_Solimp /= null and then G.Flex_Solimp'First = 0
-      and then Int64 (G.Flex_Solimp'Length) = Int64 (S.Nflex) * (5)
-      and then G.Flex_Friction /= null and then G.Flex_Friction'First = 0
-      and then Int64 (G.Flex_Friction'Length) = Int64 (S.Nflex) * (3)
-      and then G.Flex_Margin /= null and then G.Flex_Margin'First = 0
-      and then Int64 (G.Flex_Margin'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Gap /= null and then G.Flex_Gap'First = 0
-      and then Int64 (G.Flex_Gap'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Internal /= null and then G.Flex_Internal'First = 0
-      and then Int64 (G.Flex_Internal'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Selfcollide /= null and then G.Flex_Selfcollide'First = 0
-      and then Int64 (G.Flex_Selfcollide'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Activelayers /= null and then G.Flex_Activelayers'First = 0
-      and then Int64 (G.Flex_Activelayers'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Passive /= null and then G.Flex_Passive'First = 0
-      and then Int64 (G.Flex_Passive'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Dim /= null and then G.Flex_Dim'First = 0
-      and then Int64 (G.Flex_Dim'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Matid /= null and then G.Flex_Matid'First = 0
-      and then Int64 (G.Flex_Matid'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Group /= null and then G.Flex_Group'First = 0
-      and then Int64 (G.Flex_Group'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Interp /= null and then G.Flex_Interp'First = 0
-      and then Int64 (G.Flex_Interp'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Cellnum /= null and then G.Flex_Cellnum'First = 0
-      and then Int64 (G.Flex_Cellnum'Length) = Int64 (S.Nflex) * (3)
-      and then G.Flex_Nodeadr /= null and then G.Flex_Nodeadr'First = 0
-      and then Int64 (G.Flex_Nodeadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Nodenum /= null and then G.Flex_Nodenum'First = 0
-      and then Int64 (G.Flex_Nodenum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Vertadr /= null and then G.Flex_Vertadr'First = 0
-      and then Int64 (G.Flex_Vertadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Vertnum /= null and then G.Flex_Vertnum'First = 0
-      and then Int64 (G.Flex_Vertnum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Edgeadr /= null and then G.Flex_Edgeadr'First = 0
-      and then Int64 (G.Flex_Edgeadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Edgenum /= null and then G.Flex_Edgenum'First = 0
-      and then Int64 (G.Flex_Edgenum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Elemadr /= null and then G.Flex_Elemadr'First = 0
-      and then Int64 (G.Flex_Elemadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Elemnum /= null and then G.Flex_Elemnum'First = 0
-      and then Int64 (G.Flex_Elemnum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Elemdataadr /= null and then G.Flex_Elemdataadr'First = 0
-      and then Int64 (G.Flex_Elemdataadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Stiffnessadr /= null and then G.Flex_Stiffnessadr'First = 0
-      and then Int64 (G.Flex_Stiffnessadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Elemedgeadr /= null and then G.Flex_Elemedgeadr'First = 0
-      and then Int64 (G.Flex_Elemedgeadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Bendingadr /= null and then G.Flex_Bendingadr'First = 0
-      and then Int64 (G.Flex_Bendingadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Shellnum /= null and then G.Flex_Shellnum'First = 0
-      and then Int64 (G.Flex_Shellnum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Shelldataadr /= null and then G.Flex_Shelldataadr'First = 0
-      and then Int64 (G.Flex_Shelldataadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Evpairadr /= null and then G.Flex_Evpairadr'First = 0
-      and then Int64 (G.Flex_Evpairadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Evpairnum /= null and then G.Flex_Evpairnum'First = 0
-      and then Int64 (G.Flex_Evpairnum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Texcoordadr /= null and then G.Flex_Texcoordadr'First = 0
-      and then Int64 (G.Flex_Texcoordadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Nodebodyid /= null and then G.Flex_Nodebodyid'First = 0
-      and then Int64 (G.Flex_Nodebodyid'Length) = Int64 (S.Nflexnode) * (1)
-      and then G.Flex_Vertbodyid /= null and then G.Flex_Vertbodyid'First = 0
-      and then Int64 (G.Flex_Vertbodyid'Length) = Int64 (S.Nflexvert) * (1)
-      and then G.Flex_Vertedgeadr /= null and then G.Flex_Vertedgeadr'First = 0
-      and then Int64 (G.Flex_Vertedgeadr'Length) = Int64 (S.Nflexvert) * (1)
-      and then G.Flex_Vertedgenum /= null and then G.Flex_Vertedgenum'First = 0
-      and then Int64 (G.Flex_Vertedgenum'Length) = Int64 (S.Nflexvert) * (1)
-      and then G.Flex_Vertedge /= null and then G.Flex_Vertedge'First = 0
-      and then Int64 (G.Flex_Vertedge'Length) = Int64 (S.Nflexedge) * (2)
-      and then G.Flex_Edge /= null and then G.Flex_Edge'First = 0
-      and then Int64 (G.Flex_Edge'Length) = Int64 (S.Nflexedge) * (2)
-      and then G.Flex_Edgeflap /= null and then G.Flex_Edgeflap'First = 0
-      and then Int64 (G.Flex_Edgeflap'Length) = Int64 (S.Nflexedge) * (2)
-      and then G.Flex_Elem /= null and then G.Flex_Elem'First = 0
-      and then Int64 (G.Flex_Elem'Length) = Int64 (S.Nflexelemdata) * (1)
-      and then G.Flex_Elemtexcoord /= null and then G.Flex_Elemtexcoord'First = 0
-      and then Int64 (G.Flex_Elemtexcoord'Length) = Int64 (S.Nflexelemdata) * (1)
-      and then G.Flex_Elemedge /= null and then G.Flex_Elemedge'First = 0
-      and then Int64 (G.Flex_Elemedge'Length) = Int64 (S.Nflexelemedge) * (1)
-      and then G.Flex_Elemlayer /= null and then G.Flex_Elemlayer'First = 0
-      and then Int64 (G.Flex_Elemlayer'Length) = Int64 (S.Nflexelem) * (1)
-      and then G.Flex_Shell /= null and then G.Flex_Shell'First = 0
-      and then Int64 (G.Flex_Shell'Length) = Int64 (S.Nflexshelldata) * (1)
-      and then G.Flex_Evpair /= null and then G.Flex_Evpair'First = 0
-      and then Int64 (G.Flex_Evpair'Length) = Int64 (S.Nflexevpair) * (2)
-      and then G.Flex_Vert /= null and then G.Flex_Vert'First = 0
-      and then Int64 (G.Flex_Vert'Length) = Int64 (S.Nflexvert) * (3)
-      and then G.Flex_Vert0 /= null and then G.Flex_Vert0'First = 0
-      and then Int64 (G.Flex_Vert0'Length) = Int64 (S.Nflexvert) * (3)
-      and then G.Flex_Vertmetric /= null and then G.Flex_Vertmetric'First = 0
-      and then Int64 (G.Flex_Vertmetric'Length) = Int64 (S.Nflexvert) * (4)
-      and then G.Flex_Node /= null and then G.Flex_Node'First = 0
-      and then Int64 (G.Flex_Node'Length) = Int64 (S.Nflexnode) * (3)
-      and then G.Flex_Node0 /= null and then G.Flex_Node0'First = 0
-      and then Int64 (G.Flex_Node0'Length) = Int64 (S.Nflexnode) * (3)
-      and then G.Flexedge_Length0 /= null and then G.Flexedge_Length0'First = 0
-      and then Int64 (G.Flexedge_Length0'Length) = Int64 (S.Nflexedge) * (1)
-      and then G.Flexedge_Invweight0 /= null and then G.Flexedge_Invweight0'First = 0
-      and then Int64 (G.Flexedge_Invweight0'Length) = Int64 (S.Nflexedge) * (1)
-      and then G.Flex_Radius /= null and then G.Flex_Radius'First = 0
-      and then Int64 (G.Flex_Radius'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Size /= null and then G.Flex_Size'First = 0
-      and then Int64 (G.Flex_Size'Length) = Int64 (S.Nflex) * (3)
-      and then G.Flex_Stiffness /= null and then G.Flex_Stiffness'First = 0
-      and then Int64 (G.Flex_Stiffness'Length) = Int64 (S.Nflexstiffness) * (1)
-      and then G.Flex_Bending /= null and then G.Flex_Bending'First = 0
-      and then Int64 (G.Flex_Bending'Length) = Int64 (S.Nflexbending) * (1)
-      and then G.Efm0_Dofid /= null and then G.Efm0_Dofid'First = 0
-      and then Int64 (G.Efm0_Dofid'Length) = Int64 (S.Nefm0dof) * (1)
-      and then G.Efm0_L_Rownnz /= null and then G.Efm0_L_Rownnz'First = 0
-      and then Int64 (G.Efm0_L_Rownnz'Length) = Int64 (S.Nefm0dof) * (1)
-      and then G.Efm0_L_Rowadr /= null and then G.Efm0_L_Rowadr'First = 0
-      and then Int64 (G.Efm0_L_Rowadr'Length) = Int64 (S.Nefm0dof) * (1)
-      and then G.Efm0_L_Colind /= null and then G.Efm0_L_Colind'First = 0
-      and then Int64 (G.Efm0_L_Colind'Length) = Int64 (S.Nefm0L) * (1)
-      and then G.Efm0_L /= null and then G.Efm0_L'First = 0
-      and then Int64 (G.Efm0_L'Length) = Int64 (S.Nefm0L) * (1)
-      and then G.Flex_Damping /= null and then G.Flex_Damping'First = 0
-      and then Int64 (G.Flex_Damping'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Edgestiffness /= null and then G.Flex_Edgestiffness'First = 0
-      and then Int64 (G.Flex_Edgestiffness'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Edgedamping /= null and then G.Flex_Edgedamping'First = 0
-      and then Int64 (G.Flex_Edgedamping'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Edgeequality /= null and then G.Flex_Edgeequality'First = 0
-      and then Int64 (G.Flex_Edgeequality'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Rigid /= null and then G.Flex_Rigid'First = 0
-      and then Int64 (G.Flex_Rigid'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flexedge_Rigid /= null and then G.Flexedge_Rigid'First = 0
-      and then Int64 (G.Flexedge_Rigid'Length) = Int64 (S.Nflexedge) * (1)
-      and then G.Flex_Centered /= null and then G.Flex_Centered'First = 0
-      and then Int64 (G.Flex_Centered'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Flatskin /= null and then G.Flex_Flatskin'First = 0
-      and then Int64 (G.Flex_Flatskin'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Bvhadr /= null and then G.Flex_Bvhadr'First = 0
-      and then Int64 (G.Flex_Bvhadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flex_Bvhnum /= null and then G.Flex_Bvhnum'First = 0
-      and then Int64 (G.Flex_Bvhnum'Length) = Int64 (S.Nflex) * (1)
-      and then G.Flexedge_J_Rownnz /= null and then G.Flexedge_J_Rownnz'First = 0
-      and then Int64 (G.Flexedge_J_Rownnz'Length) = Int64 (S.Nflexedge) * (1)
-      and then G.Flexedge_J_Rowadr /= null and then G.Flexedge_J_Rowadr'First = 0
-      and then Int64 (G.Flexedge_J_Rowadr'Length) = Int64 (S.Nflexedge) * (1)
-      and then G.Flexedge_J_Colind /= null and then G.Flexedge_J_Colind'First = 0
-      and then Int64 (G.Flexedge_J_Colind'Length) = Int64 (S.NJfe) * (1)
-      and then G.Flexvert_J_Rownnz /= null and then G.Flexvert_J_Rownnz'First = 0
-      and then Int64 (G.Flexvert_J_Rownnz'Length) = Int64 (S.Nflexvert) * (2)
-      and then G.Flexvert_J_Rowadr /= null and then G.Flexvert_J_Rowadr'First = 0
-      and then Int64 (G.Flexvert_J_Rowadr'Length) = Int64 (S.Nflexvert) * (2)
-      and then G.Flexvert_J_Colind /= null and then G.Flexvert_J_Colind'First = 0
-      and then Int64 (G.Flexvert_J_Colind'Length) = Int64 (S.NJfv) * (2)
-      and then G.Flex_Rgba /= null and then G.Flex_Rgba'First = 0
-      and then Int64 (G.Flex_Rgba'Length) = Int64 (S.Nflex) * (4)
-      and then G.Flex_Texcoord /= null and then G.Flex_Texcoord'First = 0
-      and then Int64 (G.Flex_Texcoord'Length) = Int64 (S.Nflextexcoord) * (2));
+     (I32_OK (G.Flex_Contype, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Conaffinity, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Condim, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Priority, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Solmix, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Solref, Int64 (S.Nflex) * (2))
+      and then F64_OK (G.Flex_Solimp, Int64 (S.Nflex) * (5))
+      and then F64_OK (G.Flex_Friction, Int64 (S.Nflex) * (3))
+      and then F64_OK (G.Flex_Margin, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Gap, Int64 (S.Nflex) * (1))
+      and then U8_OK (G.Flex_Internal, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Selfcollide, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Activelayers, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Passive, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Dim, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Matid, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Group, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Interp, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Cellnum, Int64 (S.Nflex) * (3))
+      and then I32_OK (G.Flex_Nodeadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Nodenum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Vertadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Vertnum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Edgeadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Edgenum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Elemadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Elemnum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Elemdataadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Stiffnessadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Elemedgeadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Bendingadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Shellnum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Shelldataadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Evpairadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Evpairnum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Texcoordadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Nodebodyid, Int64 (S.Nflexnode) * (1))
+      and then I32_OK (G.Flex_Vertbodyid, Int64 (S.Nflexvert) * (1))
+      and then I32_OK (G.Flex_Vertedgeadr, Int64 (S.Nflexvert) * (1))
+      and then I32_OK (G.Flex_Vertedgenum, Int64 (S.Nflexvert) * (1))
+      and then I32_OK (G.Flex_Vertedge, Int64 (S.Nflexedge) * (2))
+      and then I32_OK (G.Flex_Edge, Int64 (S.Nflexedge) * (2))
+      and then I32_OK (G.Flex_Edgeflap, Int64 (S.Nflexedge) * (2))
+      and then I32_OK (G.Flex_Elem, Int64 (S.Nflexelemdata) * (1))
+      and then I32_OK (G.Flex_Elemtexcoord, Int64 (S.Nflexelemdata) * (1))
+      and then I32_OK (G.Flex_Elemedge, Int64 (S.Nflexelemedge) * (1))
+      and then I32_OK (G.Flex_Elemlayer, Int64 (S.Nflexelem) * (1))
+      and then I32_OK (G.Flex_Shell, Int64 (S.Nflexshelldata) * (1))
+      and then I32_OK (G.Flex_Evpair, Int64 (S.Nflexevpair) * (2))
+      and then F64_OK (G.Flex_Vert, Int64 (S.Nflexvert) * (3))
+      and then F64_OK (G.Flex_Vert0, Int64 (S.Nflexvert) * (3))
+      and then F64_OK (G.Flex_Vertmetric, Int64 (S.Nflexvert) * (4))
+      and then F64_OK (G.Flex_Node, Int64 (S.Nflexnode) * (3))
+      and then F64_OK (G.Flex_Node0, Int64 (S.Nflexnode) * (3))
+      and then F64_OK (G.Flexedge_Length0, Int64 (S.Nflexedge) * (1))
+      and then F64_OK (G.Flexedge_Invweight0, Int64 (S.Nflexedge) * (1))
+      and then F64_OK (G.Flex_Radius, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Size, Int64 (S.Nflex) * (3))
+      and then F64_OK (G.Flex_Stiffness, Int64 (S.Nflexstiffness) * (1))
+      and then F64_OK (G.Flex_Bending, Int64 (S.Nflexbending) * (1))
+      and then I32_OK (G.Efm0_Dofid, Int64 (S.Nefm0dof) * (1))
+      and then I32_OK (G.Efm0_L_Rownnz, Int64 (S.Nefm0dof) * (1))
+      and then I32_OK (G.Efm0_L_Rowadr, Int64 (S.Nefm0dof) * (1))
+      and then I32_OK (G.Efm0_L_Colind, Int64 (S.Nefm0L) * (1))
+      and then F64_OK (G.Efm0_L, Int64 (S.Nefm0L) * (1))
+      and then F64_OK (G.Flex_Damping, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Edgestiffness, Int64 (S.Nflex) * (1))
+      and then F64_OK (G.Flex_Edgedamping, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Edgeequality, Int64 (S.Nflex) * (1))
+      and then U8_OK (G.Flex_Rigid, Int64 (S.Nflex) * (1))
+      and then U8_OK (G.Flexedge_Rigid, Int64 (S.Nflexedge) * (1))
+      and then U8_OK (G.Flex_Centered, Int64 (S.Nflex) * (1))
+      and then U8_OK (G.Flex_Flatskin, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Bvhadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flex_Bvhnum, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Flexedge_J_Rownnz, Int64 (S.Nflexedge) * (1))
+      and then I32_OK (G.Flexedge_J_Rowadr, Int64 (S.Nflexedge) * (1))
+      and then I32_OK (G.Flexedge_J_Colind, Int64 (S.NJfe) * (1))
+      and then I32_OK (G.Flexvert_J_Rownnz, Int64 (S.Nflexvert) * (2))
+      and then I32_OK (G.Flexvert_J_Rowadr, Int64 (S.Nflexvert) * (2))
+      and then I32_OK (G.Flexvert_J_Colind, Int64 (S.NJfv) * (2))
+      and then F32_OK (G.Flex_Rgba, Int64 (S.Nflex) * (4))
+      and then F32_OK (G.Flex_Texcoord, Int64 (S.Nflextexcoord) * (2)));
 
    function Flex_All_Null (G : Flex_Arrays) return Boolean is
      (G.Flex_Contype = null
@@ -1201,74 +990,40 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nmeshpoly) * (3) <= Int64 (Max_Size));
 
    function Mesh_Layout_OK (S : Sizes; G : Mesh_Arrays) return Boolean is
-     (G.Mesh_Vertadr /= null and then G.Mesh_Vertadr'First = 0
-      and then Int64 (G.Mesh_Vertadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Vertnum /= null and then G.Mesh_Vertnum'First = 0
-      and then Int64 (G.Mesh_Vertnum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Faceadr /= null and then G.Mesh_Faceadr'First = 0
-      and then Int64 (G.Mesh_Faceadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Facenum /= null and then G.Mesh_Facenum'First = 0
-      and then Int64 (G.Mesh_Facenum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Bvhadr /= null and then G.Mesh_Bvhadr'First = 0
-      and then Int64 (G.Mesh_Bvhadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Bvhnum /= null and then G.Mesh_Bvhnum'First = 0
-      and then Int64 (G.Mesh_Bvhnum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Octadr /= null and then G.Mesh_Octadr'First = 0
-      and then Int64 (G.Mesh_Octadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Octnum /= null and then G.Mesh_Octnum'First = 0
-      and then Int64 (G.Mesh_Octnum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Normaladr /= null and then G.Mesh_Normaladr'First = 0
-      and then Int64 (G.Mesh_Normaladr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Normalnum /= null and then G.Mesh_Normalnum'First = 0
-      and then Int64 (G.Mesh_Normalnum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Texcoordadr /= null and then G.Mesh_Texcoordadr'First = 0
-      and then Int64 (G.Mesh_Texcoordadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Texcoordnum /= null and then G.Mesh_Texcoordnum'First = 0
-      and then Int64 (G.Mesh_Texcoordnum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Graphadr /= null and then G.Mesh_Graphadr'First = 0
-      and then Int64 (G.Mesh_Graphadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Extrema /= null and then G.Mesh_Extrema'First = 0
-      and then Int64 (G.Mesh_Extrema'Length) = Int64 (S.Nmesh) * (27)
-      and then G.Mesh_Vert /= null and then G.Mesh_Vert'First = 0
-      and then Int64 (G.Mesh_Vert'Length) = Int64 (S.Nmeshvert) * (3)
-      and then G.Mesh_Normal /= null and then G.Mesh_Normal'First = 0
-      and then Int64 (G.Mesh_Normal'Length) = Int64 (S.Nmeshnormal) * (3)
-      and then G.Mesh_Texcoord /= null and then G.Mesh_Texcoord'First = 0
-      and then Int64 (G.Mesh_Texcoord'Length) = Int64 (S.Nmeshtexcoord) * (2)
-      and then G.Mesh_Face /= null and then G.Mesh_Face'First = 0
-      and then Int64 (G.Mesh_Face'Length) = Int64 (S.Nmeshface) * (3)
-      and then G.Mesh_Facenormal /= null and then G.Mesh_Facenormal'First = 0
-      and then Int64 (G.Mesh_Facenormal'Length) = Int64 (S.Nmeshface) * (3)
-      and then G.Mesh_Facetexcoord /= null and then G.Mesh_Facetexcoord'First = 0
-      and then Int64 (G.Mesh_Facetexcoord'Length) = Int64 (S.Nmeshface) * (3)
-      and then G.Mesh_Graph /= null and then G.Mesh_Graph'First = 0
-      and then Int64 (G.Mesh_Graph'Length) = Int64 (S.Nmeshgraph) * (1)
-      and then G.Mesh_Scale /= null and then G.Mesh_Scale'First = 0
-      and then Int64 (G.Mesh_Scale'Length) = Int64 (S.Nmesh) * (3)
-      and then G.Mesh_Pos /= null and then G.Mesh_Pos'First = 0
-      and then Int64 (G.Mesh_Pos'Length) = Int64 (S.Nmesh) * (3)
-      and then G.Mesh_Quat /= null and then G.Mesh_Quat'First = 0
-      and then Int64 (G.Mesh_Quat'Length) = Int64 (S.Nmesh) * (4)
-      and then G.Mesh_Pathadr /= null and then G.Mesh_Pathadr'First = 0
-      and then Int64 (G.Mesh_Pathadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Polynum /= null and then G.Mesh_Polynum'First = 0
-      and then Int64 (G.Mesh_Polynum'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Polyadr /= null and then G.Mesh_Polyadr'First = 0
-      and then Int64 (G.Mesh_Polyadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Mesh_Polynormal /= null and then G.Mesh_Polynormal'First = 0
-      and then Int64 (G.Mesh_Polynormal'Length) = Int64 (S.Nmeshpoly) * (3)
-      and then G.Mesh_Polyvertadr /= null and then G.Mesh_Polyvertadr'First = 0
-      and then Int64 (G.Mesh_Polyvertadr'Length) = Int64 (S.Nmeshpoly) * (1)
-      and then G.Mesh_Polyvertnum /= null and then G.Mesh_Polyvertnum'First = 0
-      and then Int64 (G.Mesh_Polyvertnum'Length) = Int64 (S.Nmeshpoly) * (1)
-      and then G.Mesh_Polyvert /= null and then G.Mesh_Polyvert'First = 0
-      and then Int64 (G.Mesh_Polyvert'Length) = Int64 (S.Nmeshpolyvert) * (1)
-      and then G.Mesh_Polymapadr /= null and then G.Mesh_Polymapadr'First = 0
-      and then Int64 (G.Mesh_Polymapadr'Length) = Int64 (S.Nmeshvert) * (1)
-      and then G.Mesh_Polymapnum /= null and then G.Mesh_Polymapnum'First = 0
-      and then Int64 (G.Mesh_Polymapnum'Length) = Int64 (S.Nmeshvert) * (1)
-      and then G.Mesh_Polymap /= null and then G.Mesh_Polymap'First = 0
-      and then Int64 (G.Mesh_Polymap'Length) = Int64 (S.Nmeshpolymap) * (1));
+     (I32_OK (G.Mesh_Vertadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Vertnum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Faceadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Facenum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Bvhadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Bvhnum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Octadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Octnum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Normaladr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Normalnum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Texcoordadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Texcoordnum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Graphadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Extrema, Int64 (S.Nmesh) * (27))
+      and then F32_OK (G.Mesh_Vert, Int64 (S.Nmeshvert) * (3))
+      and then F32_OK (G.Mesh_Normal, Int64 (S.Nmeshnormal) * (3))
+      and then F32_OK (G.Mesh_Texcoord, Int64 (S.Nmeshtexcoord) * (2))
+      and then I32_OK (G.Mesh_Face, Int64 (S.Nmeshface) * (3))
+      and then I32_OK (G.Mesh_Facenormal, Int64 (S.Nmeshface) * (3))
+      and then I32_OK (G.Mesh_Facetexcoord, Int64 (S.Nmeshface) * (3))
+      and then I32_OK (G.Mesh_Graph, Int64 (S.Nmeshgraph) * (1))
+      and then F64_OK (G.Mesh_Scale, Int64 (S.Nmesh) * (3))
+      and then F64_OK (G.Mesh_Pos, Int64 (S.Nmesh) * (3))
+      and then F64_OK (G.Mesh_Quat, Int64 (S.Nmesh) * (4))
+      and then I32_OK (G.Mesh_Pathadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Polynum, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Mesh_Polyadr, Int64 (S.Nmesh) * (1))
+      and then F64_OK (G.Mesh_Polynormal, Int64 (S.Nmeshpoly) * (3))
+      and then I32_OK (G.Mesh_Polyvertadr, Int64 (S.Nmeshpoly) * (1))
+      and then I32_OK (G.Mesh_Polyvertnum, Int64 (S.Nmeshpoly) * (1))
+      and then I32_OK (G.Mesh_Polyvert, Int64 (S.Nmeshpolyvert) * (1))
+      and then I32_OK (G.Mesh_Polymapadr, Int64 (S.Nmeshvert) * (1))
+      and then I32_OK (G.Mesh_Polymapnum, Int64 (S.Nmeshvert) * (1))
+      and then I32_OK (G.Mesh_Polymap, Int64 (S.Nmeshpolymap) * (1)));
 
    function Mesh_All_Null (G : Mesh_Arrays) return Boolean is
      (G.Mesh_Vertadr = null
@@ -1342,50 +1097,28 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nskinbone) * (4) <= Int64 (Max_Size));
 
    function Skin_Layout_OK (S : Sizes; G : Skin_Arrays) return Boolean is
-     (G.Skin_Matid /= null and then G.Skin_Matid'First = 0
-      and then Int64 (G.Skin_Matid'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Group /= null and then G.Skin_Group'First = 0
-      and then Int64 (G.Skin_Group'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Rgba /= null and then G.Skin_Rgba'First = 0
-      and then Int64 (G.Skin_Rgba'Length) = Int64 (S.Nskin) * (4)
-      and then G.Skin_Inflate /= null and then G.Skin_Inflate'First = 0
-      and then Int64 (G.Skin_Inflate'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Vertadr /= null and then G.Skin_Vertadr'First = 0
-      and then Int64 (G.Skin_Vertadr'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Vertnum /= null and then G.Skin_Vertnum'First = 0
-      and then Int64 (G.Skin_Vertnum'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Texcoordadr /= null and then G.Skin_Texcoordadr'First = 0
-      and then Int64 (G.Skin_Texcoordadr'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Faceadr /= null and then G.Skin_Faceadr'First = 0
-      and then Int64 (G.Skin_Faceadr'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Facenum /= null and then G.Skin_Facenum'First = 0
-      and then Int64 (G.Skin_Facenum'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Boneadr /= null and then G.Skin_Boneadr'First = 0
-      and then Int64 (G.Skin_Boneadr'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Bonenum /= null and then G.Skin_Bonenum'First = 0
-      and then Int64 (G.Skin_Bonenum'Length) = Int64 (S.Nskin) * (1)
-      and then G.Skin_Vert /= null and then G.Skin_Vert'First = 0
-      and then Int64 (G.Skin_Vert'Length) = Int64 (S.Nskinvert) * (3)
-      and then G.Skin_Texcoord /= null and then G.Skin_Texcoord'First = 0
-      and then Int64 (G.Skin_Texcoord'Length) = Int64 (S.Nskintexvert) * (2)
-      and then G.Skin_Face /= null and then G.Skin_Face'First = 0
-      and then Int64 (G.Skin_Face'Length) = Int64 (S.Nskinface) * (3)
-      and then G.Skin_Bonevertadr /= null and then G.Skin_Bonevertadr'First = 0
-      and then Int64 (G.Skin_Bonevertadr'Length) = Int64 (S.Nskinbone) * (1)
-      and then G.Skin_Bonevertnum /= null and then G.Skin_Bonevertnum'First = 0
-      and then Int64 (G.Skin_Bonevertnum'Length) = Int64 (S.Nskinbone) * (1)
-      and then G.Skin_Bonebindpos /= null and then G.Skin_Bonebindpos'First = 0
-      and then Int64 (G.Skin_Bonebindpos'Length) = Int64 (S.Nskinbone) * (3)
-      and then G.Skin_Bonebindquat /= null and then G.Skin_Bonebindquat'First = 0
-      and then Int64 (G.Skin_Bonebindquat'Length) = Int64 (S.Nskinbone) * (4)
-      and then G.Skin_Bonebodyid /= null and then G.Skin_Bonebodyid'First = 0
-      and then Int64 (G.Skin_Bonebodyid'Length) = Int64 (S.Nskinbone) * (1)
-      and then G.Skin_Bonevertid /= null and then G.Skin_Bonevertid'First = 0
-      and then Int64 (G.Skin_Bonevertid'Length) = Int64 (S.Nskinbonevert) * (1)
-      and then G.Skin_Bonevertweight /= null and then G.Skin_Bonevertweight'First = 0
-      and then Int64 (G.Skin_Bonevertweight'Length) = Int64 (S.Nskinbonevert) * (1)
-      and then G.Skin_Pathadr /= null and then G.Skin_Pathadr'First = 0
-      and then Int64 (G.Skin_Pathadr'Length) = Int64 (S.Nskin) * (1));
+     (I32_OK (G.Skin_Matid, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Group, Int64 (S.Nskin) * (1))
+      and then F32_OK (G.Skin_Rgba, Int64 (S.Nskin) * (4))
+      and then F32_OK (G.Skin_Inflate, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Vertadr, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Vertnum, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Texcoordadr, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Faceadr, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Facenum, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Boneadr, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Skin_Bonenum, Int64 (S.Nskin) * (1))
+      and then F32_OK (G.Skin_Vert, Int64 (S.Nskinvert) * (3))
+      and then F32_OK (G.Skin_Texcoord, Int64 (S.Nskintexvert) * (2))
+      and then I32_OK (G.Skin_Face, Int64 (S.Nskinface) * (3))
+      and then I32_OK (G.Skin_Bonevertadr, Int64 (S.Nskinbone) * (1))
+      and then I32_OK (G.Skin_Bonevertnum, Int64 (S.Nskinbone) * (1))
+      and then F32_OK (G.Skin_Bonebindpos, Int64 (S.Nskinbone) * (3))
+      and then F32_OK (G.Skin_Bonebindquat, Int64 (S.Nskinbone) * (4))
+      and then I32_OK (G.Skin_Bonebodyid, Int64 (S.Nskinbone) * (1))
+      and then I32_OK (G.Skin_Bonevertid, Int64 (S.Nskinbonevert) * (1))
+      and then F32_OK (G.Skin_Bonevertweight, Int64 (S.Nskinbonevert) * (1))
+      and then I32_OK (G.Skin_Pathadr, Int64 (S.Nskin) * (1)));
 
    function Skin_All_Null (G : Skin_Arrays) return Boolean is
      (G.Skin_Matid = null
@@ -1426,18 +1159,12 @@ package MJ.Models with SPARK_Mode is
      (Int64 (S.Nhfield) * (4) <= Int64 (Max_Size));
 
    function Hfield_Layout_OK (S : Sizes; G : Hfield_Arrays) return Boolean is
-     (G.Hfield_Size /= null and then G.Hfield_Size'First = 0
-      and then Int64 (G.Hfield_Size'Length) = Int64 (S.Nhfield) * (4)
-      and then G.Hfield_Nrow /= null and then G.Hfield_Nrow'First = 0
-      and then Int64 (G.Hfield_Nrow'Length) = Int64 (S.Nhfield) * (1)
-      and then G.Hfield_Ncol /= null and then G.Hfield_Ncol'First = 0
-      and then Int64 (G.Hfield_Ncol'Length) = Int64 (S.Nhfield) * (1)
-      and then G.Hfield_Adr /= null and then G.Hfield_Adr'First = 0
-      and then Int64 (G.Hfield_Adr'Length) = Int64 (S.Nhfield) * (1)
-      and then G.Hfield_Data /= null and then G.Hfield_Data'First = 0
-      and then Int64 (G.Hfield_Data'Length) = Int64 (S.Nhfielddata) * (1)
-      and then G.Hfield_Pathadr /= null and then G.Hfield_Pathadr'First = 0
-      and then Int64 (G.Hfield_Pathadr'Length) = Int64 (S.Nhfield) * (1));
+     (F64_OK (G.Hfield_Size, Int64 (S.Nhfield) * (4))
+      and then I32_OK (G.Hfield_Nrow, Int64 (S.Nhfield) * (1))
+      and then I32_OK (G.Hfield_Ncol, Int64 (S.Nhfield) * (1))
+      and then I32_OK (G.Hfield_Adr, Int64 (S.Nhfield) * (1))
+      and then F32_OK (G.Hfield_Data, Int64 (S.Nhfielddata) * (1))
+      and then I32_OK (G.Hfield_Pathadr, Int64 (S.Nhfield) * (1)));
 
    function Hfield_All_Null (G : Hfield_Arrays) return Boolean is
      (G.Hfield_Size = null
@@ -1463,22 +1190,14 @@ package MJ.Models with SPARK_Mode is
    function Texture_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Texture_Layout_OK (S : Sizes; G : Texture_Arrays) return Boolean is
-     (G.Tex_Type /= null and then G.Tex_Type'First = 0
-      and then Int64 (G.Tex_Type'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Colorspace /= null and then G.Tex_Colorspace'First = 0
-      and then Int64 (G.Tex_Colorspace'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Height /= null and then G.Tex_Height'First = 0
-      and then Int64 (G.Tex_Height'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Width /= null and then G.Tex_Width'First = 0
-      and then Int64 (G.Tex_Width'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Nchannel /= null and then G.Tex_Nchannel'First = 0
-      and then Int64 (G.Tex_Nchannel'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Adr /= null and then G.Tex_Adr'First = 0
-      and then Int64 (G.Tex_Adr'Length) = Int64 (S.Ntex) * (1)
-      and then G.Tex_Data /= null and then G.Tex_Data'First = 0
-      and then Int64 (G.Tex_Data'Length) = Int64 (S.Ntexdata) * (1)
-      and then G.Tex_Pathadr /= null and then G.Tex_Pathadr'First = 0
-      and then Int64 (G.Tex_Pathadr'Length) = Int64 (S.Ntex) * (1));
+     (I32_OK (G.Tex_Type, Int64 (S.Ntex) * (1))
+      and then I32_OK (G.Tex_Colorspace, Int64 (S.Ntex) * (1))
+      and then I32_OK (G.Tex_Height, Int64 (S.Ntex) * (1))
+      and then I32_OK (G.Tex_Width, Int64 (S.Ntex) * (1))
+      and then I32_OK (G.Tex_Nchannel, Int64 (S.Ntex) * (1))
+      and then I64_OK (G.Tex_Adr, Int64 (S.Ntex) * (1))
+      and then U8_OK (G.Tex_Data, Int64 (S.Ntexdata) * (1))
+      and then I32_OK (G.Tex_Pathadr, Int64 (S.Ntex) * (1)));
 
    function Texture_All_Null (G : Texture_Arrays) return Boolean is
      (G.Tex_Type = null
@@ -1511,26 +1230,16 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nmat) * (4) <= Int64 (Max_Size));
 
    function Material_Layout_OK (S : Sizes; G : Material_Arrays) return Boolean is
-     (G.Mat_Texid /= null and then G.Mat_Texid'First = 0
-      and then Int64 (G.Mat_Texid'Length) = Int64 (S.Nmat) * (10)
-      and then G.Mat_Texuniform /= null and then G.Mat_Texuniform'First = 0
-      and then Int64 (G.Mat_Texuniform'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Texrepeat /= null and then G.Mat_Texrepeat'First = 0
-      and then Int64 (G.Mat_Texrepeat'Length) = Int64 (S.Nmat) * (2)
-      and then G.Mat_Emission /= null and then G.Mat_Emission'First = 0
-      and then Int64 (G.Mat_Emission'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Specular /= null and then G.Mat_Specular'First = 0
-      and then Int64 (G.Mat_Specular'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Shininess /= null and then G.Mat_Shininess'First = 0
-      and then Int64 (G.Mat_Shininess'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Reflectance /= null and then G.Mat_Reflectance'First = 0
-      and then Int64 (G.Mat_Reflectance'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Metallic /= null and then G.Mat_Metallic'First = 0
-      and then Int64 (G.Mat_Metallic'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Roughness /= null and then G.Mat_Roughness'First = 0
-      and then Int64 (G.Mat_Roughness'Length) = Int64 (S.Nmat) * (1)
-      and then G.Mat_Rgba /= null and then G.Mat_Rgba'First = 0
-      and then Int64 (G.Mat_Rgba'Length) = Int64 (S.Nmat) * (4));
+     (I32_OK (G.Mat_Texid, Int64 (S.Nmat) * (10))
+      and then U8_OK (G.Mat_Texuniform, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Texrepeat, Int64 (S.Nmat) * (2))
+      and then F32_OK (G.Mat_Emission, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Specular, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Shininess, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Reflectance, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Metallic, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Roughness, Int64 (S.Nmat) * (1))
+      and then F32_OK (G.Mat_Rgba, Int64 (S.Nmat) * (4)));
 
    function Material_All_Null (G : Material_Arrays) return Boolean is
      (G.Mat_Texid = null
@@ -1565,28 +1274,17 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Npair) * (5) <= Int64 (Max_Size));
 
    function Pair_Layout_OK (S : Sizes; G : Pair_Arrays) return Boolean is
-     (G.Pair_Dim /= null and then G.Pair_Dim'First = 0
-      and then Int64 (G.Pair_Dim'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Geom1 /= null and then G.Pair_Geom1'First = 0
-      and then Int64 (G.Pair_Geom1'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Geom2 /= null and then G.Pair_Geom2'First = 0
-      and then Int64 (G.Pair_Geom2'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Signature /= null and then G.Pair_Signature'First = 0
-      and then Int64 (G.Pair_Signature'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Solref /= null and then G.Pair_Solref'First = 0
-      and then Int64 (G.Pair_Solref'Length) = Int64 (S.Npair) * (2)
-      and then G.Pair_Solreffriction /= null and then G.Pair_Solreffriction'First = 0
-      and then Int64 (G.Pair_Solreffriction'Length) = Int64 (S.Npair) * (2)
-      and then G.Pair_Solimp /= null and then G.Pair_Solimp'First = 0
-      and then Int64 (G.Pair_Solimp'Length) = Int64 (S.Npair) * (5)
-      and then G.Pair_Margin /= null and then G.Pair_Margin'First = 0
-      and then Int64 (G.Pair_Margin'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Gap /= null and then G.Pair_Gap'First = 0
-      and then Int64 (G.Pair_Gap'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Adhesion /= null and then G.Pair_Adhesion'First = 0
-      and then Int64 (G.Pair_Adhesion'Length) = Int64 (S.Npair) * (1)
-      and then G.Pair_Friction /= null and then G.Pair_Friction'First = 0
-      and then Int64 (G.Pair_Friction'Length) = Int64 (S.Npair) * (5));
+     (I32_OK (G.Pair_Dim, Int64 (S.Npair) * (1))
+      and then I32_OK (G.Pair_Geom1, Int64 (S.Npair) * (1))
+      and then I32_OK (G.Pair_Geom2, Int64 (S.Npair) * (1))
+      and then I32_OK (G.Pair_Signature, Int64 (S.Npair) * (1))
+      and then F64_OK (G.Pair_Solref, Int64 (S.Npair) * (2))
+      and then F64_OK (G.Pair_Solreffriction, Int64 (S.Npair) * (2))
+      and then F64_OK (G.Pair_Solimp, Int64 (S.Npair) * (5))
+      and then F64_OK (G.Pair_Margin, Int64 (S.Npair) * (1))
+      and then F64_OK (G.Pair_Gap, Int64 (S.Npair) * (1))
+      and then F64_OK (G.Pair_Adhesion, Int64 (S.Npair) * (1))
+      and then F64_OK (G.Pair_Friction, Int64 (S.Npair) * (5)));
 
    function Pair_All_Null (G : Pair_Arrays) return Boolean is
      (G.Pair_Dim = null
@@ -1610,8 +1308,7 @@ package MJ.Models with SPARK_Mode is
    function Exclude_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Exclude_Layout_OK (S : Sizes; G : Exclude_Arrays) return Boolean is
-     (G.Exclude_Signature /= null and then G.Exclude_Signature'First = 0
-      and then Int64 (G.Exclude_Signature'Length) = Int64 (S.Nexclude) * (1));
+     (I32_OK (G.Exclude_Signature, Int64 (S.Nexclude) * (1)));
 
    function Exclude_All_Null (G : Exclude_Arrays) return Boolean is
      (G.Exclude_Signature = null);
@@ -1635,22 +1332,14 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Neq) * (11) <= Int64 (Max_Size));
 
    function Equality_Layout_OK (S : Sizes; G : Equality_Arrays) return Boolean is
-     (G.Eq_Type /= null and then G.Eq_Type'First = 0
-      and then Int64 (G.Eq_Type'Length) = Int64 (S.Neq) * (1)
-      and then G.Eq_Obj1id /= null and then G.Eq_Obj1id'First = 0
-      and then Int64 (G.Eq_Obj1id'Length) = Int64 (S.Neq) * (1)
-      and then G.Eq_Obj2id /= null and then G.Eq_Obj2id'First = 0
-      and then Int64 (G.Eq_Obj2id'Length) = Int64 (S.Neq) * (1)
-      and then G.Eq_Objtype /= null and then G.Eq_Objtype'First = 0
-      and then Int64 (G.Eq_Objtype'Length) = Int64 (S.Neq) * (1)
-      and then G.Eq_Active0 /= null and then G.Eq_Active0'First = 0
-      and then Int64 (G.Eq_Active0'Length) = Int64 (S.Neq) * (1)
-      and then G.Eq_Solref /= null and then G.Eq_Solref'First = 0
-      and then Int64 (G.Eq_Solref'Length) = Int64 (S.Neq) * (2)
-      and then G.Eq_Solimp /= null and then G.Eq_Solimp'First = 0
-      and then Int64 (G.Eq_Solimp'Length) = Int64 (S.Neq) * (5)
-      and then G.Eq_Data /= null and then G.Eq_Data'First = 0
-      and then Int64 (G.Eq_Data'Length) = Int64 (S.Neq) * (11));
+     (I32_OK (G.Eq_Type, Int64 (S.Neq) * (1))
+      and then I32_OK (G.Eq_Obj1id, Int64 (S.Neq) * (1))
+      and then I32_OK (G.Eq_Obj2id, Int64 (S.Neq) * (1))
+      and then I32_OK (G.Eq_Objtype, Int64 (S.Neq) * (1))
+      and then U8_OK (G.Eq_Active0, Int64 (S.Neq) * (1))
+      and then F64_OK (G.Eq_Solref, Int64 (S.Neq) * (2))
+      and then F64_OK (G.Eq_Solimp, Int64 (S.Neq) * (5))
+      and then F64_OK (G.Eq_Data, Int64 (S.Neq) * (11)));
 
    function Equality_All_Null (G : Equality_Arrays) return Boolean is
      (G.Eq_Type = null
@@ -1705,68 +1394,37 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Ntendon) * (4) <= Int64 (Max_Size));
 
    function Tendon_Layout_OK (S : Sizes; G : Tendon_Arrays) return Boolean is
-     (G.Tendon_Adr /= null and then G.Tendon_Adr'First = 0
-      and then Int64 (G.Tendon_Adr'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Num /= null and then G.Tendon_Num'First = 0
-      and then Int64 (G.Tendon_Num'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Matid /= null and then G.Tendon_Matid'First = 0
-      and then Int64 (G.Tendon_Matid'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Actuatorid /= null and then G.Tendon_Actuatorid'First = 0
-      and then Int64 (G.Tendon_Actuatorid'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Group /= null and then G.Tendon_Group'First = 0
-      and then Int64 (G.Tendon_Group'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Treenum /= null and then G.Tendon_Treenum'First = 0
-      and then Int64 (G.Tendon_Treenum'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Treeid /= null and then G.Tendon_Treeid'First = 0
-      and then Int64 (G.Tendon_Treeid'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Ten_J_Rownnz /= null and then G.Ten_J_Rownnz'First = 0
-      and then Int64 (G.Ten_J_Rownnz'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Ten_J_Rowadr /= null and then G.Ten_J_Rowadr'First = 0
-      and then Int64 (G.Ten_J_Rowadr'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Ten_J_Colind /= null and then G.Ten_J_Colind'First = 0
-      and then Int64 (G.Ten_J_Colind'Length) = Int64 (S.NJten) * (1)
-      and then G.Tendon_Limited /= null and then G.Tendon_Limited'First = 0
-      and then Int64 (G.Tendon_Limited'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Actfrclimited /= null and then G.Tendon_Actfrclimited'First = 0
-      and then Int64 (G.Tendon_Actfrclimited'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Width /= null and then G.Tendon_Width'First = 0
-      and then Int64 (G.Tendon_Width'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Solref_Lim /= null and then G.Tendon_Solref_Lim'First = 0
-      and then Int64 (G.Tendon_Solref_Lim'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Solimp_Lim /= null and then G.Tendon_Solimp_Lim'First = 0
-      and then Int64 (G.Tendon_Solimp_Lim'Length) = Int64 (S.Ntendon) * (5)
-      and then G.Tendon_Solref_Fri /= null and then G.Tendon_Solref_Fri'First = 0
-      and then Int64 (G.Tendon_Solref_Fri'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Solimp_Fri /= null and then G.Tendon_Solimp_Fri'First = 0
-      and then Int64 (G.Tendon_Solimp_Fri'Length) = Int64 (S.Ntendon) * (5)
-      and then G.Tendon_Range /= null and then G.Tendon_Range'First = 0
-      and then Int64 (G.Tendon_Range'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Actfrcrange /= null and then G.Tendon_Actfrcrange'First = 0
-      and then Int64 (G.Tendon_Actfrcrange'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Margin /= null and then G.Tendon_Margin'First = 0
-      and then Int64 (G.Tendon_Margin'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Stiffness /= null and then G.Tendon_Stiffness'First = 0
-      and then Int64 (G.Tendon_Stiffness'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Stiffnesspoly /= null and then G.Tendon_Stiffnesspoly'First = 0
-      and then Int64 (G.Tendon_Stiffnesspoly'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Damping /= null and then G.Tendon_Damping'First = 0
-      and then Int64 (G.Tendon_Damping'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Dampingpoly /= null and then G.Tendon_Dampingpoly'First = 0
-      and then Int64 (G.Tendon_Dampingpoly'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Armature /= null and then G.Tendon_Armature'First = 0
-      and then Int64 (G.Tendon_Armature'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Frictionloss /= null and then G.Tendon_Frictionloss'First = 0
-      and then Int64 (G.Tendon_Frictionloss'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Lengthspring /= null and then G.Tendon_Lengthspring'First = 0
-      and then Int64 (G.Tendon_Lengthspring'Length) = Int64 (S.Ntendon) * (2)
-      and then G.Tendon_Length0 /= null and then G.Tendon_Length0'First = 0
-      and then Int64 (G.Tendon_Length0'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_Invweight0 /= null and then G.Tendon_Invweight0'First = 0
-      and then Int64 (G.Tendon_Invweight0'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Tendon_User /= null and then G.Tendon_User'First = 0
-      and then Int64 (G.Tendon_User'Length) = Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon))
-      and then G.Tendon_Rgba /= null and then G.Tendon_Rgba'First = 0
-      and then Int64 (G.Tendon_Rgba'Length) = Int64 (S.Ntendon) * (4));
+     (I32_OK (G.Tendon_Adr, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Num, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Matid, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Actuatorid, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Group, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Treenum, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Tendon_Treeid, Int64 (S.Ntendon) * (2))
+      and then I32_OK (G.Ten_J_Rownnz, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Ten_J_Rowadr, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Ten_J_Colind, Int64 (S.NJten) * (1))
+      and then U8_OK (G.Tendon_Limited, Int64 (S.Ntendon) * (1))
+      and then U8_OK (G.Tendon_Actfrclimited, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Width, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Solref_Lim, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Solimp_Lim, Int64 (S.Ntendon) * (5))
+      and then F64_OK (G.Tendon_Solref_Fri, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Solimp_Fri, Int64 (S.Ntendon) * (5))
+      and then F64_OK (G.Tendon_Range, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Actfrcrange, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Margin, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Stiffness, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Stiffnesspoly, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Damping, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Dampingpoly, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Armature, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Frictionloss, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Lengthspring, Int64 (S.Ntendon) * (2))
+      and then F64_OK (G.Tendon_Length0, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_Invweight0, Int64 (S.Ntendon) * (1))
+      and then F64_OK (G.Tendon_User, Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon)))
+      and then F32_OK (G.Tendon_Rgba, Int64 (S.Ntendon) * (4)));
 
    function Tendon_All_Null (G : Tendon_Arrays) return Boolean is
      (G.Tendon_Adr = null
@@ -1851,78 +1509,42 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nout) * (2) <= Int64 (Max_Size));
 
    function Actuator_Layout_OK (S : Sizes; G : Actuator_Arrays) return Boolean is
-     (G.Actuator_Trntype /= null and then G.Actuator_Trntype'First = 0
-      and then Int64 (G.Actuator_Trntype'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Dyntype /= null and then G.Actuator_Dyntype'First = 0
-      and then Int64 (G.Actuator_Dyntype'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Gaintype /= null and then G.Actuator_Gaintype'First = 0
-      and then Int64 (G.Actuator_Gaintype'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Biastype /= null and then G.Actuator_Biastype'First = 0
-      and then Int64 (G.Actuator_Biastype'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Ctrladr /= null and then G.Actuator_Ctrladr'First = 0
-      and then Int64 (G.Actuator_Ctrladr'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Ctrlnum /= null and then G.Actuator_Ctrlnum'First = 0
-      and then Int64 (G.Actuator_Ctrlnum'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Ctrlspec /= null and then G.Actuator_Ctrlspec'First = 0
-      and then Int64 (G.Actuator_Ctrlspec'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Outadr /= null and then G.Actuator_Outadr'First = 0
-      and then Int64 (G.Actuator_Outadr'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Outnum /= null and then G.Actuator_Outnum'First = 0
-      and then Int64 (G.Actuator_Outnum'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Actadr /= null and then G.Actuator_Actadr'First = 0
-      and then Int64 (G.Actuator_Actadr'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Actnum /= null and then G.Actuator_Actnum'First = 0
-      and then Int64 (G.Actuator_Actnum'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Trnid /= null and then G.Actuator_Trnid'First = 0
-      and then Int64 (G.Actuator_Trnid'Length) = Int64 (S.Nactuator) * (2)
-      and then G.Actuator_Cranklength /= null and then G.Actuator_Cranklength'First = 0
-      and then Int64 (G.Actuator_Cranklength'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Dynprm /= null and then G.Actuator_Dynprm'First = 0
-      and then Int64 (G.Actuator_Dynprm'Length) = Int64 (S.Nactuator) * (10)
-      and then G.Actuator_Gainprm /= null and then G.Actuator_Gainprm'First = 0
-      and then Int64 (G.Actuator_Gainprm'Length) = Int64 (S.Nactuator) * (10)
-      and then G.Actuator_Biasprm /= null and then G.Actuator_Biasprm'First = 0
-      and then Int64 (G.Actuator_Biasprm'Length) = Int64 (S.Nactuator) * (10)
-      and then G.Actuator_Actlimited /= null and then G.Actuator_Actlimited'First = 0
-      and then Int64 (G.Actuator_Actlimited'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Actrange /= null and then G.Actuator_Actrange'First = 0
-      and then Int64 (G.Actuator_Actrange'Length) = Int64 (S.Nactuator) * (2)
-      and then G.Actuator_Actearly /= null and then G.Actuator_Actearly'First = 0
-      and then Int64 (G.Actuator_Actearly'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_History /= null and then G.Actuator_History'First = 0
-      and then Int64 (G.Actuator_History'Length) = Int64 (S.Nactuator) * (2)
-      and then G.Actuator_Historyadr /= null and then G.Actuator_Historyadr'First = 0
-      and then Int64 (G.Actuator_Historyadr'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Delay /= null and then G.Actuator_Delay'First = 0
-      and then Int64 (G.Actuator_Delay'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Damping /= null and then G.Actuator_Damping'First = 0
-      and then Int64 (G.Actuator_Damping'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Dampingpoly /= null and then G.Actuator_Dampingpoly'First = 0
-      and then Int64 (G.Actuator_Dampingpoly'Length) = Int64 (S.Nactuator) * (2)
-      and then G.Actuator_Armature /= null and then G.Actuator_Armature'First = 0
-      and then Int64 (G.Actuator_Armature'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Group /= null and then G.Actuator_Group'First = 0
-      and then Int64 (G.Actuator_Group'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_User /= null and then G.Actuator_User'First = 0
-      and then Int64 (G.Actuator_User'Length) = Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator))
-      and then G.Actuator_Plugin /= null and then G.Actuator_Plugin'First = 0
-      and then Int64 (G.Actuator_Plugin'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Forcelimited /= null and then G.Actuator_Forcelimited'First = 0
-      and then Int64 (G.Actuator_Forcelimited'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Actuator_Forcerange /= null and then G.Actuator_Forcerange'First = 0
-      and then Int64 (G.Actuator_Forcerange'Length) = Int64 (S.Nactuator) * (2)
-      and then G.Actuator_Ctrllimited /= null and then G.Actuator_Ctrllimited'First = 0
-      and then Int64 (G.Actuator_Ctrllimited'Length) = Int64 (S.Nu) * (1)
-      and then G.Actuator_Ctrlrange /= null and then G.Actuator_Ctrlrange'First = 0
-      and then Int64 (G.Actuator_Ctrlrange'Length) = Int64 (S.Nu) * (2)
-      and then G.Actuator_Gear /= null and then G.Actuator_Gear'First = 0
-      and then Int64 (G.Actuator_Gear'Length) = Int64 (S.Nout) * (6)
-      and then G.Actuator_Acc0 /= null and then G.Actuator_Acc0'First = 0
-      and then Int64 (G.Actuator_Acc0'Length) = Int64 (S.Nout) * (1)
-      and then G.Actuator_Length0 /= null and then G.Actuator_Length0'First = 0
-      and then Int64 (G.Actuator_Length0'Length) = Int64 (S.Nout) * (1)
-      and then G.Actuator_Lengthrange /= null and then G.Actuator_Lengthrange'First = 0
-      and then Int64 (G.Actuator_Lengthrange'Length) = Int64 (S.Nout) * (2));
+     (I32_OK (G.Actuator_Trntype, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Dyntype, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Gaintype, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Biastype, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Ctrladr, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Ctrlnum, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Ctrlspec, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Outadr, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Outnum, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Actadr, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Actnum, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Trnid, Int64 (S.Nactuator) * (2))
+      and then F64_OK (G.Actuator_Cranklength, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Dynprm, Int64 (S.Nactuator) * (10))
+      and then F64_OK (G.Actuator_Gainprm, Int64 (S.Nactuator) * (10))
+      and then F64_OK (G.Actuator_Biasprm, Int64 (S.Nactuator) * (10))
+      and then U8_OK (G.Actuator_Actlimited, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Actrange, Int64 (S.Nactuator) * (2))
+      and then U8_OK (G.Actuator_Actearly, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_History, Int64 (S.Nactuator) * (2))
+      and then I32_OK (G.Actuator_Historyadr, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Delay, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Damping, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Dampingpoly, Int64 (S.Nactuator) * (2))
+      and then F64_OK (G.Actuator_Armature, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Actuator_Group, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_User, Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator)))
+      and then I32_OK (G.Actuator_Plugin, Int64 (S.Nactuator) * (1))
+      and then U8_OK (G.Actuator_Forcelimited, Int64 (S.Nactuator) * (1))
+      and then F64_OK (G.Actuator_Forcerange, Int64 (S.Nactuator) * (2))
+      and then U8_OK (G.Actuator_Ctrllimited, Int64 (S.Nu) * (1))
+      and then F64_OK (G.Actuator_Ctrlrange, Int64 (S.Nu) * (2))
+      and then F64_OK (G.Actuator_Gear, Int64 (S.Nout) * (6))
+      and then F64_OK (G.Actuator_Acc0, Int64 (S.Nout) * (1))
+      and then F64_OK (G.Actuator_Length0, Int64 (S.Nout) * (1))
+      and then F64_OK (G.Actuator_Lengthrange, Int64 (S.Nout) * (2)));
 
    function Actuator_All_Null (G : Actuator_Arrays) return Boolean is
      (G.Actuator_Trntype = null
@@ -1991,42 +1613,24 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor)) <= Int64 (Max_Size));
 
    function Sensor_Layout_OK (S : Sizes; G : Sensor_Arrays) return Boolean is
-     (G.Sensor_Type /= null and then G.Sensor_Type'First = 0
-      and then Int64 (G.Sensor_Type'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Datatype /= null and then G.Sensor_Datatype'First = 0
-      and then Int64 (G.Sensor_Datatype'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Needstage /= null and then G.Sensor_Needstage'First = 0
-      and then Int64 (G.Sensor_Needstage'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Objtype /= null and then G.Sensor_Objtype'First = 0
-      and then Int64 (G.Sensor_Objtype'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Objid /= null and then G.Sensor_Objid'First = 0
-      and then Int64 (G.Sensor_Objid'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Reftype /= null and then G.Sensor_Reftype'First = 0
-      and then Int64 (G.Sensor_Reftype'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Refid /= null and then G.Sensor_Refid'First = 0
-      and then Int64 (G.Sensor_Refid'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Intprm /= null and then G.Sensor_Intprm'First = 0
-      and then Int64 (G.Sensor_Intprm'Length) = Int64 (S.Nsensor) * (3)
-      and then G.Sensor_Dim /= null and then G.Sensor_Dim'First = 0
-      and then Int64 (G.Sensor_Dim'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Adr /= null and then G.Sensor_Adr'First = 0
-      and then Int64 (G.Sensor_Adr'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Cutoff /= null and then G.Sensor_Cutoff'First = 0
-      and then Int64 (G.Sensor_Cutoff'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Noise /= null and then G.Sensor_Noise'First = 0
-      and then Int64 (G.Sensor_Noise'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_History /= null and then G.Sensor_History'First = 0
-      and then Int64 (G.Sensor_History'Length) = Int64 (S.Nsensor) * (2)
-      and then G.Sensor_Historyadr /= null and then G.Sensor_Historyadr'First = 0
-      and then Int64 (G.Sensor_Historyadr'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Delay /= null and then G.Sensor_Delay'First = 0
-      and then Int64 (G.Sensor_Delay'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Sensor_Interval /= null and then G.Sensor_Interval'First = 0
-      and then Int64 (G.Sensor_Interval'Length) = Int64 (S.Nsensor) * (2)
-      and then G.Sensor_User /= null and then G.Sensor_User'First = 0
-      and then Int64 (G.Sensor_User'Length) = Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor))
-      and then G.Sensor_Plugin /= null and then G.Sensor_Plugin'First = 0
-      and then Int64 (G.Sensor_Plugin'Length) = Int64 (S.Nsensor) * (1));
+     (I32_OK (G.Sensor_Type, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Datatype, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Needstage, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Objtype, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Objid, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Reftype, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Refid, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Intprm, Int64 (S.Nsensor) * (3))
+      and then I32_OK (G.Sensor_Dim, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_Adr, Int64 (S.Nsensor) * (1))
+      and then F64_OK (G.Sensor_Cutoff, Int64 (S.Nsensor) * (1))
+      and then F64_OK (G.Sensor_Noise, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Sensor_History, Int64 (S.Nsensor) * (2))
+      and then I32_OK (G.Sensor_Historyadr, Int64 (S.Nsensor) * (1))
+      and then F64_OK (G.Sensor_Delay, Int64 (S.Nsensor) * (1))
+      and then F64_OK (G.Sensor_Interval, Int64 (S.Nsensor) * (2))
+      and then F64_OK (G.Sensor_User, Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor)))
+      and then I32_OK (G.Sensor_Plugin, Int64 (S.Nsensor) * (1)));
 
    function Sensor_All_Null (G : Sensor_Arrays) return Boolean is
      (G.Sensor_Type = null
@@ -2058,10 +1662,8 @@ package MJ.Models with SPARK_Mode is
    function Qpos_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Qpos_Layout_OK (S : Sizes; G : Qpos_Arrays) return Boolean is
-     (G.Qpos0 /= null and then G.Qpos0'First = 0
-      and then Int64 (G.Qpos0'Length) = Int64 (S.Nq) * (1)
-      and then G.Qpos_Spring /= null and then G.Qpos_Spring'First = 0
-      and then Int64 (G.Qpos_Spring'Length) = Int64 (S.Nq) * (1));
+     (F64_OK (G.Qpos0, Int64 (S.Nq) * (1))
+      and then F64_OK (G.Qpos_Spring, Int64 (S.Nq) * (1)));
 
    function Qpos_All_Null (G : Qpos_Arrays) return Boolean is
      (G.Qpos0 = null
@@ -2087,22 +1689,14 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Noct) * (6) <= Int64 (Max_Size));
 
    function Bvh_Layout_OK (S : Sizes; G : Bvh_Arrays) return Boolean is
-     (G.Bvh_Depth /= null and then G.Bvh_Depth'First = 0
-      and then Int64 (G.Bvh_Depth'Length) = Int64 (S.Nbvh) * (1)
-      and then G.Bvh_Child /= null and then G.Bvh_Child'First = 0
-      and then Int64 (G.Bvh_Child'Length) = Int64 (S.Nbvh) * (2)
-      and then G.Bvh_Nodeid /= null and then G.Bvh_Nodeid'First = 0
-      and then Int64 (G.Bvh_Nodeid'Length) = Int64 (S.Nbvh) * (1)
-      and then G.Bvh_Aabb /= null and then G.Bvh_Aabb'First = 0
-      and then Int64 (G.Bvh_Aabb'Length) = Int64 (S.Nbvhstatic) * (6)
-      and then G.Oct_Depth /= null and then G.Oct_Depth'First = 0
-      and then Int64 (G.Oct_Depth'Length) = Int64 (S.Noct) * (1)
-      and then G.Oct_Child /= null and then G.Oct_Child'First = 0
-      and then Int64 (G.Oct_Child'Length) = Int64 (S.Noct) * (8)
-      and then G.Oct_Aabb /= null and then G.Oct_Aabb'First = 0
-      and then Int64 (G.Oct_Aabb'Length) = Int64 (S.Noct) * (6)
-      and then G.Oct_Coeff /= null and then G.Oct_Coeff'First = 0
-      and then Int64 (G.Oct_Coeff'Length) = Int64 (S.Noct) * (8));
+     (I32_OK (G.Bvh_Depth, Int64 (S.Nbvh) * (1))
+      and then I32_OK (G.Bvh_Child, Int64 (S.Nbvh) * (2))
+      and then I32_OK (G.Bvh_Nodeid, Int64 (S.Nbvh) * (1))
+      and then F64_OK (G.Bvh_Aabb, Int64 (S.Nbvhstatic) * (6))
+      and then I32_OK (G.Oct_Depth, Int64 (S.Noct) * (1))
+      and then I32_OK (G.Oct_Child, Int64 (S.Noct) * (8))
+      and then F64_OK (G.Oct_Aabb, Int64 (S.Noct) * (6))
+      and then F64_OK (G.Oct_Coeff, Int64 (S.Noct) * (8)));
 
    function Bvh_All_Null (G : Bvh_Arrays) return Boolean is
      (G.Bvh_Depth = null
@@ -2125,12 +1719,9 @@ package MJ.Models with SPARK_Mode is
    function Wrap_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Wrap_Layout_OK (S : Sizes; G : Wrap_Arrays) return Boolean is
-     (G.Wrap_Type /= null and then G.Wrap_Type'First = 0
-      and then Int64 (G.Wrap_Type'Length) = Int64 (S.Nwrap) * (1)
-      and then G.Wrap_Objid /= null and then G.Wrap_Objid'First = 0
-      and then Int64 (G.Wrap_Objid'Length) = Int64 (S.Nwrap) * (1)
-      and then G.Wrap_Prm /= null and then G.Wrap_Prm'First = 0
-      and then Int64 (G.Wrap_Prm'Length) = Int64 (S.Nwrap) * (1));
+     (I32_OK (G.Wrap_Type, Int64 (S.Nwrap) * (1))
+      and then I32_OK (G.Wrap_Objid, Int64 (S.Nwrap) * (1))
+      and then F64_OK (G.Wrap_Prm, Int64 (S.Nwrap) * (1)));
 
    function Wrap_All_Null (G : Wrap_Arrays) return Boolean is
      (G.Wrap_Type = null
@@ -2150,16 +1741,11 @@ package MJ.Models with SPARK_Mode is
    function Plugin_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Plugin_Layout_OK (S : Sizes; G : Plugin_Arrays) return Boolean is
-     (G.Plugin /= null and then G.Plugin'First = 0
-      and then Int64 (G.Plugin'Length) = Int64 (S.Nplugin) * (1)
-      and then G.Plugin_Stateadr /= null and then G.Plugin_Stateadr'First = 0
-      and then Int64 (G.Plugin_Stateadr'Length) = Int64 (S.Nplugin) * (1)
-      and then G.Plugin_Statenum /= null and then G.Plugin_Statenum'First = 0
-      and then Int64 (G.Plugin_Statenum'Length) = Int64 (S.Nplugin) * (1)
-      and then G.Plugin_Attr /= null and then G.Plugin_Attr'First = 0
-      and then Int64 (G.Plugin_Attr'Length) = Int64 (S.Npluginattr) * (1)
-      and then G.Plugin_Attradr /= null and then G.Plugin_Attradr'First = 0
-      and then Int64 (G.Plugin_Attradr'Length) = Int64 (S.Nplugin) * (1));
+     (I32_OK (G.Plugin, Int64 (S.Nplugin) * (1))
+      and then I32_OK (G.Plugin_Stateadr, Int64 (S.Nplugin) * (1))
+      and then I32_OK (G.Plugin_Statenum, Int64 (S.Nplugin) * (1))
+      and then U8_OK (G.Plugin_Attr, Int64 (S.Npluginattr) * (1))
+      and then I32_OK (G.Plugin_Attradr, Int64 (S.Nplugin) * (1)));
 
    function Plugin_All_Null (G : Plugin_Arrays) return Boolean is
      (G.Plugin = null
@@ -2179,12 +1765,9 @@ package MJ.Models with SPARK_Mode is
    function Numeric_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Numeric_Layout_OK (S : Sizes; G : Numeric_Arrays) return Boolean is
-     (G.Numeric_Adr /= null and then G.Numeric_Adr'First = 0
-      and then Int64 (G.Numeric_Adr'Length) = Int64 (S.Nnumeric) * (1)
-      and then G.Numeric_Size /= null and then G.Numeric_Size'First = 0
-      and then Int64 (G.Numeric_Size'Length) = Int64 (S.Nnumeric) * (1)
-      and then G.Numeric_Data /= null and then G.Numeric_Data'First = 0
-      and then Int64 (G.Numeric_Data'Length) = Int64 (S.Nnumericdata) * (1));
+     (I32_OK (G.Numeric_Adr, Int64 (S.Nnumeric) * (1))
+      and then I32_OK (G.Numeric_Size, Int64 (S.Nnumeric) * (1))
+      and then F64_OK (G.Numeric_Data, Int64 (S.Nnumericdata) * (1)));
 
    function Numeric_All_Null (G : Numeric_Arrays) return Boolean is
      (G.Numeric_Adr = null
@@ -2202,12 +1785,9 @@ package MJ.Models with SPARK_Mode is
    function Text_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Text_Layout_OK (S : Sizes; G : Text_Arrays) return Boolean is
-     (G.Text_Adr /= null and then G.Text_Adr'First = 0
-      and then Int64 (G.Text_Adr'Length) = Int64 (S.Ntext) * (1)
-      and then G.Text_Size /= null and then G.Text_Size'First = 0
-      and then Int64 (G.Text_Size'Length) = Int64 (S.Ntext) * (1)
-      and then G.Text_Data /= null and then G.Text_Data'First = 0
-      and then Int64 (G.Text_Data'Length) = Int64 (S.Ntextdata) * (1));
+     (I32_OK (G.Text_Adr, Int64 (S.Ntext) * (1))
+      and then I32_OK (G.Text_Size, Int64 (S.Ntext) * (1))
+      and then U8_OK (G.Text_Data, Int64 (S.Ntextdata) * (1)));
 
    function Text_All_Null (G : Text_Arrays) return Boolean is
      (G.Text_Adr = null
@@ -2227,16 +1807,11 @@ package MJ.Models with SPARK_Mode is
    function Tuple_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Tuple_Layout_OK (S : Sizes; G : Tuple_Arrays) return Boolean is
-     (G.Tuple_Adr /= null and then G.Tuple_Adr'First = 0
-      and then Int64 (G.Tuple_Adr'Length) = Int64 (S.Ntuple) * (1)
-      and then G.Tuple_Size /= null and then G.Tuple_Size'First = 0
-      and then Int64 (G.Tuple_Size'Length) = Int64 (S.Ntuple) * (1)
-      and then G.Tuple_Objtype /= null and then G.Tuple_Objtype'First = 0
-      and then Int64 (G.Tuple_Objtype'Length) = Int64 (S.Ntupledata) * (1)
-      and then G.Tuple_Objid /= null and then G.Tuple_Objid'First = 0
-      and then Int64 (G.Tuple_Objid'Length) = Int64 (S.Ntupledata) * (1)
-      and then G.Tuple_Objprm /= null and then G.Tuple_Objprm'First = 0
-      and then Int64 (G.Tuple_Objprm'Length) = Int64 (S.Ntupledata) * (1));
+     (I32_OK (G.Tuple_Adr, Int64 (S.Ntuple) * (1))
+      and then I32_OK (G.Tuple_Size, Int64 (S.Ntuple) * (1))
+      and then I32_OK (G.Tuple_Objtype, Int64 (S.Ntupledata) * (1))
+      and then I32_OK (G.Tuple_Objid, Int64 (S.Ntupledata) * (1))
+      and then F64_OK (G.Tuple_Objprm, Int64 (S.Ntupledata) * (1)));
 
    function Tuple_All_Null (G : Tuple_Arrays) return Boolean is
      (G.Tuple_Adr = null
@@ -2266,20 +1841,13 @@ package MJ.Models with SPARK_Mode is
       and then Int64 (S.Nkey) * (Int64 (S.Nu)) <= Int64 (Max_Size));
 
    function Key_Layout_OK (S : Sizes; G : Key_Arrays) return Boolean is
-     (G.Key_Time /= null and then G.Key_Time'First = 0
-      and then Int64 (G.Key_Time'Length) = Int64 (S.Nkey) * (1)
-      and then G.Key_Qpos /= null and then G.Key_Qpos'First = 0
-      and then Int64 (G.Key_Qpos'Length) = Int64 (S.Nkey) * (Int64 (S.Nq))
-      and then G.Key_Qvel /= null and then G.Key_Qvel'First = 0
-      and then Int64 (G.Key_Qvel'Length) = Int64 (S.Nkey) * (Int64 (S.Nv))
-      and then G.Key_Act /= null and then G.Key_Act'First = 0
-      and then Int64 (G.Key_Act'Length) = Int64 (S.Nkey) * (Int64 (S.Na))
-      and then G.Key_Mpos /= null and then G.Key_Mpos'First = 0
-      and then Int64 (G.Key_Mpos'Length) = Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3)
-      and then G.Key_Mquat /= null and then G.Key_Mquat'First = 0
-      and then Int64 (G.Key_Mquat'Length) = Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4)
-      and then G.Key_Ctrl /= null and then G.Key_Ctrl'First = 0
-      and then Int64 (G.Key_Ctrl'Length) = Int64 (S.Nkey) * (Int64 (S.Nu)));
+     (F64_OK (G.Key_Time, Int64 (S.Nkey) * (1))
+      and then F64_OK (G.Key_Qpos, Int64 (S.Nkey) * (Int64 (S.Nq)))
+      and then F64_OK (G.Key_Qvel, Int64 (S.Nkey) * (Int64 (S.Nv)))
+      and then F64_OK (G.Key_Act, Int64 (S.Nkey) * (Int64 (S.Na)))
+      and then F64_OK (G.Key_Mpos, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3))
+      and then F64_OK (G.Key_Mquat, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4))
+      and then F64_OK (G.Key_Ctrl, Int64 (S.Nkey) * (Int64 (S.Nu))));
 
    function Key_All_Null (G : Key_Arrays) return Boolean is
      (G.Key_Time = null
@@ -2324,58 +1892,32 @@ package MJ.Models with SPARK_Mode is
    function Name_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Name_Layout_OK (S : Sizes; G : Name_Arrays) return Boolean is
-     (G.Name_Bodyadr /= null and then G.Name_Bodyadr'First = 0
-      and then Int64 (G.Name_Bodyadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.Name_Jntadr /= null and then G.Name_Jntadr'First = 0
-      and then Int64 (G.Name_Jntadr'Length) = Int64 (S.Njnt) * (1)
-      and then G.Name_Geomadr /= null and then G.Name_Geomadr'First = 0
-      and then Int64 (G.Name_Geomadr'Length) = Int64 (S.Ngeom) * (1)
-      and then G.Name_Siteadr /= null and then G.Name_Siteadr'First = 0
-      and then Int64 (G.Name_Siteadr'Length) = Int64 (S.Nsite) * (1)
-      and then G.Name_Camadr /= null and then G.Name_Camadr'First = 0
-      and then Int64 (G.Name_Camadr'Length) = Int64 (S.Ncam) * (1)
-      and then G.Name_Lightadr /= null and then G.Name_Lightadr'First = 0
-      and then Int64 (G.Name_Lightadr'Length) = Int64 (S.Nlight) * (1)
-      and then G.Name_Flexadr /= null and then G.Name_Flexadr'First = 0
-      and then Int64 (G.Name_Flexadr'Length) = Int64 (S.Nflex) * (1)
-      and then G.Name_Meshadr /= null and then G.Name_Meshadr'First = 0
-      and then Int64 (G.Name_Meshadr'Length) = Int64 (S.Nmesh) * (1)
-      and then G.Name_Skinadr /= null and then G.Name_Skinadr'First = 0
-      and then Int64 (G.Name_Skinadr'Length) = Int64 (S.Nskin) * (1)
-      and then G.Name_Hfieldadr /= null and then G.Name_Hfieldadr'First = 0
-      and then Int64 (G.Name_Hfieldadr'Length) = Int64 (S.Nhfield) * (1)
-      and then G.Name_Texadr /= null and then G.Name_Texadr'First = 0
-      and then Int64 (G.Name_Texadr'Length) = Int64 (S.Ntex) * (1)
-      and then G.Name_Matadr /= null and then G.Name_Matadr'First = 0
-      and then Int64 (G.Name_Matadr'Length) = Int64 (S.Nmat) * (1)
-      and then G.Name_Pairadr /= null and then G.Name_Pairadr'First = 0
-      and then Int64 (G.Name_Pairadr'Length) = Int64 (S.Npair) * (1)
-      and then G.Name_Excludeadr /= null and then G.Name_Excludeadr'First = 0
-      and then Int64 (G.Name_Excludeadr'Length) = Int64 (S.Nexclude) * (1)
-      and then G.Name_Eqadr /= null and then G.Name_Eqadr'First = 0
-      and then Int64 (G.Name_Eqadr'Length) = Int64 (S.Neq) * (1)
-      and then G.Name_Tendonadr /= null and then G.Name_Tendonadr'First = 0
-      and then Int64 (G.Name_Tendonadr'Length) = Int64 (S.Ntendon) * (1)
-      and then G.Name_Actuatoradr /= null and then G.Name_Actuatoradr'First = 0
-      and then Int64 (G.Name_Actuatoradr'Length) = Int64 (S.Nactuator) * (1)
-      and then G.Name_Sensoradr /= null and then G.Name_Sensoradr'First = 0
-      and then Int64 (G.Name_Sensoradr'Length) = Int64 (S.Nsensor) * (1)
-      and then G.Name_Numericadr /= null and then G.Name_Numericadr'First = 0
-      and then Int64 (G.Name_Numericadr'Length) = Int64 (S.Nnumeric) * (1)
-      and then G.Name_Textadr /= null and then G.Name_Textadr'First = 0
-      and then Int64 (G.Name_Textadr'Length) = Int64 (S.Ntext) * (1)
-      and then G.Name_Tupleadr /= null and then G.Name_Tupleadr'First = 0
-      and then Int64 (G.Name_Tupleadr'Length) = Int64 (S.Ntuple) * (1)
-      and then G.Name_Keyadr /= null and then G.Name_Keyadr'First = 0
-      and then Int64 (G.Name_Keyadr'Length) = Int64 (S.Nkey) * (1)
-      and then G.Name_Pluginadr /= null and then G.Name_Pluginadr'First = 0
-      and then Int64 (G.Name_Pluginadr'Length) = Int64 (S.Nplugin) * (1)
-      and then G.Names /= null and then G.Names'First = 0
-      and then Int64 (G.Names'Length) = Int64 (S.Nnames) * (1)
-      and then G.Names_Map /= null and then G.Names_Map'First = 0
-      and then Int64 (G.Names_Map'Length) = Int64 (S.Nnames_Map) * (1)
-      and then G.Paths /= null and then G.Paths'First = 0
-      and then Int64 (G.Paths'Length) = Int64 (S.Npaths) * (1));
+     (I32_OK (G.Name_Bodyadr, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.Name_Jntadr, Int64 (S.Njnt) * (1))
+      and then I32_OK (G.Name_Geomadr, Int64 (S.Ngeom) * (1))
+      and then I32_OK (G.Name_Siteadr, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Name_Camadr, Int64 (S.Ncam) * (1))
+      and then I32_OK (G.Name_Lightadr, Int64 (S.Nlight) * (1))
+      and then I32_OK (G.Name_Flexadr, Int64 (S.Nflex) * (1))
+      and then I32_OK (G.Name_Meshadr, Int64 (S.Nmesh) * (1))
+      and then I32_OK (G.Name_Skinadr, Int64 (S.Nskin) * (1))
+      and then I32_OK (G.Name_Hfieldadr, Int64 (S.Nhfield) * (1))
+      and then I32_OK (G.Name_Texadr, Int64 (S.Ntex) * (1))
+      and then I32_OK (G.Name_Matadr, Int64 (S.Nmat) * (1))
+      and then I32_OK (G.Name_Pairadr, Int64 (S.Npair) * (1))
+      and then I32_OK (G.Name_Excludeadr, Int64 (S.Nexclude) * (1))
+      and then I32_OK (G.Name_Eqadr, Int64 (S.Neq) * (1))
+      and then I32_OK (G.Name_Tendonadr, Int64 (S.Ntendon) * (1))
+      and then I32_OK (G.Name_Actuatoradr, Int64 (S.Nactuator) * (1))
+      and then I32_OK (G.Name_Sensoradr, Int64 (S.Nsensor) * (1))
+      and then I32_OK (G.Name_Numericadr, Int64 (S.Nnumeric) * (1))
+      and then I32_OK (G.Name_Textadr, Int64 (S.Ntext) * (1))
+      and then I32_OK (G.Name_Tupleadr, Int64 (S.Ntuple) * (1))
+      and then I32_OK (G.Name_Keyadr, Int64 (S.Nkey) * (1))
+      and then I32_OK (G.Name_Pluginadr, Int64 (S.Nplugin) * (1))
+      and then U8_OK (G.Names, Int64 (S.Nnames) * (1))
+      and then I32_OK (G.Names_Map, Int64 (S.Nnames_Map) * (1))
+      and then U8_OK (G.Paths, Int64 (S.Npaths) * (1)));
 
    function Name_All_Null (G : Name_Arrays) return Boolean is
      (G.Name_Bodyadr = null
@@ -2426,32 +1968,19 @@ package MJ.Models with SPARK_Mode is
    function Sparse_Sizes_OK (Unused_S : Sizes) return Boolean is (True);
 
    function Sparse_Layout_OK (S : Sizes; G : Sparse_Arrays) return Boolean is
-     (G.B_Rownnz /= null and then G.B_Rownnz'First = 0
-      and then Int64 (G.B_Rownnz'Length) = Int64 (S.Nbody) * (1)
-      and then G.B_Rowadr /= null and then G.B_Rowadr'First = 0
-      and then Int64 (G.B_Rowadr'Length) = Int64 (S.Nbody) * (1)
-      and then G.B_Colind /= null and then G.B_Colind'First = 0
-      and then Int64 (G.B_Colind'Length) = Int64 (S.NB) * (1)
-      and then G.M_Rownnz /= null and then G.M_Rownnz'First = 0
-      and then Int64 (G.M_Rownnz'Length) = Int64 (S.Nv) * (1)
-      and then G.M_Rowadr /= null and then G.M_Rowadr'First = 0
-      and then Int64 (G.M_Rowadr'Length) = Int64 (S.Nv) * (1)
-      and then G.M_Colind /= null and then G.M_Colind'First = 0
-      and then Int64 (G.M_Colind'Length) = Int64 (S.NC) * (1)
-      and then G.MapM2M /= null and then G.MapM2M'First = 0
-      and then Int64 (G.MapM2M'Length) = Int64 (S.NC) * (1)
-      and then G.D_Rownnz /= null and then G.D_Rownnz'First = 0
-      and then Int64 (G.D_Rownnz'Length) = Int64 (S.Nv) * (1)
-      and then G.D_Rowadr /= null and then G.D_Rowadr'First = 0
-      and then Int64 (G.D_Rowadr'Length) = Int64 (S.Nv) * (1)
-      and then G.D_Diag /= null and then G.D_Diag'First = 0
-      and then Int64 (G.D_Diag'Length) = Int64 (S.Nv) * (1)
-      and then G.D_Colind /= null and then G.D_Colind'First = 0
-      and then Int64 (G.D_Colind'Length) = Int64 (S.ND) * (1)
-      and then G.MapM2D /= null and then G.MapM2D'First = 0
-      and then Int64 (G.MapM2D'Length) = Int64 (S.ND) * (1)
-      and then G.MapD2M /= null and then G.MapD2M'First = 0
-      and then Int64 (G.MapD2M'Length) = Int64 (S.NC) * (1));
+     (I32_OK (G.B_Rownnz, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.B_Rowadr, Int64 (S.Nbody) * (1))
+      and then I32_OK (G.B_Colind, Int64 (S.NB) * (1))
+      and then I32_OK (G.M_Rownnz, Int64 (S.Nv) * (1))
+      and then I32_OK (G.M_Rowadr, Int64 (S.Nv) * (1))
+      and then I32_OK (G.M_Colind, Int64 (S.NC) * (1))
+      and then I32_OK (G.MapM2M, Int64 (S.NC) * (1))
+      and then I32_OK (G.D_Rownnz, Int64 (S.Nv) * (1))
+      and then I32_OK (G.D_Rowadr, Int64 (S.Nv) * (1))
+      and then I32_OK (G.D_Diag, Int64 (S.Nv) * (1))
+      and then I32_OK (G.D_Colind, Int64 (S.ND) * (1))
+      and then I32_OK (G.MapM2D, Int64 (S.ND) * (1))
+      and then I32_OK (G.MapD2M, Int64 (S.NC) * (1)));
 
    function Sparse_All_Null (G : Sparse_Arrays) return Boolean is
      (G.B_Rownnz = null
