@@ -5,7 +5,8 @@ with MJ.Types; use MJ.Types;
 
 package MJ.File_IO with
   SPARK_Mode,
-  Abstract_State => (File_System with External)
+  Abstract_State => (File_System with External),
+  Initializes    => File_System   --  the file system exists before the program runs
 is
    --  Reads the whole file into a fresh 0-based buffer. On failure B is null.
    procedure Read_File (Path : String; B : out Byte_Array_Access; OK : out Boolean) with
