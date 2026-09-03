@@ -77,8 +77,8 @@ package body MJ.Validation with SPARK_Mode is
       Contact := Int64'Min (Contact, Int64 (Max_Cap));
 
       Efc := Ne + Nf + Nl + 10 * Contact;
-      NJ  := Efc * Int64 (M.S.Nv);
-      Overflow := Efc > Int64 (Max_Cap) or else NJ > Int64 (Max_Size);
+      NJ  := Int64'Min (Efc * Int64 (M.S.Nv), Int64 (Max_Size));
+      Overflow := Efc > Int64 (Max_Cap);
       if Overflow then
          return;
       end if;
@@ -391,7 +391,7 @@ package body MJ.Validation with SPARK_Mode is
    is
    begin
       Diagnose_CSR (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
-                    M.S.Nv, M.S.Nm, M.S.Nv, M_Rowadr, Result);
+                    M.S.Nv, M.S.Nc, M.S.Nv, M_Rowadr, Result);
       if Result.Status /= OK then
          return;
       end if;
@@ -411,11 +411,13 @@ package body MJ.Validation with SPARK_Mode is
          return;
       end if;
       for I in 0 .. M.S.Nv - 1 loop
-         if M.Sparse.M_Rownnz (I) /= Row_Len (M, I) then
+         if M.Sparse.M_Rownnz (I) /= (if M.Dofs.Dof_Simplenum (I) > 0 then 1 else Row_Len (M, I)) then
             Result := (Invalid_CSR, M_Rownnz, I);
             return;
          end if;
-         pragma Loop_Invariant (for all K in 0 .. I => M.Sparse.M_Rownnz (K) = Row_Len (M, K));
+         pragma Loop_Invariant
+           (for all K in 0 .. I =>
+              M.Sparse.M_Rownnz (K) = (if M.Dofs.Dof_Simplenum (K) > 0 then 1 else Row_Len (M, K)));
       end loop;
       for I in 0 .. M.S.Nv - 1 loop
          if not M_Row_At (M, I) then
@@ -439,20 +441,20 @@ package body MJ.Validation with SPARK_Mode is
          pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2M (J) in 0 .. M.S.Nm - 1);
       end loop;
       for K in 0 .. M.S.Nd - 1 loop
-         if M.Sparse.MapM2D (K) not in 0 .. M.S.Nm - 1 then
+         if M.Sparse.MapM2D (K) not in -1 .. M.S.Nc - 1 then
             Result := (Invalid_CSR, MapM2D, K);
             return;
          end if;
-         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2D (J) in 0 .. M.S.Nm - 1);
+         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2D (J) in -1 .. M.S.Nc - 1);
       end loop;
-      for K in 0 .. M.S.Nm - 1 loop
+      for K in 0 .. M.S.Nc - 1 loop
          if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1 then
             Result := (Invalid_CSR, MapD2M, K);
             return;
          end if;
          pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapD2M (J) in 0 .. M.S.Nd - 1);
       end loop;
-      for K in 0 .. M.S.Nm - 1 loop
+      for K in 0 .. M.S.Nc - 1 loop
          if M.Sparse.MapM2D (M.Sparse.MapD2M (K)) /= K then
             Result := (Invalid_CSR, MapD2M, K);
             return;

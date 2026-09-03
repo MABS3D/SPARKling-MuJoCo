@@ -795,6 +795,15 @@ def field_path(t: Tables, cname: str) -> str:
     return f"M.{GROUP_FIELD[f.group]}.{f.ada}"
 
 
+# Bounding boxes hold mjMAXVAL-sized half-extents for planes (found on model/replicate/*):
+# bounds, not physical parameters, so they are checked against tier 1 instead of tier 0.
+TIER1_FIELDS = {"bvh_aabb", "geom_aabb", "oct_aabb"}
+
+
+def real_tier(f: Field) -> str:
+    return "Tier1_Real" if f.name in TIER1_FIELDS else "Tier0_Real"
+
+
 POLICY_PRAGMA = (
     "--  Contracts and loop invariants in this unit are proven by GNATprove and are\n"
     "--  not evaluated at run time: evaluating them made the GCC optimiser inline\n"
@@ -834,10 +843,12 @@ def emit_gen_clauses(t: Tables, refs: list) -> None:
     out.append("   with Pre => Valid_Layout (M);")
     out.append("   pragma No_Inline (Refs_OK);\n")
     reals = [f for f in t.fields if f.ctype == "mjtNum"]
-    out.append("   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0).")
+    out.append("   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0),")
+    out.append("   --  except the bounding boxes, whose half-extents for planes are mjMAXVAL-sized")
+    out.append("   --  bounds rather than physical quantities: those are tier 1.")
     out.append("   function Reals_In_Tier0 (M : Model) return Boolean is")
     out.append("     (" + "\n      and then ".join(
-        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) in Tier0_Real)" for f in reals) + ")")
+        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) in {real_tier(f)})" for f in reals) + ")")
     out.append("   with Pre => Valid_Layout (M);")
     out.append("   pragma No_Inline (Reals_In_Tier0);\n")
     bools = [f for f in t.fields if f.ctype == "mjtBool"]
@@ -873,7 +884,7 @@ def emit_diagnose(t: Tables, refs: list) -> None:
            "   Result := OK_Result;"]
     for f in (f for f in t.fields if f.ctype == "mjtNum"):
         arr = f"M.{GROUP_FIELD[f.group]}.{f.ada}"
-        loop(out, arr, f"{arr} (I) in Tier0_Real", "Invalid_Parameter", f.ada)
+        loop(out, arr, f"{arr} (I) in {real_tier(f)}", "Invalid_Parameter", f.ada)
     out.append("end Diagnose_Reals;")
     write(GEN / "mj-validation-diagnose_reals.adb", "\n".join(out) + "\n")
 

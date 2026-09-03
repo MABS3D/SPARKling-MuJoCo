@@ -593,7 +593,9 @@ package MJ.Models.Gen_Clauses with SPARK_Mode is
    with Pre => Valid_Layout (M);
    pragma No_Inline (Refs_OK);
 
-   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0).
+   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0),
+   --  except the bounding boxes, whose half-extents for planes are mjMAXVAL-sized
+   --  bounds rather than physical quantities: those are tier 1.
    function Reals_In_Tier0 (M : Model) return Boolean is
      ((for all I in M.Qpos.Qpos0'Range => M.Qpos.Qpos0 (I) in Tier0_Real)
       and then (for all I in M.Qpos.Qpos_Spring'Range => M.Qpos.Qpos_Spring (I) in Tier0_Real)
@@ -608,8 +610,8 @@ package MJ.Models.Gen_Clauses with SPARK_Mode is
       and then (for all I in M.Bodies.Body_Gravcomp'Range => M.Bodies.Body_Gravcomp (I) in Tier0_Real)
       and then (for all I in M.Bodies.Body_Margin'Range => M.Bodies.Body_Margin (I) in Tier0_Real)
       and then (for all I in M.Bodies.Body_User'Range => M.Bodies.Body_User (I) in Tier0_Real)
-      and then (for all I in M.Bvh.Bvh_Aabb'Range => M.Bvh.Bvh_Aabb (I) in Tier0_Real)
-      and then (for all I in M.Bvh.Oct_Aabb'Range => M.Bvh.Oct_Aabb (I) in Tier0_Real)
+      and then (for all I in M.Bvh.Bvh_Aabb'Range => M.Bvh.Bvh_Aabb (I) in Tier1_Real)
+      and then (for all I in M.Bvh.Oct_Aabb'Range => M.Bvh.Oct_Aabb (I) in Tier1_Real)
       and then (for all I in M.Bvh.Oct_Coeff'Range => M.Bvh.Oct_Coeff (I) in Tier0_Real)
       and then (for all I in M.Joints.Jnt_Solref'Range => M.Joints.Jnt_Solref (I) in Tier0_Real)
       and then (for all I in M.Joints.Jnt_Solimp'Range => M.Joints.Jnt_Solimp (I) in Tier0_Real)
@@ -634,7 +636,7 @@ package MJ.Models.Gen_Clauses with SPARK_Mode is
       and then (for all I in M.Geoms.Geom_Solref'Range => M.Geoms.Geom_Solref (I) in Tier0_Real)
       and then (for all I in M.Geoms.Geom_Solimp'Range => M.Geoms.Geom_Solimp (I) in Tier0_Real)
       and then (for all I in M.Geoms.Geom_Size'Range => M.Geoms.Geom_Size (I) in Tier0_Real)
-      and then (for all I in M.Geoms.Geom_Aabb'Range => M.Geoms.Geom_Aabb (I) in Tier0_Real)
+      and then (for all I in M.Geoms.Geom_Aabb'Range => M.Geoms.Geom_Aabb (I) in Tier1_Real)
       and then (for all I in M.Geoms.Geom_Rbound'Range => M.Geoms.Geom_Rbound (I) in Tier0_Real)
       and then (for all I in M.Geoms.Geom_Pos'Range => M.Geoms.Geom_Pos (I) in Tier0_Real)
       and then (for all I in M.Geoms.Geom_Quat'Range => M.Geoms.Geom_Quat (I) in Tier0_Real)

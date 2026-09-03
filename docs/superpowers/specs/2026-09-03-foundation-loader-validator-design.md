@@ -445,7 +445,8 @@ The full per-field table is generated from the C reference macro and reviewed by
 - `Body_Rootid (I) <= I` and `Body_Weldid (I) <= I`; `Body_Rootid (0) = 0`; `Body_Weldid (0) = 0`.
 - `Body_Rootid (I) = Body_Rootid (Body_Parentid (I))` for `I >= 1` unless the parent is the
   world, in which case `Body_Rootid (I) = I`.
-- `Body_Weldid (I) = I` if `Body_Jntnum (I) > 0`, else `Body_Weldid (Body_Parentid (I))`.
+- `Body_Weldid (I) = I` if `Body_Jntnum (I) > 0` or `Body_Mocapid (I) >= 0` (a mocap body is its
+  own weld body, found on `model/replicate/scene.xml`), else `Body_Weldid (Body_Parentid (I))`.
 - Joints, dofs, and geoms are laid out contiguously by body: `Body_Jntadr (I) = sum of
   Body_Jntnum (0 .. I-1)`, and `Jnt_Bodyid (J) = I` for every joint in the body's range.
   Same for `Body_Dofadr`/`Body_Dofnum`/`Dof_Bodyid` and `Body_Geomadr`/`Body_Geomnum`/`Geom_Bodyid`.
@@ -484,18 +485,22 @@ A CSR triple `(rownnz, rowadr, colind)` with `n` rows and `nnz` non-zeros is wel
 `rowadr (0) = 0`; `rowadr (i+1) = rowadr (i) + rownnz (i)`; `rowadr (n-1) + rownnz (n-1) = nnz`;
 every `colind` in `0 .. ncols - 1`; and `colind` strictly increasing within each row.
 
-- `M_*` is the lower-triangular CSR view of the inertia matrix: `n = Nv`, `nnz = Nm`, columns in
-  `0 .. Nv - 1`. Row `i` contains exactly the ancestors of dof `i` and `i` itself, in increasing
-  order, so it agrees with `Dof_Madr` and `Dof_Parentid`.
+- `M_*` is the reduced lower-triangular CSR view of the inertia matrix built by
+  `mj_makeDofDofSparse (reduced = 1)`: `n = Nv`, `nnz = Nc` (not `Nm`, which is the legacy chain
+  layout), columns in `0 .. Nv - 1`. A simple dof (`dof_simplenum > 0`) keeps only its diagonal;
+  every other dof's row contains its ancestors and itself in increasing order, the parent's row
+  followed by the dof, and a non-simple dof's parent is never simple. Found on the corpus:
+  `model/sleep/dominos.xml` has 576 simple dofs with `nM = 2016` and `nC = 576`.
 - `B_*`: `n = Nbody`, `nnz = Nb`, columns in `0 .. Nv - 1`.
 - `D_*`: `n = Nv`, `nnz = Nd`, columns in `0 .. Nv - 1`; `D_Diag (i)` is the position of
   column `i` within row `i`.
-- `mapM2M` has length `Nc` and entries in `0 .. Nm - 1` (reduced entry to legacy `M` index).
-  `mapM2D` has length `Nd` and entries in `0 .. Nm - 1` (symmetric `D` entry to the lower
-  triangular `M` entry holding its value). `mapD2M` has length `Nm` and entries in `0 .. Nd - 1`
-  (lower `M` entry to its position in `D`). These are the maps `mj_makeDofDofMaps` builds.
+- `mapM2M` has length `Nc` and entries in `0 .. Nm - 1` (CSR entry to legacy `qM` index).
+  `mapM2D` has length `Nd` and entries in `-1 .. Nc - 1` (symmetric `D` entry to the CSR entry
+  holding its value, or -1). `mapD2M` has length `Nc` and entries in `0 .. Nd - 1` (CSR entry to
+  its position in `D`). These are the maps `mj_makeDofDofMaps` builds; the lengths are the
+  X-macro's, verified against the wheel's arrays.
 - The two `D` maps are mutually consistent: `mapM2D (mapD2M (i)) = i` for every `i` in
-  `0 .. Nm - 1`. Stated as a clause because the sparse kernels in sub-project 3 rely on it;
+  `0 .. Nc - 1`. Stated as a clause because the sparse kernels in sub-project 3 rely on it;
   sub-project 3 states any finer structural facts it needs as lemmas over these bounds.
 
 ### 5.6 Geoms, meshes, heightfields, textures, BVH
@@ -582,7 +587,9 @@ Every double in `Model` is finite (guaranteed by the loader) and:
 
 - `Opt.Timestep > 0`, `Opt.Impratio > 0`, tolerances `>= 0`, iteration counts `>= 0`;
   `Opt.Integrator in 0 .. 3`, `Opt.Cone in 0 .. 1`, `Opt.Jacobian in 0 .. 2`, `Opt.Solver in 0 .. 2`.
-- Every `mjtNum` array value is in `Tier0_Real` (magnitude at most 1e10).
+- Every `mjtNum` array value is in `Tier0_Real` (magnitude at most 1e10), except the bounding
+  boxes `bvh_aabb`, `geom_aabb`, and `oct_aabb`, which are in `Tier1_Real`: the compiler gives
+  planes half-extents of `mjMAXVAL` plus a center offset (found on `model/replicate/*`).
 - `Body_Mass (I) >= 0`, `Body_Subtreemass (I) >= Body_Mass (I)`, `Body_Inertia` components `>= 0`,
   `Body_Invweight0` components `>= 0`; `Body_Quat` and `Body_Iquat` unit quaternions within 1e-6.
 - `Jnt_Axis` unit vector within 1e-6 for slide and hinge; `Geom_Size` components `>= 0`;
