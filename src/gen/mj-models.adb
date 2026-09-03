@@ -8,7 +8,7 @@ package body MJ.Models with SPARK_Mode is
 
    procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => I32_OK (P, N)
    is
    begin
       P := new Int_Array'[0 .. Integer (N) - 1 => 0];
@@ -16,7 +16,7 @@ package body MJ.Models with SPARK_Mode is
 
    procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => F64_OK (P, N)
    is
    begin
       P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
@@ -24,7 +24,7 @@ package body MJ.Models with SPARK_Mode is
 
    procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => U8_OK (P, N)
    is
    begin
       P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
@@ -32,7 +32,7 @@ package body MJ.Models with SPARK_Mode is
 
    procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => F32_OK (P, N)
    is
    begin
       P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
@@ -40,7 +40,7 @@ package body MJ.Models with SPARK_Mode is
 
    procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => I64_OK (P, N)
    is
    begin
       P := new Int64_Array'[0 .. Integer (N) - 1 => 0];

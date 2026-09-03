@@ -285,7 +285,7 @@ ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is 
 
    procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => I32_OK (P, N)
    is
    begin
       P := new Int_Array'[0 .. Integer (N) - 1 => 0];
@@ -293,7 +293,7 @@ ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is 
 
    procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => F64_OK (P, N)
    is
    begin
       P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
@@ -301,7 +301,7 @@ ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is 
 
    procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => U8_OK (P, N)
    is
    begin
       P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
@@ -309,7 +309,7 @@ ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is 
 
    procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => F32_OK (P, N)
    is
    begin
       P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
@@ -317,7 +317,7 @@ ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is 
 
    procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
      Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+     Post => I64_OK (P, N)
    is
    begin
       P := new Int64_Array'[0 .. Integer (N) - 1 => 0];
@@ -346,6 +346,14 @@ def emit_model(t: Tables) -> None:
         spec.append(size_component(c))
     spec.append("   end record;\n")
 
+    # One layout predicate per element kind: allocated, zero-based, of the given length.
+    # The allocator helpers in the body establish exactly these, so every group layout
+    # postcondition is a syntactic match rather than a large conjunction of attributes.
+    for tag, acc in (("I32", "Int_Array_Access"), ("F64", "Real_Array_Access"), ("U8", "Byte_Array_Access"),
+                     ("F32", "Float32_Array_Access"), ("I64", "Int64_Array_Access")):
+        spec.append(f"   function {tag}_OK (P : {acc}; N : Int64) return Boolean is")
+        spec.append(f"     (P /= null and then P'First = 0 and then Int64 (P'Length) = N);\n")
+
     # per-group declarations
     for g in GROUP_ORDER:
         P, T, fs = group_prefix(g), group_type(g), by_group[g]
@@ -370,10 +378,7 @@ def emit_model(t: Tables) -> None:
             # GNAT does not warn about unreferenced formals whose name starts with "Unused".
             spec.append(f"   function {P}_Sizes_OK (Unused_S : Sizes) return Boolean is (True);\n")
         spec.append(f"   function {P}_Layout_OK (S : Sizes; G : {T}) return Boolean is")
-        conj = []
-        for f in fs:
-            conj.append(f"G.{f.ada} /= null and then G.{f.ada}'First = 0\n"
-                        f"      and then Int64 (G.{f.ada}'Length) = {count_long(f, m)}")
+        conj = [f"{f.reader}_OK (G.{f.ada}, {count_long(f, m)})" for f in fs]
         spec.append("     (" + "\n      and then ".join(conj) + ");\n")
         spec.append(f"   function {P}_All_Null (G : {T}) return Boolean is")
         spec.append("     (" + "\n      and then ".join(f"G.{f.ada} = null" for f in fs) + ");\n")
