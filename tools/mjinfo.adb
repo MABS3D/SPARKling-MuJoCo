@@ -4,7 +4,6 @@ with MJ.Types;         use MJ.Types;
 with MJ.Fields;        use MJ.Fields;
 with MJ.Models;        use MJ.Models;
 with MJ.MJB;
-with MJ.Validation;
 
 --  mjinfo <model.mjb>: load, validate, and print sizes and capacities.
 --  Exit status 0 on OK, 1 on rejection, 2 on usage error.
