@@ -167,6 +167,36 @@ begin
    M.Names.Names (M.S.Nnames - 1) := Character'Pos ('x');
    Expect (Invalid_Parameter, Names, M.S.Nnames - 1, "names not NUL-terminated");
 
+   --  parameters
+   M.Opt.Timestep := 0.0;
+   Expect (Invalid_Parameter, Option_Block, -1, "zero timestep");
+   M.Opt.Integrator := 4;
+   Expect (Invalid_Parameter, Option_Block, -1, "integrator 4");
+   M.Stat.Extent := -1.0;
+   Expect (Invalid_Parameter, Statistic_Block, -1, "negative extent");
+   M.Bodies.Body_Mass (1) := -1.0;
+   Expect (Invalid_Parameter, Body_Mass, 1, "negative mass");
+   M.Bodies.Body_Quat (4) := 2.0;
+   Expect (Invalid_Parameter, Body_Mass, 1, "non-unit body quaternion");
+   M.Joints.Jnt_Axis (3 * 1) := 5.0;
+   Expect (Invalid_Parameter, Jnt_Axis, 1, "non-unit joint axis");
+   M.Geoms.Geom_Size (0) := -0.1;
+   Expect (Invalid_Parameter, Geom_Size, 0, "negative geom size");
+   M.Dofs.Dof_Damping (0) := -1.0;
+   Expect (Invalid_Parameter, Dof_Damping, -1, "negative damping");
+   M.Geoms.Geom_Adhesion (0) := 1.0;
+   Expect (OK, None, -1, "adhesion is recomputed, not rejected");
+   declare
+      R : Load_Result;
+   begin
+      M.Geoms.Geom_Adhesion (0) := 1.0;
+      Validate (M, Opts, R);
+      Assert (R.Status = OK and then M.Flg_Adhesion, "adhesion flag set from geom_adhesion");
+      Reload;
+      Validate (M, Opts, R);
+      Assert (R.Status = OK and then not M.Flg_Adhesion, "adhesion flag clear for the humanoid");
+   end;
+
    Free (M);
    Free_Byte (Bytes);
 

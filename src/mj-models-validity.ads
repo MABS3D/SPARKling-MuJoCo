@@ -799,7 +799,132 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
-   --  Conjunction. Task 8d appends clauses here, before Valid_Model.
+   --  5.10 Parameter sanity. Only facts the compiler guarantees and a later
+   --  proof needs: signs of masses, inertias, damping and friction; unit
+   --  quaternions and axes; positive timestep and statistics. Solver
+   --  impedance and reference parameters are clamped by the engine at use, as
+   --  in C, so they are not constrained here.
+   ----------------------------------------------------------------------------
+
+   function In_Tier0 (X : Real) return Boolean is (X in Tier0_Real);
+
+   function Unit_Quat (Q : Real_Array; Pos : Integer) return Boolean is
+     (abs (Q (Pos) * Q (Pos) + Q (Pos + 1) * Q (Pos + 1) + Q (Pos + 2) * Q (Pos + 2) + Q (Pos + 3) * Q (Pos + 3) - 1.0)
+      <= 1.0e-6)
+   with Pre => Pos >= Q'First and then Pos <= Q'Last - 3
+               and then (for all K in Pos .. Pos + 3 => Q (K) in Tier0_Real);
+
+   function Unit_Vec3 (V : Real_Array; Pos : Integer) return Boolean is
+     (abs (V (Pos) * V (Pos) + V (Pos + 1) * V (Pos + 1) + V (Pos + 2) * V (Pos + 2) - 1.0) <= 1.0e-6)
+   with Pre => Pos >= V'First and then Pos <= V'Last - 2
+               and then (for all K in Pos .. Pos + 2 => V (K) in Tier0_Real);
+
+   function Option_OK (M : Model) return Boolean is
+     (In_Tier0 (M.Opt.Timestep) and then M.Opt.Timestep > 0.0
+      and then In_Tier0 (M.Opt.Impratio) and then M.Opt.Impratio > 0.0
+      and then In_Tier0 (M.Opt.Tolerance) and then M.Opt.Tolerance >= 0.0
+      and then In_Tier0 (M.Opt.Ls_Tolerance) and then M.Opt.Ls_Tolerance >= 0.0
+      and then In_Tier0 (M.Opt.Noslip_Tolerance) and then M.Opt.Noslip_Tolerance >= 0.0
+      and then In_Tier0 (M.Opt.Ccd_Tolerance) and then M.Opt.Ccd_Tolerance >= 0.0
+      and then In_Tier0 (M.Opt.Sleep_Tolerance) and then M.Opt.Sleep_Tolerance >= 0.0
+      and then (for all K in 0 .. 2 => In_Tier0 (M.Opt.Gravity (K)))
+      and then (for all K in 0 .. 2 => In_Tier0 (M.Opt.Wind (K)))
+      and then (for all K in 0 .. 2 => In_Tier0 (M.Opt.Magnetic (K)))
+      and then In_Tier0 (M.Opt.Density) and then M.Opt.Density >= 0.0
+      and then In_Tier0 (M.Opt.Viscosity) and then M.Opt.Viscosity >= 0.0
+      and then In_Tier0 (M.Opt.O_Margin)
+      and then (for all K in 0 .. 1 => In_Tier0 (M.Opt.O_Solref (K)))
+      and then (for all K in 0 .. 4 => In_Tier0 (M.Opt.O_Solimp (K)))
+      and then (for all K in 0 .. 4 => In_Tier0 (M.Opt.O_Friction (K)))
+      and then M.Opt.Integrator in 0 .. 3 and then M.Opt.Cone in 0 .. 1
+      and then M.Opt.Jacobian in 0 .. 2 and then M.Opt.Solver in 0 .. 2
+      and then M.Opt.Iterations >= 0 and then M.Opt.Ls_Iterations >= 0
+      and then M.Opt.Noslip_Iterations >= 0 and then M.Opt.Ccd_Iterations >= 0
+      and then M.Opt.Sdf_Initpoints >= 0 and then M.Opt.Sdf_Iterations >= 0);
+
+   function Stat_OK (M : Model) return Boolean is
+     (In_Tier0 (M.Stat.Meaninertia) and then M.Stat.Meaninertia > 0.0
+      and then In_Tier0 (M.Stat.Meanmass) and then M.Stat.Meanmass > 0.0
+      and then In_Tier0 (M.Stat.Meansize) and then M.Stat.Meansize > 0.0
+      and then In_Tier0 (M.Stat.Extent) and then M.Stat.Extent > 0.0
+      and then (for all K in 0 .. 2 => In_Tier0 (M.Stat.Center (K))));
+
+   function Body_Param_At (M : Model; I : Integer) return Boolean is
+     (M.Bodies.Body_Mass (I) >= 0.0
+      and then M.Bodies.Body_Subtreemass (I) >= M.Bodies.Body_Mass (I)
+      and then (for all K in 0 .. 2 => M.Bodies.Body_Inertia (3 * I + K) >= 0.0)
+      and then M.Bodies.Body_Invweight0 (2 * I) >= 0.0 and then M.Bodies.Body_Invweight0 (2 * I + 1) >= 0.0
+      and then Unit_Quat (M.Bodies.Body_Quat.all, 4 * I)
+      and then Unit_Quat (M.Bodies.Body_Iquat.all, 4 * I))
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then I in 0 .. M.S.Nbody - 1;
+
+   function Body_Params_OK (M : Model) return Boolean is
+     (for all I in 0 .. M.S.Nbody - 1 => Body_Param_At (M, I))
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M);
+
+   function Jnt_Param_At (M : Model; J : Integer) return Boolean is
+     ((if M.Joints.Jnt_Type (J) in 2 | 3 then Unit_Vec3 (M.Joints.Jnt_Axis.all, 3 * J))
+      and then M.Joints.Jnt_Margin (J) >= 0.0)
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then Jnt_Types_OK (M)
+               and then J in 0 .. M.S.Njnt - 1;
+
+   function Jnt_Params_OK (M : Model) return Boolean is
+     (for all J in 0 .. M.S.Njnt - 1 => Jnt_Param_At (M, J))
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then Jnt_Types_OK (M);
+
+   function Geom_Param_At (M : Model; G : Integer) return Boolean is
+     ((for all K in 0 .. 2 => M.Geoms.Geom_Size (3 * G + K) >= 0.0)
+      and then M.Geoms.Geom_Rbound (G) >= 0.0
+      and then M.Geoms.Geom_Margin (G) >= 0.0 and then M.Geoms.Geom_Gap (G) >= 0.0
+      and then Unit_Quat (M.Geoms.Geom_Quat.all, 4 * G))
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then G in 0 .. M.S.Ngeom - 1;
+
+   function Geom_Params_OK (M : Model) return Boolean is
+     ((for all G in 0 .. M.S.Ngeom - 1 => Geom_Param_At (M, G))
+      and then (for all S in 0 .. M.S.Nsite - 1 => Unit_Quat (M.Sites.Site_Quat.all, 4 * S))
+      and then (for all C in 0 .. M.S.Ncam - 1 => Unit_Quat (M.Cameras.Cam_Quat.all, 4 * C))
+      and then (for all I in 0 .. M.S.Nmesh - 1 => Unit_Quat (M.Meshes.Mesh_Quat.all, 4 * I)))
+   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M);
+
+   function Dof_Params_OK (M : Model) return Boolean is
+     (for all D in 0 .. M.S.Nv - 1 =>
+        M.Dofs.Dof_Armature (D) >= 0.0 and then M.Dofs.Dof_Damping (D) >= 0.0
+        and then M.Dofs.Dof_Frictionloss (D) >= 0.0 and then M.Dofs.Dof_Invweight0 (D) >= 0.0
+        and then M.Dofs.Dof_M0 (D) >= 0.0)
+   with Pre => Valid_Layout (M);
+
+   function Tendon_Params_OK (M : Model) return Boolean is
+     (for all T in 0 .. M.S.Ntendon - 1 =>
+        M.Tendons.Tendon_Stiffness (T) >= 0.0 and then M.Tendons.Tendon_Damping (T) >= 0.0
+        and then M.Tendons.Tendon_Frictionloss (T) >= 0.0 and then M.Tendons.Tendon_Armature (T) >= 0.0
+        and then M.Tendons.Tendon_Width (T) >= 0.0 and then M.Tendons.Tendon_Margin (T) >= 0.0)
+   with Pre => Valid_Layout (M);
+
+   function Actuator_Params_OK (M : Model) return Boolean is
+     (for all A in 0 .. M.S.Nactuator - 1 =>
+        M.Actuators.Actuator_Acc0 (A) >= 0.0 and then M.Actuators.Actuator_Cranklength (A) >= 0.0)
+   with Pre => Valid_Layout (M);
+
+   ----------------------------------------------------------------------------
+   --  5.11 Capacity consistency, 5.12 adhesion flag
+   ----------------------------------------------------------------------------
+
+   function Caps_OK (M : Model) return Boolean is
+     (Int64 (M.Caps.Efc_Cap) =
+        Int64 (M.Caps.Ne_Max) + Int64 (M.Caps.Nf_Max) + Int64 (M.Caps.Nl_Max)
+        + 10 * Int64 (M.Caps.Contact_Cap)
+      and then Int64 (M.Caps.NJ_Cap) = Int64 (M.Caps.Efc_Cap) * Int64 (M.S.Nv)
+      and then M.Caps.NIsland_Cap = M.S.Ntree
+      and then M.Caps.NIdof_Cap = M.S.Nv);
+
+   function Adhesion_OK (M : Model) return Boolean is
+     (M.Flg_Adhesion =
+        ((for some G in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Adhesion (G) > 0.0)
+         or else (for some P in 0 .. M.S.Npair - 1 => M.Pairs.Pair_Adhesion (P) > 0.0)))
+   with Pre => Valid_Layout (M);
+
+   ----------------------------------------------------------------------------
+   --  Conjunction, complete for version one.
    ----------------------------------------------------------------------------
 
    function Is_Valid (M : Model) return Boolean is
@@ -823,7 +948,11 @@ package MJ.Models.Validity with SPARK_Mode is
       and then Actuator_Ranges_OK (M)
       and then Sensor_Types_OK (M) and then Sensor_Objs_OK (M) and then Sensor_Dims_OK (M)
       and then Sensor_Adrs_OK (M)
-      and then Tuples_OK (M) and then Names_OK (M) and then Paths_OK (M))
+      and then Tuples_OK (M) and then Names_OK (M) and then Paths_OK (M)
+      and then Option_OK (M) and then Stat_OK (M)
+      and then Body_Params_OK (M) and then Jnt_Params_OK (M) and then Geom_Params_OK (M)
+      and then Dof_Params_OK (M) and then Tendon_Params_OK (M) and then Actuator_Params_OK (M)
+      and then Caps_OK (M) and then Adhesion_OK (M))
    with Pre => Valid_Layout (M);
 
    subtype Valid_Model is Model
@@ -839,6 +968,8 @@ package MJ.Models.Validity with SPARK_Mode is
                      Pairs_OK, Excludes_OK, Eq_Types_OK, Eq_Objs_OK, Wraps_OK, Tendons_OK,
                      Actuator_Types_OK, Actuator_Trnids_OK, Actuator_Acts_OK, Actuator_Ranges_OK,
                      Sensor_Types_OK, Sensor_Objs_OK, Sensor_Dims_OK, Sensor_Adrs_OK,
-                     Tuples_OK, Names_OK, Paths_OK, Is_Valid);
+                     Tuples_OK, Names_OK, Paths_OK, Option_OK, Stat_OK, Body_Params_OK,
+                     Jnt_Params_OK, Geom_Params_OK, Dof_Params_OK, Tendon_Params_OK,
+                     Actuator_Params_OK, Caps_OK, Adhesion_OK, Is_Valid);
 
 end MJ.Models.Validity;
