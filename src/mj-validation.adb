@@ -15,11 +15,32 @@ package body MJ.Validation with SPARK_Mode is
    procedure Compute_Caps (M : in out Model; Options : Validate_Options; Overflow : out Boolean) with
      Pre  => Valid_Layout (M),
      Post => Valid_Layout (M) and then M.S = M.S'Old
+             and then (if not Overflow then Caps_OK (M) and then Adhesion_OK (M))
    is
       Ne, Nf, Nl : Int64 := 0;
       Contact    : Int64;
       Efc, NJ    : Int64;
    begin
+      --  adhesion flag (spec 5.12): not stored in .mjb, recomputed as the compiler does
+      M.Flg_Adhesion := False;
+      for G in 0 .. M.S.Ngeom - 1 loop
+         if M.Geoms.Geom_Adhesion (G) > 0.0 then
+            M.Flg_Adhesion := True;
+         end if;
+         pragma Loop_Invariant (Valid_Layout (M) and then M.S = M.S'Loop_Entry);
+         pragma Loop_Invariant
+           (M.Flg_Adhesion = (for some K in 0 .. G => M.Geoms.Geom_Adhesion (K) > 0.0));
+      end loop;
+      for P in 0 .. M.S.Npair - 1 loop
+         if M.Pairs.Pair_Adhesion (P) > 0.0 then
+            M.Flg_Adhesion := True;
+         end if;
+         pragma Loop_Invariant (Valid_Layout (M) and then M.S = M.S'Loop_Entry);
+         pragma Loop_Invariant
+           (M.Flg_Adhesion = ((for some K in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Adhesion (K) > 0.0)
+                              or else (for some K in 0 .. P => M.Pairs.Pair_Adhesion (K) > 0.0)));
+      end loop;
+
       for E in 0 .. M.S.Neq - 1 loop
          pragma Loop_Invariant (Ne in 0 .. 6 * Int64 (E));
          Ne := Ne + (case M.Equalities.Eq_Type (E) is
@@ -703,6 +724,88 @@ package body MJ.Validation with SPARK_Mode is
       end if;
    end Diagnose_Objects;
 
+   procedure Diagnose_Params (M : Model; Result : out Load_Result) with
+     Pre  => Valid_Layout (M) and then Reals_In_Tier0 (M) and then Jnt_Types_OK (M),
+     Post => (if Result.Status = OK then
+                Option_OK (M) and then Stat_OK (M)
+                and then Body_Params_OK (M) and then Jnt_Params_OK (M) and then Geom_Params_OK (M)
+                and then Dof_Params_OK (M) and then Tendon_Params_OK (M) and then Actuator_Params_OK (M)
+                and then Caps_OK (M) and then Adhesion_OK (M))
+   is
+   begin
+      Result := OK_Result;
+      if not Option_OK (M) then
+         Result := (Invalid_Parameter, Option_Block, -1);
+         return;
+      end if;
+      if not Stat_OK (M) then
+         Result := (Invalid_Parameter, Statistic_Block, -1);
+         return;
+      end if;
+      for I in 0 .. M.S.Nbody - 1 loop
+         if not Body_Param_At (M, I) then
+            Result := (Invalid_Parameter, Body_Mass, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => Body_Param_At (M, K));
+      end loop;
+      for J in 0 .. M.S.Njnt - 1 loop
+         if not Jnt_Param_At (M, J) then
+            Result := (Invalid_Parameter, Jnt_Axis, J);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. J => Jnt_Param_At (M, K));
+      end loop;
+      for G in 0 .. M.S.Ngeom - 1 loop
+         if not Geom_Param_At (M, G) then
+            Result := (Invalid_Parameter, Geom_Size, G);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. G => Geom_Param_At (M, K));
+      end loop;
+      for S in 0 .. M.S.Nsite - 1 loop
+         if not Unit_Quat (M.Sites.Site_Quat.all, 4 * S) then
+            Result := (Invalid_Parameter, Site_Quat, S);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. S => Unit_Quat (M.Sites.Site_Quat.all, 4 * K));
+      end loop;
+      for C in 0 .. M.S.Ncam - 1 loop
+         if not Unit_Quat (M.Cameras.Cam_Quat.all, 4 * C) then
+            Result := (Invalid_Parameter, Cam_Quat, C);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. C => Unit_Quat (M.Cameras.Cam_Quat.all, 4 * K));
+      end loop;
+      for I in 0 .. M.S.Nmesh - 1 loop
+         if not Unit_Quat (M.Meshes.Mesh_Quat.all, 4 * I) then
+            Result := (Invalid_Parameter, Mesh_Quat, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => Unit_Quat (M.Meshes.Mesh_Quat.all, 4 * K));
+      end loop;
+      if not Dof_Params_OK (M) then
+         Result := (Invalid_Parameter, Dof_Damping, -1);
+         return;
+      end if;
+      if not Tendon_Params_OK (M) then
+         Result := (Invalid_Parameter, Tendon_Stiffness, -1);
+         return;
+      end if;
+      if not Actuator_Params_OK (M) then
+         Result := (Invalid_Parameter, Actuator_Acc0, -1);
+         return;
+      end if;
+      if not Caps_OK (M) then
+         Result := (Capacity_Overflow, Capacity_Block, -1);
+         return;
+      end if;
+      if not Adhesion_OK (M) then
+         Result := (Invalid_Parameter, Flag_Block, -1);
+         return;
+      end if;
+   end Diagnose_Params;
+
    --  Size ordinals in the .mjb size table (position in MJMODEL_SIZES).
    Size_Nbody   : constant := 6;
    Size_Nbvh    : constant := 7;
@@ -765,7 +868,10 @@ package body MJ.Validation with SPARK_Mode is
       if Result.Status /= OK then
          return;
       end if;
-      --  Task 8d inserts Diagnose_Params here.
+      Diagnose_Params (M, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
 
       --  Unreachable when Is_Valid (M) is false; keeps Result well defined.
       Result := (Invalid_Parameter, None, -1);
