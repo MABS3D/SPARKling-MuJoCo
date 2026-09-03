@@ -2,40 +2,84 @@
 
 package body MJ.Models with SPARK_Mode is
 
+   --  One allocator per element kind. Each postcondition is exactly the conjunct
+   --  the group layout predicate states for that array, which keeps every
+   --  Allocate_<Group> proof a sequence of trivial steps.
+
+   procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Int_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_I32;
+
+   procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
+   end Alloc_F64;
+
+   procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_U8;
+
+   procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
+   end Alloc_F32;
+
+   procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Int64_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_I64;
+
    procedure Allocate_Body (S : Sizes; G : in out Body_Arrays) with
      Pre  => Body_Sizes_OK (S) and then Body_All_Null (G),
      Post => Body_Layout_OK (S, G)
    is
    begin
-      G.Body_Parentid := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Rootid := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Weldid := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Mocapid := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Jntnum := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Jntadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Dofnum := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Dofadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Treeid := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Geomnum := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Geomadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Simple := new Byte_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Sameframe := new Byte_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Pos := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (3)) - 1 => 0.0];
-      G.Body_Quat := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (4)) - 1 => 0.0];
-      G.Body_Ipos := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (3)) - 1 => 0.0];
-      G.Body_Iquat := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (4)) - 1 => 0.0];
-      G.Body_Mass := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0.0];
-      G.Body_Subtreemass := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0.0];
-      G.Body_Inertia := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (3)) - 1 => 0.0];
-      G.Body_Invweight0 := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (2)) - 1 => 0.0];
-      G.Body_Gravcomp := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0.0];
-      G.Body_Margin := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0.0];
-      G.Body_User := new Real_Array'[0 .. Integer (Int64 (S.Nbody) * (Int64 (S.Nuser_Body))) - 1 => 0.0];
-      G.Body_Plugin := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Contype := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Conaffinity := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Bvhadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Body_Bvhnum := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
+      Alloc_I32 (G.Body_Parentid, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Rootid, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Weldid, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Mocapid, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Jntnum, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Jntadr, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Dofnum, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Dofadr, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Treeid, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Geomnum, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Geomadr, Int64 (S.Nbody) * (1));
+      Alloc_U8 (G.Body_Simple, Int64 (S.Nbody) * (1));
+      Alloc_U8 (G.Body_Sameframe, Int64 (S.Nbody) * (1));
+      Alloc_F64 (G.Body_Pos, Int64 (S.Nbody) * (3));
+      Alloc_F64 (G.Body_Quat, Int64 (S.Nbody) * (4));
+      Alloc_F64 (G.Body_Ipos, Int64 (S.Nbody) * (3));
+      Alloc_F64 (G.Body_Iquat, Int64 (S.Nbody) * (4));
+      Alloc_F64 (G.Body_Mass, Int64 (S.Nbody) * (1));
+      Alloc_F64 (G.Body_Subtreemass, Int64 (S.Nbody) * (1));
+      Alloc_F64 (G.Body_Inertia, Int64 (S.Nbody) * (3));
+      Alloc_F64 (G.Body_Invweight0, Int64 (S.Nbody) * (2));
+      Alloc_F64 (G.Body_Gravcomp, Int64 (S.Nbody) * (1));
+      Alloc_F64 (G.Body_Margin, Int64 (S.Nbody) * (1));
+      Alloc_F64 (G.Body_User, Int64 (S.Nbody) * (Int64 (S.Nuser_Body)));
+      Alloc_I32 (G.Body_Plugin, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Contype, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Conaffinity, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Bvhadr, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Body_Bvhnum, Int64 (S.Nbody) * (1));
    end Allocate_Body;
 
    procedure Free_Body (G : in out Body_Arrays) with
@@ -78,25 +122,25 @@ package body MJ.Models with SPARK_Mode is
      Post => Joint_Layout_OK (S, G)
    is
    begin
-      G.Jnt_Type := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Qposadr := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Dofadr := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Actuatorid := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Group := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Limited := new Byte_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Actfrclimited := new Byte_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Actgravcomp := new Byte_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Jnt_Solref := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (2)) - 1 => 0.0];
-      G.Jnt_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (5)) - 1 => 0.0];
-      G.Jnt_Pos := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (3)) - 1 => 0.0];
-      G.Jnt_Axis := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (3)) - 1 => 0.0];
-      G.Jnt_Stiffness := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0.0];
-      G.Jnt_Stiffnesspoly := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (2)) - 1 => 0.0];
-      G.Jnt_Range := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (2)) - 1 => 0.0];
-      G.Jnt_Actfrcrange := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (2)) - 1 => 0.0];
-      G.Jnt_Margin := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0.0];
-      G.Jnt_User := new Real_Array'[0 .. Integer (Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt))) - 1 => 0.0];
+      Alloc_I32 (G.Jnt_Type, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Jnt_Qposadr, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Jnt_Dofadr, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Jnt_Bodyid, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Jnt_Actuatorid, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Jnt_Group, Int64 (S.Njnt) * (1));
+      Alloc_U8 (G.Jnt_Limited, Int64 (S.Njnt) * (1));
+      Alloc_U8 (G.Jnt_Actfrclimited, Int64 (S.Njnt) * (1));
+      Alloc_U8 (G.Jnt_Actgravcomp, Int64 (S.Njnt) * (1));
+      Alloc_F64 (G.Jnt_Solref, Int64 (S.Njnt) * (2));
+      Alloc_F64 (G.Jnt_Solimp, Int64 (S.Njnt) * (5));
+      Alloc_F64 (G.Jnt_Pos, Int64 (S.Njnt) * (3));
+      Alloc_F64 (G.Jnt_Axis, Int64 (S.Njnt) * (3));
+      Alloc_F64 (G.Jnt_Stiffness, Int64 (S.Njnt) * (1));
+      Alloc_F64 (G.Jnt_Stiffnesspoly, Int64 (S.Njnt) * (2));
+      Alloc_F64 (G.Jnt_Range, Int64 (S.Njnt) * (2));
+      Alloc_F64 (G.Jnt_Actfrcrange, Int64 (S.Njnt) * (2));
+      Alloc_F64 (G.Jnt_Margin, Int64 (S.Njnt) * (1));
+      Alloc_F64 (G.Jnt_User, Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt)));
    end Allocate_Joint;
 
    procedure Free_Joint (G : in out Joint_Arrays) with
@@ -129,21 +173,21 @@ package body MJ.Models with SPARK_Mode is
      Post => Dof_Layout_OK (S, G)
    is
    begin
-      G.Dof_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Jntid := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Parentid := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Treeid := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Madr := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Simplenum := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.Dof_Solref := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (2)) - 1 => 0.0];
-      G.Dof_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (5)) - 1 => 0.0];
-      G.Dof_Frictionloss := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
-      G.Dof_Armature := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
-      G.Dof_Damping := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
-      G.Dof_Dampingpoly := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (2)) - 1 => 0.0];
-      G.Dof_Invweight0 := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
-      G.Dof_M0 := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
-      G.Dof_Length := new Real_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0.0];
+      Alloc_I32 (G.Dof_Bodyid, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.Dof_Jntid, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.Dof_Parentid, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.Dof_Treeid, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.Dof_Madr, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.Dof_Simplenum, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_Solref, Int64 (S.Nv) * (2));
+      Alloc_F64 (G.Dof_Solimp, Int64 (S.Nv) * (5));
+      Alloc_F64 (G.Dof_Frictionloss, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_Armature, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_Damping, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_Dampingpoly, Int64 (S.Nv) * (2));
+      Alloc_F64 (G.Dof_Invweight0, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_M0, Int64 (S.Nv) * (1));
+      Alloc_F64 (G.Dof_Length, Int64 (S.Nv) * (1));
    end Allocate_Dof;
 
    procedure Free_Dof (G : in out Dof_Arrays) with
@@ -172,11 +216,11 @@ package body MJ.Models with SPARK_Mode is
      Post => Tree_Layout_OK (S, G)
    is
    begin
-      G.Tree_Bodyadr := new Int_Array'[0 .. Integer (Int64 (S.Ntree) * (1)) - 1 => 0];
-      G.Tree_Bodynum := new Int_Array'[0 .. Integer (Int64 (S.Ntree) * (1)) - 1 => 0];
-      G.Tree_Dofadr := new Int_Array'[0 .. Integer (Int64 (S.Ntree) * (1)) - 1 => 0];
-      G.Tree_Dofnum := new Int_Array'[0 .. Integer (Int64 (S.Ntree) * (1)) - 1 => 0];
-      G.Tree_Sleep_Policy := new Int_Array'[0 .. Integer (Int64 (S.Ntree) * (1)) - 1 => 0];
+      Alloc_I32 (G.Tree_Bodyadr, Int64 (S.Ntree) * (1));
+      Alloc_I32 (G.Tree_Bodynum, Int64 (S.Ntree) * (1));
+      Alloc_I32 (G.Tree_Dofadr, Int64 (S.Ntree) * (1));
+      Alloc_I32 (G.Tree_Dofnum, Int64 (S.Ntree) * (1));
+      Alloc_I32 (G.Tree_Sleep_Policy, Int64 (S.Ntree) * (1));
    end Allocate_Tree;
 
    procedure Free_Tree (G : in out Tree_Arrays) with
@@ -195,33 +239,33 @@ package body MJ.Models with SPARK_Mode is
      Post => Geom_Layout_OK (S, G)
    is
    begin
-      G.Geom_Type := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Contype := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Conaffinity := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Condim := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Dataid := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Matid := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Group := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Priority := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Plugin := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Sameframe := new Byte_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Geom_Solmix := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0.0];
-      G.Geom_Solref := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (2)) - 1 => 0.0];
-      G.Geom_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (5)) - 1 => 0.0];
-      G.Geom_Size := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (3)) - 1 => 0.0];
-      G.Geom_Aabb := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (6)) - 1 => 0.0];
-      G.Geom_Rbound := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0.0];
-      G.Geom_Pos := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (3)) - 1 => 0.0];
-      G.Geom_Quat := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (4)) - 1 => 0.0];
-      G.Geom_Friction := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (3)) - 1 => 0.0];
-      G.Geom_Margin := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0.0];
-      G.Geom_Gap := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0.0];
-      G.Geom_Surfacevel := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (6)) - 1 => 0.0];
-      G.Geom_Adhesion := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0.0];
-      G.Geom_Fluid := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (12)) - 1 => 0.0];
-      G.Geom_User := new Real_Array'[0 .. Integer (Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom))) - 1 => 0.0];
-      G.Geom_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Ngeom) * (4)) - 1 => 0.0];
+      Alloc_I32 (G.Geom_Type, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Contype, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Conaffinity, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Condim, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Bodyid, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Dataid, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Matid, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Group, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Priority, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Geom_Plugin, Int64 (S.Ngeom) * (1));
+      Alloc_U8 (G.Geom_Sameframe, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Solmix, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Solref, Int64 (S.Ngeom) * (2));
+      Alloc_F64 (G.Geom_Solimp, Int64 (S.Ngeom) * (5));
+      Alloc_F64 (G.Geom_Size, Int64 (S.Ngeom) * (3));
+      Alloc_F64 (G.Geom_Aabb, Int64 (S.Ngeom) * (6));
+      Alloc_F64 (G.Geom_Rbound, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Pos, Int64 (S.Ngeom) * (3));
+      Alloc_F64 (G.Geom_Quat, Int64 (S.Ngeom) * (4));
+      Alloc_F64 (G.Geom_Friction, Int64 (S.Ngeom) * (3));
+      Alloc_F64 (G.Geom_Margin, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Gap, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Surfacevel, Int64 (S.Ngeom) * (6));
+      Alloc_F64 (G.Geom_Adhesion, Int64 (S.Ngeom) * (1));
+      Alloc_F64 (G.Geom_Fluid, Int64 (S.Ngeom) * (12));
+      Alloc_F64 (G.Geom_User, Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom)));
+      Alloc_F32 (G.Geom_Rgba, Int64 (S.Ngeom) * (4));
    end Allocate_Geom;
 
    procedure Free_Geom (G : in out Geom_Arrays) with
@@ -262,16 +306,16 @@ package body MJ.Models with SPARK_Mode is
      Post => Site_Layout_OK (S, G)
    is
    begin
-      G.Site_Type := new Int_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Site_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Site_Matid := new Int_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Site_Group := new Int_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Site_Sameframe := new Byte_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Site_Size := new Real_Array'[0 .. Integer (Int64 (S.Nsite) * (3)) - 1 => 0.0];
-      G.Site_Pos := new Real_Array'[0 .. Integer (Int64 (S.Nsite) * (3)) - 1 => 0.0];
-      G.Site_Quat := new Real_Array'[0 .. Integer (Int64 (S.Nsite) * (4)) - 1 => 0.0];
-      G.Site_User := new Real_Array'[0 .. Integer (Int64 (S.Nsite) * (Int64 (S.Nuser_Site))) - 1 => 0.0];
-      G.Site_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Nsite) * (4)) - 1 => 0.0];
+      Alloc_I32 (G.Site_Type, Int64 (S.Nsite) * (1));
+      Alloc_I32 (G.Site_Bodyid, Int64 (S.Nsite) * (1));
+      Alloc_I32 (G.Site_Matid, Int64 (S.Nsite) * (1));
+      Alloc_I32 (G.Site_Group, Int64 (S.Nsite) * (1));
+      Alloc_U8 (G.Site_Sameframe, Int64 (S.Nsite) * (1));
+      Alloc_F64 (G.Site_Size, Int64 (S.Nsite) * (3));
+      Alloc_F64 (G.Site_Pos, Int64 (S.Nsite) * (3));
+      Alloc_F64 (G.Site_Quat, Int64 (S.Nsite) * (4));
+      Alloc_F64 (G.Site_User, Int64 (S.Nsite) * (Int64 (S.Nuser_Site)));
+      Alloc_F32 (G.Site_Rgba, Int64 (S.Nsite) * (4));
    end Allocate_Site;
 
    procedure Free_Site (G : in out Site_Arrays) with
@@ -295,22 +339,22 @@ package body MJ.Models with SPARK_Mode is
      Post => Camera_Layout_OK (S, G)
    is
    begin
-      G.Cam_Mode := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Cam_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Cam_Targetbodyid := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Cam_Pos := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (3)) - 1 => 0.0];
-      G.Cam_Quat := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (4)) - 1 => 0.0];
-      G.Cam_Poscom0 := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (3)) - 1 => 0.0];
-      G.Cam_Pos0 := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (3)) - 1 => 0.0];
-      G.Cam_Mat0 := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (9)) - 1 => 0.0];
-      G.Cam_Projection := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Cam_Fovy := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0.0];
-      G.Cam_Ipd := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0.0];
-      G.Cam_Resolution := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (2)) - 1 => 0];
-      G.Cam_Output := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Cam_Sensorsize := new Float32_Array'[0 .. Integer (Int64 (S.Ncam) * (2)) - 1 => 0.0];
-      G.Cam_Intrinsic := new Float32_Array'[0 .. Integer (Int64 (S.Ncam) * (4)) - 1 => 0.0];
-      G.Cam_User := new Real_Array'[0 .. Integer (Int64 (S.Ncam) * (Int64 (S.Nuser_Cam))) - 1 => 0.0];
+      Alloc_I32 (G.Cam_Mode, Int64 (S.Ncam) * (1));
+      Alloc_I32 (G.Cam_Bodyid, Int64 (S.Ncam) * (1));
+      Alloc_I32 (G.Cam_Targetbodyid, Int64 (S.Ncam) * (1));
+      Alloc_F64 (G.Cam_Pos, Int64 (S.Ncam) * (3));
+      Alloc_F64 (G.Cam_Quat, Int64 (S.Ncam) * (4));
+      Alloc_F64 (G.Cam_Poscom0, Int64 (S.Ncam) * (3));
+      Alloc_F64 (G.Cam_Pos0, Int64 (S.Ncam) * (3));
+      Alloc_F64 (G.Cam_Mat0, Int64 (S.Ncam) * (9));
+      Alloc_I32 (G.Cam_Projection, Int64 (S.Ncam) * (1));
+      Alloc_F64 (G.Cam_Fovy, Int64 (S.Ncam) * (1));
+      Alloc_F64 (G.Cam_Ipd, Int64 (S.Ncam) * (1));
+      Alloc_I32 (G.Cam_Resolution, Int64 (S.Ncam) * (2));
+      Alloc_I32 (G.Cam_Output, Int64 (S.Ncam) * (1));
+      Alloc_F32 (G.Cam_Sensorsize, Int64 (S.Ncam) * (2));
+      Alloc_F32 (G.Cam_Intrinsic, Int64 (S.Ncam) * (4));
+      Alloc_F64 (G.Cam_User, Int64 (S.Ncam) * (Int64 (S.Nuser_Cam)));
    end Allocate_Camera;
 
    procedure Free_Camera (G : in out Camera_Arrays) with
@@ -340,28 +384,28 @@ package body MJ.Models with SPARK_Mode is
      Post => Light_Layout_OK (S, G)
    is
    begin
-      G.Light_Mode := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Bodyid := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Targetbodyid := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Type := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Texid := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Castshadow := new Byte_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Bulbradius := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Intensity := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Range := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Active := new Byte_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Light_Pos := new Real_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Dir := new Real_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Poscom0 := new Real_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Pos0 := new Real_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Dir0 := new Real_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Attenuation := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Cutoff := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Softness := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Exponent := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0.0];
-      G.Light_Ambient := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Diffuse := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
-      G.Light_Specular := new Float32_Array'[0 .. Integer (Int64 (S.Nlight) * (3)) - 1 => 0.0];
+      Alloc_I32 (G.Light_Mode, Int64 (S.Nlight) * (1));
+      Alloc_I32 (G.Light_Bodyid, Int64 (S.Nlight) * (1));
+      Alloc_I32 (G.Light_Targetbodyid, Int64 (S.Nlight) * (1));
+      Alloc_I32 (G.Light_Type, Int64 (S.Nlight) * (1));
+      Alloc_I32 (G.Light_Texid, Int64 (S.Nlight) * (1));
+      Alloc_U8 (G.Light_Castshadow, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Bulbradius, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Intensity, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Range, Int64 (S.Nlight) * (1));
+      Alloc_U8 (G.Light_Active, Int64 (S.Nlight) * (1));
+      Alloc_F64 (G.Light_Pos, Int64 (S.Nlight) * (3));
+      Alloc_F64 (G.Light_Dir, Int64 (S.Nlight) * (3));
+      Alloc_F64 (G.Light_Poscom0, Int64 (S.Nlight) * (3));
+      Alloc_F64 (G.Light_Pos0, Int64 (S.Nlight) * (3));
+      Alloc_F64 (G.Light_Dir0, Int64 (S.Nlight) * (3));
+      Alloc_F32 (G.Light_Attenuation, Int64 (S.Nlight) * (3));
+      Alloc_F32 (G.Light_Cutoff, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Softness, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Exponent, Int64 (S.Nlight) * (1));
+      Alloc_F32 (G.Light_Ambient, Int64 (S.Nlight) * (3));
+      Alloc_F32 (G.Light_Diffuse, Int64 (S.Nlight) * (3));
+      Alloc_F32 (G.Light_Specular, Int64 (S.Nlight) * (3));
    end Allocate_Light;
 
    procedure Free_Light (G : in out Light_Arrays) with
@@ -397,89 +441,89 @@ package body MJ.Models with SPARK_Mode is
      Post => Flex_Layout_OK (S, G)
    is
    begin
-      G.Flex_Contype := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Conaffinity := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Condim := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Priority := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Solmix := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Solref := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (2)) - 1 => 0.0];
-      G.Flex_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (5)) - 1 => 0.0];
-      G.Flex_Friction := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (3)) - 1 => 0.0];
-      G.Flex_Margin := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Gap := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Internal := new Byte_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Selfcollide := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Activelayers := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Passive := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Dim := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Matid := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Group := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Interp := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Cellnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (3)) - 1 => 0];
-      G.Flex_Nodeadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Nodenum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Vertadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Vertnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Edgeadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Edgenum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Elemadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Elemnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Elemdataadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Stiffnessadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Elemedgeadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Bendingadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Shellnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Shelldataadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Evpairadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Evpairnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Texcoordadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Nodebodyid := new Int_Array'[0 .. Integer (Int64 (S.Nflexnode) * (1)) - 1 => 0];
-      G.Flex_Vertbodyid := new Int_Array'[0 .. Integer (Int64 (S.Nflexvert) * (1)) - 1 => 0];
-      G.Flex_Vertedgeadr := new Int_Array'[0 .. Integer (Int64 (S.Nflexvert) * (1)) - 1 => 0];
-      G.Flex_Vertedgenum := new Int_Array'[0 .. Integer (Int64 (S.Nflexvert) * (1)) - 1 => 0];
-      G.Flex_Vertedge := new Int_Array'[0 .. Integer (Int64 (S.Nflexedge) * (2)) - 1 => 0];
-      G.Flex_Edge := new Int_Array'[0 .. Integer (Int64 (S.Nflexedge) * (2)) - 1 => 0];
-      G.Flex_Edgeflap := new Int_Array'[0 .. Integer (Int64 (S.Nflexedge) * (2)) - 1 => 0];
-      G.Flex_Elem := new Int_Array'[0 .. Integer (Int64 (S.Nflexelemdata) * (1)) - 1 => 0];
-      G.Flex_Elemtexcoord := new Int_Array'[0 .. Integer (Int64 (S.Nflexelemdata) * (1)) - 1 => 0];
-      G.Flex_Elemedge := new Int_Array'[0 .. Integer (Int64 (S.Nflexelemedge) * (1)) - 1 => 0];
-      G.Flex_Elemlayer := new Int_Array'[0 .. Integer (Int64 (S.Nflexelem) * (1)) - 1 => 0];
-      G.Flex_Shell := new Int_Array'[0 .. Integer (Int64 (S.Nflexshelldata) * (1)) - 1 => 0];
-      G.Flex_Evpair := new Int_Array'[0 .. Integer (Int64 (S.Nflexevpair) * (2)) - 1 => 0];
-      G.Flex_Vert := new Real_Array'[0 .. Integer (Int64 (S.Nflexvert) * (3)) - 1 => 0.0];
-      G.Flex_Vert0 := new Real_Array'[0 .. Integer (Int64 (S.Nflexvert) * (3)) - 1 => 0.0];
-      G.Flex_Vertmetric := new Real_Array'[0 .. Integer (Int64 (S.Nflexvert) * (4)) - 1 => 0.0];
-      G.Flex_Node := new Real_Array'[0 .. Integer (Int64 (S.Nflexnode) * (3)) - 1 => 0.0];
-      G.Flex_Node0 := new Real_Array'[0 .. Integer (Int64 (S.Nflexnode) * (3)) - 1 => 0.0];
-      G.Flexedge_Length0 := new Real_Array'[0 .. Integer (Int64 (S.Nflexedge) * (1)) - 1 => 0.0];
-      G.Flexedge_Invweight0 := new Real_Array'[0 .. Integer (Int64 (S.Nflexedge) * (1)) - 1 => 0.0];
-      G.Flex_Radius := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Size := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (3)) - 1 => 0.0];
-      G.Flex_Stiffness := new Real_Array'[0 .. Integer (Int64 (S.Nflexstiffness) * (1)) - 1 => 0.0];
-      G.Flex_Bending := new Real_Array'[0 .. Integer (Int64 (S.Nflexbending) * (1)) - 1 => 0.0];
-      G.Efm0_Dofid := new Int_Array'[0 .. Integer (Int64 (S.Nefm0dof) * (1)) - 1 => 0];
-      G.Efm0_L_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nefm0dof) * (1)) - 1 => 0];
-      G.Efm0_L_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nefm0dof) * (1)) - 1 => 0];
-      G.Efm0_L_Colind := new Int_Array'[0 .. Integer (Int64 (S.Nefm0L) * (1)) - 1 => 0];
-      G.Efm0_L := new Real_Array'[0 .. Integer (Int64 (S.Nefm0L) * (1)) - 1 => 0.0];
-      G.Flex_Damping := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Edgestiffness := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Edgedamping := new Real_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0.0];
-      G.Flex_Edgeequality := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Rigid := new Byte_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flexedge_Rigid := new Byte_Array'[0 .. Integer (Int64 (S.Nflexedge) * (1)) - 1 => 0];
-      G.Flex_Centered := new Byte_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Flatskin := new Byte_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Bvhadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flex_Bvhnum := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Flexedge_J_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nflexedge) * (1)) - 1 => 0];
-      G.Flexedge_J_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nflexedge) * (1)) - 1 => 0];
-      G.Flexedge_J_Colind := new Int_Array'[0 .. Integer (Int64 (S.NJfe) * (1)) - 1 => 0];
-      G.Flexvert_J_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nflexvert) * (2)) - 1 => 0];
-      G.Flexvert_J_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nflexvert) * (2)) - 1 => 0];
-      G.Flexvert_J_Colind := new Int_Array'[0 .. Integer (Int64 (S.NJfv) * (2)) - 1 => 0];
-      G.Flex_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Nflex) * (4)) - 1 => 0.0];
-      G.Flex_Texcoord := new Float32_Array'[0 .. Integer (Int64 (S.Nflextexcoord) * (2)) - 1 => 0.0];
+      Alloc_I32 (G.Flex_Contype, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Conaffinity, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Condim, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Priority, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Solmix, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Solref, Int64 (S.Nflex) * (2));
+      Alloc_F64 (G.Flex_Solimp, Int64 (S.Nflex) * (5));
+      Alloc_F64 (G.Flex_Friction, Int64 (S.Nflex) * (3));
+      Alloc_F64 (G.Flex_Margin, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Gap, Int64 (S.Nflex) * (1));
+      Alloc_U8 (G.Flex_Internal, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Selfcollide, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Activelayers, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Passive, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Dim, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Matid, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Group, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Interp, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Cellnum, Int64 (S.Nflex) * (3));
+      Alloc_I32 (G.Flex_Nodeadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Nodenum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Vertadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Vertnum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Edgeadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Edgenum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Elemadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Elemnum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Elemdataadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Stiffnessadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Elemedgeadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Bendingadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Shellnum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Shelldataadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Evpairadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Evpairnum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Texcoordadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Nodebodyid, Int64 (S.Nflexnode) * (1));
+      Alloc_I32 (G.Flex_Vertbodyid, Int64 (S.Nflexvert) * (1));
+      Alloc_I32 (G.Flex_Vertedgeadr, Int64 (S.Nflexvert) * (1));
+      Alloc_I32 (G.Flex_Vertedgenum, Int64 (S.Nflexvert) * (1));
+      Alloc_I32 (G.Flex_Vertedge, Int64 (S.Nflexedge) * (2));
+      Alloc_I32 (G.Flex_Edge, Int64 (S.Nflexedge) * (2));
+      Alloc_I32 (G.Flex_Edgeflap, Int64 (S.Nflexedge) * (2));
+      Alloc_I32 (G.Flex_Elem, Int64 (S.Nflexelemdata) * (1));
+      Alloc_I32 (G.Flex_Elemtexcoord, Int64 (S.Nflexelemdata) * (1));
+      Alloc_I32 (G.Flex_Elemedge, Int64 (S.Nflexelemedge) * (1));
+      Alloc_I32 (G.Flex_Elemlayer, Int64 (S.Nflexelem) * (1));
+      Alloc_I32 (G.Flex_Shell, Int64 (S.Nflexshelldata) * (1));
+      Alloc_I32 (G.Flex_Evpair, Int64 (S.Nflexevpair) * (2));
+      Alloc_F64 (G.Flex_Vert, Int64 (S.Nflexvert) * (3));
+      Alloc_F64 (G.Flex_Vert0, Int64 (S.Nflexvert) * (3));
+      Alloc_F64 (G.Flex_Vertmetric, Int64 (S.Nflexvert) * (4));
+      Alloc_F64 (G.Flex_Node, Int64 (S.Nflexnode) * (3));
+      Alloc_F64 (G.Flex_Node0, Int64 (S.Nflexnode) * (3));
+      Alloc_F64 (G.Flexedge_Length0, Int64 (S.Nflexedge) * (1));
+      Alloc_F64 (G.Flexedge_Invweight0, Int64 (S.Nflexedge) * (1));
+      Alloc_F64 (G.Flex_Radius, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Size, Int64 (S.Nflex) * (3));
+      Alloc_F64 (G.Flex_Stiffness, Int64 (S.Nflexstiffness) * (1));
+      Alloc_F64 (G.Flex_Bending, Int64 (S.Nflexbending) * (1));
+      Alloc_I32 (G.Efm0_Dofid, Int64 (S.Nefm0dof) * (1));
+      Alloc_I32 (G.Efm0_L_Rownnz, Int64 (S.Nefm0dof) * (1));
+      Alloc_I32 (G.Efm0_L_Rowadr, Int64 (S.Nefm0dof) * (1));
+      Alloc_I32 (G.Efm0_L_Colind, Int64 (S.Nefm0L) * (1));
+      Alloc_F64 (G.Efm0_L, Int64 (S.Nefm0L) * (1));
+      Alloc_F64 (G.Flex_Damping, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Edgestiffness, Int64 (S.Nflex) * (1));
+      Alloc_F64 (G.Flex_Edgedamping, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Edgeequality, Int64 (S.Nflex) * (1));
+      Alloc_U8 (G.Flex_Rigid, Int64 (S.Nflex) * (1));
+      Alloc_U8 (G.Flexedge_Rigid, Int64 (S.Nflexedge) * (1));
+      Alloc_U8 (G.Flex_Centered, Int64 (S.Nflex) * (1));
+      Alloc_U8 (G.Flex_Flatskin, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Bvhadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flex_Bvhnum, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Flexedge_J_Rownnz, Int64 (S.Nflexedge) * (1));
+      Alloc_I32 (G.Flexedge_J_Rowadr, Int64 (S.Nflexedge) * (1));
+      Alloc_I32 (G.Flexedge_J_Colind, Int64 (S.NJfe) * (1));
+      Alloc_I32 (G.Flexvert_J_Rownnz, Int64 (S.Nflexvert) * (2));
+      Alloc_I32 (G.Flexvert_J_Rowadr, Int64 (S.Nflexvert) * (2));
+      Alloc_I32 (G.Flexvert_J_Colind, Int64 (S.NJfv) * (2));
+      Alloc_F32 (G.Flex_Rgba, Int64 (S.Nflex) * (4));
+      Alloc_F32 (G.Flex_Texcoord, Int64 (S.Nflextexcoord) * (2));
    end Allocate_Flex;
 
    procedure Free_Flex (G : in out Flex_Arrays) with
@@ -576,40 +620,40 @@ package body MJ.Models with SPARK_Mode is
      Post => Mesh_Layout_OK (S, G)
    is
    begin
-      G.Mesh_Vertadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Vertnum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Faceadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Facenum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Bvhadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Bvhnum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Octadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Octnum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Normaladr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Normalnum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Texcoordadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Texcoordnum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Graphadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Extrema := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (27)) - 1 => 0];
-      G.Mesh_Vert := new Float32_Array'[0 .. Integer (Int64 (S.Nmeshvert) * (3)) - 1 => 0.0];
-      G.Mesh_Normal := new Float32_Array'[0 .. Integer (Int64 (S.Nmeshnormal) * (3)) - 1 => 0.0];
-      G.Mesh_Texcoord := new Float32_Array'[0 .. Integer (Int64 (S.Nmeshtexcoord) * (2)) - 1 => 0.0];
-      G.Mesh_Face := new Int_Array'[0 .. Integer (Int64 (S.Nmeshface) * (3)) - 1 => 0];
-      G.Mesh_Facenormal := new Int_Array'[0 .. Integer (Int64 (S.Nmeshface) * (3)) - 1 => 0];
-      G.Mesh_Facetexcoord := new Int_Array'[0 .. Integer (Int64 (S.Nmeshface) * (3)) - 1 => 0];
-      G.Mesh_Graph := new Int_Array'[0 .. Integer (Int64 (S.Nmeshgraph) * (1)) - 1 => 0];
-      G.Mesh_Scale := new Real_Array'[0 .. Integer (Int64 (S.Nmesh) * (3)) - 1 => 0.0];
-      G.Mesh_Pos := new Real_Array'[0 .. Integer (Int64 (S.Nmesh) * (3)) - 1 => 0.0];
-      G.Mesh_Quat := new Real_Array'[0 .. Integer (Int64 (S.Nmesh) * (4)) - 1 => 0.0];
-      G.Mesh_Pathadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Polynum := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Polyadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Mesh_Polynormal := new Real_Array'[0 .. Integer (Int64 (S.Nmeshpoly) * (3)) - 1 => 0.0];
-      G.Mesh_Polyvertadr := new Int_Array'[0 .. Integer (Int64 (S.Nmeshpoly) * (1)) - 1 => 0];
-      G.Mesh_Polyvertnum := new Int_Array'[0 .. Integer (Int64 (S.Nmeshpoly) * (1)) - 1 => 0];
-      G.Mesh_Polyvert := new Int_Array'[0 .. Integer (Int64 (S.Nmeshpolyvert) * (1)) - 1 => 0];
-      G.Mesh_Polymapadr := new Int_Array'[0 .. Integer (Int64 (S.Nmeshvert) * (1)) - 1 => 0];
-      G.Mesh_Polymapnum := new Int_Array'[0 .. Integer (Int64 (S.Nmeshvert) * (1)) - 1 => 0];
-      G.Mesh_Polymap := new Int_Array'[0 .. Integer (Int64 (S.Nmeshpolymap) * (1)) - 1 => 0];
+      Alloc_I32 (G.Mesh_Vertadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Vertnum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Faceadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Facenum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Bvhadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Bvhnum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Octadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Octnum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Normaladr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Normalnum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Texcoordadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Texcoordnum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Graphadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Extrema, Int64 (S.Nmesh) * (27));
+      Alloc_F32 (G.Mesh_Vert, Int64 (S.Nmeshvert) * (3));
+      Alloc_F32 (G.Mesh_Normal, Int64 (S.Nmeshnormal) * (3));
+      Alloc_F32 (G.Mesh_Texcoord, Int64 (S.Nmeshtexcoord) * (2));
+      Alloc_I32 (G.Mesh_Face, Int64 (S.Nmeshface) * (3));
+      Alloc_I32 (G.Mesh_Facenormal, Int64 (S.Nmeshface) * (3));
+      Alloc_I32 (G.Mesh_Facetexcoord, Int64 (S.Nmeshface) * (3));
+      Alloc_I32 (G.Mesh_Graph, Int64 (S.Nmeshgraph) * (1));
+      Alloc_F64 (G.Mesh_Scale, Int64 (S.Nmesh) * (3));
+      Alloc_F64 (G.Mesh_Pos, Int64 (S.Nmesh) * (3));
+      Alloc_F64 (G.Mesh_Quat, Int64 (S.Nmesh) * (4));
+      Alloc_I32 (G.Mesh_Pathadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Polynum, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Mesh_Polyadr, Int64 (S.Nmesh) * (1));
+      Alloc_F64 (G.Mesh_Polynormal, Int64 (S.Nmeshpoly) * (3));
+      Alloc_I32 (G.Mesh_Polyvertadr, Int64 (S.Nmeshpoly) * (1));
+      Alloc_I32 (G.Mesh_Polyvertnum, Int64 (S.Nmeshpoly) * (1));
+      Alloc_I32 (G.Mesh_Polyvert, Int64 (S.Nmeshpolyvert) * (1));
+      Alloc_I32 (G.Mesh_Polymapadr, Int64 (S.Nmeshvert) * (1));
+      Alloc_I32 (G.Mesh_Polymapnum, Int64 (S.Nmeshvert) * (1));
+      Alloc_I32 (G.Mesh_Polymap, Int64 (S.Nmeshpolymap) * (1));
    end Allocate_Mesh;
 
    procedure Free_Mesh (G : in out Mesh_Arrays) with
@@ -657,28 +701,28 @@ package body MJ.Models with SPARK_Mode is
      Post => Skin_Layout_OK (S, G)
    is
    begin
-      G.Skin_Matid := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Group := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Nskin) * (4)) - 1 => 0.0];
-      G.Skin_Inflate := new Float32_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0.0];
-      G.Skin_Vertadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Vertnum := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Texcoordadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Faceadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Facenum := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Boneadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Bonenum := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Skin_Vert := new Float32_Array'[0 .. Integer (Int64 (S.Nskinvert) * (3)) - 1 => 0.0];
-      G.Skin_Texcoord := new Float32_Array'[0 .. Integer (Int64 (S.Nskintexvert) * (2)) - 1 => 0.0];
-      G.Skin_Face := new Int_Array'[0 .. Integer (Int64 (S.Nskinface) * (3)) - 1 => 0];
-      G.Skin_Bonevertadr := new Int_Array'[0 .. Integer (Int64 (S.Nskinbone) * (1)) - 1 => 0];
-      G.Skin_Bonevertnum := new Int_Array'[0 .. Integer (Int64 (S.Nskinbone) * (1)) - 1 => 0];
-      G.Skin_Bonebindpos := new Float32_Array'[0 .. Integer (Int64 (S.Nskinbone) * (3)) - 1 => 0.0];
-      G.Skin_Bonebindquat := new Float32_Array'[0 .. Integer (Int64 (S.Nskinbone) * (4)) - 1 => 0.0];
-      G.Skin_Bonebodyid := new Int_Array'[0 .. Integer (Int64 (S.Nskinbone) * (1)) - 1 => 0];
-      G.Skin_Bonevertid := new Int_Array'[0 .. Integer (Int64 (S.Nskinbonevert) * (1)) - 1 => 0];
-      G.Skin_Bonevertweight := new Float32_Array'[0 .. Integer (Int64 (S.Nskinbonevert) * (1)) - 1 => 0.0];
-      G.Skin_Pathadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
+      Alloc_I32 (G.Skin_Matid, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Group, Int64 (S.Nskin) * (1));
+      Alloc_F32 (G.Skin_Rgba, Int64 (S.Nskin) * (4));
+      Alloc_F32 (G.Skin_Inflate, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Vertadr, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Vertnum, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Texcoordadr, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Faceadr, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Facenum, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Boneadr, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Skin_Bonenum, Int64 (S.Nskin) * (1));
+      Alloc_F32 (G.Skin_Vert, Int64 (S.Nskinvert) * (3));
+      Alloc_F32 (G.Skin_Texcoord, Int64 (S.Nskintexvert) * (2));
+      Alloc_I32 (G.Skin_Face, Int64 (S.Nskinface) * (3));
+      Alloc_I32 (G.Skin_Bonevertadr, Int64 (S.Nskinbone) * (1));
+      Alloc_I32 (G.Skin_Bonevertnum, Int64 (S.Nskinbone) * (1));
+      Alloc_F32 (G.Skin_Bonebindpos, Int64 (S.Nskinbone) * (3));
+      Alloc_F32 (G.Skin_Bonebindquat, Int64 (S.Nskinbone) * (4));
+      Alloc_I32 (G.Skin_Bonebodyid, Int64 (S.Nskinbone) * (1));
+      Alloc_I32 (G.Skin_Bonevertid, Int64 (S.Nskinbonevert) * (1));
+      Alloc_F32 (G.Skin_Bonevertweight, Int64 (S.Nskinbonevert) * (1));
+      Alloc_I32 (G.Skin_Pathadr, Int64 (S.Nskin) * (1));
    end Allocate_Skin;
 
    procedure Free_Skin (G : in out Skin_Arrays) with
@@ -714,12 +758,12 @@ package body MJ.Models with SPARK_Mode is
      Post => Hfield_Layout_OK (S, G)
    is
    begin
-      G.Hfield_Size := new Real_Array'[0 .. Integer (Int64 (S.Nhfield) * (4)) - 1 => 0.0];
-      G.Hfield_Nrow := new Int_Array'[0 .. Integer (Int64 (S.Nhfield) * (1)) - 1 => 0];
-      G.Hfield_Ncol := new Int_Array'[0 .. Integer (Int64 (S.Nhfield) * (1)) - 1 => 0];
-      G.Hfield_Adr := new Int_Array'[0 .. Integer (Int64 (S.Nhfield) * (1)) - 1 => 0];
-      G.Hfield_Data := new Float32_Array'[0 .. Integer (Int64 (S.Nhfielddata) * (1)) - 1 => 0.0];
-      G.Hfield_Pathadr := new Int_Array'[0 .. Integer (Int64 (S.Nhfield) * (1)) - 1 => 0];
+      Alloc_F64 (G.Hfield_Size, Int64 (S.Nhfield) * (4));
+      Alloc_I32 (G.Hfield_Nrow, Int64 (S.Nhfield) * (1));
+      Alloc_I32 (G.Hfield_Ncol, Int64 (S.Nhfield) * (1));
+      Alloc_I32 (G.Hfield_Adr, Int64 (S.Nhfield) * (1));
+      Alloc_F32 (G.Hfield_Data, Int64 (S.Nhfielddata) * (1));
+      Alloc_I32 (G.Hfield_Pathadr, Int64 (S.Nhfield) * (1));
    end Allocate_Hfield;
 
    procedure Free_Hfield (G : in out Hfield_Arrays) with
@@ -739,14 +783,14 @@ package body MJ.Models with SPARK_Mode is
      Post => Texture_Layout_OK (S, G)
    is
    begin
-      G.Tex_Type := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Colorspace := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Height := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Width := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Nchannel := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Adr := new Int64_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Tex_Data := new Byte_Array'[0 .. Integer (Int64 (S.Ntexdata) * (1)) - 1 => 0];
-      G.Tex_Pathadr := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
+      Alloc_I32 (G.Tex_Type, Int64 (S.Ntex) * (1));
+      Alloc_I32 (G.Tex_Colorspace, Int64 (S.Ntex) * (1));
+      Alloc_I32 (G.Tex_Height, Int64 (S.Ntex) * (1));
+      Alloc_I32 (G.Tex_Width, Int64 (S.Ntex) * (1));
+      Alloc_I32 (G.Tex_Nchannel, Int64 (S.Ntex) * (1));
+      Alloc_I64 (G.Tex_Adr, Int64 (S.Ntex) * (1));
+      Alloc_U8 (G.Tex_Data, Int64 (S.Ntexdata) * (1));
+      Alloc_I32 (G.Tex_Pathadr, Int64 (S.Ntex) * (1));
    end Allocate_Texture;
 
    procedure Free_Texture (G : in out Texture_Arrays) with
@@ -768,16 +812,16 @@ package body MJ.Models with SPARK_Mode is
      Post => Material_Layout_OK (S, G)
    is
    begin
-      G.Mat_Texid := new Int_Array'[0 .. Integer (Int64 (S.Nmat) * (10)) - 1 => 0];
-      G.Mat_Texuniform := new Byte_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0];
-      G.Mat_Texrepeat := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (2)) - 1 => 0.0];
-      G.Mat_Emission := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Specular := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Shininess := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Reflectance := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Metallic := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Roughness := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0.0];
-      G.Mat_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Nmat) * (4)) - 1 => 0.0];
+      Alloc_I32 (G.Mat_Texid, Int64 (S.Nmat) * (10));
+      Alloc_U8 (G.Mat_Texuniform, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Texrepeat, Int64 (S.Nmat) * (2));
+      Alloc_F32 (G.Mat_Emission, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Specular, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Shininess, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Reflectance, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Metallic, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Roughness, Int64 (S.Nmat) * (1));
+      Alloc_F32 (G.Mat_Rgba, Int64 (S.Nmat) * (4));
    end Allocate_Material;
 
    procedure Free_Material (G : in out Material_Arrays) with
@@ -801,17 +845,17 @@ package body MJ.Models with SPARK_Mode is
      Post => Pair_Layout_OK (S, G)
    is
    begin
-      G.Pair_Dim := new Int_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0];
-      G.Pair_Geom1 := new Int_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0];
-      G.Pair_Geom2 := new Int_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0];
-      G.Pair_Signature := new Int_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0];
-      G.Pair_Solref := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (2)) - 1 => 0.0];
-      G.Pair_Solreffriction := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (2)) - 1 => 0.0];
-      G.Pair_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (5)) - 1 => 0.0];
-      G.Pair_Margin := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0.0];
-      G.Pair_Gap := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0.0];
-      G.Pair_Adhesion := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0.0];
-      G.Pair_Friction := new Real_Array'[0 .. Integer (Int64 (S.Npair) * (5)) - 1 => 0.0];
+      Alloc_I32 (G.Pair_Dim, Int64 (S.Npair) * (1));
+      Alloc_I32 (G.Pair_Geom1, Int64 (S.Npair) * (1));
+      Alloc_I32 (G.Pair_Geom2, Int64 (S.Npair) * (1));
+      Alloc_I32 (G.Pair_Signature, Int64 (S.Npair) * (1));
+      Alloc_F64 (G.Pair_Solref, Int64 (S.Npair) * (2));
+      Alloc_F64 (G.Pair_Solreffriction, Int64 (S.Npair) * (2));
+      Alloc_F64 (G.Pair_Solimp, Int64 (S.Npair) * (5));
+      Alloc_F64 (G.Pair_Margin, Int64 (S.Npair) * (1));
+      Alloc_F64 (G.Pair_Gap, Int64 (S.Npair) * (1));
+      Alloc_F64 (G.Pair_Adhesion, Int64 (S.Npair) * (1));
+      Alloc_F64 (G.Pair_Friction, Int64 (S.Npair) * (5));
    end Allocate_Pair;
 
    procedure Free_Pair (G : in out Pair_Arrays) with
@@ -836,7 +880,7 @@ package body MJ.Models with SPARK_Mode is
      Post => Exclude_Layout_OK (S, G)
    is
    begin
-      G.Exclude_Signature := new Int_Array'[0 .. Integer (Int64 (S.Nexclude) * (1)) - 1 => 0];
+      Alloc_I32 (G.Exclude_Signature, Int64 (S.Nexclude) * (1));
    end Allocate_Exclude;
 
    procedure Free_Exclude (G : in out Exclude_Arrays) with
@@ -851,14 +895,14 @@ package body MJ.Models with SPARK_Mode is
      Post => Equality_Layout_OK (S, G)
    is
    begin
-      G.Eq_Type := new Int_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Eq_Obj1id := new Int_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Eq_Obj2id := new Int_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Eq_Objtype := new Int_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Eq_Active0 := new Byte_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Eq_Solref := new Real_Array'[0 .. Integer (Int64 (S.Neq) * (2)) - 1 => 0.0];
-      G.Eq_Solimp := new Real_Array'[0 .. Integer (Int64 (S.Neq) * (5)) - 1 => 0.0];
-      G.Eq_Data := new Real_Array'[0 .. Integer (Int64 (S.Neq) * (11)) - 1 => 0.0];
+      Alloc_I32 (G.Eq_Type, Int64 (S.Neq) * (1));
+      Alloc_I32 (G.Eq_Obj1id, Int64 (S.Neq) * (1));
+      Alloc_I32 (G.Eq_Obj2id, Int64 (S.Neq) * (1));
+      Alloc_I32 (G.Eq_Objtype, Int64 (S.Neq) * (1));
+      Alloc_U8 (G.Eq_Active0, Int64 (S.Neq) * (1));
+      Alloc_F64 (G.Eq_Solref, Int64 (S.Neq) * (2));
+      Alloc_F64 (G.Eq_Solimp, Int64 (S.Neq) * (5));
+      Alloc_F64 (G.Eq_Data, Int64 (S.Neq) * (11));
    end Allocate_Equality;
 
    procedure Free_Equality (G : in out Equality_Arrays) with
@@ -880,37 +924,37 @@ package body MJ.Models with SPARK_Mode is
      Post => Tendon_Layout_OK (S, G)
    is
    begin
-      G.Tendon_Adr := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Num := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Matid := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Actuatorid := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Group := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Treenum := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Treeid := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0];
-      G.Ten_J_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Ten_J_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Ten_J_Colind := new Int_Array'[0 .. Integer (Int64 (S.NJten) * (1)) - 1 => 0];
-      G.Tendon_Limited := new Byte_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Actfrclimited := new Byte_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Tendon_Width := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Solref_Lim := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Solimp_Lim := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (5)) - 1 => 0.0];
-      G.Tendon_Solref_Fri := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Solimp_Fri := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (5)) - 1 => 0.0];
-      G.Tendon_Range := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Actfrcrange := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Margin := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Stiffness := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Stiffnesspoly := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Damping := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Dampingpoly := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Armature := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Frictionloss := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Lengthspring := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (2)) - 1 => 0.0];
-      G.Tendon_Length0 := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_Invweight0 := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0.0];
-      G.Tendon_User := new Real_Array'[0 .. Integer (Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon))) - 1 => 0.0];
-      G.Tendon_Rgba := new Float32_Array'[0 .. Integer (Int64 (S.Ntendon) * (4)) - 1 => 0.0];
+      Alloc_I32 (G.Tendon_Adr, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Num, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Matid, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Actuatorid, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Group, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Treenum, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Tendon_Treeid, Int64 (S.Ntendon) * (2));
+      Alloc_I32 (G.Ten_J_Rownnz, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Ten_J_Rowadr, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Ten_J_Colind, Int64 (S.NJten) * (1));
+      Alloc_U8 (G.Tendon_Limited, Int64 (S.Ntendon) * (1));
+      Alloc_U8 (G.Tendon_Actfrclimited, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Width, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Solref_Lim, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Solimp_Lim, Int64 (S.Ntendon) * (5));
+      Alloc_F64 (G.Tendon_Solref_Fri, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Solimp_Fri, Int64 (S.Ntendon) * (5));
+      Alloc_F64 (G.Tendon_Range, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Actfrcrange, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Margin, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Stiffness, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Stiffnesspoly, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Damping, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Dampingpoly, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Armature, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Frictionloss, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Lengthspring, Int64 (S.Ntendon) * (2));
+      Alloc_F64 (G.Tendon_Length0, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_Invweight0, Int64 (S.Ntendon) * (1));
+      Alloc_F64 (G.Tendon_User, Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon)));
+      Alloc_F32 (G.Tendon_Rgba, Int64 (S.Ntendon) * (4));
    end Allocate_Tendon;
 
    procedure Free_Tendon (G : in out Tendon_Arrays) with
@@ -955,42 +999,42 @@ package body MJ.Models with SPARK_Mode is
      Post => Actuator_Layout_OK (S, G)
    is
    begin
-      G.Actuator_Trntype := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Dyntype := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Gaintype := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Biastype := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Ctrladr := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Ctrlnum := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Ctrlspec := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Outadr := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Outnum := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Actadr := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Actnum := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Trnid := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (2)) - 1 => 0];
-      G.Actuator_Cranklength := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0.0];
-      G.Actuator_Dynprm := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (10)) - 1 => 0.0];
-      G.Actuator_Gainprm := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (10)) - 1 => 0.0];
-      G.Actuator_Biasprm := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (10)) - 1 => 0.0];
-      G.Actuator_Actlimited := new Byte_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Actrange := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (2)) - 1 => 0.0];
-      G.Actuator_Actearly := new Byte_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_History := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (2)) - 1 => 0];
-      G.Actuator_Historyadr := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Delay := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0.0];
-      G.Actuator_Damping := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0.0];
-      G.Actuator_Dampingpoly := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (2)) - 1 => 0.0];
-      G.Actuator_Armature := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0.0];
-      G.Actuator_Group := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_User := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator))) - 1 => 0.0];
-      G.Actuator_Plugin := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Forcelimited := new Byte_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Actuator_Forcerange := new Real_Array'[0 .. Integer (Int64 (S.Nactuator) * (2)) - 1 => 0.0];
-      G.Actuator_Ctrllimited := new Byte_Array'[0 .. Integer (Int64 (S.Nu) * (1)) - 1 => 0];
-      G.Actuator_Ctrlrange := new Real_Array'[0 .. Integer (Int64 (S.Nu) * (2)) - 1 => 0.0];
-      G.Actuator_Gear := new Real_Array'[0 .. Integer (Int64 (S.Nout) * (6)) - 1 => 0.0];
-      G.Actuator_Acc0 := new Real_Array'[0 .. Integer (Int64 (S.Nout) * (1)) - 1 => 0.0];
-      G.Actuator_Length0 := new Real_Array'[0 .. Integer (Int64 (S.Nout) * (1)) - 1 => 0.0];
-      G.Actuator_Lengthrange := new Real_Array'[0 .. Integer (Int64 (S.Nout) * (2)) - 1 => 0.0];
+      Alloc_I32 (G.Actuator_Trntype, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Dyntype, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Gaintype, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Biastype, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Ctrladr, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Ctrlnum, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Ctrlspec, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Outadr, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Outnum, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Actadr, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Actnum, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Trnid, Int64 (S.Nactuator) * (2));
+      Alloc_F64 (G.Actuator_Cranklength, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Dynprm, Int64 (S.Nactuator) * (10));
+      Alloc_F64 (G.Actuator_Gainprm, Int64 (S.Nactuator) * (10));
+      Alloc_F64 (G.Actuator_Biasprm, Int64 (S.Nactuator) * (10));
+      Alloc_U8 (G.Actuator_Actlimited, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Actrange, Int64 (S.Nactuator) * (2));
+      Alloc_U8 (G.Actuator_Actearly, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_History, Int64 (S.Nactuator) * (2));
+      Alloc_I32 (G.Actuator_Historyadr, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Delay, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Damping, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Dampingpoly, Int64 (S.Nactuator) * (2));
+      Alloc_F64 (G.Actuator_Armature, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Actuator_Group, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_User, Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator)));
+      Alloc_I32 (G.Actuator_Plugin, Int64 (S.Nactuator) * (1));
+      Alloc_U8 (G.Actuator_Forcelimited, Int64 (S.Nactuator) * (1));
+      Alloc_F64 (G.Actuator_Forcerange, Int64 (S.Nactuator) * (2));
+      Alloc_U8 (G.Actuator_Ctrllimited, Int64 (S.Nu) * (1));
+      Alloc_F64 (G.Actuator_Ctrlrange, Int64 (S.Nu) * (2));
+      Alloc_F64 (G.Actuator_Gear, Int64 (S.Nout) * (6));
+      Alloc_F64 (G.Actuator_Acc0, Int64 (S.Nout) * (1));
+      Alloc_F64 (G.Actuator_Length0, Int64 (S.Nout) * (1));
+      Alloc_F64 (G.Actuator_Lengthrange, Int64 (S.Nout) * (2));
    end Allocate_Actuator;
 
    procedure Free_Actuator (G : in out Actuator_Arrays) with
@@ -1040,24 +1084,24 @@ package body MJ.Models with SPARK_Mode is
      Post => Sensor_Layout_OK (S, G)
    is
    begin
-      G.Sensor_Type := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Datatype := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Needstage := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Objtype := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Objid := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Reftype := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Refid := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Intprm := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (3)) - 1 => 0];
-      G.Sensor_Dim := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Adr := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Cutoff := new Real_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0.0];
-      G.Sensor_Noise := new Real_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0.0];
-      G.Sensor_History := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (2)) - 1 => 0];
-      G.Sensor_Historyadr := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Sensor_Delay := new Real_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0.0];
-      G.Sensor_Interval := new Real_Array'[0 .. Integer (Int64 (S.Nsensor) * (2)) - 1 => 0.0];
-      G.Sensor_User := new Real_Array'[0 .. Integer (Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor))) - 1 => 0.0];
-      G.Sensor_Plugin := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
+      Alloc_I32 (G.Sensor_Type, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Datatype, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Needstage, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Objtype, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Objid, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Reftype, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Refid, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Intprm, Int64 (S.Nsensor) * (3));
+      Alloc_I32 (G.Sensor_Dim, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_Adr, Int64 (S.Nsensor) * (1));
+      Alloc_F64 (G.Sensor_Cutoff, Int64 (S.Nsensor) * (1));
+      Alloc_F64 (G.Sensor_Noise, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Sensor_History, Int64 (S.Nsensor) * (2));
+      Alloc_I32 (G.Sensor_Historyadr, Int64 (S.Nsensor) * (1));
+      Alloc_F64 (G.Sensor_Delay, Int64 (S.Nsensor) * (1));
+      Alloc_F64 (G.Sensor_Interval, Int64 (S.Nsensor) * (2));
+      Alloc_F64 (G.Sensor_User, Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor)));
+      Alloc_I32 (G.Sensor_Plugin, Int64 (S.Nsensor) * (1));
    end Allocate_Sensor;
 
    procedure Free_Sensor (G : in out Sensor_Arrays) with
@@ -1089,8 +1133,8 @@ package body MJ.Models with SPARK_Mode is
      Post => Qpos_Layout_OK (S, G)
    is
    begin
-      G.Qpos0 := new Real_Array'[0 .. Integer (Int64 (S.Nq) * (1)) - 1 => 0.0];
-      G.Qpos_Spring := new Real_Array'[0 .. Integer (Int64 (S.Nq) * (1)) - 1 => 0.0];
+      Alloc_F64 (G.Qpos0, Int64 (S.Nq) * (1));
+      Alloc_F64 (G.Qpos_Spring, Int64 (S.Nq) * (1));
    end Allocate_Qpos;
 
    procedure Free_Qpos (G : in out Qpos_Arrays) with
@@ -1106,14 +1150,14 @@ package body MJ.Models with SPARK_Mode is
      Post => Bvh_Layout_OK (S, G)
    is
    begin
-      G.Bvh_Depth := new Int_Array'[0 .. Integer (Int64 (S.Nbvh) * (1)) - 1 => 0];
-      G.Bvh_Child := new Int_Array'[0 .. Integer (Int64 (S.Nbvh) * (2)) - 1 => 0];
-      G.Bvh_Nodeid := new Int_Array'[0 .. Integer (Int64 (S.Nbvh) * (1)) - 1 => 0];
-      G.Bvh_Aabb := new Real_Array'[0 .. Integer (Int64 (S.Nbvhstatic) * (6)) - 1 => 0.0];
-      G.Oct_Depth := new Int_Array'[0 .. Integer (Int64 (S.Noct) * (1)) - 1 => 0];
-      G.Oct_Child := new Int_Array'[0 .. Integer (Int64 (S.Noct) * (8)) - 1 => 0];
-      G.Oct_Aabb := new Real_Array'[0 .. Integer (Int64 (S.Noct) * (6)) - 1 => 0.0];
-      G.Oct_Coeff := new Real_Array'[0 .. Integer (Int64 (S.Noct) * (8)) - 1 => 0.0];
+      Alloc_I32 (G.Bvh_Depth, Int64 (S.Nbvh) * (1));
+      Alloc_I32 (G.Bvh_Child, Int64 (S.Nbvh) * (2));
+      Alloc_I32 (G.Bvh_Nodeid, Int64 (S.Nbvh) * (1));
+      Alloc_F64 (G.Bvh_Aabb, Int64 (S.Nbvhstatic) * (6));
+      Alloc_I32 (G.Oct_Depth, Int64 (S.Noct) * (1));
+      Alloc_I32 (G.Oct_Child, Int64 (S.Noct) * (8));
+      Alloc_F64 (G.Oct_Aabb, Int64 (S.Noct) * (6));
+      Alloc_F64 (G.Oct_Coeff, Int64 (S.Noct) * (8));
    end Allocate_Bvh;
 
    procedure Free_Bvh (G : in out Bvh_Arrays) with
@@ -1135,9 +1179,9 @@ package body MJ.Models with SPARK_Mode is
      Post => Wrap_Layout_OK (S, G)
    is
    begin
-      G.Wrap_Type := new Int_Array'[0 .. Integer (Int64 (S.Nwrap) * (1)) - 1 => 0];
-      G.Wrap_Objid := new Int_Array'[0 .. Integer (Int64 (S.Nwrap) * (1)) - 1 => 0];
-      G.Wrap_Prm := new Real_Array'[0 .. Integer (Int64 (S.Nwrap) * (1)) - 1 => 0.0];
+      Alloc_I32 (G.Wrap_Type, Int64 (S.Nwrap) * (1));
+      Alloc_I32 (G.Wrap_Objid, Int64 (S.Nwrap) * (1));
+      Alloc_F64 (G.Wrap_Prm, Int64 (S.Nwrap) * (1));
    end Allocate_Wrap;
 
    procedure Free_Wrap (G : in out Wrap_Arrays) with
@@ -1154,11 +1198,11 @@ package body MJ.Models with SPARK_Mode is
      Post => Plugin_Layout_OK (S, G)
    is
    begin
-      G.Plugin := new Int_Array'[0 .. Integer (Int64 (S.Nplugin) * (1)) - 1 => 0];
-      G.Plugin_Stateadr := new Int_Array'[0 .. Integer (Int64 (S.Nplugin) * (1)) - 1 => 0];
-      G.Plugin_Statenum := new Int_Array'[0 .. Integer (Int64 (S.Nplugin) * (1)) - 1 => 0];
-      G.Plugin_Attr := new Byte_Array'[0 .. Integer (Int64 (S.Npluginattr) * (1)) - 1 => 0];
-      G.Plugin_Attradr := new Int_Array'[0 .. Integer (Int64 (S.Nplugin) * (1)) - 1 => 0];
+      Alloc_I32 (G.Plugin, Int64 (S.Nplugin) * (1));
+      Alloc_I32 (G.Plugin_Stateadr, Int64 (S.Nplugin) * (1));
+      Alloc_I32 (G.Plugin_Statenum, Int64 (S.Nplugin) * (1));
+      Alloc_U8 (G.Plugin_Attr, Int64 (S.Npluginattr) * (1));
+      Alloc_I32 (G.Plugin_Attradr, Int64 (S.Nplugin) * (1));
    end Allocate_Plugin;
 
    procedure Free_Plugin (G : in out Plugin_Arrays) with
@@ -1177,9 +1221,9 @@ package body MJ.Models with SPARK_Mode is
      Post => Numeric_Layout_OK (S, G)
    is
    begin
-      G.Numeric_Adr := new Int_Array'[0 .. Integer (Int64 (S.Nnumeric) * (1)) - 1 => 0];
-      G.Numeric_Size := new Int_Array'[0 .. Integer (Int64 (S.Nnumeric) * (1)) - 1 => 0];
-      G.Numeric_Data := new Real_Array'[0 .. Integer (Int64 (S.Nnumericdata) * (1)) - 1 => 0.0];
+      Alloc_I32 (G.Numeric_Adr, Int64 (S.Nnumeric) * (1));
+      Alloc_I32 (G.Numeric_Size, Int64 (S.Nnumeric) * (1));
+      Alloc_F64 (G.Numeric_Data, Int64 (S.Nnumericdata) * (1));
    end Allocate_Numeric;
 
    procedure Free_Numeric (G : in out Numeric_Arrays) with
@@ -1196,9 +1240,9 @@ package body MJ.Models with SPARK_Mode is
      Post => Text_Layout_OK (S, G)
    is
    begin
-      G.Text_Adr := new Int_Array'[0 .. Integer (Int64 (S.Ntext) * (1)) - 1 => 0];
-      G.Text_Size := new Int_Array'[0 .. Integer (Int64 (S.Ntext) * (1)) - 1 => 0];
-      G.Text_Data := new Byte_Array'[0 .. Integer (Int64 (S.Ntextdata) * (1)) - 1 => 0];
+      Alloc_I32 (G.Text_Adr, Int64 (S.Ntext) * (1));
+      Alloc_I32 (G.Text_Size, Int64 (S.Ntext) * (1));
+      Alloc_U8 (G.Text_Data, Int64 (S.Ntextdata) * (1));
    end Allocate_Text;
 
    procedure Free_Text (G : in out Text_Arrays) with
@@ -1215,11 +1259,11 @@ package body MJ.Models with SPARK_Mode is
      Post => Tuple_Layout_OK (S, G)
    is
    begin
-      G.Tuple_Adr := new Int_Array'[0 .. Integer (Int64 (S.Ntuple) * (1)) - 1 => 0];
-      G.Tuple_Size := new Int_Array'[0 .. Integer (Int64 (S.Ntuple) * (1)) - 1 => 0];
-      G.Tuple_Objtype := new Int_Array'[0 .. Integer (Int64 (S.Ntupledata) * (1)) - 1 => 0];
-      G.Tuple_Objid := new Int_Array'[0 .. Integer (Int64 (S.Ntupledata) * (1)) - 1 => 0];
-      G.Tuple_Objprm := new Real_Array'[0 .. Integer (Int64 (S.Ntupledata) * (1)) - 1 => 0.0];
+      Alloc_I32 (G.Tuple_Adr, Int64 (S.Ntuple) * (1));
+      Alloc_I32 (G.Tuple_Size, Int64 (S.Ntuple) * (1));
+      Alloc_I32 (G.Tuple_Objtype, Int64 (S.Ntupledata) * (1));
+      Alloc_I32 (G.Tuple_Objid, Int64 (S.Ntupledata) * (1));
+      Alloc_F64 (G.Tuple_Objprm, Int64 (S.Ntupledata) * (1));
    end Allocate_Tuple;
 
    procedure Free_Tuple (G : in out Tuple_Arrays) with
@@ -1238,13 +1282,13 @@ package body MJ.Models with SPARK_Mode is
      Post => Key_Layout_OK (S, G)
    is
    begin
-      G.Key_Time := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (1)) - 1 => 0.0];
-      G.Key_Qpos := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Nq))) - 1 => 0.0];
-      G.Key_Qvel := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Nv))) - 1 => 0.0];
-      G.Key_Act := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Na))) - 1 => 0.0];
-      G.Key_Mpos := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3)) - 1 => 0.0];
-      G.Key_Mquat := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4)) - 1 => 0.0];
-      G.Key_Ctrl := new Real_Array'[0 .. Integer (Int64 (S.Nkey) * (Int64 (S.Nu))) - 1 => 0.0];
+      Alloc_F64 (G.Key_Time, Int64 (S.Nkey) * (1));
+      Alloc_F64 (G.Key_Qpos, Int64 (S.Nkey) * (Int64 (S.Nq)));
+      Alloc_F64 (G.Key_Qvel, Int64 (S.Nkey) * (Int64 (S.Nv)));
+      Alloc_F64 (G.Key_Act, Int64 (S.Nkey) * (Int64 (S.Na)));
+      Alloc_F64 (G.Key_Mpos, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3));
+      Alloc_F64 (G.Key_Mquat, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4));
+      Alloc_F64 (G.Key_Ctrl, Int64 (S.Nkey) * (Int64 (S.Nu)));
    end Allocate_Key;
 
    procedure Free_Key (G : in out Key_Arrays) with
@@ -1265,32 +1309,32 @@ package body MJ.Models with SPARK_Mode is
      Post => Name_Layout_OK (S, G)
    is
    begin
-      G.Name_Bodyadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.Name_Jntadr := new Int_Array'[0 .. Integer (Int64 (S.Njnt) * (1)) - 1 => 0];
-      G.Name_Geomadr := new Int_Array'[0 .. Integer (Int64 (S.Ngeom) * (1)) - 1 => 0];
-      G.Name_Siteadr := new Int_Array'[0 .. Integer (Int64 (S.Nsite) * (1)) - 1 => 0];
-      G.Name_Camadr := new Int_Array'[0 .. Integer (Int64 (S.Ncam) * (1)) - 1 => 0];
-      G.Name_Lightadr := new Int_Array'[0 .. Integer (Int64 (S.Nlight) * (1)) - 1 => 0];
-      G.Name_Flexadr := new Int_Array'[0 .. Integer (Int64 (S.Nflex) * (1)) - 1 => 0];
-      G.Name_Meshadr := new Int_Array'[0 .. Integer (Int64 (S.Nmesh) * (1)) - 1 => 0];
-      G.Name_Skinadr := new Int_Array'[0 .. Integer (Int64 (S.Nskin) * (1)) - 1 => 0];
-      G.Name_Hfieldadr := new Int_Array'[0 .. Integer (Int64 (S.Nhfield) * (1)) - 1 => 0];
-      G.Name_Texadr := new Int_Array'[0 .. Integer (Int64 (S.Ntex) * (1)) - 1 => 0];
-      G.Name_Matadr := new Int_Array'[0 .. Integer (Int64 (S.Nmat) * (1)) - 1 => 0];
-      G.Name_Pairadr := new Int_Array'[0 .. Integer (Int64 (S.Npair) * (1)) - 1 => 0];
-      G.Name_Excludeadr := new Int_Array'[0 .. Integer (Int64 (S.Nexclude) * (1)) - 1 => 0];
-      G.Name_Eqadr := new Int_Array'[0 .. Integer (Int64 (S.Neq) * (1)) - 1 => 0];
-      G.Name_Tendonadr := new Int_Array'[0 .. Integer (Int64 (S.Ntendon) * (1)) - 1 => 0];
-      G.Name_Actuatoradr := new Int_Array'[0 .. Integer (Int64 (S.Nactuator) * (1)) - 1 => 0];
-      G.Name_Sensoradr := new Int_Array'[0 .. Integer (Int64 (S.Nsensor) * (1)) - 1 => 0];
-      G.Name_Numericadr := new Int_Array'[0 .. Integer (Int64 (S.Nnumeric) * (1)) - 1 => 0];
-      G.Name_Textadr := new Int_Array'[0 .. Integer (Int64 (S.Ntext) * (1)) - 1 => 0];
-      G.Name_Tupleadr := new Int_Array'[0 .. Integer (Int64 (S.Ntuple) * (1)) - 1 => 0];
-      G.Name_Keyadr := new Int_Array'[0 .. Integer (Int64 (S.Nkey) * (1)) - 1 => 0];
-      G.Name_Pluginadr := new Int_Array'[0 .. Integer (Int64 (S.Nplugin) * (1)) - 1 => 0];
-      G.Names := new Byte_Array'[0 .. Integer (Int64 (S.Nnames) * (1)) - 1 => 0];
-      G.Names_Map := new Int_Array'[0 .. Integer (Int64 (S.Nnames_Map) * (1)) - 1 => 0];
-      G.Paths := new Byte_Array'[0 .. Integer (Int64 (S.Npaths) * (1)) - 1 => 0];
+      Alloc_I32 (G.Name_Bodyadr, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.Name_Jntadr, Int64 (S.Njnt) * (1));
+      Alloc_I32 (G.Name_Geomadr, Int64 (S.Ngeom) * (1));
+      Alloc_I32 (G.Name_Siteadr, Int64 (S.Nsite) * (1));
+      Alloc_I32 (G.Name_Camadr, Int64 (S.Ncam) * (1));
+      Alloc_I32 (G.Name_Lightadr, Int64 (S.Nlight) * (1));
+      Alloc_I32 (G.Name_Flexadr, Int64 (S.Nflex) * (1));
+      Alloc_I32 (G.Name_Meshadr, Int64 (S.Nmesh) * (1));
+      Alloc_I32 (G.Name_Skinadr, Int64 (S.Nskin) * (1));
+      Alloc_I32 (G.Name_Hfieldadr, Int64 (S.Nhfield) * (1));
+      Alloc_I32 (G.Name_Texadr, Int64 (S.Ntex) * (1));
+      Alloc_I32 (G.Name_Matadr, Int64 (S.Nmat) * (1));
+      Alloc_I32 (G.Name_Pairadr, Int64 (S.Npair) * (1));
+      Alloc_I32 (G.Name_Excludeadr, Int64 (S.Nexclude) * (1));
+      Alloc_I32 (G.Name_Eqadr, Int64 (S.Neq) * (1));
+      Alloc_I32 (G.Name_Tendonadr, Int64 (S.Ntendon) * (1));
+      Alloc_I32 (G.Name_Actuatoradr, Int64 (S.Nactuator) * (1));
+      Alloc_I32 (G.Name_Sensoradr, Int64 (S.Nsensor) * (1));
+      Alloc_I32 (G.Name_Numericadr, Int64 (S.Nnumeric) * (1));
+      Alloc_I32 (G.Name_Textadr, Int64 (S.Ntext) * (1));
+      Alloc_I32 (G.Name_Tupleadr, Int64 (S.Ntuple) * (1));
+      Alloc_I32 (G.Name_Keyadr, Int64 (S.Nkey) * (1));
+      Alloc_I32 (G.Name_Pluginadr, Int64 (S.Nplugin) * (1));
+      Alloc_U8 (G.Names, Int64 (S.Nnames) * (1));
+      Alloc_I32 (G.Names_Map, Int64 (S.Nnames_Map) * (1));
+      Alloc_U8 (G.Paths, Int64 (S.Npaths) * (1));
    end Allocate_Name;
 
    procedure Free_Name (G : in out Name_Arrays) with
@@ -1330,19 +1374,19 @@ package body MJ.Models with SPARK_Mode is
      Post => Sparse_Layout_OK (S, G)
    is
    begin
-      G.B_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.B_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nbody) * (1)) - 1 => 0];
-      G.B_Colind := new Int_Array'[0 .. Integer (Int64 (S.NB) * (1)) - 1 => 0];
-      G.M_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.M_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.M_Colind := new Int_Array'[0 .. Integer (Int64 (S.NC) * (1)) - 1 => 0];
-      G.MapM2M := new Int_Array'[0 .. Integer (Int64 (S.NC) * (1)) - 1 => 0];
-      G.D_Rownnz := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.D_Rowadr := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.D_Diag := new Int_Array'[0 .. Integer (Int64 (S.Nv) * (1)) - 1 => 0];
-      G.D_Colind := new Int_Array'[0 .. Integer (Int64 (S.ND) * (1)) - 1 => 0];
-      G.MapM2D := new Int_Array'[0 .. Integer (Int64 (S.ND) * (1)) - 1 => 0];
-      G.MapD2M := new Int_Array'[0 .. Integer (Int64 (S.NC) * (1)) - 1 => 0];
+      Alloc_I32 (G.B_Rownnz, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.B_Rowadr, Int64 (S.Nbody) * (1));
+      Alloc_I32 (G.B_Colind, Int64 (S.NB) * (1));
+      Alloc_I32 (G.M_Rownnz, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.M_Rowadr, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.M_Colind, Int64 (S.NC) * (1));
+      Alloc_I32 (G.MapM2M, Int64 (S.NC) * (1));
+      Alloc_I32 (G.D_Rownnz, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.D_Rowadr, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.D_Diag, Int64 (S.Nv) * (1));
+      Alloc_I32 (G.D_Colind, Int64 (S.ND) * (1));
+      Alloc_I32 (G.MapM2D, Int64 (S.ND) * (1));
+      Alloc_I32 (G.MapD2M, Int64 (S.NC) * (1));
    end Allocate_Sparse;
 
    procedure Free_Sparse (G : in out Sparse_Arrays) with

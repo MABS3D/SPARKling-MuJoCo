@@ -279,6 +279,52 @@ def emit_fixed(t: Tables) -> None:
     write(GEN / "mj-fixed.ads", "\n".join(out))
 
 
+ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is exactly the conjunct
+   --  the group layout predicate states for that array, which keeps every
+   --  Allocate_<Group> proof a sequence of trivial steps.
+
+   procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Int_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_I32;
+
+   procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
+   end Alloc_F64;
+
+   procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_U8;
+
+   procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
+   end Alloc_F32;
+
+   procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
+     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
+     Post => P /= null and then P'First = 0 and then Int64 (P'Length) = N
+   is
+   begin
+      P := new Int64_Array'[0 .. Integer (N) - 1 => 0];
+   end Alloc_I64;
+"""
+
+
 def size_component(c: str) -> str:
     if c in SIZE_LONG:
         return f"      {ada_name(c):<16} : Int64 := 0;"
@@ -363,7 +409,7 @@ def emit_model(t: Tables) -> None:
     spec.append("end MJ.Models;")
     write(GEN / "mj-models.ads", "\n".join(spec) + "\n")
 
-    body = ["package body MJ.Models with SPARK_Mode is", ""]
+    body = ["package body MJ.Models with SPARK_Mode is", "", ALLOC_HELPERS]
     for g in GROUP_ORDER:
         P, T, fs = group_prefix(g), group_type(g), by_group[g]
         body.append(f"   procedure Allocate_{P} (S : Sizes; G : in out {T}) with")
@@ -371,7 +417,7 @@ def emit_model(t: Tables) -> None:
         body.append(f"     Post => {P}_Layout_OK (S, G)")
         body.append("   is\n   begin")
         for f in fs:
-            body.append(f"      G.{f.ada} := new {f.atype}'[0 .. Integer ({count_long(f, m)}) - 1 => {f.zero}];")
+            body.append(f"      Alloc_{f.reader} (G.{f.ada}, {count_long(f, m)});")
         body.append(f"   end Allocate_{P};\n")
         body.append(f"   procedure Free_{P} (G : in out {T}) with")
         body.append(f"     Post => {P}_All_Null (G)")
