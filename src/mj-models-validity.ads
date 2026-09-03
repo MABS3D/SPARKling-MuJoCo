@@ -97,10 +97,13 @@ package MJ.Models.Validity with SPARK_Mode is
      (for all I in 0 .. M.S.Nbody - 1 => Root_At (M, I))
    with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M);
 
+   --  A body is its own weld body when it has joints or is a mocap body (its pose
+   --  is set from outside); otherwise it is welded to its parent's weld body.
    function Weld_At (M : Model; I : Integer) return Boolean is
      (M.Bodies.Body_Weldid (I) in 0 .. I
       and then (if I = 0 then M.Bodies.Body_Weldid (0) = 0
-                elsif M.Bodies.Body_Jntnum (I) > 0 then M.Bodies.Body_Weldid (I) = I
+                elsif M.Bodies.Body_Jntnum (I) > 0 or else M.Bodies.Body_Mocapid (I) >= 0
+                then M.Bodies.Body_Weldid (I) = I
                 else M.Bodies.Body_Weldid (I) = M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (I))))
    with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
                and then I in 0 .. M.S.Nbody - 1;
@@ -318,9 +321,12 @@ package MJ.Models.Validity with SPARK_Mode is
                      Colind (K) < Colind (K + 1))))
    with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
 
+   --  The CSR inertia is the reduced form of mj_makeDofDofSparse: a simple dof
+   --  (dof_simplenum > 0) keeps only its diagonal, every other dof keeps its
+   --  ancestors and itself, and the total is nC (nM is the legacy chain layout).
    function Sparse_M_OK (M : Model) return Boolean is
      (CSR_OK (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
-              M.S.Nv, M.S.Nm, M.S.Nv))
+              M.S.Nv, M.S.Nc, M.S.Nv))
    with Pre => Valid_Layout (M);
 
    function Sparse_B_OK (M : Model) return Boolean is
@@ -338,16 +344,19 @@ package MJ.Models.Validity with SPARK_Mode is
               M.S.Ntendon, M.S.Njten, M.S.Nv))
    with Pre => Valid_Layout (M);
 
-   --  Row I of the CSR inertia has the length dof_Madr dictates and holds the
-   --  parent's row followed by I.
+   --  Row I of the CSR inertia: one entry for a simple dof, else the length
+   --  dof_Madr dictates, holding the parent's row followed by I. A simple dof
+   --  never has non-simple descendants, so a non-simple dof's parent is not simple.
    function M_Rownnz_OK (M : Model) return Boolean is
-     (for all I in 0 .. M.S.Nv - 1 => M.Sparse.M_Rownnz (I) = Row_Len (M, I))
+     (for all I in 0 .. M.S.Nv - 1 =>
+        M.Sparse.M_Rownnz (I) = (if M.Dofs.Dof_Simplenum (I) > 0 then 1 else Row_Len (M, I)))
    with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Sparse_M_OK (M);
 
    function M_Row_At (M : Model; I : Integer) return Boolean is
      (M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I) - 1) = I
-      and then (if M.Dofs.Dof_Parentid (I) >= 0 then
-                  (for all K in 0 .. M.Sparse.M_Rownnz (I) - 2 =>
+      and then (if M.Dofs.Dof_Simplenum (I) = 0 and then M.Dofs.Dof_Parentid (I) >= 0 then
+                  M.Dofs.Dof_Simplenum (M.Dofs.Dof_Parentid (I)) = 0
+                  and then (for all K in 0 .. M.Sparse.M_Rownnz (I) - 2 =>
                      M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + K) =
                      M.Sparse.M_Colind (M.Sparse.M_Rowadr (M.Dofs.Dof_Parentid (I)) + K))))
    with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M)
@@ -368,11 +377,13 @@ package MJ.Models.Validity with SPARK_Mode is
      (for all I in 0 .. M.S.Nv - 1 => D_Diag_At (M, I))
    with Pre => Valid_Layout (M) and then Sparse_D_OK (M);
 
+   --  mapM2M: CSR entry (nC) -> legacy qM index; mapM2D: symmetric D entry (nD) ->
+   --  CSR entry or -1; mapD2M: CSR entry (nC) -> D entry, inverse of mapM2D.
    function Maps_OK (M : Model) return Boolean is
      ((for all K in 0 .. M.S.Nc - 1 => M.Sparse.MapM2M (K) in 0 .. M.S.Nm - 1)
-      and then (for all K in 0 .. M.S.Nd - 1 => M.Sparse.MapM2D (K) in 0 .. M.S.Nm - 1)
-      and then (for all K in 0 .. M.S.Nm - 1 => M.Sparse.MapD2M (K) in 0 .. M.S.Nd - 1)
-      and then (for all K in 0 .. M.S.Nm - 1 => M.Sparse.MapM2D (M.Sparse.MapD2M (K)) = K))
+      and then (for all K in 0 .. M.S.Nd - 1 => M.Sparse.MapM2D (K) in -1 .. M.S.Nc - 1)
+      and then (for all K in 0 .. M.S.Nc - 1 => M.Sparse.MapD2M (K) in 0 .. M.S.Nd - 1)
+      and then (for all K in 0 .. M.S.Nc - 1 => M.Sparse.MapM2D (M.Sparse.MapD2M (K)) = K))
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
@@ -626,7 +637,7 @@ package MJ.Models.Validity with SPARK_Mode is
    function Tendon_At (M : Model; T : Integer) return Boolean is
      (M.Tendons.Tendon_Num (T) >= 1
       and then M.Tendons.Tendon_Actuatorid (T) in -1 .. M.S.Nactuator - 1
-      and then M.Tendons.Tendon_Treenum (T) in 0 .. 2
+      and then M.Tendons.Tendon_Treenum (T) >= 0   --  counts every tree on the path; only two ids are stored
       and then (if M.Wraps.Wrap_Type (M.Tendons.Tendon_Adr (T)) = 3 then
                   (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
                      M.Wraps.Wrap_Type (W) in 2 .. 5)
@@ -913,7 +924,9 @@ package MJ.Models.Validity with SPARK_Mode is
      (Int64 (M.Caps.Efc_Cap) =
         Int64 (M.Caps.Ne_Max) + Int64 (M.Caps.Nf_Max) + Int64 (M.Caps.Nl_Max)
         + 10 * Int64 (M.Caps.Contact_Cap)
-      and then Int64 (M.Caps.NJ_Cap) = Int64 (M.Caps.Efc_Cap) * Int64 (M.S.Nv)
+      --  the dense bound saturates at Max_Size: large sparse models (100 humanoids) exceed it,
+      --  and the constraint assembler checks nJ against the allocated capacity dynamically
+      and then Int64 (M.Caps.NJ_Cap) = Int64'Min (Int64 (M.Caps.Efc_Cap) * Int64 (M.S.Nv), Int64 (Max_Size))
       and then M.Caps.NIsland_Cap = M.S.Ntree
       and then M.Caps.NIdof_Cap = M.S.Nv);
 

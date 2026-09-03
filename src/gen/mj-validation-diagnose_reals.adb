@@ -102,18 +102,18 @@ begin
       pragma Loop_Invariant (for all K in M.Bodies.Body_User'First .. I => M.Bodies.Body_User (K) in Tier0_Real);
    end loop;
    for I in M.Bvh.Bvh_Aabb'Range loop
-      if not (M.Bvh.Bvh_Aabb (I) in Tier0_Real) then
+      if not (M.Bvh.Bvh_Aabb (I) in Tier1_Real) then
          Result := (Invalid_Parameter, Bvh_Aabb, I);
          return;
       end if;
-      pragma Loop_Invariant (for all K in M.Bvh.Bvh_Aabb'First .. I => M.Bvh.Bvh_Aabb (K) in Tier0_Real);
+      pragma Loop_Invariant (for all K in M.Bvh.Bvh_Aabb'First .. I => M.Bvh.Bvh_Aabb (K) in Tier1_Real);
    end loop;
    for I in M.Bvh.Oct_Aabb'Range loop
-      if not (M.Bvh.Oct_Aabb (I) in Tier0_Real) then
+      if not (M.Bvh.Oct_Aabb (I) in Tier1_Real) then
          Result := (Invalid_Parameter, Oct_Aabb, I);
          return;
       end if;
-      pragma Loop_Invariant (for all K in M.Bvh.Oct_Aabb'First .. I => M.Bvh.Oct_Aabb (K) in Tier0_Real);
+      pragma Loop_Invariant (for all K in M.Bvh.Oct_Aabb'First .. I => M.Bvh.Oct_Aabb (K) in Tier1_Real);
    end loop;
    for I in M.Bvh.Oct_Coeff'Range loop
       if not (M.Bvh.Oct_Coeff (I) in Tier0_Real) then
@@ -284,11 +284,11 @@ begin
       pragma Loop_Invariant (for all K in M.Geoms.Geom_Size'First .. I => M.Geoms.Geom_Size (K) in Tier0_Real);
    end loop;
    for I in M.Geoms.Geom_Aabb'Range loop
-      if not (M.Geoms.Geom_Aabb (I) in Tier0_Real) then
+      if not (M.Geoms.Geom_Aabb (I) in Tier1_Real) then
          Result := (Invalid_Parameter, Geom_Aabb, I);
          return;
       end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Aabb'First .. I => M.Geoms.Geom_Aabb (K) in Tier0_Real);
+      pragma Loop_Invariant (for all K in M.Geoms.Geom_Aabb'First .. I => M.Geoms.Geom_Aabb (K) in Tier1_Real);
    end loop;
    for I in M.Geoms.Geom_Rbound'Range loop
       if not (M.Geoms.Geom_Rbound (I) in Tier0_Real) then

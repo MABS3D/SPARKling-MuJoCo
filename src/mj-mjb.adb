@@ -80,4 +80,29 @@ package body MJ.MJB with SPARK_Mode is
       end if;
    end Parse_Raw;
 
+   procedure Parse (B : Byte_Array; Options : Validate_Options; M : in out Model; Result : out Load_Result) is
+   begin
+      Parse_Raw (B, M, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      Validate (M, Options, Result);
+      if Result.Status /= OK then
+         Free (M);
+      end if;
+   end Parse;
+
+   procedure Load (Path : String; Options : Validate_Options; M : in out Model; Result : out Load_Result) is
+      B       : Byte_Array_Access;
+      Read_OK : Boolean;
+   begin
+      MJ.File_IO.Read_File (Path, B, Read_OK);
+      if not Read_OK then
+         Result := (File_Error, None, -1);
+         return;
+      end if;
+      Parse (B.all, Options, M, Result);
+      Free_Byte (B);
+   end Load;
+
 end MJ.MJB;
