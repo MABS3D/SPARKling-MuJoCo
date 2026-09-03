@@ -299,7 +299,260 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
-   --  Conjunction. Tasks 8b to 8d append clauses here, before Valid_Model.
+   --  5.5 Sparse structures. A CSR triple is well formed when rows are
+   --  contiguous, cover exactly nnz entries, and column indexes are in range
+   --  and strictly increasing within each row.
+   ----------------------------------------------------------------------------
+
+   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer) return Boolean is
+     (Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
+      and then Rownnz'Length = N and then Rowadr'Length = N and then Colind'Length = Nnz
+      and then (for all I in 0 .. N - 1 =>
+                  Rownnz (I) in 0 .. Nnz and then Rowadr (I) in 0 .. Nnz - Rownnz (I))
+      and then (for all I in 0 .. N - 1 =>
+                  Rowadr (I) = (if I = 0 then 0 else Rowadr (I - 1) + Rownnz (I - 1)))
+      and then (if N = 0 then Nnz = 0 else Rowadr (N - 1) + Rownnz (N - 1) = Nnz)
+      and then (for all K in 0 .. Nnz - 1 => Colind (K) in 0 .. Ncols - 1)
+      and then (for all I in 0 .. N - 1 =>
+                  (for all K in Rowadr (I) .. Rowadr (I) + Rownnz (I) - 2 =>
+                     Colind (K) < Colind (K + 1))))
+   with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
+
+   function Sparse_M_OK (M : Model) return Boolean is
+     (CSR_OK (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
+              M.S.Nv, M.S.Nm, M.S.Nv))
+   with Pre => Valid_Layout (M);
+
+   function Sparse_B_OK (M : Model) return Boolean is
+     (CSR_OK (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all, M.Sparse.B_Colind.all,
+              M.S.Nbody, M.S.Nb, M.S.Nv))
+   with Pre => Valid_Layout (M);
+
+   function Sparse_D_OK (M : Model) return Boolean is
+     (CSR_OK (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all, M.Sparse.D_Colind.all,
+              M.S.Nv, M.S.Nd, M.S.Nv))
+   with Pre => Valid_Layout (M);
+
+   function Sparse_Ten_J_OK (M : Model) return Boolean is
+     (CSR_OK (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+              M.S.Ntendon, M.S.Njten, M.S.Nv))
+   with Pre => Valid_Layout (M);
+
+   --  Row I of the CSR inertia has the length dof_Madr dictates and holds the
+   --  parent's row followed by I.
+   function M_Rownnz_OK (M : Model) return Boolean is
+     (for all I in 0 .. M.S.Nv - 1 => M.Sparse.M_Rownnz (I) = Row_Len (M, I))
+   with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Sparse_M_OK (M);
+
+   function M_Row_At (M : Model; I : Integer) return Boolean is
+     (M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I) - 1) = I
+      and then (if M.Dofs.Dof_Parentid (I) >= 0 then
+                  (for all K in 0 .. M.Sparse.M_Rownnz (I) - 2 =>
+                     M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + K) =
+                     M.Sparse.M_Colind (M.Sparse.M_Rowadr (M.Dofs.Dof_Parentid (I)) + K))))
+   with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M)
+               and then Madrs_OK (M) and then Sparse_M_OK (M) and then M_Rownnz_OK (M)
+               and then I in 0 .. M.S.Nv - 1;
+
+   function M_Rows_OK (M : Model) return Boolean is
+     (for all I in 0 .. M.S.Nv - 1 => M_Row_At (M, I))
+   with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M)
+               and then Madrs_OK (M) and then Sparse_M_OK (M) and then M_Rownnz_OK (M);
+
+   function D_Diag_At (M : Model; I : Integer) return Boolean is
+     (M.Sparse.D_Diag (I) in 0 .. M.Sparse.D_Rownnz (I) - 1
+      and then M.Sparse.D_Colind (M.Sparse.D_Rowadr (I) + M.Sparse.D_Diag (I)) = I)
+   with Pre => Valid_Layout (M) and then Sparse_D_OK (M) and then I in 0 .. M.S.Nv - 1;
+
+   function D_Diags_OK (M : Model) return Boolean is
+     (for all I in 0 .. M.S.Nv - 1 => D_Diag_At (M, I))
+   with Pre => Valid_Layout (M) and then Sparse_D_OK (M);
+
+   function Maps_OK (M : Model) return Boolean is
+     ((for all K in 0 .. M.S.Nc - 1 => M.Sparse.MapM2M (K) in 0 .. M.S.Nm - 1)
+      and then (for all K in 0 .. M.S.Nd - 1 => M.Sparse.MapM2D (K) in 0 .. M.S.Nm - 1)
+      and then (for all K in 0 .. M.S.Nm - 1 => M.Sparse.MapD2M (K) in 0 .. M.S.Nd - 1)
+      and then (for all K in 0 .. M.S.Nm - 1 => M.Sparse.MapM2D (M.Sparse.MapD2M (K)) = K))
+   with Pre => Valid_Layout (M);
+
+   ----------------------------------------------------------------------------
+   --  5.6 Geoms, meshes, heightfields, textures, bounding volume hierarchies
+   ----------------------------------------------------------------------------
+
+   function Geom_Type_At (M : Model; G : Integer) return Boolean is
+     (M.Geoms.Geom_Type (G) in 0 .. 7            --  8 = SDF needs a plugin
+      and then M.Geoms.Geom_Condim (G) in 1 | 3 | 4 | 6)
+   with Pre => Valid_Layout (M) and then G in 0 .. M.S.Ngeom - 1;
+
+   function Geom_Types_OK (M : Model) return Boolean is
+     (for all G in 0 .. M.S.Ngeom - 1 => Geom_Type_At (M, G))
+   with Pre => Valid_Layout (M);
+
+   function Geom_Data_At (M : Model; G : Integer) return Boolean is
+     (case M.Geoms.Geom_Type (G) is
+        when 1      => M.Geoms.Geom_Dataid (G) in 0 .. M.S.Nhfield - 1,
+        when 7      => M.Geoms.Geom_Dataid (G) in 0 .. M.S.Nmesh - 1,
+        when others => M.Geoms.Geom_Dataid (G) = -1)
+   with Pre => Valid_Layout (M) and then G in 0 .. M.S.Ngeom - 1;
+
+   function Geom_Datas_OK (M : Model) return Boolean is
+     (for all G in 0 .. M.S.Ngeom - 1 => Geom_Data_At (M, G))
+   with Pre => Valid_Layout (M);
+
+   function Sameframes_OK (M : Model) return Boolean is
+     ((for all I in 0 .. M.S.Nbody - 1 => M.Bodies.Body_Sameframe (I) <= 4)
+      and then (for all G in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Sameframe (G) <= 4)
+      and then (for all S in 0 .. M.S.Nsite - 1 => M.Sites.Site_Sameframe (S) <= 4))
+   with Pre => Valid_Layout (M);
+
+   --  Face vertex, normal, and texcoord indexes are local to the mesh.
+   function Mesh_Faces_At (M : Model; I : Integer) return Boolean is
+     (for all F in M.Meshes.Mesh_Faceadr (I) .. M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I) - 1 =>
+        (for all K in 0 .. 2 =>
+           M.Meshes.Mesh_Face (3 * F + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1
+           and then (if M.Meshes.Mesh_Normalnum (I) > 0 then
+                       M.Meshes.Mesh_Facenormal (3 * F + K) in 0 .. M.Meshes.Mesh_Normalnum (I) - 1)
+           and then (if M.Meshes.Mesh_Texcoordadr (I) >= 0 and then M.Meshes.Mesh_Texcoordnum (I) > 0 then
+                       M.Meshes.Mesh_Facetexcoord (3 * F + K) in 0 .. M.Meshes.Mesh_Texcoordnum (I) - 1)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+
+   --  Polygon vertex lists index the mesh's vertices; the per-vertex polygon map
+   --  indexes the mesh's polygons.
+   function Mesh_Polys_At (M : Model; I : Integer) return Boolean is
+     ((for all P in M.Meshes.Mesh_Polyadr (I) .. M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I) - 1 =>
+         (for all K in M.Meshes.Mesh_Polyvertadr (P) ..
+                       M.Meshes.Mesh_Polyvertadr (P) + M.Meshes.Mesh_Polyvertnum (P) - 1 =>
+            M.Meshes.Mesh_Polyvert (K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1))
+      and then (for all V in M.Meshes.Mesh_Vertadr (I) .. M.Meshes.Mesh_Vertadr (I) + M.Meshes.Mesh_Vertnum (I) - 1 =>
+                  (for all K in M.Meshes.Mesh_Polymapadr (V) ..
+                                M.Meshes.Mesh_Polymapadr (V) + M.Meshes.Mesh_Polymapnum (V) - 1 =>
+                     M.Meshes.Mesh_Polymap (K) in 0 .. M.Meshes.Mesh_Polynum (I) - 1)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+
+   --  Convex hull graph block (user_mesh.cc MakeGraph): numvert, numface,
+   --  vert_edgeadr[numvert], vert_globalid[numvert], edge_localid[numvert+3*numface]
+   --  terminated by -1 runs, face_globalid[3*numface]. Blocks must fit before
+   --  the end of mesh_graph; the engine walks edge lists until a -1, so the
+   --  last edge entry must be -1.
+   function Graph_Block_At (M : Model; I, A, Nv, Nf : Integer) return Boolean is
+     (declare
+        Ne : constant Integer := Nv + 3 * Nf;
+      begin
+        Int64 (A) + 2 + 3 * Int64 (Nv) + 6 * Int64 (Nf) <= Int64 (M.S.Nmeshgraph)
+        and then (for all K in 0 .. Nv - 1 => M.Meshes.Mesh_Graph (A + 2 + K) in 0 .. Ne - 1)
+        and then (for all K in 0 .. Nv - 1 =>
+                    M.Meshes.Mesh_Graph (A + 2 + Nv + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)
+        and then (for all K in 0 .. Ne - 1 => M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + K) in -1 .. Nv - 1)
+        and then (Ne = 0 or else M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + Ne - 1) = -1)
+        and then (for all K in 0 .. 3 * Nf - 1 =>
+                    M.Meshes.Mesh_Graph (A + 2 + 3 * Nv + 3 * Nf + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1))
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1
+               and then A in 0 .. M.S.Nmeshgraph - 2
+               and then Nv in 0 .. M.Meshes.Mesh_Vertnum (I) and then Nf in 0 .. Max_Size / 6;
+
+   function Mesh_Graph_At (M : Model; I : Integer) return Boolean is
+     (if M.Meshes.Mesh_Graphadr (I) >= 0 then
+        M.Meshes.Mesh_Graphadr (I) <= M.S.Nmeshgraph - 2
+        and then M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I)) in 0 .. M.Meshes.Mesh_Vertnum (I)
+        and then M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I) + 1) in 0 .. Max_Size / 6
+        and then Graph_Block_At (M, I, M.Meshes.Mesh_Graphadr (I),
+                                 M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I)),
+                                 M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I) + 1)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+
+   function Meshes_OK (M : Model) return Boolean is
+     (for all I in 0 .. M.S.Nmesh - 1 =>
+        Mesh_Faces_At (M, I) and then Mesh_Polys_At (M, I) and then Mesh_Graph_At (M, I))
+   with Pre => Valid_Layout (M) and then Refs_OK (M);
+
+   function Hfield_At (M : Model; H : Integer) return Boolean is
+     (M.Hfields.Hfield_Nrow (H) >= 1 and then M.Hfields.Hfield_Ncol (H) >= 1
+      and then M.Hfields.Hfield_Adr (H) in 0 .. M.S.Nhfielddata
+      and then Int64 (M.Hfields.Hfield_Adr (H))
+               + Int64 (M.Hfields.Hfield_Nrow (H)) * Int64 (M.Hfields.Hfield_Ncol (H))
+               <= Int64 (M.S.Nhfielddata)
+      and then M.Hfields.Hfield_Size (4 * H) > 0.0 and then M.Hfields.Hfield_Size (4 * H + 1) > 0.0
+      and then M.Hfields.Hfield_Size (4 * H + 2) > 0.0 and then M.Hfields.Hfield_Size (4 * H + 3) >= 0.0)
+   with Pre => Valid_Layout (M) and then H in 0 .. M.S.Nhfield - 1;
+
+   function Hfields_OK (M : Model) return Boolean is
+     (for all H in 0 .. M.S.Nhfield - 1 => Hfield_At (M, H))
+   with Pre => Valid_Layout (M);
+
+   function Texture_At (M : Model; T : Integer) return Boolean is
+     (M.Textures.Tex_Nchannel (T) in 1 .. 4
+      and then M.Textures.Tex_Height (T) >= 0 and then M.Textures.Tex_Width (T) >= 0
+      and then Int64 (M.Textures.Tex_Height (T)) * Int64 (M.Textures.Tex_Width (T))
+               <= Int64 (Max_Size)
+      and then M.Textures.Tex_Adr (T) in 0 .. Int64 (M.S.Ntexdata)
+      and then M.Textures.Tex_Adr (T)
+               + Int64 (M.Textures.Tex_Nchannel (T))
+                 * (Int64 (M.Textures.Tex_Height (T)) * Int64 (M.Textures.Tex_Width (T)))
+               <= Int64 (M.S.Ntexdata))
+   with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntex - 1;
+
+   function Textures_OK (M : Model) return Boolean is
+     (for all T in 0 .. M.S.Ntex - 1 => Texture_At (M, T))
+   with Pre => Valid_Layout (M);
+
+   --  Texture references not covered by the C reference table.
+   function Texids_OK (M : Model) return Boolean is
+     ((for all K in M.Materials.Mat_Texid'Range => M.Materials.Mat_Texid (K) in -1 .. M.S.Ntex - 1)
+      and then (for all L in 0 .. M.S.Nlight - 1 => M.Lights.Light_Texid (L) in -1 .. M.S.Ntex - 1))
+   with Pre => Valid_Layout (M);
+
+   --  BVH children are local indexes within the block and point forward;
+   --  leaves (nodeid >= 0) have no children.
+   function Bvh_Node_At (M : Model; Adr, Num, L : Integer) return Boolean is
+     (declare
+        N : constant Integer := Adr + L;
+      begin
+        M.Bvh.Bvh_Depth (N) in 0 .. Max_Tree_Depth
+        and then M.Bvh.Bvh_Child (2 * N) in -1 .. Num - 1
+        and then M.Bvh.Bvh_Child (2 * N + 1) in -1 .. Num - 1
+        and then (M.Bvh.Bvh_Child (2 * N) = -1 or else M.Bvh.Bvh_Child (2 * N) > L)
+        and then (M.Bvh.Bvh_Child (2 * N + 1) = -1 or else M.Bvh.Bvh_Child (2 * N + 1) > L)
+        and then (M.Bvh.Bvh_Nodeid (N) >= 0) =
+                 (M.Bvh.Bvh_Child (2 * N) = -1 and then M.Bvh.Bvh_Child (2 * N + 1) = -1))
+   with Pre => Valid_Layout (M) and then Adr >= 0 and then Num >= 1
+               and then Adr <= M.S.Nbvh - Num and then L in 0 .. Num - 1;
+
+   function Body_Bvh_At (M : Model; B : Integer) return Boolean is
+     (if M.Bodies.Body_Bvhnum (B) > 0 then
+        (for all L in 0 .. M.Bodies.Body_Bvhnum (B) - 1 =>
+           Bvh_Node_At (M, M.Bodies.Body_Bvhadr (B), M.Bodies.Body_Bvhnum (B), L)
+           and then (if M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L) >= 0 then
+                       M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L) in 0 .. M.S.Ngeom - 1
+                       and then M.Geoms.Geom_Bodyid (M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L)) = B)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then B in 0 .. M.S.Nbody - 1;
+
+   function Mesh_Bvh_At (M : Model; I : Integer) return Boolean is
+     (if M.Meshes.Mesh_Bvhnum (I) > 0 then
+        (for all L in 0 .. M.Meshes.Mesh_Bvhnum (I) - 1 =>
+           Bvh_Node_At (M, M.Meshes.Mesh_Bvhadr (I), M.Meshes.Mesh_Bvhnum (I), L)
+           and then (if M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (I) + L) >= 0 then
+                       M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (I) + L) in 0 .. M.Meshes.Mesh_Facenum (I) - 1)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+
+   function Bvhs_OK (M : Model) return Boolean is
+     ((for all B in 0 .. M.S.Nbody - 1 => Body_Bvh_At (M, B))
+      and then (for all I in 0 .. M.S.Nmesh - 1 => Mesh_Bvh_At (M, I)))
+   with Pre => Valid_Layout (M) and then Refs_OK (M);
+
+   --  Octree nodes (mesh SDF path of sub-project 8): block ranges and child
+   --  indexes in range; finer structure is stated there.
+   function Octs_OK (M : Model) return Boolean is
+     ((for all I in 0 .. M.S.Nmesh - 1 =>
+         M.Meshes.Mesh_Octnum (I) in 0 .. M.S.Noct
+         and then (if M.Meshes.Mesh_Octnum (I) = 0 then M.Meshes.Mesh_Octadr (I) in -1 .. M.S.Noct
+                   else M.Meshes.Mesh_Octadr (I) in 0 .. M.S.Noct - M.Meshes.Mesh_Octnum (I)))
+      and then (for all N in 0 .. M.S.Noct - 1 =>
+                  M.Bvh.Oct_Depth (N) in 0 .. Max_Tree_Depth
+                  and then (for all K in 0 .. 7 => M.Bvh.Oct_Child (8 * N + K) in -1 .. M.S.Noct - 1)))
+   with Pre => Valid_Layout (M);
+
+   ----------------------------------------------------------------------------
+   --  Conjunction. Tasks 8c and 8d append clauses here, before Valid_Model.
    ----------------------------------------------------------------------------
 
    function Is_Valid (M : Model) return Boolean is
@@ -310,7 +563,13 @@ package MJ.Models.Validity with SPARK_Mode is
       and then Dof_Trees_OK (M) and then Tree_Dofs_OK (M) and then Body_Trees_OK (M)
       and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M) and then Dof_Joints_OK (M)
       and then Dof_Parents_OK (M) and then Dof_Parent_Ranges_OK (M)
-      and then Madr_Range_OK (M) and then Madrs_OK (M) and then Simplenums_OK (M))
+      and then Madr_Range_OK (M) and then Madrs_OK (M) and then Simplenums_OK (M)
+      and then Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
+      and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
+      and then D_Diags_OK (M) and then Maps_OK (M)
+      and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Sameframes_OK (M)
+      and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M) and then Texids_OK (M)
+      and then Bvhs_OK (M) and then Octs_OK (M))
    with Pre => Valid_Layout (M);
 
    subtype Valid_Model is Model
@@ -319,6 +578,9 @@ package MJ.Models.Validity with SPARK_Mode is
    pragma No_Inline (Sizes_OK, Owners_Sorted, Blocks_OK, Covered_OK, Parents_OK, Roots_OK, Welds_OK,
                      Body_Joints_OK, Body_Dofs_OK, Body_Geoms_OK, Dof_Trees_OK, Tree_Dofs_OK,
                      Body_Trees_OK, Jnt_Types_OK, Jnt_Adrs_OK, Dof_Joints_OK, Dof_Parents_OK,
-                     Dof_Parent_Ranges_OK, Madr_Range_OK, Madrs_OK, Simplenums_OK, Is_Valid);
+                     Dof_Parent_Ranges_OK, Madr_Range_OK, Madrs_OK, Simplenums_OK,
+                     CSR_OK, Sparse_M_OK, Sparse_B_OK, Sparse_D_OK, Sparse_Ten_J_OK, M_Rownnz_OK,
+                     M_Rows_OK, D_Diags_OK, Maps_OK, Geom_Types_OK, Geom_Datas_OK, Sameframes_OK,
+                     Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK, Is_Valid);
 
 end MJ.Models.Validity;

@@ -1,4 +1,5 @@
 with Ada.Text_IO;   use Ada.Text_IO;
+with Ada.Strings.Fixed;
 with Check;         use Check;
 with MJ.Types;      use MJ.Types;
 with MJ.Fields;     use MJ.Fields;
@@ -115,7 +116,98 @@ begin
    M.Dofs.Dof_Simplenum (0) := M.S.Nv + 1;
    Expect (Invalid_Dof_Chain, Dof_Simplenum, 0, "simplenum past nv");
 
+   --  sparse structures
+   M.Sparse.M_Rowadr (1) := M.Sparse.M_Rowadr (1) + 1;
+   Expect (Invalid_CSR, M_Rowadr, 1, "inertia row start gap");
+   M.Sparse.M_Colind (M.Sparse.M_Rowadr (1)) := M.S.Nv;
+   Expect (Invalid_CSR, M_Rowadr, -1, "inertia column out of range");
+   M.Sparse.M_Colind (M.Sparse.M_Rowadr (1) + M.Sparse.M_Rownnz (1) - 1) := 2;   --  still a valid CSR row
+   Expect (Invalid_CSR, M_Colind, 1, "inertia row does not end with its own dof");
+   M.Sparse.D_Diag (0) := M.Sparse.D_Rownnz (0);
+   Expect (Invalid_CSR, D_Diag, 0, "diagonal offset past the row");
+   M.Sparse.MapD2M (0) := M.S.Nd;
+   Expect (Invalid_CSR, MapD2M, 0, "map entry out of range");
+
+   --  geoms
+   M.Geoms.Geom_Type (0) := 8;
+   Expect (Unsupported_Plugins, Geom_Type, 0, "sdf geom");
+   M.Geoms.Geom_Type (0) := 9;
+   Expect (Invalid_Enum, Geom_Type, 0, "geom type 9");
+   M.Geoms.Geom_Condim (0) := 2;
+   Expect (Invalid_Enum, Geom_Condim, 0, "condim 2");
+   M.Geoms.Geom_Dataid (0) := 0;
+   Expect (Invalid_Reference, Geom_Dataid, 0, "primitive geom with a data id");
+   M.Geoms.Geom_Sameframe (0) := 5;
+   Expect (Invalid_Enum, Geom_Sameframe, 0, "sameframe 5");
+
+   --  bounding volumes
+   if M.S.Nbvh > 0 then
+      M.Bvh.Bvh_Depth (0) := Max_Tree_Depth + 1;
+      Expect (Invalid_BVH, Body_Bvhadr, -1, "bvh depth past the maximum");
+      M.Bvh.Bvh_Child (0) := 0;
+      Expect (Invalid_BVH, Body_Bvhadr, -1, "bvh child pointing at itself");
+   end if;
+
    Free (M);
    Free_Byte (Bytes);
+
+   --  meshes, textures: use the first corpus model that has both a mesh and a texture
+   declare
+      L     : Ada.Text_IO.File_Type;
+      Found : Boolean := False;
+   begin
+      Ada.Text_IO.Open (L, Ada.Text_IO.In_File, "tests/corpus_expected.txt");
+      while not Found and then not Ada.Text_IO.End_Of_File (L) loop
+         declare
+            Line : constant String := Ada.Text_IO.Get_Line (L);
+         begin
+            if Line'Length > 3 and then Line (Line'First .. Line'First + 2) = "OK " then
+               declare
+                  Rest : constant String := Line (Line'First + 3 .. Line'Last);
+                  Sp   : constant Natural := Ada.Strings.Fixed.Index (Rest, " ");
+                  Name : constant String := Rest (Rest'First .. Sp - 1);
+                  R    : Load_Result;
+               begin
+                  MJ.File_IO.Read_File ("tests/out/corpus/" & Name, Bytes, Read_OK);
+                  if Read_OK then
+                     Parse_Raw (Bytes.all, M, R);
+                     if R.Status = OK and then M.S.Nmesh > 0 and then M.S.Ntex > 0 then
+                        Found := True;
+                        Put_Line ("mesh model: " & Name);
+                     else
+                        if R.Status = OK then
+                           Free (M);
+                        end if;
+                        Free_Byte (Bytes);
+                     end if;
+                  end if;
+               end;
+            end if;
+         end;
+      end loop;
+      Ada.Text_IO.Close (L);
+      if Found then
+         Expect (OK, None, -1, "mesh model validates");
+         M.Meshes.Mesh_Face (3 * M.Meshes.Mesh_Faceadr (0)) := M.Meshes.Mesh_Vertnum (0);
+         Expect (Invalid_Reference, Mesh_Face, 0, "face vertex past the mesh");
+         if M.Meshes.Mesh_Graphadr (0) >= 0 then
+            M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (0)) := M.Meshes.Mesh_Vertnum (0) + 1;
+            Expect (Invalid_Reference, Mesh_Graph, 0, "graph numvert past the mesh");
+         end if;
+         M.Textures.Tex_Nchannel (0) := 5;
+         Expect (Invalid_Parameter, Tex_Adr, 0, "texture with five channels");
+         M.Materials.Mat_Texid (0) := M.S.Ntex;
+         Expect (Invalid_Reference, Mat_Texid, 0, "material texture id past ntex");
+         if M.Meshes.Mesh_Bvhnum (0) > 0 then
+            M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (0) + M.Meshes.Mesh_Bvhnum (0) - 1) := M.Meshes.Mesh_Facenum (0);
+            Expect (Invalid_BVH, Mesh_Bvhadr, 0, "mesh bvh leaf past facenum");
+         end if;
+         Free (M);
+         Free_Byte (Bytes);
+      else
+         Put_Line ("no corpus model with both a mesh and a texture; mesh mutations skipped");
+      end if;
+   end;
+
    Report_And_Exit;
 end Test_Validate;

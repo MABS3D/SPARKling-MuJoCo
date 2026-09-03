@@ -332,6 +332,222 @@ package body MJ.Validation with SPARK_Mode is
       end loop;
    end Diagnose_Joints;
 
+   procedure Diagnose_CSR
+     (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer;
+      Field : Field_Id; Result : out Load_Result) with
+     Pre  => N >= 0 and then Nnz >= 0 and then Ncols >= 0,
+     Post => (if Result.Status = OK then CSR_OK (Rownnz, Rowadr, Colind, N, Nnz, Ncols))
+   is
+   begin
+      if CSR_OK (Rownnz, Rowadr, Colind, N, Nnz, Ncols) then
+         Result := OK_Result;
+      else
+         Result := (Invalid_CSR, Field, -1);
+         --  locate a row that breaks the contiguity or ordering rules, if any
+         if Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
+           and then Rownnz'Length = N and then Rowadr'Length = N and then Colind'Length = Nnz
+         then
+            for I in 0 .. N - 1 loop
+               if Rownnz (I) not in 0 .. Nnz or else Rowadr (I) not in 0 .. Nnz - Rownnz (I)
+                 or else Rowadr (I) /= (if I = 0 then 0 else Rowadr (I - 1) + Rownnz (I - 1))
+               then
+                  Result := (Invalid_CSR, Field, I);
+                  return;
+               end if;
+               pragma Loop_Invariant
+                 (for all J in 0 .. I => Rownnz (J) in 0 .. Nnz and then Rowadr (J) in 0 .. Nnz - Rownnz (J));
+            end loop;
+         end if;
+      end if;
+   end Diagnose_CSR;
+
+   procedure Diagnose_Sparse (M : Model; Result : out Load_Result) with
+     Pre  => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M) and then Madrs_OK (M),
+     Post => (if Result.Status = OK then
+                Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
+                and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
+                and then D_Diags_OK (M) and then Maps_OK (M))
+   is
+   begin
+      Diagnose_CSR (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
+                    M.S.Nv, M.S.Nm, M.S.Nv, M_Rowadr, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      Diagnose_CSR (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all, M.Sparse.B_Colind.all,
+                    M.S.Nbody, M.S.Nb, M.S.Nv, B_Rowadr, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      Diagnose_CSR (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all, M.Sparse.D_Colind.all,
+                    M.S.Nv, M.S.Nd, M.S.Nv, D_Rowadr, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      Diagnose_CSR (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+                    M.S.Ntendon, M.S.Njten, M.S.Nv, Ten_J_Rowadr, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      for I in 0 .. M.S.Nv - 1 loop
+         if M.Sparse.M_Rownnz (I) /= Row_Len (M, I) then
+            Result := (Invalid_CSR, M_Rownnz, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => M.Sparse.M_Rownnz (K) = Row_Len (M, K));
+      end loop;
+      for I in 0 .. M.S.Nv - 1 loop
+         if not M_Row_At (M, I) then
+            Result := (Invalid_CSR, M_Colind, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => M_Row_At (M, K));
+      end loop;
+      for I in 0 .. M.S.Nv - 1 loop
+         if not D_Diag_At (M, I) then
+            Result := (Invalid_CSR, D_Diag, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => D_Diag_At (M, K));
+      end loop;
+      for K in 0 .. M.S.Nc - 1 loop
+         if M.Sparse.MapM2M (K) not in 0 .. M.S.Nm - 1 then
+            Result := (Invalid_CSR, MapM2M, K);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2M (J) in 0 .. M.S.Nm - 1);
+      end loop;
+      for K in 0 .. M.S.Nd - 1 loop
+         if M.Sparse.MapM2D (K) not in 0 .. M.S.Nm - 1 then
+            Result := (Invalid_CSR, MapM2D, K);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2D (J) in 0 .. M.S.Nm - 1);
+      end loop;
+      for K in 0 .. M.S.Nm - 1 loop
+         if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1 then
+            Result := (Invalid_CSR, MapD2M, K);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapD2M (J) in 0 .. M.S.Nd - 1);
+      end loop;
+      for K in 0 .. M.S.Nm - 1 loop
+         if M.Sparse.MapM2D (M.Sparse.MapD2M (K)) /= K then
+            Result := (Invalid_CSR, MapD2M, K);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. K => M.Sparse.MapM2D (M.Sparse.MapD2M (J)) = J);
+      end loop;
+      Result := OK_Result;
+   end Diagnose_Sparse;
+
+   procedure Diagnose_Assets (M : Model; Result : out Load_Result) with
+     Pre  => Valid_Layout (M) and then Refs_OK (M),
+     Post => (if Result.Status = OK then
+                Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Sameframes_OK (M)
+                and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M)
+                and then Texids_OK (M) and then Bvhs_OK (M) and then Octs_OK (M))
+   is
+   begin
+      Result := OK_Result;
+      for G in 0 .. M.S.Ngeom - 1 loop
+         if not Geom_Type_At (M, G) then
+            Result := ((if M.Geoms.Geom_Type (G) = 8 then Unsupported_Plugins else Invalid_Enum),
+                       (if M.Geoms.Geom_Type (G) in 0 .. 7 then Geom_Condim else Geom_Type), G);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. G => Geom_Type_At (M, K));
+      end loop;
+      for G in 0 .. M.S.Ngeom - 1 loop
+         if not Geom_Data_At (M, G) then
+            Result := (Invalid_Reference, Geom_Dataid, G);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. G => Geom_Data_At (M, K));
+      end loop;
+      for I in 0 .. M.S.Nbody - 1 loop
+         if M.Bodies.Body_Sameframe (I) > 4 then
+            Result := (Invalid_Enum, Body_Sameframe, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => M.Bodies.Body_Sameframe (K) <= 4);
+      end loop;
+      for G in 0 .. M.S.Ngeom - 1 loop
+         if M.Geoms.Geom_Sameframe (G) > 4 then
+            Result := (Invalid_Enum, Geom_Sameframe, G);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. G => M.Geoms.Geom_Sameframe (K) <= 4);
+      end loop;
+      for S in 0 .. M.S.Nsite - 1 loop
+         if M.Sites.Site_Sameframe (S) > 4 then
+            Result := (Invalid_Enum, Site_Sameframe, S);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. S => M.Sites.Site_Sameframe (K) <= 4);
+      end loop;
+      for I in 0 .. M.S.Nmesh - 1 loop
+         if not Mesh_Faces_At (M, I) then
+            Result := (Invalid_Reference, Mesh_Face, I);
+            return;
+         elsif not Mesh_Polys_At (M, I) then
+            Result := (Invalid_Reference, Mesh_Polyvert, I);
+            return;
+         elsif not Mesh_Graph_At (M, I) then
+            Result := (Invalid_Reference, Mesh_Graph, I);
+            return;
+         end if;
+         pragma Loop_Invariant
+           (for all K in 0 .. I => Mesh_Faces_At (M, K) and then Mesh_Polys_At (M, K) and then Mesh_Graph_At (M, K));
+      end loop;
+      for H in 0 .. M.S.Nhfield - 1 loop
+         if not Hfield_At (M, H) then
+            Result := (Invalid_Parameter, Hfield_Adr, H);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. H => Hfield_At (M, K));
+      end loop;
+      for T in 0 .. M.S.Ntex - 1 loop
+         if not Texture_At (M, T) then
+            Result := (Invalid_Parameter, Tex_Adr, T);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. T => Texture_At (M, K));
+      end loop;
+      for K in M.Materials.Mat_Texid'Range loop
+         if M.Materials.Mat_Texid (K) not in -1 .. M.S.Ntex - 1 then
+            Result := (Invalid_Reference, Mat_Texid, K);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. K => M.Materials.Mat_Texid (J) in -1 .. M.S.Ntex - 1);
+      end loop;
+      for L in 0 .. M.S.Nlight - 1 loop
+         if M.Lights.Light_Texid (L) not in -1 .. M.S.Ntex - 1 then
+            Result := (Invalid_Reference, Light_Texid, L);
+            return;
+         end if;
+         pragma Loop_Invariant (for all J in 0 .. L => M.Lights.Light_Texid (J) in -1 .. M.S.Ntex - 1);
+      end loop;
+      for B in 0 .. M.S.Nbody - 1 loop
+         if not Body_Bvh_At (M, B) then
+            Result := (Invalid_BVH, Body_Bvhadr, B);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. B => Body_Bvh_At (M, K));
+      end loop;
+      for I in 0 .. M.S.Nmesh - 1 loop
+         if not Mesh_Bvh_At (M, I) then
+            Result := (Invalid_BVH, Mesh_Bvhadr, I);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. I => Mesh_Bvh_At (M, K));
+      end loop;
+      if not Octs_OK (M) then
+         Result := (Invalid_BVH, Oct_Child, -1);
+         return;
+      end if;
+   end Diagnose_Assets;
+
    --  Size ordinals in the .mjb size table (position in MJMODEL_SIZES).
    Size_Nbody   : constant := 6;
    Size_Nbvh    : constant := 7;
@@ -382,7 +598,15 @@ package body MJ.Validation with SPARK_Mode is
       if Result.Status /= OK then
          return;
       end if;
-      --  Tasks 8b to 8d insert their Diagnose_* calls here, in Is_Valid order.
+      Diagnose_Sparse (M, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      Diagnose_Assets (M, Result);
+      if Result.Status /= OK then
+         return;
+      end if;
+      --  Tasks 8c and 8d insert their Diagnose_* calls here, in Is_Valid order.
 
       --  Unreachable when Is_Valid (M) is false; keeps Result well defined.
       Result := (Invalid_Parameter, None, -1);
