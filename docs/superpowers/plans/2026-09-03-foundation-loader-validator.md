@@ -16,7 +16,7 @@ Spec: `docs/superpowers/specs/2026-09-03-foundation-loader-validator-design.md` 
 - Toolchain: Alire 2.1.1, `gnat_native ^16`, `gnatprove ^16` (spec 2.1).
 - Profiles: `release` = `-O3 -march=native -flto -gnatn -gnatp -ffinite-math-only -fno-trapping-math -fno-math-errno`; `validation` = `-O2 -gnata -gnato -gnatVa`; `development` = `-O0 -g -gnata -gnatwa` (spec 2.1).
 - Proof: gnatprove level 2, per-check timeout 60 s, zero unproved checks, no `pragma Annotate (GNATprove, ...)` without an entry in `docs/proof-justifications.md` (spec 2.2).
-- `Real` is `Long_Float`; tiers 1e10 / 1e30 / 1e60 / 1e120 / 1e240; `Max_Size = 2**27 - 1`; `Max_Cap = 2**24 - 1` (spec 2.3, 3.1).
+- `Real` is `Long_Float`; tiers 1e10 / 1e30 / 1e61 / 1e123 / 1e247 (slack over the exact squares because bounds round to doubles); `Max_Size = 2**27 - 1`; `Max_Cap = 2**24 - 1` (spec 2.3, 3.1).
 - One owned access value per array; two-dimensional arrays flat, `I * nc + K`; every array `'First = 0` (spec 2.4, 3.2).
 - Naming: C `body_parentid` becomes Ada `Body_Parentid`; packages under root `MJ` (spec 2.9).
 - Generated units live in `src/gen/` and `tests/gen/`, are checked in, and `tools/check-gen.ps1` must report no diff (spec 2.8).
@@ -24,6 +24,10 @@ Spec: `docs/superpowers/specs/2026-09-03-foundation-loader-validator-design.md` 
 - No exceptions in SPARK code; every fallible operation returns `Load_Result` (spec 2.7).
 - Tests are plain Ada programs using `tests/support/check.ads`; each exits non-zero on failure (spec 2.11).
 - Commit after every task with the trailer `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
+- **Implementation note (found in Task 8a, after a machine crash):** with `-O2 -gnata` the optimiser inlined whole-model contracts at every call site and `gnat1` reached 65 GB. The proof-heavy units now carry `Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore, Loop_Variant => Ignore, Assert => Check)`, generated element predicates have O(1) preconditions (non-null and range only), whole-model clause functions have `pragma No_Inline`, the generated group readers call five small `Read_*_Array` helpers instead of carrying a loop invariant per array, and every build or proof runs through `tools/guarded.ps1` (memory cap and timeout; `prove.ps1` uses `-j4`). Measured after the change: each of the four big units compiles at `-O2` in 4 to 16 s using at most 352 MB.
+- **Implementation note (found in Task 6):** the packages are `MJ.Models` (type `Model`) and `MJ.Validation` (procedure `Validate`), not `MJ.Model` and `MJ.Validate`: inside a child of `MJ`, a sibling package name hides a use-visible type or procedure of the same name. Children follow: `MJ.Models.Validity`, `MJ.Models.Gen_Clauses`, `MJ.Validation` subunits.
+- **Implementation note (found in Task 6):** the generated group record types are named `<Group>_Arrays` (`Body_Arrays`, `Geom_Arrays`, ...) rather than `<Group>_Group`, because `geom_group`, `site_group`, `tendon_group`, and `actuator_group` are fields and therefore `Field_Id` literals, which would hide a type of the same name under `use`.
+- **Implementation note (found in Task 5):** `Long_Integer` is 32 bits on Windows GNAT. Every `Long_Integer` written in this plan is implemented as `MJ.Types.Int64`, a subtype of `Long_Long_Integer`; the test helper's 64-bit assertion is `Assert_Eq64` because an overload on the 64-bit type made `'Length` arguments ambiguous.
 
 ---
 
