@@ -12,64 +12,90 @@ package body MJ.Validation with SPARK_Mode is
    --  arrays are not yet known to be valid.
    ----------------------------------------------------------------------------
 
+   function Count_Equality_Rows (Kinds : Int_Array) return Int64 with
+     Global => null,
+     Post => Count_Equality_Rows'Result in 0 .. 6 * Int64 (Kinds'Length);
+
+   function Count_Equality_Rows (Kinds : Int_Array) return Int64 is
+      Count : Int64 := 0;
+   begin
+      for I in Kinds'Range loop
+         Count := Count + (case Kinds (I) is
+                            when 0 => 3, when 1 => 6, when 2 | 3 => 1, when others => 0);
+         pragma Loop_Invariant (Count in 0 .. 6 * (Int64 (I) - Int64 (Kinds'First) + 1));
+      end loop;
+      return Count;
+   end Count_Equality_Rows;
+
+   function Count_Positive (Values : Real_Array) return Int64 with
+     Global => null,
+     Post => Count_Positive'Result in 0 .. Int64 (Values'Length);
+
+   function Count_Positive (Values : Real_Array) return Int64 is
+      Count : Int64 := 0;
+   begin
+      for I in Values'Range loop
+         if Values (I) > 0.0 then
+            Count := Count + 1;
+         end if;
+         pragma Loop_Invariant (Count in 0 .. Int64 (I) - Int64 (Values'First) + 1);
+      end loop;
+      return Count;
+   end Count_Positive;
+
+   function Count_Enabled (Flags : Byte_Array) return Int64 with
+     Global => null,
+     Post => Count_Enabled'Result in 0 .. Int64 (Flags'Length);
+
+   function Count_Enabled (Flags : Byte_Array) return Int64 is
+      Count : Int64 := 0;
+   begin
+      for I in Flags'Range loop
+         if Flags (I) /= 0 then
+            Count := Count + 1;
+         end if;
+         pragma Loop_Invariant (Count in 0 .. Int64 (I) - Int64 (Flags'First) + 1);
+      end loop;
+      return Count;
+   end Count_Enabled;
+
+   function Count_Limit_Rows (Flags : Byte_Array; Kinds : Int_Array) return Int64 with
+     Global => null,
+     Pre => Flags'First = Kinds'First and then Flags'Length = Kinds'Length,
+     Post => Count_Limit_Rows'Result in 0 .. 2 * Int64 (Flags'Length);
+
+   function Count_Limit_Rows (Flags : Byte_Array; Kinds : Int_Array) return Int64 is
+      Count : Int64 := 0;
+   begin
+      for I in Flags'Range loop
+         if Flags (I) /= 0 then
+            Count := Count + (if Kinds (I) = 1 then 1 else 2);
+         end if;
+         pragma Loop_Invariant (Count in 0 .. 2 * (Int64 (I) - Int64 (Flags'First) + 1));
+      end loop;
+      return Count;
+   end Count_Limit_Rows;
+
    procedure Compute_Caps (M : in out Model; Options : Validate_Options; Overflow : out Boolean) with
      Pre  => Valid_Layout (M),
      Post => Valid_Layout (M) and then M.S = M.S'Old
              and then (if not Overflow then Caps_OK (M) and then Adhesion_OK (M))
    is
-      Ne, Nf, Nl : Int64 := 0;
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jacobian_Capacity);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Has_Positive);
+      Adhesion   : Boolean;
+      Ne, Nf, Nl : Int64;
       Contact    : Int64;
-      Efc, NJ    : Int64;
+      Efc        : Int64;
+      NJ         : Size_Type;
    begin
-      --  adhesion flag (spec 5.12): not stored in .mjb, recomputed as the compiler does
-      M.Flg_Adhesion := False;
-      for G in 0 .. M.S.Ngeom - 1 loop
-         if M.Geoms.Geom_Adhesion (G) > 0.0 then
-            M.Flg_Adhesion := True;
-         end if;
-         pragma Loop_Invariant (Valid_Layout (M) and then M.S = M.S'Loop_Entry);
-         pragma Loop_Invariant
-           (M.Flg_Adhesion = (for some K in 0 .. G => M.Geoms.Geom_Adhesion (K) > 0.0));
-      end loop;
-      for P in 0 .. M.S.Npair - 1 loop
-         if M.Pairs.Pair_Adhesion (P) > 0.0 then
-            M.Flg_Adhesion := True;
-         end if;
-         pragma Loop_Invariant (Valid_Layout (M) and then M.S = M.S'Loop_Entry);
-         pragma Loop_Invariant
-           (M.Flg_Adhesion = ((for some K in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Adhesion (K) > 0.0)
-                              or else (for some K in 0 .. P => M.Pairs.Pair_Adhesion (K) > 0.0)));
-      end loop;
-
-      for E in 0 .. M.S.Neq - 1 loop
-         pragma Loop_Invariant (Ne in 0 .. 6 * Int64 (E));
-         Ne := Ne + (case M.Equalities.Eq_Type (E) is
-                       when 0 => 3, when 1 => 6, when 2 | 3 => 1, when others => 0);
-      end loop;
-      for D in 0 .. M.S.Nv - 1 loop
-         pragma Loop_Invariant (Nf in 0 .. Int64 (D));
-         if M.Dofs.Dof_Frictionloss (D) > 0.0 then
-            Nf := Nf + 1;
-         end if;
-      end loop;
-      for T in 0 .. M.S.Ntendon - 1 loop
-         pragma Loop_Invariant (Nf in 0 .. Int64 (M.S.Nv) + Int64 (T));
-         if M.Tendons.Tendon_Frictionloss (T) > 0.0 then
-            Nf := Nf + 1;
-         end if;
-      end loop;
-      for J in 0 .. M.S.Njnt - 1 loop
-         pragma Loop_Invariant (Nl in 0 .. 2 * Int64 (J));
-         if M.Joints.Jnt_Limited (J) /= 0 then
-            Nl := Nl + (if M.Joints.Jnt_Type (J) = 1 then 1 else 2);   --  ball 1, slide/hinge 2
-         end if;
-      end loop;
-      for T in 0 .. M.S.Ntendon - 1 loop
-         pragma Loop_Invariant (Nl in 0 .. 2 * Int64 (M.S.Njnt) + 2 * Int64 (T));
-         if M.Tendons.Tendon_Limited (T) /= 0 then
-            Nl := Nl + 2;
-         end if;
-      end loop;
+      Adhesion := Has_Positive (M.Geoms.Geom_Adhesion.all)
+                  or else Has_Positive (M.Pairs.Pair_Adhesion.all);
+      Ne := Count_Equality_Rows (M.Equalities.Eq_Type.all);
+      Nf := Count_Positive (M.Dofs.Dof_Frictionloss.all)
+            + Count_Positive (M.Tendons.Tendon_Frictionloss.all);
+      Nl := Count_Limit_Rows (M.Joints.Jnt_Limited.all, M.Joints.Jnt_Type.all)
+            + 2 * Count_Enabled (M.Tendons.Tendon_Limited.all);
 
       Contact := (if Options.Contact_Cap > 0 then Int64 (Options.Contact_Cap)
                   elsif M.S.Nconmax >= 0 then Int64 (M.S.Nconmax)
@@ -77,17 +103,18 @@ package body MJ.Validation with SPARK_Mode is
       Contact := Int64'Min (Contact, Int64 (Max_Cap));
 
       Efc := Ne + Nf + Nl + 10 * Contact;
-      NJ  := Int64'Min (Efc * Int64 (M.S.Nv), Int64 (Max_Size));
       Overflow := Efc > Int64 (Max_Cap);
+      M.Flg_Adhesion := Adhesion;
       if Overflow then
          return;
       end if;
+      NJ := Jacobian_Capacity (Cap_Type (Efc), M.S.Nv);
       M.Caps := (Contact_Cap => Integer (Contact),
                  Ne_Max      => Integer (Ne),
                  Nf_Max      => Integer (Nf),
                  Nl_Max      => Integer (Nl),
                  Efc_Cap     => Integer (Efc),
-                 NJ_Cap      => Integer (NJ),
+                 NJ_Cap      => NJ,
                  NIsland_Cap => M.S.Ntree,
                  NIdof_Cap   => M.S.Nv);
    end Compute_Caps;
@@ -122,8 +149,14 @@ package body MJ.Validation with SPARK_Mode is
                 Owners_Sorted (Owner, N_Owner) and then Blocks_OK (Adr, Num, Owner)
                 and then Covered_OK (Adr, Num, Owner))
    is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Block_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Covered_At);
    begin
       Result := OK_Result;
+      if Int64 (Owner'Length) > Int64 (Max_Size) then
+         Result := (Invalid_Tree, Owner_Field, -1);
+         return;
+      end if;
       if not Owners_Sorted (Owner, N_Owner) then
          Result := (Invalid_Tree, Owner_Field, -1);
          return;
@@ -152,6 +185,13 @@ package body MJ.Validation with SPARK_Mode is
                 and then Body_Joints_OK (M) and then Body_Dofs_OK (M) and then Body_Geoms_OK (M)
                 and then Dof_Trees_OK (M) and then Tree_Dofs_OK (M) and then Body_Trees_OK (M))
    is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Parent_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Root_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Weld_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Tree_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Tree_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tree_Body_Range_At);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_In_Tree_At);
    begin
       Result := OK_Result;
       for I in 0 .. M.S.Nbody - 1 loop
@@ -262,8 +302,7 @@ package body MJ.Validation with SPARK_Mode is
    end Diagnose_Tree;
 
    procedure Diagnose_Joints (M : Model; Result : out Load_Result) with
-     Pre  => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M) and then Welds_OK (M)
-             and then Body_Joints_OK (M) and then Body_Dofs_OK (M),
+     Pre  => Valid_Layout (M),
      Post => (if Result.Status = OK then
                 Jnt_Types_OK (M) and then Jnt_Adrs_OK (M) and then Dof_Joints_OK (M)
                 and then Dof_Parents_OK (M) and then Dof_Parent_Ranges_OK (M)
@@ -366,7 +405,9 @@ package body MJ.Validation with SPARK_Mode is
          Result := (Invalid_CSR, Field, -1);
          --  locate a row that breaks the contiguity or ordering rules, if any
          if Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
-           and then Rownnz'Length = N and then Rowadr'Length = N and then Colind'Length = Nnz
+           and then Int64 (Rownnz'Length) = Int64 (N)
+           and then Int64 (Rowadr'Length) = Int64 (N)
+           and then Int64 (Colind'Length) = Int64 (Nnz)
          then
             for I in 0 .. N - 1 loop
                if Rownnz (I) not in 0 .. Nnz or else Rowadr (I) not in 0 .. Nnz - Rownnz (I)
@@ -465,7 +506,7 @@ package body MJ.Validation with SPARK_Mode is
    end Diagnose_Sparse;
 
    procedure Diagnose_Assets (M : Model; Result : out Load_Result) with
-     Pre  => Valid_Layout (M) and then Refs_OK (M),
+     Pre  => Valid_Layout (M),
      Post => (if Result.Status = OK then
                 Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Sameframes_OK (M)
                 and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M)
@@ -572,7 +613,7 @@ package body MJ.Validation with SPARK_Mode is
    end Diagnose_Assets;
 
    procedure Diagnose_Objects (M : Model; Result : out Load_Result) with
-     Pre  => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M),
+     Pre  => Valid_Layout (M) and then Sizes_OK (M) and then Body_Geoms_OK (M),
      Post => (if Result.Status = OK then
                 Pairs_OK (M) and then Excludes_OK (M) and then Eq_Types_OK (M) and then Eq_Objs_OK (M)
                 and then Wraps_OK (M) and then Tendons_OK (M)
@@ -655,9 +696,20 @@ package body MJ.Validation with SPARK_Mode is
          end if;
          pragma Loop_Invariant (for all K in 0 .. A => Actuator_Act_At (M, K));
       end loop;
+      for C in 0 .. M.S.Nu - 1 loop
+         if not Control_Range_At (M, C) then
+            Result := (Invalid_Parameter, Actuator_Ctrlrange, C);
+            return;
+         end if;
+         pragma Loop_Invariant (for all K in 0 .. C => Control_Range_At (M, K));
+      end loop;
       for A in 0 .. M.S.Nactuator - 1 loop
          if not Actuator_Range_At (M, A) then
-            Result := (Invalid_Parameter, Actuator_Ctrlrange, A);
+            Result := (Invalid_Parameter,
+                       (if M.Actuators.Actuator_Forcelimited (A) /= 0
+                          and then M.Actuators.Actuator_Forcerange (2 * A)
+                                   > M.Actuators.Actuator_Forcerange (2 * A + 1)
+                        then Actuator_Forcerange else Actuator_Actrange), A);
             return;
          end if;
          pragma Loop_Invariant (for all K in 0 .. A => Actuator_Range_At (M, K));
@@ -880,6 +932,10 @@ package body MJ.Validation with SPARK_Mode is
    end Diagnose;
 
    procedure Validate (M : in out Model; Options : Validate_Options; Result : out Load_Result) is
+      --  The branch tests this exact predicate; its full definition is not
+      --  needed to compose Compute_Caps and Diagnose with the public contract.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Valid);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
       Overflow : Boolean;
    begin
       Compute_Caps (M, Options, Overflow);

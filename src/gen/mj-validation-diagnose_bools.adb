@@ -8,132 +8,168 @@ pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore
 
 separate (MJ.Validation)
 procedure Diagnose_Bools (M : Model; Result : out Load_Result) is
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bools_OK);
+   procedure Scan_Bools_1 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Joints.Jnt_Limited /= null
+       and then Input.Joints.Jnt_Actfrclimited /= null
+       and then Input.Joints.Jnt_Actgravcomp /= null
+       and then Input.Lights.Light_Castshadow /= null
+       and then Input.Lights.Light_Active /= null
+       and then Input.Flexes.Flex_Internal /= null
+       and then Input.Flexes.Flex_Rigid /= null
+       and then Input.Flexes.Flexedge_Rigid /= null;
+   procedure Scan_Bools_1 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Joints.Jnt_Limited'Range loop
+         if not (Input.Joints.Jnt_Limited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Jnt_Limited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Actfrclimited'Range loop
+         if not (Input.Joints.Jnt_Actfrclimited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Jnt_Actfrclimited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Actgravcomp'Range loop
+         if not (Input.Joints.Jnt_Actgravcomp (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Jnt_Actgravcomp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Castshadow'Range loop
+         if not (Input.Lights.Light_Castshadow (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Light_Castshadow, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Active'Range loop
+         if not (Input.Lights.Light_Active (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Light_Active, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Internal'Range loop
+         if not (Input.Flexes.Flex_Internal (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Flex_Internal, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Rigid'Range loop
+         if not (Input.Flexes.Flex_Rigid (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Flex_Rigid, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flexedge_Rigid'Range loop
+         if not (Input.Flexes.Flexedge_Rigid (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Flexedge_Rigid, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Bools_1;
+
+   procedure Scan_Bools_2 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Flexes.Flex_Centered /= null
+       and then Input.Flexes.Flex_Flatskin /= null
+       and then Input.Materials.Mat_Texuniform /= null
+       and then Input.Equalities.Eq_Active0 /= null
+       and then Input.Tendons.Tendon_Limited /= null
+       and then Input.Tendons.Tendon_Actfrclimited /= null
+       and then Input.Actuators.Actuator_Actlimited /= null
+       and then Input.Actuators.Actuator_Actearly /= null;
+   procedure Scan_Bools_2 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Flexes.Flex_Centered'Range loop
+         if not (Input.Flexes.Flex_Centered (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Flex_Centered, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Flatskin'Range loop
+         if not (Input.Flexes.Flex_Flatskin (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Flex_Flatskin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Materials.Mat_Texuniform'Range loop
+         if not (Input.Materials.Mat_Texuniform (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Mat_Texuniform, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Equalities.Eq_Active0'Range loop
+         if not (Input.Equalities.Eq_Active0 (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Eq_Active0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Limited'Range loop
+         if not (Input.Tendons.Tendon_Limited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Tendon_Limited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Actfrclimited'Range loop
+         if not (Input.Tendons.Tendon_Actfrclimited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Tendon_Actfrclimited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Actlimited'Range loop
+         if not (Input.Actuators.Actuator_Actlimited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Actuator_Actlimited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Actearly'Range loop
+         if not (Input.Actuators.Actuator_Actearly (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Actuator_Actearly, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Bools_2;
+
+   procedure Scan_Bools_3 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Actuators.Actuator_Forcelimited /= null
+       and then Input.Actuators.Actuator_Ctrllimited /= null;
+   procedure Scan_Bools_3 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Actuators.Actuator_Forcelimited'Range loop
+         if not (Input.Actuators.Actuator_Forcelimited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Actuator_Forcelimited, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Ctrllimited'Range loop
+         if not (Input.Actuators.Actuator_Ctrllimited (I) <= 1) then
+            Diagnostic := (Invalid_Parameter, Actuator_Ctrllimited, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Bools_3;
+
 begin
-   Result := OK_Result;
-   for I in M.Joints.Jnt_Limited'Range loop
-      if not (M.Joints.Jnt_Limited (I) <= 1) then
-         Result := (Invalid_Parameter, Jnt_Limited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Limited'First .. I => M.Joints.Jnt_Limited (K) <= 1);
-   end loop;
-   for I in M.Joints.Jnt_Actfrclimited'Range loop
-      if not (M.Joints.Jnt_Actfrclimited (I) <= 1) then
-         Result := (Invalid_Parameter, Jnt_Actfrclimited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Actfrclimited'First .. I => M.Joints.Jnt_Actfrclimited (K) <= 1);
-   end loop;
-   for I in M.Joints.Jnt_Actgravcomp'Range loop
-      if not (M.Joints.Jnt_Actgravcomp (I) <= 1) then
-         Result := (Invalid_Parameter, Jnt_Actgravcomp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Actgravcomp'First .. I => M.Joints.Jnt_Actgravcomp (K) <= 1);
-   end loop;
-   for I in M.Lights.Light_Castshadow'Range loop
-      if not (M.Lights.Light_Castshadow (I) <= 1) then
-         Result := (Invalid_Parameter, Light_Castshadow, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Castshadow'First .. I => M.Lights.Light_Castshadow (K) <= 1);
-   end loop;
-   for I in M.Lights.Light_Active'Range loop
-      if not (M.Lights.Light_Active (I) <= 1) then
-         Result := (Invalid_Parameter, Light_Active, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Active'First .. I => M.Lights.Light_Active (K) <= 1);
-   end loop;
-   for I in M.Flexes.Flex_Internal'Range loop
-      if not (M.Flexes.Flex_Internal (I) <= 1) then
-         Result := (Invalid_Parameter, Flex_Internal, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Internal'First .. I => M.Flexes.Flex_Internal (K) <= 1);
-   end loop;
-   for I in M.Flexes.Flex_Rigid'Range loop
-      if not (M.Flexes.Flex_Rigid (I) <= 1) then
-         Result := (Invalid_Parameter, Flex_Rigid, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Rigid'First .. I => M.Flexes.Flex_Rigid (K) <= 1);
-   end loop;
-   for I in M.Flexes.Flexedge_Rigid'Range loop
-      if not (M.Flexes.Flexedge_Rigid (I) <= 1) then
-         Result := (Invalid_Parameter, Flexedge_Rigid, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flexedge_Rigid'First .. I => M.Flexes.Flexedge_Rigid (K) <= 1);
-   end loop;
-   for I in M.Flexes.Flex_Centered'Range loop
-      if not (M.Flexes.Flex_Centered (I) <= 1) then
-         Result := (Invalid_Parameter, Flex_Centered, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Centered'First .. I => M.Flexes.Flex_Centered (K) <= 1);
-   end loop;
-   for I in M.Flexes.Flex_Flatskin'Range loop
-      if not (M.Flexes.Flex_Flatskin (I) <= 1) then
-         Result := (Invalid_Parameter, Flex_Flatskin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Flatskin'First .. I => M.Flexes.Flex_Flatskin (K) <= 1);
-   end loop;
-   for I in M.Materials.Mat_Texuniform'Range loop
-      if not (M.Materials.Mat_Texuniform (I) <= 1) then
-         Result := (Invalid_Parameter, Mat_Texuniform, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Materials.Mat_Texuniform'First .. I => M.Materials.Mat_Texuniform (K) <= 1);
-   end loop;
-   for I in M.Equalities.Eq_Active0'Range loop
-      if not (M.Equalities.Eq_Active0 (I) <= 1) then
-         Result := (Invalid_Parameter, Eq_Active0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Equalities.Eq_Active0'First .. I => M.Equalities.Eq_Active0 (K) <= 1);
-   end loop;
-   for I in M.Tendons.Tendon_Limited'Range loop
-      if not (M.Tendons.Tendon_Limited (I) <= 1) then
-         Result := (Invalid_Parameter, Tendon_Limited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Limited'First .. I => M.Tendons.Tendon_Limited (K) <= 1);
-   end loop;
-   for I in M.Tendons.Tendon_Actfrclimited'Range loop
-      if not (M.Tendons.Tendon_Actfrclimited (I) <= 1) then
-         Result := (Invalid_Parameter, Tendon_Actfrclimited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Actfrclimited'First .. I => M.Tendons.Tendon_Actfrclimited (K) <= 1);
-   end loop;
-   for I in M.Actuators.Actuator_Actlimited'Range loop
-      if not (M.Actuators.Actuator_Actlimited (I) <= 1) then
-         Result := (Invalid_Parameter, Actuator_Actlimited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Actlimited'First .. I => M.Actuators.Actuator_Actlimited (K) <= 1);
-   end loop;
-   for I in M.Actuators.Actuator_Actearly'Range loop
-      if not (M.Actuators.Actuator_Actearly (I) <= 1) then
-         Result := (Invalid_Parameter, Actuator_Actearly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Actearly'First .. I => M.Actuators.Actuator_Actearly (K) <= 1);
-   end loop;
-   for I in M.Actuators.Actuator_Forcelimited'Range loop
-      if not (M.Actuators.Actuator_Forcelimited (I) <= 1) then
-         Result := (Invalid_Parameter, Actuator_Forcelimited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Forcelimited'First .. I => M.Actuators.Actuator_Forcelimited (K) <= 1);
-   end loop;
-   for I in M.Actuators.Actuator_Ctrllimited'Range loop
-      if not (M.Actuators.Actuator_Ctrllimited (I) <= 1) then
-         Result := (Invalid_Parameter, Actuator_Ctrllimited, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Ctrllimited'First .. I => M.Actuators.Actuator_Ctrllimited (K) <= 1);
-   end loop;
+   if Bools_OK (M) then
+      Result := OK_Result;
+      return;
+   end if;
+   --  The predicate established failure; the scans locate its first field.
+   Scan_Bools_1 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Bools_2 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Bools_3 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Result := (Invalid_Parameter, Header, -1);
 end Diagnose_Bools;

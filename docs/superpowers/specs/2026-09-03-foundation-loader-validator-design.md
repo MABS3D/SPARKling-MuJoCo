@@ -82,7 +82,24 @@ call site of an element predicate, `gnat1` grew past 60 GB and crashed the devel
 2026-09-03. Two rules follow: element-level expression functions carry only O(1) preconditions
 (non-null and index-range facts), and whole-model clause functions carry `pragma No_Inline`. Every
 build and proof runs under `tools/guarded.ps1`, which kills the tool tree when any compiler or
-prover process exceeds a memory cap, and gnatprove runs with bounded parallelism (`-j4`), not `-j0`.
+prover process exceeds a memory cap, and the proof gate processes units serially with bounded parallelism (`-j1` by default), not `-j0`.
+
+A third rule concerns `gnatwhy3` rather than the compiler: a chain of calls that each update one
+component of the same record with many access components makes its verification-condition
+generation exceed several gigabytes (83 calls on the flex group: killed above 5 GB before any
+prover started; measurements in `docs/toolchain.md`). Generated code therefore builds each group
+record with one aggregate of allocating functions, rebuilds `Model` from per-group locals with one
+aggregate (both `Allocate` and `Read_Arrays`, which allocates and reads each group through a local,
+skips the remaining reads after a failure rather than returning early, and leaves freeing to the
+loader), and frees or reads the arrays of a group in chunk procedures of at most 8 arrays with
+cumulative postconditions; the size table and the fixed structs are read the same way, 8 scalar
+writes per chunk. Hand-written code never chains more than about ten component-updating calls on
+one record.
+
+Byte buffers are `array (Natural range <>)`. A zero-based array can contain
+`Natural'Last + 1` elements, so the loader rejects lengths greater than `Natural'Last`
+before reading. Length comparisons use `Int64`, and generated readers explicitly require
+this bound. The cursor can therefore represent the position just past the final byte.
 
 ### 2.3 Numeric model
 
@@ -541,8 +558,11 @@ every `colind` in `0 .. ncols - 1`; and `colind` strictly increasing within each
 
 - `Pair_Geom1`, `Pair_Geom2` in `0 .. Ngeom - 1`, and
   `Pair_Signature (P) = Geom_Bodyid (Pair_Geom1 (P)) * 2**16 + Geom_Bodyid (Pair_Geom2 (P))`,
-  which is how the compiler forms it. `Exclude_Signature (E) = B1 * 2**16 + B2` with `B1` and
-  `B2` distinct body ids in `0 .. Nbody - 1`. Both imply `Nbody < 2**16`, which is checked.
+  computed in 64 bits to avoid signed overflow on rejected models. MuJoCo's reference
+  validator decodes the upper body with a signed right shift and rejects signatures
+  with bit 31 set; preserve that restriction. `Exclude_Signature (E) = B1 * 2**16 + B2`
+  likewise requires a nonnegative signature, with `B1` and `B2` distinct body ids in
+  `0 .. Nbody - 1`. `Nbody < 2**16` is checked separately.
 - Equalities: object checks exactly as the C checker (`eq_type`, `eq_objtype`, `eq_obj1id`,
   `eq_obj2id` per type); `Eq_Active0 (E) in 0 .. 1`; `Eq_Type (E) /= Distance` (removed type,
   fatal in C) reported as `Invalid_Enum`.
@@ -561,7 +581,9 @@ every `colind` in `0 .. ncols - 1`; and `colind` strictly increasing within each
   `Dyntype /= None`, `-1`/`0` otherwise; `Actuator_Ctrladr`/`Actuator_Ctrlnum` and
   `Actuator_Outadr`/`Actuator_Outnum` contiguous within `0 .. Nu - 1` and `0 .. Nout - 1`.
 - `Actuator_Actlimited`, `Actuator_Ctrllimited`, `Actuator_Forcelimited` in `0 .. 1`;
-  when limited, `range (0) <= range (1)`.
+  when limited, `range (0) <= range (1)`. Control flags/ranges have `Nu` channels;
+  force and activation flags/ranges have `Nactuator` entries. They must be checked
+  with their respective dimensions, including vector actuators.
 - Sensors: `Sensor_Type (S) in 0 .. 48` and not `Plugin` (plugins are rejected earlier);
   `Sensor_Datatype in 0 .. 3`; `Sensor_Needstage in 0 .. 3`; `Sensor_Dim (S) = Sensor_Size (type, dim)`
   as computed by C's `sensorSize`; `Sensor_Adr` contiguous, `Sensor_Adr (last) + Dim (last) = Nsensordata`;

@@ -38,12 +38,14 @@ package MJ.Models.Validity with SPARK_Mode is
    ----------------------------------------------------------------------------
 
    function Owners_Sorted (Owner : Int_Array; N_Owner : Integer) return Boolean is
-     ((for all K in Owner'Range => Owner (K) in 0 .. N_Owner - 1)
+     (N_Owner >= 0
+      and then (for all K in Owner'Range => Owner (K) in 0 .. N_Owner - 1)
       and then (for all K in Owner'Range =>
                   (if K > Owner'First then Owner (K) >= Owner (K - 1))));
 
    function Block_At (Adr, Num, Owner : Int_Array; I : Integer) return Boolean is
-     (Num (I) in 0 .. Owner'Length
+     (Int64 (Owner'Length) <= Int64 (Max_Size)
+      and then Num (I) in 0 .. Owner'Length
       and then (if Num (I) = 0 then Adr (I) = -1
                 else Adr (I) in 0 .. Owner'Length - Num (I)
                      and then Owner (Adr (I)) = I
@@ -55,7 +57,8 @@ package MJ.Models.Validity with SPARK_Mode is
                and then Adr'Length = Num'Length and then I in Adr'Range;
 
    function Blocks_OK (Adr, Num, Owner : Int_Array) return Boolean is
-     (for all I in Adr'Range => Block_At (Adr, Num, Owner, I))
+     (Int64 (Owner'Length) <= Int64 (Max_Size)
+      and then (for all I in Adr'Range => Block_At (Adr, Num, Owner, I)))
    with Pre => Adr'First = 0 and then Num'First = 0 and then Owner'First = 0
                and then Adr'Length = Num'Length;
 
@@ -160,11 +163,11 @@ package MJ.Models.Validity with SPARK_Mode is
      (declare
         W : constant Integer := M.Bodies.Body_Weldid (I);
       begin
-        (if M.Bodies.Body_Dofnum (W) = 0 then M.Bodies.Body_Treeid (I) = -1
-         else M.Bodies.Body_Treeid (I) = M.Dofs.Dof_Treeid (M.Bodies.Body_Dofadr (W))))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
-               and then Welds_OK (M) and then Body_Dofs_OK (M) and then Dof_Trees_OK (M)
-               and then I in 0 .. M.S.Nbody - 1;
+        (W in 0 .. M.S.Nbody - 1
+         and then (if M.Bodies.Body_Dofnum (W) = 0 then M.Bodies.Body_Treeid (I) = -1
+                   else M.Bodies.Body_Dofadr (W) in 0 .. M.S.Nv - 1
+                     and then M.Bodies.Body_Treeid (I) = M.Dofs.Dof_Treeid (M.Bodies.Body_Dofadr (W)))))
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nbody - 1;
 
    function Tree_Body_Range_At (M : Model; T : Integer) return Boolean is
      (M.Trees.Tree_Bodynum (T) in 1 .. M.S.Nbody
@@ -172,25 +175,22 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (for all K in M.Trees.Tree_Bodyadr (T) ..
                              M.Trees.Tree_Bodyadr (T) + M.Trees.Tree_Bodynum (T) - 1 =>
                   M.Bodies.Body_Treeid (K) = T))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then T in 0 .. M.S.Ntree - 1;
+   with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntree - 1;
 
    function Body_In_Tree_At (M : Model; I : Integer) return Boolean is
      (if M.Bodies.Body_Treeid (I) >= 0 then
         M.Bodies.Body_Treeid (I) in 0 .. M.S.Ntree - 1
-        and then I in M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I)) ..
-                      M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I))
-                      + M.Trees.Tree_Bodynum (M.Bodies.Body_Treeid (I)) - 1)
-   with Pre => Valid_Layout (M) and then Sizes_OK (M)
-               and then (for all T in 0 .. M.S.Ntree - 1 => Tree_Body_Range_At (M, T))
-               and then I in 0 .. M.S.Nbody - 1;
+        and then Int64 (I) in Int64 (M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I))) ..
+                      Int64 (M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I)))
+                      + Int64 (M.Trees.Tree_Bodynum (M.Bodies.Body_Treeid (I))) - 1)
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nbody - 1;
 
    function Body_Trees_OK (M : Model) return Boolean is
      ((for all I in 0 .. M.S.Nbody - 1 => Body_Tree_At (M, I))
       and then (for all T in 0 .. M.S.Ntree - 1 => Tree_Body_Range_At (M, T))
       and then (for all I in 0 .. M.S.Nbody - 1 => Body_In_Tree_At (M, I))
       and then (for all T in 0 .. M.S.Ntree - 1 => M.Trees.Tree_Sleep_Policy (T) in 0 .. 5))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
-               and then Welds_OK (M) and then Body_Dofs_OK (M) and then Dof_Trees_OK (M);
+   with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
    --  5.4 Joints and dofs
@@ -216,28 +216,47 @@ package MJ.Models.Validity with SPARK_Mode is
    function Jnt_Adrs_OK (M : Model) return Boolean is
      ((for all J in 0 .. M.S.Njnt - 1 => Jnt_Adr_At (M, J))
       and then (if M.S.Njnt = 0 then M.S.Nq = 0 and then M.S.Nv = 0
-                else M.Joints.Jnt_Qposadr (M.S.Njnt - 1)
-                       + Qpos_Width (M.Joints.Jnt_Type (M.S.Njnt - 1)) = M.S.Nq
-                     and then M.Joints.Jnt_Dofadr (M.S.Njnt - 1)
-                       + Dof_Width (M.Joints.Jnt_Type (M.S.Njnt - 1)) = M.S.Nv))
+                else Int64 (M.Joints.Jnt_Qposadr (M.S.Njnt - 1))
+                       + Int64 (Qpos_Width (M.Joints.Jnt_Type (M.S.Njnt - 1))) = Int64 (M.S.Nq)
+                     and then Int64 (M.Joints.Jnt_Dofadr (M.S.Njnt - 1))
+                       + Int64 (Dof_Width (M.Joints.Jnt_Type (M.S.Njnt - 1))) = Int64 (M.S.Nv)))
    with Pre => Valid_Layout (M) and then Jnt_Types_OK (M);
 
    function Dof_Joint_At (M : Model; D : Integer) return Boolean is
      (M.Dofs.Dof_Jntid (D) in 0 .. M.S.Njnt - 1
-      and then D in M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D)) ..
-                    M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D))
-                    + Dof_Width (M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D))) - 1
+      and then M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D)) in 0 .. 3
+      and then Int64 (D) in Int64 (M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D))) ..
+                    Int64 (M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D)))
+                    + Int64 (Dof_Width (M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D)))) - 1
       and then M.Dofs.Dof_Bodyid (D) = M.Joints.Jnt_Bodyid (M.Dofs.Dof_Jntid (D)))
-   with Pre => Valid_Layout (M) and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M)
-               and then D in 0 .. M.S.Nv - 1;
+   with Pre => Valid_Layout (M) and then D in 0 .. M.S.Nv - 1;
 
    function Dof_Joints_OK (M : Model) return Boolean is
      (for all D in 0 .. M.S.Nv - 1 => Dof_Joint_At (M, D))
-   with Pre => Valid_Layout (M) and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M);
+   with Pre => Valid_Layout (M);
 
    --  Parent of the first dof of joint J: the last dof of the previous joint on
    --  the same body, else the last dof of the weld body of the parent body,
    --  else -1.
+   --  The element predicate supplies the exact local bounds needed below.
+   --  This avoids importing several quantified whole-model clauses merely
+   --  to establish safe indexing and arithmetic in one parent computation.
+   function First_Parent_Input_OK (M : Model; J : Integer) return Boolean is
+     (M.Joints.Jnt_Bodyid (J) in 0 .. M.S.Nbody - 1
+      and then (declare
+        B : constant Integer := M.Joints.Jnt_Bodyid (J);
+      begin
+        (if J > M.Bodies.Body_Jntadr (B) then M.Joints.Jnt_Dofadr (J) in 0 .. M.S.Nv
+         else M.Bodies.Body_Parentid (B) in 0 .. M.S.Nbody - 1
+           and then M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B)) in 0 .. M.S.Nbody - 1
+           and then (declare
+             W : constant Integer := M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B));
+           begin
+             (M.Bodies.Body_Dofnum (W) = 0
+              or else Int64 (M.Bodies.Body_Dofadr (W)) + Int64 (M.Bodies.Body_Dofnum (W)) - 1
+                      in -1 .. Int64 (M.S.Nv) - 1)))))
+   with Pre => Valid_Layout (M) and then J in 0 .. M.S.Njnt - 1;
+
    function Expected_First_Parent (M : Model; J : Integer) return Integer is
      (declare
         B : constant Integer := M.Joints.Jnt_Bodyid (J);
@@ -247,28 +266,24 @@ package MJ.Models.Validity with SPARK_Mode is
                  W : constant Integer := M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B));
                begin
                  (if M.Bodies.Body_Dofnum (W) = 0 then -1
-                  else M.Bodies.Body_Dofadr (W) + M.Bodies.Body_Dofnum (W) - 1))))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
-               and then Welds_OK (M) and then Body_Joints_OK (M) and then Body_Dofs_OK (M)
-               and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M)
-               and then J in 0 .. M.S.Njnt - 1,
+                  else Integer (Int64 (M.Bodies.Body_Dofadr (W))
+                                + Int64 (M.Bodies.Body_Dofnum (W)) - 1)))))
+   with Pre => Valid_Layout (M) and then J in 0 .. M.S.Njnt - 1
+               and then First_Parent_Input_OK (M, J),
         Post => Expected_First_Parent'Result in -1 .. M.S.Nv - 1;
 
    function Dof_Parent_At (M : Model; D : Integer) return Boolean is
      (M.Dofs.Dof_Parentid (D) in -1 .. D - 1
+      and then M.Dofs.Dof_Jntid (D) in 0 .. M.S.Njnt - 1
       and then (if D > M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D))
                 then M.Dofs.Dof_Parentid (D) = D - 1
-                else M.Dofs.Dof_Parentid (D) = Expected_First_Parent (M, M.Dofs.Dof_Jntid (D))))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
-               and then Welds_OK (M) and then Body_Joints_OK (M) and then Body_Dofs_OK (M)
-               and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M) and then Dof_Joints_OK (M)
-               and then D in 0 .. M.S.Nv - 1;
+                else First_Parent_Input_OK (M, M.Dofs.Dof_Jntid (D))
+                  and then M.Dofs.Dof_Parentid (D) = Expected_First_Parent (M, M.Dofs.Dof_Jntid (D))))
+   with Pre => Valid_Layout (M) and then D in 0 .. M.S.Nv - 1;
 
    function Dof_Parents_OK (M : Model) return Boolean is
      (for all D in 0 .. M.S.Nv - 1 => Dof_Parent_At (M, D))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Parents_OK (M)
-               and then Welds_OK (M) and then Body_Joints_OK (M) and then Body_Dofs_OK (M)
-               and then Jnt_Types_OK (M) and then Jnt_Adrs_OK (M) and then Dof_Joints_OK (M);
+   with Pre => Valid_Layout (M);
 
    --  Parent ranges alone, restated for the Madr preconditions.
    function Dof_Parent_Ranges_OK (M : Model) return Boolean is
@@ -309,7 +324,9 @@ package MJ.Models.Validity with SPARK_Mode is
 
    function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer) return Boolean is
      (Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
-      and then Rownnz'Length = N and then Rowadr'Length = N and then Colind'Length = Nnz
+      and then Int64 (Rownnz'Length) = Int64 (N)
+      and then Int64 (Rowadr'Length) = Int64 (N)
+      and then Int64 (Colind'Length) = Int64 (Nnz)
       and then (for all I in 0 .. N - 1 =>
                   Rownnz (I) in 0 .. Nnz and then Rowadr (I) in 0 .. Nnz - Rownnz (I))
       and then (for all I in 0 .. N - 1 =>
@@ -353,20 +370,24 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Sparse_M_OK (M);
 
    function M_Row_At (M : Model; I : Integer) return Boolean is
-     (M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I) - 1) = I
+     (M.Sparse.M_Rownnz (I) in 1 .. M.S.Nc
+      and then M.Sparse.M_Rowadr (I) in 0 .. M.S.Nc - M.Sparse.M_Rownnz (I)
+      and then M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I) - 1) = I
       and then (if M.Dofs.Dof_Simplenum (I) = 0 and then M.Dofs.Dof_Parentid (I) >= 0 then
-                  M.Dofs.Dof_Simplenum (M.Dofs.Dof_Parentid (I)) = 0
+                  M.Dofs.Dof_Parentid (I) < M.S.Nv
+                  and then M.Dofs.Dof_Simplenum (M.Dofs.Dof_Parentid (I)) = 0
+                  and then M.Sparse.M_Rownnz (M.Dofs.Dof_Parentid (I)) in 0 .. M.S.Nc
+                  and then M.Sparse.M_Rowadr (M.Dofs.Dof_Parentid (I)) in
+                    0 .. M.S.Nc - M.Sparse.M_Rownnz (M.Dofs.Dof_Parentid (I))
+                  and then M.Sparse.M_Rownnz (I) - 1 <= M.Sparse.M_Rownnz (M.Dofs.Dof_Parentid (I))
                   and then (for all K in 0 .. M.Sparse.M_Rownnz (I) - 2 =>
                      M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + K) =
                      M.Sparse.M_Colind (M.Sparse.M_Rowadr (M.Dofs.Dof_Parentid (I)) + K))))
-   with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M)
-               and then Madrs_OK (M) and then Sparse_M_OK (M) and then M_Rownnz_OK (M)
-               and then I in 0 .. M.S.Nv - 1;
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nv - 1;
 
    function M_Rows_OK (M : Model) return Boolean is
      (for all I in 0 .. M.S.Nv - 1 => M_Row_At (M, I))
-   with Pre => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M)
-               and then Madrs_OK (M) and then Sparse_M_OK (M) and then M_Rownnz_OK (M);
+   with Pre => Valid_Layout (M);
 
    function D_Diag_At (M : Model; I : Integer) return Boolean is
      (M.Sparse.D_Diag (I) in 0 .. M.Sparse.D_Rownnz (I) - 1
@@ -418,27 +439,34 @@ package MJ.Models.Validity with SPARK_Mode is
 
    --  Face vertex, normal, and texcoord indexes are local to the mesh.
    function Mesh_Faces_At (M : Model; I : Integer) return Boolean is
-     (for all F in M.Meshes.Mesh_Faceadr (I) .. M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I) - 1 =>
+     (Ref_Mesh_Faceadr_At (M, I)
+      and then Ref_Mesh_Vertadr_At (M, I)
+      and then Ref_Mesh_Normaladr_At (M, I)
+      and then Ref_Mesh_Texcoordadr_At (M, I)
+      and then (for all F in M.Meshes.Mesh_Faceadr (I) .. M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I) - 1 =>
         (for all K in 0 .. 2 =>
            M.Meshes.Mesh_Face (3 * F + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1
            and then (if M.Meshes.Mesh_Normalnum (I) > 0 then
                        M.Meshes.Mesh_Facenormal (3 * F + K) in 0 .. M.Meshes.Mesh_Normalnum (I) - 1)
            and then (if M.Meshes.Mesh_Texcoordadr (I) >= 0 and then M.Meshes.Mesh_Texcoordnum (I) > 0 then
-                       M.Meshes.Mesh_Facetexcoord (3 * F + K) in 0 .. M.Meshes.Mesh_Texcoordnum (I) - 1)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+                       M.Meshes.Mesh_Facetexcoord (3 * F + K) in 0 .. M.Meshes.Mesh_Texcoordnum (I) - 1))))
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
 
    --  Polygon vertex lists index the mesh's vertices; the per-vertex polygon map
    --  indexes the mesh's polygons.
    function Mesh_Polys_At (M : Model; I : Integer) return Boolean is
-     ((for all P in M.Meshes.Mesh_Polyadr (I) .. M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I) - 1 =>
-         (for all K in M.Meshes.Mesh_Polyvertadr (P) ..
+     (Ref_Mesh_Polyadr_At (M, I) and then Ref_Mesh_Vertadr_At (M, I)
+      and then (for all P in M.Meshes.Mesh_Polyadr (I) .. M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I) - 1 =>
+         Ref_Mesh_Polyvertadr_At (M, P)
+         and then (for all K in M.Meshes.Mesh_Polyvertadr (P) ..
                        M.Meshes.Mesh_Polyvertadr (P) + M.Meshes.Mesh_Polyvertnum (P) - 1 =>
             M.Meshes.Mesh_Polyvert (K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1))
       and then (for all V in M.Meshes.Mesh_Vertadr (I) .. M.Meshes.Mesh_Vertadr (I) + M.Meshes.Mesh_Vertnum (I) - 1 =>
-                  (for all K in M.Meshes.Mesh_Polymapadr (V) ..
+                  Ref_Mesh_Polymapadr_At (M, V)
+                  and then (for all K in M.Meshes.Mesh_Polymapadr (V) ..
                                 M.Meshes.Mesh_Polymapadr (V) + M.Meshes.Mesh_Polymapnum (V) - 1 =>
                      M.Meshes.Mesh_Polymap (K) in 0 .. M.Meshes.Mesh_Polynum (I) - 1)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
 
    --  Convex hull graph block (user_mesh.cc MakeGraph): numvert, numface,
    --  vert_edgeadr[numvert], vert_globalid[numvert], edge_localid[numvert+3*numface]
@@ -446,17 +474,17 @@ package MJ.Models.Validity with SPARK_Mode is
    --  the end of mesh_graph; the engine walks edge lists until a -1, so the
    --  last edge entry must be -1.
    function Graph_Block_At (M : Model; I, A, Nv, Nf : Integer) return Boolean is
-     (declare
+     (Int64 (A) + 2 + 3 * Int64 (Nv) + 6 * Int64 (Nf) <= Int64 (M.S.Nmeshgraph)
+      and then (declare
         Ne : constant Integer := Nv + 3 * Nf;
       begin
-        Int64 (A) + 2 + 3 * Int64 (Nv) + 6 * Int64 (Nf) <= Int64 (M.S.Nmeshgraph)
-        and then (for all K in 0 .. Nv - 1 => M.Meshes.Mesh_Graph (A + 2 + K) in 0 .. Ne - 1)
+        (for all K in 0 .. Nv - 1 => M.Meshes.Mesh_Graph (A + 2 + K) in 0 .. Ne - 1)
         and then (for all K in 0 .. Nv - 1 =>
                     M.Meshes.Mesh_Graph (A + 2 + Nv + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)
         and then (for all K in 0 .. Ne - 1 => M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + K) in -1 .. Nv - 1)
         and then (Ne = 0 or else M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + Ne - 1) = -1)
         and then (for all K in 0 .. 3 * Nf - 1 =>
-                    M.Meshes.Mesh_Graph (A + 2 + 3 * Nv + 3 * Nf + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1))
+                    M.Meshes.Mesh_Graph (A + 2 + 3 * Nv + 3 * Nf + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)))
    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1
                and then A in 0 .. M.S.Nmeshgraph - 2
                and then Nv in 0 .. M.Meshes.Mesh_Vertnum (I) and then Nf in 0 .. Max_Size / 6;
@@ -469,12 +497,12 @@ package MJ.Models.Validity with SPARK_Mode is
         and then Graph_Block_At (M, I, M.Meshes.Mesh_Graphadr (I),
                                  M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I)),
                                  M.Meshes.Mesh_Graph (M.Meshes.Mesh_Graphadr (I) + 1)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
 
    function Meshes_OK (M : Model) return Boolean is
      (for all I in 0 .. M.S.Nmesh - 1 =>
         Mesh_Faces_At (M, I) and then Mesh_Polys_At (M, I) and then Mesh_Graph_At (M, I))
-   with Pre => Valid_Layout (M) and then Refs_OK (M);
+   with Pre => Valid_Layout (M);
 
    function Hfield_At (M : Model; H : Integer) return Boolean is
      (M.Hfields.Hfield_Nrow (H) >= 1 and then M.Hfields.Hfield_Ncol (H) >= 1
@@ -490,16 +518,19 @@ package MJ.Models.Validity with SPARK_Mode is
      (for all H in 0 .. M.S.Nhfield - 1 => Hfield_At (M, H))
    with Pre => Valid_Layout (M);
 
+   --  With nonnegative sizes and positive channels, this division is exactly
+   --  equivalent to Adr + Channels * Height * Width <= Length. It avoids
+   --  forming the larger product while checking an untrusted texture.
+   function Texture_Block_OK
+     (Adr : Int64; Channels, Height, Width : Integer; Length : Size_Type) return Boolean is
+     (Channels in 1 .. 4 and then Height >= 0 and then Width >= 0
+      and then Adr in 0 .. Int64 (Length)
+      and then Int64 (Height) * Int64 (Width) <= (Int64 (Length) - Adr) / Int64 (Channels))
+   with Global => null;
+
    function Texture_At (M : Model; T : Integer) return Boolean is
-     (M.Textures.Tex_Nchannel (T) in 1 .. 4
-      and then M.Textures.Tex_Height (T) >= 0 and then M.Textures.Tex_Width (T) >= 0
-      and then Int64 (M.Textures.Tex_Height (T)) * Int64 (M.Textures.Tex_Width (T))
-               <= Int64 (Max_Size)
-      and then M.Textures.Tex_Adr (T) in 0 .. Int64 (M.S.Ntexdata)
-      and then M.Textures.Tex_Adr (T)
-               + Int64 (M.Textures.Tex_Nchannel (T))
-                 * (Int64 (M.Textures.Tex_Height (T)) * Int64 (M.Textures.Tex_Width (T)))
-               <= Int64 (M.S.Ntexdata))
+     (Texture_Block_OK (M.Textures.Tex_Adr (T), M.Textures.Tex_Nchannel (T),
+                        M.Textures.Tex_Height (T), M.Textures.Tex_Width (T), M.S.Ntexdata))
    with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntex - 1;
 
    function Textures_OK (M : Model) return Boolean is
@@ -529,26 +560,28 @@ package MJ.Models.Validity with SPARK_Mode is
                and then Adr <= M.S.Nbvh - Num and then L in 0 .. Num - 1;
 
    function Body_Bvh_At (M : Model; B : Integer) return Boolean is
-     (if M.Bodies.Body_Bvhnum (B) > 0 then
+     (Ref_Body_Bvhadr_At (M, B)
+      and then (if M.Bodies.Body_Bvhnum (B) > 0 then
         (for all L in 0 .. M.Bodies.Body_Bvhnum (B) - 1 =>
            Bvh_Node_At (M, M.Bodies.Body_Bvhadr (B), M.Bodies.Body_Bvhnum (B), L)
            and then (if M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L) >= 0 then
                        M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L) in 0 .. M.S.Ngeom - 1
-                       and then M.Geoms.Geom_Bodyid (M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L)) = B)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then B in 0 .. M.S.Nbody - 1;
+                       and then M.Geoms.Geom_Bodyid (M.Bvh.Bvh_Nodeid (M.Bodies.Body_Bvhadr (B) + L)) = B))))
+   with Pre => Valid_Layout (M) and then B in 0 .. M.S.Nbody - 1;
 
    function Mesh_Bvh_At (M : Model; I : Integer) return Boolean is
-     (if M.Meshes.Mesh_Bvhnum (I) > 0 then
+     (Ref_Mesh_Bvhadr_At (M, I) and then Ref_Mesh_Faceadr_At (M, I)
+      and then (if M.Meshes.Mesh_Bvhnum (I) > 0 then
         (for all L in 0 .. M.Meshes.Mesh_Bvhnum (I) - 1 =>
            Bvh_Node_At (M, M.Meshes.Mesh_Bvhadr (I), M.Meshes.Mesh_Bvhnum (I), L)
            and then (if M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (I) + L) >= 0 then
-                       M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (I) + L) in 0 .. M.Meshes.Mesh_Facenum (I) - 1)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then I in 0 .. M.S.Nmesh - 1;
+                       M.Bvh.Bvh_Nodeid (M.Meshes.Mesh_Bvhadr (I) + L) in 0 .. M.Meshes.Mesh_Facenum (I) - 1))))
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
 
    function Bvhs_OK (M : Model) return Boolean is
      ((for all B in 0 .. M.S.Nbody - 1 => Body_Bvh_At (M, B))
       and then (for all I in 0 .. M.S.Nmesh - 1 => Mesh_Bvh_At (M, I)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M);
+   with Pre => Valid_Layout (M);
 
    --  Octree nodes (mesh SDF path of sub-project 8): block ranges and child
    --  indexes in range; finer structure is stated there.
@@ -570,17 +603,24 @@ package MJ.Models.Validity with SPARK_Mode is
      (M.Pairs.Pair_Dim (P) in 1 | 3 | 4 | 6)
    with Pre => Valid_Layout (M) and then P in 0 .. M.S.Npair - 1;
 
+   --  MuJoCo's loader rejects signatures with bit 31 set: its upper-body
+   --  extraction uses signed right shift. Widen arithmetic before comparing
+   --  so an invalid high-body pair is rejected without raising overflow.
    --  The compiler forms the signature as body(geom1) << 16 | body(geom2).
    function Pair_Signature_At (M : Model; P : Integer) return Boolean is
-     (M.Pairs.Pair_Signature (P) =
-        M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P)) * 2**16 + M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P)))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M)
-               and then P in 0 .. M.S.Npair - 1;
+     (M.Pairs.Pair_Geom1 (P) in 0 .. M.S.Ngeom - 1
+      and then M.Pairs.Pair_Geom2 (P) in 0 .. M.S.Ngeom - 1
+      and then M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P)) in 0 .. M.S.Nbody - 1
+      and then M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P)) in 0 .. M.S.Nbody - 1
+      and then Int64 (M.Pairs.Pair_Signature (P)) =
+        Int64 (M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P))) * 2**16
+        + Int64 (M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P))))
+   with Pre => Valid_Layout (M) and then P in 0 .. M.S.Npair - 1;
 
    function Pairs_OK (M : Model) return Boolean is
      ((for all P in 0 .. M.S.Npair - 1 => Pair_Dim_At (M, P))
       and then (for all P in 0 .. M.S.Npair - 1 => Pair_Signature_At (M, P)))
-   with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Refs_OK (M) and then Body_Geoms_OK (M);
+   with Pre => Valid_Layout (M);
 
    function Exclude_At (M : Model; E : Integer) return Boolean is
      (M.Excludes.Exclude_Signature (E) >= 0
@@ -635,7 +675,8 @@ package MJ.Models.Validity with SPARK_Mode is
    --  A tendon is spatial (site and geom wraps, pulleys allowed) or fixed
    --  (joint wraps only), decided by its first wrap.
    function Tendon_At (M : Model; T : Integer) return Boolean is
-     (M.Tendons.Tendon_Num (T) >= 1
+     (Ref_Tendon_Adr_At (M, T)
+      and then M.Tendons.Tendon_Num (T) >= 1
       and then M.Tendons.Tendon_Actuatorid (T) in -1 .. M.S.Nactuator - 1
       and then M.Tendons.Tendon_Treenum (T) >= 0   --  counts every tree on the path; only two ids are stored
       and then (if M.Wraps.Wrap_Type (M.Tendons.Tendon_Adr (T)) = 3 then
@@ -644,11 +685,11 @@ package MJ.Models.Validity with SPARK_Mode is
                 else
                   (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
                      M.Wraps.Wrap_Type (W) = 1)))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then Wraps_OK (M) and then T in 0 .. M.S.Ntendon - 1;
+   with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntendon - 1;
 
    function Tendons_OK (M : Model) return Boolean is
      (for all T in 0 .. M.S.Ntendon - 1 => Tendon_At (M, T))
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then Wraps_OK (M);
+   with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
    --  5.8 Actuators and sensors
@@ -690,23 +731,29 @@ package MJ.Models.Validity with SPARK_Mode is
      ((M.Actuators.Actuator_Actnum (A) > 0) = (M.Actuators.Actuator_Dyntype (A) /= 0)
       and then M.Actuators.Actuator_Ctrlnum (A) >= 1
       and then M.Actuators.Actuator_Outnum (A) >= 1)
-   with Pre => Valid_Layout (M) and then Refs_OK (M) and then A in 0 .. M.S.Nactuator - 1;
+   with Pre => Valid_Layout (M) and then A in 0 .. M.S.Nactuator - 1;
 
    function Actuator_Acts_OK (M : Model) return Boolean is
      (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Act_At (M, A))
-   with Pre => Valid_Layout (M) and then Refs_OK (M);
+   with Pre => Valid_Layout (M);
+
+   --  Control limits are indexed by channel (nu), unlike force/activation
+   --  limits which are indexed by actuator (nactuator).
+   function Control_Range_At (M : Model; C : Integer) return Boolean is
+     (if M.Actuators.Actuator_Ctrllimited (C) /= 0 then
+         M.Actuators.Actuator_Ctrlrange (2 * C) <= M.Actuators.Actuator_Ctrlrange (2 * C + 1))
+   with Pre => Valid_Layout (M) and then C in 0 .. M.S.Nu - 1;
 
    function Actuator_Range_At (M : Model; A : Integer) return Boolean is
-     ((if M.Actuators.Actuator_Ctrllimited (A) /= 0 then
-         M.Actuators.Actuator_Ctrlrange (2 * A) <= M.Actuators.Actuator_Ctrlrange (2 * A + 1))
-      and then (if M.Actuators.Actuator_Forcelimited (A) /= 0 then
+     ((if M.Actuators.Actuator_Forcelimited (A) /= 0 then
                   M.Actuators.Actuator_Forcerange (2 * A) <= M.Actuators.Actuator_Forcerange (2 * A + 1))
       and then (if M.Actuators.Actuator_Actlimited (A) /= 0 then
                   M.Actuators.Actuator_Actrange (2 * A) <= M.Actuators.Actuator_Actrange (2 * A + 1)))
    with Pre => Valid_Layout (M) and then A in 0 .. M.S.Nactuator - 1;
 
    function Actuator_Ranges_OK (M : Model) return Boolean is
-     (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Range_At (M, A))
+     ((for all C in 0 .. M.S.Nu - 1 => Control_Range_At (M, C))
+      and then (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Range_At (M, A)))
    with Pre => Valid_Layout (M);
 
    --  sensorSize in engine_io.c, by mjtSensor code.
@@ -819,15 +866,23 @@ package MJ.Models.Validity with SPARK_Mode is
 
    function In_Tier0 (X : Real) return Boolean is (X in Tier0_Real);
 
+   function Squared_Norm4 (A, B, C, D : Tier0_Real) return Tier1_Real is
+     (((A * A + B * B) + C * C) + D * D)
+   with Global => null;
+
+   function Squared_Norm3 (A, B, C : Tier0_Real) return Tier1_Real is
+     ((A * A + B * B) + C * C)
+   with Global => null;
+
    function Unit_Quat (Q : Real_Array; Pos : Integer) return Boolean is
-     (abs (Q (Pos) * Q (Pos) + Q (Pos + 1) * Q (Pos + 1) + Q (Pos + 2) * Q (Pos + 2) + Q (Pos + 3) * Q (Pos + 3) - 1.0)
+     (abs (Squared_Norm4 (Q (Pos), Q (Pos + 1), Q (Pos + 2), Q (Pos + 3)) - 1.0)
       <= 1.0e-6)
-   with Pre => Pos >= Q'First and then Pos <= Q'Last - 3
+   with Pre => Pos in Q'Range and then Pos <= Q'Last - 3
                and then (for all K in Pos .. Pos + 3 => Q (K) in Tier0_Real);
 
    function Unit_Vec3 (V : Real_Array; Pos : Integer) return Boolean is
-     (abs (V (Pos) * V (Pos) + V (Pos + 1) * V (Pos + 1) + V (Pos + 2) * V (Pos + 2) - 1.0) <= 1.0e-6)
-   with Pre => Pos >= V'First and then Pos <= V'Last - 2
+     (abs (Squared_Norm3 (V (Pos), V (Pos + 1), V (Pos + 2)) - 1.0) <= 1.0e-6)
+   with Pre => Pos in V'Range and then Pos <= V'Last - 2
                and then (for all K in Pos .. Pos + 2 => V (K) in Tier0_Real);
 
    function Option_OK (M : Model) return Boolean is
@@ -920,20 +975,28 @@ package MJ.Models.Validity with SPARK_Mode is
    --  5.11 Capacity consistency, 5.12 adhesion flag
    ----------------------------------------------------------------------------
 
+   --  Bound the dense Jacobian size independently of the whole model.
+   function Jacobian_Capacity (Efc : Cap_Type; Nv : Size_Type) return Size_Type is
+     (Size_Type (Int64'Min (Int64 (Efc) * Int64 (Nv), Int64 (Max_Size))))
+   with Global => null;
+
    function Caps_OK (M : Model) return Boolean is
      (Int64 (M.Caps.Efc_Cap) =
         Int64 (M.Caps.Ne_Max) + Int64 (M.Caps.Nf_Max) + Int64 (M.Caps.Nl_Max)
         + 10 * Int64 (M.Caps.Contact_Cap)
       --  the dense bound saturates at Max_Size: large sparse models (100 humanoids) exceed it,
       --  and the constraint assembler checks nJ against the allocated capacity dynamically
-      and then Int64 (M.Caps.NJ_Cap) = Int64'Min (Int64 (M.Caps.Efc_Cap) * Int64 (M.S.Nv), Int64 (Max_Size))
+      and then M.Caps.NJ_Cap = Jacobian_Capacity (M.Caps.Efc_Cap, M.S.Nv)
       and then M.Caps.NIsland_Cap = M.S.Ntree
       and then M.Caps.NIdof_Cap = M.S.Nv);
 
+   function Has_Positive (Values : Real_Array) return Boolean is
+     (for some Value of Values => Value > 0.0)
+   with Global => null;
+
    function Adhesion_OK (M : Model) return Boolean is
-     (M.Flg_Adhesion =
-        ((for some G in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Adhesion (G) > 0.0)
-         or else (for some P in 0 .. M.S.Npair - 1 => M.Pairs.Pair_Adhesion (P) > 0.0)))
+     (M.Flg_Adhesion = (Has_Positive (M.Geoms.Geom_Adhesion.all)
+                       or else Has_Positive (M.Pairs.Pair_Adhesion.all)))
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------

@@ -8,1070 +8,1266 @@ pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore
 
 separate (MJ.Validation)
 procedure Diagnose_Reals (M : Model; Result : out Load_Result) is
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Reals_In_Tier0);
+   procedure Scan_Reals_1 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Qpos.Qpos0 /= null
+       and then Input.Qpos.Qpos_Spring /= null
+       and then Input.Bodies.Body_Pos /= null
+       and then Input.Bodies.Body_Quat /= null
+       and then Input.Bodies.Body_Ipos /= null
+       and then Input.Bodies.Body_Iquat /= null
+       and then Input.Bodies.Body_Mass /= null
+       and then Input.Bodies.Body_Subtreemass /= null;
+   procedure Scan_Reals_1 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Qpos.Qpos0'Range loop
+         if not (Input.Qpos.Qpos0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Qpos0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Qpos.Qpos_Spring'Range loop
+         if not (Input.Qpos.Qpos_Spring (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Qpos_Spring, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Pos'Range loop
+         if not (Input.Bodies.Body_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Quat'Range loop
+         if not (Input.Bodies.Body_Quat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Quat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Ipos'Range loop
+         if not (Input.Bodies.Body_Ipos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Ipos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Iquat'Range loop
+         if not (Input.Bodies.Body_Iquat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Iquat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Mass'Range loop
+         if not (Input.Bodies.Body_Mass (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Mass, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Subtreemass'Range loop
+         if not (Input.Bodies.Body_Subtreemass (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Subtreemass, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_1;
+
+   procedure Scan_Reals_2 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Bodies.Body_Inertia /= null
+       and then Input.Bodies.Body_Invweight0 /= null
+       and then Input.Bodies.Body_Gravcomp /= null
+       and then Input.Bodies.Body_Margin /= null
+       and then Input.Bodies.Body_User /= null
+       and then Input.Bvh.Bvh_Aabb /= null
+       and then Input.Bvh.Oct_Aabb /= null
+       and then Input.Bvh.Oct_Coeff /= null;
+   procedure Scan_Reals_2 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Bodies.Body_Inertia'Range loop
+         if not (Input.Bodies.Body_Inertia (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Inertia, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Invweight0'Range loop
+         if not (Input.Bodies.Body_Invweight0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Invweight0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Gravcomp'Range loop
+         if not (Input.Bodies.Body_Gravcomp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Gravcomp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_Margin'Range loop
+         if not (Input.Bodies.Body_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_Margin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bodies.Body_User'Range loop
+         if not (Input.Bodies.Body_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Body_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bvh.Bvh_Aabb'Range loop
+         if not (Input.Bvh.Bvh_Aabb (I) in Tier1_Real) then
+            Diagnostic := (Invalid_Parameter, Bvh_Aabb, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bvh.Oct_Aabb'Range loop
+         if not (Input.Bvh.Oct_Aabb (I) in Tier1_Real) then
+            Diagnostic := (Invalid_Parameter, Oct_Aabb, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Bvh.Oct_Coeff'Range loop
+         if not (Input.Bvh.Oct_Coeff (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Oct_Coeff, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_2;
+
+   procedure Scan_Reals_3 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Joints.Jnt_Solref /= null
+       and then Input.Joints.Jnt_Solimp /= null
+       and then Input.Joints.Jnt_Pos /= null
+       and then Input.Joints.Jnt_Axis /= null
+       and then Input.Joints.Jnt_Stiffness /= null
+       and then Input.Joints.Jnt_Stiffnesspoly /= null
+       and then Input.Joints.Jnt_Range /= null
+       and then Input.Joints.Jnt_Actfrcrange /= null;
+   procedure Scan_Reals_3 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Joints.Jnt_Solref'Range loop
+         if not (Input.Joints.Jnt_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Solimp'Range loop
+         if not (Input.Joints.Jnt_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Solimp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Pos'Range loop
+         if not (Input.Joints.Jnt_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Axis'Range loop
+         if not (Input.Joints.Jnt_Axis (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Axis, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Stiffness'Range loop
+         if not (Input.Joints.Jnt_Stiffness (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Stiffness, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Stiffnesspoly'Range loop
+         if not (Input.Joints.Jnt_Stiffnesspoly (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Stiffnesspoly, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Range'Range loop
+         if not (Input.Joints.Jnt_Range (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Range, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_Actfrcrange'Range loop
+         if not (Input.Joints.Jnt_Actfrcrange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Actfrcrange, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_3;
+
+   procedure Scan_Reals_4 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Joints.Jnt_Margin /= null
+       and then Input.Joints.Jnt_User /= null
+       and then Input.Dofs.Dof_Solref /= null
+       and then Input.Dofs.Dof_Solimp /= null
+       and then Input.Dofs.Dof_Frictionloss /= null
+       and then Input.Dofs.Dof_Armature /= null
+       and then Input.Dofs.Dof_Damping /= null
+       and then Input.Dofs.Dof_Dampingpoly /= null;
+   procedure Scan_Reals_4 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Joints.Jnt_Margin'Range loop
+         if not (Input.Joints.Jnt_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_Margin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Joints.Jnt_User'Range loop
+         if not (Input.Joints.Jnt_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Jnt_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Solref'Range loop
+         if not (Input.Dofs.Dof_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Solimp'Range loop
+         if not (Input.Dofs.Dof_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Solimp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Frictionloss'Range loop
+         if not (Input.Dofs.Dof_Frictionloss (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Frictionloss, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Armature'Range loop
+         if not (Input.Dofs.Dof_Armature (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Armature, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Damping'Range loop
+         if not (Input.Dofs.Dof_Damping (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Damping, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Dampingpoly'Range loop
+         if not (Input.Dofs.Dof_Dampingpoly (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Dampingpoly, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_4;
+
+   procedure Scan_Reals_5 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Dofs.Dof_Invweight0 /= null
+       and then Input.Dofs.Dof_M0 /= null
+       and then Input.Dofs.Dof_Length /= null
+       and then Input.Geoms.Geom_Solmix /= null
+       and then Input.Geoms.Geom_Solref /= null
+       and then Input.Geoms.Geom_Solimp /= null
+       and then Input.Geoms.Geom_Size /= null
+       and then Input.Geoms.Geom_Aabb /= null;
+   procedure Scan_Reals_5 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Dofs.Dof_Invweight0'Range loop
+         if not (Input.Dofs.Dof_Invweight0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Invweight0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_M0'Range loop
+         if not (Input.Dofs.Dof_M0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_M0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Dofs.Dof_Length'Range loop
+         if not (Input.Dofs.Dof_Length (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Dof_Length, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Solmix'Range loop
+         if not (Input.Geoms.Geom_Solmix (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Solmix, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Solref'Range loop
+         if not (Input.Geoms.Geom_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Solimp'Range loop
+         if not (Input.Geoms.Geom_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Solimp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Size'Range loop
+         if not (Input.Geoms.Geom_Size (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Size, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Aabb'Range loop
+         if not (Input.Geoms.Geom_Aabb (I) in Tier1_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Aabb, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_5;
+
+   procedure Scan_Reals_6 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Geoms.Geom_Rbound /= null
+       and then Input.Geoms.Geom_Pos /= null
+       and then Input.Geoms.Geom_Quat /= null
+       and then Input.Geoms.Geom_Friction /= null
+       and then Input.Geoms.Geom_Margin /= null
+       and then Input.Geoms.Geom_Gap /= null
+       and then Input.Geoms.Geom_Surfacevel /= null
+       and then Input.Geoms.Geom_Adhesion /= null;
+   procedure Scan_Reals_6 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Geoms.Geom_Rbound'Range loop
+         if not (Input.Geoms.Geom_Rbound (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Rbound, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Pos'Range loop
+         if not (Input.Geoms.Geom_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Quat'Range loop
+         if not (Input.Geoms.Geom_Quat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Quat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Friction'Range loop
+         if not (Input.Geoms.Geom_Friction (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Friction, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Margin'Range loop
+         if not (Input.Geoms.Geom_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Margin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Gap'Range loop
+         if not (Input.Geoms.Geom_Gap (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Gap, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Surfacevel'Range loop
+         if not (Input.Geoms.Geom_Surfacevel (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Surfacevel, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_Adhesion'Range loop
+         if not (Input.Geoms.Geom_Adhesion (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Adhesion, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_6;
+
+   procedure Scan_Reals_7 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Geoms.Geom_Fluid /= null
+       and then Input.Geoms.Geom_User /= null
+       and then Input.Sites.Site_Size /= null
+       and then Input.Sites.Site_Pos /= null
+       and then Input.Sites.Site_Quat /= null
+       and then Input.Sites.Site_User /= null
+       and then Input.Cameras.Cam_Pos /= null
+       and then Input.Cameras.Cam_Quat /= null;
+   procedure Scan_Reals_7 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Geoms.Geom_Fluid'Range loop
+         if not (Input.Geoms.Geom_Fluid (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_Fluid, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Geoms.Geom_User'Range loop
+         if not (Input.Geoms.Geom_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Geom_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sites.Site_Size'Range loop
+         if not (Input.Sites.Site_Size (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Site_Size, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sites.Site_Pos'Range loop
+         if not (Input.Sites.Site_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Site_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sites.Site_Quat'Range loop
+         if not (Input.Sites.Site_Quat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Site_Quat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sites.Site_User'Range loop
+         if not (Input.Sites.Site_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Site_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Pos'Range loop
+         if not (Input.Cameras.Cam_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Quat'Range loop
+         if not (Input.Cameras.Cam_Quat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Quat, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_7;
+
+   procedure Scan_Reals_8 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Cameras.Cam_Poscom0 /= null
+       and then Input.Cameras.Cam_Pos0 /= null
+       and then Input.Cameras.Cam_Mat0 /= null
+       and then Input.Cameras.Cam_Fovy /= null
+       and then Input.Cameras.Cam_Ipd /= null
+       and then Input.Cameras.Cam_User /= null
+       and then Input.Lights.Light_Pos /= null
+       and then Input.Lights.Light_Dir /= null;
+   procedure Scan_Reals_8 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Cameras.Cam_Poscom0'Range loop
+         if not (Input.Cameras.Cam_Poscom0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Poscom0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Pos0'Range loop
+         if not (Input.Cameras.Cam_Pos0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Pos0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Mat0'Range loop
+         if not (Input.Cameras.Cam_Mat0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Mat0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Fovy'Range loop
+         if not (Input.Cameras.Cam_Fovy (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Fovy, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_Ipd'Range loop
+         if not (Input.Cameras.Cam_Ipd (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_Ipd, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Cameras.Cam_User'Range loop
+         if not (Input.Cameras.Cam_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Cam_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Pos'Range loop
+         if not (Input.Lights.Light_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Light_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Dir'Range loop
+         if not (Input.Lights.Light_Dir (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Light_Dir, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_8;
+
+   procedure Scan_Reals_9 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Lights.Light_Poscom0 /= null
+       and then Input.Lights.Light_Pos0 /= null
+       and then Input.Lights.Light_Dir0 /= null
+       and then Input.Flexes.Flex_Solmix /= null
+       and then Input.Flexes.Flex_Solref /= null
+       and then Input.Flexes.Flex_Solimp /= null
+       and then Input.Flexes.Flex_Friction /= null
+       and then Input.Flexes.Flex_Margin /= null;
+   procedure Scan_Reals_9 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Lights.Light_Poscom0'Range loop
+         if not (Input.Lights.Light_Poscom0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Light_Poscom0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Pos0'Range loop
+         if not (Input.Lights.Light_Pos0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Light_Pos0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Lights.Light_Dir0'Range loop
+         if not (Input.Lights.Light_Dir0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Light_Dir0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Solmix'Range loop
+         if not (Input.Flexes.Flex_Solmix (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Solmix, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Solref'Range loop
+         if not (Input.Flexes.Flex_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Solimp'Range loop
+         if not (Input.Flexes.Flex_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Solimp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Friction'Range loop
+         if not (Input.Flexes.Flex_Friction (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Friction, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Margin'Range loop
+         if not (Input.Flexes.Flex_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Margin, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_9;
+
+   procedure Scan_Reals_10 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Flexes.Flex_Gap /= null
+       and then Input.Flexes.Flex_Vert /= null
+       and then Input.Flexes.Flex_Vert0 /= null
+       and then Input.Flexes.Flex_Vertmetric /= null
+       and then Input.Flexes.Flex_Node /= null
+       and then Input.Flexes.Flex_Node0 /= null
+       and then Input.Flexes.Flexedge_Length0 /= null
+       and then Input.Flexes.Flexedge_Invweight0 /= null;
+   procedure Scan_Reals_10 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Flexes.Flex_Gap'Range loop
+         if not (Input.Flexes.Flex_Gap (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Gap, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Vert'Range loop
+         if not (Input.Flexes.Flex_Vert (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Vert, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Vert0'Range loop
+         if not (Input.Flexes.Flex_Vert0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Vert0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Vertmetric'Range loop
+         if not (Input.Flexes.Flex_Vertmetric (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Vertmetric, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Node'Range loop
+         if not (Input.Flexes.Flex_Node (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Node, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Node0'Range loop
+         if not (Input.Flexes.Flex_Node0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Node0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flexedge_Length0'Range loop
+         if not (Input.Flexes.Flexedge_Length0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flexedge_Length0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flexedge_Invweight0'Range loop
+         if not (Input.Flexes.Flexedge_Invweight0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flexedge_Invweight0, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_10;
+
+   procedure Scan_Reals_11 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Flexes.Flex_Radius /= null
+       and then Input.Flexes.Flex_Size /= null
+       and then Input.Flexes.Flex_Stiffness /= null
+       and then Input.Flexes.Flex_Bending /= null
+       and then Input.Flexes.Efm0_L /= null
+       and then Input.Flexes.Flex_Damping /= null
+       and then Input.Flexes.Flex_Edgestiffness /= null
+       and then Input.Flexes.Flex_Edgedamping /= null;
+   procedure Scan_Reals_11 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Flexes.Flex_Radius'Range loop
+         if not (Input.Flexes.Flex_Radius (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Radius, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Size'Range loop
+         if not (Input.Flexes.Flex_Size (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Size, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Stiffness'Range loop
+         if not (Input.Flexes.Flex_Stiffness (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Stiffness, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Bending'Range loop
+         if not (Input.Flexes.Flex_Bending (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Bending, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Efm0_L'Range loop
+         if not (Input.Flexes.Efm0_L (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Efm0_L, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Damping'Range loop
+         if not (Input.Flexes.Flex_Damping (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Damping, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Edgestiffness'Range loop
+         if not (Input.Flexes.Flex_Edgestiffness (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Edgestiffness, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Flexes.Flex_Edgedamping'Range loop
+         if not (Input.Flexes.Flex_Edgedamping (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Flex_Edgedamping, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_11;
+
+   procedure Scan_Reals_12 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Meshes.Mesh_Scale /= null
+       and then Input.Meshes.Mesh_Pos /= null
+       and then Input.Meshes.Mesh_Quat /= null
+       and then Input.Meshes.Mesh_Polynormal /= null
+       and then Input.Hfields.Hfield_Size /= null
+       and then Input.Pairs.Pair_Solref /= null
+       and then Input.Pairs.Pair_Solreffriction /= null
+       and then Input.Pairs.Pair_Solimp /= null;
+   procedure Scan_Reals_12 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Meshes.Mesh_Scale'Range loop
+         if not (Input.Meshes.Mesh_Scale (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Mesh_Scale, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Meshes.Mesh_Pos'Range loop
+         if not (Input.Meshes.Mesh_Pos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Mesh_Pos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Meshes.Mesh_Quat'Range loop
+         if not (Input.Meshes.Mesh_Quat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Mesh_Quat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Meshes.Mesh_Polynormal'Range loop
+         if not (Input.Meshes.Mesh_Polynormal (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Mesh_Polynormal, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Hfields.Hfield_Size'Range loop
+         if not (Input.Hfields.Hfield_Size (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Hfield_Size, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Solref'Range loop
+         if not (Input.Pairs.Pair_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Solreffriction'Range loop
+         if not (Input.Pairs.Pair_Solreffriction (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Solreffriction, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Solimp'Range loop
+         if not (Input.Pairs.Pair_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Solimp, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_12;
+
+   procedure Scan_Reals_13 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Pairs.Pair_Margin /= null
+       and then Input.Pairs.Pair_Gap /= null
+       and then Input.Pairs.Pair_Adhesion /= null
+       and then Input.Pairs.Pair_Friction /= null
+       and then Input.Equalities.Eq_Solref /= null
+       and then Input.Equalities.Eq_Solimp /= null
+       and then Input.Equalities.Eq_Data /= null
+       and then Input.Tendons.Tendon_Width /= null;
+   procedure Scan_Reals_13 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Pairs.Pair_Margin'Range loop
+         if not (Input.Pairs.Pair_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Margin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Gap'Range loop
+         if not (Input.Pairs.Pair_Gap (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Gap, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Adhesion'Range loop
+         if not (Input.Pairs.Pair_Adhesion (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Adhesion, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Pairs.Pair_Friction'Range loop
+         if not (Input.Pairs.Pair_Friction (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Pair_Friction, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Equalities.Eq_Solref'Range loop
+         if not (Input.Equalities.Eq_Solref (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Eq_Solref, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Equalities.Eq_Solimp'Range loop
+         if not (Input.Equalities.Eq_Solimp (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Eq_Solimp, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Equalities.Eq_Data'Range loop
+         if not (Input.Equalities.Eq_Data (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Eq_Data, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Width'Range loop
+         if not (Input.Tendons.Tendon_Width (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Width, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_13;
+
+   procedure Scan_Reals_14 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Tendons.Tendon_Solref_Lim /= null
+       and then Input.Tendons.Tendon_Solimp_Lim /= null
+       and then Input.Tendons.Tendon_Solref_Fri /= null
+       and then Input.Tendons.Tendon_Solimp_Fri /= null
+       and then Input.Tendons.Tendon_Range /= null
+       and then Input.Tendons.Tendon_Actfrcrange /= null
+       and then Input.Tendons.Tendon_Margin /= null
+       and then Input.Tendons.Tendon_Stiffness /= null;
+   procedure Scan_Reals_14 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Tendons.Tendon_Solref_Lim'Range loop
+         if not (Input.Tendons.Tendon_Solref_Lim (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Solref_Lim, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Solimp_Lim'Range loop
+         if not (Input.Tendons.Tendon_Solimp_Lim (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Solimp_Lim, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Solref_Fri'Range loop
+         if not (Input.Tendons.Tendon_Solref_Fri (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Solref_Fri, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Solimp_Fri'Range loop
+         if not (Input.Tendons.Tendon_Solimp_Fri (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Solimp_Fri, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Range'Range loop
+         if not (Input.Tendons.Tendon_Range (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Range, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Actfrcrange'Range loop
+         if not (Input.Tendons.Tendon_Actfrcrange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Actfrcrange, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Margin'Range loop
+         if not (Input.Tendons.Tendon_Margin (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Margin, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Stiffness'Range loop
+         if not (Input.Tendons.Tendon_Stiffness (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Stiffness, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_14;
+
+   procedure Scan_Reals_15 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Tendons.Tendon_Stiffnesspoly /= null
+       and then Input.Tendons.Tendon_Damping /= null
+       and then Input.Tendons.Tendon_Dampingpoly /= null
+       and then Input.Tendons.Tendon_Armature /= null
+       and then Input.Tendons.Tendon_Frictionloss /= null
+       and then Input.Tendons.Tendon_Lengthspring /= null
+       and then Input.Tendons.Tendon_Length0 /= null
+       and then Input.Tendons.Tendon_Invweight0 /= null;
+   procedure Scan_Reals_15 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Tendons.Tendon_Stiffnesspoly'Range loop
+         if not (Input.Tendons.Tendon_Stiffnesspoly (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Stiffnesspoly, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Damping'Range loop
+         if not (Input.Tendons.Tendon_Damping (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Damping, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Dampingpoly'Range loop
+         if not (Input.Tendons.Tendon_Dampingpoly (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Dampingpoly, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Armature'Range loop
+         if not (Input.Tendons.Tendon_Armature (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Armature, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Frictionloss'Range loop
+         if not (Input.Tendons.Tendon_Frictionloss (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Frictionloss, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Lengthspring'Range loop
+         if not (Input.Tendons.Tendon_Lengthspring (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Lengthspring, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Length0'Range loop
+         if not (Input.Tendons.Tendon_Length0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Length0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Tendons.Tendon_Invweight0'Range loop
+         if not (Input.Tendons.Tendon_Invweight0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_Invweight0, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_15;
+
+   procedure Scan_Reals_16 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Tendons.Tendon_User /= null
+       and then Input.Wraps.Wrap_Prm /= null
+       and then Input.Actuators.Actuator_Cranklength /= null
+       and then Input.Actuators.Actuator_Dynprm /= null
+       and then Input.Actuators.Actuator_Gainprm /= null
+       and then Input.Actuators.Actuator_Biasprm /= null
+       and then Input.Actuators.Actuator_Actrange /= null
+       and then Input.Actuators.Actuator_Delay /= null;
+   procedure Scan_Reals_16 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Tendons.Tendon_User'Range loop
+         if not (Input.Tendons.Tendon_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tendon_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Wraps.Wrap_Prm'Range loop
+         if not (Input.Wraps.Wrap_Prm (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Wrap_Prm, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Cranklength'Range loop
+         if not (Input.Actuators.Actuator_Cranklength (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Cranklength, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Dynprm'Range loop
+         if not (Input.Actuators.Actuator_Dynprm (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Dynprm, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Gainprm'Range loop
+         if not (Input.Actuators.Actuator_Gainprm (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Gainprm, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Biasprm'Range loop
+         if not (Input.Actuators.Actuator_Biasprm (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Biasprm, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Actrange'Range loop
+         if not (Input.Actuators.Actuator_Actrange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Actrange, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Delay'Range loop
+         if not (Input.Actuators.Actuator_Delay (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Delay, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_16;
+
+   procedure Scan_Reals_17 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Actuators.Actuator_Damping /= null
+       and then Input.Actuators.Actuator_Dampingpoly /= null
+       and then Input.Actuators.Actuator_Armature /= null
+       and then Input.Actuators.Actuator_User /= null
+       and then Input.Actuators.Actuator_Forcerange /= null
+       and then Input.Actuators.Actuator_Ctrlrange /= null
+       and then Input.Actuators.Actuator_Gear /= null
+       and then Input.Actuators.Actuator_Acc0 /= null;
+   procedure Scan_Reals_17 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Actuators.Actuator_Damping'Range loop
+         if not (Input.Actuators.Actuator_Damping (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Damping, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Dampingpoly'Range loop
+         if not (Input.Actuators.Actuator_Dampingpoly (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Dampingpoly, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Armature'Range loop
+         if not (Input.Actuators.Actuator_Armature (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Armature, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_User'Range loop
+         if not (Input.Actuators.Actuator_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Forcerange'Range loop
+         if not (Input.Actuators.Actuator_Forcerange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Forcerange, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Ctrlrange'Range loop
+         if not (Input.Actuators.Actuator_Ctrlrange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Ctrlrange, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Gear'Range loop
+         if not (Input.Actuators.Actuator_Gear (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Gear, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Acc0'Range loop
+         if not (Input.Actuators.Actuator_Acc0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Acc0, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_17;
+
+   procedure Scan_Reals_18 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Actuators.Actuator_Length0 /= null
+       and then Input.Actuators.Actuator_Lengthrange /= null
+       and then Input.Sensors.Sensor_Cutoff /= null
+       and then Input.Sensors.Sensor_Noise /= null
+       and then Input.Sensors.Sensor_Delay /= null
+       and then Input.Sensors.Sensor_Interval /= null
+       and then Input.Sensors.Sensor_User /= null
+       and then Input.Numerics.Numeric_Data /= null;
+   procedure Scan_Reals_18 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Actuators.Actuator_Length0'Range loop
+         if not (Input.Actuators.Actuator_Length0 (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Length0, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Actuators.Actuator_Lengthrange'Range loop
+         if not (Input.Actuators.Actuator_Lengthrange (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Actuator_Lengthrange, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sensors.Sensor_Cutoff'Range loop
+         if not (Input.Sensors.Sensor_Cutoff (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Sensor_Cutoff, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sensors.Sensor_Noise'Range loop
+         if not (Input.Sensors.Sensor_Noise (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Sensor_Noise, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sensors.Sensor_Delay'Range loop
+         if not (Input.Sensors.Sensor_Delay (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Sensor_Delay, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sensors.Sensor_Interval'Range loop
+         if not (Input.Sensors.Sensor_Interval (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Sensor_Interval, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Sensors.Sensor_User'Range loop
+         if not (Input.Sensors.Sensor_User (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Sensor_User, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Numerics.Numeric_Data'Range loop
+         if not (Input.Numerics.Numeric_Data (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Numeric_Data, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_18;
+
+   procedure Scan_Reals_19 (Input : Model; Diagnostic : out Load_Result) with
+     Pre => Input.Tuples.Tuple_Objprm /= null
+       and then Input.Keys.Key_Time /= null
+       and then Input.Keys.Key_Qpos /= null
+       and then Input.Keys.Key_Qvel /= null
+       and then Input.Keys.Key_Act /= null
+       and then Input.Keys.Key_Mpos /= null
+       and then Input.Keys.Key_Mquat /= null
+       and then Input.Keys.Key_Ctrl /= null;
+   procedure Scan_Reals_19 (Input : Model; Diagnostic : out Load_Result) is
+   begin
+      Diagnostic := OK_Result;
+      for I in Input.Tuples.Tuple_Objprm'Range loop
+         if not (Input.Tuples.Tuple_Objprm (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Tuple_Objprm, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Time'Range loop
+         if not (Input.Keys.Key_Time (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Time, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Qpos'Range loop
+         if not (Input.Keys.Key_Qpos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Qpos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Qvel'Range loop
+         if not (Input.Keys.Key_Qvel (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Qvel, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Act'Range loop
+         if not (Input.Keys.Key_Act (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Act, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Mpos'Range loop
+         if not (Input.Keys.Key_Mpos (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Mpos, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Mquat'Range loop
+         if not (Input.Keys.Key_Mquat (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Mquat, I);
+            return;
+         end if;
+      end loop;
+      for I in Input.Keys.Key_Ctrl'Range loop
+         if not (Input.Keys.Key_Ctrl (I) in Tier0_Real) then
+            Diagnostic := (Invalid_Parameter, Key_Ctrl, I);
+            return;
+         end if;
+      end loop;
+   end Scan_Reals_19;
+
 begin
-   Result := OK_Result;
-   for I in M.Qpos.Qpos0'Range loop
-      if not (M.Qpos.Qpos0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Qpos0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Qpos.Qpos0'First .. I => M.Qpos.Qpos0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Qpos.Qpos_Spring'Range loop
-      if not (M.Qpos.Qpos_Spring (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Qpos_Spring, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Qpos.Qpos_Spring'First .. I => M.Qpos.Qpos_Spring (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Pos'Range loop
-      if not (M.Bodies.Body_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Pos'First .. I => M.Bodies.Body_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Quat'Range loop
-      if not (M.Bodies.Body_Quat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Quat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Quat'First .. I => M.Bodies.Body_Quat (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Ipos'Range loop
-      if not (M.Bodies.Body_Ipos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Ipos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Ipos'First .. I => M.Bodies.Body_Ipos (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Iquat'Range loop
-      if not (M.Bodies.Body_Iquat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Iquat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Iquat'First .. I => M.Bodies.Body_Iquat (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Mass'Range loop
-      if not (M.Bodies.Body_Mass (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Mass, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Mass'First .. I => M.Bodies.Body_Mass (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Subtreemass'Range loop
-      if not (M.Bodies.Body_Subtreemass (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Subtreemass, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Subtreemass'First .. I => M.Bodies.Body_Subtreemass (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Inertia'Range loop
-      if not (M.Bodies.Body_Inertia (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Inertia, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Inertia'First .. I => M.Bodies.Body_Inertia (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Invweight0'Range loop
-      if not (M.Bodies.Body_Invweight0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Invweight0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Invweight0'First .. I => M.Bodies.Body_Invweight0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Gravcomp'Range loop
-      if not (M.Bodies.Body_Gravcomp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Gravcomp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Gravcomp'First .. I => M.Bodies.Body_Gravcomp (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_Margin'Range loop
-      if not (M.Bodies.Body_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_Margin'First .. I => M.Bodies.Body_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Bodies.Body_User'Range loop
-      if not (M.Bodies.Body_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Body_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bodies.Body_User'First .. I => M.Bodies.Body_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Bvh.Bvh_Aabb'Range loop
-      if not (M.Bvh.Bvh_Aabb (I) in Tier1_Real) then
-         Result := (Invalid_Parameter, Bvh_Aabb, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bvh.Bvh_Aabb'First .. I => M.Bvh.Bvh_Aabb (K) in Tier1_Real);
-   end loop;
-   for I in M.Bvh.Oct_Aabb'Range loop
-      if not (M.Bvh.Oct_Aabb (I) in Tier1_Real) then
-         Result := (Invalid_Parameter, Oct_Aabb, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bvh.Oct_Aabb'First .. I => M.Bvh.Oct_Aabb (K) in Tier1_Real);
-   end loop;
-   for I in M.Bvh.Oct_Coeff'Range loop
-      if not (M.Bvh.Oct_Coeff (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Oct_Coeff, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Bvh.Oct_Coeff'First .. I => M.Bvh.Oct_Coeff (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Solref'Range loop
-      if not (M.Joints.Jnt_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Solref'First .. I => M.Joints.Jnt_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Solimp'Range loop
-      if not (M.Joints.Jnt_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Solimp'First .. I => M.Joints.Jnt_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Pos'Range loop
-      if not (M.Joints.Jnt_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Pos'First .. I => M.Joints.Jnt_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Axis'Range loop
-      if not (M.Joints.Jnt_Axis (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Axis, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Axis'First .. I => M.Joints.Jnt_Axis (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Stiffness'Range loop
-      if not (M.Joints.Jnt_Stiffness (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Stiffness, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Stiffness'First .. I => M.Joints.Jnt_Stiffness (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Stiffnesspoly'Range loop
-      if not (M.Joints.Jnt_Stiffnesspoly (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Stiffnesspoly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Stiffnesspoly'First .. I => M.Joints.Jnt_Stiffnesspoly (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Range'Range loop
-      if not (M.Joints.Jnt_Range (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Range, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Range'First .. I => M.Joints.Jnt_Range (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Actfrcrange'Range loop
-      if not (M.Joints.Jnt_Actfrcrange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Actfrcrange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Actfrcrange'First .. I => M.Joints.Jnt_Actfrcrange (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_Margin'Range loop
-      if not (M.Joints.Jnt_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_Margin'First .. I => M.Joints.Jnt_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Joints.Jnt_User'Range loop
-      if not (M.Joints.Jnt_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Jnt_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Joints.Jnt_User'First .. I => M.Joints.Jnt_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Solref'Range loop
-      if not (M.Dofs.Dof_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Solref'First .. I => M.Dofs.Dof_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Solimp'Range loop
-      if not (M.Dofs.Dof_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Solimp'First .. I => M.Dofs.Dof_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Frictionloss'Range loop
-      if not (M.Dofs.Dof_Frictionloss (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Frictionloss, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Frictionloss'First .. I => M.Dofs.Dof_Frictionloss (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Armature'Range loop
-      if not (M.Dofs.Dof_Armature (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Armature, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Armature'First .. I => M.Dofs.Dof_Armature (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Damping'Range loop
-      if not (M.Dofs.Dof_Damping (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Damping, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Damping'First .. I => M.Dofs.Dof_Damping (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Dampingpoly'Range loop
-      if not (M.Dofs.Dof_Dampingpoly (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Dampingpoly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Dampingpoly'First .. I => M.Dofs.Dof_Dampingpoly (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Invweight0'Range loop
-      if not (M.Dofs.Dof_Invweight0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Invweight0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Invweight0'First .. I => M.Dofs.Dof_Invweight0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_M0'Range loop
-      if not (M.Dofs.Dof_M0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_M0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_M0'First .. I => M.Dofs.Dof_M0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Dofs.Dof_Length'Range loop
-      if not (M.Dofs.Dof_Length (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Dof_Length, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Dofs.Dof_Length'First .. I => M.Dofs.Dof_Length (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Solmix'Range loop
-      if not (M.Geoms.Geom_Solmix (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Solmix, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Solmix'First .. I => M.Geoms.Geom_Solmix (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Solref'Range loop
-      if not (M.Geoms.Geom_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Solref'First .. I => M.Geoms.Geom_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Solimp'Range loop
-      if not (M.Geoms.Geom_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Solimp'First .. I => M.Geoms.Geom_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Size'Range loop
-      if not (M.Geoms.Geom_Size (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Size, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Size'First .. I => M.Geoms.Geom_Size (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Aabb'Range loop
-      if not (M.Geoms.Geom_Aabb (I) in Tier1_Real) then
-         Result := (Invalid_Parameter, Geom_Aabb, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Aabb'First .. I => M.Geoms.Geom_Aabb (K) in Tier1_Real);
-   end loop;
-   for I in M.Geoms.Geom_Rbound'Range loop
-      if not (M.Geoms.Geom_Rbound (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Rbound, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Rbound'First .. I => M.Geoms.Geom_Rbound (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Pos'Range loop
-      if not (M.Geoms.Geom_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Pos'First .. I => M.Geoms.Geom_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Quat'Range loop
-      if not (M.Geoms.Geom_Quat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Quat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Quat'First .. I => M.Geoms.Geom_Quat (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Friction'Range loop
-      if not (M.Geoms.Geom_Friction (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Friction, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Friction'First .. I => M.Geoms.Geom_Friction (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Margin'Range loop
-      if not (M.Geoms.Geom_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Margin'First .. I => M.Geoms.Geom_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Gap'Range loop
-      if not (M.Geoms.Geom_Gap (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Gap, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Gap'First .. I => M.Geoms.Geom_Gap (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Surfacevel'Range loop
-      if not (M.Geoms.Geom_Surfacevel (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Surfacevel, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Surfacevel'First .. I => M.Geoms.Geom_Surfacevel (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Adhesion'Range loop
-      if not (M.Geoms.Geom_Adhesion (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Adhesion, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Adhesion'First .. I => M.Geoms.Geom_Adhesion (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_Fluid'Range loop
-      if not (M.Geoms.Geom_Fluid (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_Fluid, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_Fluid'First .. I => M.Geoms.Geom_Fluid (K) in Tier0_Real);
-   end loop;
-   for I in M.Geoms.Geom_User'Range loop
-      if not (M.Geoms.Geom_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Geom_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Geoms.Geom_User'First .. I => M.Geoms.Geom_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Sites.Site_Size'Range loop
-      if not (M.Sites.Site_Size (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Site_Size, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sites.Site_Size'First .. I => M.Sites.Site_Size (K) in Tier0_Real);
-   end loop;
-   for I in M.Sites.Site_Pos'Range loop
-      if not (M.Sites.Site_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Site_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sites.Site_Pos'First .. I => M.Sites.Site_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Sites.Site_Quat'Range loop
-      if not (M.Sites.Site_Quat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Site_Quat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sites.Site_Quat'First .. I => M.Sites.Site_Quat (K) in Tier0_Real);
-   end loop;
-   for I in M.Sites.Site_User'Range loop
-      if not (M.Sites.Site_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Site_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sites.Site_User'First .. I => M.Sites.Site_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Pos'Range loop
-      if not (M.Cameras.Cam_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Pos'First .. I => M.Cameras.Cam_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Quat'Range loop
-      if not (M.Cameras.Cam_Quat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Quat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Quat'First .. I => M.Cameras.Cam_Quat (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Poscom0'Range loop
-      if not (M.Cameras.Cam_Poscom0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Poscom0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Poscom0'First .. I => M.Cameras.Cam_Poscom0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Pos0'Range loop
-      if not (M.Cameras.Cam_Pos0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Pos0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Pos0'First .. I => M.Cameras.Cam_Pos0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Mat0'Range loop
-      if not (M.Cameras.Cam_Mat0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Mat0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Mat0'First .. I => M.Cameras.Cam_Mat0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Fovy'Range loop
-      if not (M.Cameras.Cam_Fovy (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Fovy, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Fovy'First .. I => M.Cameras.Cam_Fovy (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_Ipd'Range loop
-      if not (M.Cameras.Cam_Ipd (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_Ipd, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_Ipd'First .. I => M.Cameras.Cam_Ipd (K) in Tier0_Real);
-   end loop;
-   for I in M.Cameras.Cam_User'Range loop
-      if not (M.Cameras.Cam_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Cam_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Cameras.Cam_User'First .. I => M.Cameras.Cam_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Lights.Light_Pos'Range loop
-      if not (M.Lights.Light_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Light_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Pos'First .. I => M.Lights.Light_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Lights.Light_Dir'Range loop
-      if not (M.Lights.Light_Dir (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Light_Dir, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Dir'First .. I => M.Lights.Light_Dir (K) in Tier0_Real);
-   end loop;
-   for I in M.Lights.Light_Poscom0'Range loop
-      if not (M.Lights.Light_Poscom0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Light_Poscom0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Poscom0'First .. I => M.Lights.Light_Poscom0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Lights.Light_Pos0'Range loop
-      if not (M.Lights.Light_Pos0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Light_Pos0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Pos0'First .. I => M.Lights.Light_Pos0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Lights.Light_Dir0'Range loop
-      if not (M.Lights.Light_Dir0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Light_Dir0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Lights.Light_Dir0'First .. I => M.Lights.Light_Dir0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Solmix'Range loop
-      if not (M.Flexes.Flex_Solmix (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Solmix, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Solmix'First .. I => M.Flexes.Flex_Solmix (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Solref'Range loop
-      if not (M.Flexes.Flex_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Solref'First .. I => M.Flexes.Flex_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Solimp'Range loop
-      if not (M.Flexes.Flex_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Solimp'First .. I => M.Flexes.Flex_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Friction'Range loop
-      if not (M.Flexes.Flex_Friction (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Friction, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Friction'First .. I => M.Flexes.Flex_Friction (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Margin'Range loop
-      if not (M.Flexes.Flex_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Margin'First .. I => M.Flexes.Flex_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Gap'Range loop
-      if not (M.Flexes.Flex_Gap (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Gap, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Gap'First .. I => M.Flexes.Flex_Gap (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Vert'Range loop
-      if not (M.Flexes.Flex_Vert (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Vert, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Vert'First .. I => M.Flexes.Flex_Vert (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Vert0'Range loop
-      if not (M.Flexes.Flex_Vert0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Vert0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Vert0'First .. I => M.Flexes.Flex_Vert0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Vertmetric'Range loop
-      if not (M.Flexes.Flex_Vertmetric (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Vertmetric, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Vertmetric'First .. I => M.Flexes.Flex_Vertmetric (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Node'Range loop
-      if not (M.Flexes.Flex_Node (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Node, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Node'First .. I => M.Flexes.Flex_Node (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Node0'Range loop
-      if not (M.Flexes.Flex_Node0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Node0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Node0'First .. I => M.Flexes.Flex_Node0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flexedge_Length0'Range loop
-      if not (M.Flexes.Flexedge_Length0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flexedge_Length0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flexedge_Length0'First .. I => M.Flexes.Flexedge_Length0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flexedge_Invweight0'Range loop
-      if not (M.Flexes.Flexedge_Invweight0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flexedge_Invweight0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flexedge_Invweight0'First .. I => M.Flexes.Flexedge_Invweight0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Radius'Range loop
-      if not (M.Flexes.Flex_Radius (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Radius, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Radius'First .. I => M.Flexes.Flex_Radius (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Size'Range loop
-      if not (M.Flexes.Flex_Size (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Size, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Size'First .. I => M.Flexes.Flex_Size (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Stiffness'Range loop
-      if not (M.Flexes.Flex_Stiffness (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Stiffness, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Stiffness'First .. I => M.Flexes.Flex_Stiffness (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Bending'Range loop
-      if not (M.Flexes.Flex_Bending (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Bending, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Bending'First .. I => M.Flexes.Flex_Bending (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Efm0_L'Range loop
-      if not (M.Flexes.Efm0_L (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Efm0_L, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Efm0_L'First .. I => M.Flexes.Efm0_L (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Damping'Range loop
-      if not (M.Flexes.Flex_Damping (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Damping, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Damping'First .. I => M.Flexes.Flex_Damping (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Edgestiffness'Range loop
-      if not (M.Flexes.Flex_Edgestiffness (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Edgestiffness, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Edgestiffness'First .. I => M.Flexes.Flex_Edgestiffness (K) in Tier0_Real);
-   end loop;
-   for I in M.Flexes.Flex_Edgedamping'Range loop
-      if not (M.Flexes.Flex_Edgedamping (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Flex_Edgedamping, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Flexes.Flex_Edgedamping'First .. I => M.Flexes.Flex_Edgedamping (K) in Tier0_Real);
-   end loop;
-   for I in M.Meshes.Mesh_Scale'Range loop
-      if not (M.Meshes.Mesh_Scale (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Mesh_Scale, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Meshes.Mesh_Scale'First .. I => M.Meshes.Mesh_Scale (K) in Tier0_Real);
-   end loop;
-   for I in M.Meshes.Mesh_Pos'Range loop
-      if not (M.Meshes.Mesh_Pos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Mesh_Pos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Meshes.Mesh_Pos'First .. I => M.Meshes.Mesh_Pos (K) in Tier0_Real);
-   end loop;
-   for I in M.Meshes.Mesh_Quat'Range loop
-      if not (M.Meshes.Mesh_Quat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Mesh_Quat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Meshes.Mesh_Quat'First .. I => M.Meshes.Mesh_Quat (K) in Tier0_Real);
-   end loop;
-   for I in M.Meshes.Mesh_Polynormal'Range loop
-      if not (M.Meshes.Mesh_Polynormal (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Mesh_Polynormal, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Meshes.Mesh_Polynormal'First .. I => M.Meshes.Mesh_Polynormal (K) in Tier0_Real);
-   end loop;
-   for I in M.Hfields.Hfield_Size'Range loop
-      if not (M.Hfields.Hfield_Size (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Hfield_Size, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Hfields.Hfield_Size'First .. I => M.Hfields.Hfield_Size (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Solref'Range loop
-      if not (M.Pairs.Pair_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Solref'First .. I => M.Pairs.Pair_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Solreffriction'Range loop
-      if not (M.Pairs.Pair_Solreffriction (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Solreffriction, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Solreffriction'First .. I => M.Pairs.Pair_Solreffriction (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Solimp'Range loop
-      if not (M.Pairs.Pair_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Solimp'First .. I => M.Pairs.Pair_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Margin'Range loop
-      if not (M.Pairs.Pair_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Margin'First .. I => M.Pairs.Pair_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Gap'Range loop
-      if not (M.Pairs.Pair_Gap (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Gap, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Gap'First .. I => M.Pairs.Pair_Gap (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Adhesion'Range loop
-      if not (M.Pairs.Pair_Adhesion (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Adhesion, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Adhesion'First .. I => M.Pairs.Pair_Adhesion (K) in Tier0_Real);
-   end loop;
-   for I in M.Pairs.Pair_Friction'Range loop
-      if not (M.Pairs.Pair_Friction (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Pair_Friction, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Pairs.Pair_Friction'First .. I => M.Pairs.Pair_Friction (K) in Tier0_Real);
-   end loop;
-   for I in M.Equalities.Eq_Solref'Range loop
-      if not (M.Equalities.Eq_Solref (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Eq_Solref, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Equalities.Eq_Solref'First .. I => M.Equalities.Eq_Solref (K) in Tier0_Real);
-   end loop;
-   for I in M.Equalities.Eq_Solimp'Range loop
-      if not (M.Equalities.Eq_Solimp (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Eq_Solimp, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Equalities.Eq_Solimp'First .. I => M.Equalities.Eq_Solimp (K) in Tier0_Real);
-   end loop;
-   for I in M.Equalities.Eq_Data'Range loop
-      if not (M.Equalities.Eq_Data (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Eq_Data, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Equalities.Eq_Data'First .. I => M.Equalities.Eq_Data (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Width'Range loop
-      if not (M.Tendons.Tendon_Width (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Width, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Width'First .. I => M.Tendons.Tendon_Width (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Solref_Lim'Range loop
-      if not (M.Tendons.Tendon_Solref_Lim (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Solref_Lim, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Solref_Lim'First .. I => M.Tendons.Tendon_Solref_Lim (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Solimp_Lim'Range loop
-      if not (M.Tendons.Tendon_Solimp_Lim (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Solimp_Lim, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Solimp_Lim'First .. I => M.Tendons.Tendon_Solimp_Lim (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Solref_Fri'Range loop
-      if not (M.Tendons.Tendon_Solref_Fri (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Solref_Fri, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Solref_Fri'First .. I => M.Tendons.Tendon_Solref_Fri (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Solimp_Fri'Range loop
-      if not (M.Tendons.Tendon_Solimp_Fri (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Solimp_Fri, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Solimp_Fri'First .. I => M.Tendons.Tendon_Solimp_Fri (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Range'Range loop
-      if not (M.Tendons.Tendon_Range (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Range, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Range'First .. I => M.Tendons.Tendon_Range (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Actfrcrange'Range loop
-      if not (M.Tendons.Tendon_Actfrcrange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Actfrcrange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Actfrcrange'First .. I => M.Tendons.Tendon_Actfrcrange (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Margin'Range loop
-      if not (M.Tendons.Tendon_Margin (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Margin, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Margin'First .. I => M.Tendons.Tendon_Margin (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Stiffness'Range loop
-      if not (M.Tendons.Tendon_Stiffness (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Stiffness, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Stiffness'First .. I => M.Tendons.Tendon_Stiffness (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Stiffnesspoly'Range loop
-      if not (M.Tendons.Tendon_Stiffnesspoly (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Stiffnesspoly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Stiffnesspoly'First .. I => M.Tendons.Tendon_Stiffnesspoly (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Damping'Range loop
-      if not (M.Tendons.Tendon_Damping (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Damping, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Damping'First .. I => M.Tendons.Tendon_Damping (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Dampingpoly'Range loop
-      if not (M.Tendons.Tendon_Dampingpoly (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Dampingpoly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Dampingpoly'First .. I => M.Tendons.Tendon_Dampingpoly (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Armature'Range loop
-      if not (M.Tendons.Tendon_Armature (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Armature, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Armature'First .. I => M.Tendons.Tendon_Armature (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Frictionloss'Range loop
-      if not (M.Tendons.Tendon_Frictionloss (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Frictionloss, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Frictionloss'First .. I => M.Tendons.Tendon_Frictionloss (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Lengthspring'Range loop
-      if not (M.Tendons.Tendon_Lengthspring (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Lengthspring, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Lengthspring'First .. I => M.Tendons.Tendon_Lengthspring (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Length0'Range loop
-      if not (M.Tendons.Tendon_Length0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Length0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Length0'First .. I => M.Tendons.Tendon_Length0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_Invweight0'Range loop
-      if not (M.Tendons.Tendon_Invweight0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_Invweight0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_Invweight0'First .. I => M.Tendons.Tendon_Invweight0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Tendons.Tendon_User'Range loop
-      if not (M.Tendons.Tendon_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tendon_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tendons.Tendon_User'First .. I => M.Tendons.Tendon_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Wraps.Wrap_Prm'Range loop
-      if not (M.Wraps.Wrap_Prm (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Wrap_Prm, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Wraps.Wrap_Prm'First .. I => M.Wraps.Wrap_Prm (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Cranklength'Range loop
-      if not (M.Actuators.Actuator_Cranklength (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Cranklength, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Cranklength'First .. I => M.Actuators.Actuator_Cranklength (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Dynprm'Range loop
-      if not (M.Actuators.Actuator_Dynprm (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Dynprm, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Dynprm'First .. I => M.Actuators.Actuator_Dynprm (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Gainprm'Range loop
-      if not (M.Actuators.Actuator_Gainprm (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Gainprm, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Gainprm'First .. I => M.Actuators.Actuator_Gainprm (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Biasprm'Range loop
-      if not (M.Actuators.Actuator_Biasprm (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Biasprm, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Biasprm'First .. I => M.Actuators.Actuator_Biasprm (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Actrange'Range loop
-      if not (M.Actuators.Actuator_Actrange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Actrange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Actrange'First .. I => M.Actuators.Actuator_Actrange (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Delay'Range loop
-      if not (M.Actuators.Actuator_Delay (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Delay, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Delay'First .. I => M.Actuators.Actuator_Delay (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Damping'Range loop
-      if not (M.Actuators.Actuator_Damping (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Damping, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Damping'First .. I => M.Actuators.Actuator_Damping (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Dampingpoly'Range loop
-      if not (M.Actuators.Actuator_Dampingpoly (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Dampingpoly, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Dampingpoly'First .. I => M.Actuators.Actuator_Dampingpoly (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Armature'Range loop
-      if not (M.Actuators.Actuator_Armature (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Armature, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Armature'First .. I => M.Actuators.Actuator_Armature (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_User'Range loop
-      if not (M.Actuators.Actuator_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_User'First .. I => M.Actuators.Actuator_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Forcerange'Range loop
-      if not (M.Actuators.Actuator_Forcerange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Forcerange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Forcerange'First .. I => M.Actuators.Actuator_Forcerange (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Ctrlrange'Range loop
-      if not (M.Actuators.Actuator_Ctrlrange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Ctrlrange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Ctrlrange'First .. I => M.Actuators.Actuator_Ctrlrange (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Gear'Range loop
-      if not (M.Actuators.Actuator_Gear (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Gear, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Gear'First .. I => M.Actuators.Actuator_Gear (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Acc0'Range loop
-      if not (M.Actuators.Actuator_Acc0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Acc0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Acc0'First .. I => M.Actuators.Actuator_Acc0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Length0'Range loop
-      if not (M.Actuators.Actuator_Length0 (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Length0, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Length0'First .. I => M.Actuators.Actuator_Length0 (K) in Tier0_Real);
-   end loop;
-   for I in M.Actuators.Actuator_Lengthrange'Range loop
-      if not (M.Actuators.Actuator_Lengthrange (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Actuator_Lengthrange, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Actuators.Actuator_Lengthrange'First .. I => M.Actuators.Actuator_Lengthrange (K) in Tier0_Real);
-   end loop;
-   for I in M.Sensors.Sensor_Cutoff'Range loop
-      if not (M.Sensors.Sensor_Cutoff (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Sensor_Cutoff, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sensors.Sensor_Cutoff'First .. I => M.Sensors.Sensor_Cutoff (K) in Tier0_Real);
-   end loop;
-   for I in M.Sensors.Sensor_Noise'Range loop
-      if not (M.Sensors.Sensor_Noise (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Sensor_Noise, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sensors.Sensor_Noise'First .. I => M.Sensors.Sensor_Noise (K) in Tier0_Real);
-   end loop;
-   for I in M.Sensors.Sensor_Delay'Range loop
-      if not (M.Sensors.Sensor_Delay (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Sensor_Delay, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sensors.Sensor_Delay'First .. I => M.Sensors.Sensor_Delay (K) in Tier0_Real);
-   end loop;
-   for I in M.Sensors.Sensor_Interval'Range loop
-      if not (M.Sensors.Sensor_Interval (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Sensor_Interval, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sensors.Sensor_Interval'First .. I => M.Sensors.Sensor_Interval (K) in Tier0_Real);
-   end loop;
-   for I in M.Sensors.Sensor_User'Range loop
-      if not (M.Sensors.Sensor_User (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Sensor_User, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Sensors.Sensor_User'First .. I => M.Sensors.Sensor_User (K) in Tier0_Real);
-   end loop;
-   for I in M.Numerics.Numeric_Data'Range loop
-      if not (M.Numerics.Numeric_Data (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Numeric_Data, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Numerics.Numeric_Data'First .. I => M.Numerics.Numeric_Data (K) in Tier0_Real);
-   end loop;
-   for I in M.Tuples.Tuple_Objprm'Range loop
-      if not (M.Tuples.Tuple_Objprm (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Tuple_Objprm, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Tuples.Tuple_Objprm'First .. I => M.Tuples.Tuple_Objprm (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Time'Range loop
-      if not (M.Keys.Key_Time (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Time, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Time'First .. I => M.Keys.Key_Time (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Qpos'Range loop
-      if not (M.Keys.Key_Qpos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Qpos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Qpos'First .. I => M.Keys.Key_Qpos (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Qvel'Range loop
-      if not (M.Keys.Key_Qvel (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Qvel, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Qvel'First .. I => M.Keys.Key_Qvel (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Act'Range loop
-      if not (M.Keys.Key_Act (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Act, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Act'First .. I => M.Keys.Key_Act (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Mpos'Range loop
-      if not (M.Keys.Key_Mpos (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Mpos, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Mpos'First .. I => M.Keys.Key_Mpos (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Mquat'Range loop
-      if not (M.Keys.Key_Mquat (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Mquat, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Mquat'First .. I => M.Keys.Key_Mquat (K) in Tier0_Real);
-   end loop;
-   for I in M.Keys.Key_Ctrl'Range loop
-      if not (M.Keys.Key_Ctrl (I) in Tier0_Real) then
-         Result := (Invalid_Parameter, Key_Ctrl, I);
-         return;
-      end if;
-      pragma Loop_Invariant (for all K in M.Keys.Key_Ctrl'First .. I => M.Keys.Key_Ctrl (K) in Tier0_Real);
-   end loop;
+   if Reals_In_Tier0 (M) then
+      Result := OK_Result;
+      return;
+   end if;
+   --  The predicate established failure; the scans locate its first field.
+   Scan_Reals_1 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_2 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_3 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_4 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_5 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_6 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_7 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_8 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_9 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_10 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_11 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_12 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_13 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_14 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_15 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_16 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_17 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_18 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Scan_Reals_19 (M, Result);
+   if Result.Status /= OK then
+      return;
+   end if;
+   Result := (Invalid_Parameter, Header, -1);
 end Diagnose_Reals;

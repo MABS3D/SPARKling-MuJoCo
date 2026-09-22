@@ -72,11 +72,24 @@ begin
    M.Bodies.Body_Jntnum (1) := M.S.Njnt + 1;
    Expect (Invalid_Reference, Body_Jntadr, 1, "jntnum past njnt");
 
+   --  Chunked diagnostics retain field order and the first offending index
+   --  even when several arrays, and several elements, fail together.
+   M.Bodies.Body_Parentid (1) := -1;
+   M.Bodies.Body_Parentid (2) := -1;
+   M.Geoms.Geom_Matid (0) := -2;
+   Expect (Invalid_Reference, Body_Parentid, 1, "first reference across chunks");
+
    --  flags and real ranges (generated clauses)
    M.Joints.Jnt_Limited (0) := 2;
    Expect (Invalid_Parameter, Jnt_Limited, 0, "flag byte 2");
    M.Bodies.Body_Mass (1) := 1.0e11;
    Expect (Invalid_Parameter, Body_Mass, 1, "mass above Max_Val");
+   M.Bodies.Body_Mass (1) := 1.0e11;
+   M.Geoms.Geom_Friction (0) := 1.0e11;
+   Expect (Invalid_Parameter, Body_Mass, 1, "first real array across chunks");
+   M.Joints.Jnt_Limited (0) := 2;
+   M.Actuators.Actuator_Ctrllimited (0) := 2;
+   Expect (Invalid_Parameter, Jnt_Limited, 0, "first Boolean array across chunks");
 
    --  body tree
    M.Bodies.Body_Parentid (1) := 1;
@@ -162,6 +175,14 @@ begin
    M.Actuators.Actuator_Ctrlrange (0) := 2.0;
    M.Actuators.Actuator_Ctrlrange (1) := 1.0;
    Expect (Invalid_Parameter, Actuator_Ctrlrange, 0, "inverted control range");
+   M.Actuators.Actuator_Forcelimited (0) := 1;
+   M.Actuators.Actuator_Forcerange (0) := 2.0;
+   M.Actuators.Actuator_Forcerange (1) := 1.0;
+   Expect (Invalid_Parameter, Actuator_Forcerange, 0, "inverted force range names its own field");
+   M.Actuators.Actuator_Actlimited (0) := 1;
+   M.Actuators.Actuator_Actrange (0) := 2.0;
+   M.Actuators.Actuator_Actrange (1) := 1.0;
+   Expect (Invalid_Parameter, Actuator_Actrange, 0, "inverted activation range names its own field");
 
    --  equality-free, tendon-free humanoid: corrupt the names buffer instead
    M.Names.Names (M.S.Nnames - 1) := Character'Pos ('x');

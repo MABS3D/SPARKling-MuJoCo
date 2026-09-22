@@ -1,0 +1,14 @@
+with "../sparkling_mujoco.gpr";
+project Differential is
+   for Source_Dirs use (".");
+   for Object_Dir use Sparkling_Mujoco.Build_Root & "/obj/differential";
+   for Exec_Dir use Sparkling_Mujoco.Build_Root & "/bin";
+   for Create_Missing_Dirs use "True";
+   for Main use ("blas_probe.adb");
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-g", "-gnata", "-gnato");
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use Sparkling_Mujoco.Link_Switches;
+   end Linker;
+end Differential;
