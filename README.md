@@ -1,204 +1,122 @@
-<h1>
-  <a href="#"><img alt="MuJoCo" src="banner.png" width="100%"/></a>
-</h1>
+# SPARKling MuJoCo
 
-<p>
-  <a href="https://github.com/google-deepmind/mujoco/actions/workflows/build.yml?query=branch%3Amain" alt="GitHub Actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/google-deepmind/mujoco/build.yml?branch=main">
-  </a>
-  <a href="https://mujoco.readthedocs.io/" alt="Documentation">
-    <img src="https://readthedocs.org/projects/mujoco/badge/?version=latest">
-  </a>
-  <a href="https://github.com/google-deepmind/mujoco/blob/main/LICENSE" alt="License">
-    <img src="https://img.shields.io/github/license/google-deepmind/mujoco">
-  </a>
-</p>
+**We might be a little mad: we want to port MuJoCo to Ada/SPARK.**
 
-**MuJoCo** stands for **Mu**lti-**Jo**int dynamics with **Co**ntact. It is a
-general purpose physics engine that aims to facilitate research and development
-in robotics, biomechanics, graphics and animation, machine learning, and other
-areas which demand fast and accurate simulation of articulated structures
-interacting with their environment.
+MuJoCo is a sophisticated physics engine. Rebuilding its engine in a language
+that lets us prove properties of the implementation is an ambitious way to spend
+our evenings. We are doing it anyway, one small, testable piece at a time.
 
-This repository is maintained by [Google DeepMind](https://www.deepmind.com/).
+The goal is a SPARK port of the MuJoCo engine and its visualization geometry,
+with explicit contracts, checked data flow, proofs of runtime safety, and
+numerical comparisons against the original C implementation.
 
-MuJoCo has a C API and is intended for researchers and developers. The runtime
-simulation module is tuned to maximize performance and operates on low-level
-data structures that are preallocated by the built-in XML compiler. The library
-includes interactive visualization with a native GUI, rendered in OpenGL. MuJoCo
-further exposes a large number of utility functions for computing
-physics-related quantities.
+This is an independent, early-stage project. It is not a complete simulator,
+an official MuJoCo distribution, or a drop-in replacement.
 
-We also provide [Python bindings] and a plug-in for the [Unity] game engine.
+## What exists today
 
-## Documentation
+- Ada model types and generated structures based on the MuJoCo C tables.
+- Binary `.mjb` loading, allocation, cleanup, and model validation.
+- Structural and numeric validity predicates, capacity calculations, and
+  diagnostics for malformed models.
+- Four initial bounded numeric kernels: `Add3`, `Sub3`, `Scl3`, and `Dot3`.
+- Corpus tests, corruption tests, proof-report checks, reproducible generation
+  checks, and a differential harness that compiles the actual MuJoCo C kernels.
+- Development, validation, and release build profiles, with resource guards
+  around expensive builds and proofs.
 
-MuJoCo's documentation can be found at [mujoco.readthedocs.io]. Upcoming
-features due for the next release can be found in the [changelog] in the
-"latest" branch.
+The validator and its proofs are actively being refactored. This snapshot does
+**not** claim a complete, passing whole-library proof. Passing tests or a proof
+of one function must not be presented as verification of the entire engine.
 
-## Getting Started
+The numeric comparison suite contains 2,102 input cases and 21,020 scalar
+comparisons for the four implemented kernels. These are correctness checks,
+not performance benchmarks. We have not demonstrated a speed advantage over C.
 
-There are two easy ways to get started with MuJoCo:
+## The approach
 
-1. **Run `simulate` on your machine.**
-[This video](https://www.youtube.com/watch?v=P83tKA1iz2Y) shows a screen capture
-of `simulate`, MuJoCo's native interactive viewer. Follow the steps described in
-the [Getting Started] section of the documentation to get `simulate` running on
-your machine.
+Start with a model validator. Establish the layout and index properties that
+the simulation code will need, then express those requirements in contracts.
+Build the numerical and physical routines on that foundation, checking each
+increment against C as it becomes usable.
 
-2. **Explore our online IPython notebooks.**
-If you are a Python user, you might want to start with our tutorial notebooks
-running on Google Colab:
+Formal verification establishes the properties we specify; it does not
+automatically establish physical correctness, numerical equivalence, or solver
+convergence. Differential tests and numerical analysis remain essential.
 
- - The **introductory** tutorial teaches MuJoCo basics:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb)
- - The **Model Editing** tutorial shows how to create and edit models procedurally:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/mjspec.ipynb)
- - The **rollout** tutorial shows how to use the multithreaded `rollout` module:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/rollout.ipynb)
- - The **LQR** tutorial synthesizes a linear-quadratic controller, balancing a
-   humanoid on one leg:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/LQR.ipynb)
- - The **least-squares** tutorial explains how to use the Python-based nonlinear
-   least-squares solver:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/least_squares.ipynb)
- - The **MJX** tutorial provides usage examples of
-   [MuJoCo XLA](https://mujoco.readthedocs.io/en/stable/mjx.html), a branch of MuJoCo written in JAX:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/mjx/tutorial.ipynb)
- - The **differentiable physics** tutorial trains locomotion policies with
-   analytical gradients automatically derived from MuJoCo's physics step:
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/mjx/training_apg.ipynb)
+The current explicit trusted code boundaries include file I/O and two
+bit-to-floating-point conversions. Proof-context annotations are documented in
+[the justification ledger](docs/proof-justifications.md).
 
-## Installation
+## Where we are going
 
-### Prebuilt binaries
+1. Finish the foundation and validator verification.
+2. Extend the numeric kernels: spatial algebra, quaternions, sparse operations,
+   and factorizations.
+3. Build `Data`, state management, unconstrained dynamics, and integration.
+4. Add collision detection, contacts, constraints, and solvers.
+5. Expand sensors, state APIs, inverse dynamics, and other engine services.
+6. Tackle advanced features such as derivatives and implicit integration.
+7. Port visualization geometry and measure performance against C.
 
-Versioned releases are available as precompiled binaries from the GitHub
-[releases page], built for Linux (x86-64 and AArch64), Windows (x86-64 only),
-and macOS (universal). This is the recommended way to use the software.
+We intend to grow through working examples, starting with simple systems
+without contacts, rather than waiting for every subsystem to be finished.
+The ambitions in `bible.md` describe the destination, not the current status.
 
-### Building from source
+The initial target is binary64 and single-threaded execution. Flex and
+plugin-dependent models are currently rejected. The upstream compiler produces
+the binary models used by the tests; an XML compiler is not implemented here.
 
-Users who wish to build MuJoCo from source should consult the [build from
-source] section of the documentation. However, note that the commit at
-the tip of the `main` branch may be unstable.
+## Reference version
 
-### Python (>= 3.10)
+The `mujoco/` submodule pins MuJoCo **3.12.0**, commit
+`13827e9ee56f097f57acf69ae52b078f9839682d`.
 
-The native Python bindings, which come pre-packaged with a copy of MuJoCo, can
-be installed from [PyPI] via:
+After cloning, initialize the reference sources:
 
-```bash
-pip install mujoco
+```sh
+git submodule update --init --recursive
 ```
 
-Note that Pre-built Linux wheels target `manylinux2014`, see
-[here](https://github.com/pypa/manylinux) for compatible distributions. For more
-information such as building the bindings from source, see the [Python bindings]
-section of the documentation.
+The C differential harness also checks recorded hashes of its reference source
+and headers. See [numeric-kernels.md](docs/numeric-kernels.md) for the contracts,
+test inputs, and floating-point tolerances.
 
-## Versioning
+## Building and checking
 
-We aim to release MuJoCo in the first week of each month. Our versioning
-standards changed to modified Semantic Versioning in 3.5.0,
-see [versioning](VERSIONING.md) for details.
+Read [the toolchain notes](docs/toolchain.md) first. The project uses GNAT and
+GNATprove 16, GPRbuild, Python, and a C compiler. Alire can resolve the Ada tools.
+Proof workloads can be substantial; keep the resource guards enabled and use
+separate build directories for independent runs.
 
-## Contributing
+Prepare the test corpus with the pinned Python reference package:
 
-We welcome community engagement: questions, requests for help, bug reports and
-feature requests. To read more about bug reports, feature requests and more
-ambitious contributions, please see our [contributors guide](CONTRIBUTING.md)
-and [style guide](STYLEGUIDE.md).
-
-## Asking Questions
-
-Questions and requests for help are welcome as a GitHub
-["Asking for Help" Discussion](https://github.com/google-deepmind/mujoco/discussions/categories/asking-for-help)
-and should focus on a specific problem or question.
-
-## Bug reports and feature requests
-
-GitHub [Issues](https://github.com/google-deepmind/mujoco/issues) are reserved
-for bug reports, feature requests and other development-related subjects.
-
-## Related software
-MuJoCo is the backbone for numerous environment packages. Below we list several
-bindings and converters.
-
-### Bindings
-
-These packages give users of various languages access to MuJoCo functionality:
-
-#### First-party bindings:
-
-- [Python bindings](https://mujoco.readthedocs.io/en/stable/python.html)
-  - [dm_control](https://github.com/google-deepmind/dm_control), Google
-    DeepMind's related environment stack, includes
-    [PyMJCF](https://github.com/google-deepmind/dm_control/blob/main/dm_control/mjcf/README.md),
-    a module for procedural manipulation of MuJoCo models.
-- [JavaScript bindings and WebAssembly support](/wasm/README.md) (inspired [stillonearth](https://github.com/stillonearth) and [zalo](https://github.com/zalo)'s community projects; [mjswan](https://github.com/ttktjmt/mjswan) extends these with real-time policy control, interactive force
-application, and more).
-- [C# bindings and Unity plug-in](https://mujoco.readthedocs.io/en/stable/unity.html)
-
-#### Third-party bindings:
-
-- **MATLAB Simulink**: [Simulink Blockset for MuJoCo Simulator](https://github.com/mathworks-robotics/mujoco-simulink-blockset)
-  by [Manoj Velmurugan](https://github.com/vmanoj1996).
-- **Swift**: [swift-mujoco](https://github.com/liuliu/swift-mujoco)
-- **Java**: [mujoco-java](https://github.com/CommonWealthRobotics/mujoco-java)
-- **Julia**: [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl)
-- **Rust**: [MuJoCo-rs](https://github.com/davidhozic/mujoco-rs)
-
-### Converters
-
-- **OpenSim**: [MyoConverter](https://github.com/MyoHub/myoconverter) converts
-  OpenSim models to MJCF.
-- **SDFormat**: [gz-mujoco](https://github.com/gazebosim/gz-mujoco/) is a
-  two-way SDFormat <-> MJCF conversion tool.
-- **OBJ**: [obj2mjcf](https://github.com/kevinzakka/obj2mjcf)
-  a script for converting composite OBJ files into a loadable MJCF model.
-- **onshape**: [Onshape to Robot](https://github.com/rhoban/onshape-to-robot)
-  Converts [onshape](https://www.onshape.com/en/) CAD assemblies to MJCF.
-
-## Citation
-
-If you use MuJoCo for published research, please cite:
-
-```
-@inproceedings{todorov2012mujoco,
-  title={MuJoCo: A physics engine for model-based control},
-  author={Todorov, Emanuel and Erez, Tom and Tassa, Yuval},
-  booktitle={2012 IEEE/RSJ International Conference on Intelligent Robots and Systems},
-  pages={5026--5033},
-  year={2012},
-  organization={IEEE},
-  doi={10.1109/IROS.2012.6386109}
-}
+```sh
+python -m pip install mujoco==3.12.0
+python tools/oracle.py corpus
 ```
 
-## License and Disclaimer
+Run the combined generation, build-profile, test, tool, and proof checks:
 
-Copyright 2021 DeepMind Technologies Limited.
+```sh
+python tools/check_all.py --alire
+```
 
-Box collision code ([`engine_collision_box.c`](https://github.com/google-deepmind/mujoco/blob/main/src/engine/engine_collision_box.c))
-is Copyright 2016 Svetoslav Kolev.
+If the native tools are already on `PATH`, omit `--alire`. Set
+`SPARKLING_BUILD_ROOT` to place build artifacts outside the source tree.
+The checks intentionally fail when required proof reports or test executables
+are missing, stale, or incomplete. The full proof gate is still a development
+target, not a promised green build for this work-in-progress snapshot.
 
-ReStructuredText documents, images, and videos in the `doc` directory are made
-available under the terms of the Creative Commons Attribution 4.0 (CC BY 4.0)
-license. You may obtain a copy of the License at
-https://creativecommons.org/licenses/by/4.0/legalcode.
+## Contributions
 
-Source code is licensed under the Apache License, Version 2.0. You may obtain a
-copy of the License at https://www.apache.org/licenses/LICENSE-2.0.
+Small, reviewable changes are welcome: a bounded kernel with a useful contract,
+a reproducible mismatch against C, a better invariant, or a regression test for
+a malformed model. Keep verification claims scoped to the evidence and explain
+any numerical tolerance.
 
-This is not an officially supported Google product.
+The project declares Apache-2.0 in `alire.toml`. Upstream MuJoCo and its bundled
+dependencies retain their respective licenses and notices in the submodule.
 
-[build from source]: https://mujoco.readthedocs.io/en/latest/programming#building-from-source
-[Getting Started]: https://mujoco.readthedocs.io/en/latest/programming#getting-started
-[Unity]: https://unity.com/
-[releases page]: https://github.com/google-deepmind/mujoco/releases
-[mujoco.readthedocs.io]: https://mujoco.readthedocs.io
-[changelog]: https://mujoco.readthedocs.io/en/latest/changelog.html
-[Python bindings]: https://mujoco.readthedocs.io/en/stable/python.html#python-bindings
-[PyPI]: https://pypi.org/project/mujoco/
+Ambitious? Yes. A little unreasonable? Probably. Let's see how much physics we
+can make explicit enough to prove.

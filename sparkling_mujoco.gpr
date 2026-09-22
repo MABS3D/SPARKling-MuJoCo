@@ -1,0 +1,47 @@
+library project Sparkling_Mujoco is
+
+   type Mode_Type is ("development", "validation", "release");
+   Mode : Mode_Type := external ("SPARKLING_BUILD_MODE", "development");
+
+   Build_Root := external ("SPARKLING_BUILD_ROOT", Sparkling_Mujoco'Project_Dir);
+
+   for Library_Name use "sparkling_mujoco";
+   for Library_Kind use "static";
+   for Source_Dirs use ("src", "src/gen");
+   for Object_Dir use Build_Root & "/obj/" & Mode;
+   for Library_Dir use Build_Root & "/lib/" & Mode;
+   for Create_Missing_Dirs use "True";
+
+   Common := ("-gnat2022", "-gnatwa", "-gnatw.X");
+   Link_Switches := ();
+   case Mode is
+      when "release" =>
+         Link_Switches := ("-flto", "-fuse-linker-plugin");
+      when others => null;
+   end case;
+
+   package Compiler is
+      case Mode is
+         when "release" =>
+            for Default_Switches ("Ada") use Common &
+              ("-O3", "-march=native", "-flto", "-ffat-lto-objects", "-gnatn", "-gnatp",
+               "-ffinite-math-only", "-fno-trapping-math", "-fno-math-errno");
+         when "validation" =>
+            for Default_Switches ("Ada") use Common &
+              ("-O2", "-g", "-gnata", "-gnato", "-gnatVa");
+         when "development" =>
+            for Default_Switches ("Ada") use Common &
+              ("-O0", "-g", "-gnata", "-gnato", "-gnatVa");
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+
+   package Prove is
+      for Proof_Switches ("Ada") use
+        ("--level=2", "--timeout=60", "-j2", "--counterexamples=off");
+   end Prove;
+
+end Sparkling_Mujoco;

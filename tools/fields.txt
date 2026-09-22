@@ -1,0 +1,1121 @@
+META version 3012000
+META sizeof_mjtNum 8
+META mjNREF 2
+META mjNIMP 5
+META mjNPOLY 2
+META mjNSENS 3
+META mjNGAIN 10
+META mjNBIAS 10
+META mjNDYN 10
+META mjNFLUID 12
+META mjNEQDATA 11
+META mjNTEXROLE 10
+META mjNGEOMTYPES 9
+SIZE nq
+SIZE nv
+SIZE nu
+SIZE nactuator
+SIZE nout
+SIZE na
+SIZE nbody
+SIZE nbvh
+SIZE nbvhstatic
+SIZE nbvhdynamic
+SIZE noct
+SIZE njnt
+SIZE ntree
+SIZE nM
+SIZE nB
+SIZE nC
+SIZE nD
+SIZE ngeom
+SIZE nsite
+SIZE ncam
+SIZE nlight
+SIZE nflex
+SIZE nflexnode
+SIZE nflexvert
+SIZE nflexedge
+SIZE nflexelem
+SIZE nflexelemdata
+SIZE nflexstiffness
+SIZE nflexbending
+SIZE nefm0dof
+SIZE nefm0L
+SIZE nflexelemedge
+SIZE nflexshelldata
+SIZE nflexevpair
+SIZE nflextexcoord
+SIZE nJfe
+SIZE nJfv
+SIZE nmesh
+SIZE nmeshvert
+SIZE nmeshnormal
+SIZE nmeshtexcoord
+SIZE nmeshface
+SIZE nmeshgraph
+SIZE nmeshpoly
+SIZE nmeshpolyvert
+SIZE nmeshpolymap
+SIZE nskin
+SIZE nskinvert
+SIZE nskintexvert
+SIZE nskinface
+SIZE nskinbone
+SIZE nskinbonevert
+SIZE nhfield
+SIZE nhfielddata
+SIZE ntex
+SIZE ntexdata
+SIZE nmat
+SIZE npair
+SIZE nexclude
+SIZE neq
+SIZE ntendon
+SIZE nJten
+SIZE nwrap
+SIZE nsensor
+SIZE nnumeric
+SIZE nnumericdata
+SIZE ntext
+SIZE ntextdata
+SIZE ntuple
+SIZE ntupledata
+SIZE nkey
+SIZE nmocap
+SIZE nplugin
+SIZE npluginattr
+SIZE nuser_body
+SIZE nuser_jnt
+SIZE nuser_geom
+SIZE nuser_site
+SIZE nuser_cam
+SIZE nuser_tendon
+SIZE nuser_actuator
+SIZE nuser_sensor
+SIZE nnames
+SIZE npaths
+SIZE nnames_map
+SIZE nJmom
+SIZE ngravcomp
+SIZE nemax
+SIZE njmax
+SIZE nconmax
+SIZE npolygonmax
+SIZE nmeshdegmax
+SIZE nuserdata
+SIZE nsensordata
+SIZE npluginstate
+SIZE nhistory
+SIZE narena
+SIZE nbuffer
+META nsize 98
+PTR ALL mjtNum qpos0 nq 1
+PTR ALL mjtNum qpos_spring nq 1
+PTR ALL int body_parentid nbody 1
+PTR ALL int body_rootid nbody 1
+PTR ALL int body_weldid nbody 1
+PTR ALL int body_mocapid nbody 1
+PTR ALL int body_jntnum nbody 1
+PTR ALL int body_jntadr nbody 1
+PTR ALL int body_dofnum nbody 1
+PTR ALL int body_dofadr nbody 1
+PTR ALL int body_treeid nbody 1
+PTR ALL int body_geomnum nbody 1
+PTR ALL int body_geomadr nbody 1
+PTR ALL mjtByte body_simple nbody 1
+PTR ALL mjtByte body_sameframe nbody 1
+PTR ALL mjtNum body_pos nbody 3
+PTR ALL mjtNum body_quat nbody 4
+PTR ALL mjtNum body_ipos nbody 3
+PTR ALL mjtNum body_iquat nbody 4
+PTR ALL mjtNum body_mass nbody 1
+PTR ALL mjtNum body_subtreemass nbody 1
+PTR ALL mjtNum body_inertia nbody 3
+PTR ALL mjtNum body_invweight0 nbody 2
+PTR ALL mjtNum body_gravcomp nbody 1
+PTR ALL mjtNum body_margin nbody 1
+PTR ALL mjtNum body_user nbody MJ_M(nuser_body)
+PTR ALL int body_plugin nbody 1
+PTR ALL int body_contype nbody 1
+PTR ALL int body_conaffinity nbody 1
+PTR ALL int body_bvhadr nbody 1
+PTR ALL int body_bvhnum nbody 1
+PTR ALL int bvh_depth nbvh 1
+PTR ALL int bvh_child nbvh 2
+PTR ALL int bvh_nodeid nbvh 1
+PTR ALL mjtNum bvh_aabb nbvhstatic 6
+PTR ALL int oct_depth noct 1
+PTR ALL int oct_child noct 8
+PTR ALL mjtNum oct_aabb noct 6
+PTR ALL mjtNum oct_coeff noct 8
+PTR ALL int jnt_type njnt 1
+PTR ALL int jnt_qposadr njnt 1
+PTR ALL int jnt_dofadr njnt 1
+PTR ALL int jnt_bodyid njnt 1
+PTR ALL int jnt_actuatorid njnt 1
+PTR ALL int jnt_group njnt 1
+PTR ALL mjtBool jnt_limited njnt 1
+PTR ALL mjtBool jnt_actfrclimited njnt 1
+PTR ALL mjtBool jnt_actgravcomp njnt 1
+PTR ALL mjtNum jnt_solref njnt mjNREF
+PTR ALL mjtNum jnt_solimp njnt mjNIMP
+PTR ALL mjtNum jnt_pos njnt 3
+PTR ALL mjtNum jnt_axis njnt 3
+PTR ALL mjtNum jnt_stiffness njnt 1
+PTR ALL mjtNum jnt_stiffnesspoly njnt mjNPOLY
+PTR ALL mjtNum jnt_range njnt 2
+PTR ALL mjtNum jnt_actfrcrange njnt 2
+PTR ALL mjtNum jnt_margin njnt 1
+PTR ALL mjtNum jnt_user njnt MJ_M(nuser_jnt)
+PTR ALL int dof_bodyid nv 1
+PTR ALL int dof_jntid nv 1
+PTR ALL int dof_parentid nv 1
+PTR ALL int dof_treeid nv 1
+PTR ALL int dof_Madr nv 1
+PTR ALL int dof_simplenum nv 1
+PTR ALL mjtNum dof_solref nv mjNREF
+PTR ALL mjtNum dof_solimp nv mjNIMP
+PTR ALL mjtNum dof_frictionloss nv 1
+PTR ALL mjtNum dof_armature nv 1
+PTR ALL mjtNum dof_damping nv 1
+PTR ALL mjtNum dof_dampingpoly nv mjNPOLY
+PTR ALL mjtNum dof_invweight0 nv 1
+PTR ALL mjtNum dof_M0 nv 1
+PTR ALL mjtNum dof_length nv 1
+PTR ALL int tree_bodyadr ntree 1
+PTR ALL int tree_bodynum ntree 1
+PTR ALL int tree_dofadr ntree 1
+PTR ALL int tree_dofnum ntree 1
+PTR ALL int tree_sleep_policy ntree 1
+PTR ALL int geom_type ngeom 1
+PTR ALL int geom_contype ngeom 1
+PTR ALL int geom_conaffinity ngeom 1
+PTR ALL int geom_condim ngeom 1
+PTR ALL int geom_bodyid ngeom 1
+PTR ALL int geom_dataid ngeom 1
+PTR ALL int geom_matid ngeom 1
+PTR ALL int geom_group ngeom 1
+PTR ALL int geom_priority ngeom 1
+PTR ALL int geom_plugin ngeom 1
+PTR ALL mjtByte geom_sameframe ngeom 1
+PTR ALL mjtNum geom_solmix ngeom 1
+PTR ALL mjtNum geom_solref ngeom mjNREF
+PTR ALL mjtNum geom_solimp ngeom mjNIMP
+PTR ALL mjtNum geom_size ngeom 3
+PTR ALL mjtNum geom_aabb ngeom 6
+PTR ALL mjtNum geom_rbound ngeom 1
+PTR ALL mjtNum geom_pos ngeom 3
+PTR ALL mjtNum geom_quat ngeom 4
+PTR ALL mjtNum geom_friction ngeom 3
+PTR ALL mjtNum geom_margin ngeom 1
+PTR ALL mjtNum geom_gap ngeom 1
+PTR ALL mjtNum geom_surfacevel ngeom 6
+PTR ALL mjtNum geom_adhesion ngeom 1
+PTR ALL mjtNum geom_fluid ngeom mjNFLUID
+PTR ALL mjtNum geom_user ngeom MJ_M(nuser_geom)
+PTR ALL float geom_rgba ngeom 4
+PTR ALL int site_type nsite 1
+PTR ALL int site_bodyid nsite 1
+PTR ALL int site_matid nsite 1
+PTR ALL int site_group nsite 1
+PTR ALL mjtByte site_sameframe nsite 1
+PTR ALL mjtNum site_size nsite 3
+PTR ALL mjtNum site_pos nsite 3
+PTR ALL mjtNum site_quat nsite 4
+PTR ALL mjtNum site_user nsite MJ_M(nuser_site)
+PTR ALL float site_rgba nsite 4
+PTR ALL int cam_mode ncam 1
+PTR ALL int cam_bodyid ncam 1
+PTR ALL int cam_targetbodyid ncam 1
+PTR ALL mjtNum cam_pos ncam 3
+PTR ALL mjtNum cam_quat ncam 4
+PTR ALL mjtNum cam_poscom0 ncam 3
+PTR ALL mjtNum cam_pos0 ncam 3
+PTR ALL mjtNum cam_mat0 ncam 9
+PTR ALL int cam_projection ncam 1
+PTR ALL mjtNum cam_fovy ncam 1
+PTR ALL mjtNum cam_ipd ncam 1
+PTR ALL int cam_resolution ncam 2
+PTR ALL int cam_output ncam 1
+PTR ALL float cam_sensorsize ncam 2
+PTR ALL float cam_intrinsic ncam 4
+PTR ALL mjtNum cam_user ncam MJ_M(nuser_cam)
+PTR ALL int light_mode nlight 1
+PTR ALL int light_bodyid nlight 1
+PTR ALL int light_targetbodyid nlight 1
+PTR ALL int light_type nlight 1
+PTR ALL int light_texid nlight 1
+PTR ALL mjtBool light_castshadow nlight 1
+PTR ALL float light_bulbradius nlight 1
+PTR ALL float light_intensity nlight 1
+PTR ALL float light_range nlight 1
+PTR ALL mjtBool light_active nlight 1
+PTR ALL mjtNum light_pos nlight 3
+PTR ALL mjtNum light_dir nlight 3
+PTR ALL mjtNum light_poscom0 nlight 3
+PTR ALL mjtNum light_pos0 nlight 3
+PTR ALL mjtNum light_dir0 nlight 3
+PTR ALL float light_attenuation nlight 3
+PTR ALL float light_cutoff nlight 1
+PTR ALL float light_softness nlight 1
+PTR ALL float light_exponent nlight 1
+PTR ALL float light_ambient nlight 3
+PTR ALL float light_diffuse nlight 3
+PTR ALL float light_specular nlight 3
+PTR ALL int flex_contype nflex 1
+PTR ALL int flex_conaffinity nflex 1
+PTR ALL int flex_condim nflex 1
+PTR ALL int flex_priority nflex 1
+PTR ALL mjtNum flex_solmix nflex 1
+PTR ALL mjtNum flex_solref nflex mjNREF
+PTR ALL mjtNum flex_solimp nflex mjNIMP
+PTR ALL mjtNum flex_friction nflex 3
+PTR ALL mjtNum flex_margin nflex 1
+PTR ALL mjtNum flex_gap nflex 1
+PTR ALL mjtBool flex_internal nflex 1
+PTR ALL int flex_selfcollide nflex 1
+PTR ALL int flex_activelayers nflex 1
+PTR ALL int flex_passive nflex 1
+PTR ALL int flex_dim nflex 1
+PTR ALL int flex_matid nflex 1
+PTR ALL int flex_group nflex 1
+PTR ALL int flex_interp nflex 1
+PTR ALL int flex_cellnum nflex 3
+PTR ALL int flex_nodeadr nflex 1
+PTR ALL int flex_nodenum nflex 1
+PTR ALL int flex_vertadr nflex 1
+PTR ALL int flex_vertnum nflex 1
+PTR ALL int flex_edgeadr nflex 1
+PTR ALL int flex_edgenum nflex 1
+PTR ALL int flex_elemadr nflex 1
+PTR ALL int flex_elemnum nflex 1
+PTR ALL int flex_elemdataadr nflex 1
+PTR ALL int flex_stiffnessadr nflex 1
+PTR ALL int flex_elemedgeadr nflex 1
+PTR ALL int flex_bendingadr nflex 1
+PTR ALL int flex_shellnum nflex 1
+PTR ALL int flex_shelldataadr nflex 1
+PTR ALL int flex_evpairadr nflex 1
+PTR ALL int flex_evpairnum nflex 1
+PTR ALL int flex_texcoordadr nflex 1
+PTR ALL int flex_nodebodyid nflexnode 1
+PTR ALL int flex_vertbodyid nflexvert 1
+PTR ALL int flex_vertedgeadr nflexvert 1
+PTR ALL int flex_vertedgenum nflexvert 1
+PTR ALL int flex_vertedge nflexedge 2
+PTR ALL int flex_edge nflexedge 2
+PTR ALL int flex_edgeflap nflexedge 2
+PTR ALL int flex_elem nflexelemdata 1
+PTR ALL int flex_elemtexcoord nflexelemdata 1
+PTR ALL int flex_elemedge nflexelemedge 1
+PTR ALL int flex_elemlayer nflexelem 1
+PTR ALL int flex_shell nflexshelldata 1
+PTR ALL int flex_evpair nflexevpair 2
+PTR ALL mjtNum flex_vert nflexvert 3
+PTR ALL mjtNum flex_vert0 nflexvert 3
+PTR ALL mjtNum flex_vertmetric nflexvert 4
+PTR ALL mjtNum flex_node nflexnode 3
+PTR ALL mjtNum flex_node0 nflexnode 3
+PTR ALL mjtNum flexedge_length0 nflexedge 1
+PTR ALL mjtNum flexedge_invweight0 nflexedge 1
+PTR ALL mjtNum flex_radius nflex 1
+PTR ALL mjtNum flex_size nflex 3
+PTR ALL mjtNum flex_stiffness nflexstiffness 1
+PTR ALL mjtNum flex_bending nflexbending 1
+PTR ALL int efm0_dofid nefm0dof 1
+PTR ALL int efm0_L_rownnz nefm0dof 1
+PTR ALL int efm0_L_rowadr nefm0dof 1
+PTR ALL int efm0_L_colind nefm0L 1
+PTR ALL mjtNum efm0_L nefm0L 1
+PTR ALL mjtNum flex_damping nflex 1
+PTR ALL mjtNum flex_edgestiffness nflex 1
+PTR ALL mjtNum flex_edgedamping nflex 1
+PTR ALL int flex_edgeequality nflex 1
+PTR ALL mjtBool flex_rigid nflex 1
+PTR ALL mjtBool flexedge_rigid nflexedge 1
+PTR ALL mjtBool flex_centered nflex 1
+PTR ALL mjtBool flex_flatskin nflex 1
+PTR ALL int flex_bvhadr nflex 1
+PTR ALL int flex_bvhnum nflex 1
+PTR ALL int flexedge_J_rownnz nflexedge 1
+PTR ALL int flexedge_J_rowadr nflexedge 1
+PTR ALL int flexedge_J_colind nJfe 1
+PTR ALL int flexvert_J_rownnz nflexvert 2
+PTR ALL int flexvert_J_rowadr nflexvert 2
+PTR ALL int flexvert_J_colind nJfv 2
+PTR ALL float flex_rgba nflex 4
+PTR ALL float flex_texcoord nflextexcoord 2
+PTR ALL int mesh_vertadr nmesh 1
+PTR ALL int mesh_vertnum nmesh 1
+PTR ALL int mesh_faceadr nmesh 1
+PTR ALL int mesh_facenum nmesh 1
+PTR ALL int mesh_bvhadr nmesh 1
+PTR ALL int mesh_bvhnum nmesh 1
+PTR ALL int mesh_octadr nmesh 1
+PTR ALL int mesh_octnum nmesh 1
+PTR ALL int mesh_normaladr nmesh 1
+PTR ALL int mesh_normalnum nmesh 1
+PTR ALL int mesh_texcoordadr nmesh 1
+PTR ALL int mesh_texcoordnum nmesh 1
+PTR ALL int mesh_graphadr nmesh 1
+PTR ALL int mesh_extrema nmesh 27
+PTR ALL float mesh_vert nmeshvert 3
+PTR ALL float mesh_normal nmeshnormal 3
+PTR ALL float mesh_texcoord nmeshtexcoord 2
+PTR ALL int mesh_face nmeshface 3
+PTR ALL int mesh_facenormal nmeshface 3
+PTR ALL int mesh_facetexcoord nmeshface 3
+PTR ALL int mesh_graph nmeshgraph 1
+PTR ALL mjtNum mesh_scale nmesh 3
+PTR ALL mjtNum mesh_pos nmesh 3
+PTR ALL mjtNum mesh_quat nmesh 4
+PTR ALL int mesh_pathadr nmesh 1
+PTR ALL int mesh_polynum nmesh 1
+PTR ALL int mesh_polyadr nmesh 1
+PTR ALL mjtNum mesh_polynormal nmeshpoly 3
+PTR ALL int mesh_polyvertadr nmeshpoly 1
+PTR ALL int mesh_polyvertnum nmeshpoly 1
+PTR ALL int mesh_polyvert nmeshpolyvert 1
+PTR ALL int mesh_polymapadr nmeshvert 1
+PTR ALL int mesh_polymapnum nmeshvert 1
+PTR ALL int mesh_polymap nmeshpolymap 1
+PTR ALL int skin_matid nskin 1
+PTR ALL int skin_group nskin 1
+PTR ALL float skin_rgba nskin 4
+PTR ALL float skin_inflate nskin 1
+PTR ALL int skin_vertadr nskin 1
+PTR ALL int skin_vertnum nskin 1
+PTR ALL int skin_texcoordadr nskin 1
+PTR ALL int skin_faceadr nskin 1
+PTR ALL int skin_facenum nskin 1
+PTR ALL int skin_boneadr nskin 1
+PTR ALL int skin_bonenum nskin 1
+PTR ALL float skin_vert nskinvert 3
+PTR ALL float skin_texcoord nskintexvert 2
+PTR ALL int skin_face nskinface 3
+PTR ALL int skin_bonevertadr nskinbone 1
+PTR ALL int skin_bonevertnum nskinbone 1
+PTR ALL float skin_bonebindpos nskinbone 3
+PTR ALL float skin_bonebindquat nskinbone 4
+PTR ALL int skin_bonebodyid nskinbone 1
+PTR ALL int skin_bonevertid nskinbonevert 1
+PTR ALL float skin_bonevertweight nskinbonevert 1
+PTR ALL int skin_pathadr nskin 1
+PTR ALL mjtNum hfield_size nhfield 4
+PTR ALL int hfield_nrow nhfield 1
+PTR ALL int hfield_ncol nhfield 1
+PTR ALL int hfield_adr nhfield 1
+PTR ALL float hfield_data nhfielddata 1
+PTR ALL int hfield_pathadr nhfield 1
+PTR ALL int tex_type ntex 1
+PTR ALL int tex_colorspace ntex 1
+PTR ALL int tex_height ntex 1
+PTR ALL int tex_width ntex 1
+PTR ALL int tex_nchannel ntex 1
+PTR ALL mjtSize tex_adr ntex 1
+PTR ALL mjtByte tex_data ntexdata 1
+PTR ALL int tex_pathadr ntex 1
+PTR ALL int mat_texid nmat mjNTEXROLE
+PTR ALL mjtBool mat_texuniform nmat 1
+PTR ALL float mat_texrepeat nmat 2
+PTR ALL float mat_emission nmat 1
+PTR ALL float mat_specular nmat 1
+PTR ALL float mat_shininess nmat 1
+PTR ALL float mat_reflectance nmat 1
+PTR ALL float mat_metallic nmat 1
+PTR ALL float mat_roughness nmat 1
+PTR ALL float mat_rgba nmat 4
+PTR ALL int pair_dim npair 1
+PTR ALL int pair_geom1 npair 1
+PTR ALL int pair_geom2 npair 1
+PTR ALL int pair_signature npair 1
+PTR ALL mjtNum pair_solref npair mjNREF
+PTR ALL mjtNum pair_solreffriction npair mjNREF
+PTR ALL mjtNum pair_solimp npair mjNIMP
+PTR ALL mjtNum pair_margin npair 1
+PTR ALL mjtNum pair_gap npair 1
+PTR ALL mjtNum pair_adhesion npair 1
+PTR ALL mjtNum pair_friction npair 5
+PTR ALL int exclude_signature nexclude 1
+PTR ALL int eq_type neq 1
+PTR ALL int eq_obj1id neq 1
+PTR ALL int eq_obj2id neq 1
+PTR ALL int eq_objtype neq 1
+PTR ALL mjtBool eq_active0 neq 1
+PTR ALL mjtNum eq_solref neq mjNREF
+PTR ALL mjtNum eq_solimp neq mjNIMP
+PTR ALL mjtNum eq_data neq mjNEQDATA
+PTR ALL int tendon_adr ntendon 1
+PTR ALL int tendon_num ntendon 1
+PTR ALL int tendon_matid ntendon 1
+PTR ALL int tendon_actuatorid ntendon 1
+PTR ALL int tendon_group ntendon 1
+PTR ALL int tendon_treenum ntendon 1
+PTR ALL int tendon_treeid ntendon 2
+PTR ALL int ten_J_rownnz ntendon 1
+PTR ALL int ten_J_rowadr ntendon 1
+PTR ALL int ten_J_colind nJten 1
+PTR ALL mjtBool tendon_limited ntendon 1
+PTR ALL mjtBool tendon_actfrclimited ntendon 1
+PTR ALL mjtNum tendon_width ntendon 1
+PTR ALL mjtNum tendon_solref_lim ntendon mjNREF
+PTR ALL mjtNum tendon_solimp_lim ntendon mjNIMP
+PTR ALL mjtNum tendon_solref_fri ntendon mjNREF
+PTR ALL mjtNum tendon_solimp_fri ntendon mjNIMP
+PTR ALL mjtNum tendon_range ntendon 2
+PTR ALL mjtNum tendon_actfrcrange ntendon 2
+PTR ALL mjtNum tendon_margin ntendon 1
+PTR ALL mjtNum tendon_stiffness ntendon 1
+PTR ALL mjtNum tendon_stiffnesspoly ntendon mjNPOLY
+PTR ALL mjtNum tendon_damping ntendon 1
+PTR ALL mjtNum tendon_dampingpoly ntendon mjNPOLY
+PTR ALL mjtNum tendon_armature ntendon 1
+PTR ALL mjtNum tendon_frictionloss ntendon 1
+PTR ALL mjtNum tendon_lengthspring ntendon 2
+PTR ALL mjtNum tendon_length0 ntendon 1
+PTR ALL mjtNum tendon_invweight0 ntendon 1
+PTR ALL mjtNum tendon_user ntendon MJ_M(nuser_tendon)
+PTR ALL float tendon_rgba ntendon 4
+PTR ALL int wrap_type nwrap 1
+PTR ALL int wrap_objid nwrap 1
+PTR ALL mjtNum wrap_prm nwrap 1
+PTR ALL int actuator_trntype nactuator 1
+PTR ALL int actuator_dyntype nactuator 1
+PTR ALL int actuator_gaintype nactuator 1
+PTR ALL int actuator_biastype nactuator 1
+PTR ALL int actuator_ctrladr nactuator 1
+PTR ALL int actuator_ctrlnum nactuator 1
+PTR ALL int actuator_ctrlspec nactuator 1
+PTR ALL int actuator_outadr nactuator 1
+PTR ALL int actuator_outnum nactuator 1
+PTR ALL int actuator_actadr nactuator 1
+PTR ALL int actuator_actnum nactuator 1
+PTR ALL int actuator_trnid nactuator 2
+PTR ALL mjtNum actuator_cranklength nactuator 1
+PTR ALL mjtNum actuator_dynprm nactuator mjNDYN
+PTR ALL mjtNum actuator_gainprm nactuator mjNGAIN
+PTR ALL mjtNum actuator_biasprm nactuator mjNBIAS
+PTR ALL mjtBool actuator_actlimited nactuator 1
+PTR ALL mjtNum actuator_actrange nactuator 2
+PTR ALL mjtBool actuator_actearly nactuator 1
+PTR ALL int actuator_history nactuator 2
+PTR ALL int actuator_historyadr nactuator 1
+PTR ALL mjtNum actuator_delay nactuator 1
+PTR ALL mjtNum actuator_damping nactuator 1
+PTR ALL mjtNum actuator_dampingpoly nactuator mjNPOLY
+PTR ALL mjtNum actuator_armature nactuator 1
+PTR ALL int actuator_group nactuator 1
+PTR ALL mjtNum actuator_user nactuator MJ_M(nuser_actuator)
+PTR ALL int actuator_plugin nactuator 1
+PTR ALL mjtBool actuator_forcelimited nactuator 1
+PTR ALL mjtNum actuator_forcerange nactuator 2
+PTR ALL mjtBool actuator_ctrllimited nu 1
+PTR ALL mjtNum actuator_ctrlrange nu 2
+PTR ALL mjtNum actuator_gear nout 6
+PTR ALL mjtNum actuator_acc0 nout 1
+PTR ALL mjtNum actuator_length0 nout 1
+PTR ALL mjtNum actuator_lengthrange nout 2
+PTR ALL int sensor_type nsensor 1
+PTR ALL int sensor_datatype nsensor 1
+PTR ALL int sensor_needstage nsensor 1
+PTR ALL int sensor_objtype nsensor 1
+PTR ALL int sensor_objid nsensor 1
+PTR ALL int sensor_reftype nsensor 1
+PTR ALL int sensor_refid nsensor 1
+PTR ALL int sensor_intprm nsensor mjNSENS
+PTR ALL int sensor_dim nsensor 1
+PTR ALL int sensor_adr nsensor 1
+PTR ALL mjtNum sensor_cutoff nsensor 1
+PTR ALL mjtNum sensor_noise nsensor 1
+PTR ALL int sensor_history nsensor 2
+PTR ALL int sensor_historyadr nsensor 1
+PTR ALL mjtNum sensor_delay nsensor 1
+PTR ALL mjtNum sensor_interval nsensor 2
+PTR ALL mjtNum sensor_user nsensor MJ_M(nuser_sensor)
+PTR ALL int sensor_plugin nsensor 1
+PTR ALL int plugin nplugin 1
+PTR ALL int plugin_stateadr nplugin 1
+PTR ALL int plugin_statenum nplugin 1
+PTR ALL char plugin_attr npluginattr 1
+PTR ALL int plugin_attradr nplugin 1
+PTR ALL int numeric_adr nnumeric 1
+PTR ALL int numeric_size nnumeric 1
+PTR ALL mjtNum numeric_data nnumericdata 1
+PTR ALL int text_adr ntext 1
+PTR ALL int text_size ntext 1
+PTR ALL char text_data ntextdata 1
+PTR ALL int tuple_adr ntuple 1
+PTR ALL int tuple_size ntuple 1
+PTR ALL int tuple_objtype ntupledata 1
+PTR ALL int tuple_objid ntupledata 1
+PTR ALL mjtNum tuple_objprm ntupledata 1
+PTR ALL mjtNum key_time nkey 1
+PTR ALL mjtNum key_qpos nkey MJ_M(nq)
+PTR ALL mjtNum key_qvel nkey MJ_M(nv)
+PTR ALL mjtNum key_act nkey MJ_M(na)
+PTR ALL mjtNum key_mpos nkey MJ_M(nmocap)*3
+PTR ALL mjtNum key_mquat nkey MJ_M(nmocap)*4
+PTR ALL mjtNum key_ctrl nkey MJ_M(nu)
+PTR ALL int name_bodyadr nbody 1
+PTR ALL int name_jntadr njnt 1
+PTR ALL int name_geomadr ngeom 1
+PTR ALL int name_siteadr nsite 1
+PTR ALL int name_camadr ncam 1
+PTR ALL int name_lightadr nlight 1
+PTR ALL int name_flexadr nflex 1
+PTR ALL int name_meshadr nmesh 1
+PTR ALL int name_skinadr nskin 1
+PTR ALL int name_hfieldadr nhfield 1
+PTR ALL int name_texadr ntex 1
+PTR ALL int name_matadr nmat 1
+PTR ALL int name_pairadr npair 1
+PTR ALL int name_excludeadr nexclude 1
+PTR ALL int name_eqadr neq 1
+PTR ALL int name_tendonadr ntendon 1
+PTR ALL int name_actuatoradr nactuator 1
+PTR ALL int name_sensoradr nsensor 1
+PTR ALL int name_numericadr nnumeric 1
+PTR ALL int name_textadr ntext 1
+PTR ALL int name_tupleadr ntuple 1
+PTR ALL int name_keyadr nkey 1
+PTR ALL int name_pluginadr nplugin 1
+PTR ALL char names nnames 1
+PTR ALL int names_map nnames_map 1
+PTR ALL char paths npaths 1
+PTR ALL int B_rownnz nbody 1
+PTR ALL int B_rowadr nbody 1
+PTR ALL int B_colind nB 1
+PTR ALL int M_rownnz nv 1
+PTR ALL int M_rowadr nv 1
+PTR ALL int M_colind nC 1
+PTR ALL int mapM2M nC 1
+PTR ALL int D_rownnz nv 1
+PTR ALL int D_rowadr nv 1
+PTR ALL int D_diag nv 1
+PTR ALL int D_colind nD 1
+PTR ALL int mapM2D nD 1
+PTR ALL int mapD2M nC 1
+META nptr 486
+PTR BODY int body_parentid nbody 1
+PTR BODY int body_rootid nbody 1
+PTR BODY int body_weldid nbody 1
+PTR BODY int body_mocapid nbody 1
+PTR BODY int body_jntnum nbody 1
+PTR BODY int body_jntadr nbody 1
+PTR BODY int body_dofnum nbody 1
+PTR BODY int body_dofadr nbody 1
+PTR BODY int body_treeid nbody 1
+PTR BODY int body_geomnum nbody 1
+PTR BODY int body_geomadr nbody 1
+PTR BODY mjtByte body_simple nbody 1
+PTR BODY mjtByte body_sameframe nbody 1
+PTR BODY mjtNum body_pos nbody 3
+PTR BODY mjtNum body_quat nbody 4
+PTR BODY mjtNum body_ipos nbody 3
+PTR BODY mjtNum body_iquat nbody 4
+PTR BODY mjtNum body_mass nbody 1
+PTR BODY mjtNum body_subtreemass nbody 1
+PTR BODY mjtNum body_inertia nbody 3
+PTR BODY mjtNum body_invweight0 nbody 2
+PTR BODY mjtNum body_gravcomp nbody 1
+PTR BODY mjtNum body_margin nbody 1
+PTR BODY mjtNum body_user nbody MJ_M(nuser_body)
+PTR BODY int body_plugin nbody 1
+PTR BODY int body_contype nbody 1
+PTR BODY int body_conaffinity nbody 1
+PTR BODY int body_bvhadr nbody 1
+PTR BODY int body_bvhnum nbody 1
+PTR JOINT int jnt_type njnt 1
+PTR JOINT int jnt_qposadr njnt 1
+PTR JOINT int jnt_dofadr njnt 1
+PTR JOINT int jnt_bodyid njnt 1
+PTR JOINT int jnt_actuatorid njnt 1
+PTR JOINT int jnt_group njnt 1
+PTR JOINT mjtBool jnt_limited njnt 1
+PTR JOINT mjtBool jnt_actfrclimited njnt 1
+PTR JOINT mjtBool jnt_actgravcomp njnt 1
+PTR JOINT mjtNum jnt_solref njnt mjNREF
+PTR JOINT mjtNum jnt_solimp njnt mjNIMP
+PTR JOINT mjtNum jnt_pos njnt 3
+PTR JOINT mjtNum jnt_axis njnt 3
+PTR JOINT mjtNum jnt_stiffness njnt 1
+PTR JOINT mjtNum jnt_stiffnesspoly njnt mjNPOLY
+PTR JOINT mjtNum jnt_range njnt 2
+PTR JOINT mjtNum jnt_actfrcrange njnt 2
+PTR JOINT mjtNum jnt_margin njnt 1
+PTR JOINT mjtNum jnt_user njnt MJ_M(nuser_jnt)
+PTR DOF int dof_bodyid nv 1
+PTR DOF int dof_jntid nv 1
+PTR DOF int dof_parentid nv 1
+PTR DOF int dof_treeid nv 1
+PTR DOF int dof_Madr nv 1
+PTR DOF int dof_simplenum nv 1
+PTR DOF mjtNum dof_solref nv mjNREF
+PTR DOF mjtNum dof_solimp nv mjNIMP
+PTR DOF mjtNum dof_frictionloss nv 1
+PTR DOF mjtNum dof_armature nv 1
+PTR DOF mjtNum dof_damping nv 1
+PTR DOF mjtNum dof_dampingpoly nv mjNPOLY
+PTR DOF mjtNum dof_invweight0 nv 1
+PTR DOF mjtNum dof_M0 nv 1
+PTR DOF mjtNum dof_length nv 1
+PTR TREE int tree_bodyadr ntree 1
+PTR TREE int tree_bodynum ntree 1
+PTR TREE int tree_dofadr ntree 1
+PTR TREE int tree_dofnum ntree 1
+PTR TREE int tree_sleep_policy ntree 1
+PTR GEOM int geom_type ngeom 1
+PTR GEOM int geom_contype ngeom 1
+PTR GEOM int geom_conaffinity ngeom 1
+PTR GEOM int geom_condim ngeom 1
+PTR GEOM int geom_bodyid ngeom 1
+PTR GEOM int geom_dataid ngeom 1
+PTR GEOM int geom_matid ngeom 1
+PTR GEOM int geom_group ngeom 1
+PTR GEOM int geom_priority ngeom 1
+PTR GEOM int geom_plugin ngeom 1
+PTR GEOM mjtByte geom_sameframe ngeom 1
+PTR GEOM mjtNum geom_solmix ngeom 1
+PTR GEOM mjtNum geom_solref ngeom mjNREF
+PTR GEOM mjtNum geom_solimp ngeom mjNIMP
+PTR GEOM mjtNum geom_size ngeom 3
+PTR GEOM mjtNum geom_aabb ngeom 6
+PTR GEOM mjtNum geom_rbound ngeom 1
+PTR GEOM mjtNum geom_pos ngeom 3
+PTR GEOM mjtNum geom_quat ngeom 4
+PTR GEOM mjtNum geom_friction ngeom 3
+PTR GEOM mjtNum geom_margin ngeom 1
+PTR GEOM mjtNum geom_gap ngeom 1
+PTR GEOM mjtNum geom_surfacevel ngeom 6
+PTR GEOM mjtNum geom_adhesion ngeom 1
+PTR GEOM mjtNum geom_fluid ngeom mjNFLUID
+PTR GEOM mjtNum geom_user ngeom MJ_M(nuser_geom)
+PTR GEOM float geom_rgba ngeom 4
+PTR SITE int site_type nsite 1
+PTR SITE int site_bodyid nsite 1
+PTR SITE int site_matid nsite 1
+PTR SITE int site_group nsite 1
+PTR SITE mjtByte site_sameframe nsite 1
+PTR SITE mjtNum site_size nsite 3
+PTR SITE mjtNum site_pos nsite 3
+PTR SITE mjtNum site_quat nsite 4
+PTR SITE mjtNum site_user nsite MJ_M(nuser_site)
+PTR SITE float site_rgba nsite 4
+PTR CAMERA int cam_mode ncam 1
+PTR CAMERA int cam_bodyid ncam 1
+PTR CAMERA int cam_targetbodyid ncam 1
+PTR CAMERA mjtNum cam_pos ncam 3
+PTR CAMERA mjtNum cam_quat ncam 4
+PTR CAMERA mjtNum cam_poscom0 ncam 3
+PTR CAMERA mjtNum cam_pos0 ncam 3
+PTR CAMERA mjtNum cam_mat0 ncam 9
+PTR CAMERA int cam_projection ncam 1
+PTR CAMERA mjtNum cam_fovy ncam 1
+PTR CAMERA mjtNum cam_ipd ncam 1
+PTR CAMERA int cam_resolution ncam 2
+PTR CAMERA int cam_output ncam 1
+PTR CAMERA float cam_sensorsize ncam 2
+PTR CAMERA float cam_intrinsic ncam 4
+PTR CAMERA mjtNum cam_user ncam MJ_M(nuser_cam)
+PTR LIGHT int light_mode nlight 1
+PTR LIGHT int light_bodyid nlight 1
+PTR LIGHT int light_targetbodyid nlight 1
+PTR LIGHT int light_type nlight 1
+PTR LIGHT int light_texid nlight 1
+PTR LIGHT mjtBool light_castshadow nlight 1
+PTR LIGHT float light_bulbradius nlight 1
+PTR LIGHT float light_intensity nlight 1
+PTR LIGHT float light_range nlight 1
+PTR LIGHT mjtBool light_active nlight 1
+PTR LIGHT mjtNum light_pos nlight 3
+PTR LIGHT mjtNum light_dir nlight 3
+PTR LIGHT mjtNum light_poscom0 nlight 3
+PTR LIGHT mjtNum light_pos0 nlight 3
+PTR LIGHT mjtNum light_dir0 nlight 3
+PTR LIGHT float light_attenuation nlight 3
+PTR LIGHT float light_cutoff nlight 1
+PTR LIGHT float light_softness nlight 1
+PTR LIGHT float light_exponent nlight 1
+PTR LIGHT float light_ambient nlight 3
+PTR LIGHT float light_diffuse nlight 3
+PTR LIGHT float light_specular nlight 3
+PTR FLEX int flex_contype nflex 1
+PTR FLEX int flex_conaffinity nflex 1
+PTR FLEX int flex_condim nflex 1
+PTR FLEX int flex_priority nflex 1
+PTR FLEX mjtNum flex_solmix nflex 1
+PTR FLEX mjtNum flex_solref nflex mjNREF
+PTR FLEX mjtNum flex_solimp nflex mjNIMP
+PTR FLEX mjtNum flex_friction nflex 3
+PTR FLEX mjtNum flex_margin nflex 1
+PTR FLEX mjtNum flex_gap nflex 1
+PTR FLEX mjtBool flex_internal nflex 1
+PTR FLEX int flex_selfcollide nflex 1
+PTR FLEX int flex_activelayers nflex 1
+PTR FLEX int flex_passive nflex 1
+PTR FLEX int flex_dim nflex 1
+PTR FLEX int flex_matid nflex 1
+PTR FLEX int flex_group nflex 1
+PTR FLEX int flex_interp nflex 1
+PTR FLEX int flex_cellnum nflex 3
+PTR FLEX int flex_nodeadr nflex 1
+PTR FLEX int flex_nodenum nflex 1
+PTR FLEX int flex_vertadr nflex 1
+PTR FLEX int flex_vertnum nflex 1
+PTR FLEX int flex_edgeadr nflex 1
+PTR FLEX int flex_edgenum nflex 1
+PTR FLEX int flex_elemadr nflex 1
+PTR FLEX int flex_elemnum nflex 1
+PTR FLEX int flex_elemdataadr nflex 1
+PTR FLEX int flex_stiffnessadr nflex 1
+PTR FLEX int flex_elemedgeadr nflex 1
+PTR FLEX int flex_bendingadr nflex 1
+PTR FLEX int flex_shellnum nflex 1
+PTR FLEX int flex_shelldataadr nflex 1
+PTR FLEX int flex_evpairadr nflex 1
+PTR FLEX int flex_evpairnum nflex 1
+PTR FLEX int flex_texcoordadr nflex 1
+PTR FLEX int flex_nodebodyid nflexnode 1
+PTR FLEX int flex_vertbodyid nflexvert 1
+PTR FLEX int flex_vertedgeadr nflexvert 1
+PTR FLEX int flex_vertedgenum nflexvert 1
+PTR FLEX int flex_vertedge nflexedge 2
+PTR FLEX int flex_edge nflexedge 2
+PTR FLEX int flex_edgeflap nflexedge 2
+PTR FLEX int flex_elem nflexelemdata 1
+PTR FLEX int flex_elemtexcoord nflexelemdata 1
+PTR FLEX int flex_elemedge nflexelemedge 1
+PTR FLEX int flex_elemlayer nflexelem 1
+PTR FLEX int flex_shell nflexshelldata 1
+PTR FLEX int flex_evpair nflexevpair 2
+PTR FLEX mjtNum flex_vert nflexvert 3
+PTR FLEX mjtNum flex_vert0 nflexvert 3
+PTR FLEX mjtNum flex_vertmetric nflexvert 4
+PTR FLEX mjtNum flex_node nflexnode 3
+PTR FLEX mjtNum flex_node0 nflexnode 3
+PTR FLEX mjtNum flexedge_length0 nflexedge 1
+PTR FLEX mjtNum flexedge_invweight0 nflexedge 1
+PTR FLEX mjtNum flex_radius nflex 1
+PTR FLEX mjtNum flex_size nflex 3
+PTR FLEX mjtNum flex_stiffness nflexstiffness 1
+PTR FLEX mjtNum flex_bending nflexbending 1
+PTR FLEX int efm0_dofid nefm0dof 1
+PTR FLEX int efm0_L_rownnz nefm0dof 1
+PTR FLEX int efm0_L_rowadr nefm0dof 1
+PTR FLEX int efm0_L_colind nefm0L 1
+PTR FLEX mjtNum efm0_L nefm0L 1
+PTR FLEX mjtNum flex_damping nflex 1
+PTR FLEX mjtNum flex_edgestiffness nflex 1
+PTR FLEX mjtNum flex_edgedamping nflex 1
+PTR FLEX int flex_edgeequality nflex 1
+PTR FLEX mjtBool flex_rigid nflex 1
+PTR FLEX mjtBool flexedge_rigid nflexedge 1
+PTR FLEX mjtBool flex_centered nflex 1
+PTR FLEX mjtBool flex_flatskin nflex 1
+PTR FLEX int flex_bvhadr nflex 1
+PTR FLEX int flex_bvhnum nflex 1
+PTR FLEX int flexedge_J_rownnz nflexedge 1
+PTR FLEX int flexedge_J_rowadr nflexedge 1
+PTR FLEX int flexedge_J_colind nJfe 1
+PTR FLEX int flexvert_J_rownnz nflexvert 2
+PTR FLEX int flexvert_J_rowadr nflexvert 2
+PTR FLEX int flexvert_J_colind nJfv 2
+PTR FLEX float flex_rgba nflex 4
+PTR FLEX float flex_texcoord nflextexcoord 2
+PTR MESH int mesh_vertadr nmesh 1
+PTR MESH int mesh_vertnum nmesh 1
+PTR MESH int mesh_faceadr nmesh 1
+PTR MESH int mesh_facenum nmesh 1
+PTR MESH int mesh_bvhadr nmesh 1
+PTR MESH int mesh_bvhnum nmesh 1
+PTR MESH int mesh_octadr nmesh 1
+PTR MESH int mesh_octnum nmesh 1
+PTR MESH int mesh_normaladr nmesh 1
+PTR MESH int mesh_normalnum nmesh 1
+PTR MESH int mesh_texcoordadr nmesh 1
+PTR MESH int mesh_texcoordnum nmesh 1
+PTR MESH int mesh_graphadr nmesh 1
+PTR MESH int mesh_extrema nmesh 27
+PTR MESH float mesh_vert nmeshvert 3
+PTR MESH float mesh_normal nmeshnormal 3
+PTR MESH float mesh_texcoord nmeshtexcoord 2
+PTR MESH int mesh_face nmeshface 3
+PTR MESH int mesh_facenormal nmeshface 3
+PTR MESH int mesh_facetexcoord nmeshface 3
+PTR MESH int mesh_graph nmeshgraph 1
+PTR MESH mjtNum mesh_scale nmesh 3
+PTR MESH mjtNum mesh_pos nmesh 3
+PTR MESH mjtNum mesh_quat nmesh 4
+PTR MESH int mesh_pathadr nmesh 1
+PTR MESH int mesh_polynum nmesh 1
+PTR MESH int mesh_polyadr nmesh 1
+PTR MESH mjtNum mesh_polynormal nmeshpoly 3
+PTR MESH int mesh_polyvertadr nmeshpoly 1
+PTR MESH int mesh_polyvertnum nmeshpoly 1
+PTR MESH int mesh_polyvert nmeshpolyvert 1
+PTR MESH int mesh_polymapadr nmeshvert 1
+PTR MESH int mesh_polymapnum nmeshvert 1
+PTR MESH int mesh_polymap nmeshpolymap 1
+PTR SKIN int skin_matid nskin 1
+PTR SKIN int skin_group nskin 1
+PTR SKIN float skin_rgba nskin 4
+PTR SKIN float skin_inflate nskin 1
+PTR SKIN int skin_vertadr nskin 1
+PTR SKIN int skin_vertnum nskin 1
+PTR SKIN int skin_texcoordadr nskin 1
+PTR SKIN int skin_faceadr nskin 1
+PTR SKIN int skin_facenum nskin 1
+PTR SKIN int skin_boneadr nskin 1
+PTR SKIN int skin_bonenum nskin 1
+PTR SKIN float skin_vert nskinvert 3
+PTR SKIN float skin_texcoord nskintexvert 2
+PTR SKIN int skin_face nskinface 3
+PTR SKIN int skin_bonevertadr nskinbone 1
+PTR SKIN int skin_bonevertnum nskinbone 1
+PTR SKIN float skin_bonebindpos nskinbone 3
+PTR SKIN float skin_bonebindquat nskinbone 4
+PTR SKIN int skin_bonebodyid nskinbone 1
+PTR SKIN int skin_bonevertid nskinbonevert 1
+PTR SKIN float skin_bonevertweight nskinbonevert 1
+PTR SKIN int skin_pathadr nskin 1
+PTR HFIELD mjtNum hfield_size nhfield 4
+PTR HFIELD int hfield_nrow nhfield 1
+PTR HFIELD int hfield_ncol nhfield 1
+PTR HFIELD int hfield_adr nhfield 1
+PTR HFIELD float hfield_data nhfielddata 1
+PTR HFIELD int hfield_pathadr nhfield 1
+PTR TEXTURE int tex_type ntex 1
+PTR TEXTURE int tex_colorspace ntex 1
+PTR TEXTURE int tex_height ntex 1
+PTR TEXTURE int tex_width ntex 1
+PTR TEXTURE int tex_nchannel ntex 1
+PTR TEXTURE mjtSize tex_adr ntex 1
+PTR TEXTURE mjtByte tex_data ntexdata 1
+PTR TEXTURE int tex_pathadr ntex 1
+PTR MATERIAL int mat_texid nmat mjNTEXROLE
+PTR MATERIAL mjtBool mat_texuniform nmat 1
+PTR MATERIAL float mat_texrepeat nmat 2
+PTR MATERIAL float mat_emission nmat 1
+PTR MATERIAL float mat_specular nmat 1
+PTR MATERIAL float mat_shininess nmat 1
+PTR MATERIAL float mat_reflectance nmat 1
+PTR MATERIAL float mat_metallic nmat 1
+PTR MATERIAL float mat_roughness nmat 1
+PTR MATERIAL float mat_rgba nmat 4
+PTR PAIR int pair_dim npair 1
+PTR PAIR int pair_geom1 npair 1
+PTR PAIR int pair_geom2 npair 1
+PTR PAIR int pair_signature npair 1
+PTR PAIR mjtNum pair_solref npair mjNREF
+PTR PAIR mjtNum pair_solreffriction npair mjNREF
+PTR PAIR mjtNum pair_solimp npair mjNIMP
+PTR PAIR mjtNum pair_margin npair 1
+PTR PAIR mjtNum pair_gap npair 1
+PTR PAIR mjtNum pair_adhesion npair 1
+PTR PAIR mjtNum pair_friction npair 5
+PTR EXCLUDE int exclude_signature nexclude 1
+PTR EQUALITY int eq_type neq 1
+PTR EQUALITY int eq_obj1id neq 1
+PTR EQUALITY int eq_obj2id neq 1
+PTR EQUALITY int eq_objtype neq 1
+PTR EQUALITY mjtBool eq_active0 neq 1
+PTR EQUALITY mjtNum eq_solref neq mjNREF
+PTR EQUALITY mjtNum eq_solimp neq mjNIMP
+PTR EQUALITY mjtNum eq_data neq mjNEQDATA
+PTR TENDON int tendon_adr ntendon 1
+PTR TENDON int tendon_num ntendon 1
+PTR TENDON int tendon_matid ntendon 1
+PTR TENDON int tendon_actuatorid ntendon 1
+PTR TENDON int tendon_group ntendon 1
+PTR TENDON int tendon_treenum ntendon 1
+PTR TENDON int tendon_treeid ntendon 2
+PTR TENDON int ten_J_rownnz ntendon 1
+PTR TENDON int ten_J_rowadr ntendon 1
+PTR TENDON int ten_J_colind nJten 1
+PTR TENDON mjtBool tendon_limited ntendon 1
+PTR TENDON mjtBool tendon_actfrclimited ntendon 1
+PTR TENDON mjtNum tendon_width ntendon 1
+PTR TENDON mjtNum tendon_solref_lim ntendon mjNREF
+PTR TENDON mjtNum tendon_solimp_lim ntendon mjNIMP
+PTR TENDON mjtNum tendon_solref_fri ntendon mjNREF
+PTR TENDON mjtNum tendon_solimp_fri ntendon mjNIMP
+PTR TENDON mjtNum tendon_range ntendon 2
+PTR TENDON mjtNum tendon_actfrcrange ntendon 2
+PTR TENDON mjtNum tendon_margin ntendon 1
+PTR TENDON mjtNum tendon_stiffness ntendon 1
+PTR TENDON mjtNum tendon_stiffnesspoly ntendon mjNPOLY
+PTR TENDON mjtNum tendon_damping ntendon 1
+PTR TENDON mjtNum tendon_dampingpoly ntendon mjNPOLY
+PTR TENDON mjtNum tendon_armature ntendon 1
+PTR TENDON mjtNum tendon_frictionloss ntendon 1
+PTR TENDON mjtNum tendon_lengthspring ntendon 2
+PTR TENDON mjtNum tendon_length0 ntendon 1
+PTR TENDON mjtNum tendon_invweight0 ntendon 1
+PTR TENDON mjtNum tendon_user ntendon MJ_M(nuser_tendon)
+PTR TENDON float tendon_rgba ntendon 4
+PTR ACTUATOR int actuator_trntype nactuator 1
+PTR ACTUATOR int actuator_dyntype nactuator 1
+PTR ACTUATOR int actuator_gaintype nactuator 1
+PTR ACTUATOR int actuator_biastype nactuator 1
+PTR ACTUATOR int actuator_ctrladr nactuator 1
+PTR ACTUATOR int actuator_ctrlnum nactuator 1
+PTR ACTUATOR int actuator_ctrlspec nactuator 1
+PTR ACTUATOR int actuator_outadr nactuator 1
+PTR ACTUATOR int actuator_outnum nactuator 1
+PTR ACTUATOR int actuator_actadr nactuator 1
+PTR ACTUATOR int actuator_actnum nactuator 1
+PTR ACTUATOR int actuator_trnid nactuator 2
+PTR ACTUATOR mjtNum actuator_cranklength nactuator 1
+PTR ACTUATOR mjtNum actuator_dynprm nactuator mjNDYN
+PTR ACTUATOR mjtNum actuator_gainprm nactuator mjNGAIN
+PTR ACTUATOR mjtNum actuator_biasprm nactuator mjNBIAS
+PTR ACTUATOR mjtBool actuator_actlimited nactuator 1
+PTR ACTUATOR mjtNum actuator_actrange nactuator 2
+PTR ACTUATOR mjtBool actuator_actearly nactuator 1
+PTR ACTUATOR int actuator_history nactuator 2
+PTR ACTUATOR int actuator_historyadr nactuator 1
+PTR ACTUATOR mjtNum actuator_delay nactuator 1
+PTR ACTUATOR mjtNum actuator_damping nactuator 1
+PTR ACTUATOR mjtNum actuator_dampingpoly nactuator mjNPOLY
+PTR ACTUATOR mjtNum actuator_armature nactuator 1
+PTR ACTUATOR int actuator_group nactuator 1
+PTR ACTUATOR mjtNum actuator_user nactuator MJ_M(nuser_actuator)
+PTR ACTUATOR int actuator_plugin nactuator 1
+PTR ACTUATOR mjtBool actuator_forcelimited nactuator 1
+PTR ACTUATOR mjtNum actuator_forcerange nactuator 2
+PTR ACTUATOR mjtBool actuator_ctrllimited nu 1
+PTR ACTUATOR mjtNum actuator_ctrlrange nu 2
+PTR ACTUATOR mjtNum actuator_gear nout 6
+PTR ACTUATOR mjtNum actuator_acc0 nout 1
+PTR ACTUATOR mjtNum actuator_length0 nout 1
+PTR ACTUATOR mjtNum actuator_lengthrange nout 2
+PTR SENSOR int sensor_type nsensor 1
+PTR SENSOR int sensor_datatype nsensor 1
+PTR SENSOR int sensor_needstage nsensor 1
+PTR SENSOR int sensor_objtype nsensor 1
+PTR SENSOR int sensor_objid nsensor 1
+PTR SENSOR int sensor_reftype nsensor 1
+PTR SENSOR int sensor_refid nsensor 1
+PTR SENSOR int sensor_intprm nsensor mjNSENS
+PTR SENSOR int sensor_dim nsensor 1
+PTR SENSOR int sensor_adr nsensor 1
+PTR SENSOR mjtNum sensor_cutoff nsensor 1
+PTR SENSOR mjtNum sensor_noise nsensor 1
+PTR SENSOR int sensor_history nsensor 2
+PTR SENSOR int sensor_historyadr nsensor 1
+PTR SENSOR mjtNum sensor_delay nsensor 1
+PTR SENSOR mjtNum sensor_interval nsensor 2
+PTR SENSOR mjtNum sensor_user nsensor MJ_M(nuser_sensor)
+PTR SENSOR int sensor_plugin nsensor 1
+OPT mjtNum timestep 1
+OPT mjtNum impratio 1
+OPT mjtNum tolerance 1
+OPT mjtNum ls_tolerance 1
+OPT mjtNum noslip_tolerance 1
+OPT mjtNum ccd_tolerance 1
+OPT mjtNum sleep_tolerance 1
+OPTVEC mjtNum gravity 3
+OPTVEC mjtNum wind 3
+OPTVEC mjtNum magnetic 3
+OPT mjtNum density 1
+OPT mjtNum viscosity 1
+OPT mjtNum o_margin 1
+OPTVEC mjtNum o_solref 2
+OPTVEC mjtNum o_solimp 5
+OPTVEC mjtNum o_friction 5
+OPT int integrator 1
+OPT int cone 1
+OPT int jacobian 1
+OPT int solver 1
+OPT int iterations 1
+OPT int ls_iterations 1
+OPT int noslip_iterations 1
+OPT int ccd_iterations 1
+OPT int disableflags 1
+OPT int enableflags 1
+OPT int disableactuator 1
+OPT int sdf_initpoints 1
+OPT int sdf_iterations 1
+STAT meaninertia 1
+STAT meanmass 1
+STAT meansize 1
+STAT extent 1
+STATVEC center 3
+VIS global int cameraid 1
+VIS global int orthographic 1
+VIS global float fovy 1
+VIS global float ipd 1
+VIS global float azimuth 1
+VIS global float elevation 1
+VIS global float linewidth 1
+VIS global float glow 1
+VIS global float realtime 1
+VIS global int offwidth 1
+VIS global int offheight 1
+VIS global int ellipsoidinertia 1
+VIS global int bvactive 1
+VIS quality int shadowsize 1
+VIS quality int offsamples 1
+VIS quality int numslices 1
+VIS quality int numstacks 1
+VIS quality int numquads 1
+VISVEC headlight float ambient 3
+VISVEC headlight float diffuse 3
+VISVEC headlight float specular 3
+VIS headlight int active 1
+VIS map float stiffness 1
+VIS map float stiffnessrot 1
+VIS map float force 1
+VIS map float torque 1
+VIS map float alpha 1
+VIS map float fogstart 1
+VIS map float fogend 1
+VIS map float znear 1
+VIS map float zfar 1
+VIS map float haze 1
+VIS map float shadowclip 1
+VIS map float shadowscale 1
+VIS map float actuatortendon 1
+VIS scale float forcewidth 1
+VIS scale float contactwidth 1
+VIS scale float contactheight 1
+VIS scale float connect 1
+VIS scale float com 1
+VIS scale float camera 1
+VIS scale float light 1
+VIS scale float selectpoint 1
+VIS scale float jointlength 1
+VIS scale float jointwidth 1
+VIS scale float actuatorlength 1
+VIS scale float actuatorwidth 1
+VIS scale float framelength 1
+VIS scale float framewidth 1
+VIS scale float constraint 1
+VIS scale float slidercrank 1
+VIS scale float frustum 1
+VISVEC rgba float fog 4
+VISVEC rgba float haze 4
+VISVEC rgba float force 4
+VISVEC rgba float inertia 4
+VISVEC rgba float joint 4
+VISVEC rgba float actuator 4
+VISVEC rgba float actuatornegative 4
+VISVEC rgba float actuatorpositive 4
+VISVEC rgba float com 4
+VISVEC rgba float camera 4
+VISVEC rgba float light 4
+VISVEC rgba float selectpoint 4
+VISVEC rgba float connect 4
+VISVEC rgba float contactpoint 4
+VISVEC rgba float contactforce 4
+VISVEC rgba float contactfriction 4
+VISVEC rgba float contacttorque 4
+VISVEC rgba float contactgap 4
+VISVEC rgba float rangefinder 4
+VISVEC rgba float constraint 4
+VISVEC rgba float slidercrank 4
+VISVEC rgba float crankbroken 4
+VISVEC rgba float frustum 4
+VISVEC rgba float bv 4
+VISVEC rgba float bvactive 4
