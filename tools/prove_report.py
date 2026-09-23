@@ -22,6 +22,44 @@ TRUSTED_SPEC_ONLY = {
     "mj-bytes": {"mj.bytes.bits_to_real", "mj.bytes.bits_to_float"},
 }
 
+# GNAT reports its generated generic wrappers as "all", but the standard
+# deallocator instances inside those wrappers as "spec". Calls are modeled
+# by GNATprove's ownership/deallocation rules; there is no project Ada body.
+STANDARD_DEALLOCATORS = {
+    "free_real": ("real_array", "real_array_access"),
+    "free_int": ("int_array", "int_array_access"),
+    "free_int64": ("int64_array", "int64_array_access"),
+    "free_byte": ("byte_array", "byte_array_access"),
+    "free_float32": ("float32_array", "float32_array_access"),
+}
+
+
+def modeled_deallocator(unit: str, entity: dict, data: dict) -> bool:
+    """Recognize only the five exact standard instances in MJ.Types."""
+    if unit != "mj-types":
+        return False
+    match = re.fullmatch(r"mj\.types\.(free_\w+)gp\d+\.\1", entity["name"].lower())
+    if not match or match[1] not in STANDARD_DEALLOCATORS:
+        return False
+    name = match[1]
+    wrapper = entity["name"].rsplit(".", 1)[0].lower()
+    if not any(data["entities"][key]["name"].lower() == wrapper and mode == "all"
+               for key, mode in data["spark"].items()):
+        return False
+    sources = list(ROOT.glob("src/**/mj-types.ads"))
+    if len(sources) != 1:
+        return False
+    lines = source_code(sources[0]).lower().splitlines()
+    obj, access = STANDARD_DEALLOCATORS[name]
+    declaration = (rf"\s*procedure\s+{name}\s+is\s+new\s+ada\.unchecked_deallocation"
+                   rf"\s*\(\s*{obj}\s*,\s*{access}\s*\)\s*;\s*")
+    for location in entity.get("sloc", []):
+        line = location.get("line")
+        if (location.get("file") == "mj-types.ads" and isinstance(line, int)
+                and 1 <= line <= len(lines) and re.fullmatch(declaration, lines[line - 1])):
+            return True
+    return False
+
 
 def source_hashes() -> dict[str, str]:
     paths = [*ROOT.glob("src/**/*.ad?"), ROOT / "sparkling_mujoco.gpr"]
@@ -158,9 +196,13 @@ def main(argv: list[str] | None = None) -> int:
                 print("    Not analyzed: " + ", ".join(sorted(missing)))
         outside = []
         trusted = 0
+        modeled = 0
         for key, mode in data["spark"].items():
             name = data["entities"][key]["name"].lower()
             if mode == "all":
+                continue
+            if mode == "spec" and modeled_deallocator(unit, data["entities"][key], data):
+                modeled += 1
                 continue
             if mode == "spec" and name in TRUSTED_SPEC_ONLY.get(unit, set()):
                 trusted += name.rsplit(".", 1)[-1] in declared
@@ -194,7 +236,8 @@ def main(argv: list[str] | None = None) -> int:
         total_trusted += trusted
         invalid |= bool(problems)
         print(f"{unit:<28} proved={ok:6} unproved={bad:4} warnings={warnings:4} "
-              + (f"trusted-bodies={trusted} " if trusted else "") + " ".join(problems))
+              + (f"trusted-bodies={trusted} " if trusted else "")
+              + (f"modeled-deallocators={modeled} " if modeled else "") + " ".join(problems))
     print(f"TOTAL proved={total_ok} unproved={total_bad} warnings={total_warnings}; "
           f"scope={'selected units' if args.unit else 'all subprogram units'}; "
           f"trusted-bodies={total_trusted}")

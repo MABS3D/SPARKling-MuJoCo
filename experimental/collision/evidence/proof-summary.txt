@@ -1,0 +1,46 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                         Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------------
+Data Dependencies                10          10                                               .           .          .
+Flow Dependencies                 .           .                                               .           .          .
+Initialization                    1           1                                               .           .          .
+Non-Aliasing                      .           .                                               .           .          .
+Run-time Checks                  64           .                      64 (CVC5 14%, Trivial 86%)           .          .
+Assertions                        1           .                       1 (CVC5 80%, Trivial 20%)           .          .
+Functional Contracts             20           .    20 (CVC5 86%, Trivial 8%, Z3 4%, altergo 2%)           .          .
+LSP Verification                  .           .                                               .           .          .
+Termination                      10          10                                               .           .          .
+Concurrency                       .           .                                               .           .          .
+----------------------------------------------------------------------------------------------------------------------
+Total                           106    21 (20%)                                        85 (80%)           .          .
+
+
+max steps used for successful proof: 89379
+
+============================
+Most difficult proved checks
+============================
+
+No check found with max time greater than 1 second
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-collision, 11 subprograms and packages out of 11 analyzed
+  MJ.Collision at mj-collision.ads:7 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Collision.Capsule_End at mj-collision.ads:74 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Collision.Capsule_Model at mj-collision.ads:105 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Collision.Endpoint at mj-collision.adb:80 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Collision.In_Tier0 at mj-collision.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Collision.Is_Unit at mj-collision.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Collision.Pack_Contacts at mj-collision.adb:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Collision.Packed_Model at mj-collision.ads:85 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Collision.Plane_Capsule at mj-collision.ads:121 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Collision.Plane_Sphere at mj-collision.ads:50 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)
+  MJ.Collision.Projected_Distance at mj-collision.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)

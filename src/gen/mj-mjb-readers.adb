@@ -2938,6 +2938,15 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Site_Bodyid.all);
       Pos := Pos + Integer (Nbytes);
+      --  site_dataid : int (nsite x 1)
+      Count  := Int64 (S.Nsite) * (1);
+      Nbytes := Count * 4;
+      if Int64 (B'Length) - Int64 (Pos) < Nbytes then
+         Result := (Truncated, Site_Dataid, -1);
+         return;
+      end if;
+      Read_I32_Array (B, Pos, G.Site_Dataid.all);
+      Pos := Pos + Integer (Nbytes);
       --  site_matid : int (nsite x 1)
       Count  := Int64 (S.Nsite) * (1);
       Nbytes := Count * 4;
@@ -2991,6 +3000,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Site_1;
+
+   procedure Read_Site_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Site_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Site_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  site_quat : mjtNum (nsite x 4)
       Count  := Int64 (S.Nsite) * (4);
       Nbytes := Count * 8;
@@ -3004,18 +3025,6 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
-   end Read_Site_1;
-
-   procedure Read_Site_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result)
-   with
-     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Site_Layout_OK (S, G),
-     Post => Pos <= B'Length and then Site_Layout_OK (S, G)
-   is
-      Count  : Int64;
-      Nbytes : Int64;
-      Bad    : Integer;
-   begin
-      Result := OK_Result;
       --  site_user : mjtNum (nsite x MJ_M(nuser_site))
       Count  := Int64 (S.Nsite) * (Int64 (S.Nuser_Site));
       Nbytes := Count * 8;

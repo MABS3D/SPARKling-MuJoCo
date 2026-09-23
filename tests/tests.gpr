@@ -6,11 +6,12 @@ project Tests is
    for Exec_Dir use Sparkling_Mujoco.Build_Root & "/bin";
    for Create_Missing_Dirs use "True";
    for Main use ("test_types.adb", "test_model_alloc.adb", "test_bytes.adb", "test_parse_raw.adb",
-                 "test_corpus_raw.adb", "test_validate.adb", "test_validity.adb", "test_corpus.adb");
+                 "test_corpus_raw.adb", "test_validate.adb", "test_validity.adb", "test_corpus.adb",
+                 "test_vectors.adb", "test_matrices.adb");
 
    package Compiler is
       --  no -gnatwa: tests assert static facts on purpose and the "always True" notes are noise
-      for Default_Switches ("Ada") use ("-gnat2022", "-g", "-gnata", "-gnato");
+      for Default_Switches ("Ada") use ("-gnat2022", "-g", "-gnata", "-gnato", "-ffp-contract=off");
    end Compiler;
 
    package Binder is

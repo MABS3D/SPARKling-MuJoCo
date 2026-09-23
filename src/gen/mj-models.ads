@@ -6,8 +6,8 @@ with MJ.Fixed;
 package MJ.Models with SPARK_Mode is
 
    Size_Count     : constant := 98;      --  int64 sizes in the .mjb size table
-   Pointer_Count  : constant := 486;     --  arrays in MJMODEL_POINTERS
-   Version_Header : constant := 3012000; --  mjVERSION_HEADER
+   Pointer_Count  : constant := 487;     --  arrays in MJMODEL_POINTERS
+   Version_Header : constant := 3014000; --  mjVERSION_HEADER
 
    type Sizes is record
       Nq               : Size_Type := 0;
@@ -512,11 +512,12 @@ package MJ.Models with SPARK_Mode is
    procedure Free_Geom (G : in out Geom_Arrays) with
      Post => Geom_All_Null (G);
 
-   ---- SITE (10 arrays)
+   ---- SITE (11 arrays)
 
    type Site_Arrays is record
       Site_Type                : Int_Array_Access := null;
       Site_Bodyid              : Int_Array_Access := null;
+      Site_Dataid              : Int_Array_Access := null;
       Site_Matid               : Int_Array_Access := null;
       Site_Group               : Int_Array_Access := null;
       Site_Sameframe           : Byte_Array_Access := null;
@@ -535,6 +536,7 @@ package MJ.Models with SPARK_Mode is
    function Site_Layout_OK (S : Sizes; G : Site_Arrays) return Boolean is
      (I32_OK (G.Site_Type, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Bodyid, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Site_Dataid, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Matid, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Group, Int64 (S.Nsite) * (1))
       and then U8_OK (G.Site_Sameframe, Int64 (S.Nsite) * (1))
@@ -547,6 +549,7 @@ package MJ.Models with SPARK_Mode is
    function Site_All_Null (G : Site_Arrays) return Boolean is
      (G.Site_Type = null
       and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
       and then G.Site_Matid = null
       and then G.Site_Group = null
       and then G.Site_Sameframe = null

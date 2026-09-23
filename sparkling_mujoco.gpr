@@ -12,11 +12,12 @@ library project Sparkling_Mujoco is
    for Library_Dir use Build_Root & "/lib/" & Mode;
    for Create_Missing_Dirs use "True";
 
-   Common := ("-gnat2022", "-gnatwa", "-gnatw.X");
+   --  GNATprove models separate IEEE operations, not contracted FMA.
+   Common := ("-gnat2022", "-gnatwa", "-gnatw.X", "-ffp-contract=off");
    Link_Switches := ();
    case Mode is
       when "release" =>
-         Link_Switches := ("-flto", "-fuse-linker-plugin");
+         Link_Switches := ("-flto", "-fuse-linker-plugin", "-ffp-contract=off");
       when others => null;
    end case;
 

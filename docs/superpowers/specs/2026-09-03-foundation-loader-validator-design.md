@@ -1,5 +1,9 @@
 # Sparkling MuJoCo: Foundation, `.mjb` Loader, and Proven Model Validator
 
+> Historical 3.12 design/planning baseline. Current reference, ABI and compatibility
+> decisions are documented in [the MuJoCo 3.14 migration](../../mujoco-3.14-alignment.md);
+> old version/count examples below are retained as history.
+
 Date: 2026-09-03
 Status: approved design, awaiting implementation plan
 Scope: sub-projects 1 and 2 of the nine-part program described in Section 0
@@ -622,7 +626,8 @@ Every double in `Model` is finite (guaranteed by the loader) and:
   stiffness/damping form, as in C).
 - `Dof_Armature >= 0`, `Dof_Damping >= 0`, `Dof_Frictionloss >= 0`, `Dof_Invweight0 >= 0`,
   `Dof_M0 >= 0`; `Tendon_Stiffness >= 0`, `Tendon_Damping >= 0`, `Tendon_Frictionloss >= 0`;
-  `Actuator_Acc0 >= 0`.
+  `Actuator_Acc0 >= 0` for each of the `Nout` force outputs;
+  `Actuator_Cranklength >= 0` for each of the `Nactuator` actuators.
 - `Stat.Meaninertia > 0`, `Stat.Meanmass > 0`, `Stat.Meansize > 0`, `Stat.Extent > 0`.
 
 Every one of these is a fact some downstream proof needs; the list grows only when a later

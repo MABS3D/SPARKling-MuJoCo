@@ -7,7 +7,7 @@
 | gprbuild | 26.0.1 | `alr -n toolchain --select gprbuild` |
 | gnatprove | 16.1.0 | not a toolchain component in Alire 2.1.1; pulled by the `gnatprove = "^16"` dependency of `alire.toml` on the first `alr build` |
 | Python | 3.13.15 | `winget install Python.Python.3.13`, at `%LOCALAPPDATA%\Programs\Python\Python313\python.exe` |
-| mujoco wheel | 3.12.0 | `python -m pip install mujoco==3.12.0` |
+| mujoco wheel | 3.14.0 | `python -m pip install mujoco==3.14.0` |
 | C compiler for the table dumpers | gcc 16.1.0 (GNAT-FSF-builds) | the one bundled with `gnat_native`, invoked as `alr exec -- gcc`; the pre-existing MSYS2 gcc 12.2.0 at `C:\msys64` exits with status 1 on any input and is not used |
 
 Alire settings: `toolchain.assistant=false`, `msys2.do_not_install=true`.
@@ -73,7 +73,7 @@ the same record with many access components. Measured on an isolated 83-componen
 
 The scalar-record case matters as much as the pointer case: `Sizes` has 98 integer components.
 The chain length is not the only factor: the frame of each call grows with the size of the
-state being updated (`Model` holds 486 arrays; so do 30 group locals taken together), so a
+state being updated (`Model` now holds 487 arrays; so do 30 group locals taken together), so a
 subprogram must not contain many calls whose effects cover that whole state, whether they
 update a record component or a set of locals through globals.
 
@@ -199,7 +199,7 @@ The release library uses `-ffat-lto-objects` so its static archive contains
 ordinary symbol definitions even when `ar` does not discover the LTO plugin.
 The executable projects use `-flto -fuse-linker-plugin` at link time. See the
 [GCC LTO documentation](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html).
-The first bounded 3D kernels and their comparison tolerances are documented in
+The dense vector kernels, functional contracts and comparison tolerances are documented in
 [numeric-kernels.md](numeric-kernels.md).
 
 
@@ -226,9 +226,9 @@ and hand-written ones are listed in `docs/proof-justifications.md`.
 
 Structural element predicates check the array ranges they consume before
 indexing. In particular, graph edge counts are computed only after a widened
-block-size check. Pair signatures are compared in 64 bits: the reference loader
-rejects a signature with bit 31 set, and the SPARK validator preserves that
-restriction without overflowing while checking an invalid pair.
+block-size check. Pair/exclusion signatures use 64-bit intermediates to decode the unsigned
+32-bit storage. Since the MuJoCo 3.14 alignment, bit 31 is accepted when the
+decoded body IDs are valid; range and reconstruction contracts cover this case.
 Texture extents are checked as `height * width <= (length - address) / channels`
 after checking the address, nonnegative dimensions and positive channel count.
 For those integers this is equivalent to the original byte-count comparison,
@@ -243,7 +243,74 @@ range fields separately. Quaternion/vector preconditions test membership in the
 array range before subtracting from its last bound, including extreme null bounds.
 Their squared norms are evaluated in pure scalar helpers with Tier0 arguments
 and Tier1 results, separating floating-point bounds from array indexing.
+The quaternion/vector predicates reject selected values outside Tier0 before
+calling those helpers. Body/joint/geometry parameter checks therefore need only
+their layout and applicable enum conditions, rather than the quantified real
+values of the entire model. Is_Valid still requires the global real-value clause.
 
 Generated real/Boolean family predicates compose shared array predicates.
 Those helpers are proved separately; local Hide_Info annotations prevent their
 quantifiers from being expanded once per model field while proving composition.
+
+
+During diagnosis, always select the smallest affected subprogram with
+`--limit-subp=source.adb:line`, locating its current declaration before running.
+Keep the 4000 MB process-group guard and short per-obligation timeouts. Fix and
+recheck that subprogram before broadening the scope; use complete-unit runs
+only for final integration evidence. Limited reports are diagnostic artifacts:
+`tools/prove.py` deliberately rejects limit switches, and the final report gate
+requires fresh complete-unit invocation receipts over identical source hashes.
+
+The diagnostic families check their full Boolean predicates before scanning
+for a detailed error. A failed family returns a non-OK fallback even if the
+scan finds no detail; only the path passing every family can return OK.
+This keeps the contractual success proof independent of error-scan induction.
+`Reveal_Layout` is a proved ghost lemma exposing array bounds at local proof
+boundaries. The dof-tree helper uses a proved `Assert_And_Cut` to retain the
+facts needed for block checking without carrying earlier traversal history.
+
+
+GNAT's generated wrappers for the five `Ada.Unchecked_Deallocation` instances
+in `MJ.Types` are reported in SPARK, while the standard instance inside each
+wrapper is reported as specification-only. The report gate recognizes these
+instances separately as `modeled-deallocators`, requiring the exact source
+unit, instance name, argument types, declaration line, and an in-SPARK wrapper.
+It does not accept other specification-only project bodies through that rule.
+The four application trusted bodies remain counted separately.
+GNATprove checks deallocator calls through its ownership and memory model;
+see the [SPARK deallocation documentation](https://docs.adacore.com/spark2014-docs/html/ug/en/source/access.html#deallocation).
+
+
+The vector implementation and its ghost recurrences require GNAT/GNATprove 16.
+The library, test projects and C probes disable floating-point contraction with
+`-ffp-contract=off`; release LTO linking carries the same switch. This preserves
+the separate binary64 operations used by the proof model. The validated x86-64
+target uses SSE arithmetic, round-to-nearest-even and gradual underflow; a new
+target must preserve those assumptions. Static ghost functions/contracts and
+unfolding lemmas remain proof obligations but are absent from executable code.
+`tests/run.py` now also invokes `tools/compare_vectors.py` and requires the
+additional `test_vectors` executable. Use the selected complete-unit gate for
+a vector increment:
+
+```sh
+python tools/prove.py --unit mj-blas --unit mj-vector_models --jobs 2 -- --timeout=20
+```
+
+This selected run does not refresh the certificates of unchanged foundation
+units: invocation receipts hash all core sources and the library project file.
+
+
+Dense matrix kernels and their domains are described in
+[matrix-kernels.md](matrix-kernels.md). `tests/run.py` also requires
+`test_matrices` and invokes `tools/compare_matrices.py`; matrix comparisons
+require exact finite numeric equality with the pinned C scalar implementation.
+The selected complete-unit gate for the dense numeric layer is:
+
+```sh
+python tools/prove.py --unit mj-blas --unit mj-vector_models --unit mj-matrix_types --unit mj-matrix_models --unit mj-matrices --jobs 2 -- --timeout=20
+```
+
+Start diagnostic runs with `--limit-subp=file:line` at the scalar helper or
+single-component operation, then its composing kernel. Complete-unit reports,
+source hashes and invocation receipts are the final evidence; subprogram limits
+must never be passed to the final gate. The memory guard remains 4,000 MB.

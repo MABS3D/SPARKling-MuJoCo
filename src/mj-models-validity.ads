@@ -32,7 +32,7 @@ package MJ.Models.Validity with SPARK_Mode is
 
    ----------------------------------------------------------------------------
    --  Contiguous ownership blocks. Owner (K) is the owner of object K; owner I
-   --  holds exactly the objects Adr (I) .. Adr (I) + Num (I) - 1, and Adr (I)
+   --  holds exactly the objects Adr (I) .. (Adr (I) + Num (I)) - 1, and Adr (I)
    --  is -1 when Num (I) = 0. Used for body/joint, body/dof, body/geom,
    --  tree/dof (spec 5.3).
    ----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (if Num (I) = 0 then Adr (I) = -1
                 else Adr (I) in 0 .. Owner'Length - Num (I)
                      and then Owner (Adr (I)) = I
-                     and then Owner (Adr (I) + Num (I) - 1) = I
+                     and then Owner ((Adr (I) + Num (I)) - 1) = I
                      and then (Adr (I) = 0 or else Owner (Adr (I) - 1) /= I)
                      and then (Adr (I) + Num (I) = Owner'Length
                                or else Owner (Adr (I) + Num (I)) /= I)))
@@ -65,7 +65,7 @@ package MJ.Models.Validity with SPARK_Mode is
    function Covered_At (Adr, Num, Owner : Int_Array; K : Integer) return Boolean is
      (Owner (K) in Adr'Range
       and then Num (Owner (K)) > 0
-      and then K in Adr (Owner (K)) .. Adr (Owner (K)) + Num (Owner (K)) - 1)
+      and then K in Adr (Owner (K)) .. (Adr (Owner (K)) + Num (Owner (K))) - 1)
    with Pre => Adr'First = 0 and then Num'First = 0 and then Owner'First = 0
                and then Adr'Length = Num'Length
                and then Blocks_OK (Adr, Num, Owner) and then K in Owner'Range;
@@ -173,7 +173,7 @@ package MJ.Models.Validity with SPARK_Mode is
      (M.Trees.Tree_Bodynum (T) in 1 .. M.S.Nbody
       and then M.Trees.Tree_Bodyadr (T) in 0 .. M.S.Nbody - M.Trees.Tree_Bodynum (T)
       and then (for all K in M.Trees.Tree_Bodyadr (T) ..
-                             M.Trees.Tree_Bodyadr (T) + M.Trees.Tree_Bodynum (T) - 1 =>
+                             (M.Trees.Tree_Bodyadr (T) + M.Trees.Tree_Bodynum (T)) - 1 =>
                   M.Bodies.Body_Treeid (K) = T))
    with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntree - 1;
 
@@ -181,8 +181,8 @@ package MJ.Models.Validity with SPARK_Mode is
      (if M.Bodies.Body_Treeid (I) >= 0 then
         M.Bodies.Body_Treeid (I) in 0 .. M.S.Ntree - 1
         and then Int64 (I) in Int64 (M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I))) ..
-                      Int64 (M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I)))
-                      + Int64 (M.Trees.Tree_Bodynum (M.Bodies.Body_Treeid (I))) - 1)
+                      (Int64 (M.Trees.Tree_Bodyadr (M.Bodies.Body_Treeid (I)))
+                       + Int64 (M.Trees.Tree_Bodynum (M.Bodies.Body_Treeid (I)))) - 1)
    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nbody - 1;
 
    function Body_Trees_OK (M : Model) return Boolean is
@@ -226,8 +226,8 @@ package MJ.Models.Validity with SPARK_Mode is
      (M.Dofs.Dof_Jntid (D) in 0 .. M.S.Njnt - 1
       and then M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D)) in 0 .. 3
       and then Int64 (D) in Int64 (M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D))) ..
-                    Int64 (M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D)))
-                    + Int64 (Dof_Width (M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D)))) - 1
+                    (Int64 (M.Joints.Jnt_Dofadr (M.Dofs.Dof_Jntid (D)))
+                     + Int64 (Dof_Width (M.Joints.Jnt_Type (M.Dofs.Dof_Jntid (D))))) - 1
       and then M.Dofs.Dof_Bodyid (D) = M.Joints.Jnt_Bodyid (M.Dofs.Dof_Jntid (D)))
    with Pre => Valid_Layout (M) and then D in 0 .. M.S.Nv - 1;
 
@@ -253,7 +253,7 @@ package MJ.Models.Validity with SPARK_Mode is
              W : constant Integer := M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B));
            begin
              (M.Bodies.Body_Dofnum (W) = 0
-              or else Int64 (M.Bodies.Body_Dofadr (W)) + Int64 (M.Bodies.Body_Dofnum (W)) - 1
+              or else (Int64 (M.Bodies.Body_Dofadr (W)) + Int64 (M.Bodies.Body_Dofnum (W))) - 1
                       in -1 .. Int64 (M.S.Nv) - 1)))))
    with Pre => Valid_Layout (M) and then J in 0 .. M.S.Njnt - 1;
 
@@ -266,8 +266,8 @@ package MJ.Models.Validity with SPARK_Mode is
                  W : constant Integer := M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B));
                begin
                  (if M.Bodies.Body_Dofnum (W) = 0 then -1
-                  else Integer (Int64 (M.Bodies.Body_Dofadr (W))
-                                + Int64 (M.Bodies.Body_Dofnum (W)) - 1)))))
+                  else Integer ((Int64 (M.Bodies.Body_Dofadr (W))
+                                 + Int64 (M.Bodies.Body_Dofnum (W))) - 1)))))
    with Pre => Valid_Layout (M) and then J in 0 .. M.S.Njnt - 1
                and then First_Parent_Input_OK (M, J),
         Post => Expected_First_Parent'Result in -1 .. M.S.Nv - 1;
@@ -334,7 +334,7 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (if N = 0 then Nnz = 0 else Rowadr (N - 1) + Rownnz (N - 1) = Nnz)
       and then (for all K in 0 .. Nnz - 1 => Colind (K) in 0 .. Ncols - 1)
       and then (for all I in 0 .. N - 1 =>
-                  (for all K in Rowadr (I) .. Rowadr (I) + Rownnz (I) - 2 =>
+                  (for all K in Rowadr (I) .. (Rowadr (I) + Rownnz (I)) - 2 =>
                      Colind (K) < Colind (K + 1))))
    with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
 
@@ -372,7 +372,7 @@ package MJ.Models.Validity with SPARK_Mode is
    function M_Row_At (M : Model; I : Integer) return Boolean is
      (M.Sparse.M_Rownnz (I) in 1 .. M.S.Nc
       and then M.Sparse.M_Rowadr (I) in 0 .. M.S.Nc - M.Sparse.M_Rownnz (I)
-      and then M.Sparse.M_Colind (M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I) - 1) = I
+      and then M.Sparse.M_Colind ((M.Sparse.M_Rowadr (I) + M.Sparse.M_Rownnz (I)) - 1) = I
       and then (if M.Dofs.Dof_Simplenum (I) = 0 and then M.Dofs.Dof_Parentid (I) >= 0 then
                   M.Dofs.Dof_Parentid (I) < M.S.Nv
                   and then M.Dofs.Dof_Simplenum (M.Dofs.Dof_Parentid (I)) = 0
@@ -431,6 +431,17 @@ package MJ.Models.Validity with SPARK_Mode is
      (for all G in 0 .. M.S.Ngeom - 1 => Geom_Data_At (M, G))
    with Pre => Valid_Layout (M);
 
+   --  MuJoCo 3.14 checks the mesh reference only for mesh sites, including
+   --  the -1 sentinel. Other site types do not dereference this field.
+   function Site_Data_At (M : Model; S : Integer) return Boolean is
+     (if M.Sites.Site_Type (S) = 7 then
+        M.Sites.Site_Dataid (S) in -1 .. M.S.Nmesh - 1)
+   with Pre => Valid_Layout (M) and then S in 0 .. M.S.Nsite - 1;
+
+   function Site_Datas_OK (M : Model) return Boolean is
+     (for all S in 0 .. M.S.Nsite - 1 => Site_Data_At (M, S))
+   with Pre => Valid_Layout (M);
+
    function Sameframes_OK (M : Model) return Boolean is
      ((for all I in 0 .. M.S.Nbody - 1 => M.Bodies.Body_Sameframe (I) <= 4)
       and then (for all G in 0 .. M.S.Ngeom - 1 => M.Geoms.Geom_Sameframe (G) <= 4)
@@ -443,7 +454,7 @@ package MJ.Models.Validity with SPARK_Mode is
       and then Ref_Mesh_Vertadr_At (M, I)
       and then Ref_Mesh_Normaladr_At (M, I)
       and then Ref_Mesh_Texcoordadr_At (M, I)
-      and then (for all F in M.Meshes.Mesh_Faceadr (I) .. M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I) - 1 =>
+      and then (for all F in M.Meshes.Mesh_Faceadr (I) .. (M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I)) - 1 =>
         (for all K in 0 .. 2 =>
            M.Meshes.Mesh_Face (3 * F + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1
            and then (if M.Meshes.Mesh_Normalnum (I) > 0 then
@@ -456,15 +467,15 @@ package MJ.Models.Validity with SPARK_Mode is
    --  indexes the mesh's polygons.
    function Mesh_Polys_At (M : Model; I : Integer) return Boolean is
      (Ref_Mesh_Polyadr_At (M, I) and then Ref_Mesh_Vertadr_At (M, I)
-      and then (for all P in M.Meshes.Mesh_Polyadr (I) .. M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I) - 1 =>
+      and then (for all P in M.Meshes.Mesh_Polyadr (I) .. (M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I)) - 1 =>
          Ref_Mesh_Polyvertadr_At (M, P)
          and then (for all K in M.Meshes.Mesh_Polyvertadr (P) ..
-                       M.Meshes.Mesh_Polyvertadr (P) + M.Meshes.Mesh_Polyvertnum (P) - 1 =>
+                       (M.Meshes.Mesh_Polyvertadr (P) + M.Meshes.Mesh_Polyvertnum (P)) - 1 =>
             M.Meshes.Mesh_Polyvert (K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1))
-      and then (for all V in M.Meshes.Mesh_Vertadr (I) .. M.Meshes.Mesh_Vertadr (I) + M.Meshes.Mesh_Vertnum (I) - 1 =>
+      and then (for all V in M.Meshes.Mesh_Vertadr (I) .. (M.Meshes.Mesh_Vertadr (I) + M.Meshes.Mesh_Vertnum (I)) - 1 =>
                   Ref_Mesh_Polymapadr_At (M, V)
                   and then (for all K in M.Meshes.Mesh_Polymapadr (V) ..
-                                M.Meshes.Mesh_Polymapadr (V) + M.Meshes.Mesh_Polymapnum (V) - 1 =>
+                                (M.Meshes.Mesh_Polymapadr (V) + M.Meshes.Mesh_Polymapnum (V)) - 1 =>
                      M.Meshes.Mesh_Polymap (K) in 0 .. M.Meshes.Mesh_Polynum (I) - 1)))
    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
 
@@ -474,17 +485,17 @@ package MJ.Models.Validity with SPARK_Mode is
    --  the end of mesh_graph; the engine walks edge lists until a -1, so the
    --  last edge entry must be -1.
    function Graph_Block_At (M : Model; I, A, Nv, Nf : Integer) return Boolean is
-     (Int64 (A) + 2 + 3 * Int64 (Nv) + 6 * Int64 (Nf) <= Int64 (M.S.Nmeshgraph)
+     (((Int64 (A) + 2) + 3 * Int64 (Nv)) + 6 * Int64 (Nf) <= Int64 (M.S.Nmeshgraph)
       and then (declare
         Ne : constant Integer := Nv + 3 * Nf;
       begin
-        (for all K in 0 .. Nv - 1 => M.Meshes.Mesh_Graph (A + 2 + K) in 0 .. Ne - 1)
+        (for all K in 0 .. Nv - 1 => M.Meshes.Mesh_Graph ((A + 2) + K) in 0 .. Ne - 1)
         and then (for all K in 0 .. Nv - 1 =>
-                    M.Meshes.Mesh_Graph (A + 2 + Nv + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)
-        and then (for all K in 0 .. Ne - 1 => M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + K) in -1 .. Nv - 1)
-        and then (Ne = 0 or else M.Meshes.Mesh_Graph (A + 2 + 2 * Nv + Ne - 1) = -1)
+                    M.Meshes.Mesh_Graph (((A + 2) + Nv) + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)
+        and then (for all K in 0 .. Ne - 1 => M.Meshes.Mesh_Graph (((A + 2) + 2 * Nv) + K) in -1 .. Nv - 1)
+        and then (Ne = 0 or else M.Meshes.Mesh_Graph ((((A + 2) + 2 * Nv) + Ne) - 1) = -1)
         and then (for all K in 0 .. 3 * Nf - 1 =>
-                    M.Meshes.Mesh_Graph (A + 2 + 3 * Nv + 3 * Nf + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)))
+                    M.Meshes.Mesh_Graph ((((A + 2) + 3 * Nv) + 3 * Nf) + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)))
    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1
                and then A in 0 .. M.S.Nmeshgraph - 2
                and then Nv in 0 .. M.Meshes.Mesh_Vertnum (I) and then Nf in 0 .. Max_Size / 6;
@@ -603,18 +614,34 @@ package MJ.Models.Validity with SPARK_Mode is
      (M.Pairs.Pair_Dim (P) in 1 | 3 | 4 | 6)
    with Pre => Valid_Layout (M) and then P in 0 .. M.S.Npair - 1;
 
-   --  MuJoCo's loader rejects signatures with bit 31 set: its upper-body
-   --  extraction uses signed right shift. Widen arithmetic before comparing
-   --  so an invalid high-body pair is rejected without raising overflow.
-   --  The compiler forms the signature as body(geom1) << 16 | body(geom2).
+   --  Interpret the signed storage as unsigned 32-bit bits, without an
+   --  unchecked conversion. MuJoCo 3.14 uses an unsigned upper-body shift.
+   function Signature_Bits (Signature : Integer) return Int64 is
+     (if Signature < 0 then Int64 (Signature) + 2**32 else Int64 (Signature))
+   with Post => Signature_Bits'Result in 0 .. 2**32 - 1
+                and then Signature_Bits'Result mod 2**32 = Int64 (Signature) mod 2**32;
+
+   function Signature_Low (Signature : Integer) return Integer is
+     (Integer (Signature_Bits (Signature) mod 2**16))
+   with Post => Signature_Low'Result in 0 .. 2**16 - 1;
+
+   function Signature_High (Signature : Integer) return Integer is
+     (Integer (Signature_Bits (Signature) / 2**16))
+   with Post => Signature_High'Result in 0 .. 2**16 - 1
+                and then Int64 (Signature_High'Result) * 2**16
+                  + Int64 (Signature_Low (Signature)) = Signature_Bits (Signature);
+
+   --  The compiler packs body(geom1) in the high half and body(geom2) in
+   --  the low half. Retain the port's stronger check against the actual geoms.
    function Pair_Signature_At (M : Model; P : Integer) return Boolean is
      (M.Pairs.Pair_Geom1 (P) in 0 .. M.S.Ngeom - 1
       and then M.Pairs.Pair_Geom2 (P) in 0 .. M.S.Ngeom - 1
       and then M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P)) in 0 .. M.S.Nbody - 1
       and then M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P)) in 0 .. M.S.Nbody - 1
-      and then Int64 (M.Pairs.Pair_Signature (P)) =
-        Int64 (M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P))) * 2**16
-        + Int64 (M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P))))
+      and then Signature_High (M.Pairs.Pair_Signature (P)) =
+        M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom1 (P))
+      and then Signature_Low (M.Pairs.Pair_Signature (P)) =
+        M.Geoms.Geom_Bodyid (M.Pairs.Pair_Geom2 (P)))
    with Pre => Valid_Layout (M) and then P in 0 .. M.S.Npair - 1;
 
    function Pairs_OK (M : Model) return Boolean is
@@ -623,10 +650,10 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M);
 
    function Exclude_At (M : Model; E : Integer) return Boolean is
-     (M.Excludes.Exclude_Signature (E) >= 0
-      and then M.Excludes.Exclude_Signature (E) / 2**16 in 0 .. M.S.Nbody - 1
-      and then M.Excludes.Exclude_Signature (E) mod 2**16 in 0 .. M.S.Nbody - 1
-      and then M.Excludes.Exclude_Signature (E) / 2**16 /= M.Excludes.Exclude_Signature (E) mod 2**16)
+     (Signature_High (M.Excludes.Exclude_Signature (E)) in 0 .. M.S.Nbody - 1
+      and then Signature_Low (M.Excludes.Exclude_Signature (E)) in 0 .. M.S.Nbody - 1
+      and then Signature_High (M.Excludes.Exclude_Signature (E)) /=
+        Signature_Low (M.Excludes.Exclude_Signature (E)))
    with Pre => Valid_Layout (M) and then E in 0 .. M.S.Nexclude - 1;
 
    function Excludes_OK (M : Model) return Boolean is
@@ -680,10 +707,10 @@ package MJ.Models.Validity with SPARK_Mode is
       and then M.Tendons.Tendon_Actuatorid (T) in -1 .. M.S.Nactuator - 1
       and then M.Tendons.Tendon_Treenum (T) >= 0   --  counts every tree on the path; only two ids are stored
       and then (if M.Wraps.Wrap_Type (M.Tendons.Tendon_Adr (T)) = 3 then
-                  (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
+                  (for all W in M.Tendons.Tendon_Adr (T) .. (M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T)) - 1 =>
                      M.Wraps.Wrap_Type (W) in 2 .. 5)
                 else
-                  (for all W in M.Tendons.Tendon_Adr (T) .. M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T) - 1 =>
+                  (for all W in M.Tendons.Tendon_Adr (T) .. (M.Tendons.Tendon_Adr (T) + M.Tendons.Tendon_Num (T)) - 1 =>
                      M.Wraps.Wrap_Type (W) = 1)))
    with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntendon - 1;
 
@@ -806,7 +833,7 @@ package MJ.Models.Validity with SPARK_Mode is
                               B : constant Integer := M.Geoms.Geom_Bodyid (M.Sensors.Sensor_Refid (S));
                             begin
                               (for some K in M.Bodies.Body_Geomadr (B) ..
-                                             M.Bodies.Body_Geomadr (B) + M.Bodies.Body_Geomnum (B) - 1 =>
+                                             (M.Bodies.Body_Geomadr (B) + M.Bodies.Body_Geomnum (B)) - 1 =>
                                  M.Geoms.Geom_Contype (K) /= 0 or else M.Geoms.Geom_Conaffinity (K) /= 0))))
    with Pre => Valid_Layout (M) and then Sizes_OK (M) and then Body_Geoms_OK (M)
                and then S in 0 .. M.S.Nsensor - 1;
@@ -875,15 +902,27 @@ package MJ.Models.Validity with SPARK_Mode is
    with Global => null;
 
    function Unit_Quat (Q : Real_Array; Pos : Integer) return Boolean is
-     (abs (Squared_Norm4 (Q (Pos), Q (Pos + 1), Q (Pos + 2), Q (Pos + 3)) - 1.0)
+     ((for all K in Pos .. Pos + 3 => Q (K) in Tier0_Real)
+      and then abs (Squared_Norm4 (Q (Pos), Q (Pos + 1), Q (Pos + 2), Q (Pos + 3)) - 1.0)
       <= 1.0e-6)
-   with Pre => Pos in Q'Range and then Pos <= Q'Last - 3
-               and then (for all K in Pos .. Pos + 3 => Q (K) in Tier0_Real);
+   with Pre => Pos in Q'Range and then Pos <= Q'Last - 3;
 
    function Unit_Vec3 (V : Real_Array; Pos : Integer) return Boolean is
-     (abs (Squared_Norm3 (V (Pos), V (Pos + 1), V (Pos + 2)) - 1.0) <= 1.0e-6)
-   with Pre => Pos in V'Range and then Pos <= V'Last - 2
-               and then (for all K in Pos .. Pos + 2 => V (K) in Tier0_Real);
+     ((for all K in Pos .. Pos + 2 => V (K) in Tier0_Real)
+      and then abs (Squared_Norm3 (V (Pos), V (Pos + 1), V (Pos + 2)) - 1.0) <= 1.0e-6)
+   with Pre => Pos in V'Range and then Pos <= V'Last - 2;
+
+   --  mj_checkDiscrete constraints for the supported non-flex model subset.
+   --  Positive modulus extracts each bit even from signed flag storage.
+   function Discrete_Options_OK (M : Model) return Boolean is
+     ((if M.Opt.Enableflags mod (2 * Enbl_Ipc) >= Enbl_Ipc then
+         M.Opt.Integrator = Integrator_Kind'Pos (Int_Discrete)
+         and then M.Opt.Solver = Solver_Kind'Pos (Sol_Cg)
+         and then M.Opt.Enableflags mod (2 * Enbl_Fwdinv) < Enbl_Fwdinv
+         and then M.Opt.Enableflags mod (2 * Enbl_Sleep) < Enbl_Sleep)
+      and then (if M.Opt.Integrator = Integrator_Kind'Pos (Int_Discrete)
+                   and then M.Opt.Enableflags mod (2 * Enbl_Sleep) >= Enbl_Sleep
+                then M.Opt.Disableflags mod (2 * Dsbl_Island) < Dsbl_Island));
 
    function Option_OK (M : Model) return Boolean is
      (In_Tier0 (M.Opt.Timestep) and then M.Opt.Timestep > 0.0
@@ -902,7 +941,9 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (for all K in 0 .. 1 => In_Tier0 (M.Opt.O_Solref (K)))
       and then (for all K in 0 .. 4 => In_Tier0 (M.Opt.O_Solimp (K)))
       and then (for all K in 0 .. 4 => In_Tier0 (M.Opt.O_Friction (K)))
-      and then M.Opt.Integrator in 0 .. 3 and then M.Opt.Cone in 0 .. 1
+      and then M.Opt.Integrator in 0 .. Integrator_Kind'Pos (Integrator_Kind'Last)
+      and then Discrete_Options_OK (M)
+      and then M.Opt.Cone in 0 .. 1
       and then M.Opt.Jacobian in 0 .. 2 and then M.Opt.Solver in 0 .. 2
       and then M.Opt.Iterations >= 0 and then M.Opt.Ls_Iterations >= 0
       and then M.Opt.Noslip_Iterations >= 0 and then M.Opt.Ccd_Iterations >= 0
@@ -922,35 +963,37 @@ package MJ.Models.Validity with SPARK_Mode is
       and then M.Bodies.Body_Invweight0 (2 * I) >= 0.0 and then M.Bodies.Body_Invweight0 (2 * I + 1) >= 0.0
       and then Unit_Quat (M.Bodies.Body_Quat.all, 4 * I)
       and then Unit_Quat (M.Bodies.Body_Iquat.all, 4 * I))
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then I in 0 .. M.S.Nbody - 1;
+   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nbody - 1;
 
    function Body_Params_OK (M : Model) return Boolean is
      (for all I in 0 .. M.S.Nbody - 1 => Body_Param_At (M, I))
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M);
+   with Pre => Valid_Layout (M);
 
    function Jnt_Param_At (M : Model; J : Integer) return Boolean is
      ((if M.Joints.Jnt_Type (J) in 2 | 3 then Unit_Vec3 (M.Joints.Jnt_Axis.all, 3 * J))
       and then M.Joints.Jnt_Margin (J) >= 0.0)
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then Jnt_Types_OK (M)
+   with Pre => Valid_Layout (M) and then Jnt_Types_OK (M)
                and then J in 0 .. M.S.Njnt - 1;
 
    function Jnt_Params_OK (M : Model) return Boolean is
      (for all J in 0 .. M.S.Njnt - 1 => Jnt_Param_At (M, J))
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then Jnt_Types_OK (M);
+   with Pre => Valid_Layout (M) and then Jnt_Types_OK (M);
 
    function Geom_Param_At (M : Model; G : Integer) return Boolean is
-     ((for all K in 0 .. 2 => M.Geoms.Geom_Size (3 * G + K) >= 0.0)
+     ((for all K in 0 .. 2 =>
+         (if M.Geoms.Geom_Type (G) /= 0 or else K = 2 then
+            M.Geoms.Geom_Size (3 * G + K) >= 0.0))
       and then M.Geoms.Geom_Rbound (G) >= 0.0
       and then M.Geoms.Geom_Margin (G) >= 0.0 and then M.Geoms.Geom_Gap (G) >= 0.0
       and then Unit_Quat (M.Geoms.Geom_Quat.all, 4 * G))
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M) and then G in 0 .. M.S.Ngeom - 1;
+   with Pre => Valid_Layout (M) and then G in 0 .. M.S.Ngeom - 1;
 
    function Geom_Params_OK (M : Model) return Boolean is
      ((for all G in 0 .. M.S.Ngeom - 1 => Geom_Param_At (M, G))
       and then (for all S in 0 .. M.S.Nsite - 1 => Unit_Quat (M.Sites.Site_Quat.all, 4 * S))
       and then (for all C in 0 .. M.S.Ncam - 1 => Unit_Quat (M.Cameras.Cam_Quat.all, 4 * C))
       and then (for all I in 0 .. M.S.Nmesh - 1 => Unit_Quat (M.Meshes.Mesh_Quat.all, 4 * I)))
-   with Pre => Valid_Layout (M) and then Reals_In_Tier0 (M);
+   with Pre => Valid_Layout (M);
 
    function Dof_Params_OK (M : Model) return Boolean is
      (for all D in 0 .. M.S.Nv - 1 =>
@@ -967,8 +1010,9 @@ package MJ.Models.Validity with SPARK_Mode is
    with Pre => Valid_Layout (M);
 
    function Actuator_Params_OK (M : Model) return Boolean is
-     (for all A in 0 .. M.S.Nactuator - 1 =>
-        M.Actuators.Actuator_Acc0 (A) >= 0.0 and then M.Actuators.Actuator_Cranklength (A) >= 0.0)
+     ((for all O in 0 .. M.S.Nout - 1 => M.Actuators.Actuator_Acc0 (O) >= 0.0)
+      and then (for all A in 0 .. M.S.Nactuator - 1 =>
+                  M.Actuators.Actuator_Cranklength (A) >= 0.0))
    with Pre => Valid_Layout (M);
 
    ----------------------------------------------------------------------------
@@ -982,7 +1026,7 @@ package MJ.Models.Validity with SPARK_Mode is
 
    function Caps_OK (M : Model) return Boolean is
      (Int64 (M.Caps.Efc_Cap) =
-        Int64 (M.Caps.Ne_Max) + Int64 (M.Caps.Nf_Max) + Int64 (M.Caps.Nl_Max)
+        ((Int64 (M.Caps.Ne_Max) + Int64 (M.Caps.Nf_Max)) + Int64 (M.Caps.Nl_Max))
         + 10 * Int64 (M.Caps.Contact_Cap)
       --  the dense bound saturates at Max_Size: large sparse models (100 humanoids) exceed it,
       --  and the constraint assembler checks nJ against the allocated capacity dynamically
@@ -1015,7 +1059,7 @@ package MJ.Models.Validity with SPARK_Mode is
       and then Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
       and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
       and then D_Diags_OK (M) and then Maps_OK (M)
-      and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Sameframes_OK (M)
+      and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Site_Datas_OK (M) and then Sameframes_OK (M)
       and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M) and then Texids_OK (M)
       and then Bvhs_OK (M) and then Octs_OK (M)
       and then Pairs_OK (M) and then Excludes_OK (M) and then Eq_Types_OK (M) and then Eq_Objs_OK (M)
@@ -1031,6 +1075,75 @@ package MJ.Models.Validity with SPARK_Mode is
       and then Caps_OK (M) and then Adhesion_OK (M))
    with Pre => Valid_Layout (M);
 
+   --  Compose the callee contracts; every clause body is proved separately.
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sizes_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Refs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bools_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Reals_In_Tier0);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Parents_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Roots_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Welds_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Joints_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Dofs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Geoms_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Trees_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tree_Dofs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Trees_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Types_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Adrs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Joints_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Parents_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Parent_Ranges_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madr_Range_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madrs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Simplenums_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_M_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_B_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_D_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Ten_J_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", M_Rownnz_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", M_Rows_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_Diags_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Maps_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Types_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Datas_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Site_Datas_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sameframes_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Meshes_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Hfields_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Textures_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Texids_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bvhs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Octs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Pairs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Excludes_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Eq_Types_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Eq_Objs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Wraps_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tendons_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Types_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Trnids_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Acts_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Ranges_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Types_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Objs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Dims_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Adrs_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tuples_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Names_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Paths_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Option_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stat_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tendon_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Params_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Caps_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Adhesion_OK);
+   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+
    subtype Valid_Model is Model
      with Dynamic_Predicate => Valid_Layout (Valid_Model) and then Is_Valid (Valid_Model);
 
@@ -1039,7 +1152,7 @@ package MJ.Models.Validity with SPARK_Mode is
                      Body_Trees_OK, Jnt_Types_OK, Jnt_Adrs_OK, Dof_Joints_OK, Dof_Parents_OK,
                      Dof_Parent_Ranges_OK, Madr_Range_OK, Madrs_OK, Simplenums_OK,
                      CSR_OK, Sparse_M_OK, Sparse_B_OK, Sparse_D_OK, Sparse_Ten_J_OK, M_Rownnz_OK,
-                     M_Rows_OK, D_Diags_OK, Maps_OK, Geom_Types_OK, Geom_Datas_OK, Sameframes_OK,
+                     M_Rows_OK, D_Diags_OK, Maps_OK, Geom_Types_OK, Geom_Datas_OK, Site_Datas_OK, Sameframes_OK,
                      Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK,
                      Pairs_OK, Excludes_OK, Eq_Types_OK, Eq_Objs_OK, Wraps_OK, Tendons_OK,
                      Actuator_Types_OK, Actuator_Trnids_OK, Actuator_Acts_OK, Actuator_Ranges_OK,

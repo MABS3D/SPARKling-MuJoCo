@@ -158,7 +158,8 @@ package MJ.Types with SPARK_Mode is
       Cnstr_Contact_Elliptic) with Convention => C;
 
    type Solver_Kind       is (Sol_Pgs, Sol_Cg, Sol_Newton) with Convention => C;
-   type Integrator_Kind   is (Int_Euler, Int_Rk4, Int_Implicit, Int_Implicitfast) with Convention => C;
+   type Integrator_Kind   is (Int_Euler, Int_Rk4, Int_Implicit, Int_Implicitfast, Int_Discrete)
+     with Convention => C;
    type Cone_Kind         is (Cone_Pyramidal, Cone_Elliptic) with Convention => C;
    type Jacobian_Kind     is (Jac_Dense, Jac_Sparse, Jac_Auto) with Convention => C;
    type Sdf_Kind          is (Sdf_Single, Sdf_Intersection, Sdf_Midsurface, Sdf_Collision) with Convention => C;
@@ -198,7 +199,8 @@ package MJ.Types with SPARK_Mode is
    Enbl_Invdiscrete : constant := 2**3;
    Enbl_Sleep       : constant := 2**4;
    Enbl_Diagexact   : constant := 2**5;
-   N_Enable         : constant := 6;
+   Enbl_Ipc         : constant := 2**6;
+   N_Enable         : constant := 7;
 
    ---------------------------------------------------------------------------
    --  Load status (spec 3.4) and runtime capacities (spec 5.11)

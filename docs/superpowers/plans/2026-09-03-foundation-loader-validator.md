@@ -1,5 +1,9 @@
 # Foundation, `.mjb` Loader, and Proven Validator Implementation Plan
 
+> Historical 3.12 design/planning baseline. Current reference, ABI and compatibility
+> decisions are documented in [the MuJoCo 3.14 migration](../../mujoco-3.14-alignment.md);
+> old version/count examples below are retained as history.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the SPARK crate, generate the `Model` record from MuJoCo's X-macros, load `.mjb` files, and prove a validator whose `OK` result implies the `Valid_Model` predicate every later sub-project assumes.

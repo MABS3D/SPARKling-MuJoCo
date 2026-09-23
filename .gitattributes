@@ -8,3 +8,19 @@
 *.md  text eol=lf
 *.toml text eol=lf
 *.ps1 text eol=crlf
+
+# SPARK uses Ada syntax; retain honest classifications for the tooling and C tests.
+*.ads linguist-language=Ada
+*.adb linguist-language=Ada
+*.ada linguist-language=Ada
+*.py linguist-language=Python
+*.ps1 linguist-language=PowerShell
+*.c linguist-language=C
+
+# The pinned upstream engine is a reference dependency, not the Ada/SPARK port.
+mujoco/** linguist-vendored
+
+# Reproducible generator output and archived proof evidence are not handwritten code.
+src/gen/** linguist-generated
+tests/gen/** linguist-generated
+experimental/collision/evidence/** linguist-generated
