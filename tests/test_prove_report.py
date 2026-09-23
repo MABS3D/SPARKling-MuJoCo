@@ -200,6 +200,83 @@ class ProofReportTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("OUTSIDE_SPARK", output)
 
+    def deallocator_fixture(self):
+        (self.root / "src/subject.ads").unlink()
+        (self.root / "src/mj-types.ads").write_text(
+            "package MJ.Types is\n"
+            "procedure Free_Real is new Ada.Unchecked_Deallocation (Real_Array, Real_Array_Access);\n"
+            "end MJ.Types;\n")
+        self.path = self.path.with_name("mj-types.spark")
+        self.data["entities"] = {
+            "1": {"name": "MJ.Types.FREE_REALGP3479"},
+            "2": {"name": "MJ.Types.FREE_REALGP3479.Free_Real",
+                  "sloc": [{"file": "mj-types.ads", "line": 2, "column": 11}]},
+        }
+        self.data["spark"] = {"1": "all", "2": "spec"}
+
+    def test_standard_deallocator_is_modeled_not_trusted_body(self):
+        self.deallocator_fixture()
+        self.write_report()
+        code, output = self.run_report()
+        self.assertEqual(code, 0)
+        self.assertIn("modeled-deallocators=1", output)
+        self.assertIn("trusted-bodies=0", output)
+
+    def test_deallocator_name_cannot_hide_a_project_body(self):
+        self.deallocator_fixture()
+        (self.root / "src/mj-types.ads").write_text(
+            "package MJ.Types is\nprocedure Free_Real;\nend MJ.Types;\n")
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_other_generic_rejected(self):
+        self.deallocator_fixture()
+        path = self.root / "src/mj-types.ads"
+        path.write_text(path.read_text().replace("Ada.Unchecked_Deallocation", "Custom.Free"))
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_wrong_location_rejected(self):
+        self.deallocator_fixture()
+        self.data["entities"]["2"]["sloc"][0]["line"] = 1
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_wrapper_must_be_in_spark(self):
+        self.deallocator_fixture()
+        self.data["spark"]["1"] = "spec"
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_unknown_mode_rejected(self):
+        self.deallocator_fixture()
+        self.data["spark"]["2"] = "none"
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_other_source_unit_rejected(self):
+        self.deallocator_fixture()
+        (self.root / "src/mj-types.ads").rename(self.root / "src/subject.ads")
+        self.path = self.path.with_name("subject.spark")
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_unknown_instance_rejected(self):
+        self.deallocator_fixture()
+        path = self.root / "src/mj-types.ads"
+        path.write_text(path.read_text().replace("Free_Real", "Free_Other"))
+        for entity in self.data["entities"].values():
+            entity["name"] = entity["name"].replace("FREE_REAL", "FREE_OTHER").replace("Free_Real", "Free_Other")
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
+    def test_deallocator_changed_argument_types_rejected(self):
+        self.deallocator_fixture()
+        path = self.root / "src/mj-types.ads"
+        path.write_text(path.read_text().replace("Real_Array_Access", "Different_Access"))
+        self.write_report()
+        self.assertNotEqual(self.run_report()[0], 0)
+
     def test_unknown_spark_mode_fails(self):
         self.data["spark"]["1"] = "none"
         self.write_report()

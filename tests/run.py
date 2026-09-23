@@ -77,10 +77,14 @@ def main() -> int:
                         "-p", "test_*.py", "-v"], cwd=ROOT, env=env, check=True)
         subprocess.run([sys.executable, "tools/compare_blas.py", "--mode", args.mode,
                         *(["--alire"] if args.alire else [])], cwd=ROOT, env=env, check=True)
+        subprocess.run([sys.executable, "tools/compare_vectors.py", "--mode", args.mode,
+                        *(["--alire"] if args.alire else [])], cwd=ROOT, env=env, check=True)
+        subprocess.run([sys.executable, "tools/compare_matrices.py", "--mode", args.mode,
+                        *(["--alire"] if args.alire else [])], cwd=ROOT, env=env, check=True)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"TESTS FAILED: {error}", file=sys.stderr)
         return 1
-    print(f"All {len(paths)} declared Ada tests, Python tests and BLAS comparisons passed")
+    print(f"All {len(paths)} declared Ada tests, Python tests and matrix/vector/BLAS comparisons passed")
     return 0
 
 

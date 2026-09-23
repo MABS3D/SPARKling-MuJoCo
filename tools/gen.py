@@ -156,8 +156,10 @@ def load_tables() -> Tables:
             sys.exit(f"fields.txt: unknown line kind {k!r}")
     if meta.get("nsize") != len(sizes) or len(sizes) != 98:
         sys.exit(f"expected 98 sizes, got {len(sizes)} (META nsize {meta.get('nsize')})")
-    if meta.get("nptr") != len(ptrs) or len(ptrs) != 486:
-        sys.exit(f"expected 486 pointer fields, got {len(ptrs)} (META nptr {meta.get('nptr')})")
+    if meta.get("version") != 3_014_000:
+        sys.exit(f"expected MuJoCo 3.14.0, got version {meta.get('version')}")
+    if meta.get("nptr") != len(ptrs) or len(ptrs) != 487:
+        sys.exit(f"expected 487 pointer fields, got {len(ptrs)} (META nptr {meta.get('nptr')})")
     fields = []
     for ctype, name, nr, nc in ptrs:
         g = grouped.get(name)

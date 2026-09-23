@@ -626,6 +626,7 @@ package body MJ.Models with SPARK_Mode is
    begin
       G := (Site_Type                => New_I32 (Int64 (S.Nsite) * (1)),
             Site_Bodyid              => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Dataid              => New_I32 (Int64 (S.Nsite) * (1)),
             Site_Matid               => New_I32 (Int64 (S.Nsite) * (1)),
             Site_Group               => New_I32 (Int64 (S.Nsite) * (1)),
             Site_Sameframe           => New_U8 (Int64 (S.Nsite) * (1)),
@@ -639,16 +640,17 @@ package body MJ.Models with SPARK_Mode is
    function Site_Null_Upto_1 (G : Site_Arrays) return Boolean is
      (G.Site_Type = null
       and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
       and then G.Site_Matid = null
       and then G.Site_Group = null
       and then G.Site_Sameframe = null
       and then G.Site_Size = null
-      and then G.Site_Pos = null
-      and then G.Site_Quat = null);
+      and then G.Site_Pos = null);
 
    function Site_Null_Upto_2 (G : Site_Arrays) return Boolean is
      (G.Site_Type = null
       and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
       and then G.Site_Matid = null
       and then G.Site_Group = null
       and then G.Site_Sameframe = null
@@ -664,12 +666,12 @@ package body MJ.Models with SPARK_Mode is
    begin
       Free_Int (G.Site_Type);
       Free_Int (G.Site_Bodyid);
+      Free_Int (G.Site_Dataid);
       Free_Int (G.Site_Matid);
       Free_Int (G.Site_Group);
       Free_Byte (G.Site_Sameframe);
       Free_Real (G.Site_Size);
       Free_Real (G.Site_Pos);
-      Free_Real (G.Site_Quat);
    end Free_Site_1;
 
    procedure Free_Site_2 (G : in out Site_Arrays) with
@@ -677,6 +679,7 @@ package body MJ.Models with SPARK_Mode is
      Post => Site_Null_Upto_2 (G)
    is
    begin
+      Free_Real (G.Site_Quat);
       Free_Real (G.Site_User);
       Free_Float32 (G.Site_Rgba);
    end Free_Site_2;

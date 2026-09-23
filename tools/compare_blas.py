@@ -76,7 +76,7 @@ def main() -> int:
         ada = RUNNER.checked_executables(build / "bin", ["blas_probe"], started, suffix)[0]
         ref = build / "bin" / ("blas_reference" + suffix)
         started = time.time_ns()
-        subprocess.run(RUNNER.guard([*prefix, "gcc", "-std=c11", "-O2", "-ffunction-sections",
+        subprocess.run(RUNNER.guard([*prefix, "gcc", "-std=c11", "-O2", "-ffp-contract=off", "-ffunction-sections",
                        "-fdata-sections", "-I", "mujoco/include", "-I", "mujoco/src",
                        "tests/blas_reference.c", "mujoco/src/engine/engine_util_blas.c",
                        "-Wl,--gc-sections", "-lm", "-o", str(ref)]), cwd=ROOT, env=env, check=True)

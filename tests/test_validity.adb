@@ -9,6 +9,15 @@ procedure Test_Validity is
    Adr   : constant Int_Array := [0, 2];
    Num   : constant Int_Array := [2, 1];
 begin
+   Assert (Signature_Bits (Integer'First) = 2**31, "unsigned sign-bit mapping");
+   Assert (Signature_Bits (-1) = 2**32 - 1, "unsigned all-ones mapping");
+   Assert (Signature_High (Integer'First) = 32_768, "upper ID is not sign-extended");
+   Assert (Signature_Low (Integer'First) = 0, "zero lower ID at signed minimum");
+   Assert (Signature_High (-1) = 65_535 and Signature_Low (-1) = 65_535,
+           "both halves retain all sixteen bits");
+   Assert (Signature_High (Integer'Last) = 32_767 and Signature_Low (Integer'Last) = 65_535,
+           "signed maximum splits at sixteen bits");
+   Assert (Signature_High (0) = 0 and Signature_Low (0) = 0, "zero signature");
    Assert (not Owners_Sorted ([0 => 0], Integer'First), "minimum owner count is rejected");
    Assert (not Owners_Sorted (Empty, -1), "negative count rejected even with no objects");
    Assert (Owners_Sorted (Empty, 0), "empty ownership is valid");
@@ -37,12 +46,17 @@ begin
    Assert (not Unit_Vec3 ([Max_Val, Max_Val, Max_Val], 0),
            "large axis rejected without floating overflow");
    Assert (not Unit_Vec3 ([0.0, 0.0, 0.0], 0), "zero axis rejected");
+   Assert (not Unit_Quat ([Real'Last, 0.0, 0.0, 0.0], 0),
+           "quaternion values outside Tier0 rejected before squaring");
+   Assert (not Unit_Vec3 ([Real'Last, 0.0, 0.0], 0),
+           "axis values outside Tier0 rejected before squaring");
    declare
       S : Sizes;
       M : Model;
    begin
       S.Nactuator := 1;
       S.Nu := 3;
+      S.Nout := 3;
       Allocate (S, M);
       Assert (Actuator_Ranges_OK (M), "vector control ranges initially valid");
       M.Actuators.Actuator_Ctrllimited (2) := 1;
@@ -51,11 +65,20 @@ begin
       Assert (not Actuator_Ranges_OK (M), "last vector control channel is checked");
       M.Actuators.Actuator_Ctrlrange (5) := 3.0;
       Assert (Actuator_Ranges_OK (M), "ordered vector control range accepted");
+      Assert (Actuator_Params_OK (M), "vector output parameters initially valid");
+      M.Actuators.Actuator_Acc0 (2) := -1.0;
+      Assert (not Actuator_Params_OK (M), "last vector output acceleration is checked");
+      M.Actuators.Actuator_Acc0 (2) := 0.0;
+      Assert (Actuator_Params_OK (M), "nonnegative vector output acceleration accepted");
       Free (M);
       S.Nactuator := 2;
       S.Nu := 0;
+      S.Nout := 0;
       Allocate (S, M);
       Assert (Actuator_Ranges_OK (M), "range checker never indexes channels by actuator count");
+      Assert (Actuator_Params_OK (M), "parameter checker never indexes outputs by actuator count");
+      M.Actuators.Actuator_Cranklength (1) := -1.0;
+      Assert (not Actuator_Params_OK (M), "crank lengths are checked by actuator count");
       Free (M);
    end;
    declare
@@ -135,7 +158,7 @@ begin
       M.Pairs.Pair_Geom2 (0) := 1;
       M.Pairs.Pair_Dim (0) := 1;
       M.Pairs.Pair_Signature (0) := Integer'First + 32_769;
-      Assert (not Pairs_OK (M), "high-bit pair signature rejected without overflow");
+      Assert (Pairs_OK (M), "MuJoCo 3.14 high-bit pair signature accepted");
       M.Geoms.Geom_Bodyid (0) := 32_767;
       M.Geoms.Geom_Bodyid (1) := 32_768;
       M.Pairs.Pair_Signature (0) := 2**31 - 32_768;
@@ -145,7 +168,7 @@ begin
       M.Pairs.Pair_Geom1 (0) := -1;
       Assert (not Pairs_OK (M), "invalid pair geometry is rejected before indexing");
       M.Excludes.Exclude_Signature (0) := Integer'First + 32_769;
-      Assert (not Excludes_OK (M), "high-bit exclusion rejected as in MuJoCo");
+      Assert (Excludes_OK (M), "MuJoCo 3.14 high-bit exclusion accepted");
       M.Excludes.Exclude_Signature (0) := 2**31 - 32_768;
       Assert (Excludes_OK (M), "signed upper-body boundary exclusion accepted");
       M.Excludes.Exclude_Signature (0) := 32_767 * 2**16 + 32_767;
@@ -177,6 +200,23 @@ begin
       M.Meshes.Mesh_Vertnum (0) := Integer'Last;
       Assert (not Graph_Block_At (M, 0, 0, Integer'Last, 1),
               "oversized graph rejected before computing edge count");
+      Free (M);
+   end;
+   declare
+      S : Sizes;
+      M : Model;
+   begin
+      S.Ngeom := 1;
+      Allocate (S, M);
+      M.Geoms.Geom_Quat.all := [1.0, 0.0, 0.0, 0.0];
+      M.Geoms.Geom_Type (0) := 0;
+      M.Geoms.Geom_Size.all := [-1.0, -1.0, 0.05];
+      Assert (Geom_Param_At (M, 0), "negative plane extents follow upstream rendering semantics");
+      M.Geoms.Geom_Type (0) := 6;
+      Assert (not Geom_Param_At (M, 0), "negative solid geom sizes remain invalid");
+      M.Geoms.Geom_Type (0) := 0;
+      M.Geoms.Geom_Size (2) := -0.05;
+      Assert (not Geom_Param_At (M, 0), "negative plane grid spacing remains invalid");
       Free (M);
    end;
    Report_And_Exit;

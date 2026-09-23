@@ -15,6 +15,9 @@ begin
    Assert_Eq (Integer'(Obj_Kind'Enum_Rep (Obj_Plugin)), 25, "mjOBJ_PLUGIN code");
    Assert_Eq (Sensor_Kind'Pos (Sens_User), 48, "49 sensor kinds");
    Assert_Eq (Integer'(Geom_Kind'Enum_Rep (Sdf)), 8, "mjGEOM_SDF code");
+   Assert_Eq (Integer'(Integrator_Kind'Enum_Rep (Int_Discrete)), 4, "mjINT_DISCRETE code");
+   Assert_Eq (Integer'(Enbl_Ipc), 64, "mjENBL_IPC bit");
+   Assert_Eq (Integer'(N_Enable), 7, "seven MuJoCo 3.14 enable flags");
 
    Assert (Tier0_Real'Last = Max_Val, "tier 0 bound is mjMAXVAL");
    Assert (Tier0_Real'Last * Tier0_Real'Last <= Tier1_Real'Last

@@ -25,6 +25,8 @@ procedure Test_Parse_Raw is
       S.Nq := 1;
       S.Nv := 1;
       S.Ngeom := 1;
+      S.Nsite := 2;
+      S.Nmesh := 1;
       S.Nnames := Names'Length;
       S.Nmocap := 0;
       Allocate (S, M0);
@@ -39,6 +41,9 @@ procedure Test_Parse_Raw is
       M0.Bodies.Body_Pos (3 .. 5) := [1.0, 2.0, 3.0];
       M0.Joints.Jnt_Type (0) := 3;
       M0.Geoms.Geom_Type (0) := 2;
+      M0.Sites.Site_Type.all := [7, 2];
+      M0.Sites.Site_Dataid.all := [0, -1];
+      M0.Sites.Site_Matid.all := [-1, 17];
       for K in Names'Range loop
          M0.Names.Names (K - Names'First) := Character'Pos (Names (K));
       end loop;
@@ -130,6 +135,8 @@ begin
       Assert (M1.Bodies.Body_Mass (1) = 3.5, "body mass");
       Assert (M1.Bodies.Body_Pos (4) = 2.0, "body pos");
       Assert_Eq (M1.Joints.Jnt_Type (0), 3, "joint type");
+      Assert (M1.Sites.Site_Dataid.all = [0, -1], "mesh-site ids and sentinel round-trip");
+      Assert (M1.Sites.Site_Matid.all = [-1, 17], "field following site_dataid stays aligned");
       Assert_Eq (Integer (M1.Names.Names (6)), Character'Pos ('t'), "names bytes");
       declare
          B2 : Byte_Array (0 .. Integer (Len) - 1);
