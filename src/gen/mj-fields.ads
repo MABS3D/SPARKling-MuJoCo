@@ -121,6 +121,7 @@ package MJ.Fields with SPARK_Mode is
       Geom_Rgba,
       Site_Type,
       Site_Bodyid,
+      Site_Dataid,
       Site_Matid,
       Site_Group,
       Site_Sameframe,

@@ -68,6 +68,16 @@ def group_type(g: str) -> str:          # BODY -> Body_Arrays (not _Group: geom_
     return g.capitalize() + "_Arrays"
 
 
+# Longest chain of calls that update one component each of the same record, in the
+# generated free procedures and group readers. gnatwhy3's memory grows far faster than
+# linearly with that chain length (83 calls: killed above 5 GB; 11 calls of 8: 7 s).
+CHUNK = 8
+
+
+def chunks(fs: list) -> list:
+    return [fs[i:i + CHUNK] for i in range(0, len(fs), CHUNK)]
+
+
 def group_prefix(g: str) -> str:        # BODY -> Body   (used for Body_Layout_OK etc.)
     return g.capitalize()
 
@@ -146,8 +156,10 @@ def load_tables() -> Tables:
             sys.exit(f"fields.txt: unknown line kind {k!r}")
     if meta.get("nsize") != len(sizes) or len(sizes) != 98:
         sys.exit(f"expected 98 sizes, got {len(sizes)} (META nsize {meta.get('nsize')})")
-    if meta.get("nptr") != len(ptrs) or len(ptrs) != 486:
-        sys.exit(f"expected 486 pointer fields, got {len(ptrs)} (META nptr {meta.get('nptr')})")
+    if meta.get("version") != 3_014_000:
+        sys.exit(f"expected MuJoCo 3.14.0, got version {meta.get('version')}")
+    if meta.get("nptr") != len(ptrs) or len(ptrs) != 487:
+        sys.exit(f"expected 487 pointer fields, got {len(ptrs)} (META nptr {meta.get('nptr')})")
     fields = []
     for ctype, name, nr, nc in ptrs:
         g = grouped.get(name)
@@ -279,50 +291,57 @@ def emit_fixed(t: Tables) -> None:
     write(GEN / "mj-fixed.ads", "\n".join(out))
 
 
-ALLOC_HELPERS = """   --  One allocator per element kind. Each postcondition is exactly the conjunct
-   --  the group layout predicate states for that array, which keeps every
-   --  Allocate_<Group> proof a sequence of trivial steps.
+ALLOC_HELPERS = """   --  One allocating function per element kind. Each postcondition is exactly the
+   --  conjunct the group layout predicate states for that array, and every group is
+   --  built by a single aggregate assignment. A chain of per-component updates on a
+   --  record with many access components (one call per array) makes gnatwhy3 run out
+   --  of memory: 83 such calls exceeded 5 GB, the aggregate form proves in seconds.
 
-   procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => I32_OK (P, N)
+   function New_I32 (N : Int64) return Int_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => I32_OK (New_I32'Result, N)
    is
    begin
-      P := new Int_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_I32;
+      return new Int_Array'[0 .. Integer (N) - 1 => 0];
+   end New_I32;
 
-   procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => F64_OK (P, N)
+   function New_F64 (N : Int64) return Real_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => F64_OK (New_F64'Result, N)
    is
    begin
-      P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
-   end Alloc_F64;
+      return new Real_Array'[0 .. Integer (N) - 1 => 0.0];
+   end New_F64;
 
-   procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => U8_OK (P, N)
+   function New_U8 (N : Int64) return Byte_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => U8_OK (New_U8'Result, N)
    is
    begin
-      P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_U8;
+      return new Byte_Array'[0 .. Integer (N) - 1 => 0];
+   end New_U8;
 
-   procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => F32_OK (P, N)
+   function New_F32 (N : Int64) return Float32_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => F32_OK (New_F32'Result, N)
    is
    begin
-      P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
-   end Alloc_F32;
+      return new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
+   end New_F32;
 
-   procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => I64_OK (P, N)
+   function New_I64 (N : Int64) return Int64_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => I64_OK (New_I64'Result, N)
    is
    begin
-      P := new Int64_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_I64;
+      return new Int64_Array'[0 .. Integer (N) - 1 => 0];
+   end New_I64;
 """
+
+# Fixed (non-array) components of Model, in declaration order after S.
+MODEL_FIXED = [("Opt", "MJ.Fixed.Option"), ("Vis", "MJ.Fixed.Visual"), ("Stat", "MJ.Fixed.Statistic"),
+               ("Flg_Gravcomp", "Boolean := False"), ("Flg_Surfacevel", "Boolean := False"),
+               ("Flg_Adhesion", "Boolean := False"), ("Caps", "Capacities")]
 
 
 def size_component(c: str) -> str:
@@ -382,19 +401,19 @@ def emit_model(t: Tables) -> None:
         spec.append("     (" + "\n      and then ".join(conj) + ");\n")
         spec.append(f"   function {P}_All_Null (G : {T}) return Boolean is")
         spec.append("     (" + "\n      and then ".join(f"G.{f.ada} = null" for f in fs) + ");\n")
+        spec.append(f"   procedure Allocate_{P} (S : Sizes; G : in out {T}) with")
+        spec.append(f"     Pre  => {P}_Sizes_OK (S) and then {P}_All_Null (G),")
+        spec.append(f"     Post => {P}_Layout_OK (S, G);")
+        spec.append(f"   procedure Free_{P} (G : in out {T}) with")
+        spec.append(f"     Post => {P}_All_Null (G);\n")
 
     spec.append("   function Sizes_In_Range (S : Sizes) return Boolean is")
     spec.append("     (" + "\n      and then ".join(f"{group_prefix(g)}_Sizes_OK (S)" for g in GROUP_ORDER) + ");\n")
 
     spec.append("   type Model is record")
     spec.append("      S              : Sizes;")
-    spec.append("      Opt            : MJ.Fixed.Option;")
-    spec.append("      Vis            : MJ.Fixed.Visual;")
-    spec.append("      Stat           : MJ.Fixed.Statistic;")
-    spec.append("      Flg_Gravcomp   : Boolean := False;")
-    spec.append("      Flg_Surfacevel : Boolean := False;")
-    spec.append("      Flg_Adhesion   : Boolean := False;")
-    spec.append("      Caps           : Capacities;")
+    for name, typ in MODEL_FIXED:
+        spec.append(f"      {name:<14} : {typ};")
     for g in GROUP_ORDER:
         spec.append(f"      {GROUP_FIELD[g]:<14} : {group_type(g)};")
     spec.append("   end record;\n")
@@ -417,23 +436,49 @@ def emit_model(t: Tables) -> None:
     body = ["package body MJ.Models with SPARK_Mode is", "", ALLOC_HELPERS]
     for g in GROUP_ORDER:
         P, T, fs = group_prefix(g), group_type(g), by_group[g]
-        body.append(f"   procedure Allocate_{P} (S : Sizes; G : in out {T}) with")
-        body.append(f"     Pre  => {P}_Sizes_OK (S) and then {P}_All_Null (G),")
-        body.append(f"     Post => {P}_Layout_OK (S, G)")
-        body.append("   is\n   begin")
-        for f in fs:
-            body.append(f"      Alloc_{f.reader} (G.{f.ada}, {count_long(f, m)});")
+        body.append(f"   procedure Allocate_{P} (S : Sizes; G : in out {T}) is")
+        body.append("   begin")
+        body.append("      G := (" + ",\n            ".join(
+            f"{f.ada:<24} => New_{f.reader} ({count_long(f, m)})" for f in fs) + ");")
         body.append(f"   end Allocate_{P};\n")
-        body.append(f"   procedure Free_{P} (G : in out {T}) with")
-        body.append(f"     Post => {P}_All_Null (G)")
-        body.append("   is\n   begin")
-        for f in fs:
-            body.append(f"      {FREE_PROC[f.acc]} (G.{f.ada});")
+        # Deallocation has no aggregate form, so groups with more than CHUNK arrays are
+        # freed in chunks: each chunk procedure states cumulatively which arrays are
+        # null, which keeps every call chain short (see the comment on the allocators).
+        parts = chunks(fs)
+        if len(parts) > 1:
+            for k in range(1, len(parts) + 1):
+                done = [f for part in parts[:k] for f in part]
+                body.append(f"   function {P}_Null_Upto_{k} (G : {T}) return Boolean is")
+                body.append("     (" + "\n      and then ".join(f"G.{f.ada} = null" for f in done) + ");\n")
+            for k, part in enumerate(parts, start=1):
+                body.append(f"   procedure Free_{P}_{k} (G : in out {T}) with")
+                if k > 1:
+                    body.append(f"     Pre  => {P}_Null_Upto_{k - 1} (G),")
+                body.append(f"     Post => {P}_Null_Upto_{k} (G)")
+                body.append("   is\n   begin")
+                for f in part:
+                    body.append(f"      {FREE_PROC[f.acc]} (G.{f.ada});")
+                body.append(f"   end Free_{P}_{k};\n")
+        body.append(f"   procedure Free_{P} (G : in out {T}) is")
+        body.append("   begin")
+        if len(parts) > 1:
+            for k in range(1, len(parts) + 1):
+                body.append(f"      Free_{P}_{k} (G);")
+        else:
+            for f in fs:
+                body.append(f"      {FREE_PROC[f.acc]} (G.{f.ada});")
         body.append(f"   end Free_{P};\n")
-    body.append("   procedure Allocate (S : Sizes; M : in out Model) is\n   begin")
-    body.append("      M.S := S;")
+    # Each group is allocated into a default-null local and the model is rebuilt by one
+    # aggregate, so no chain of component updates on Model reaches the prover.
+    body.append("   procedure Allocate (S : Sizes; M : in out Model) is")
     for g in GROUP_ORDER:
-        body.append(f"      Allocate_{group_prefix(g)} (S, M.{GROUP_FIELD[g]});")
+        body.append(f"      L_{GROUP_FIELD[g]:<12} : {group_type(g)};")
+    body.append("   begin")
+    for g in GROUP_ORDER:
+        body.append(f"      Allocate_{group_prefix(g)} (S, L_{GROUP_FIELD[g]});")
+    agg = ["S              => S"] + [f"{name:<14} => M.{name}" for name, _ in MODEL_FIXED]
+    agg += [f"{GROUP_FIELD[g]:<14} => L_{GROUP_FIELD[g]}" for g in GROUP_ORDER]
+    body.append("      M := (" + ",\n            ".join(agg) + ");")
     body.append("   end Allocate;\n")
     body.append("   procedure Free (M : in out Model) is\n   begin")
     for g in GROUP_ORDER:
@@ -474,7 +519,7 @@ HELPERS = """
    --  the caller has checked that the bytes for the whole array are present.
 
    procedure Read_I32_Array (B : Byte_Array; Pos : Natural; A : in out Int_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length)
    is
    begin
@@ -484,7 +529,7 @@ HELPERS = """
    end Read_I32_Array;
 
    procedure Read_I64_Array (B : Byte_Array; Pos : Natural; A : in out Int64_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length)
    is
    begin
@@ -494,7 +539,7 @@ HELPERS = """
    end Read_I64_Array;
 
    procedure Read_U8_Array (B : Byte_Array; Pos : Natural; A : in out Byte_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= Int64 (A'Length)
    is
    begin
@@ -505,9 +550,9 @@ HELPERS = """
 
    --  Bad is -1 when every value is finite, else the index of the first that is not.
    procedure Read_F64_Array (B : Byte_Array; Pos : Natural; A : in out Real_Array; Bad : out Integer) with
-     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length),
-     Post => Bad in -1 .. A'Last
+     Post => Bad = -1 or else Bad in A'Range
    is
       U : Unsigned_64;
    begin
@@ -523,9 +568,9 @@ HELPERS = """
    end Read_F64_Array;
 
    procedure Read_F32_Array (B : Byte_Array; Pos : Natural; A : in out Float32_Array; Bad : out Integer) with
-     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length),
-     Post => Bad in -1 .. A'Last
+     Post => Bad = -1 or else Bad in A'Range
    is
       U : Unsigned_32;
    begin
@@ -602,87 +647,141 @@ def emit_readers(t: Tables) -> None:
             "package MJ.MJB.Readers with SPARK_Mode is", "",
             "   Fixed_Bytes : constant := Option_Size + Visual_Size + Statistic_Size + 2 * Bool_Size;", "",
             "   procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) with",
-            "     Pre  => B'First = 0 and then Pos <= B'Length",
+            "     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length",
             "             and then Int64 (B'Length) - Int64 (Pos) >= 8 * Size_Count,",
             "     Post => Pos <= B'Length and then (if Result.Status = OK then Pos = Pos'Old + 8 * Size_Count);", "",
             "   procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;",
             "                         Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) with",
-            "     Pre  => B'First = 0 and then Pos <= B'Length",
+            "     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length",
             "             and then Int64 (B'Length) - Int64 (Pos) >= Fixed_Bytes,",
             "     Post => Pos <= B'Length and then (if Result.Status = OK then Pos = Pos'Old + Fixed_Bytes);", ""]
     for g in GROUP_ORDER:
         P, T = group_prefix(g), group_type(g)
         spec.append(f"   procedure Read_{P} (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out {T}; Result : out Load_Result) with")
-        spec.append(f"     Pre  => B'First = 0 and then Pos <= B'Length and then {P}_Layout_OK (S, G),")
+        spec.append(f"     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then {P}_Layout_OK (S, G),")
         spec.append(f"     Post => Pos <= B'Length and then {P}_Layout_OK (S, G);")
         spec.append("")
+    spec.append("   --  Allocates every array of M.S and fills it from B; M keeps its other components.")
+    spec.append("   --  The arrays are allocated whatever the outcome (partly filled after a failure),")
+    spec.append("   --  so the caller frees M when Result is not OK.")
     spec.append("   procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) with")
-    spec.append("     Pre  => B'First = 0 and then Pos <= B'Length and then Valid_Layout (M),")
-    spec.append("     Post => Pos <= B'Length and then Valid_Layout (M) and then M.S = M.S'Old;")
+    spec.append("     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sizes_In_Range (M.S) and then All_Null (M),")
+    spec.append("     Post => Pos <= B'Length and then M.S = M.S'Old and then Valid_Layout (M);")
     spec.append("")
     spec.append("end MJ.MJB.Readers;")
     write(GEN / "mj-mjb-readers.ads", "\n".join(spec) + "\n")
 
     body = [POLICY_PRAGMA, "with Interfaces; use Interfaces;", "with MJ.Bytes;   use MJ.Bytes;", "",
             "package body MJ.MJB.Readers with SPARK_Mode is", HELPERS]
-    # Read_Sizes
+    # Read_Sizes: the size table is read in chunks of CHUNK fields, so that no long chain
+    # of updates to S (98 components, one range check and early return each) reaches the
+    # prover; the unchunked form made gnatwhy3 exceed 5 GB.
+    size_parts = chunks(list(enumerate(t.sizes)))
+    for k, part in enumerate(size_parts, start=1):
+        body.append(f"   procedure Read_Sizes_{k} (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with")
+        body.append("     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count")
+        body.append("   is")
+        body.append("      V : Int64;")
+        body.append("   begin")
+        body.append("      Result := OK_Result;")
+        for i, c in part:
+            a = ada_name(c)
+            body.append(f"      V := Get_I64 (B, P + {8 * i});")
+            if c in SIZE_LONG:
+                body.append(f"      S.{a} := V;")
+            else:
+                lo = "-1" if c in SIZE_OPT else "0"
+                body.append(f"      if V not in {lo} .. Int64 (Max_Size) then")
+                body.append(f"         Result := (Size_Out_Of_Range, Size_Table, {i});")
+                body.append("         return;")
+                body.append("      end if;")
+                body.append(f"      S.{a} := Integer (V);")
+        body.append(f"   end Read_Sizes_{k};\n")
     body.append("   procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) is")
     body.append("      P : constant Natural := Pos;")
-    body.append("      V : Int64;")
     body.append("   begin")
     body.append("      S := (others => <>);")
-    body.append("      Result := OK_Result;")
-    for i, c in enumerate(t.sizes):
-        a = ada_name(c)
-        body.append(f"      V := Get_I64 (B, P + {8 * i});")
-        if c in SIZE_LONG:
-            body.append(f"      S.{a} := V;")
-        else:
-            lo = "-1" if c in SIZE_OPT else "0"
-            body.append(f"      if V not in {lo} .. Int64 (Max_Size) then")
-            body.append(f"         Result := (Size_Out_Of_Range, Size_Table, {i});")
-            body.append("         return;")
-            body.append("      end if;")
-            body.append(f"      S.{a} := Integer (V);")
+    for k in range(1, len(size_parts) + 1):
+        if k > 1:
+            body.append("      if Result.Status /= OK then return; end if;")
+        body.append(f"      Read_Sizes_{k} (B, P, S, Result);")
+    body.append("      if Result.Status /= OK then return; end if;")
     body.append("      Pos := P + 8 * Size_Count;")
     body.append("   end Read_Sizes;\n")
-    # Read_Fixed
+
+    # Read_Fixed: the members of mjOption, mjVisual and mjStatistic are read by chunk
+    # procedures of at most CHUNK scalar writes each, for the same reason.
+    def fixed_chunks(members: list) -> list:
+        parts, cur, cnt = [], [], 0
+        for mem in members:
+            width = mem[4] if mem[3] else 1
+            if cur and cnt + width > CHUNK:
+                parts.append(cur)
+                cur, cnt = [], 0
+            cur.append(mem)
+            cnt += width
+        if cur:
+            parts.append(cur)
+        return parts
+
+    struct_info = {"Opt": ("Option", "Option_Size"), "Vis": ("Visual", "Visual_Size"), "Stat": ("Statistic", "Statistic_Size")}
+    by_struct = {s: [] for s in struct_info}
+    for mem in fixed_members(t):
+        by_struct[mem[0]].append(mem)
+    driver_calls = {}
+    for struct, (typ, size_const) in struct_info.items():
+        driver_calls[struct] = []
+        for k, part in enumerate(fixed_chunks(by_struct[struct]), start=1):
+            name = f"Read_{typ}_{k}"
+            driver_calls[struct].append(name)
+            body.append(f"   procedure {name} (B : Byte_Array; Base : Natural; {struct} : in out {typ}; Result : out Load_Result) with")
+            body.append(f"     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= {size_const}")
+            body.append("   is")
+            ctypes = {mem[2] for mem in part}
+            if "mjtNum" in ctypes:
+                body.append("      U64 : Unsigned_64;")
+            if "float" in ctypes:
+                body.append("      U32 : Unsigned_32;")
+            body.append("   begin")
+            body.append("      Result := OK_Result;")
+            for _, path, ctype, is_vec, n, off, ordinal, block in part:
+                emit_fixed_member_read(body, path, ctype, is_vec, n, off, ordinal, block)
+            body.append(f"   end {name};\n")
     body.append("   procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;")
     body.append("                         Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) is")
     body.append("      Base : Natural := Pos;")
-    body.append("      U64  : Unsigned_64;")
-    body.append("      U32  : Unsigned_32;")
     body.append("   begin")
-    body.append("      Result := OK_Result;")
     body.append("      Opt := (others => <>);")
     body.append("      Vis := (others => <>);")
     body.append("      Stat := (others => <>);")
     body.append("      Gravcomp := False;")
     body.append("      Surfacevel := False;")
-    current = None
-    for struct, path, ctype, is_vec, n, off, ordinal, block in fixed_members(t):
-        if struct != current:
-            if current is not None:
-                body.append(f"      Base := Base + {'Option_Size' if current == 'Opt' else 'Visual_Size'};")
-            current = struct
-            body.append(f"      --  {block}")
-        emit_fixed_member_read(body, path, ctype, is_vec, n, off, ordinal, block)
-    body.append("      Base := Base + Statistic_Size;")
+    for struct, (typ, size_const) in struct_info.items():
+        body.append(f"      --  {typ}")
+        for name in driver_calls[struct]:
+            body.append(f"      {name} (B, Base, {struct}, Result);")
+            body.append("      if Result.Status /= OK then return; end if;")
+        body.append(f"      Base := Base + {size_const};")
     body.append("      Gravcomp := Get_U8 (B, Base) /= 0;")
     body.append("      Surfacevel := Get_U8 (B, Base + Bool_Size) /= 0;")
     body.append("      Pos := Base + 2 * Bool_Size;")
     body.append("   end Read_Fixed;\n")
-    # one reader per group
-    for g in GROUP_ORDER:
-        P, T, fs = group_prefix(g), group_type(g), by_group[g]
-        body.append(f"   procedure Read_{P} (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out {T}; Result : out Load_Result) is")
+    # one reader per group; groups with more than CHUNK arrays are read by a sequence
+    # of chunk procedures so that no long chain of updates to G reaches the prover
+    def emit_array_reads(name: str, part: list) -> None:
+        body.append(f"   procedure {name} (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out {T}; Result : out Load_Result)")
+        if name != f"Read_{P}":
+            body.append("   with")
+            body.append(f"     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then {P}_Layout_OK (S, G),")
+            body.append(f"     Post => Pos <= B'Length and then {P}_Layout_OK (S, G)")
+        body.append("   is")
         body.append("      Count  : Int64;")
         body.append("      Nbytes : Int64;")
-        if any(f.reader in ("F64", "F32") for f in fs):
+        if any(f.reader in ("F64", "F32") for f in part):
             body.append("      Bad    : Integer;")
         body.append("   begin")
         body.append("      Result := OK_Result;")
-        for f in fs:
+        for f in part:
             body.append(f"      --  {f.name} : {f.ctype} ({f.nr} x {f.nc})")
             body.append(f"      Count  := {count_long(f, m)};")
             body.append(f"      Nbytes := Count * {f.nbytes};")
@@ -692,13 +791,56 @@ def emit_readers(t: Tables) -> None:
             body.append("      end if;")
             emit_element_loop(body, 6, f"G.{f.ada}", f, f.ada, f"{P}_Layout_OK (S, G)")
             body.append("      Pos := Pos + Integer (Nbytes);")
+        body.append(f"   end {name};\n")
+
+    for g in GROUP_ORDER:
+        P, T, fs = group_prefix(g), group_type(g), by_group[g]
+        parts = chunks(fs)
+        if len(parts) == 1:
+            emit_array_reads(f"Read_{P}", fs)
+            continue
+        for k, part in enumerate(parts, start=1):
+            emit_array_reads(f"Read_{P}_{k}", part)
+        body.append(f"   procedure Read_{P} (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out {T}; Result : out Load_Result) is")
+        body.append("   begin")
+        for k in range(1, len(parts) + 1):
+            if k > 1:
+                body.append("      if Result.Status /= OK then return; end if;")
+            body.append(f"      Read_{P}_{k} (B, Pos, S, G, Result);")
         body.append(f"   end Read_{P};\n")
-    # driver: groups in the order their arrays appear in the .mjb file (MJMODEL_POINTERS order)
-    body.append("   procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) is")
-    body.append("   begin")
+    # Allocate and read each group through one helper. This halves the driver's
+    # call chain and keeps the per-group branch out of the whole-model context.
+    # Every group is allocated even after a read failure, so the final Model has
+    # a valid layout and the caller can free it through the normal error path.
     for g in file_group_order(t):
-        body.append(f"      Read_{group_prefix(g)} (B, Pos, M.S, M.{GROUP_FIELD[g]}, Result);")
-        body.append("      if Result.Status /= OK then return; end if;")
+        P, T = group_prefix(g), group_type(g)
+        body.append(f"   procedure Allocate_Read_{P}")
+        body.append("     (B : Byte_Array; Pos : in out Natural; S : Sizes;")
+        body.append(f"      G : in out {T}; Result : in out Load_Result) with")
+        body.append("     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)")
+        body.append(f"       and then Pos <= B'Length and then {P}_Sizes_OK (S)")
+        body.append(f"       and then {P}_All_Null (G),")
+        body.append(f"     Post => Pos <= B'Length and then {P}_Layout_OK (S, G)")
+        body.append("       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);\n")
+        body.append(f"   procedure Allocate_Read_{P}")
+        body.append("     (B : Byte_Array; Pos : in out Natural; S : Sizes;")
+        body.append(f"      G : in out {T}; Result : in out Load_Result) is")
+        body.append("   begin")
+        body.append(f"      Allocate_{P} (S, G);")
+        body.append("      if Result.Status = OK then")
+        body.append(f"         Read_{P} (B, Pos, S, G, Result);")
+        body.append("      end if;")
+        body.append(f"   end Allocate_Read_{P};\n")
+    body.append("   procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) is")
+    for g in GROUP_ORDER:
+        body.append(f"      L_{GROUP_FIELD[g]:<12} : {group_type(g)};")
+    body.append("   begin")
+    body.append("      Result := (OK, None, -1);")
+    for g in file_group_order(t):
+        body.append(f"      Allocate_Read_{group_prefix(g)} (B, Pos, M.S, L_{GROUP_FIELD[g]}, Result);")
+    agg = ["S              => M.S"] + [f"{name:<14} => M.{name}" for name, _ in MODEL_FIXED]
+    agg += [f"{GROUP_FIELD[g]:<14} => L_{GROUP_FIELD[g]}" for g in GROUP_ORDER]
+    body.append("      M := (" + ",\n            ".join(agg) + ");")
     body.append("   end Read_Arrays;\n")
     body.append("end MJ.MJB.Readers;")
     write(GEN / "mj-mjb-readers.adb", "\n".join(body) + "\n")
@@ -889,63 +1031,101 @@ def emit_gen_clauses(t: Tables, refs: list) -> None:
         out.append(f"     ({body})")
         out.append(f"   with Pre => {pre};\n")
     out.append("   function Refs_OK (M : Model) return Boolean is")
-    out.append("     (" + "\n      and then ".join(
+    # Each operand is safe under Valid_Layout alone. A Boolean conjunction
+    # avoids importing all earlier quantified results into every later check.
+    out.append("     (" + "\n      and ".join(
         f"(for all I in {field_path(t, adr)}'Range => Ref_{ada_name(adr)}_At (M, I))" for adr, _, _ in refs) + ")")
     out.append("   with Pre => Valid_Layout (M);")
+    out.append("   --  Composition uses each element contract; its Boolean body is proved separately.")
+    for adr, _, _ in refs:
+        out.append(f'   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ref_{ada_name(adr)}_At);')
     out.append("   pragma No_Inline (Refs_OK);\n")
     reals = [f for f in t.fields if f.ctype == "mjtNum"]
+    for tier in (0, 1):
+        out += [f"   function Real_Values_In_Tier{tier} (Values : Real_Array) return Boolean is",
+                f"     (for all Value of Values => Value in Tier{tier}_Real)",
+                "   with Global => null;", ""]
     out.append("   --  Spec 5.10: every mjtNum array value has magnitude at most Max_Val (tier 0),")
     out.append("   --  except the bounding boxes, whose half-extents for planes are mjMAXVAL-sized")
     out.append("   --  bounds rather than physical quantities: those are tier 1.")
     out.append("   function Reals_In_Tier0 (M : Model) return Boolean is")
-    out.append("     (" + "\n      and then ".join(
-        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) in {real_tier(f)})" for f in reals) + ")")
+    out.append("     (" + "\n      and ".join(
+        f"Real_Values_In_Tier{1 if f.name in TIER1_FIELDS else 0} (M.{GROUP_FIELD[f.group]}.{f.ada}.all)"
+        for f in reals) + ")")
     out.append("   with Pre => Valid_Layout (M);")
+    for tier in (0, 1):
+        out.append(f'   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Real_Values_In_Tier{tier});')
     out.append("   pragma No_Inline (Reals_In_Tier0);\n")
     bools = [f for f in t.fields if f.ctype == "mjtBool"]
+    out += ["   function Boolean_Values_OK (Values : Byte_Array) return Boolean is",
+            "     (for all Value of Values => Value <= 1)",
+            "   with Global => null;", ""]
     out.append("   --  Spec 5.3: every mjtBool array holds only 0 or 1.")
     out.append("   function Bools_OK (M : Model) return Boolean is")
-    out.append("     (" + "\n      and then ".join(
-        f"(for all I in M.{GROUP_FIELD[f.group]}.{f.ada}'Range => M.{GROUP_FIELD[f.group]}.{f.ada} (I) <= 1)" for f in bools) + ")")
+    out.append("     (" + "\n      and ".join(
+        f"Boolean_Values_OK (M.{GROUP_FIELD[f.group]}.{f.ada}.all)" for f in bools) + ")")
     out.append("   with Pre => Valid_Layout (M);")
+    out.append('   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Boolean_Values_OK);')
     out.append("   pragma No_Inline (Bools_OK);\n")
     out.append("end MJ.Models.Gen_Clauses;")
     write(GEN / "mj-models-gen_clauses.ads", "\n".join(out) + "\n")
 
 
 def emit_diagnose(t: Tables, refs: list) -> None:
-    def loop(out, arr, pred, status, lit):
-        out.append(f"   for I in {arr}'Range loop")
-        out.append(f"      if not ({pred}) then")
-        out.append(f"         Result := ({status}, {lit}, I);")
-        out.append("         return;")
-        out.append("      end if;")
-        inv = pred.replace("(I)", "(K)").replace(", I)", ", K)")
-        out.append(f"      pragma Loop_Invariant (for all K in {arr}'First .. I => {inv});")
-        out.append("   end loop;")
+    def emit(name, predicate, status, rows):
+        # Bound each diagnostic body: a long chain of whole-Model scans causes
+        # GNATprove to build huge contexts even though the model is read-only.
+        out = [POLICY_PRAGMA, "separate (MJ.Validation)",
+               f"procedure {name} (M : Model; Result : out Load_Result) is",
+               f'   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", {predicate});']
+        scans = []
+        for number, first in enumerate(range(0, len(rows), CHUNK), 1):
+            scan = f"Scan_{name.removeprefix('Diagnose_')}_{number}"
+            scans.append(scan)
+            chunk = rows[first:first + CHUNK]
+            requirements = list(dict.fromkeys(
+                requirement.replace("M.", "Input.")
+                for _, _, _, required in chunk for requirement in required))
+            out += [f"   procedure {scan} (Input : Model; Diagnostic : out Load_Result) with",
+                    "     Pre => " + "\n       and then ".join(requirements) + ";",
+                    f"   procedure {scan} (Input : Model; Diagnostic : out Load_Result) is",
+                    "   begin", "      Diagnostic := OK_Result;"]
+            for array, test, field, _ in chunk:
+                array, test = array.replace("M.", "Input."), test.replace("M.", "Input.").replace("(M,", "(Input,")
+                out += [f"      for I in {array}'Range loop",
+                        f"         if not ({test}) then",
+                        f"            Diagnostic := ({status}, {field}, I);",
+                        "            return;", "         end if;", "      end loop;"]
+            out += [f"   end {scan};", ""]
+        out += ["begin", f"   if {predicate} (M) then",
+                "      Result := OK_Result;", "      return;", "   end if;",
+                "   --  The predicate established failure; the scans locate its first field."]
+        for scan in scans:
+            out += [f"   {scan} (M, Result);", "   if Result.Status /= OK then",
+                    "      return;", "   end if;"]
+        out += [f"   Result := ({status}, Header, -1);", f"end {name};"]
+        filename = "mj-validation-" + name.lower() + ".adb"
+        write(GEN / filename, "\n".join(out) + "\n")
 
-    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Refs (M : Model; Result : out Load_Result) is", "begin",
-           "   Result := OK_Result;"]
-    for adr, _, _ in refs:
-        loop(out, field_path(t, adr), f"Ref_{ada_name(adr)}_At (M, I)", "Invalid_Reference", ada_name(adr))
-    out.append("end Diagnose_Refs;")
-    write(GEN / "mj-validation-diagnose_refs.adb", "\n".join(out) + "\n")
-
-    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Reals (M : Model; Result : out Load_Result) is", "begin",
-           "   Result := OK_Result;"]
-    for f in (f for f in t.fields if f.ctype == "mjtNum"):
-        arr = f"M.{GROUP_FIELD[f.group]}.{f.ada}"
-        loop(out, arr, f"{arr} (I) in {real_tier(f)}", "Invalid_Parameter", f.ada)
-    out.append("end Diagnose_Reals;")
-    write(GEN / "mj-validation-diagnose_reals.adb", "\n".join(out) + "\n")
-
-    out = [POLICY_PRAGMA, "separate (MJ.Validation)", "procedure Diagnose_Bools (M : Model; Result : out Load_Result) is", "begin",
-           "   Result := OK_Result;"]
-    for f in (f for f in t.fields if f.ctype == "mjtBool"):
-        arr = f"M.{GROUP_FIELD[f.group]}.{f.ada}"
-        loop(out, arr, f"{arr} (I) <= 1", "Invalid_Parameter", f.ada)
-    out.append("end Diagnose_Bools;")
-    write(GEN / "mj-validation-diagnose_bools.adb", "\n".join(out) + "\n")
+    reference_rows = []
+    for adr, _, num in refs:
+        array = field_path(t, adr)
+        required = [f"{array} /= null"]
+        if num:
+            counts = field_path(t, num)
+            required += [f"{counts} /= null", f"{counts}'First = {array}'First",
+                         f"{counts}'Length = {array}'Length"]
+        reference_rows.append((array, f"Ref_{ada_name(adr)}_At (M, I)", ada_name(adr), required))
+    emit("Diagnose_Refs", "Refs_OK", "Invalid_Reference", reference_rows)
+    emit("Diagnose_Reals", "Reals_In_Tier0", "Invalid_Parameter", [
+        (f"M.{GROUP_FIELD[f.group]}.{f.ada}",
+         f"M.{GROUP_FIELD[f.group]}.{f.ada} (I) in {real_tier(f)}", f.ada,
+         [f"M.{GROUP_FIELD[f.group]}.{f.ada} /= null"])
+        for f in t.fields if f.ctype == "mjtNum"])
+    emit("Diagnose_Bools", "Bools_OK", "Invalid_Parameter", [
+        (f"M.{GROUP_FIELD[f.group]}.{f.ada}", f"M.{GROUP_FIELD[f.group]}.{f.ada} (I) <= 1", f.ada,
+         [f"M.{GROUP_FIELD[f.group]}.{f.ada} /= null"])
+        for f in t.fields if f.ctype == "mjtBool"])
 
 
 # ----------------------------------------------------------------------------- main

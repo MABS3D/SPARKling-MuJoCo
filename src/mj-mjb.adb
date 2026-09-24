@@ -5,7 +5,7 @@ with MJ.MJB.Readers; use MJ.MJB.Readers;
 package body MJ.MJB with SPARK_Mode is
 
    procedure Parse_Raw (B : Byte_Array; M : in out Model; Result : out Load_Result) is
-      Pos        : Natural := 0;
+      Pos        : Natural;
       S          : Sizes;
       Opt        : MJ.Fixed.Option;
       Vis        : MJ.Fixed.Visual;
@@ -13,6 +13,12 @@ package body MJ.MJB with SPARK_Mode is
       Gravcomp   : Boolean;
       Surfacevel : Boolean;
    begin
+      --  A zero-based array can have Natural'Last + 1 elements, but the
+      --  cursor must also represent the position just past the final byte.
+      if Int64 (B'Length) > Int64 (Natural'Last) then
+         Result := (Size_Out_Of_Range, Header, -1);
+         return;
+      end if;
       if B'Length < Header_Bytes then
          Result := (Truncated, Header, -1);
          return;
@@ -67,13 +73,13 @@ package body MJ.MJB with SPARK_Mode is
       M.Flg_Gravcomp := Gravcomp;
       M.Flg_Surfacevel := Surfacevel;
 
-      Allocate (S, M);
+      M.S := S;
       Read_Arrays (B, Pos, M, Result);
       if Result.Status /= OK then
          Free (M);
          return;
       end if;
-      if Pos /= B'Length then
+      if Int64 (Pos) /= Int64 (B'Length) then
          Result := (Trailing_Bytes, None, Pos);
          Free (M);
          return;
@@ -81,6 +87,11 @@ package body MJ.MJB with SPARK_Mode is
    end Parse_Raw;
 
    procedure Parse (B : Byte_Array; Options : Validate_Options; M : in out Model; Result : out Load_Result) is
+      --  Compose the callees' contracts without expanding their model-wide
+      --  predicates. This removes proof facts, not checks or obligations.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Valid);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", All_Null);
    begin
       Parse_Raw (B, M, Result);
       if Result.Status /= OK then
@@ -93,6 +104,11 @@ package body MJ.MJB with SPARK_Mode is
    end Parse;
 
    procedure Load (Path : String; Options : Validate_Options; M : in out Model; Result : out Load_Result) is
+      --  Compose the callees' contracts without expanding their model-wide
+      --  predicates. This removes proof facts, not checks or obligations.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Valid);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", All_Null);
       B       : Byte_Array_Access;
       Read_OK : Boolean;
    begin

@@ -19,7 +19,7 @@ package MJ.Bytes with SPARK_Mode is
      (if U >= 2**31 then Integer (Int64 (U) - 2**32) else Integer (U));
 
    function To_I64 (U : Unsigned_64) return Int64 is
-     (if U >= 2**63 then Int64 (U - 2**63) - 2**62 - 2**62 else Int64 (U));
+     (if U >= 2**63 then (Int64 (U - 2**63) - 2**62) - 2**62 else Int64 (U));
 
    function Get_I32 (B : Byte_Array; Pos : Natural) return Integer is (To_I32 (Get_U32 (B, Pos)))
      with Pre => Pos in B'Range and then B'Last - Pos >= 3;

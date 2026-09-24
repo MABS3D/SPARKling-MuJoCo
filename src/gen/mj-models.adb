@@ -2,88 +2,172 @@
 
 package body MJ.Models with SPARK_Mode is
 
-   --  One allocator per element kind. Each postcondition is exactly the conjunct
-   --  the group layout predicate states for that array, which keeps every
-   --  Allocate_<Group> proof a sequence of trivial steps.
+   --  One allocating function per element kind. Each postcondition is exactly the
+   --  conjunct the group layout predicate states for that array, and every group is
+   --  built by a single aggregate assignment. A chain of per-component updates on a
+   --  record with many access components (one call per array) makes gnatwhy3 run out
+   --  of memory: 83 such calls exceeded 5 GB, the aggregate form proves in seconds.
 
-   procedure Alloc_I32 (P : in out Int_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => I32_OK (P, N)
+   function New_I32 (N : Int64) return Int_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => I32_OK (New_I32'Result, N)
    is
    begin
-      P := new Int_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_I32;
+      return new Int_Array'[0 .. Integer (N) - 1 => 0];
+   end New_I32;
 
-   procedure Alloc_F64 (P : in out Real_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => F64_OK (P, N)
+   function New_F64 (N : Int64) return Real_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => F64_OK (New_F64'Result, N)
    is
    begin
-      P := new Real_Array'[0 .. Integer (N) - 1 => 0.0];
-   end Alloc_F64;
+      return new Real_Array'[0 .. Integer (N) - 1 => 0.0];
+   end New_F64;
 
-   procedure Alloc_U8 (P : in out Byte_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => U8_OK (P, N)
+   function New_U8 (N : Int64) return Byte_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => U8_OK (New_U8'Result, N)
    is
    begin
-      P := new Byte_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_U8;
+      return new Byte_Array'[0 .. Integer (N) - 1 => 0];
+   end New_U8;
 
-   procedure Alloc_F32 (P : in out Float32_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => F32_OK (P, N)
+   function New_F32 (N : Int64) return Float32_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => F32_OK (New_F32'Result, N)
    is
    begin
-      P := new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
-   end Alloc_F32;
+      return new Float32_Array'[0 .. Integer (N) - 1 => 0.0];
+   end New_F32;
 
-   procedure Alloc_I64 (P : in out Int64_Array_Access; N : Int64) with
-     Pre  => P = null and then N in 0 .. Int64 (Max_Size),
-     Post => I64_OK (P, N)
+   function New_I64 (N : Int64) return Int64_Array_Access with
+     Pre  => N in 0 .. Int64 (Max_Size),
+     Post => I64_OK (New_I64'Result, N)
    is
    begin
-      P := new Int64_Array'[0 .. Integer (N) - 1 => 0];
-   end Alloc_I64;
+      return new Int64_Array'[0 .. Integer (N) - 1 => 0];
+   end New_I64;
 
-   procedure Allocate_Body (S : Sizes; G : in out Body_Arrays) with
-     Pre  => Body_Sizes_OK (S) and then Body_All_Null (G),
-     Post => Body_Layout_OK (S, G)
-   is
+   procedure Allocate_Body (S : Sizes; G : in out Body_Arrays) is
    begin
-      Alloc_I32 (G.Body_Parentid, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Rootid, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Weldid, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Mocapid, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Jntnum, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Jntadr, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Dofnum, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Dofadr, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Treeid, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Geomnum, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Geomadr, Int64 (S.Nbody) * (1));
-      Alloc_U8 (G.Body_Simple, Int64 (S.Nbody) * (1));
-      Alloc_U8 (G.Body_Sameframe, Int64 (S.Nbody) * (1));
-      Alloc_F64 (G.Body_Pos, Int64 (S.Nbody) * (3));
-      Alloc_F64 (G.Body_Quat, Int64 (S.Nbody) * (4));
-      Alloc_F64 (G.Body_Ipos, Int64 (S.Nbody) * (3));
-      Alloc_F64 (G.Body_Iquat, Int64 (S.Nbody) * (4));
-      Alloc_F64 (G.Body_Mass, Int64 (S.Nbody) * (1));
-      Alloc_F64 (G.Body_Subtreemass, Int64 (S.Nbody) * (1));
-      Alloc_F64 (G.Body_Inertia, Int64 (S.Nbody) * (3));
-      Alloc_F64 (G.Body_Invweight0, Int64 (S.Nbody) * (2));
-      Alloc_F64 (G.Body_Gravcomp, Int64 (S.Nbody) * (1));
-      Alloc_F64 (G.Body_Margin, Int64 (S.Nbody) * (1));
-      Alloc_F64 (G.Body_User, Int64 (S.Nbody) * (Int64 (S.Nuser_Body)));
-      Alloc_I32 (G.Body_Plugin, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Contype, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Conaffinity, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Bvhadr, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Body_Bvhnum, Int64 (S.Nbody) * (1));
+      G := (Body_Parentid            => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Rootid              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Weldid              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Mocapid             => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Jntnum              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Jntadr              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Dofnum              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Dofadr              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Treeid              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Geomnum             => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Geomadr             => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Simple              => New_U8 (Int64 (S.Nbody) * (1)),
+            Body_Sameframe           => New_U8 (Int64 (S.Nbody) * (1)),
+            Body_Pos                 => New_F64 (Int64 (S.Nbody) * (3)),
+            Body_Quat                => New_F64 (Int64 (S.Nbody) * (4)),
+            Body_Ipos                => New_F64 (Int64 (S.Nbody) * (3)),
+            Body_Iquat               => New_F64 (Int64 (S.Nbody) * (4)),
+            Body_Mass                => New_F64 (Int64 (S.Nbody) * (1)),
+            Body_Subtreemass         => New_F64 (Int64 (S.Nbody) * (1)),
+            Body_Inertia             => New_F64 (Int64 (S.Nbody) * (3)),
+            Body_Invweight0          => New_F64 (Int64 (S.Nbody) * (2)),
+            Body_Gravcomp            => New_F64 (Int64 (S.Nbody) * (1)),
+            Body_Margin              => New_F64 (Int64 (S.Nbody) * (1)),
+            Body_User                => New_F64 (Int64 (S.Nbody) * (Int64 (S.Nuser_Body))),
+            Body_Plugin              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Contype             => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Conaffinity         => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Bvhadr              => New_I32 (Int64 (S.Nbody) * (1)),
+            Body_Bvhnum              => New_I32 (Int64 (S.Nbody) * (1)));
    end Allocate_Body;
 
-   procedure Free_Body (G : in out Body_Arrays) with
-     Post => Body_All_Null (G)
+   function Body_Null_Upto_1 (G : Body_Arrays) return Boolean is
+     (G.Body_Parentid = null
+      and then G.Body_Rootid = null
+      and then G.Body_Weldid = null
+      and then G.Body_Mocapid = null
+      and then G.Body_Jntnum = null
+      and then G.Body_Jntadr = null
+      and then G.Body_Dofnum = null
+      and then G.Body_Dofadr = null);
+
+   function Body_Null_Upto_2 (G : Body_Arrays) return Boolean is
+     (G.Body_Parentid = null
+      and then G.Body_Rootid = null
+      and then G.Body_Weldid = null
+      and then G.Body_Mocapid = null
+      and then G.Body_Jntnum = null
+      and then G.Body_Jntadr = null
+      and then G.Body_Dofnum = null
+      and then G.Body_Dofadr = null
+      and then G.Body_Treeid = null
+      and then G.Body_Geomnum = null
+      and then G.Body_Geomadr = null
+      and then G.Body_Simple = null
+      and then G.Body_Sameframe = null
+      and then G.Body_Pos = null
+      and then G.Body_Quat = null
+      and then G.Body_Ipos = null);
+
+   function Body_Null_Upto_3 (G : Body_Arrays) return Boolean is
+     (G.Body_Parentid = null
+      and then G.Body_Rootid = null
+      and then G.Body_Weldid = null
+      and then G.Body_Mocapid = null
+      and then G.Body_Jntnum = null
+      and then G.Body_Jntadr = null
+      and then G.Body_Dofnum = null
+      and then G.Body_Dofadr = null
+      and then G.Body_Treeid = null
+      and then G.Body_Geomnum = null
+      and then G.Body_Geomadr = null
+      and then G.Body_Simple = null
+      and then G.Body_Sameframe = null
+      and then G.Body_Pos = null
+      and then G.Body_Quat = null
+      and then G.Body_Ipos = null
+      and then G.Body_Iquat = null
+      and then G.Body_Mass = null
+      and then G.Body_Subtreemass = null
+      and then G.Body_Inertia = null
+      and then G.Body_Invweight0 = null
+      and then G.Body_Gravcomp = null
+      and then G.Body_Margin = null
+      and then G.Body_User = null);
+
+   function Body_Null_Upto_4 (G : Body_Arrays) return Boolean is
+     (G.Body_Parentid = null
+      and then G.Body_Rootid = null
+      and then G.Body_Weldid = null
+      and then G.Body_Mocapid = null
+      and then G.Body_Jntnum = null
+      and then G.Body_Jntadr = null
+      and then G.Body_Dofnum = null
+      and then G.Body_Dofadr = null
+      and then G.Body_Treeid = null
+      and then G.Body_Geomnum = null
+      and then G.Body_Geomadr = null
+      and then G.Body_Simple = null
+      and then G.Body_Sameframe = null
+      and then G.Body_Pos = null
+      and then G.Body_Quat = null
+      and then G.Body_Ipos = null
+      and then G.Body_Iquat = null
+      and then G.Body_Mass = null
+      and then G.Body_Subtreemass = null
+      and then G.Body_Inertia = null
+      and then G.Body_Invweight0 = null
+      and then G.Body_Gravcomp = null
+      and then G.Body_Margin = null
+      and then G.Body_User = null
+      and then G.Body_Plugin = null
+      and then G.Body_Contype = null
+      and then G.Body_Conaffinity = null
+      and then G.Body_Bvhadr = null
+      and then G.Body_Bvhnum = null);
+
+   procedure Free_Body_1 (G : in out Body_Arrays) with
+     Post => Body_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Body_Parentid);
@@ -94,6 +178,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Body_Jntadr);
       Free_Int (G.Body_Dofnum);
       Free_Int (G.Body_Dofadr);
+   end Free_Body_1;
+
+   procedure Free_Body_2 (G : in out Body_Arrays) with
+     Pre  => Body_Null_Upto_1 (G),
+     Post => Body_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Body_Treeid);
       Free_Int (G.Body_Geomnum);
       Free_Int (G.Body_Geomadr);
@@ -102,6 +193,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Body_Pos);
       Free_Real (G.Body_Quat);
       Free_Real (G.Body_Ipos);
+   end Free_Body_2;
+
+   procedure Free_Body_3 (G : in out Body_Arrays) with
+     Pre  => Body_Null_Upto_2 (G),
+     Post => Body_Null_Upto_3 (G)
+   is
+   begin
       Free_Real (G.Body_Iquat);
       Free_Real (G.Body_Mass);
       Free_Real (G.Body_Subtreemass);
@@ -110,41 +208,102 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Body_Gravcomp);
       Free_Real (G.Body_Margin);
       Free_Real (G.Body_User);
+   end Free_Body_3;
+
+   procedure Free_Body_4 (G : in out Body_Arrays) with
+     Pre  => Body_Null_Upto_3 (G),
+     Post => Body_Null_Upto_4 (G)
+   is
+   begin
       Free_Int (G.Body_Plugin);
       Free_Int (G.Body_Contype);
       Free_Int (G.Body_Conaffinity);
       Free_Int (G.Body_Bvhadr);
       Free_Int (G.Body_Bvhnum);
+   end Free_Body_4;
+
+   procedure Free_Body (G : in out Body_Arrays) is
+   begin
+      Free_Body_1 (G);
+      Free_Body_2 (G);
+      Free_Body_3 (G);
+      Free_Body_4 (G);
    end Free_Body;
 
-   procedure Allocate_Joint (S : Sizes; G : in out Joint_Arrays) with
-     Pre  => Joint_Sizes_OK (S) and then Joint_All_Null (G),
-     Post => Joint_Layout_OK (S, G)
-   is
+   procedure Allocate_Joint (S : Sizes; G : in out Joint_Arrays) is
    begin
-      Alloc_I32 (G.Jnt_Type, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Jnt_Qposadr, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Jnt_Dofadr, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Jnt_Bodyid, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Jnt_Actuatorid, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Jnt_Group, Int64 (S.Njnt) * (1));
-      Alloc_U8 (G.Jnt_Limited, Int64 (S.Njnt) * (1));
-      Alloc_U8 (G.Jnt_Actfrclimited, Int64 (S.Njnt) * (1));
-      Alloc_U8 (G.Jnt_Actgravcomp, Int64 (S.Njnt) * (1));
-      Alloc_F64 (G.Jnt_Solref, Int64 (S.Njnt) * (2));
-      Alloc_F64 (G.Jnt_Solimp, Int64 (S.Njnt) * (5));
-      Alloc_F64 (G.Jnt_Pos, Int64 (S.Njnt) * (3));
-      Alloc_F64 (G.Jnt_Axis, Int64 (S.Njnt) * (3));
-      Alloc_F64 (G.Jnt_Stiffness, Int64 (S.Njnt) * (1));
-      Alloc_F64 (G.Jnt_Stiffnesspoly, Int64 (S.Njnt) * (2));
-      Alloc_F64 (G.Jnt_Range, Int64 (S.Njnt) * (2));
-      Alloc_F64 (G.Jnt_Actfrcrange, Int64 (S.Njnt) * (2));
-      Alloc_F64 (G.Jnt_Margin, Int64 (S.Njnt) * (1));
-      Alloc_F64 (G.Jnt_User, Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt)));
+      G := (Jnt_Type                 => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Qposadr              => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Dofadr               => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Bodyid               => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Actuatorid           => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Group                => New_I32 (Int64 (S.Njnt) * (1)),
+            Jnt_Limited              => New_U8 (Int64 (S.Njnt) * (1)),
+            Jnt_Actfrclimited        => New_U8 (Int64 (S.Njnt) * (1)),
+            Jnt_Actgravcomp          => New_U8 (Int64 (S.Njnt) * (1)),
+            Jnt_Solref               => New_F64 (Int64 (S.Njnt) * (2)),
+            Jnt_Solimp               => New_F64 (Int64 (S.Njnt) * (5)),
+            Jnt_Pos                  => New_F64 (Int64 (S.Njnt) * (3)),
+            Jnt_Axis                 => New_F64 (Int64 (S.Njnt) * (3)),
+            Jnt_Stiffness            => New_F64 (Int64 (S.Njnt) * (1)),
+            Jnt_Stiffnesspoly        => New_F64 (Int64 (S.Njnt) * (2)),
+            Jnt_Range                => New_F64 (Int64 (S.Njnt) * (2)),
+            Jnt_Actfrcrange          => New_F64 (Int64 (S.Njnt) * (2)),
+            Jnt_Margin               => New_F64 (Int64 (S.Njnt) * (1)),
+            Jnt_User                 => New_F64 (Int64 (S.Njnt) * (Int64 (S.Nuser_Jnt))));
    end Allocate_Joint;
 
-   procedure Free_Joint (G : in out Joint_Arrays) with
-     Post => Joint_All_Null (G)
+   function Joint_Null_Upto_1 (G : Joint_Arrays) return Boolean is
+     (G.Jnt_Type = null
+      and then G.Jnt_Qposadr = null
+      and then G.Jnt_Dofadr = null
+      and then G.Jnt_Bodyid = null
+      and then G.Jnt_Actuatorid = null
+      and then G.Jnt_Group = null
+      and then G.Jnt_Limited = null
+      and then G.Jnt_Actfrclimited = null);
+
+   function Joint_Null_Upto_2 (G : Joint_Arrays) return Boolean is
+     (G.Jnt_Type = null
+      and then G.Jnt_Qposadr = null
+      and then G.Jnt_Dofadr = null
+      and then G.Jnt_Bodyid = null
+      and then G.Jnt_Actuatorid = null
+      and then G.Jnt_Group = null
+      and then G.Jnt_Limited = null
+      and then G.Jnt_Actfrclimited = null
+      and then G.Jnt_Actgravcomp = null
+      and then G.Jnt_Solref = null
+      and then G.Jnt_Solimp = null
+      and then G.Jnt_Pos = null
+      and then G.Jnt_Axis = null
+      and then G.Jnt_Stiffness = null
+      and then G.Jnt_Stiffnesspoly = null
+      and then G.Jnt_Range = null);
+
+   function Joint_Null_Upto_3 (G : Joint_Arrays) return Boolean is
+     (G.Jnt_Type = null
+      and then G.Jnt_Qposadr = null
+      and then G.Jnt_Dofadr = null
+      and then G.Jnt_Bodyid = null
+      and then G.Jnt_Actuatorid = null
+      and then G.Jnt_Group = null
+      and then G.Jnt_Limited = null
+      and then G.Jnt_Actfrclimited = null
+      and then G.Jnt_Actgravcomp = null
+      and then G.Jnt_Solref = null
+      and then G.Jnt_Solimp = null
+      and then G.Jnt_Pos = null
+      and then G.Jnt_Axis = null
+      and then G.Jnt_Stiffness = null
+      and then G.Jnt_Stiffnesspoly = null
+      and then G.Jnt_Range = null
+      and then G.Jnt_Actfrcrange = null
+      and then G.Jnt_Margin = null
+      and then G.Jnt_User = null);
+
+   procedure Free_Joint_1 (G : in out Joint_Arrays) with
+     Post => Joint_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Jnt_Type);
@@ -155,6 +314,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Jnt_Group);
       Free_Byte (G.Jnt_Limited);
       Free_Byte (G.Jnt_Actfrclimited);
+   end Free_Joint_1;
+
+   procedure Free_Joint_2 (G : in out Joint_Arrays) with
+     Pre  => Joint_Null_Upto_1 (G),
+     Post => Joint_Null_Upto_2 (G)
+   is
+   begin
       Free_Byte (G.Jnt_Actgravcomp);
       Free_Real (G.Jnt_Solref);
       Free_Real (G.Jnt_Solimp);
@@ -163,35 +329,73 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Jnt_Stiffness);
       Free_Real (G.Jnt_Stiffnesspoly);
       Free_Real (G.Jnt_Range);
+   end Free_Joint_2;
+
+   procedure Free_Joint_3 (G : in out Joint_Arrays) with
+     Pre  => Joint_Null_Upto_2 (G),
+     Post => Joint_Null_Upto_3 (G)
+   is
+   begin
       Free_Real (G.Jnt_Actfrcrange);
       Free_Real (G.Jnt_Margin);
       Free_Real (G.Jnt_User);
+   end Free_Joint_3;
+
+   procedure Free_Joint (G : in out Joint_Arrays) is
+   begin
+      Free_Joint_1 (G);
+      Free_Joint_2 (G);
+      Free_Joint_3 (G);
    end Free_Joint;
 
-   procedure Allocate_Dof (S : Sizes; G : in out Dof_Arrays) with
-     Pre  => Dof_Sizes_OK (S) and then Dof_All_Null (G),
-     Post => Dof_Layout_OK (S, G)
-   is
+   procedure Allocate_Dof (S : Sizes; G : in out Dof_Arrays) is
    begin
-      Alloc_I32 (G.Dof_Bodyid, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.Dof_Jntid, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.Dof_Parentid, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.Dof_Treeid, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.Dof_Madr, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.Dof_Simplenum, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_Solref, Int64 (S.Nv) * (2));
-      Alloc_F64 (G.Dof_Solimp, Int64 (S.Nv) * (5));
-      Alloc_F64 (G.Dof_Frictionloss, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_Armature, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_Damping, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_Dampingpoly, Int64 (S.Nv) * (2));
-      Alloc_F64 (G.Dof_Invweight0, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_M0, Int64 (S.Nv) * (1));
-      Alloc_F64 (G.Dof_Length, Int64 (S.Nv) * (1));
+      G := (Dof_Bodyid               => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Jntid                => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Parentid             => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Treeid               => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Madr                 => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Simplenum            => New_I32 (Int64 (S.Nv) * (1)),
+            Dof_Solref               => New_F64 (Int64 (S.Nv) * (2)),
+            Dof_Solimp               => New_F64 (Int64 (S.Nv) * (5)),
+            Dof_Frictionloss         => New_F64 (Int64 (S.Nv) * (1)),
+            Dof_Armature             => New_F64 (Int64 (S.Nv) * (1)),
+            Dof_Damping              => New_F64 (Int64 (S.Nv) * (1)),
+            Dof_Dampingpoly          => New_F64 (Int64 (S.Nv) * (2)),
+            Dof_Invweight0           => New_F64 (Int64 (S.Nv) * (1)),
+            Dof_M0                   => New_F64 (Int64 (S.Nv) * (1)),
+            Dof_Length               => New_F64 (Int64 (S.Nv) * (1)));
    end Allocate_Dof;
 
-   procedure Free_Dof (G : in out Dof_Arrays) with
-     Post => Dof_All_Null (G)
+   function Dof_Null_Upto_1 (G : Dof_Arrays) return Boolean is
+     (G.Dof_Bodyid = null
+      and then G.Dof_Jntid = null
+      and then G.Dof_Parentid = null
+      and then G.Dof_Treeid = null
+      and then G.Dof_Madr = null
+      and then G.Dof_Simplenum = null
+      and then G.Dof_Solref = null
+      and then G.Dof_Solimp = null);
+
+   function Dof_Null_Upto_2 (G : Dof_Arrays) return Boolean is
+     (G.Dof_Bodyid = null
+      and then G.Dof_Jntid = null
+      and then G.Dof_Parentid = null
+      and then G.Dof_Treeid = null
+      and then G.Dof_Madr = null
+      and then G.Dof_Simplenum = null
+      and then G.Dof_Solref = null
+      and then G.Dof_Solimp = null
+      and then G.Dof_Frictionloss = null
+      and then G.Dof_Armature = null
+      and then G.Dof_Damping = null
+      and then G.Dof_Dampingpoly = null
+      and then G.Dof_Invweight0 = null
+      and then G.Dof_M0 = null
+      and then G.Dof_Length = null);
+
+   procedure Free_Dof_1 (G : in out Dof_Arrays) with
+     Post => Dof_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Dof_Bodyid);
@@ -202,6 +406,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Dof_Simplenum);
       Free_Real (G.Dof_Solref);
       Free_Real (G.Dof_Solimp);
+   end Free_Dof_1;
+
+   procedure Free_Dof_2 (G : in out Dof_Arrays) with
+     Pre  => Dof_Null_Upto_1 (G),
+     Post => Dof_Null_Upto_2 (G)
+   is
+   begin
       Free_Real (G.Dof_Frictionloss);
       Free_Real (G.Dof_Armature);
       Free_Real (G.Dof_Damping);
@@ -209,23 +420,24 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Dof_Invweight0);
       Free_Real (G.Dof_M0);
       Free_Real (G.Dof_Length);
+   end Free_Dof_2;
+
+   procedure Free_Dof (G : in out Dof_Arrays) is
+   begin
+      Free_Dof_1 (G);
+      Free_Dof_2 (G);
    end Free_Dof;
 
-   procedure Allocate_Tree (S : Sizes; G : in out Tree_Arrays) with
-     Pre  => Tree_Sizes_OK (S) and then Tree_All_Null (G),
-     Post => Tree_Layout_OK (S, G)
-   is
+   procedure Allocate_Tree (S : Sizes; G : in out Tree_Arrays) is
    begin
-      Alloc_I32 (G.Tree_Bodyadr, Int64 (S.Ntree) * (1));
-      Alloc_I32 (G.Tree_Bodynum, Int64 (S.Ntree) * (1));
-      Alloc_I32 (G.Tree_Dofadr, Int64 (S.Ntree) * (1));
-      Alloc_I32 (G.Tree_Dofnum, Int64 (S.Ntree) * (1));
-      Alloc_I32 (G.Tree_Sleep_Policy, Int64 (S.Ntree) * (1));
+      G := (Tree_Bodyadr             => New_I32 (Int64 (S.Ntree) * (1)),
+            Tree_Bodynum             => New_I32 (Int64 (S.Ntree) * (1)),
+            Tree_Dofadr              => New_I32 (Int64 (S.Ntree) * (1)),
+            Tree_Dofnum              => New_I32 (Int64 (S.Ntree) * (1)),
+            Tree_Sleep_Policy        => New_I32 (Int64 (S.Ntree) * (1)));
    end Allocate_Tree;
 
-   procedure Free_Tree (G : in out Tree_Arrays) with
-     Post => Tree_All_Null (G)
-   is
+   procedure Free_Tree (G : in out Tree_Arrays) is
    begin
       Free_Int (G.Tree_Bodyadr);
       Free_Int (G.Tree_Bodynum);
@@ -234,42 +446,122 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Tree_Sleep_Policy);
    end Free_Tree;
 
-   procedure Allocate_Geom (S : Sizes; G : in out Geom_Arrays) with
-     Pre  => Geom_Sizes_OK (S) and then Geom_All_Null (G),
-     Post => Geom_Layout_OK (S, G)
-   is
+   procedure Allocate_Geom (S : Sizes; G : in out Geom_Arrays) is
    begin
-      Alloc_I32 (G.Geom_Type, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Contype, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Conaffinity, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Condim, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Bodyid, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Dataid, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Matid, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Group, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Priority, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Geom_Plugin, Int64 (S.Ngeom) * (1));
-      Alloc_U8 (G.Geom_Sameframe, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Solmix, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Solref, Int64 (S.Ngeom) * (2));
-      Alloc_F64 (G.Geom_Solimp, Int64 (S.Ngeom) * (5));
-      Alloc_F64 (G.Geom_Size, Int64 (S.Ngeom) * (3));
-      Alloc_F64 (G.Geom_Aabb, Int64 (S.Ngeom) * (6));
-      Alloc_F64 (G.Geom_Rbound, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Pos, Int64 (S.Ngeom) * (3));
-      Alloc_F64 (G.Geom_Quat, Int64 (S.Ngeom) * (4));
-      Alloc_F64 (G.Geom_Friction, Int64 (S.Ngeom) * (3));
-      Alloc_F64 (G.Geom_Margin, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Gap, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Surfacevel, Int64 (S.Ngeom) * (6));
-      Alloc_F64 (G.Geom_Adhesion, Int64 (S.Ngeom) * (1));
-      Alloc_F64 (G.Geom_Fluid, Int64 (S.Ngeom) * (12));
-      Alloc_F64 (G.Geom_User, Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom)));
-      Alloc_F32 (G.Geom_Rgba, Int64 (S.Ngeom) * (4));
+      G := (Geom_Type                => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Contype             => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Conaffinity         => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Condim              => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Bodyid              => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Dataid              => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Matid               => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Group               => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Priority            => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Plugin              => New_I32 (Int64 (S.Ngeom) * (1)),
+            Geom_Sameframe           => New_U8 (Int64 (S.Ngeom) * (1)),
+            Geom_Solmix              => New_F64 (Int64 (S.Ngeom) * (1)),
+            Geom_Solref              => New_F64 (Int64 (S.Ngeom) * (2)),
+            Geom_Solimp              => New_F64 (Int64 (S.Ngeom) * (5)),
+            Geom_Size                => New_F64 (Int64 (S.Ngeom) * (3)),
+            Geom_Aabb                => New_F64 (Int64 (S.Ngeom) * (6)),
+            Geom_Rbound              => New_F64 (Int64 (S.Ngeom) * (1)),
+            Geom_Pos                 => New_F64 (Int64 (S.Ngeom) * (3)),
+            Geom_Quat                => New_F64 (Int64 (S.Ngeom) * (4)),
+            Geom_Friction            => New_F64 (Int64 (S.Ngeom) * (3)),
+            Geom_Margin              => New_F64 (Int64 (S.Ngeom) * (1)),
+            Geom_Gap                 => New_F64 (Int64 (S.Ngeom) * (1)),
+            Geom_Surfacevel          => New_F64 (Int64 (S.Ngeom) * (6)),
+            Geom_Adhesion            => New_F64 (Int64 (S.Ngeom) * (1)),
+            Geom_Fluid               => New_F64 (Int64 (S.Ngeom) * (12)),
+            Geom_User                => New_F64 (Int64 (S.Ngeom) * (Int64 (S.Nuser_Geom))),
+            Geom_Rgba                => New_F32 (Int64 (S.Ngeom) * (4)));
    end Allocate_Geom;
 
-   procedure Free_Geom (G : in out Geom_Arrays) with
-     Post => Geom_All_Null (G)
+   function Geom_Null_Upto_1 (G : Geom_Arrays) return Boolean is
+     (G.Geom_Type = null
+      and then G.Geom_Contype = null
+      and then G.Geom_Conaffinity = null
+      and then G.Geom_Condim = null
+      and then G.Geom_Bodyid = null
+      and then G.Geom_Dataid = null
+      and then G.Geom_Matid = null
+      and then G.Geom_Group = null);
+
+   function Geom_Null_Upto_2 (G : Geom_Arrays) return Boolean is
+     (G.Geom_Type = null
+      and then G.Geom_Contype = null
+      and then G.Geom_Conaffinity = null
+      and then G.Geom_Condim = null
+      and then G.Geom_Bodyid = null
+      and then G.Geom_Dataid = null
+      and then G.Geom_Matid = null
+      and then G.Geom_Group = null
+      and then G.Geom_Priority = null
+      and then G.Geom_Plugin = null
+      and then G.Geom_Sameframe = null
+      and then G.Geom_Solmix = null
+      and then G.Geom_Solref = null
+      and then G.Geom_Solimp = null
+      and then G.Geom_Size = null
+      and then G.Geom_Aabb = null);
+
+   function Geom_Null_Upto_3 (G : Geom_Arrays) return Boolean is
+     (G.Geom_Type = null
+      and then G.Geom_Contype = null
+      and then G.Geom_Conaffinity = null
+      and then G.Geom_Condim = null
+      and then G.Geom_Bodyid = null
+      and then G.Geom_Dataid = null
+      and then G.Geom_Matid = null
+      and then G.Geom_Group = null
+      and then G.Geom_Priority = null
+      and then G.Geom_Plugin = null
+      and then G.Geom_Sameframe = null
+      and then G.Geom_Solmix = null
+      and then G.Geom_Solref = null
+      and then G.Geom_Solimp = null
+      and then G.Geom_Size = null
+      and then G.Geom_Aabb = null
+      and then G.Geom_Rbound = null
+      and then G.Geom_Pos = null
+      and then G.Geom_Quat = null
+      and then G.Geom_Friction = null
+      and then G.Geom_Margin = null
+      and then G.Geom_Gap = null
+      and then G.Geom_Surfacevel = null
+      and then G.Geom_Adhesion = null);
+
+   function Geom_Null_Upto_4 (G : Geom_Arrays) return Boolean is
+     (G.Geom_Type = null
+      and then G.Geom_Contype = null
+      and then G.Geom_Conaffinity = null
+      and then G.Geom_Condim = null
+      and then G.Geom_Bodyid = null
+      and then G.Geom_Dataid = null
+      and then G.Geom_Matid = null
+      and then G.Geom_Group = null
+      and then G.Geom_Priority = null
+      and then G.Geom_Plugin = null
+      and then G.Geom_Sameframe = null
+      and then G.Geom_Solmix = null
+      and then G.Geom_Solref = null
+      and then G.Geom_Solimp = null
+      and then G.Geom_Size = null
+      and then G.Geom_Aabb = null
+      and then G.Geom_Rbound = null
+      and then G.Geom_Pos = null
+      and then G.Geom_Quat = null
+      and then G.Geom_Friction = null
+      and then G.Geom_Margin = null
+      and then G.Geom_Gap = null
+      and then G.Geom_Surfacevel = null
+      and then G.Geom_Adhesion = null
+      and then G.Geom_Fluid = null
+      and then G.Geom_User = null
+      and then G.Geom_Rgba = null);
+
+   procedure Free_Geom_1 (G : in out Geom_Arrays) with
+     Post => Geom_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Geom_Type);
@@ -280,6 +572,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Geom_Dataid);
       Free_Int (G.Geom_Matid);
       Free_Int (G.Geom_Group);
+   end Free_Geom_1;
+
+   procedure Free_Geom_2 (G : in out Geom_Arrays) with
+     Pre  => Geom_Null_Upto_1 (G),
+     Post => Geom_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Geom_Priority);
       Free_Int (G.Geom_Plugin);
       Free_Byte (G.Geom_Sameframe);
@@ -288,6 +587,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Geom_Solimp);
       Free_Real (G.Geom_Size);
       Free_Real (G.Geom_Aabb);
+   end Free_Geom_2;
+
+   procedure Free_Geom_3 (G : in out Geom_Arrays) with
+     Pre  => Geom_Null_Upto_2 (G),
+     Post => Geom_Null_Upto_3 (G)
+   is
+   begin
       Free_Real (G.Geom_Rbound);
       Free_Real (G.Geom_Pos);
       Free_Real (G.Geom_Quat);
@@ -296,69 +602,144 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Geom_Gap);
       Free_Real (G.Geom_Surfacevel);
       Free_Real (G.Geom_Adhesion);
+   end Free_Geom_3;
+
+   procedure Free_Geom_4 (G : in out Geom_Arrays) with
+     Pre  => Geom_Null_Upto_3 (G),
+     Post => Geom_Null_Upto_4 (G)
+   is
+   begin
       Free_Real (G.Geom_Fluid);
       Free_Real (G.Geom_User);
       Free_Float32 (G.Geom_Rgba);
+   end Free_Geom_4;
+
+   procedure Free_Geom (G : in out Geom_Arrays) is
+   begin
+      Free_Geom_1 (G);
+      Free_Geom_2 (G);
+      Free_Geom_3 (G);
+      Free_Geom_4 (G);
    end Free_Geom;
 
-   procedure Allocate_Site (S : Sizes; G : in out Site_Arrays) with
-     Pre  => Site_Sizes_OK (S) and then Site_All_Null (G),
-     Post => Site_Layout_OK (S, G)
-   is
+   procedure Allocate_Site (S : Sizes; G : in out Site_Arrays) is
    begin
-      Alloc_I32 (G.Site_Type, Int64 (S.Nsite) * (1));
-      Alloc_I32 (G.Site_Bodyid, Int64 (S.Nsite) * (1));
-      Alloc_I32 (G.Site_Matid, Int64 (S.Nsite) * (1));
-      Alloc_I32 (G.Site_Group, Int64 (S.Nsite) * (1));
-      Alloc_U8 (G.Site_Sameframe, Int64 (S.Nsite) * (1));
-      Alloc_F64 (G.Site_Size, Int64 (S.Nsite) * (3));
-      Alloc_F64 (G.Site_Pos, Int64 (S.Nsite) * (3));
-      Alloc_F64 (G.Site_Quat, Int64 (S.Nsite) * (4));
-      Alloc_F64 (G.Site_User, Int64 (S.Nsite) * (Int64 (S.Nuser_Site)));
-      Alloc_F32 (G.Site_Rgba, Int64 (S.Nsite) * (4));
+      G := (Site_Type                => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Bodyid              => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Dataid              => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Matid               => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Group               => New_I32 (Int64 (S.Nsite) * (1)),
+            Site_Sameframe           => New_U8 (Int64 (S.Nsite) * (1)),
+            Site_Size                => New_F64 (Int64 (S.Nsite) * (3)),
+            Site_Pos                 => New_F64 (Int64 (S.Nsite) * (3)),
+            Site_Quat                => New_F64 (Int64 (S.Nsite) * (4)),
+            Site_User                => New_F64 (Int64 (S.Nsite) * (Int64 (S.Nuser_Site))),
+            Site_Rgba                => New_F32 (Int64 (S.Nsite) * (4)));
    end Allocate_Site;
 
-   procedure Free_Site (G : in out Site_Arrays) with
-     Post => Site_All_Null (G)
+   function Site_Null_Upto_1 (G : Site_Arrays) return Boolean is
+     (G.Site_Type = null
+      and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
+      and then G.Site_Matid = null
+      and then G.Site_Group = null
+      and then G.Site_Sameframe = null
+      and then G.Site_Size = null
+      and then G.Site_Pos = null);
+
+   function Site_Null_Upto_2 (G : Site_Arrays) return Boolean is
+     (G.Site_Type = null
+      and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
+      and then G.Site_Matid = null
+      and then G.Site_Group = null
+      and then G.Site_Sameframe = null
+      and then G.Site_Size = null
+      and then G.Site_Pos = null
+      and then G.Site_Quat = null
+      and then G.Site_User = null
+      and then G.Site_Rgba = null);
+
+   procedure Free_Site_1 (G : in out Site_Arrays) with
+     Post => Site_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Site_Type);
       Free_Int (G.Site_Bodyid);
+      Free_Int (G.Site_Dataid);
       Free_Int (G.Site_Matid);
       Free_Int (G.Site_Group);
       Free_Byte (G.Site_Sameframe);
       Free_Real (G.Site_Size);
       Free_Real (G.Site_Pos);
+   end Free_Site_1;
+
+   procedure Free_Site_2 (G : in out Site_Arrays) with
+     Pre  => Site_Null_Upto_1 (G),
+     Post => Site_Null_Upto_2 (G)
+   is
+   begin
       Free_Real (G.Site_Quat);
       Free_Real (G.Site_User);
       Free_Float32 (G.Site_Rgba);
+   end Free_Site_2;
+
+   procedure Free_Site (G : in out Site_Arrays) is
+   begin
+      Free_Site_1 (G);
+      Free_Site_2 (G);
    end Free_Site;
 
-   procedure Allocate_Camera (S : Sizes; G : in out Camera_Arrays) with
-     Pre  => Camera_Sizes_OK (S) and then Camera_All_Null (G),
-     Post => Camera_Layout_OK (S, G)
-   is
+   procedure Allocate_Camera (S : Sizes; G : in out Camera_Arrays) is
    begin
-      Alloc_I32 (G.Cam_Mode, Int64 (S.Ncam) * (1));
-      Alloc_I32 (G.Cam_Bodyid, Int64 (S.Ncam) * (1));
-      Alloc_I32 (G.Cam_Targetbodyid, Int64 (S.Ncam) * (1));
-      Alloc_F64 (G.Cam_Pos, Int64 (S.Ncam) * (3));
-      Alloc_F64 (G.Cam_Quat, Int64 (S.Ncam) * (4));
-      Alloc_F64 (G.Cam_Poscom0, Int64 (S.Ncam) * (3));
-      Alloc_F64 (G.Cam_Pos0, Int64 (S.Ncam) * (3));
-      Alloc_F64 (G.Cam_Mat0, Int64 (S.Ncam) * (9));
-      Alloc_I32 (G.Cam_Projection, Int64 (S.Ncam) * (1));
-      Alloc_F64 (G.Cam_Fovy, Int64 (S.Ncam) * (1));
-      Alloc_F64 (G.Cam_Ipd, Int64 (S.Ncam) * (1));
-      Alloc_I32 (G.Cam_Resolution, Int64 (S.Ncam) * (2));
-      Alloc_I32 (G.Cam_Output, Int64 (S.Ncam) * (1));
-      Alloc_F32 (G.Cam_Sensorsize, Int64 (S.Ncam) * (2));
-      Alloc_F32 (G.Cam_Intrinsic, Int64 (S.Ncam) * (4));
-      Alloc_F64 (G.Cam_User, Int64 (S.Ncam) * (Int64 (S.Nuser_Cam)));
+      G := (Cam_Mode                 => New_I32 (Int64 (S.Ncam) * (1)),
+            Cam_Bodyid               => New_I32 (Int64 (S.Ncam) * (1)),
+            Cam_Targetbodyid         => New_I32 (Int64 (S.Ncam) * (1)),
+            Cam_Pos                  => New_F64 (Int64 (S.Ncam) * (3)),
+            Cam_Quat                 => New_F64 (Int64 (S.Ncam) * (4)),
+            Cam_Poscom0              => New_F64 (Int64 (S.Ncam) * (3)),
+            Cam_Pos0                 => New_F64 (Int64 (S.Ncam) * (3)),
+            Cam_Mat0                 => New_F64 (Int64 (S.Ncam) * (9)),
+            Cam_Projection           => New_I32 (Int64 (S.Ncam) * (1)),
+            Cam_Fovy                 => New_F64 (Int64 (S.Ncam) * (1)),
+            Cam_Ipd                  => New_F64 (Int64 (S.Ncam) * (1)),
+            Cam_Resolution           => New_I32 (Int64 (S.Ncam) * (2)),
+            Cam_Output               => New_I32 (Int64 (S.Ncam) * (1)),
+            Cam_Sensorsize           => New_F32 (Int64 (S.Ncam) * (2)),
+            Cam_Intrinsic            => New_F32 (Int64 (S.Ncam) * (4)),
+            Cam_User                 => New_F64 (Int64 (S.Ncam) * (Int64 (S.Nuser_Cam))));
    end Allocate_Camera;
 
-   procedure Free_Camera (G : in out Camera_Arrays) with
-     Post => Camera_All_Null (G)
+   function Camera_Null_Upto_1 (G : Camera_Arrays) return Boolean is
+     (G.Cam_Mode = null
+      and then G.Cam_Bodyid = null
+      and then G.Cam_Targetbodyid = null
+      and then G.Cam_Pos = null
+      and then G.Cam_Quat = null
+      and then G.Cam_Poscom0 = null
+      and then G.Cam_Pos0 = null
+      and then G.Cam_Mat0 = null);
+
+   function Camera_Null_Upto_2 (G : Camera_Arrays) return Boolean is
+     (G.Cam_Mode = null
+      and then G.Cam_Bodyid = null
+      and then G.Cam_Targetbodyid = null
+      and then G.Cam_Pos = null
+      and then G.Cam_Quat = null
+      and then G.Cam_Poscom0 = null
+      and then G.Cam_Pos0 = null
+      and then G.Cam_Mat0 = null
+      and then G.Cam_Projection = null
+      and then G.Cam_Fovy = null
+      and then G.Cam_Ipd = null
+      and then G.Cam_Resolution = null
+      and then G.Cam_Output = null
+      and then G.Cam_Sensorsize = null
+      and then G.Cam_Intrinsic = null
+      and then G.Cam_User = null);
+
+   procedure Free_Camera_1 (G : in out Camera_Arrays) with
+     Post => Camera_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Cam_Mode);
@@ -369,6 +750,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Cam_Poscom0);
       Free_Real (G.Cam_Pos0);
       Free_Real (G.Cam_Mat0);
+   end Free_Camera_1;
+
+   procedure Free_Camera_2 (G : in out Camera_Arrays) with
+     Pre  => Camera_Null_Upto_1 (G),
+     Post => Camera_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Cam_Projection);
       Free_Real (G.Cam_Fovy);
       Free_Real (G.Cam_Ipd);
@@ -377,39 +765,94 @@ package body MJ.Models with SPARK_Mode is
       Free_Float32 (G.Cam_Sensorsize);
       Free_Float32 (G.Cam_Intrinsic);
       Free_Real (G.Cam_User);
+   end Free_Camera_2;
+
+   procedure Free_Camera (G : in out Camera_Arrays) is
+   begin
+      Free_Camera_1 (G);
+      Free_Camera_2 (G);
    end Free_Camera;
 
-   procedure Allocate_Light (S : Sizes; G : in out Light_Arrays) with
-     Pre  => Light_Sizes_OK (S) and then Light_All_Null (G),
-     Post => Light_Layout_OK (S, G)
-   is
+   procedure Allocate_Light (S : Sizes; G : in out Light_Arrays) is
    begin
-      Alloc_I32 (G.Light_Mode, Int64 (S.Nlight) * (1));
-      Alloc_I32 (G.Light_Bodyid, Int64 (S.Nlight) * (1));
-      Alloc_I32 (G.Light_Targetbodyid, Int64 (S.Nlight) * (1));
-      Alloc_I32 (G.Light_Type, Int64 (S.Nlight) * (1));
-      Alloc_I32 (G.Light_Texid, Int64 (S.Nlight) * (1));
-      Alloc_U8 (G.Light_Castshadow, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Bulbradius, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Intensity, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Range, Int64 (S.Nlight) * (1));
-      Alloc_U8 (G.Light_Active, Int64 (S.Nlight) * (1));
-      Alloc_F64 (G.Light_Pos, Int64 (S.Nlight) * (3));
-      Alloc_F64 (G.Light_Dir, Int64 (S.Nlight) * (3));
-      Alloc_F64 (G.Light_Poscom0, Int64 (S.Nlight) * (3));
-      Alloc_F64 (G.Light_Pos0, Int64 (S.Nlight) * (3));
-      Alloc_F64 (G.Light_Dir0, Int64 (S.Nlight) * (3));
-      Alloc_F32 (G.Light_Attenuation, Int64 (S.Nlight) * (3));
-      Alloc_F32 (G.Light_Cutoff, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Softness, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Exponent, Int64 (S.Nlight) * (1));
-      Alloc_F32 (G.Light_Ambient, Int64 (S.Nlight) * (3));
-      Alloc_F32 (G.Light_Diffuse, Int64 (S.Nlight) * (3));
-      Alloc_F32 (G.Light_Specular, Int64 (S.Nlight) * (3));
+      G := (Light_Mode               => New_I32 (Int64 (S.Nlight) * (1)),
+            Light_Bodyid             => New_I32 (Int64 (S.Nlight) * (1)),
+            Light_Targetbodyid       => New_I32 (Int64 (S.Nlight) * (1)),
+            Light_Type               => New_I32 (Int64 (S.Nlight) * (1)),
+            Light_Texid              => New_I32 (Int64 (S.Nlight) * (1)),
+            Light_Castshadow         => New_U8 (Int64 (S.Nlight) * (1)),
+            Light_Bulbradius         => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Intensity          => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Range              => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Active             => New_U8 (Int64 (S.Nlight) * (1)),
+            Light_Pos                => New_F64 (Int64 (S.Nlight) * (3)),
+            Light_Dir                => New_F64 (Int64 (S.Nlight) * (3)),
+            Light_Poscom0            => New_F64 (Int64 (S.Nlight) * (3)),
+            Light_Pos0               => New_F64 (Int64 (S.Nlight) * (3)),
+            Light_Dir0               => New_F64 (Int64 (S.Nlight) * (3)),
+            Light_Attenuation        => New_F32 (Int64 (S.Nlight) * (3)),
+            Light_Cutoff             => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Softness           => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Exponent           => New_F32 (Int64 (S.Nlight) * (1)),
+            Light_Ambient            => New_F32 (Int64 (S.Nlight) * (3)),
+            Light_Diffuse            => New_F32 (Int64 (S.Nlight) * (3)),
+            Light_Specular           => New_F32 (Int64 (S.Nlight) * (3)));
    end Allocate_Light;
 
-   procedure Free_Light (G : in out Light_Arrays) with
-     Post => Light_All_Null (G)
+   function Light_Null_Upto_1 (G : Light_Arrays) return Boolean is
+     (G.Light_Mode = null
+      and then G.Light_Bodyid = null
+      and then G.Light_Targetbodyid = null
+      and then G.Light_Type = null
+      and then G.Light_Texid = null
+      and then G.Light_Castshadow = null
+      and then G.Light_Bulbradius = null
+      and then G.Light_Intensity = null);
+
+   function Light_Null_Upto_2 (G : Light_Arrays) return Boolean is
+     (G.Light_Mode = null
+      and then G.Light_Bodyid = null
+      and then G.Light_Targetbodyid = null
+      and then G.Light_Type = null
+      and then G.Light_Texid = null
+      and then G.Light_Castshadow = null
+      and then G.Light_Bulbradius = null
+      and then G.Light_Intensity = null
+      and then G.Light_Range = null
+      and then G.Light_Active = null
+      and then G.Light_Pos = null
+      and then G.Light_Dir = null
+      and then G.Light_Poscom0 = null
+      and then G.Light_Pos0 = null
+      and then G.Light_Dir0 = null
+      and then G.Light_Attenuation = null);
+
+   function Light_Null_Upto_3 (G : Light_Arrays) return Boolean is
+     (G.Light_Mode = null
+      and then G.Light_Bodyid = null
+      and then G.Light_Targetbodyid = null
+      and then G.Light_Type = null
+      and then G.Light_Texid = null
+      and then G.Light_Castshadow = null
+      and then G.Light_Bulbradius = null
+      and then G.Light_Intensity = null
+      and then G.Light_Range = null
+      and then G.Light_Active = null
+      and then G.Light_Pos = null
+      and then G.Light_Dir = null
+      and then G.Light_Poscom0 = null
+      and then G.Light_Pos0 = null
+      and then G.Light_Dir0 = null
+      and then G.Light_Attenuation = null
+      and then G.Light_Cutoff = null
+      and then G.Light_Softness = null
+      and then G.Light_Exponent = null
+      and then G.Light_Ambient = null
+      and then G.Light_Diffuse = null
+      and then G.Light_Specular = null);
+
+   procedure Free_Light_1 (G : in out Light_Arrays) with
+     Post => Light_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Light_Mode);
@@ -420,6 +863,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Byte (G.Light_Castshadow);
       Free_Float32 (G.Light_Bulbradius);
       Free_Float32 (G.Light_Intensity);
+   end Free_Light_1;
+
+   procedure Free_Light_2 (G : in out Light_Arrays) with
+     Pre  => Light_Null_Upto_1 (G),
+     Post => Light_Null_Upto_2 (G)
+   is
+   begin
       Free_Float32 (G.Light_Range);
       Free_Byte (G.Light_Active);
       Free_Real (G.Light_Pos);
@@ -428,106 +878,662 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Light_Pos0);
       Free_Real (G.Light_Dir0);
       Free_Float32 (G.Light_Attenuation);
+   end Free_Light_2;
+
+   procedure Free_Light_3 (G : in out Light_Arrays) with
+     Pre  => Light_Null_Upto_2 (G),
+     Post => Light_Null_Upto_3 (G)
+   is
+   begin
       Free_Float32 (G.Light_Cutoff);
       Free_Float32 (G.Light_Softness);
       Free_Float32 (G.Light_Exponent);
       Free_Float32 (G.Light_Ambient);
       Free_Float32 (G.Light_Diffuse);
       Free_Float32 (G.Light_Specular);
+   end Free_Light_3;
+
+   procedure Free_Light (G : in out Light_Arrays) is
+   begin
+      Free_Light_1 (G);
+      Free_Light_2 (G);
+      Free_Light_3 (G);
    end Free_Light;
 
-   procedure Allocate_Flex (S : Sizes; G : in out Flex_Arrays) with
-     Pre  => Flex_Sizes_OK (S) and then Flex_All_Null (G),
-     Post => Flex_Layout_OK (S, G)
-   is
+   procedure Allocate_Flex (S : Sizes; G : in out Flex_Arrays) is
    begin
-      Alloc_I32 (G.Flex_Contype, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Conaffinity, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Condim, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Priority, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Solmix, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Solref, Int64 (S.Nflex) * (2));
-      Alloc_F64 (G.Flex_Solimp, Int64 (S.Nflex) * (5));
-      Alloc_F64 (G.Flex_Friction, Int64 (S.Nflex) * (3));
-      Alloc_F64 (G.Flex_Margin, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Gap, Int64 (S.Nflex) * (1));
-      Alloc_U8 (G.Flex_Internal, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Selfcollide, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Activelayers, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Passive, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Dim, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Matid, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Group, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Interp, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Cellnum, Int64 (S.Nflex) * (3));
-      Alloc_I32 (G.Flex_Nodeadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Nodenum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Vertadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Vertnum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Edgeadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Edgenum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Elemadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Elemnum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Elemdataadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Stiffnessadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Elemedgeadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Bendingadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Shellnum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Shelldataadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Evpairadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Evpairnum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Texcoordadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Nodebodyid, Int64 (S.Nflexnode) * (1));
-      Alloc_I32 (G.Flex_Vertbodyid, Int64 (S.Nflexvert) * (1));
-      Alloc_I32 (G.Flex_Vertedgeadr, Int64 (S.Nflexvert) * (1));
-      Alloc_I32 (G.Flex_Vertedgenum, Int64 (S.Nflexvert) * (1));
-      Alloc_I32 (G.Flex_Vertedge, Int64 (S.Nflexedge) * (2));
-      Alloc_I32 (G.Flex_Edge, Int64 (S.Nflexedge) * (2));
-      Alloc_I32 (G.Flex_Edgeflap, Int64 (S.Nflexedge) * (2));
-      Alloc_I32 (G.Flex_Elem, Int64 (S.Nflexelemdata) * (1));
-      Alloc_I32 (G.Flex_Elemtexcoord, Int64 (S.Nflexelemdata) * (1));
-      Alloc_I32 (G.Flex_Elemedge, Int64 (S.Nflexelemedge) * (1));
-      Alloc_I32 (G.Flex_Elemlayer, Int64 (S.Nflexelem) * (1));
-      Alloc_I32 (G.Flex_Shell, Int64 (S.Nflexshelldata) * (1));
-      Alloc_I32 (G.Flex_Evpair, Int64 (S.Nflexevpair) * (2));
-      Alloc_F64 (G.Flex_Vert, Int64 (S.Nflexvert) * (3));
-      Alloc_F64 (G.Flex_Vert0, Int64 (S.Nflexvert) * (3));
-      Alloc_F64 (G.Flex_Vertmetric, Int64 (S.Nflexvert) * (4));
-      Alloc_F64 (G.Flex_Node, Int64 (S.Nflexnode) * (3));
-      Alloc_F64 (G.Flex_Node0, Int64 (S.Nflexnode) * (3));
-      Alloc_F64 (G.Flexedge_Length0, Int64 (S.Nflexedge) * (1));
-      Alloc_F64 (G.Flexedge_Invweight0, Int64 (S.Nflexedge) * (1));
-      Alloc_F64 (G.Flex_Radius, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Size, Int64 (S.Nflex) * (3));
-      Alloc_F64 (G.Flex_Stiffness, Int64 (S.Nflexstiffness) * (1));
-      Alloc_F64 (G.Flex_Bending, Int64 (S.Nflexbending) * (1));
-      Alloc_I32 (G.Efm0_Dofid, Int64 (S.Nefm0dof) * (1));
-      Alloc_I32 (G.Efm0_L_Rownnz, Int64 (S.Nefm0dof) * (1));
-      Alloc_I32 (G.Efm0_L_Rowadr, Int64 (S.Nefm0dof) * (1));
-      Alloc_I32 (G.Efm0_L_Colind, Int64 (S.Nefm0L) * (1));
-      Alloc_F64 (G.Efm0_L, Int64 (S.Nefm0L) * (1));
-      Alloc_F64 (G.Flex_Damping, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Edgestiffness, Int64 (S.Nflex) * (1));
-      Alloc_F64 (G.Flex_Edgedamping, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Edgeequality, Int64 (S.Nflex) * (1));
-      Alloc_U8 (G.Flex_Rigid, Int64 (S.Nflex) * (1));
-      Alloc_U8 (G.Flexedge_Rigid, Int64 (S.Nflexedge) * (1));
-      Alloc_U8 (G.Flex_Centered, Int64 (S.Nflex) * (1));
-      Alloc_U8 (G.Flex_Flatskin, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Bvhadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flex_Bvhnum, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Flexedge_J_Rownnz, Int64 (S.Nflexedge) * (1));
-      Alloc_I32 (G.Flexedge_J_Rowadr, Int64 (S.Nflexedge) * (1));
-      Alloc_I32 (G.Flexedge_J_Colind, Int64 (S.NJfe) * (1));
-      Alloc_I32 (G.Flexvert_J_Rownnz, Int64 (S.Nflexvert) * (2));
-      Alloc_I32 (G.Flexvert_J_Rowadr, Int64 (S.Nflexvert) * (2));
-      Alloc_I32 (G.Flexvert_J_Colind, Int64 (S.NJfv) * (2));
-      Alloc_F32 (G.Flex_Rgba, Int64 (S.Nflex) * (4));
-      Alloc_F32 (G.Flex_Texcoord, Int64 (S.Nflextexcoord) * (2));
+      G := (Flex_Contype             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Conaffinity         => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Condim              => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Priority            => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Solmix              => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Solref              => New_F64 (Int64 (S.Nflex) * (2)),
+            Flex_Solimp              => New_F64 (Int64 (S.Nflex) * (5)),
+            Flex_Friction            => New_F64 (Int64 (S.Nflex) * (3)),
+            Flex_Margin              => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Gap                 => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Internal            => New_U8 (Int64 (S.Nflex) * (1)),
+            Flex_Selfcollide         => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Activelayers        => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Passive             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Dim                 => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Matid               => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Group               => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Interp              => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Cellnum             => New_I32 (Int64 (S.Nflex) * (3)),
+            Flex_Nodeadr             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Nodenum             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Vertadr             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Vertnum             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Edgeadr             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Edgenum             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Elemadr             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Elemnum             => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Elemdataadr         => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Stiffnessadr        => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Elemedgeadr         => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Bendingadr          => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Shellnum            => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Shelldataadr        => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Evpairadr           => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Evpairnum           => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Texcoordadr         => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Nodebodyid          => New_I32 (Int64 (S.Nflexnode) * (1)),
+            Flex_Vertbodyid          => New_I32 (Int64 (S.Nflexvert) * (1)),
+            Flex_Vertedgeadr         => New_I32 (Int64 (S.Nflexvert) * (1)),
+            Flex_Vertedgenum         => New_I32 (Int64 (S.Nflexvert) * (1)),
+            Flex_Vertedge            => New_I32 (Int64 (S.Nflexedge) * (2)),
+            Flex_Edge                => New_I32 (Int64 (S.Nflexedge) * (2)),
+            Flex_Edgeflap            => New_I32 (Int64 (S.Nflexedge) * (2)),
+            Flex_Elem                => New_I32 (Int64 (S.Nflexelemdata) * (1)),
+            Flex_Elemtexcoord        => New_I32 (Int64 (S.Nflexelemdata) * (1)),
+            Flex_Elemedge            => New_I32 (Int64 (S.Nflexelemedge) * (1)),
+            Flex_Elemlayer           => New_I32 (Int64 (S.Nflexelem) * (1)),
+            Flex_Shell               => New_I32 (Int64 (S.Nflexshelldata) * (1)),
+            Flex_Evpair              => New_I32 (Int64 (S.Nflexevpair) * (2)),
+            Flex_Vert                => New_F64 (Int64 (S.Nflexvert) * (3)),
+            Flex_Vert0               => New_F64 (Int64 (S.Nflexvert) * (3)),
+            Flex_Vertmetric          => New_F64 (Int64 (S.Nflexvert) * (4)),
+            Flex_Node                => New_F64 (Int64 (S.Nflexnode) * (3)),
+            Flex_Node0               => New_F64 (Int64 (S.Nflexnode) * (3)),
+            Flexedge_Length0         => New_F64 (Int64 (S.Nflexedge) * (1)),
+            Flexedge_Invweight0      => New_F64 (Int64 (S.Nflexedge) * (1)),
+            Flex_Radius              => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Size                => New_F64 (Int64 (S.Nflex) * (3)),
+            Flex_Stiffness           => New_F64 (Int64 (S.Nflexstiffness) * (1)),
+            Flex_Bending             => New_F64 (Int64 (S.Nflexbending) * (1)),
+            Efm0_Dofid               => New_I32 (Int64 (S.Nefm0dof) * (1)),
+            Efm0_L_Rownnz            => New_I32 (Int64 (S.Nefm0dof) * (1)),
+            Efm0_L_Rowadr            => New_I32 (Int64 (S.Nefm0dof) * (1)),
+            Efm0_L_Colind            => New_I32 (Int64 (S.Nefm0L) * (1)),
+            Efm0_L                   => New_F64 (Int64 (S.Nefm0L) * (1)),
+            Flex_Damping             => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Edgestiffness       => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Edgedamping         => New_F64 (Int64 (S.Nflex) * (1)),
+            Flex_Edgeequality        => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Rigid               => New_U8 (Int64 (S.Nflex) * (1)),
+            Flexedge_Rigid           => New_U8 (Int64 (S.Nflexedge) * (1)),
+            Flex_Centered            => New_U8 (Int64 (S.Nflex) * (1)),
+            Flex_Flatskin            => New_U8 (Int64 (S.Nflex) * (1)),
+            Flex_Bvhadr              => New_I32 (Int64 (S.Nflex) * (1)),
+            Flex_Bvhnum              => New_I32 (Int64 (S.Nflex) * (1)),
+            Flexedge_J_Rownnz        => New_I32 (Int64 (S.Nflexedge) * (1)),
+            Flexedge_J_Rowadr        => New_I32 (Int64 (S.Nflexedge) * (1)),
+            Flexedge_J_Colind        => New_I32 (Int64 (S.NJfe) * (1)),
+            Flexvert_J_Rownnz        => New_I32 (Int64 (S.Nflexvert) * (2)),
+            Flexvert_J_Rowadr        => New_I32 (Int64 (S.Nflexvert) * (2)),
+            Flexvert_J_Colind        => New_I32 (Int64 (S.NJfv) * (2)),
+            Flex_Rgba                => New_F32 (Int64 (S.Nflex) * (4)),
+            Flex_Texcoord            => New_F32 (Int64 (S.Nflextexcoord) * (2)));
    end Allocate_Flex;
 
-   procedure Free_Flex (G : in out Flex_Arrays) with
-     Post => Flex_All_Null (G)
+   function Flex_Null_Upto_1 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null);
+
+   function Flex_Null_Upto_2 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null);
+
+   function Flex_Null_Upto_3 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null);
+
+   function Flex_Null_Upto_4 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null);
+
+   function Flex_Null_Upto_5 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null);
+
+   function Flex_Null_Upto_6 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null);
+
+   function Flex_Null_Upto_7 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null
+      and then G.Flex_Evpair = null
+      and then G.Flex_Vert = null
+      and then G.Flex_Vert0 = null
+      and then G.Flex_Vertmetric = null
+      and then G.Flex_Node = null
+      and then G.Flex_Node0 = null
+      and then G.Flexedge_Length0 = null
+      and then G.Flexedge_Invweight0 = null);
+
+   function Flex_Null_Upto_8 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null
+      and then G.Flex_Evpair = null
+      and then G.Flex_Vert = null
+      and then G.Flex_Vert0 = null
+      and then G.Flex_Vertmetric = null
+      and then G.Flex_Node = null
+      and then G.Flex_Node0 = null
+      and then G.Flexedge_Length0 = null
+      and then G.Flexedge_Invweight0 = null
+      and then G.Flex_Radius = null
+      and then G.Flex_Size = null
+      and then G.Flex_Stiffness = null
+      and then G.Flex_Bending = null
+      and then G.Efm0_Dofid = null
+      and then G.Efm0_L_Rownnz = null
+      and then G.Efm0_L_Rowadr = null
+      and then G.Efm0_L_Colind = null);
+
+   function Flex_Null_Upto_9 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null
+      and then G.Flex_Evpair = null
+      and then G.Flex_Vert = null
+      and then G.Flex_Vert0 = null
+      and then G.Flex_Vertmetric = null
+      and then G.Flex_Node = null
+      and then G.Flex_Node0 = null
+      and then G.Flexedge_Length0 = null
+      and then G.Flexedge_Invweight0 = null
+      and then G.Flex_Radius = null
+      and then G.Flex_Size = null
+      and then G.Flex_Stiffness = null
+      and then G.Flex_Bending = null
+      and then G.Efm0_Dofid = null
+      and then G.Efm0_L_Rownnz = null
+      and then G.Efm0_L_Rowadr = null
+      and then G.Efm0_L_Colind = null
+      and then G.Efm0_L = null
+      and then G.Flex_Damping = null
+      and then G.Flex_Edgestiffness = null
+      and then G.Flex_Edgedamping = null
+      and then G.Flex_Edgeequality = null
+      and then G.Flex_Rigid = null
+      and then G.Flexedge_Rigid = null
+      and then G.Flex_Centered = null);
+
+   function Flex_Null_Upto_10 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null
+      and then G.Flex_Evpair = null
+      and then G.Flex_Vert = null
+      and then G.Flex_Vert0 = null
+      and then G.Flex_Vertmetric = null
+      and then G.Flex_Node = null
+      and then G.Flex_Node0 = null
+      and then G.Flexedge_Length0 = null
+      and then G.Flexedge_Invweight0 = null
+      and then G.Flex_Radius = null
+      and then G.Flex_Size = null
+      and then G.Flex_Stiffness = null
+      and then G.Flex_Bending = null
+      and then G.Efm0_Dofid = null
+      and then G.Efm0_L_Rownnz = null
+      and then G.Efm0_L_Rowadr = null
+      and then G.Efm0_L_Colind = null
+      and then G.Efm0_L = null
+      and then G.Flex_Damping = null
+      and then G.Flex_Edgestiffness = null
+      and then G.Flex_Edgedamping = null
+      and then G.Flex_Edgeequality = null
+      and then G.Flex_Rigid = null
+      and then G.Flexedge_Rigid = null
+      and then G.Flex_Centered = null
+      and then G.Flex_Flatskin = null
+      and then G.Flex_Bvhadr = null
+      and then G.Flex_Bvhnum = null
+      and then G.Flexedge_J_Rownnz = null
+      and then G.Flexedge_J_Rowadr = null
+      and then G.Flexedge_J_Colind = null
+      and then G.Flexvert_J_Rownnz = null
+      and then G.Flexvert_J_Rowadr = null);
+
+   function Flex_Null_Upto_11 (G : Flex_Arrays) return Boolean is
+     (G.Flex_Contype = null
+      and then G.Flex_Conaffinity = null
+      and then G.Flex_Condim = null
+      and then G.Flex_Priority = null
+      and then G.Flex_Solmix = null
+      and then G.Flex_Solref = null
+      and then G.Flex_Solimp = null
+      and then G.Flex_Friction = null
+      and then G.Flex_Margin = null
+      and then G.Flex_Gap = null
+      and then G.Flex_Internal = null
+      and then G.Flex_Selfcollide = null
+      and then G.Flex_Activelayers = null
+      and then G.Flex_Passive = null
+      and then G.Flex_Dim = null
+      and then G.Flex_Matid = null
+      and then G.Flex_Group = null
+      and then G.Flex_Interp = null
+      and then G.Flex_Cellnum = null
+      and then G.Flex_Nodeadr = null
+      and then G.Flex_Nodenum = null
+      and then G.Flex_Vertadr = null
+      and then G.Flex_Vertnum = null
+      and then G.Flex_Edgeadr = null
+      and then G.Flex_Edgenum = null
+      and then G.Flex_Elemadr = null
+      and then G.Flex_Elemnum = null
+      and then G.Flex_Elemdataadr = null
+      and then G.Flex_Stiffnessadr = null
+      and then G.Flex_Elemedgeadr = null
+      and then G.Flex_Bendingadr = null
+      and then G.Flex_Shellnum = null
+      and then G.Flex_Shelldataadr = null
+      and then G.Flex_Evpairadr = null
+      and then G.Flex_Evpairnum = null
+      and then G.Flex_Texcoordadr = null
+      and then G.Flex_Nodebodyid = null
+      and then G.Flex_Vertbodyid = null
+      and then G.Flex_Vertedgeadr = null
+      and then G.Flex_Vertedgenum = null
+      and then G.Flex_Vertedge = null
+      and then G.Flex_Edge = null
+      and then G.Flex_Edgeflap = null
+      and then G.Flex_Elem = null
+      and then G.Flex_Elemtexcoord = null
+      and then G.Flex_Elemedge = null
+      and then G.Flex_Elemlayer = null
+      and then G.Flex_Shell = null
+      and then G.Flex_Evpair = null
+      and then G.Flex_Vert = null
+      and then G.Flex_Vert0 = null
+      and then G.Flex_Vertmetric = null
+      and then G.Flex_Node = null
+      and then G.Flex_Node0 = null
+      and then G.Flexedge_Length0 = null
+      and then G.Flexedge_Invweight0 = null
+      and then G.Flex_Radius = null
+      and then G.Flex_Size = null
+      and then G.Flex_Stiffness = null
+      and then G.Flex_Bending = null
+      and then G.Efm0_Dofid = null
+      and then G.Efm0_L_Rownnz = null
+      and then G.Efm0_L_Rowadr = null
+      and then G.Efm0_L_Colind = null
+      and then G.Efm0_L = null
+      and then G.Flex_Damping = null
+      and then G.Flex_Edgestiffness = null
+      and then G.Flex_Edgedamping = null
+      and then G.Flex_Edgeequality = null
+      and then G.Flex_Rigid = null
+      and then G.Flexedge_Rigid = null
+      and then G.Flex_Centered = null
+      and then G.Flex_Flatskin = null
+      and then G.Flex_Bvhadr = null
+      and then G.Flex_Bvhnum = null
+      and then G.Flexedge_J_Rownnz = null
+      and then G.Flexedge_J_Rowadr = null
+      and then G.Flexedge_J_Colind = null
+      and then G.Flexvert_J_Rownnz = null
+      and then G.Flexvert_J_Rowadr = null
+      and then G.Flexvert_J_Colind = null
+      and then G.Flex_Rgba = null
+      and then G.Flex_Texcoord = null);
+
+   procedure Free_Flex_1 (G : in out Flex_Arrays) with
+     Post => Flex_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Flex_Contype);
@@ -538,6 +1544,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Flex_Solref);
       Free_Real (G.Flex_Solimp);
       Free_Real (G.Flex_Friction);
+   end Free_Flex_1;
+
+   procedure Free_Flex_2 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_1 (G),
+     Post => Flex_Null_Upto_2 (G)
+   is
+   begin
       Free_Real (G.Flex_Margin);
       Free_Real (G.Flex_Gap);
       Free_Byte (G.Flex_Internal);
@@ -546,6 +1559,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flex_Passive);
       Free_Int (G.Flex_Dim);
       Free_Int (G.Flex_Matid);
+   end Free_Flex_2;
+
+   procedure Free_Flex_3 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_2 (G),
+     Post => Flex_Null_Upto_3 (G)
+   is
+   begin
       Free_Int (G.Flex_Group);
       Free_Int (G.Flex_Interp);
       Free_Int (G.Flex_Cellnum);
@@ -554,6 +1574,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flex_Vertadr);
       Free_Int (G.Flex_Vertnum);
       Free_Int (G.Flex_Edgeadr);
+   end Free_Flex_3;
+
+   procedure Free_Flex_4 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_3 (G),
+     Post => Flex_Null_Upto_4 (G)
+   is
+   begin
       Free_Int (G.Flex_Edgenum);
       Free_Int (G.Flex_Elemadr);
       Free_Int (G.Flex_Elemnum);
@@ -562,6 +1589,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flex_Elemedgeadr);
       Free_Int (G.Flex_Bendingadr);
       Free_Int (G.Flex_Shellnum);
+   end Free_Flex_4;
+
+   procedure Free_Flex_5 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_4 (G),
+     Post => Flex_Null_Upto_5 (G)
+   is
+   begin
       Free_Int (G.Flex_Shelldataadr);
       Free_Int (G.Flex_Evpairadr);
       Free_Int (G.Flex_Evpairnum);
@@ -570,6 +1604,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flex_Vertbodyid);
       Free_Int (G.Flex_Vertedgeadr);
       Free_Int (G.Flex_Vertedgenum);
+   end Free_Flex_5;
+
+   procedure Free_Flex_6 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_5 (G),
+     Post => Flex_Null_Upto_6 (G)
+   is
+   begin
       Free_Int (G.Flex_Vertedge);
       Free_Int (G.Flex_Edge);
       Free_Int (G.Flex_Edgeflap);
@@ -578,6 +1619,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flex_Elemedge);
       Free_Int (G.Flex_Elemlayer);
       Free_Int (G.Flex_Shell);
+   end Free_Flex_6;
+
+   procedure Free_Flex_7 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_6 (G),
+     Post => Flex_Null_Upto_7 (G)
+   is
+   begin
       Free_Int (G.Flex_Evpair);
       Free_Real (G.Flex_Vert);
       Free_Real (G.Flex_Vert0);
@@ -586,6 +1634,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Flex_Node0);
       Free_Real (G.Flexedge_Length0);
       Free_Real (G.Flexedge_Invweight0);
+   end Free_Flex_7;
+
+   procedure Free_Flex_8 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_7 (G),
+     Post => Flex_Null_Upto_8 (G)
+   is
+   begin
       Free_Real (G.Flex_Radius);
       Free_Real (G.Flex_Size);
       Free_Real (G.Flex_Stiffness);
@@ -594,6 +1649,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Efm0_L_Rownnz);
       Free_Int (G.Efm0_L_Rowadr);
       Free_Int (G.Efm0_L_Colind);
+   end Free_Flex_8;
+
+   procedure Free_Flex_9 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_8 (G),
+     Post => Flex_Null_Upto_9 (G)
+   is
+   begin
       Free_Real (G.Efm0_L);
       Free_Real (G.Flex_Damping);
       Free_Real (G.Flex_Edgestiffness);
@@ -602,6 +1664,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Byte (G.Flex_Rigid);
       Free_Byte (G.Flexedge_Rigid);
       Free_Byte (G.Flex_Centered);
+   end Free_Flex_9;
+
+   procedure Free_Flex_10 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_9 (G),
+     Post => Flex_Null_Upto_10 (G)
+   is
+   begin
       Free_Byte (G.Flex_Flatskin);
       Free_Int (G.Flex_Bvhadr);
       Free_Int (G.Flex_Bvhnum);
@@ -610,54 +1679,197 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Flexedge_J_Colind);
       Free_Int (G.Flexvert_J_Rownnz);
       Free_Int (G.Flexvert_J_Rowadr);
+   end Free_Flex_10;
+
+   procedure Free_Flex_11 (G : in out Flex_Arrays) with
+     Pre  => Flex_Null_Upto_10 (G),
+     Post => Flex_Null_Upto_11 (G)
+   is
+   begin
       Free_Int (G.Flexvert_J_Colind);
       Free_Float32 (G.Flex_Rgba);
       Free_Float32 (G.Flex_Texcoord);
+   end Free_Flex_11;
+
+   procedure Free_Flex (G : in out Flex_Arrays) is
+   begin
+      Free_Flex_1 (G);
+      Free_Flex_2 (G);
+      Free_Flex_3 (G);
+      Free_Flex_4 (G);
+      Free_Flex_5 (G);
+      Free_Flex_6 (G);
+      Free_Flex_7 (G);
+      Free_Flex_8 (G);
+      Free_Flex_9 (G);
+      Free_Flex_10 (G);
+      Free_Flex_11 (G);
    end Free_Flex;
 
-   procedure Allocate_Mesh (S : Sizes; G : in out Mesh_Arrays) with
-     Pre  => Mesh_Sizes_OK (S) and then Mesh_All_Null (G),
-     Post => Mesh_Layout_OK (S, G)
-   is
+   procedure Allocate_Mesh (S : Sizes; G : in out Mesh_Arrays) is
    begin
-      Alloc_I32 (G.Mesh_Vertadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Vertnum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Faceadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Facenum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Bvhadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Bvhnum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Octadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Octnum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Normaladr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Normalnum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Texcoordadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Texcoordnum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Graphadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Extrema, Int64 (S.Nmesh) * (27));
-      Alloc_F32 (G.Mesh_Vert, Int64 (S.Nmeshvert) * (3));
-      Alloc_F32 (G.Mesh_Normal, Int64 (S.Nmeshnormal) * (3));
-      Alloc_F32 (G.Mesh_Texcoord, Int64 (S.Nmeshtexcoord) * (2));
-      Alloc_I32 (G.Mesh_Face, Int64 (S.Nmeshface) * (3));
-      Alloc_I32 (G.Mesh_Facenormal, Int64 (S.Nmeshface) * (3));
-      Alloc_I32 (G.Mesh_Facetexcoord, Int64 (S.Nmeshface) * (3));
-      Alloc_I32 (G.Mesh_Graph, Int64 (S.Nmeshgraph) * (1));
-      Alloc_F64 (G.Mesh_Scale, Int64 (S.Nmesh) * (3));
-      Alloc_F64 (G.Mesh_Pos, Int64 (S.Nmesh) * (3));
-      Alloc_F64 (G.Mesh_Quat, Int64 (S.Nmesh) * (4));
-      Alloc_I32 (G.Mesh_Pathadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Polynum, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Mesh_Polyadr, Int64 (S.Nmesh) * (1));
-      Alloc_F64 (G.Mesh_Polynormal, Int64 (S.Nmeshpoly) * (3));
-      Alloc_I32 (G.Mesh_Polyvertadr, Int64 (S.Nmeshpoly) * (1));
-      Alloc_I32 (G.Mesh_Polyvertnum, Int64 (S.Nmeshpoly) * (1));
-      Alloc_I32 (G.Mesh_Polyvert, Int64 (S.Nmeshpolyvert) * (1));
-      Alloc_I32 (G.Mesh_Polymapadr, Int64 (S.Nmeshvert) * (1));
-      Alloc_I32 (G.Mesh_Polymapnum, Int64 (S.Nmeshvert) * (1));
-      Alloc_I32 (G.Mesh_Polymap, Int64 (S.Nmeshpolymap) * (1));
+      G := (Mesh_Vertadr             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Vertnum             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Faceadr             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Facenum             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Bvhadr              => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Bvhnum              => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Octadr              => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Octnum              => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Normaladr           => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Normalnum           => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Texcoordadr         => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Texcoordnum         => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Graphadr            => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Extrema             => New_I32 (Int64 (S.Nmesh) * (27)),
+            Mesh_Vert                => New_F32 (Int64 (S.Nmeshvert) * (3)),
+            Mesh_Normal              => New_F32 (Int64 (S.Nmeshnormal) * (3)),
+            Mesh_Texcoord            => New_F32 (Int64 (S.Nmeshtexcoord) * (2)),
+            Mesh_Face                => New_I32 (Int64 (S.Nmeshface) * (3)),
+            Mesh_Facenormal          => New_I32 (Int64 (S.Nmeshface) * (3)),
+            Mesh_Facetexcoord        => New_I32 (Int64 (S.Nmeshface) * (3)),
+            Mesh_Graph               => New_I32 (Int64 (S.Nmeshgraph) * (1)),
+            Mesh_Scale               => New_F64 (Int64 (S.Nmesh) * (3)),
+            Mesh_Pos                 => New_F64 (Int64 (S.Nmesh) * (3)),
+            Mesh_Quat                => New_F64 (Int64 (S.Nmesh) * (4)),
+            Mesh_Pathadr             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Polynum             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Polyadr             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Mesh_Polynormal          => New_F64 (Int64 (S.Nmeshpoly) * (3)),
+            Mesh_Polyvertadr         => New_I32 (Int64 (S.Nmeshpoly) * (1)),
+            Mesh_Polyvertnum         => New_I32 (Int64 (S.Nmeshpoly) * (1)),
+            Mesh_Polyvert            => New_I32 (Int64 (S.Nmeshpolyvert) * (1)),
+            Mesh_Polymapadr          => New_I32 (Int64 (S.Nmeshvert) * (1)),
+            Mesh_Polymapnum          => New_I32 (Int64 (S.Nmeshvert) * (1)),
+            Mesh_Polymap             => New_I32 (Int64 (S.Nmeshpolymap) * (1)));
    end Allocate_Mesh;
 
-   procedure Free_Mesh (G : in out Mesh_Arrays) with
-     Post => Mesh_All_Null (G)
+   function Mesh_Null_Upto_1 (G : Mesh_Arrays) return Boolean is
+     (G.Mesh_Vertadr = null
+      and then G.Mesh_Vertnum = null
+      and then G.Mesh_Faceadr = null
+      and then G.Mesh_Facenum = null
+      and then G.Mesh_Bvhadr = null
+      and then G.Mesh_Bvhnum = null
+      and then G.Mesh_Octadr = null
+      and then G.Mesh_Octnum = null);
+
+   function Mesh_Null_Upto_2 (G : Mesh_Arrays) return Boolean is
+     (G.Mesh_Vertadr = null
+      and then G.Mesh_Vertnum = null
+      and then G.Mesh_Faceadr = null
+      and then G.Mesh_Facenum = null
+      and then G.Mesh_Bvhadr = null
+      and then G.Mesh_Bvhnum = null
+      and then G.Mesh_Octadr = null
+      and then G.Mesh_Octnum = null
+      and then G.Mesh_Normaladr = null
+      and then G.Mesh_Normalnum = null
+      and then G.Mesh_Texcoordadr = null
+      and then G.Mesh_Texcoordnum = null
+      and then G.Mesh_Graphadr = null
+      and then G.Mesh_Extrema = null
+      and then G.Mesh_Vert = null
+      and then G.Mesh_Normal = null);
+
+   function Mesh_Null_Upto_3 (G : Mesh_Arrays) return Boolean is
+     (G.Mesh_Vertadr = null
+      and then G.Mesh_Vertnum = null
+      and then G.Mesh_Faceadr = null
+      and then G.Mesh_Facenum = null
+      and then G.Mesh_Bvhadr = null
+      and then G.Mesh_Bvhnum = null
+      and then G.Mesh_Octadr = null
+      and then G.Mesh_Octnum = null
+      and then G.Mesh_Normaladr = null
+      and then G.Mesh_Normalnum = null
+      and then G.Mesh_Texcoordadr = null
+      and then G.Mesh_Texcoordnum = null
+      and then G.Mesh_Graphadr = null
+      and then G.Mesh_Extrema = null
+      and then G.Mesh_Vert = null
+      and then G.Mesh_Normal = null
+      and then G.Mesh_Texcoord = null
+      and then G.Mesh_Face = null
+      and then G.Mesh_Facenormal = null
+      and then G.Mesh_Facetexcoord = null
+      and then G.Mesh_Graph = null
+      and then G.Mesh_Scale = null
+      and then G.Mesh_Pos = null
+      and then G.Mesh_Quat = null);
+
+   function Mesh_Null_Upto_4 (G : Mesh_Arrays) return Boolean is
+     (G.Mesh_Vertadr = null
+      and then G.Mesh_Vertnum = null
+      and then G.Mesh_Faceadr = null
+      and then G.Mesh_Facenum = null
+      and then G.Mesh_Bvhadr = null
+      and then G.Mesh_Bvhnum = null
+      and then G.Mesh_Octadr = null
+      and then G.Mesh_Octnum = null
+      and then G.Mesh_Normaladr = null
+      and then G.Mesh_Normalnum = null
+      and then G.Mesh_Texcoordadr = null
+      and then G.Mesh_Texcoordnum = null
+      and then G.Mesh_Graphadr = null
+      and then G.Mesh_Extrema = null
+      and then G.Mesh_Vert = null
+      and then G.Mesh_Normal = null
+      and then G.Mesh_Texcoord = null
+      and then G.Mesh_Face = null
+      and then G.Mesh_Facenormal = null
+      and then G.Mesh_Facetexcoord = null
+      and then G.Mesh_Graph = null
+      and then G.Mesh_Scale = null
+      and then G.Mesh_Pos = null
+      and then G.Mesh_Quat = null
+      and then G.Mesh_Pathadr = null
+      and then G.Mesh_Polynum = null
+      and then G.Mesh_Polyadr = null
+      and then G.Mesh_Polynormal = null
+      and then G.Mesh_Polyvertadr = null
+      and then G.Mesh_Polyvertnum = null
+      and then G.Mesh_Polyvert = null
+      and then G.Mesh_Polymapadr = null);
+
+   function Mesh_Null_Upto_5 (G : Mesh_Arrays) return Boolean is
+     (G.Mesh_Vertadr = null
+      and then G.Mesh_Vertnum = null
+      and then G.Mesh_Faceadr = null
+      and then G.Mesh_Facenum = null
+      and then G.Mesh_Bvhadr = null
+      and then G.Mesh_Bvhnum = null
+      and then G.Mesh_Octadr = null
+      and then G.Mesh_Octnum = null
+      and then G.Mesh_Normaladr = null
+      and then G.Mesh_Normalnum = null
+      and then G.Mesh_Texcoordadr = null
+      and then G.Mesh_Texcoordnum = null
+      and then G.Mesh_Graphadr = null
+      and then G.Mesh_Extrema = null
+      and then G.Mesh_Vert = null
+      and then G.Mesh_Normal = null
+      and then G.Mesh_Texcoord = null
+      and then G.Mesh_Face = null
+      and then G.Mesh_Facenormal = null
+      and then G.Mesh_Facetexcoord = null
+      and then G.Mesh_Graph = null
+      and then G.Mesh_Scale = null
+      and then G.Mesh_Pos = null
+      and then G.Mesh_Quat = null
+      and then G.Mesh_Pathadr = null
+      and then G.Mesh_Polynum = null
+      and then G.Mesh_Polyadr = null
+      and then G.Mesh_Polynormal = null
+      and then G.Mesh_Polyvertadr = null
+      and then G.Mesh_Polyvertnum = null
+      and then G.Mesh_Polyvert = null
+      and then G.Mesh_Polymapadr = null
+      and then G.Mesh_Polymapnum = null
+      and then G.Mesh_Polymap = null);
+
+   procedure Free_Mesh_1 (G : in out Mesh_Arrays) with
+     Post => Mesh_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Mesh_Vertadr);
@@ -668,6 +1880,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Mesh_Bvhnum);
       Free_Int (G.Mesh_Octadr);
       Free_Int (G.Mesh_Octnum);
+   end Free_Mesh_1;
+
+   procedure Free_Mesh_2 (G : in out Mesh_Arrays) with
+     Pre  => Mesh_Null_Upto_1 (G),
+     Post => Mesh_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Mesh_Normaladr);
       Free_Int (G.Mesh_Normalnum);
       Free_Int (G.Mesh_Texcoordadr);
@@ -676,6 +1895,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Mesh_Extrema);
       Free_Float32 (G.Mesh_Vert);
       Free_Float32 (G.Mesh_Normal);
+   end Free_Mesh_2;
+
+   procedure Free_Mesh_3 (G : in out Mesh_Arrays) with
+     Pre  => Mesh_Null_Upto_2 (G),
+     Post => Mesh_Null_Upto_3 (G)
+   is
+   begin
       Free_Float32 (G.Mesh_Texcoord);
       Free_Int (G.Mesh_Face);
       Free_Int (G.Mesh_Facenormal);
@@ -684,6 +1910,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Mesh_Scale);
       Free_Real (G.Mesh_Pos);
       Free_Real (G.Mesh_Quat);
+   end Free_Mesh_3;
+
+   procedure Free_Mesh_4 (G : in out Mesh_Arrays) with
+     Pre  => Mesh_Null_Upto_3 (G),
+     Post => Mesh_Null_Upto_4 (G)
+   is
+   begin
       Free_Int (G.Mesh_Pathadr);
       Free_Int (G.Mesh_Polynum);
       Free_Int (G.Mesh_Polyadr);
@@ -692,41 +1925,106 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Mesh_Polyvertnum);
       Free_Int (G.Mesh_Polyvert);
       Free_Int (G.Mesh_Polymapadr);
-      Free_Int (G.Mesh_Polymapnum);
-      Free_Int (G.Mesh_Polymap);
-   end Free_Mesh;
+   end Free_Mesh_4;
 
-   procedure Allocate_Skin (S : Sizes; G : in out Skin_Arrays) with
-     Pre  => Skin_Sizes_OK (S) and then Skin_All_Null (G),
-     Post => Skin_Layout_OK (S, G)
+   procedure Free_Mesh_5 (G : in out Mesh_Arrays) with
+     Pre  => Mesh_Null_Upto_4 (G),
+     Post => Mesh_Null_Upto_5 (G)
    is
    begin
-      Alloc_I32 (G.Skin_Matid, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Group, Int64 (S.Nskin) * (1));
-      Alloc_F32 (G.Skin_Rgba, Int64 (S.Nskin) * (4));
-      Alloc_F32 (G.Skin_Inflate, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Vertadr, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Vertnum, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Texcoordadr, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Faceadr, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Facenum, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Boneadr, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Skin_Bonenum, Int64 (S.Nskin) * (1));
-      Alloc_F32 (G.Skin_Vert, Int64 (S.Nskinvert) * (3));
-      Alloc_F32 (G.Skin_Texcoord, Int64 (S.Nskintexvert) * (2));
-      Alloc_I32 (G.Skin_Face, Int64 (S.Nskinface) * (3));
-      Alloc_I32 (G.Skin_Bonevertadr, Int64 (S.Nskinbone) * (1));
-      Alloc_I32 (G.Skin_Bonevertnum, Int64 (S.Nskinbone) * (1));
-      Alloc_F32 (G.Skin_Bonebindpos, Int64 (S.Nskinbone) * (3));
-      Alloc_F32 (G.Skin_Bonebindquat, Int64 (S.Nskinbone) * (4));
-      Alloc_I32 (G.Skin_Bonebodyid, Int64 (S.Nskinbone) * (1));
-      Alloc_I32 (G.Skin_Bonevertid, Int64 (S.Nskinbonevert) * (1));
-      Alloc_F32 (G.Skin_Bonevertweight, Int64 (S.Nskinbonevert) * (1));
-      Alloc_I32 (G.Skin_Pathadr, Int64 (S.Nskin) * (1));
+      Free_Int (G.Mesh_Polymapnum);
+      Free_Int (G.Mesh_Polymap);
+   end Free_Mesh_5;
+
+   procedure Free_Mesh (G : in out Mesh_Arrays) is
+   begin
+      Free_Mesh_1 (G);
+      Free_Mesh_2 (G);
+      Free_Mesh_3 (G);
+      Free_Mesh_4 (G);
+      Free_Mesh_5 (G);
+   end Free_Mesh;
+
+   procedure Allocate_Skin (S : Sizes; G : in out Skin_Arrays) is
+   begin
+      G := (Skin_Matid               => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Group               => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Rgba                => New_F32 (Int64 (S.Nskin) * (4)),
+            Skin_Inflate             => New_F32 (Int64 (S.Nskin) * (1)),
+            Skin_Vertadr             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Vertnum             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Texcoordadr         => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Faceadr             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Facenum             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Boneadr             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Bonenum             => New_I32 (Int64 (S.Nskin) * (1)),
+            Skin_Vert                => New_F32 (Int64 (S.Nskinvert) * (3)),
+            Skin_Texcoord            => New_F32 (Int64 (S.Nskintexvert) * (2)),
+            Skin_Face                => New_I32 (Int64 (S.Nskinface) * (3)),
+            Skin_Bonevertadr         => New_I32 (Int64 (S.Nskinbone) * (1)),
+            Skin_Bonevertnum         => New_I32 (Int64 (S.Nskinbone) * (1)),
+            Skin_Bonebindpos         => New_F32 (Int64 (S.Nskinbone) * (3)),
+            Skin_Bonebindquat        => New_F32 (Int64 (S.Nskinbone) * (4)),
+            Skin_Bonebodyid          => New_I32 (Int64 (S.Nskinbone) * (1)),
+            Skin_Bonevertid          => New_I32 (Int64 (S.Nskinbonevert) * (1)),
+            Skin_Bonevertweight      => New_F32 (Int64 (S.Nskinbonevert) * (1)),
+            Skin_Pathadr             => New_I32 (Int64 (S.Nskin) * (1)));
    end Allocate_Skin;
 
-   procedure Free_Skin (G : in out Skin_Arrays) with
-     Post => Skin_All_Null (G)
+   function Skin_Null_Upto_1 (G : Skin_Arrays) return Boolean is
+     (G.Skin_Matid = null
+      and then G.Skin_Group = null
+      and then G.Skin_Rgba = null
+      and then G.Skin_Inflate = null
+      and then G.Skin_Vertadr = null
+      and then G.Skin_Vertnum = null
+      and then G.Skin_Texcoordadr = null
+      and then G.Skin_Faceadr = null);
+
+   function Skin_Null_Upto_2 (G : Skin_Arrays) return Boolean is
+     (G.Skin_Matid = null
+      and then G.Skin_Group = null
+      and then G.Skin_Rgba = null
+      and then G.Skin_Inflate = null
+      and then G.Skin_Vertadr = null
+      and then G.Skin_Vertnum = null
+      and then G.Skin_Texcoordadr = null
+      and then G.Skin_Faceadr = null
+      and then G.Skin_Facenum = null
+      and then G.Skin_Boneadr = null
+      and then G.Skin_Bonenum = null
+      and then G.Skin_Vert = null
+      and then G.Skin_Texcoord = null
+      and then G.Skin_Face = null
+      and then G.Skin_Bonevertadr = null
+      and then G.Skin_Bonevertnum = null);
+
+   function Skin_Null_Upto_3 (G : Skin_Arrays) return Boolean is
+     (G.Skin_Matid = null
+      and then G.Skin_Group = null
+      and then G.Skin_Rgba = null
+      and then G.Skin_Inflate = null
+      and then G.Skin_Vertadr = null
+      and then G.Skin_Vertnum = null
+      and then G.Skin_Texcoordadr = null
+      and then G.Skin_Faceadr = null
+      and then G.Skin_Facenum = null
+      and then G.Skin_Boneadr = null
+      and then G.Skin_Bonenum = null
+      and then G.Skin_Vert = null
+      and then G.Skin_Texcoord = null
+      and then G.Skin_Face = null
+      and then G.Skin_Bonevertadr = null
+      and then G.Skin_Bonevertnum = null
+      and then G.Skin_Bonebindpos = null
+      and then G.Skin_Bonebindquat = null
+      and then G.Skin_Bonebodyid = null
+      and then G.Skin_Bonevertid = null
+      and then G.Skin_Bonevertweight = null
+      and then G.Skin_Pathadr = null);
+
+   procedure Free_Skin_1 (G : in out Skin_Arrays) with
+     Post => Skin_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Skin_Matid);
@@ -737,6 +2035,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Skin_Vertnum);
       Free_Int (G.Skin_Texcoordadr);
       Free_Int (G.Skin_Faceadr);
+   end Free_Skin_1;
+
+   procedure Free_Skin_2 (G : in out Skin_Arrays) with
+     Pre  => Skin_Null_Upto_1 (G),
+     Post => Skin_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Skin_Facenum);
       Free_Int (G.Skin_Boneadr);
       Free_Int (G.Skin_Bonenum);
@@ -745,30 +2050,39 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Skin_Face);
       Free_Int (G.Skin_Bonevertadr);
       Free_Int (G.Skin_Bonevertnum);
+   end Free_Skin_2;
+
+   procedure Free_Skin_3 (G : in out Skin_Arrays) with
+     Pre  => Skin_Null_Upto_2 (G),
+     Post => Skin_Null_Upto_3 (G)
+   is
+   begin
       Free_Float32 (G.Skin_Bonebindpos);
       Free_Float32 (G.Skin_Bonebindquat);
       Free_Int (G.Skin_Bonebodyid);
       Free_Int (G.Skin_Bonevertid);
       Free_Float32 (G.Skin_Bonevertweight);
       Free_Int (G.Skin_Pathadr);
+   end Free_Skin_3;
+
+   procedure Free_Skin (G : in out Skin_Arrays) is
+   begin
+      Free_Skin_1 (G);
+      Free_Skin_2 (G);
+      Free_Skin_3 (G);
    end Free_Skin;
 
-   procedure Allocate_Hfield (S : Sizes; G : in out Hfield_Arrays) with
-     Pre  => Hfield_Sizes_OK (S) and then Hfield_All_Null (G),
-     Post => Hfield_Layout_OK (S, G)
-   is
+   procedure Allocate_Hfield (S : Sizes; G : in out Hfield_Arrays) is
    begin
-      Alloc_F64 (G.Hfield_Size, Int64 (S.Nhfield) * (4));
-      Alloc_I32 (G.Hfield_Nrow, Int64 (S.Nhfield) * (1));
-      Alloc_I32 (G.Hfield_Ncol, Int64 (S.Nhfield) * (1));
-      Alloc_I32 (G.Hfield_Adr, Int64 (S.Nhfield) * (1));
-      Alloc_F32 (G.Hfield_Data, Int64 (S.Nhfielddata) * (1));
-      Alloc_I32 (G.Hfield_Pathadr, Int64 (S.Nhfield) * (1));
+      G := (Hfield_Size              => New_F64 (Int64 (S.Nhfield) * (4)),
+            Hfield_Nrow              => New_I32 (Int64 (S.Nhfield) * (1)),
+            Hfield_Ncol              => New_I32 (Int64 (S.Nhfield) * (1)),
+            Hfield_Adr               => New_I32 (Int64 (S.Nhfield) * (1)),
+            Hfield_Data              => New_F32 (Int64 (S.Nhfielddata) * (1)),
+            Hfield_Pathadr           => New_I32 (Int64 (S.Nhfield) * (1)));
    end Allocate_Hfield;
 
-   procedure Free_Hfield (G : in out Hfield_Arrays) with
-     Post => Hfield_All_Null (G)
-   is
+   procedure Free_Hfield (G : in out Hfield_Arrays) is
    begin
       Free_Real (G.Hfield_Size);
       Free_Int (G.Hfield_Nrow);
@@ -778,24 +2092,19 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Hfield_Pathadr);
    end Free_Hfield;
 
-   procedure Allocate_Texture (S : Sizes; G : in out Texture_Arrays) with
-     Pre  => Texture_Sizes_OK (S) and then Texture_All_Null (G),
-     Post => Texture_Layout_OK (S, G)
-   is
+   procedure Allocate_Texture (S : Sizes; G : in out Texture_Arrays) is
    begin
-      Alloc_I32 (G.Tex_Type, Int64 (S.Ntex) * (1));
-      Alloc_I32 (G.Tex_Colorspace, Int64 (S.Ntex) * (1));
-      Alloc_I32 (G.Tex_Height, Int64 (S.Ntex) * (1));
-      Alloc_I32 (G.Tex_Width, Int64 (S.Ntex) * (1));
-      Alloc_I32 (G.Tex_Nchannel, Int64 (S.Ntex) * (1));
-      Alloc_I64 (G.Tex_Adr, Int64 (S.Ntex) * (1));
-      Alloc_U8 (G.Tex_Data, Int64 (S.Ntexdata) * (1));
-      Alloc_I32 (G.Tex_Pathadr, Int64 (S.Ntex) * (1));
+      G := (Tex_Type                 => New_I32 (Int64 (S.Ntex) * (1)),
+            Tex_Colorspace           => New_I32 (Int64 (S.Ntex) * (1)),
+            Tex_Height               => New_I32 (Int64 (S.Ntex) * (1)),
+            Tex_Width                => New_I32 (Int64 (S.Ntex) * (1)),
+            Tex_Nchannel             => New_I32 (Int64 (S.Ntex) * (1)),
+            Tex_Adr                  => New_I64 (Int64 (S.Ntex) * (1)),
+            Tex_Data                 => New_U8 (Int64 (S.Ntexdata) * (1)),
+            Tex_Pathadr              => New_I32 (Int64 (S.Ntex) * (1)));
    end Allocate_Texture;
 
-   procedure Free_Texture (G : in out Texture_Arrays) with
-     Post => Texture_All_Null (G)
-   is
+   procedure Free_Texture (G : in out Texture_Arrays) is
    begin
       Free_Int (G.Tex_Type);
       Free_Int (G.Tex_Colorspace);
@@ -807,25 +2116,44 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Tex_Pathadr);
    end Free_Texture;
 
-   procedure Allocate_Material (S : Sizes; G : in out Material_Arrays) with
-     Pre  => Material_Sizes_OK (S) and then Material_All_Null (G),
-     Post => Material_Layout_OK (S, G)
-   is
+   procedure Allocate_Material (S : Sizes; G : in out Material_Arrays) is
    begin
-      Alloc_I32 (G.Mat_Texid, Int64 (S.Nmat) * (10));
-      Alloc_U8 (G.Mat_Texuniform, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Texrepeat, Int64 (S.Nmat) * (2));
-      Alloc_F32 (G.Mat_Emission, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Specular, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Shininess, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Reflectance, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Metallic, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Roughness, Int64 (S.Nmat) * (1));
-      Alloc_F32 (G.Mat_Rgba, Int64 (S.Nmat) * (4));
+      G := (Mat_Texid                => New_I32 (Int64 (S.Nmat) * (10)),
+            Mat_Texuniform           => New_U8 (Int64 (S.Nmat) * (1)),
+            Mat_Texrepeat            => New_F32 (Int64 (S.Nmat) * (2)),
+            Mat_Emission             => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Specular             => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Shininess            => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Reflectance          => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Metallic             => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Roughness            => New_F32 (Int64 (S.Nmat) * (1)),
+            Mat_Rgba                 => New_F32 (Int64 (S.Nmat) * (4)));
    end Allocate_Material;
 
-   procedure Free_Material (G : in out Material_Arrays) with
-     Post => Material_All_Null (G)
+   function Material_Null_Upto_1 (G : Material_Arrays) return Boolean is
+     (G.Mat_Texid = null
+      and then G.Mat_Texuniform = null
+      and then G.Mat_Texrepeat = null
+      and then G.Mat_Emission = null
+      and then G.Mat_Specular = null
+      and then G.Mat_Shininess = null
+      and then G.Mat_Reflectance = null
+      and then G.Mat_Metallic = null);
+
+   function Material_Null_Upto_2 (G : Material_Arrays) return Boolean is
+     (G.Mat_Texid = null
+      and then G.Mat_Texuniform = null
+      and then G.Mat_Texrepeat = null
+      and then G.Mat_Emission = null
+      and then G.Mat_Specular = null
+      and then G.Mat_Shininess = null
+      and then G.Mat_Reflectance = null
+      and then G.Mat_Metallic = null
+      and then G.Mat_Roughness = null
+      and then G.Mat_Rgba = null);
+
+   procedure Free_Material_1 (G : in out Material_Arrays) with
+     Post => Material_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Mat_Texid);
@@ -836,30 +2164,63 @@ package body MJ.Models with SPARK_Mode is
       Free_Float32 (G.Mat_Shininess);
       Free_Float32 (G.Mat_Reflectance);
       Free_Float32 (G.Mat_Metallic);
-      Free_Float32 (G.Mat_Roughness);
-      Free_Float32 (G.Mat_Rgba);
-   end Free_Material;
+   end Free_Material_1;
 
-   procedure Allocate_Pair (S : Sizes; G : in out Pair_Arrays) with
-     Pre  => Pair_Sizes_OK (S) and then Pair_All_Null (G),
-     Post => Pair_Layout_OK (S, G)
+   procedure Free_Material_2 (G : in out Material_Arrays) with
+     Pre  => Material_Null_Upto_1 (G),
+     Post => Material_Null_Upto_2 (G)
    is
    begin
-      Alloc_I32 (G.Pair_Dim, Int64 (S.Npair) * (1));
-      Alloc_I32 (G.Pair_Geom1, Int64 (S.Npair) * (1));
-      Alloc_I32 (G.Pair_Geom2, Int64 (S.Npair) * (1));
-      Alloc_I32 (G.Pair_Signature, Int64 (S.Npair) * (1));
-      Alloc_F64 (G.Pair_Solref, Int64 (S.Npair) * (2));
-      Alloc_F64 (G.Pair_Solreffriction, Int64 (S.Npair) * (2));
-      Alloc_F64 (G.Pair_Solimp, Int64 (S.Npair) * (5));
-      Alloc_F64 (G.Pair_Margin, Int64 (S.Npair) * (1));
-      Alloc_F64 (G.Pair_Gap, Int64 (S.Npair) * (1));
-      Alloc_F64 (G.Pair_Adhesion, Int64 (S.Npair) * (1));
-      Alloc_F64 (G.Pair_Friction, Int64 (S.Npair) * (5));
+      Free_Float32 (G.Mat_Roughness);
+      Free_Float32 (G.Mat_Rgba);
+   end Free_Material_2;
+
+   procedure Free_Material (G : in out Material_Arrays) is
+   begin
+      Free_Material_1 (G);
+      Free_Material_2 (G);
+   end Free_Material;
+
+   procedure Allocate_Pair (S : Sizes; G : in out Pair_Arrays) is
+   begin
+      G := (Pair_Dim                 => New_I32 (Int64 (S.Npair) * (1)),
+            Pair_Geom1               => New_I32 (Int64 (S.Npair) * (1)),
+            Pair_Geom2               => New_I32 (Int64 (S.Npair) * (1)),
+            Pair_Signature           => New_I32 (Int64 (S.Npair) * (1)),
+            Pair_Solref              => New_F64 (Int64 (S.Npair) * (2)),
+            Pair_Solreffriction      => New_F64 (Int64 (S.Npair) * (2)),
+            Pair_Solimp              => New_F64 (Int64 (S.Npair) * (5)),
+            Pair_Margin              => New_F64 (Int64 (S.Npair) * (1)),
+            Pair_Gap                 => New_F64 (Int64 (S.Npair) * (1)),
+            Pair_Adhesion            => New_F64 (Int64 (S.Npair) * (1)),
+            Pair_Friction            => New_F64 (Int64 (S.Npair) * (5)));
    end Allocate_Pair;
 
-   procedure Free_Pair (G : in out Pair_Arrays) with
-     Post => Pair_All_Null (G)
+   function Pair_Null_Upto_1 (G : Pair_Arrays) return Boolean is
+     (G.Pair_Dim = null
+      and then G.Pair_Geom1 = null
+      and then G.Pair_Geom2 = null
+      and then G.Pair_Signature = null
+      and then G.Pair_Solref = null
+      and then G.Pair_Solreffriction = null
+      and then G.Pair_Solimp = null
+      and then G.Pair_Margin = null);
+
+   function Pair_Null_Upto_2 (G : Pair_Arrays) return Boolean is
+     (G.Pair_Dim = null
+      and then G.Pair_Geom1 = null
+      and then G.Pair_Geom2 = null
+      and then G.Pair_Signature = null
+      and then G.Pair_Solref = null
+      and then G.Pair_Solreffriction = null
+      and then G.Pair_Solimp = null
+      and then G.Pair_Margin = null
+      and then G.Pair_Gap = null
+      and then G.Pair_Adhesion = null
+      and then G.Pair_Friction = null);
+
+   procedure Free_Pair_1 (G : in out Pair_Arrays) with
+     Post => Pair_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Pair_Dim);
@@ -870,44 +2231,47 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Pair_Solreffriction);
       Free_Real (G.Pair_Solimp);
       Free_Real (G.Pair_Margin);
+   end Free_Pair_1;
+
+   procedure Free_Pair_2 (G : in out Pair_Arrays) with
+     Pre  => Pair_Null_Upto_1 (G),
+     Post => Pair_Null_Upto_2 (G)
+   is
+   begin
       Free_Real (G.Pair_Gap);
       Free_Real (G.Pair_Adhesion);
       Free_Real (G.Pair_Friction);
+   end Free_Pair_2;
+
+   procedure Free_Pair (G : in out Pair_Arrays) is
+   begin
+      Free_Pair_1 (G);
+      Free_Pair_2 (G);
    end Free_Pair;
 
-   procedure Allocate_Exclude (S : Sizes; G : in out Exclude_Arrays) with
-     Pre  => Exclude_Sizes_OK (S) and then Exclude_All_Null (G),
-     Post => Exclude_Layout_OK (S, G)
-   is
+   procedure Allocate_Exclude (S : Sizes; G : in out Exclude_Arrays) is
    begin
-      Alloc_I32 (G.Exclude_Signature, Int64 (S.Nexclude) * (1));
+      G := (Exclude_Signature        => New_I32 (Int64 (S.Nexclude) * (1)));
    end Allocate_Exclude;
 
-   procedure Free_Exclude (G : in out Exclude_Arrays) with
-     Post => Exclude_All_Null (G)
-   is
+   procedure Free_Exclude (G : in out Exclude_Arrays) is
    begin
       Free_Int (G.Exclude_Signature);
    end Free_Exclude;
 
-   procedure Allocate_Equality (S : Sizes; G : in out Equality_Arrays) with
-     Pre  => Equality_Sizes_OK (S) and then Equality_All_Null (G),
-     Post => Equality_Layout_OK (S, G)
-   is
+   procedure Allocate_Equality (S : Sizes; G : in out Equality_Arrays) is
    begin
-      Alloc_I32 (G.Eq_Type, Int64 (S.Neq) * (1));
-      Alloc_I32 (G.Eq_Obj1id, Int64 (S.Neq) * (1));
-      Alloc_I32 (G.Eq_Obj2id, Int64 (S.Neq) * (1));
-      Alloc_I32 (G.Eq_Objtype, Int64 (S.Neq) * (1));
-      Alloc_U8 (G.Eq_Active0, Int64 (S.Neq) * (1));
-      Alloc_F64 (G.Eq_Solref, Int64 (S.Neq) * (2));
-      Alloc_F64 (G.Eq_Solimp, Int64 (S.Neq) * (5));
-      Alloc_F64 (G.Eq_Data, Int64 (S.Neq) * (11));
+      G := (Eq_Type                  => New_I32 (Int64 (S.Neq) * (1)),
+            Eq_Obj1id                => New_I32 (Int64 (S.Neq) * (1)),
+            Eq_Obj2id                => New_I32 (Int64 (S.Neq) * (1)),
+            Eq_Objtype               => New_I32 (Int64 (S.Neq) * (1)),
+            Eq_Active0               => New_U8 (Int64 (S.Neq) * (1)),
+            Eq_Solref                => New_F64 (Int64 (S.Neq) * (2)),
+            Eq_Solimp                => New_F64 (Int64 (S.Neq) * (5)),
+            Eq_Data                  => New_F64 (Int64 (S.Neq) * (11)));
    end Allocate_Equality;
 
-   procedure Free_Equality (G : in out Equality_Arrays) with
-     Post => Equality_All_Null (G)
-   is
+   procedure Free_Equality (G : in out Equality_Arrays) is
    begin
       Free_Int (G.Eq_Type);
       Free_Int (G.Eq_Obj1id);
@@ -919,46 +2283,130 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Eq_Data);
    end Free_Equality;
 
-   procedure Allocate_Tendon (S : Sizes; G : in out Tendon_Arrays) with
-     Pre  => Tendon_Sizes_OK (S) and then Tendon_All_Null (G),
-     Post => Tendon_Layout_OK (S, G)
-   is
+   procedure Allocate_Tendon (S : Sizes; G : in out Tendon_Arrays) is
    begin
-      Alloc_I32 (G.Tendon_Adr, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Num, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Matid, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Actuatorid, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Group, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Treenum, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Tendon_Treeid, Int64 (S.Ntendon) * (2));
-      Alloc_I32 (G.Ten_J_Rownnz, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Ten_J_Rowadr, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Ten_J_Colind, Int64 (S.NJten) * (1));
-      Alloc_U8 (G.Tendon_Limited, Int64 (S.Ntendon) * (1));
-      Alloc_U8 (G.Tendon_Actfrclimited, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Width, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Solref_Lim, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Solimp_Lim, Int64 (S.Ntendon) * (5));
-      Alloc_F64 (G.Tendon_Solref_Fri, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Solimp_Fri, Int64 (S.Ntendon) * (5));
-      Alloc_F64 (G.Tendon_Range, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Actfrcrange, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Margin, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Stiffness, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Stiffnesspoly, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Damping, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Dampingpoly, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Armature, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Frictionloss, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Lengthspring, Int64 (S.Ntendon) * (2));
-      Alloc_F64 (G.Tendon_Length0, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_Invweight0, Int64 (S.Ntendon) * (1));
-      Alloc_F64 (G.Tendon_User, Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon)));
-      Alloc_F32 (G.Tendon_Rgba, Int64 (S.Ntendon) * (4));
+      G := (Tendon_Adr               => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Num               => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Matid             => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Actuatorid        => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Group             => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Treenum           => New_I32 (Int64 (S.Ntendon) * (1)),
+            Tendon_Treeid            => New_I32 (Int64 (S.Ntendon) * (2)),
+            Ten_J_Rownnz             => New_I32 (Int64 (S.Ntendon) * (1)),
+            Ten_J_Rowadr             => New_I32 (Int64 (S.Ntendon) * (1)),
+            Ten_J_Colind             => New_I32 (Int64 (S.NJten) * (1)),
+            Tendon_Limited           => New_U8 (Int64 (S.Ntendon) * (1)),
+            Tendon_Actfrclimited     => New_U8 (Int64 (S.Ntendon) * (1)),
+            Tendon_Width             => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Solref_Lim        => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Solimp_Lim        => New_F64 (Int64 (S.Ntendon) * (5)),
+            Tendon_Solref_Fri        => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Solimp_Fri        => New_F64 (Int64 (S.Ntendon) * (5)),
+            Tendon_Range             => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Actfrcrange       => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Margin            => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Stiffness         => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Stiffnesspoly     => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Damping           => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Dampingpoly       => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Armature          => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Frictionloss      => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Lengthspring      => New_F64 (Int64 (S.Ntendon) * (2)),
+            Tendon_Length0           => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_Invweight0        => New_F64 (Int64 (S.Ntendon) * (1)),
+            Tendon_User              => New_F64 (Int64 (S.Ntendon) * (Int64 (S.Nuser_Tendon))),
+            Tendon_Rgba              => New_F32 (Int64 (S.Ntendon) * (4)));
    end Allocate_Tendon;
 
-   procedure Free_Tendon (G : in out Tendon_Arrays) with
-     Post => Tendon_All_Null (G)
+   function Tendon_Null_Upto_1 (G : Tendon_Arrays) return Boolean is
+     (G.Tendon_Adr = null
+      and then G.Tendon_Num = null
+      and then G.Tendon_Matid = null
+      and then G.Tendon_Actuatorid = null
+      and then G.Tendon_Group = null
+      and then G.Tendon_Treenum = null
+      and then G.Tendon_Treeid = null
+      and then G.Ten_J_Rownnz = null);
+
+   function Tendon_Null_Upto_2 (G : Tendon_Arrays) return Boolean is
+     (G.Tendon_Adr = null
+      and then G.Tendon_Num = null
+      and then G.Tendon_Matid = null
+      and then G.Tendon_Actuatorid = null
+      and then G.Tendon_Group = null
+      and then G.Tendon_Treenum = null
+      and then G.Tendon_Treeid = null
+      and then G.Ten_J_Rownnz = null
+      and then G.Ten_J_Rowadr = null
+      and then G.Ten_J_Colind = null
+      and then G.Tendon_Limited = null
+      and then G.Tendon_Actfrclimited = null
+      and then G.Tendon_Width = null
+      and then G.Tendon_Solref_Lim = null
+      and then G.Tendon_Solimp_Lim = null
+      and then G.Tendon_Solref_Fri = null);
+
+   function Tendon_Null_Upto_3 (G : Tendon_Arrays) return Boolean is
+     (G.Tendon_Adr = null
+      and then G.Tendon_Num = null
+      and then G.Tendon_Matid = null
+      and then G.Tendon_Actuatorid = null
+      and then G.Tendon_Group = null
+      and then G.Tendon_Treenum = null
+      and then G.Tendon_Treeid = null
+      and then G.Ten_J_Rownnz = null
+      and then G.Ten_J_Rowadr = null
+      and then G.Ten_J_Colind = null
+      and then G.Tendon_Limited = null
+      and then G.Tendon_Actfrclimited = null
+      and then G.Tendon_Width = null
+      and then G.Tendon_Solref_Lim = null
+      and then G.Tendon_Solimp_Lim = null
+      and then G.Tendon_Solref_Fri = null
+      and then G.Tendon_Solimp_Fri = null
+      and then G.Tendon_Range = null
+      and then G.Tendon_Actfrcrange = null
+      and then G.Tendon_Margin = null
+      and then G.Tendon_Stiffness = null
+      and then G.Tendon_Stiffnesspoly = null
+      and then G.Tendon_Damping = null
+      and then G.Tendon_Dampingpoly = null);
+
+   function Tendon_Null_Upto_4 (G : Tendon_Arrays) return Boolean is
+     (G.Tendon_Adr = null
+      and then G.Tendon_Num = null
+      and then G.Tendon_Matid = null
+      and then G.Tendon_Actuatorid = null
+      and then G.Tendon_Group = null
+      and then G.Tendon_Treenum = null
+      and then G.Tendon_Treeid = null
+      and then G.Ten_J_Rownnz = null
+      and then G.Ten_J_Rowadr = null
+      and then G.Ten_J_Colind = null
+      and then G.Tendon_Limited = null
+      and then G.Tendon_Actfrclimited = null
+      and then G.Tendon_Width = null
+      and then G.Tendon_Solref_Lim = null
+      and then G.Tendon_Solimp_Lim = null
+      and then G.Tendon_Solref_Fri = null
+      and then G.Tendon_Solimp_Fri = null
+      and then G.Tendon_Range = null
+      and then G.Tendon_Actfrcrange = null
+      and then G.Tendon_Margin = null
+      and then G.Tendon_Stiffness = null
+      and then G.Tendon_Stiffnesspoly = null
+      and then G.Tendon_Damping = null
+      and then G.Tendon_Dampingpoly = null
+      and then G.Tendon_Armature = null
+      and then G.Tendon_Frictionloss = null
+      and then G.Tendon_Lengthspring = null
+      and then G.Tendon_Length0 = null
+      and then G.Tendon_Invweight0 = null
+      and then G.Tendon_User = null
+      and then G.Tendon_Rgba = null);
+
+   procedure Free_Tendon_1 (G : in out Tendon_Arrays) with
+     Post => Tendon_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Tendon_Adr);
@@ -969,6 +2417,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Tendon_Treenum);
       Free_Int (G.Tendon_Treeid);
       Free_Int (G.Ten_J_Rownnz);
+   end Free_Tendon_1;
+
+   procedure Free_Tendon_2 (G : in out Tendon_Arrays) with
+     Pre  => Tendon_Null_Upto_1 (G),
+     Post => Tendon_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Ten_J_Rowadr);
       Free_Int (G.Ten_J_Colind);
       Free_Byte (G.Tendon_Limited);
@@ -977,6 +2432,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Tendon_Solref_Lim);
       Free_Real (G.Tendon_Solimp_Lim);
       Free_Real (G.Tendon_Solref_Fri);
+   end Free_Tendon_2;
+
+   procedure Free_Tendon_3 (G : in out Tendon_Arrays) with
+     Pre  => Tendon_Null_Upto_2 (G),
+     Post => Tendon_Null_Upto_3 (G)
+   is
+   begin
       Free_Real (G.Tendon_Solimp_Fri);
       Free_Real (G.Tendon_Range);
       Free_Real (G.Tendon_Actfrcrange);
@@ -985,6 +2447,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Tendon_Stiffnesspoly);
       Free_Real (G.Tendon_Damping);
       Free_Real (G.Tendon_Dampingpoly);
+   end Free_Tendon_3;
+
+   procedure Free_Tendon_4 (G : in out Tendon_Arrays) with
+     Pre  => Tendon_Null_Upto_3 (G),
+     Post => Tendon_Null_Upto_4 (G)
+   is
+   begin
       Free_Real (G.Tendon_Armature);
       Free_Real (G.Tendon_Frictionloss);
       Free_Real (G.Tendon_Lengthspring);
@@ -992,53 +2461,184 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Tendon_Invweight0);
       Free_Real (G.Tendon_User);
       Free_Float32 (G.Tendon_Rgba);
+   end Free_Tendon_4;
+
+   procedure Free_Tendon (G : in out Tendon_Arrays) is
+   begin
+      Free_Tendon_1 (G);
+      Free_Tendon_2 (G);
+      Free_Tendon_3 (G);
+      Free_Tendon_4 (G);
    end Free_Tendon;
 
-   procedure Allocate_Actuator (S : Sizes; G : in out Actuator_Arrays) with
-     Pre  => Actuator_Sizes_OK (S) and then Actuator_All_Null (G),
-     Post => Actuator_Layout_OK (S, G)
-   is
+   procedure Allocate_Actuator (S : Sizes; G : in out Actuator_Arrays) is
    begin
-      Alloc_I32 (G.Actuator_Trntype, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Dyntype, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Gaintype, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Biastype, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Ctrladr, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Ctrlnum, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Ctrlspec, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Outadr, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Outnum, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Actadr, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Actnum, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Trnid, Int64 (S.Nactuator) * (2));
-      Alloc_F64 (G.Actuator_Cranklength, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Dynprm, Int64 (S.Nactuator) * (10));
-      Alloc_F64 (G.Actuator_Gainprm, Int64 (S.Nactuator) * (10));
-      Alloc_F64 (G.Actuator_Biasprm, Int64 (S.Nactuator) * (10));
-      Alloc_U8 (G.Actuator_Actlimited, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Actrange, Int64 (S.Nactuator) * (2));
-      Alloc_U8 (G.Actuator_Actearly, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_History, Int64 (S.Nactuator) * (2));
-      Alloc_I32 (G.Actuator_Historyadr, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Delay, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Damping, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Dampingpoly, Int64 (S.Nactuator) * (2));
-      Alloc_F64 (G.Actuator_Armature, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Actuator_Group, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_User, Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator)));
-      Alloc_I32 (G.Actuator_Plugin, Int64 (S.Nactuator) * (1));
-      Alloc_U8 (G.Actuator_Forcelimited, Int64 (S.Nactuator) * (1));
-      Alloc_F64 (G.Actuator_Forcerange, Int64 (S.Nactuator) * (2));
-      Alloc_U8 (G.Actuator_Ctrllimited, Int64 (S.Nu) * (1));
-      Alloc_F64 (G.Actuator_Ctrlrange, Int64 (S.Nu) * (2));
-      Alloc_F64 (G.Actuator_Gear, Int64 (S.Nout) * (6));
-      Alloc_F64 (G.Actuator_Acc0, Int64 (S.Nout) * (1));
-      Alloc_F64 (G.Actuator_Length0, Int64 (S.Nout) * (1));
-      Alloc_F64 (G.Actuator_Lengthrange, Int64 (S.Nout) * (2));
+      G := (Actuator_Trntype         => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Dyntype         => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Gaintype        => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Biastype        => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Ctrladr         => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Ctrlnum         => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Ctrlspec        => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Outadr          => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Outnum          => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Actadr          => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Actnum          => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Trnid           => New_I32 (Int64 (S.Nactuator) * (2)),
+            Actuator_Cranklength     => New_F64 (Int64 (S.Nactuator) * (1)),
+            Actuator_Dynprm          => New_F64 (Int64 (S.Nactuator) * (10)),
+            Actuator_Gainprm         => New_F64 (Int64 (S.Nactuator) * (10)),
+            Actuator_Biasprm         => New_F64 (Int64 (S.Nactuator) * (10)),
+            Actuator_Actlimited      => New_U8 (Int64 (S.Nactuator) * (1)),
+            Actuator_Actrange        => New_F64 (Int64 (S.Nactuator) * (2)),
+            Actuator_Actearly        => New_U8 (Int64 (S.Nactuator) * (1)),
+            Actuator_History         => New_I32 (Int64 (S.Nactuator) * (2)),
+            Actuator_Historyadr      => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Delay           => New_F64 (Int64 (S.Nactuator) * (1)),
+            Actuator_Damping         => New_F64 (Int64 (S.Nactuator) * (1)),
+            Actuator_Dampingpoly     => New_F64 (Int64 (S.Nactuator) * (2)),
+            Actuator_Armature        => New_F64 (Int64 (S.Nactuator) * (1)),
+            Actuator_Group           => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_User            => New_F64 (Int64 (S.Nactuator) * (Int64 (S.Nuser_Actuator))),
+            Actuator_Plugin          => New_I32 (Int64 (S.Nactuator) * (1)),
+            Actuator_Forcelimited    => New_U8 (Int64 (S.Nactuator) * (1)),
+            Actuator_Forcerange      => New_F64 (Int64 (S.Nactuator) * (2)),
+            Actuator_Ctrllimited     => New_U8 (Int64 (S.Nu) * (1)),
+            Actuator_Ctrlrange       => New_F64 (Int64 (S.Nu) * (2)),
+            Actuator_Gear            => New_F64 (Int64 (S.Nout) * (6)),
+            Actuator_Acc0            => New_F64 (Int64 (S.Nout) * (1)),
+            Actuator_Length0         => New_F64 (Int64 (S.Nout) * (1)),
+            Actuator_Lengthrange     => New_F64 (Int64 (S.Nout) * (2)));
    end Allocate_Actuator;
 
-   procedure Free_Actuator (G : in out Actuator_Arrays) with
-     Post => Actuator_All_Null (G)
+   function Actuator_Null_Upto_1 (G : Actuator_Arrays) return Boolean is
+     (G.Actuator_Trntype = null
+      and then G.Actuator_Dyntype = null
+      and then G.Actuator_Gaintype = null
+      and then G.Actuator_Biastype = null
+      and then G.Actuator_Ctrladr = null
+      and then G.Actuator_Ctrlnum = null
+      and then G.Actuator_Ctrlspec = null
+      and then G.Actuator_Outadr = null);
+
+   function Actuator_Null_Upto_2 (G : Actuator_Arrays) return Boolean is
+     (G.Actuator_Trntype = null
+      and then G.Actuator_Dyntype = null
+      and then G.Actuator_Gaintype = null
+      and then G.Actuator_Biastype = null
+      and then G.Actuator_Ctrladr = null
+      and then G.Actuator_Ctrlnum = null
+      and then G.Actuator_Ctrlspec = null
+      and then G.Actuator_Outadr = null
+      and then G.Actuator_Outnum = null
+      and then G.Actuator_Actadr = null
+      and then G.Actuator_Actnum = null
+      and then G.Actuator_Trnid = null
+      and then G.Actuator_Cranklength = null
+      and then G.Actuator_Dynprm = null
+      and then G.Actuator_Gainprm = null
+      and then G.Actuator_Biasprm = null);
+
+   function Actuator_Null_Upto_3 (G : Actuator_Arrays) return Boolean is
+     (G.Actuator_Trntype = null
+      and then G.Actuator_Dyntype = null
+      and then G.Actuator_Gaintype = null
+      and then G.Actuator_Biastype = null
+      and then G.Actuator_Ctrladr = null
+      and then G.Actuator_Ctrlnum = null
+      and then G.Actuator_Ctrlspec = null
+      and then G.Actuator_Outadr = null
+      and then G.Actuator_Outnum = null
+      and then G.Actuator_Actadr = null
+      and then G.Actuator_Actnum = null
+      and then G.Actuator_Trnid = null
+      and then G.Actuator_Cranklength = null
+      and then G.Actuator_Dynprm = null
+      and then G.Actuator_Gainprm = null
+      and then G.Actuator_Biasprm = null
+      and then G.Actuator_Actlimited = null
+      and then G.Actuator_Actrange = null
+      and then G.Actuator_Actearly = null
+      and then G.Actuator_History = null
+      and then G.Actuator_Historyadr = null
+      and then G.Actuator_Delay = null
+      and then G.Actuator_Damping = null
+      and then G.Actuator_Dampingpoly = null);
+
+   function Actuator_Null_Upto_4 (G : Actuator_Arrays) return Boolean is
+     (G.Actuator_Trntype = null
+      and then G.Actuator_Dyntype = null
+      and then G.Actuator_Gaintype = null
+      and then G.Actuator_Biastype = null
+      and then G.Actuator_Ctrladr = null
+      and then G.Actuator_Ctrlnum = null
+      and then G.Actuator_Ctrlspec = null
+      and then G.Actuator_Outadr = null
+      and then G.Actuator_Outnum = null
+      and then G.Actuator_Actadr = null
+      and then G.Actuator_Actnum = null
+      and then G.Actuator_Trnid = null
+      and then G.Actuator_Cranklength = null
+      and then G.Actuator_Dynprm = null
+      and then G.Actuator_Gainprm = null
+      and then G.Actuator_Biasprm = null
+      and then G.Actuator_Actlimited = null
+      and then G.Actuator_Actrange = null
+      and then G.Actuator_Actearly = null
+      and then G.Actuator_History = null
+      and then G.Actuator_Historyadr = null
+      and then G.Actuator_Delay = null
+      and then G.Actuator_Damping = null
+      and then G.Actuator_Dampingpoly = null
+      and then G.Actuator_Armature = null
+      and then G.Actuator_Group = null
+      and then G.Actuator_User = null
+      and then G.Actuator_Plugin = null
+      and then G.Actuator_Forcelimited = null
+      and then G.Actuator_Forcerange = null
+      and then G.Actuator_Ctrllimited = null
+      and then G.Actuator_Ctrlrange = null);
+
+   function Actuator_Null_Upto_5 (G : Actuator_Arrays) return Boolean is
+     (G.Actuator_Trntype = null
+      and then G.Actuator_Dyntype = null
+      and then G.Actuator_Gaintype = null
+      and then G.Actuator_Biastype = null
+      and then G.Actuator_Ctrladr = null
+      and then G.Actuator_Ctrlnum = null
+      and then G.Actuator_Ctrlspec = null
+      and then G.Actuator_Outadr = null
+      and then G.Actuator_Outnum = null
+      and then G.Actuator_Actadr = null
+      and then G.Actuator_Actnum = null
+      and then G.Actuator_Trnid = null
+      and then G.Actuator_Cranklength = null
+      and then G.Actuator_Dynprm = null
+      and then G.Actuator_Gainprm = null
+      and then G.Actuator_Biasprm = null
+      and then G.Actuator_Actlimited = null
+      and then G.Actuator_Actrange = null
+      and then G.Actuator_Actearly = null
+      and then G.Actuator_History = null
+      and then G.Actuator_Historyadr = null
+      and then G.Actuator_Delay = null
+      and then G.Actuator_Damping = null
+      and then G.Actuator_Dampingpoly = null
+      and then G.Actuator_Armature = null
+      and then G.Actuator_Group = null
+      and then G.Actuator_User = null
+      and then G.Actuator_Plugin = null
+      and then G.Actuator_Forcelimited = null
+      and then G.Actuator_Forcerange = null
+      and then G.Actuator_Ctrllimited = null
+      and then G.Actuator_Ctrlrange = null
+      and then G.Actuator_Gear = null
+      and then G.Actuator_Acc0 = null
+      and then G.Actuator_Length0 = null
+      and then G.Actuator_Lengthrange = null);
+
+   procedure Free_Actuator_1 (G : in out Actuator_Arrays) with
+     Post => Actuator_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Actuator_Trntype);
@@ -1049,6 +2649,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Actuator_Ctrlnum);
       Free_Int (G.Actuator_Ctrlspec);
       Free_Int (G.Actuator_Outadr);
+   end Free_Actuator_1;
+
+   procedure Free_Actuator_2 (G : in out Actuator_Arrays) with
+     Pre  => Actuator_Null_Upto_1 (G),
+     Post => Actuator_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Actuator_Outnum);
       Free_Int (G.Actuator_Actadr);
       Free_Int (G.Actuator_Actnum);
@@ -1057,6 +2664,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Actuator_Dynprm);
       Free_Real (G.Actuator_Gainprm);
       Free_Real (G.Actuator_Biasprm);
+   end Free_Actuator_2;
+
+   procedure Free_Actuator_3 (G : in out Actuator_Arrays) with
+     Pre  => Actuator_Null_Upto_2 (G),
+     Post => Actuator_Null_Upto_3 (G)
+   is
+   begin
       Free_Byte (G.Actuator_Actlimited);
       Free_Real (G.Actuator_Actrange);
       Free_Byte (G.Actuator_Actearly);
@@ -1065,6 +2679,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Actuator_Delay);
       Free_Real (G.Actuator_Damping);
       Free_Real (G.Actuator_Dampingpoly);
+   end Free_Actuator_3;
+
+   procedure Free_Actuator_4 (G : in out Actuator_Arrays) with
+     Pre  => Actuator_Null_Upto_3 (G),
+     Post => Actuator_Null_Upto_4 (G)
+   is
+   begin
       Free_Real (G.Actuator_Armature);
       Free_Int (G.Actuator_Group);
       Free_Real (G.Actuator_User);
@@ -1073,39 +2694,100 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Actuator_Forcerange);
       Free_Byte (G.Actuator_Ctrllimited);
       Free_Real (G.Actuator_Ctrlrange);
+   end Free_Actuator_4;
+
+   procedure Free_Actuator_5 (G : in out Actuator_Arrays) with
+     Pre  => Actuator_Null_Upto_4 (G),
+     Post => Actuator_Null_Upto_5 (G)
+   is
+   begin
       Free_Real (G.Actuator_Gear);
       Free_Real (G.Actuator_Acc0);
       Free_Real (G.Actuator_Length0);
       Free_Real (G.Actuator_Lengthrange);
+   end Free_Actuator_5;
+
+   procedure Free_Actuator (G : in out Actuator_Arrays) is
+   begin
+      Free_Actuator_1 (G);
+      Free_Actuator_2 (G);
+      Free_Actuator_3 (G);
+      Free_Actuator_4 (G);
+      Free_Actuator_5 (G);
    end Free_Actuator;
 
-   procedure Allocate_Sensor (S : Sizes; G : in out Sensor_Arrays) with
-     Pre  => Sensor_Sizes_OK (S) and then Sensor_All_Null (G),
-     Post => Sensor_Layout_OK (S, G)
-   is
+   procedure Allocate_Sensor (S : Sizes; G : in out Sensor_Arrays) is
    begin
-      Alloc_I32 (G.Sensor_Type, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Datatype, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Needstage, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Objtype, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Objid, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Reftype, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Refid, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Intprm, Int64 (S.Nsensor) * (3));
-      Alloc_I32 (G.Sensor_Dim, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_Adr, Int64 (S.Nsensor) * (1));
-      Alloc_F64 (G.Sensor_Cutoff, Int64 (S.Nsensor) * (1));
-      Alloc_F64 (G.Sensor_Noise, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Sensor_History, Int64 (S.Nsensor) * (2));
-      Alloc_I32 (G.Sensor_Historyadr, Int64 (S.Nsensor) * (1));
-      Alloc_F64 (G.Sensor_Delay, Int64 (S.Nsensor) * (1));
-      Alloc_F64 (G.Sensor_Interval, Int64 (S.Nsensor) * (2));
-      Alloc_F64 (G.Sensor_User, Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor)));
-      Alloc_I32 (G.Sensor_Plugin, Int64 (S.Nsensor) * (1));
+      G := (Sensor_Type              => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Datatype          => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Needstage         => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Objtype           => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Objid             => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Reftype           => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Refid             => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Intprm            => New_I32 (Int64 (S.Nsensor) * (3)),
+            Sensor_Dim               => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Adr               => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Cutoff            => New_F64 (Int64 (S.Nsensor) * (1)),
+            Sensor_Noise             => New_F64 (Int64 (S.Nsensor) * (1)),
+            Sensor_History           => New_I32 (Int64 (S.Nsensor) * (2)),
+            Sensor_Historyadr        => New_I32 (Int64 (S.Nsensor) * (1)),
+            Sensor_Delay             => New_F64 (Int64 (S.Nsensor) * (1)),
+            Sensor_Interval          => New_F64 (Int64 (S.Nsensor) * (2)),
+            Sensor_User              => New_F64 (Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor))),
+            Sensor_Plugin            => New_I32 (Int64 (S.Nsensor) * (1)));
    end Allocate_Sensor;
 
-   procedure Free_Sensor (G : in out Sensor_Arrays) with
-     Post => Sensor_All_Null (G)
+   function Sensor_Null_Upto_1 (G : Sensor_Arrays) return Boolean is
+     (G.Sensor_Type = null
+      and then G.Sensor_Datatype = null
+      and then G.Sensor_Needstage = null
+      and then G.Sensor_Objtype = null
+      and then G.Sensor_Objid = null
+      and then G.Sensor_Reftype = null
+      and then G.Sensor_Refid = null
+      and then G.Sensor_Intprm = null);
+
+   function Sensor_Null_Upto_2 (G : Sensor_Arrays) return Boolean is
+     (G.Sensor_Type = null
+      and then G.Sensor_Datatype = null
+      and then G.Sensor_Needstage = null
+      and then G.Sensor_Objtype = null
+      and then G.Sensor_Objid = null
+      and then G.Sensor_Reftype = null
+      and then G.Sensor_Refid = null
+      and then G.Sensor_Intprm = null
+      and then G.Sensor_Dim = null
+      and then G.Sensor_Adr = null
+      and then G.Sensor_Cutoff = null
+      and then G.Sensor_Noise = null
+      and then G.Sensor_History = null
+      and then G.Sensor_Historyadr = null
+      and then G.Sensor_Delay = null
+      and then G.Sensor_Interval = null);
+
+   function Sensor_Null_Upto_3 (G : Sensor_Arrays) return Boolean is
+     (G.Sensor_Type = null
+      and then G.Sensor_Datatype = null
+      and then G.Sensor_Needstage = null
+      and then G.Sensor_Objtype = null
+      and then G.Sensor_Objid = null
+      and then G.Sensor_Reftype = null
+      and then G.Sensor_Refid = null
+      and then G.Sensor_Intprm = null
+      and then G.Sensor_Dim = null
+      and then G.Sensor_Adr = null
+      and then G.Sensor_Cutoff = null
+      and then G.Sensor_Noise = null
+      and then G.Sensor_History = null
+      and then G.Sensor_Historyadr = null
+      and then G.Sensor_Delay = null
+      and then G.Sensor_Interval = null
+      and then G.Sensor_User = null
+      and then G.Sensor_Plugin = null);
+
+   procedure Free_Sensor_1 (G : in out Sensor_Arrays) with
+     Post => Sensor_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Sensor_Type);
@@ -1116,6 +2798,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Sensor_Reftype);
       Free_Int (G.Sensor_Refid);
       Free_Int (G.Sensor_Intprm);
+   end Free_Sensor_1;
+
+   procedure Free_Sensor_2 (G : in out Sensor_Arrays) with
+     Pre  => Sensor_Null_Upto_1 (G),
+     Post => Sensor_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Sensor_Dim);
       Free_Int (G.Sensor_Adr);
       Free_Real (G.Sensor_Cutoff);
@@ -1124,45 +2813,49 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Sensor_Historyadr);
       Free_Real (G.Sensor_Delay);
       Free_Real (G.Sensor_Interval);
-      Free_Real (G.Sensor_User);
-      Free_Int (G.Sensor_Plugin);
-   end Free_Sensor;
+   end Free_Sensor_2;
 
-   procedure Allocate_Qpos (S : Sizes; G : in out Qpos_Arrays) with
-     Pre  => Qpos_Sizes_OK (S) and then Qpos_All_Null (G),
-     Post => Qpos_Layout_OK (S, G)
+   procedure Free_Sensor_3 (G : in out Sensor_Arrays) with
+     Pre  => Sensor_Null_Upto_2 (G),
+     Post => Sensor_Null_Upto_3 (G)
    is
    begin
-      Alloc_F64 (G.Qpos0, Int64 (S.Nq) * (1));
-      Alloc_F64 (G.Qpos_Spring, Int64 (S.Nq) * (1));
+      Free_Real (G.Sensor_User);
+      Free_Int (G.Sensor_Plugin);
+   end Free_Sensor_3;
+
+   procedure Free_Sensor (G : in out Sensor_Arrays) is
+   begin
+      Free_Sensor_1 (G);
+      Free_Sensor_2 (G);
+      Free_Sensor_3 (G);
+   end Free_Sensor;
+
+   procedure Allocate_Qpos (S : Sizes; G : in out Qpos_Arrays) is
+   begin
+      G := (Qpos0                    => New_F64 (Int64 (S.Nq) * (1)),
+            Qpos_Spring              => New_F64 (Int64 (S.Nq) * (1)));
    end Allocate_Qpos;
 
-   procedure Free_Qpos (G : in out Qpos_Arrays) with
-     Post => Qpos_All_Null (G)
-   is
+   procedure Free_Qpos (G : in out Qpos_Arrays) is
    begin
       Free_Real (G.Qpos0);
       Free_Real (G.Qpos_Spring);
    end Free_Qpos;
 
-   procedure Allocate_Bvh (S : Sizes; G : in out Bvh_Arrays) with
-     Pre  => Bvh_Sizes_OK (S) and then Bvh_All_Null (G),
-     Post => Bvh_Layout_OK (S, G)
-   is
+   procedure Allocate_Bvh (S : Sizes; G : in out Bvh_Arrays) is
    begin
-      Alloc_I32 (G.Bvh_Depth, Int64 (S.Nbvh) * (1));
-      Alloc_I32 (G.Bvh_Child, Int64 (S.Nbvh) * (2));
-      Alloc_I32 (G.Bvh_Nodeid, Int64 (S.Nbvh) * (1));
-      Alloc_F64 (G.Bvh_Aabb, Int64 (S.Nbvhstatic) * (6));
-      Alloc_I32 (G.Oct_Depth, Int64 (S.Noct) * (1));
-      Alloc_I32 (G.Oct_Child, Int64 (S.Noct) * (8));
-      Alloc_F64 (G.Oct_Aabb, Int64 (S.Noct) * (6));
-      Alloc_F64 (G.Oct_Coeff, Int64 (S.Noct) * (8));
+      G := (Bvh_Depth                => New_I32 (Int64 (S.Nbvh) * (1)),
+            Bvh_Child                => New_I32 (Int64 (S.Nbvh) * (2)),
+            Bvh_Nodeid               => New_I32 (Int64 (S.Nbvh) * (1)),
+            Bvh_Aabb                 => New_F64 (Int64 (S.Nbvhstatic) * (6)),
+            Oct_Depth                => New_I32 (Int64 (S.Noct) * (1)),
+            Oct_Child                => New_I32 (Int64 (S.Noct) * (8)),
+            Oct_Aabb                 => New_F64 (Int64 (S.Noct) * (6)),
+            Oct_Coeff                => New_F64 (Int64 (S.Noct) * (8)));
    end Allocate_Bvh;
 
-   procedure Free_Bvh (G : in out Bvh_Arrays) with
-     Post => Bvh_All_Null (G)
-   is
+   procedure Free_Bvh (G : in out Bvh_Arrays) is
    begin
       Free_Int (G.Bvh_Depth);
       Free_Int (G.Bvh_Child);
@@ -1174,40 +2867,30 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Oct_Coeff);
    end Free_Bvh;
 
-   procedure Allocate_Wrap (S : Sizes; G : in out Wrap_Arrays) with
-     Pre  => Wrap_Sizes_OK (S) and then Wrap_All_Null (G),
-     Post => Wrap_Layout_OK (S, G)
-   is
+   procedure Allocate_Wrap (S : Sizes; G : in out Wrap_Arrays) is
    begin
-      Alloc_I32 (G.Wrap_Type, Int64 (S.Nwrap) * (1));
-      Alloc_I32 (G.Wrap_Objid, Int64 (S.Nwrap) * (1));
-      Alloc_F64 (G.Wrap_Prm, Int64 (S.Nwrap) * (1));
+      G := (Wrap_Type                => New_I32 (Int64 (S.Nwrap) * (1)),
+            Wrap_Objid               => New_I32 (Int64 (S.Nwrap) * (1)),
+            Wrap_Prm                 => New_F64 (Int64 (S.Nwrap) * (1)));
    end Allocate_Wrap;
 
-   procedure Free_Wrap (G : in out Wrap_Arrays) with
-     Post => Wrap_All_Null (G)
-   is
+   procedure Free_Wrap (G : in out Wrap_Arrays) is
    begin
       Free_Int (G.Wrap_Type);
       Free_Int (G.Wrap_Objid);
       Free_Real (G.Wrap_Prm);
    end Free_Wrap;
 
-   procedure Allocate_Plugin (S : Sizes; G : in out Plugin_Arrays) with
-     Pre  => Plugin_Sizes_OK (S) and then Plugin_All_Null (G),
-     Post => Plugin_Layout_OK (S, G)
-   is
+   procedure Allocate_Plugin (S : Sizes; G : in out Plugin_Arrays) is
    begin
-      Alloc_I32 (G.Plugin, Int64 (S.Nplugin) * (1));
-      Alloc_I32 (G.Plugin_Stateadr, Int64 (S.Nplugin) * (1));
-      Alloc_I32 (G.Plugin_Statenum, Int64 (S.Nplugin) * (1));
-      Alloc_U8 (G.Plugin_Attr, Int64 (S.Npluginattr) * (1));
-      Alloc_I32 (G.Plugin_Attradr, Int64 (S.Nplugin) * (1));
+      G := (Plugin                   => New_I32 (Int64 (S.Nplugin) * (1)),
+            Plugin_Stateadr          => New_I32 (Int64 (S.Nplugin) * (1)),
+            Plugin_Statenum          => New_I32 (Int64 (S.Nplugin) * (1)),
+            Plugin_Attr              => New_U8 (Int64 (S.Npluginattr) * (1)),
+            Plugin_Attradr           => New_I32 (Int64 (S.Nplugin) * (1)));
    end Allocate_Plugin;
 
-   procedure Free_Plugin (G : in out Plugin_Arrays) with
-     Post => Plugin_All_Null (G)
-   is
+   procedure Free_Plugin (G : in out Plugin_Arrays) is
    begin
       Free_Int (G.Plugin);
       Free_Int (G.Plugin_Stateadr);
@@ -1216,59 +2899,44 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Plugin_Attradr);
    end Free_Plugin;
 
-   procedure Allocate_Numeric (S : Sizes; G : in out Numeric_Arrays) with
-     Pre  => Numeric_Sizes_OK (S) and then Numeric_All_Null (G),
-     Post => Numeric_Layout_OK (S, G)
-   is
+   procedure Allocate_Numeric (S : Sizes; G : in out Numeric_Arrays) is
    begin
-      Alloc_I32 (G.Numeric_Adr, Int64 (S.Nnumeric) * (1));
-      Alloc_I32 (G.Numeric_Size, Int64 (S.Nnumeric) * (1));
-      Alloc_F64 (G.Numeric_Data, Int64 (S.Nnumericdata) * (1));
+      G := (Numeric_Adr              => New_I32 (Int64 (S.Nnumeric) * (1)),
+            Numeric_Size             => New_I32 (Int64 (S.Nnumeric) * (1)),
+            Numeric_Data             => New_F64 (Int64 (S.Nnumericdata) * (1)));
    end Allocate_Numeric;
 
-   procedure Free_Numeric (G : in out Numeric_Arrays) with
-     Post => Numeric_All_Null (G)
-   is
+   procedure Free_Numeric (G : in out Numeric_Arrays) is
    begin
       Free_Int (G.Numeric_Adr);
       Free_Int (G.Numeric_Size);
       Free_Real (G.Numeric_Data);
    end Free_Numeric;
 
-   procedure Allocate_Text (S : Sizes; G : in out Text_Arrays) with
-     Pre  => Text_Sizes_OK (S) and then Text_All_Null (G),
-     Post => Text_Layout_OK (S, G)
-   is
+   procedure Allocate_Text (S : Sizes; G : in out Text_Arrays) is
    begin
-      Alloc_I32 (G.Text_Adr, Int64 (S.Ntext) * (1));
-      Alloc_I32 (G.Text_Size, Int64 (S.Ntext) * (1));
-      Alloc_U8 (G.Text_Data, Int64 (S.Ntextdata) * (1));
+      G := (Text_Adr                 => New_I32 (Int64 (S.Ntext) * (1)),
+            Text_Size                => New_I32 (Int64 (S.Ntext) * (1)),
+            Text_Data                => New_U8 (Int64 (S.Ntextdata) * (1)));
    end Allocate_Text;
 
-   procedure Free_Text (G : in out Text_Arrays) with
-     Post => Text_All_Null (G)
-   is
+   procedure Free_Text (G : in out Text_Arrays) is
    begin
       Free_Int (G.Text_Adr);
       Free_Int (G.Text_Size);
       Free_Byte (G.Text_Data);
    end Free_Text;
 
-   procedure Allocate_Tuple (S : Sizes; G : in out Tuple_Arrays) with
-     Pre  => Tuple_Sizes_OK (S) and then Tuple_All_Null (G),
-     Post => Tuple_Layout_OK (S, G)
-   is
+   procedure Allocate_Tuple (S : Sizes; G : in out Tuple_Arrays) is
    begin
-      Alloc_I32 (G.Tuple_Adr, Int64 (S.Ntuple) * (1));
-      Alloc_I32 (G.Tuple_Size, Int64 (S.Ntuple) * (1));
-      Alloc_I32 (G.Tuple_Objtype, Int64 (S.Ntupledata) * (1));
-      Alloc_I32 (G.Tuple_Objid, Int64 (S.Ntupledata) * (1));
-      Alloc_F64 (G.Tuple_Objprm, Int64 (S.Ntupledata) * (1));
+      G := (Tuple_Adr                => New_I32 (Int64 (S.Ntuple) * (1)),
+            Tuple_Size               => New_I32 (Int64 (S.Ntuple) * (1)),
+            Tuple_Objtype            => New_I32 (Int64 (S.Ntupledata) * (1)),
+            Tuple_Objid              => New_I32 (Int64 (S.Ntupledata) * (1)),
+            Tuple_Objprm             => New_F64 (Int64 (S.Ntupledata) * (1)));
    end Allocate_Tuple;
 
-   procedure Free_Tuple (G : in out Tuple_Arrays) with
-     Post => Tuple_All_Null (G)
-   is
+   procedure Free_Tuple (G : in out Tuple_Arrays) is
    begin
       Free_Int (G.Tuple_Adr);
       Free_Int (G.Tuple_Size);
@@ -1277,23 +2945,18 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Tuple_Objprm);
    end Free_Tuple;
 
-   procedure Allocate_Key (S : Sizes; G : in out Key_Arrays) with
-     Pre  => Key_Sizes_OK (S) and then Key_All_Null (G),
-     Post => Key_Layout_OK (S, G)
-   is
+   procedure Allocate_Key (S : Sizes; G : in out Key_Arrays) is
    begin
-      Alloc_F64 (G.Key_Time, Int64 (S.Nkey) * (1));
-      Alloc_F64 (G.Key_Qpos, Int64 (S.Nkey) * (Int64 (S.Nq)));
-      Alloc_F64 (G.Key_Qvel, Int64 (S.Nkey) * (Int64 (S.Nv)));
-      Alloc_F64 (G.Key_Act, Int64 (S.Nkey) * (Int64 (S.Na)));
-      Alloc_F64 (G.Key_Mpos, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3));
-      Alloc_F64 (G.Key_Mquat, Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4));
-      Alloc_F64 (G.Key_Ctrl, Int64 (S.Nkey) * (Int64 (S.Nu)));
+      G := (Key_Time                 => New_F64 (Int64 (S.Nkey) * (1)),
+            Key_Qpos                 => New_F64 (Int64 (S.Nkey) * (Int64 (S.Nq))),
+            Key_Qvel                 => New_F64 (Int64 (S.Nkey) * (Int64 (S.Nv))),
+            Key_Act                  => New_F64 (Int64 (S.Nkey) * (Int64 (S.Na))),
+            Key_Mpos                 => New_F64 (Int64 (S.Nkey) * (Int64 (S.Nmocap) * 3)),
+            Key_Mquat                => New_F64 (Int64 (S.Nkey) * (Int64 (S.Nmocap) * 4)),
+            Key_Ctrl                 => New_F64 (Int64 (S.Nkey) * (Int64 (S.Nu))));
    end Allocate_Key;
 
-   procedure Free_Key (G : in out Key_Arrays) with
-     Post => Key_All_Null (G)
-   is
+   procedure Free_Key (G : in out Key_Arrays) is
    begin
       Free_Real (G.Key_Time);
       Free_Real (G.Key_Qpos);
@@ -1304,41 +2967,120 @@ package body MJ.Models with SPARK_Mode is
       Free_Real (G.Key_Ctrl);
    end Free_Key;
 
-   procedure Allocate_Name (S : Sizes; G : in out Name_Arrays) with
-     Pre  => Name_Sizes_OK (S) and then Name_All_Null (G),
-     Post => Name_Layout_OK (S, G)
-   is
+   procedure Allocate_Name (S : Sizes; G : in out Name_Arrays) is
    begin
-      Alloc_I32 (G.Name_Bodyadr, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.Name_Jntadr, Int64 (S.Njnt) * (1));
-      Alloc_I32 (G.Name_Geomadr, Int64 (S.Ngeom) * (1));
-      Alloc_I32 (G.Name_Siteadr, Int64 (S.Nsite) * (1));
-      Alloc_I32 (G.Name_Camadr, Int64 (S.Ncam) * (1));
-      Alloc_I32 (G.Name_Lightadr, Int64 (S.Nlight) * (1));
-      Alloc_I32 (G.Name_Flexadr, Int64 (S.Nflex) * (1));
-      Alloc_I32 (G.Name_Meshadr, Int64 (S.Nmesh) * (1));
-      Alloc_I32 (G.Name_Skinadr, Int64 (S.Nskin) * (1));
-      Alloc_I32 (G.Name_Hfieldadr, Int64 (S.Nhfield) * (1));
-      Alloc_I32 (G.Name_Texadr, Int64 (S.Ntex) * (1));
-      Alloc_I32 (G.Name_Matadr, Int64 (S.Nmat) * (1));
-      Alloc_I32 (G.Name_Pairadr, Int64 (S.Npair) * (1));
-      Alloc_I32 (G.Name_Excludeadr, Int64 (S.Nexclude) * (1));
-      Alloc_I32 (G.Name_Eqadr, Int64 (S.Neq) * (1));
-      Alloc_I32 (G.Name_Tendonadr, Int64 (S.Ntendon) * (1));
-      Alloc_I32 (G.Name_Actuatoradr, Int64 (S.Nactuator) * (1));
-      Alloc_I32 (G.Name_Sensoradr, Int64 (S.Nsensor) * (1));
-      Alloc_I32 (G.Name_Numericadr, Int64 (S.Nnumeric) * (1));
-      Alloc_I32 (G.Name_Textadr, Int64 (S.Ntext) * (1));
-      Alloc_I32 (G.Name_Tupleadr, Int64 (S.Ntuple) * (1));
-      Alloc_I32 (G.Name_Keyadr, Int64 (S.Nkey) * (1));
-      Alloc_I32 (G.Name_Pluginadr, Int64 (S.Nplugin) * (1));
-      Alloc_U8 (G.Names, Int64 (S.Nnames) * (1));
-      Alloc_I32 (G.Names_Map, Int64 (S.Nnames_Map) * (1));
-      Alloc_U8 (G.Paths, Int64 (S.Npaths) * (1));
+      G := (Name_Bodyadr             => New_I32 (Int64 (S.Nbody) * (1)),
+            Name_Jntadr              => New_I32 (Int64 (S.Njnt) * (1)),
+            Name_Geomadr             => New_I32 (Int64 (S.Ngeom) * (1)),
+            Name_Siteadr             => New_I32 (Int64 (S.Nsite) * (1)),
+            Name_Camadr              => New_I32 (Int64 (S.Ncam) * (1)),
+            Name_Lightadr            => New_I32 (Int64 (S.Nlight) * (1)),
+            Name_Flexadr             => New_I32 (Int64 (S.Nflex) * (1)),
+            Name_Meshadr             => New_I32 (Int64 (S.Nmesh) * (1)),
+            Name_Skinadr             => New_I32 (Int64 (S.Nskin) * (1)),
+            Name_Hfieldadr           => New_I32 (Int64 (S.Nhfield) * (1)),
+            Name_Texadr              => New_I32 (Int64 (S.Ntex) * (1)),
+            Name_Matadr              => New_I32 (Int64 (S.Nmat) * (1)),
+            Name_Pairadr             => New_I32 (Int64 (S.Npair) * (1)),
+            Name_Excludeadr          => New_I32 (Int64 (S.Nexclude) * (1)),
+            Name_Eqadr               => New_I32 (Int64 (S.Neq) * (1)),
+            Name_Tendonadr           => New_I32 (Int64 (S.Ntendon) * (1)),
+            Name_Actuatoradr         => New_I32 (Int64 (S.Nactuator) * (1)),
+            Name_Sensoradr           => New_I32 (Int64 (S.Nsensor) * (1)),
+            Name_Numericadr          => New_I32 (Int64 (S.Nnumeric) * (1)),
+            Name_Textadr             => New_I32 (Int64 (S.Ntext) * (1)),
+            Name_Tupleadr            => New_I32 (Int64 (S.Ntuple) * (1)),
+            Name_Keyadr              => New_I32 (Int64 (S.Nkey) * (1)),
+            Name_Pluginadr           => New_I32 (Int64 (S.Nplugin) * (1)),
+            Names                    => New_U8 (Int64 (S.Nnames) * (1)),
+            Names_Map                => New_I32 (Int64 (S.Nnames_Map) * (1)),
+            Paths                    => New_U8 (Int64 (S.Npaths) * (1)));
    end Allocate_Name;
 
-   procedure Free_Name (G : in out Name_Arrays) with
-     Post => Name_All_Null (G)
+   function Name_Null_Upto_1 (G : Name_Arrays) return Boolean is
+     (G.Name_Bodyadr = null
+      and then G.Name_Jntadr = null
+      and then G.Name_Geomadr = null
+      and then G.Name_Siteadr = null
+      and then G.Name_Camadr = null
+      and then G.Name_Lightadr = null
+      and then G.Name_Flexadr = null
+      and then G.Name_Meshadr = null);
+
+   function Name_Null_Upto_2 (G : Name_Arrays) return Boolean is
+     (G.Name_Bodyadr = null
+      and then G.Name_Jntadr = null
+      and then G.Name_Geomadr = null
+      and then G.Name_Siteadr = null
+      and then G.Name_Camadr = null
+      and then G.Name_Lightadr = null
+      and then G.Name_Flexadr = null
+      and then G.Name_Meshadr = null
+      and then G.Name_Skinadr = null
+      and then G.Name_Hfieldadr = null
+      and then G.Name_Texadr = null
+      and then G.Name_Matadr = null
+      and then G.Name_Pairadr = null
+      and then G.Name_Excludeadr = null
+      and then G.Name_Eqadr = null
+      and then G.Name_Tendonadr = null);
+
+   function Name_Null_Upto_3 (G : Name_Arrays) return Boolean is
+     (G.Name_Bodyadr = null
+      and then G.Name_Jntadr = null
+      and then G.Name_Geomadr = null
+      and then G.Name_Siteadr = null
+      and then G.Name_Camadr = null
+      and then G.Name_Lightadr = null
+      and then G.Name_Flexadr = null
+      and then G.Name_Meshadr = null
+      and then G.Name_Skinadr = null
+      and then G.Name_Hfieldadr = null
+      and then G.Name_Texadr = null
+      and then G.Name_Matadr = null
+      and then G.Name_Pairadr = null
+      and then G.Name_Excludeadr = null
+      and then G.Name_Eqadr = null
+      and then G.Name_Tendonadr = null
+      and then G.Name_Actuatoradr = null
+      and then G.Name_Sensoradr = null
+      and then G.Name_Numericadr = null
+      and then G.Name_Textadr = null
+      and then G.Name_Tupleadr = null
+      and then G.Name_Keyadr = null
+      and then G.Name_Pluginadr = null
+      and then G.Names = null);
+
+   function Name_Null_Upto_4 (G : Name_Arrays) return Boolean is
+     (G.Name_Bodyadr = null
+      and then G.Name_Jntadr = null
+      and then G.Name_Geomadr = null
+      and then G.Name_Siteadr = null
+      and then G.Name_Camadr = null
+      and then G.Name_Lightadr = null
+      and then G.Name_Flexadr = null
+      and then G.Name_Meshadr = null
+      and then G.Name_Skinadr = null
+      and then G.Name_Hfieldadr = null
+      and then G.Name_Texadr = null
+      and then G.Name_Matadr = null
+      and then G.Name_Pairadr = null
+      and then G.Name_Excludeadr = null
+      and then G.Name_Eqadr = null
+      and then G.Name_Tendonadr = null
+      and then G.Name_Actuatoradr = null
+      and then G.Name_Sensoradr = null
+      and then G.Name_Numericadr = null
+      and then G.Name_Textadr = null
+      and then G.Name_Tupleadr = null
+      and then G.Name_Keyadr = null
+      and then G.Name_Pluginadr = null
+      and then G.Names = null
+      and then G.Names_Map = null
+      and then G.Paths = null);
+
+   procedure Free_Name_1 (G : in out Name_Arrays) with
+     Post => Name_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.Name_Bodyadr);
@@ -1349,6 +3091,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Name_Lightadr);
       Free_Int (G.Name_Flexadr);
       Free_Int (G.Name_Meshadr);
+   end Free_Name_1;
+
+   procedure Free_Name_2 (G : in out Name_Arrays) with
+     Pre  => Name_Null_Upto_1 (G),
+     Post => Name_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.Name_Skinadr);
       Free_Int (G.Name_Hfieldadr);
       Free_Int (G.Name_Texadr);
@@ -1357,6 +3106,13 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Name_Excludeadr);
       Free_Int (G.Name_Eqadr);
       Free_Int (G.Name_Tendonadr);
+   end Free_Name_2;
+
+   procedure Free_Name_3 (G : in out Name_Arrays) with
+     Pre  => Name_Null_Upto_2 (G),
+     Post => Name_Null_Upto_3 (G)
+   is
+   begin
       Free_Int (G.Name_Actuatoradr);
       Free_Int (G.Name_Sensoradr);
       Free_Int (G.Name_Numericadr);
@@ -1365,32 +3121,69 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.Name_Keyadr);
       Free_Int (G.Name_Pluginadr);
       Free_Byte (G.Names);
-      Free_Int (G.Names_Map);
-      Free_Byte (G.Paths);
-   end Free_Name;
+   end Free_Name_3;
 
-   procedure Allocate_Sparse (S : Sizes; G : in out Sparse_Arrays) with
-     Pre  => Sparse_Sizes_OK (S) and then Sparse_All_Null (G),
-     Post => Sparse_Layout_OK (S, G)
+   procedure Free_Name_4 (G : in out Name_Arrays) with
+     Pre  => Name_Null_Upto_3 (G),
+     Post => Name_Null_Upto_4 (G)
    is
    begin
-      Alloc_I32 (G.B_Rownnz, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.B_Rowadr, Int64 (S.Nbody) * (1));
-      Alloc_I32 (G.B_Colind, Int64 (S.NB) * (1));
-      Alloc_I32 (G.M_Rownnz, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.M_Rowadr, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.M_Colind, Int64 (S.NC) * (1));
-      Alloc_I32 (G.MapM2M, Int64 (S.NC) * (1));
-      Alloc_I32 (G.D_Rownnz, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.D_Rowadr, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.D_Diag, Int64 (S.Nv) * (1));
-      Alloc_I32 (G.D_Colind, Int64 (S.ND) * (1));
-      Alloc_I32 (G.MapM2D, Int64 (S.ND) * (1));
-      Alloc_I32 (G.MapD2M, Int64 (S.NC) * (1));
+      Free_Int (G.Names_Map);
+      Free_Byte (G.Paths);
+   end Free_Name_4;
+
+   procedure Free_Name (G : in out Name_Arrays) is
+   begin
+      Free_Name_1 (G);
+      Free_Name_2 (G);
+      Free_Name_3 (G);
+      Free_Name_4 (G);
+   end Free_Name;
+
+   procedure Allocate_Sparse (S : Sizes; G : in out Sparse_Arrays) is
+   begin
+      G := (B_Rownnz                 => New_I32 (Int64 (S.Nbody) * (1)),
+            B_Rowadr                 => New_I32 (Int64 (S.Nbody) * (1)),
+            B_Colind                 => New_I32 (Int64 (S.NB) * (1)),
+            M_Rownnz                 => New_I32 (Int64 (S.Nv) * (1)),
+            M_Rowadr                 => New_I32 (Int64 (S.Nv) * (1)),
+            M_Colind                 => New_I32 (Int64 (S.NC) * (1)),
+            MapM2M                   => New_I32 (Int64 (S.NC) * (1)),
+            D_Rownnz                 => New_I32 (Int64 (S.Nv) * (1)),
+            D_Rowadr                 => New_I32 (Int64 (S.Nv) * (1)),
+            D_Diag                   => New_I32 (Int64 (S.Nv) * (1)),
+            D_Colind                 => New_I32 (Int64 (S.ND) * (1)),
+            MapM2D                   => New_I32 (Int64 (S.ND) * (1)),
+            MapD2M                   => New_I32 (Int64 (S.NC) * (1)));
    end Allocate_Sparse;
 
-   procedure Free_Sparse (G : in out Sparse_Arrays) with
-     Post => Sparse_All_Null (G)
+   function Sparse_Null_Upto_1 (G : Sparse_Arrays) return Boolean is
+     (G.B_Rownnz = null
+      and then G.B_Rowadr = null
+      and then G.B_Colind = null
+      and then G.M_Rownnz = null
+      and then G.M_Rowadr = null
+      and then G.M_Colind = null
+      and then G.MapM2M = null
+      and then G.D_Rownnz = null);
+
+   function Sparse_Null_Upto_2 (G : Sparse_Arrays) return Boolean is
+     (G.B_Rownnz = null
+      and then G.B_Rowadr = null
+      and then G.B_Colind = null
+      and then G.M_Rownnz = null
+      and then G.M_Rowadr = null
+      and then G.M_Colind = null
+      and then G.MapM2M = null
+      and then G.D_Rownnz = null
+      and then G.D_Rowadr = null
+      and then G.D_Diag = null
+      and then G.D_Colind = null
+      and then G.MapM2D = null
+      and then G.MapD2M = null);
+
+   procedure Free_Sparse_1 (G : in out Sparse_Arrays) with
+     Post => Sparse_Null_Upto_1 (G)
    is
    begin
       Free_Int (G.B_Rownnz);
@@ -1401,46 +3194,126 @@ package body MJ.Models with SPARK_Mode is
       Free_Int (G.M_Colind);
       Free_Int (G.MapM2M);
       Free_Int (G.D_Rownnz);
+   end Free_Sparse_1;
+
+   procedure Free_Sparse_2 (G : in out Sparse_Arrays) with
+     Pre  => Sparse_Null_Upto_1 (G),
+     Post => Sparse_Null_Upto_2 (G)
+   is
+   begin
       Free_Int (G.D_Rowadr);
       Free_Int (G.D_Diag);
       Free_Int (G.D_Colind);
       Free_Int (G.MapM2D);
       Free_Int (G.MapD2M);
+   end Free_Sparse_2;
+
+   procedure Free_Sparse (G : in out Sparse_Arrays) is
+   begin
+      Free_Sparse_1 (G);
+      Free_Sparse_2 (G);
    end Free_Sparse;
 
    procedure Allocate (S : Sizes; M : in out Model) is
+      L_Bodies       : Body_Arrays;
+      L_Joints       : Joint_Arrays;
+      L_Dofs         : Dof_Arrays;
+      L_Trees        : Tree_Arrays;
+      L_Geoms        : Geom_Arrays;
+      L_Sites        : Site_Arrays;
+      L_Cameras      : Camera_Arrays;
+      L_Lights       : Light_Arrays;
+      L_Flexes       : Flex_Arrays;
+      L_Meshes       : Mesh_Arrays;
+      L_Skins        : Skin_Arrays;
+      L_Hfields      : Hfield_Arrays;
+      L_Textures     : Texture_Arrays;
+      L_Materials    : Material_Arrays;
+      L_Pairs        : Pair_Arrays;
+      L_Excludes     : Exclude_Arrays;
+      L_Equalities   : Equality_Arrays;
+      L_Tendons      : Tendon_Arrays;
+      L_Actuators    : Actuator_Arrays;
+      L_Sensors      : Sensor_Arrays;
+      L_Qpos         : Qpos_Arrays;
+      L_Bvh          : Bvh_Arrays;
+      L_Wraps        : Wrap_Arrays;
+      L_Plugins      : Plugin_Arrays;
+      L_Numerics     : Numeric_Arrays;
+      L_Texts        : Text_Arrays;
+      L_Tuples       : Tuple_Arrays;
+      L_Keys         : Key_Arrays;
+      L_Names        : Name_Arrays;
+      L_Sparse       : Sparse_Arrays;
    begin
-      M.S := S;
-      Allocate_Body (S, M.Bodies);
-      Allocate_Joint (S, M.Joints);
-      Allocate_Dof (S, M.Dofs);
-      Allocate_Tree (S, M.Trees);
-      Allocate_Geom (S, M.Geoms);
-      Allocate_Site (S, M.Sites);
-      Allocate_Camera (S, M.Cameras);
-      Allocate_Light (S, M.Lights);
-      Allocate_Flex (S, M.Flexes);
-      Allocate_Mesh (S, M.Meshes);
-      Allocate_Skin (S, M.Skins);
-      Allocate_Hfield (S, M.Hfields);
-      Allocate_Texture (S, M.Textures);
-      Allocate_Material (S, M.Materials);
-      Allocate_Pair (S, M.Pairs);
-      Allocate_Exclude (S, M.Excludes);
-      Allocate_Equality (S, M.Equalities);
-      Allocate_Tendon (S, M.Tendons);
-      Allocate_Actuator (S, M.Actuators);
-      Allocate_Sensor (S, M.Sensors);
-      Allocate_Qpos (S, M.Qpos);
-      Allocate_Bvh (S, M.Bvh);
-      Allocate_Wrap (S, M.Wraps);
-      Allocate_Plugin (S, M.Plugins);
-      Allocate_Numeric (S, M.Numerics);
-      Allocate_Text (S, M.Texts);
-      Allocate_Tuple (S, M.Tuples);
-      Allocate_Key (S, M.Keys);
-      Allocate_Name (S, M.Names);
-      Allocate_Sparse (S, M.Sparse);
+      Allocate_Body (S, L_Bodies);
+      Allocate_Joint (S, L_Joints);
+      Allocate_Dof (S, L_Dofs);
+      Allocate_Tree (S, L_Trees);
+      Allocate_Geom (S, L_Geoms);
+      Allocate_Site (S, L_Sites);
+      Allocate_Camera (S, L_Cameras);
+      Allocate_Light (S, L_Lights);
+      Allocate_Flex (S, L_Flexes);
+      Allocate_Mesh (S, L_Meshes);
+      Allocate_Skin (S, L_Skins);
+      Allocate_Hfield (S, L_Hfields);
+      Allocate_Texture (S, L_Textures);
+      Allocate_Material (S, L_Materials);
+      Allocate_Pair (S, L_Pairs);
+      Allocate_Exclude (S, L_Excludes);
+      Allocate_Equality (S, L_Equalities);
+      Allocate_Tendon (S, L_Tendons);
+      Allocate_Actuator (S, L_Actuators);
+      Allocate_Sensor (S, L_Sensors);
+      Allocate_Qpos (S, L_Qpos);
+      Allocate_Bvh (S, L_Bvh);
+      Allocate_Wrap (S, L_Wraps);
+      Allocate_Plugin (S, L_Plugins);
+      Allocate_Numeric (S, L_Numerics);
+      Allocate_Text (S, L_Texts);
+      Allocate_Tuple (S, L_Tuples);
+      Allocate_Key (S, L_Keys);
+      Allocate_Name (S, L_Names);
+      Allocate_Sparse (S, L_Sparse);
+      M := (S              => S,
+            Opt            => M.Opt,
+            Vis            => M.Vis,
+            Stat           => M.Stat,
+            Flg_Gravcomp   => M.Flg_Gravcomp,
+            Flg_Surfacevel => M.Flg_Surfacevel,
+            Flg_Adhesion   => M.Flg_Adhesion,
+            Caps           => M.Caps,
+            Bodies         => L_Bodies,
+            Joints         => L_Joints,
+            Dofs           => L_Dofs,
+            Trees          => L_Trees,
+            Geoms          => L_Geoms,
+            Sites          => L_Sites,
+            Cameras        => L_Cameras,
+            Lights         => L_Lights,
+            Flexes         => L_Flexes,
+            Meshes         => L_Meshes,
+            Skins          => L_Skins,
+            Hfields        => L_Hfields,
+            Textures       => L_Textures,
+            Materials      => L_Materials,
+            Pairs          => L_Pairs,
+            Excludes       => L_Excludes,
+            Equalities     => L_Equalities,
+            Tendons        => L_Tendons,
+            Actuators      => L_Actuators,
+            Sensors        => L_Sensors,
+            Qpos           => L_Qpos,
+            Bvh            => L_Bvh,
+            Wraps          => L_Wraps,
+            Plugins        => L_Plugins,
+            Numerics       => L_Numerics,
+            Texts          => L_Texts,
+            Tuples         => L_Tuples,
+            Keys           => L_Keys,
+            Names          => L_Names,
+            Sparse         => L_Sparse);
    end Allocate;
 
    procedure Free (M : in out Model) is

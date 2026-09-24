@@ -6,8 +6,8 @@ with MJ.Fixed;
 package MJ.Models with SPARK_Mode is
 
    Size_Count     : constant := 98;      --  int64 sizes in the .mjb size table
-   Pointer_Count  : constant := 486;     --  arrays in MJMODEL_POINTERS
-   Version_Header : constant := 3012000; --  mjVERSION_HEADER
+   Pointer_Count  : constant := 487;     --  arrays in MJMODEL_POINTERS
+   Version_Header : constant := 3014000; --  mjVERSION_HEADER
 
    type Sizes is record
       Nq               : Size_Type := 0;
@@ -227,6 +227,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Body_Bvhadr = null
       and then G.Body_Bvhnum = null);
 
+   procedure Allocate_Body (S : Sizes; G : in out Body_Arrays) with
+     Pre  => Body_Sizes_OK (S) and then Body_All_Null (G),
+     Post => Body_Layout_OK (S, G);
+   procedure Free_Body (G : in out Body_Arrays) with
+     Post => Body_All_Null (G);
+
    ---- JOINT (19 arrays)
 
    type Joint_Arrays is record
@@ -299,6 +305,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Jnt_Margin = null
       and then G.Jnt_User = null);
 
+   procedure Allocate_Joint (S : Sizes; G : in out Joint_Arrays) with
+     Pre  => Joint_Sizes_OK (S) and then Joint_All_Null (G),
+     Post => Joint_Layout_OK (S, G);
+   procedure Free_Joint (G : in out Joint_Arrays) with
+     Post => Joint_All_Null (G);
+
    ---- DOF (15 arrays)
 
    type Dof_Arrays is record
@@ -357,6 +369,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Dof_M0 = null
       and then G.Dof_Length = null);
 
+   procedure Allocate_Dof (S : Sizes; G : in out Dof_Arrays) with
+     Pre  => Dof_Sizes_OK (S) and then Dof_All_Null (G),
+     Post => Dof_Layout_OK (S, G);
+   procedure Free_Dof (G : in out Dof_Arrays) with
+     Post => Dof_All_Null (G);
+
    ---- TREE (5 arrays)
 
    type Tree_Arrays is record
@@ -382,6 +400,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Tree_Dofadr = null
       and then G.Tree_Dofnum = null
       and then G.Tree_Sleep_Policy = null);
+
+   procedure Allocate_Tree (S : Sizes; G : in out Tree_Arrays) with
+     Pre  => Tree_Sizes_OK (S) and then Tree_All_Null (G),
+     Post => Tree_Layout_OK (S, G);
+   procedure Free_Tree (G : in out Tree_Arrays) with
+     Post => Tree_All_Null (G);
 
    ---- GEOM (27 arrays)
 
@@ -482,11 +506,18 @@ package MJ.Models with SPARK_Mode is
       and then G.Geom_User = null
       and then G.Geom_Rgba = null);
 
-   ---- SITE (10 arrays)
+   procedure Allocate_Geom (S : Sizes; G : in out Geom_Arrays) with
+     Pre  => Geom_Sizes_OK (S) and then Geom_All_Null (G),
+     Post => Geom_Layout_OK (S, G);
+   procedure Free_Geom (G : in out Geom_Arrays) with
+     Post => Geom_All_Null (G);
+
+   ---- SITE (11 arrays)
 
    type Site_Arrays is record
       Site_Type                : Int_Array_Access := null;
       Site_Bodyid              : Int_Array_Access := null;
+      Site_Dataid              : Int_Array_Access := null;
       Site_Matid               : Int_Array_Access := null;
       Site_Group               : Int_Array_Access := null;
       Site_Sameframe           : Byte_Array_Access := null;
@@ -505,6 +536,7 @@ package MJ.Models with SPARK_Mode is
    function Site_Layout_OK (S : Sizes; G : Site_Arrays) return Boolean is
      (I32_OK (G.Site_Type, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Bodyid, Int64 (S.Nsite) * (1))
+      and then I32_OK (G.Site_Dataid, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Matid, Int64 (S.Nsite) * (1))
       and then I32_OK (G.Site_Group, Int64 (S.Nsite) * (1))
       and then U8_OK (G.Site_Sameframe, Int64 (S.Nsite) * (1))
@@ -517,6 +549,7 @@ package MJ.Models with SPARK_Mode is
    function Site_All_Null (G : Site_Arrays) return Boolean is
      (G.Site_Type = null
       and then G.Site_Bodyid = null
+      and then G.Site_Dataid = null
       and then G.Site_Matid = null
       and then G.Site_Group = null
       and then G.Site_Sameframe = null
@@ -525,6 +558,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Site_Quat = null
       and then G.Site_User = null
       and then G.Site_Rgba = null);
+
+   procedure Allocate_Site (S : Sizes; G : in out Site_Arrays) with
+     Pre  => Site_Sizes_OK (S) and then Site_All_Null (G),
+     Post => Site_Layout_OK (S, G);
+   procedure Free_Site (G : in out Site_Arrays) with
+     Post => Site_All_Null (G);
 
    ---- CAMERA (16 arrays)
 
@@ -589,6 +628,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Cam_Sensorsize = null
       and then G.Cam_Intrinsic = null
       and then G.Cam_User = null);
+
+   procedure Allocate_Camera (S : Sizes; G : in out Camera_Arrays) with
+     Pre  => Camera_Sizes_OK (S) and then Camera_All_Null (G),
+     Post => Camera_Layout_OK (S, G);
+   procedure Free_Camera (G : in out Camera_Arrays) with
+     Post => Camera_All_Null (G);
 
    ---- LIGHT (22 arrays)
 
@@ -667,6 +712,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Light_Ambient = null
       and then G.Light_Diffuse = null
       and then G.Light_Specular = null);
+
+   procedure Allocate_Light (S : Sizes; G : in out Light_Arrays) with
+     Pre  => Light_Sizes_OK (S) and then Light_All_Null (G),
+     Post => Light_Layout_OK (S, G);
+   procedure Free_Light (G : in out Light_Arrays) with
+     Post => Light_All_Null (G);
 
    ---- FLEX (83 arrays)
 
@@ -940,6 +991,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Flex_Rgba = null
       and then G.Flex_Texcoord = null);
 
+   procedure Allocate_Flex (S : Sizes; G : in out Flex_Arrays) with
+     Pre  => Flex_Sizes_OK (S) and then Flex_All_Null (G),
+     Post => Flex_Layout_OK (S, G);
+   procedure Free_Flex (G : in out Flex_Arrays) with
+     Post => Flex_All_Null (G);
+
    ---- MESH (34 arrays)
 
    type Mesh_Arrays is record
@@ -1061,6 +1118,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Mesh_Polymapnum = null
       and then G.Mesh_Polymap = null);
 
+   procedure Allocate_Mesh (S : Sizes; G : in out Mesh_Arrays) with
+     Pre  => Mesh_Sizes_OK (S) and then Mesh_All_Null (G),
+     Post => Mesh_Layout_OK (S, G);
+   procedure Free_Mesh (G : in out Mesh_Arrays) with
+     Post => Mesh_All_Null (G);
+
    ---- SKIN (22 arrays)
 
    type Skin_Arrays is record
@@ -1144,6 +1207,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Skin_Bonevertweight = null
       and then G.Skin_Pathadr = null);
 
+   procedure Allocate_Skin (S : Sizes; G : in out Skin_Arrays) with
+     Pre  => Skin_Sizes_OK (S) and then Skin_All_Null (G),
+     Post => Skin_Layout_OK (S, G);
+   procedure Free_Skin (G : in out Skin_Arrays) with
+     Post => Skin_All_Null (G);
+
    ---- HFIELD (6 arrays)
 
    type Hfield_Arrays is record
@@ -1173,6 +1242,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Hfield_Adr = null
       and then G.Hfield_Data = null
       and then G.Hfield_Pathadr = null);
+
+   procedure Allocate_Hfield (S : Sizes; G : in out Hfield_Arrays) with
+     Pre  => Hfield_Sizes_OK (S) and then Hfield_All_Null (G),
+     Post => Hfield_Layout_OK (S, G);
+   procedure Free_Hfield (G : in out Hfield_Arrays) with
+     Post => Hfield_All_Null (G);
 
    ---- TEXTURE (8 arrays)
 
@@ -1208,6 +1283,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Tex_Adr = null
       and then G.Tex_Data = null
       and then G.Tex_Pathadr = null);
+
+   procedure Allocate_Texture (S : Sizes; G : in out Texture_Arrays) with
+     Pre  => Texture_Sizes_OK (S) and then Texture_All_Null (G),
+     Post => Texture_Layout_OK (S, G);
+   procedure Free_Texture (G : in out Texture_Arrays) with
+     Post => Texture_All_Null (G);
 
    ---- MATERIAL (10 arrays)
 
@@ -1252,6 +1333,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Mat_Metallic = null
       and then G.Mat_Roughness = null
       and then G.Mat_Rgba = null);
+
+   procedure Allocate_Material (S : Sizes; G : in out Material_Arrays) with
+     Pre  => Material_Sizes_OK (S) and then Material_All_Null (G),
+     Post => Material_Layout_OK (S, G);
+   procedure Free_Material (G : in out Material_Arrays) with
+     Post => Material_All_Null (G);
 
    ---- PAIR (11 arrays)
 
@@ -1299,6 +1386,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Pair_Adhesion = null
       and then G.Pair_Friction = null);
 
+   procedure Allocate_Pair (S : Sizes; G : in out Pair_Arrays) with
+     Pre  => Pair_Sizes_OK (S) and then Pair_All_Null (G),
+     Post => Pair_Layout_OK (S, G);
+   procedure Free_Pair (G : in out Pair_Arrays) with
+     Post => Pair_All_Null (G);
+
    ---- EXCLUDE (1 arrays)
 
    type Exclude_Arrays is record
@@ -1312,6 +1405,12 @@ package MJ.Models with SPARK_Mode is
 
    function Exclude_All_Null (G : Exclude_Arrays) return Boolean is
      (G.Exclude_Signature = null);
+
+   procedure Allocate_Exclude (S : Sizes; G : in out Exclude_Arrays) with
+     Pre  => Exclude_Sizes_OK (S) and then Exclude_All_Null (G),
+     Post => Exclude_Layout_OK (S, G);
+   procedure Free_Exclude (G : in out Exclude_Arrays) with
+     Post => Exclude_All_Null (G);
 
    ---- EQUALITY (8 arrays)
 
@@ -1350,6 +1449,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Eq_Solref = null
       and then G.Eq_Solimp = null
       and then G.Eq_Data = null);
+
+   procedure Allocate_Equality (S : Sizes; G : in out Equality_Arrays) with
+     Pre  => Equality_Sizes_OK (S) and then Equality_All_Null (G),
+     Post => Equality_Layout_OK (S, G);
+   procedure Free_Equality (G : in out Equality_Arrays) with
+     Post => Equality_All_Null (G);
 
    ---- TENDON (31 arrays)
 
@@ -1458,6 +1563,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Tendon_Invweight0 = null
       and then G.Tendon_User = null
       and then G.Tendon_Rgba = null);
+
+   procedure Allocate_Tendon (S : Sizes; G : in out Tendon_Arrays) with
+     Pre  => Tendon_Sizes_OK (S) and then Tendon_All_Null (G),
+     Post => Tendon_Layout_OK (S, G);
+   procedure Free_Tendon (G : in out Tendon_Arrays) with
+     Post => Tendon_All_Null (G);
 
    ---- ACTUATOR (36 arrays)
 
@@ -1584,6 +1695,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Actuator_Length0 = null
       and then G.Actuator_Lengthrange = null);
 
+   procedure Allocate_Actuator (S : Sizes; G : in out Actuator_Arrays) with
+     Pre  => Actuator_Sizes_OK (S) and then Actuator_All_Null (G),
+     Post => Actuator_Layout_OK (S, G);
+   procedure Free_Actuator (G : in out Actuator_Arrays) with
+     Post => Actuator_All_Null (G);
+
    ---- SENSOR (18 arrays)
 
    type Sensor_Arrays is record
@@ -1652,6 +1769,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Sensor_User = null
       and then G.Sensor_Plugin = null);
 
+   procedure Allocate_Sensor (S : Sizes; G : in out Sensor_Arrays) with
+     Pre  => Sensor_Sizes_OK (S) and then Sensor_All_Null (G),
+     Post => Sensor_Layout_OK (S, G);
+   procedure Free_Sensor (G : in out Sensor_Arrays) with
+     Post => Sensor_All_Null (G);
+
    ---- QPOS (2 arrays)
 
    type Qpos_Arrays is record
@@ -1668,6 +1791,12 @@ package MJ.Models with SPARK_Mode is
    function Qpos_All_Null (G : Qpos_Arrays) return Boolean is
      (G.Qpos0 = null
       and then G.Qpos_Spring = null);
+
+   procedure Allocate_Qpos (S : Sizes; G : in out Qpos_Arrays) with
+     Pre  => Qpos_Sizes_OK (S) and then Qpos_All_Null (G),
+     Post => Qpos_Layout_OK (S, G);
+   procedure Free_Qpos (G : in out Qpos_Arrays) with
+     Post => Qpos_All_Null (G);
 
    ---- BVH (8 arrays)
 
@@ -1708,6 +1837,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Oct_Aabb = null
       and then G.Oct_Coeff = null);
 
+   procedure Allocate_Bvh (S : Sizes; G : in out Bvh_Arrays) with
+     Pre  => Bvh_Sizes_OK (S) and then Bvh_All_Null (G),
+     Post => Bvh_Layout_OK (S, G);
+   procedure Free_Bvh (G : in out Bvh_Arrays) with
+     Post => Bvh_All_Null (G);
+
    ---- WRAP (3 arrays)
 
    type Wrap_Arrays is record
@@ -1727,6 +1862,12 @@ package MJ.Models with SPARK_Mode is
      (G.Wrap_Type = null
       and then G.Wrap_Objid = null
       and then G.Wrap_Prm = null);
+
+   procedure Allocate_Wrap (S : Sizes; G : in out Wrap_Arrays) with
+     Pre  => Wrap_Sizes_OK (S) and then Wrap_All_Null (G),
+     Post => Wrap_Layout_OK (S, G);
+   procedure Free_Wrap (G : in out Wrap_Arrays) with
+     Post => Wrap_All_Null (G);
 
    ---- PLUGIN (5 arrays)
 
@@ -1754,6 +1895,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Plugin_Attr = null
       and then G.Plugin_Attradr = null);
 
+   procedure Allocate_Plugin (S : Sizes; G : in out Plugin_Arrays) with
+     Pre  => Plugin_Sizes_OK (S) and then Plugin_All_Null (G),
+     Post => Plugin_Layout_OK (S, G);
+   procedure Free_Plugin (G : in out Plugin_Arrays) with
+     Post => Plugin_All_Null (G);
+
    ---- NUMERIC (3 arrays)
 
    type Numeric_Arrays is record
@@ -1774,6 +1921,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Numeric_Size = null
       and then G.Numeric_Data = null);
 
+   procedure Allocate_Numeric (S : Sizes; G : in out Numeric_Arrays) with
+     Pre  => Numeric_Sizes_OK (S) and then Numeric_All_Null (G),
+     Post => Numeric_Layout_OK (S, G);
+   procedure Free_Numeric (G : in out Numeric_Arrays) with
+     Post => Numeric_All_Null (G);
+
    ---- TEXT (3 arrays)
 
    type Text_Arrays is record
@@ -1793,6 +1946,12 @@ package MJ.Models with SPARK_Mode is
      (G.Text_Adr = null
       and then G.Text_Size = null
       and then G.Text_Data = null);
+
+   procedure Allocate_Text (S : Sizes; G : in out Text_Arrays) with
+     Pre  => Text_Sizes_OK (S) and then Text_All_Null (G),
+     Post => Text_Layout_OK (S, G);
+   procedure Free_Text (G : in out Text_Arrays) with
+     Post => Text_All_Null (G);
 
    ---- TUPLE (5 arrays)
 
@@ -1819,6 +1978,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Tuple_Objtype = null
       and then G.Tuple_Objid = null
       and then G.Tuple_Objprm = null);
+
+   procedure Allocate_Tuple (S : Sizes; G : in out Tuple_Arrays) with
+     Pre  => Tuple_Sizes_OK (S) and then Tuple_All_Null (G),
+     Post => Tuple_Layout_OK (S, G);
+   procedure Free_Tuple (G : in out Tuple_Arrays) with
+     Post => Tuple_All_Null (G);
 
    ---- KEY (7 arrays)
 
@@ -1857,6 +2022,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Key_Mpos = null
       and then G.Key_Mquat = null
       and then G.Key_Ctrl = null);
+
+   procedure Allocate_Key (S : Sizes; G : in out Key_Arrays) with
+     Pre  => Key_Sizes_OK (S) and then Key_All_Null (G),
+     Post => Key_Layout_OK (S, G);
+   procedure Free_Key (G : in out Key_Arrays) with
+     Post => Key_All_Null (G);
 
    ---- NAME (26 arrays)
 
@@ -1947,6 +2118,12 @@ package MJ.Models with SPARK_Mode is
       and then G.Names_Map = null
       and then G.Paths = null);
 
+   procedure Allocate_Name (S : Sizes; G : in out Name_Arrays) with
+     Pre  => Name_Sizes_OK (S) and then Name_All_Null (G),
+     Post => Name_Layout_OK (S, G);
+   procedure Free_Name (G : in out Name_Arrays) with
+     Post => Name_All_Null (G);
+
    ---- SPARSE (13 arrays)
 
    type Sparse_Arrays is record
@@ -1996,6 +2173,12 @@ package MJ.Models with SPARK_Mode is
       and then G.D_Colind = null
       and then G.MapM2D = null
       and then G.MapD2M = null);
+
+   procedure Allocate_Sparse (S : Sizes; G : in out Sparse_Arrays) with
+     Pre  => Sparse_Sizes_OK (S) and then Sparse_All_Null (G),
+     Post => Sparse_Layout_OK (S, G);
+   procedure Free_Sparse (G : in out Sparse_Arrays) with
+     Post => Sparse_All_Null (G);
 
    function Sizes_In_Range (S : Sizes) return Boolean is
      (Body_Sizes_OK (S)

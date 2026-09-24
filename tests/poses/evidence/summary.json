@@ -1,0 +1,119 @@
+{
+  "recorded_at_utc": "2026-09-24T12:28:41.452124+00:00",
+  "proof": {
+    "mj-quaternions": {
+      "proved": 422,
+      "unproved": 0,
+      "warnings": 7
+    },
+    "mj-poses": {
+      "proved": 204,
+      "unproved": 0,
+      "warnings": 2
+    },
+    "mj-rotations": {
+      "proved": 68,
+      "unproved": 0,
+      "warnings": 0
+    }
+  },
+  "scope": "MJ.Quaternions, MJ.Poses, MJ.Rotations; not the whole engine",
+  "numeric_scalars": 1989822,
+  "performance.json": {
+    "cases": 70,
+    "status_counts": {
+      "within_noise": 20,
+      "faster": 43,
+      "slower": 7
+    },
+    "slower": [
+      {
+        "operation": "compose_in_place",
+        "pattern": 4,
+        "ratio_ada_over_c": 1.0077690616155626,
+        "bootstrap_median_95": [
+          1.0011018309970439,
+          1.017168845704475
+        ],
+        "c_ns": 5.250525683863591,
+        "ada_ns": 5.263893101785921
+      },
+      {
+        "operation": "compose_in_place",
+        "pattern": 5,
+        "ratio_ada_over_c": 1.0143614235558365,
+        "bootstrap_median_95": [
+          1.0103780363212338,
+          1.0199172645471564
+        ],
+        "c_ns": 19.5182651892081,
+        "ada_ns": 19.737420667504054
+      },
+      {
+        "operation": "transform",
+        "pattern": 0,
+        "ratio_ada_over_c": 1.0149377277617964,
+        "bootstrap_median_95": [
+          1.0091350284249034,
+          1.0222025921541846
+        ],
+        "c_ns": 1.7099610391226252,
+        "ada_ns": 1.7359235520737661
+      },
+      {
+        "operation": "transform",
+        "pattern": 4,
+        "ratio_ada_over_c": 1.00935172836225,
+        "bootstrap_median_95": [
+          1.0041840666008413,
+          1.0235615789799248
+        ],
+        "c_ns": 1.7169609137831916,
+        "ada_ns": 1.7417755140668614
+      },
+      {
+        "operation": "transform",
+        "pattern": 5,
+        "ratio_ada_over_c": 1.0055367694127608,
+        "bootstrap_median_95": [
+          1.0000922082636714,
+          1.0129652884458584
+        ],
+        "c_ns": 8.533062458387572,
+        "ada_ns": 8.605492033591423
+      },
+      {
+        "operation": "transform",
+        "pattern": 6,
+        "ratio_ada_over_c": 1.011558985346713,
+        "bootstrap_median_95": [
+          1.0037279862033548,
+          1.0137726573903387
+        ],
+        "c_ns": 1.7121318138960553,
+        "ada_ns": 1.7262848331275316
+      },
+      {
+        "operation": "transform",
+        "pattern": 7,
+        "ratio_ada_over_c": 1.0143405381940558,
+        "bootstrap_median_95": [
+          1.0069095386473081,
+          1.0201936133600602
+        ],
+        "c_ns": 1.7066879707206009,
+        "ada_ns": 1.7268498453972534
+      }
+    ]
+  },
+  "normalization-performance.json": {
+    "cases": 16,
+    "status_counts": {
+      "within_noise": 9,
+      "faster": 7
+    },
+    "slower": []
+  },
+  "performance_gate": "OPEN",
+  "minimal_subprograms": 17
+}

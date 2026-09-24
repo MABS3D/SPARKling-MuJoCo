@@ -7,138 +7,141 @@ package MJ.MJB.Readers with SPARK_Mode is
    Fixed_Bytes : constant := Option_Size + Visual_Size + Statistic_Size + 2 * Bool_Size;
 
    procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= 8 * Size_Count,
      Post => Pos <= B'Length and then (if Result.Status = OK then Pos = Pos'Old + 8 * Size_Count);
 
    procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;
                          Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= Fixed_Bytes,
      Post => Pos <= B'Length and then (if Result.Status = OK then Pos = Pos'Old + Fixed_Bytes);
 
    procedure Read_Body (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Body_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Body_Layout_OK (S, G),
      Post => Pos <= B'Length and then Body_Layout_OK (S, G);
 
    procedure Read_Joint (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Joint_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Joint_Layout_OK (S, G),
      Post => Pos <= B'Length and then Joint_Layout_OK (S, G);
 
    procedure Read_Dof (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Dof_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Dof_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Dof_Layout_OK (S, G),
      Post => Pos <= B'Length and then Dof_Layout_OK (S, G);
 
    procedure Read_Tree (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tree_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Tree_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tree_Layout_OK (S, G),
      Post => Pos <= B'Length and then Tree_Layout_OK (S, G);
 
    procedure Read_Geom (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Geom_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Geom_Layout_OK (S, G),
      Post => Pos <= B'Length and then Geom_Layout_OK (S, G);
 
    procedure Read_Site (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Site_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Site_Layout_OK (S, G),
      Post => Pos <= B'Length and then Site_Layout_OK (S, G);
 
    procedure Read_Camera (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Camera_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Camera_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Camera_Layout_OK (S, G),
      Post => Pos <= B'Length and then Camera_Layout_OK (S, G);
 
    procedure Read_Light (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Light_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Light_Layout_OK (S, G),
      Post => Pos <= B'Length and then Light_Layout_OK (S, G);
 
    procedure Read_Flex (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
      Post => Pos <= B'Length and then Flex_Layout_OK (S, G);
 
    procedure Read_Mesh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
      Post => Pos <= B'Length and then Mesh_Layout_OK (S, G);
 
    procedure Read_Skin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Skin_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Skin_Layout_OK (S, G),
      Post => Pos <= B'Length and then Skin_Layout_OK (S, G);
 
    procedure Read_Hfield (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Hfield_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Hfield_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Hfield_Layout_OK (S, G),
      Post => Pos <= B'Length and then Hfield_Layout_OK (S, G);
 
    procedure Read_Texture (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Texture_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Texture_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Texture_Layout_OK (S, G),
      Post => Pos <= B'Length and then Texture_Layout_OK (S, G);
 
    procedure Read_Material (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Material_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Material_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Material_Layout_OK (S, G),
      Post => Pos <= B'Length and then Material_Layout_OK (S, G);
 
    procedure Read_Pair (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Pair_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Pair_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Pair_Layout_OK (S, G),
      Post => Pos <= B'Length and then Pair_Layout_OK (S, G);
 
    procedure Read_Exclude (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Exclude_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Exclude_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Exclude_Layout_OK (S, G),
      Post => Pos <= B'Length and then Exclude_Layout_OK (S, G);
 
    procedure Read_Equality (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Equality_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Equality_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Equality_Layout_OK (S, G),
      Post => Pos <= B'Length and then Equality_Layout_OK (S, G);
 
    procedure Read_Tendon (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
      Post => Pos <= B'Length and then Tendon_Layout_OK (S, G);
 
    procedure Read_Actuator (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
      Post => Pos <= B'Length and then Actuator_Layout_OK (S, G);
 
    procedure Read_Sensor (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Sensor_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sensor_Layout_OK (S, G),
      Post => Pos <= B'Length and then Sensor_Layout_OK (S, G);
 
    procedure Read_Qpos (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Qpos_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Qpos_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Qpos_Layout_OK (S, G),
      Post => Pos <= B'Length and then Qpos_Layout_OK (S, G);
 
    procedure Read_Bvh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Bvh_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Bvh_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Bvh_Layout_OK (S, G),
      Post => Pos <= B'Length and then Bvh_Layout_OK (S, G);
 
    procedure Read_Wrap (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Wrap_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Wrap_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Wrap_Layout_OK (S, G),
      Post => Pos <= B'Length and then Wrap_Layout_OK (S, G);
 
    procedure Read_Plugin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Plugin_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Plugin_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Plugin_Layout_OK (S, G),
      Post => Pos <= B'Length and then Plugin_Layout_OK (S, G);
 
    procedure Read_Numeric (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Numeric_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Numeric_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Numeric_Layout_OK (S, G),
      Post => Pos <= B'Length and then Numeric_Layout_OK (S, G);
 
    procedure Read_Text (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Text_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Text_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Text_Layout_OK (S, G),
      Post => Pos <= B'Length and then Text_Layout_OK (S, G);
 
    procedure Read_Tuple (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tuple_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Tuple_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tuple_Layout_OK (S, G),
      Post => Pos <= B'Length and then Tuple_Layout_OK (S, G);
 
    procedure Read_Key (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Key_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Key_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Key_Layout_OK (S, G),
      Post => Pos <= B'Length and then Key_Layout_OK (S, G);
 
    procedure Read_Name (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Name_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Name_Layout_OK (S, G),
      Post => Pos <= B'Length and then Name_Layout_OK (S, G);
 
    procedure Read_Sparse (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sparse_Arrays; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Sparse_Layout_OK (S, G),
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sparse_Layout_OK (S, G),
      Post => Pos <= B'Length and then Sparse_Layout_OK (S, G);
 
+   --  Allocates every array of M.S and fills it from B; M keeps its other components.
+   --  The arrays are allocated whatever the outcome (partly filled after a failure),
+   --  so the caller frees M when Result is not OK.
    procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) with
-     Pre  => B'First = 0 and then Pos <= B'Length and then Valid_Layout (M),
-     Post => Pos <= B'Length and then Valid_Layout (M) and then M.S = M.S'Old;
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sizes_In_Range (M.S) and then All_Null (M),
+     Post => Pos <= B'Length and then M.S = M.S'Old and then Valid_Layout (M);
 
 end MJ.MJB.Readers;
