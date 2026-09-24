@@ -151,6 +151,7 @@ package body MJB_Serialize is
       N := N + (Int64 (S.Nsite) * (1)) * 4;
       N := N + (Int64 (S.Nsite) * (1)) * 4;
       N := N + (Int64 (S.Nsite) * (1)) * 4;
+      N := N + (Int64 (S.Nsite) * (1)) * 4;
       N := N + (Int64 (S.Nsite) * (1)) * 1;
       N := N + (Int64 (S.Nsite) * (3)) * 8;
       N := N + (Int64 (S.Nsite) * (3)) * 8;
@@ -1394,6 +1395,11 @@ package body MJB_Serialize is
       Count := Int64 (S.Nsite) * (1);
       for I in 0 .. Integer (Count) - 1 loop
          Put_I32 (B, Pos + 4 * I, M.Sites.Site_Bodyid (I));
+      end loop;
+      Pos := Pos + Integer (Count) * 4;
+      Count := Int64 (S.Nsite) * (1);
+      for I in 0 .. Integer (Count) - 1 loop
+         Put_I32 (B, Pos + 4 * I, M.Sites.Site_Dataid (I));
       end loop;
       Pos := Pos + Integer (Count) * 4;
       Count := Int64 (S.Nsite) * (1);

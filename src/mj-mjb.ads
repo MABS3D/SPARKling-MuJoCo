@@ -13,6 +13,8 @@ package MJ.MJB with SPARK_Mode is
    MJB_Precision : constant := 8;       --  sizeof(mjtNum)
    Header_Bytes  : constant := 20;      --  five int32
 
+   --  Buffers longer than Natural'Last are rejected as Size_Out_Of_Range
+   --  on Header, index -1, before any reader is called or array allocated.
    procedure Parse_Raw (B : Byte_Array; M : in out Model; Result : out Load_Result) with
      Pre  => B'First = 0 and then All_Null (M),
      Post => (if Result.Status = OK then Valid_Layout (M) else All_Null (M));

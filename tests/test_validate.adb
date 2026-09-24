@@ -72,11 +72,24 @@ begin
    M.Bodies.Body_Jntnum (1) := M.S.Njnt + 1;
    Expect (Invalid_Reference, Body_Jntadr, 1, "jntnum past njnt");
 
+   --  Chunked diagnostics retain field order and the first offending index
+   --  even when several arrays, and several elements, fail together.
+   M.Bodies.Body_Parentid (1) := -1;
+   M.Bodies.Body_Parentid (2) := -1;
+   M.Geoms.Geom_Matid (0) := -2;
+   Expect (Invalid_Reference, Body_Parentid, 1, "first reference across chunks");
+
    --  flags and real ranges (generated clauses)
    M.Joints.Jnt_Limited (0) := 2;
    Expect (Invalid_Parameter, Jnt_Limited, 0, "flag byte 2");
    M.Bodies.Body_Mass (1) := 1.0e11;
    Expect (Invalid_Parameter, Body_Mass, 1, "mass above Max_Val");
+   M.Bodies.Body_Mass (1) := 1.0e11;
+   M.Geoms.Geom_Friction (0) := 1.0e11;
+   Expect (Invalid_Parameter, Body_Mass, 1, "first real array across chunks");
+   M.Joints.Jnt_Limited (0) := 2;
+   M.Actuators.Actuator_Ctrllimited (0) := 2;
+   Expect (Invalid_Parameter, Jnt_Limited, 0, "first Boolean array across chunks");
 
    --  body tree
    M.Bodies.Body_Parentid (1) := 1;
@@ -105,6 +118,10 @@ begin
    Expect (Invalid_Joint_Layout, Jnt_Qposadr, 1, "qposadr gap");
    M.Joints.Jnt_Dofadr (1) := M.Joints.Jnt_Dofadr (1) - 1;
    Expect (Invalid_Joint_Layout, Jnt_Qposadr, 1, "dofadr overlap");
+   M.Joints.Jnt_Qposadr (1) := M.Joints.Jnt_Qposadr (1) + 1;
+   M.Dofs.Dof_Jntid (0) := 1;
+   Expect (Invalid_Joint_Layout, Jnt_Qposadr, 1,
+           "joint addresses are diagnosed before a simultaneous dof-joint mismatch");
    M.Dofs.Dof_Jntid (0) := 1;
    Expect (Invalid_Dof_Chain, Dof_Jntid, 0, "dof 0 claims joint 1");
    M.Dofs.Dof_Parentid (1) := 5;
@@ -127,6 +144,11 @@ begin
    Expect (Invalid_CSR, D_Diag, 0, "diagonal offset past the row");
    M.Sparse.MapD2M (0) := M.S.Nd;
    Expect (Invalid_CSR, MapD2M, 0, "map entry out of range");
+   M.Sparse.MapM2D (M.Sparse.MapD2M (0)) := -1;
+   Expect (Invalid_CSR, MapD2M, 0, "in-range map entries must still be inverse");
+   M.Sparse.MapM2M (0) := M.S.Nm;
+   M.Sparse.MapD2M (0) := M.S.Nd;
+   Expect (Invalid_CSR, MapM2M, 0, "map range errors retain family order");
 
    --  geoms
    M.Geoms.Geom_Type (0) := 8;
@@ -139,6 +161,9 @@ begin
    Expect (Invalid_Reference, Geom_Dataid, 0, "primitive geom with a data id");
    M.Geoms.Geom_Sameframe (0) := 5;
    Expect (Invalid_Enum, Geom_Sameframe, 0, "sameframe 5");
+   M.Geoms.Geom_Dataid (0) := 0;
+   M.Geoms.Geom_Sameframe (0) := 5;
+   Expect (Invalid_Reference, Geom_Dataid, 0, "geom data errors precede sameframe errors");
 
    --  bounding volumes
    if M.S.Nbvh > 0 then
@@ -162,6 +187,14 @@ begin
    M.Actuators.Actuator_Ctrlrange (0) := 2.0;
    M.Actuators.Actuator_Ctrlrange (1) := 1.0;
    Expect (Invalid_Parameter, Actuator_Ctrlrange, 0, "inverted control range");
+   M.Actuators.Actuator_Forcelimited (0) := 1;
+   M.Actuators.Actuator_Forcerange (0) := 2.0;
+   M.Actuators.Actuator_Forcerange (1) := 1.0;
+   Expect (Invalid_Parameter, Actuator_Forcerange, 0, "inverted force range names its own field");
+   M.Actuators.Actuator_Actlimited (0) := 1;
+   M.Actuators.Actuator_Actrange (0) := 2.0;
+   M.Actuators.Actuator_Actrange (1) := 1.0;
+   Expect (Invalid_Parameter, Actuator_Actrange, 0, "inverted activation range names its own field");
 
    --  equality-free, tendon-free humanoid: corrupt the names buffer instead
    M.Names.Names (M.S.Nnames - 1) := Character'Pos ('x');
@@ -171,17 +204,45 @@ begin
    M.Opt.Timestep := 0.0;
    Expect (Invalid_Parameter, Option_Block, -1, "zero timestep");
    M.Opt.Integrator := 4;
-   Expect (Invalid_Parameter, Option_Block, -1, "integrator 4");
+   Expect (OK, None, -1, "discrete integrator is a valid model option");
+   M.Opt.Integrator := 5;
+   Expect (Invalid_Parameter, Option_Block, -1, "integrator beyond MuJoCo 3.14 enum");
+   M.Opt.Enableflags := Enbl_Ipc;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Discrete);
+   M.Opt.Solver := Solver_Kind'Pos (Sol_Cg);
+   Expect (OK, None, -1, "IPC with discrete integrator is a valid model option");
+   M.Opt.Enableflags := Enbl_Ipc;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Euler);
+   Expect (Invalid_Parameter, Option_Block, -1, "IPC requires the discrete integrator");
+   M.Opt.Enableflags := Enbl_Ipc;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Discrete);
+   M.Opt.Solver := Solver_Kind'Pos (Sol_Newton);
+   Expect (Invalid_Parameter, Option_Block, -1, "IPC requires the CG solver");
+   M.Opt.Enableflags := Enbl_Ipc + Enbl_Fwdinv;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Discrete);
+   M.Opt.Solver := Solver_Kind'Pos (Sol_Cg);
+   Expect (Invalid_Parameter, Option_Block, -1, "IPC rejects inverse dynamics comparison");
+   M.Opt.Enableflags := Enbl_Ipc + Enbl_Sleep;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Discrete);
+   M.Opt.Solver := Solver_Kind'Pos (Sol_Cg);
+   Expect (Invalid_Parameter, Option_Block, -1, "IPC rejects sleeping");
+   M.Opt.Enableflags := Enbl_Sleep;
+   M.Opt.Disableflags := Dsbl_Island;
+   M.Opt.Integrator := Integrator_Kind'Pos (Int_Discrete);
+   Expect (Invalid_Parameter, Option_Block, -1, "discrete sleeping requires islands");
    M.Stat.Extent := -1.0;
    Expect (Invalid_Parameter, Statistic_Block, -1, "negative extent");
    M.Bodies.Body_Mass (1) := -1.0;
    Expect (Invalid_Parameter, Body_Mass, 1, "negative mass");
+   M.Bodies.Body_Mass (1) := -1.0;
+   M.Joints.Jnt_Axis (3 * 1) := 5.0;
+   Expect (Invalid_Parameter, Body_Mass, 1, "body parameter errors precede joint parameter errors");
    M.Bodies.Body_Quat (4) := 2.0;
    Expect (Invalid_Parameter, Body_Mass, 1, "non-unit body quaternion");
    M.Joints.Jnt_Axis (3 * 1) := 5.0;
    Expect (Invalid_Parameter, Jnt_Axis, 1, "non-unit joint axis");
-   M.Geoms.Geom_Size (0) := -0.1;
-   Expect (Invalid_Parameter, Geom_Size, 0, "negative geom size");
+   M.Geoms.Geom_Size (2) := -0.1;
+   Expect (Invalid_Parameter, Geom_Size, 0, "negative plane grid spacing");
    M.Dofs.Dof_Damping (0) := -1.0;
    Expect (Invalid_Parameter, Dof_Damping, -1, "negative damping");
    M.Geoms.Geom_Adhesion (0) := 1.0;
@@ -220,7 +281,7 @@ begin
                   MJ.File_IO.Read_File ("tests/out/corpus/" & Name, Bytes, Read_OK);
                   if Read_OK then
                      Parse_Raw (Bytes.all, M, R);
-                     if R.Status = OK and then M.S.Nmesh > 0 and then M.S.Ntex > 0 then
+                     if R.Status = OK and then M.S.Nmesh > 0 and then M.S.Ntex > 0 and then M.S.Nsite > 0 then
                         Found := True;
                         Put_Line ("mesh model: " & Name);
                      else
@@ -237,6 +298,22 @@ begin
       Ada.Text_IO.Close (L);
       if Found then
          Expect (OK, None, -1, "mesh model validates");
+         --  Mesh-site references were added to mjModel in MuJoCo 3.14.
+         M.Sites.Site_Type (0) := 7;
+         M.Sites.Site_Dataid (0) := 0;
+         Expect (OK, None, -1, "mesh-site valid mesh reference");
+         Assert (M.S.Nsite > 0, "mesh fixture has sites for reference mutations");
+         M.Sites.Site_Type (0) := 7;
+         M.Sites.Site_Dataid (0) := -1;
+         Expect (OK, None, -1, "mesh-site -1 sentinel matches upstream validation");
+         M.Sites.Site_Type (0) := 7;
+         M.Sites.Site_Dataid (0) := -2;
+         Expect (Invalid_Reference, Site_Dataid, 0, "mesh-site reference below sentinel");
+         M.Sites.Site_Type (0) := 7;
+         M.Sites.Site_Dataid (0) := M.S.Nmesh;
+         Expect (Invalid_Reference, Site_Dataid, 0, "mesh-site reference past final mesh");
+      
+
          M.Meshes.Mesh_Face (3 * M.Meshes.Mesh_Faceadr (0)) := M.Meshes.Mesh_Vertnum (0);
          Expect (Invalid_Reference, Mesh_Face, 0, "face vertex past the mesh");
          if M.Meshes.Mesh_Graphadr (0) >= 0 then

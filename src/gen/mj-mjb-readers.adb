@@ -15,7 +15,7 @@ package body MJ.MJB.Readers with SPARK_Mode is
    --  the caller has checked that the bytes for the whole array are present.
 
    procedure Read_I32_Array (B : Byte_Array; Pos : Natural; A : in out Int_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length)
    is
    begin
@@ -25,7 +25,7 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_I32_Array;
 
    procedure Read_I64_Array (B : Byte_Array; Pos : Natural; A : in out Int64_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length)
    is
    begin
@@ -35,7 +35,7 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_I64_Array;
 
    procedure Read_U8_Array (B : Byte_Array; Pos : Natural; A : in out Byte_Array) with
-     Pre => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
             and then Int64 (B'Length) - Int64 (Pos) >= Int64 (A'Length)
    is
    begin
@@ -46,9 +46,9 @@ package body MJ.MJB.Readers with SPARK_Mode is
 
    --  Bad is -1 when every value is finite, else the index of the first that is not.
    procedure Read_F64_Array (B : Byte_Array; Pos : Natural; A : in out Real_Array; Bad : out Integer) with
-     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= 8 * Int64 (A'Length),
-     Post => Bad in -1 .. A'Last
+     Post => Bad = -1 or else Bad in A'Range
    is
       U : Unsigned_64;
    begin
@@ -64,9 +64,9 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_F64_Array;
 
    procedure Read_F32_Array (B : Byte_Array; Pos : Natural; A : in out Float32_Array; Bad : out Integer) with
-     Pre  => B'First = 0 and then A'First = 0 and then Pos <= B'Length
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then A'First = 0 and then Pos <= B'Length
              and then Int64 (B'Length) - Int64 (Pos) >= 4 * Int64 (A'Length),
-     Post => Bad in -1 .. A'Last
+     Post => Bad = -1 or else Bad in A'Range
    is
       U : Unsigned_32;
    begin
@@ -81,11 +81,11 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end loop;
    end Read_F32_Array;
 
-   procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) is
-      P : constant Natural := Pos;
+   procedure Read_Sizes_1 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
       V : Int64;
    begin
-      S := (others => <>);
       Result := OK_Result;
       V := Get_I64 (B, P + 0);
       if V not in 0 .. Int64 (Max_Size) then
@@ -135,6 +135,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nbvh := Integer (V);
+   end Read_Sizes_1;
+
+   procedure Read_Sizes_2 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 64);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 8);
@@ -183,6 +191,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.NC := Integer (V);
+   end Read_Sizes_2;
+
+   procedure Read_Sizes_3 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 128);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 16);
@@ -231,6 +247,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nflexvert := Integer (V);
+   end Read_Sizes_3;
+
+   procedure Read_Sizes_4 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 192);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 24);
@@ -279,6 +303,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nflexelemedge := Integer (V);
+   end Read_Sizes_4;
+
+   procedure Read_Sizes_5 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 256);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 32);
@@ -327,6 +359,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nmeshnormal := Integer (V);
+   end Read_Sizes_5;
+
+   procedure Read_Sizes_6 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 320);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 40);
@@ -375,6 +415,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nskinvert := Integer (V);
+   end Read_Sizes_6;
+
+   procedure Read_Sizes_7 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 384);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 48);
@@ -423,6 +471,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Ntexdata := Integer (V);
+   end Read_Sizes_7;
+
+   procedure Read_Sizes_8 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 448);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 56);
@@ -471,6 +527,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nsensor := Integer (V);
+   end Read_Sizes_8;
+
+   procedure Read_Sizes_9 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 512);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 64);
@@ -519,6 +583,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nmocap := Integer (V);
+   end Read_Sizes_9;
+
+   procedure Read_Sizes_10 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 576);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 72);
@@ -567,6 +639,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nuser_Tendon := Integer (V);
+   end Read_Sizes_10;
+
+   procedure Read_Sizes_11 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 640);
       if V not in 0 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 80);
@@ -615,6 +695,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nemax := Integer (V);
+   end Read_Sizes_11;
+
+   procedure Read_Sizes_12 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 704);
       if V not in -1 .. Int64 (Max_Size) then
          Result := (Size_Out_Of_Range, Size_Table, 88);
@@ -663,26 +751,59 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       S.Nhistory := Integer (V);
+   end Read_Sizes_12;
+
+   procedure Read_Sizes_13 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+   is
+      V : Int64;
+   begin
+      Result := OK_Result;
       V := Get_I64 (B, P + 768);
       S.Narena := V;
       V := Get_I64 (B, P + 776);
       S.Nbuffer := V;
+   end Read_Sizes_13;
+
+   procedure Read_Sizes (B : Byte_Array; Pos : in out Natural; S : out Sizes; Result : out Load_Result) is
+      P : constant Natural := Pos;
+   begin
+      S := (others => <>);
+      Read_Sizes_1 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_2 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_3 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_4 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_5 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_6 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_7 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_8 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_9 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_10 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_11 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_12 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sizes_13 (B, P, S, Result);
+      if Result.Status /= OK then return; end if;
       Pos := P + 8 * Size_Count;
    end Read_Sizes;
 
-   procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;
-                         Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) is
-      Base : Natural := Pos;
-      U64  : Unsigned_64;
-      U32  : Unsigned_32;
+   procedure Read_Option_1 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+      U64 : Unsigned_64;
    begin
       Result := OK_Result;
-      Opt := (others => <>);
-      Vis := (others => <>);
-      Stat := (others => <>);
-      Gravcomp := False;
-      Surfacevel := False;
-      --  Option_Block
       U64 := Get_U64 (B, Base + Option_Off_Timestep);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 0); return; end if;
       Opt.Timestep := Bits_To_Real (U64);
@@ -704,6 +825,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U64 := Get_U64 (B, Base + Option_Off_Sleep_Tolerance);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 6); return; end if;
       Opt.Sleep_Tolerance := Bits_To_Real (U64);
+   end Read_Option_1;
+
+   procedure Read_Option_2 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+      U64 : Unsigned_64;
+   begin
+      Result := OK_Result;
       U64 := Get_U64 (B, Base + Option_Off_Gravity + 0);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 7); return; end if;
       Opt.Gravity (0) := Bits_To_Real (U64);
@@ -722,6 +851,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U64 := Get_U64 (B, Base + Option_Off_Wind + 16);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 8); return; end if;
       Opt.Wind (2) := Bits_To_Real (U64);
+   end Read_Option_2;
+
+   procedure Read_Option_3 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+      U64 : Unsigned_64;
+   begin
+      Result := OK_Result;
       U64 := Get_U64 (B, Base + Option_Off_Magnetic + 0);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 9); return; end if;
       Opt.Magnetic (0) := Bits_To_Real (U64);
@@ -746,6 +883,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U64 := Get_U64 (B, Base + Option_Off_O_Solref + 8);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 13); return; end if;
       Opt.O_Solref (1) := Bits_To_Real (U64);
+   end Read_Option_3;
+
+   procedure Read_Option_4 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+      U64 : Unsigned_64;
+   begin
+      Result := OK_Result;
       U64 := Get_U64 (B, Base + Option_Off_O_Solimp + 0);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 14); return; end if;
       Opt.O_Solimp (0) := Bits_To_Real (U64);
@@ -761,6 +906,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U64 := Get_U64 (B, Base + Option_Off_O_Solimp + 32);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 14); return; end if;
       Opt.O_Solimp (4) := Bits_To_Real (U64);
+   end Read_Option_4;
+
+   procedure Read_Option_5 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+      U64 : Unsigned_64;
+   begin
+      Result := OK_Result;
       U64 := Get_U64 (B, Base + Option_Off_O_Friction + 0);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Option_Block, 15); return; end if;
       Opt.O_Friction (0) := Bits_To_Real (U64);
@@ -779,6 +932,13 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Opt.Integrator := Get_I32 (B, Base + Option_Off_Integrator);
       Opt.Cone := Get_I32 (B, Base + Option_Off_Cone);
       Opt.Jacobian := Get_I32 (B, Base + Option_Off_Jacobian);
+   end Read_Option_5;
+
+   procedure Read_Option_6 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+   begin
+      Result := OK_Result;
       Opt.Solver := Get_I32 (B, Base + Option_Off_Solver);
       Opt.Iterations := Get_I32 (B, Base + Option_Off_Iterations);
       Opt.Ls_Iterations := Get_I32 (B, Base + Option_Off_Ls_Iterations);
@@ -787,10 +947,23 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Opt.Disableflags := Get_I32 (B, Base + Option_Off_Disableflags);
       Opt.Enableflags := Get_I32 (B, Base + Option_Off_Enableflags);
       Opt.Disableactuator := Get_I32 (B, Base + Option_Off_Disableactuator);
+   end Read_Option_6;
+
+   procedure Read_Option_7 (B : Byte_Array; Base : Natural; Opt : in out Option; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Option_Size
+   is
+   begin
+      Result := OK_Result;
       Opt.Sdf_Initpoints := Get_I32 (B, Base + Option_Off_Sdf_Initpoints);
       Opt.Sdf_Iterations := Get_I32 (B, Base + Option_Off_Sdf_Iterations);
-      Base := Base + Option_Size;
-      --  Visual_Block
+   end Read_Option_7;
+
+   procedure Read_Visual_1 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       Vis.Global.Cameraid := Get_I32 (B, Base + Visual_Off_Global_Cameraid);
       Vis.Global.Orthographic := Get_I32 (B, Base + Visual_Off_Global_Orthographic);
       U32 := Get_U32 (B, Base + Visual_Off_Global_Fovy);
@@ -811,6 +984,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Global_Glow);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 7); return; end if;
       Vis.Global.Glow := Bits_To_Float (U32);
+   end Read_Visual_1;
+
+   procedure Read_Visual_2 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Global_Realtime);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 8); return; end if;
       Vis.Global.Realtime := Bits_To_Float (U32);
@@ -821,6 +1002,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Vis.Quality.Shadowsize := Get_I32 (B, Base + Visual_Off_Quality_Shadowsize);
       Vis.Quality.Offsamples := Get_I32 (B, Base + Visual_Off_Quality_Offsamples);
       Vis.Quality.Numslices := Get_I32 (B, Base + Visual_Off_Quality_Numslices);
+   end Read_Visual_2;
+
+   procedure Read_Visual_3 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       Vis.Quality.Numstacks := Get_I32 (B, Base + Visual_Off_Quality_Numstacks);
       Vis.Quality.Numquads := Get_I32 (B, Base + Visual_Off_Quality_Numquads);
       U32 := Get_U32 (B, Base + Visual_Off_Headlight_Ambient + 0);
@@ -841,6 +1030,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Headlight_Diffuse + 8);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 19); return; end if;
       Vis.Headlight.Diffuse (2) := Bits_To_Float (U32);
+   end Read_Visual_3;
+
+   procedure Read_Visual_4 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Headlight_Specular + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 20); return; end if;
       Vis.Headlight.Specular (0) := Bits_To_Float (U32);
@@ -863,6 +1060,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Map_Torque);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 25); return; end if;
       Vis.Map.Torque := Bits_To_Float (U32);
+   end Read_Visual_4;
+
+   procedure Read_Visual_5 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Map_Alpha);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 26); return; end if;
       Vis.Map.Alpha := Bits_To_Float (U32);
@@ -887,6 +1092,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Map_Shadowscale);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 33); return; end if;
       Vis.Map.Shadowscale := Bits_To_Float (U32);
+   end Read_Visual_5;
+
+   procedure Read_Visual_6 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Map_Actuatortendon);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 34); return; end if;
       Vis.Map.Actuatortendon := Bits_To_Float (U32);
@@ -911,6 +1124,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Scale_Light);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 41); return; end if;
       Vis.Scale.Light := Bits_To_Float (U32);
+   end Read_Visual_6;
+
+   procedure Read_Visual_7 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Scale_Selectpoint);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 42); return; end if;
       Vis.Scale.Selectpoint := Bits_To_Float (U32);
@@ -935,6 +1156,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Scale_Constraint);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 49); return; end if;
       Vis.Scale.Constraint := Bits_To_Float (U32);
+   end Read_Visual_7;
+
+   procedure Read_Visual_8 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Scale_Slidercrank);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 50); return; end if;
       Vis.Scale.Slidercrank := Bits_To_Float (U32);
@@ -953,6 +1182,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Fog + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 52); return; end if;
       Vis.Rgba.Fog (3) := Bits_To_Float (U32);
+   end Read_Visual_8;
+
+   procedure Read_Visual_9 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Haze + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 53); return; end if;
       Vis.Rgba.Haze (0) := Bits_To_Float (U32);
@@ -977,6 +1214,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Force + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 54); return; end if;
       Vis.Rgba.Force (3) := Bits_To_Float (U32);
+   end Read_Visual_9;
+
+   procedure Read_Visual_10 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Inertia + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 55); return; end if;
       Vis.Rgba.Inertia (0) := Bits_To_Float (U32);
@@ -1001,6 +1246,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Joint + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 56); return; end if;
       Vis.Rgba.Joint (3) := Bits_To_Float (U32);
+   end Read_Visual_10;
+
+   procedure Read_Visual_11 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Actuator + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 57); return; end if;
       Vis.Rgba.Actuator (0) := Bits_To_Float (U32);
@@ -1025,6 +1278,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Actuatornegative + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 58); return; end if;
       Vis.Rgba.Actuatornegative (3) := Bits_To_Float (U32);
+   end Read_Visual_11;
+
+   procedure Read_Visual_12 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Actuatorpositive + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 59); return; end if;
       Vis.Rgba.Actuatorpositive (0) := Bits_To_Float (U32);
@@ -1049,6 +1310,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Com + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 60); return; end if;
       Vis.Rgba.Com (3) := Bits_To_Float (U32);
+   end Read_Visual_12;
+
+   procedure Read_Visual_13 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Camera + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 61); return; end if;
       Vis.Rgba.Camera (0) := Bits_To_Float (U32);
@@ -1073,6 +1342,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Light + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 62); return; end if;
       Vis.Rgba.Light (3) := Bits_To_Float (U32);
+   end Read_Visual_13;
+
+   procedure Read_Visual_14 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Selectpoint + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 63); return; end if;
       Vis.Rgba.Selectpoint (0) := Bits_To_Float (U32);
@@ -1097,6 +1374,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Connect + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 64); return; end if;
       Vis.Rgba.Connect (3) := Bits_To_Float (U32);
+   end Read_Visual_14;
+
+   procedure Read_Visual_15 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Contactpoint + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 65); return; end if;
       Vis.Rgba.Contactpoint (0) := Bits_To_Float (U32);
@@ -1121,6 +1406,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Contactforce + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 66); return; end if;
       Vis.Rgba.Contactforce (3) := Bits_To_Float (U32);
+   end Read_Visual_15;
+
+   procedure Read_Visual_16 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Contactfriction + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 67); return; end if;
       Vis.Rgba.Contactfriction (0) := Bits_To_Float (U32);
@@ -1145,6 +1438,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Contacttorque + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 68); return; end if;
       Vis.Rgba.Contacttorque (3) := Bits_To_Float (U32);
+   end Read_Visual_16;
+
+   procedure Read_Visual_17 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Contactgap + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 69); return; end if;
       Vis.Rgba.Contactgap (0) := Bits_To_Float (U32);
@@ -1169,6 +1470,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Rangefinder + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 70); return; end if;
       Vis.Rgba.Rangefinder (3) := Bits_To_Float (U32);
+   end Read_Visual_17;
+
+   procedure Read_Visual_18 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Constraint + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 71); return; end if;
       Vis.Rgba.Constraint (0) := Bits_To_Float (U32);
@@ -1193,6 +1502,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Slidercrank + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 72); return; end if;
       Vis.Rgba.Slidercrank (3) := Bits_To_Float (U32);
+   end Read_Visual_18;
+
+   procedure Read_Visual_19 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Crankbroken + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 73); return; end if;
       Vis.Rgba.Crankbroken (0) := Bits_To_Float (U32);
@@ -1217,6 +1534,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Frustum + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 74); return; end if;
       Vis.Rgba.Frustum (3) := Bits_To_Float (U32);
+   end Read_Visual_19;
+
+   procedure Read_Visual_20 (B : Byte_Array; Base : Natural; Vis : in out Visual; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Visual_Size
+   is
+      U32 : Unsigned_32;
+   begin
+      Result := OK_Result;
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Bv + 0);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 75); return; end if;
       Vis.Rgba.Bv (0) := Bits_To_Float (U32);
@@ -1241,8 +1566,14 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U32 := Get_U32 (B, Base + Visual_Off_Rgba_Bvactive + 12);
       if not Is_Finite_F32 (U32) then Result := (Non_Finite_Value, Visual_Block, 76); return; end if;
       Vis.Rgba.Bvactive (3) := Bits_To_Float (U32);
-      Base := Base + Visual_Size;
-      --  Statistic_Block
+   end Read_Visual_20;
+
+   procedure Read_Statistic_1 (B : Byte_Array; Base : Natural; Stat : in out Statistic; Result : out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Base <= B'Length and then Int64 (B'Length) - Int64 (Base) >= Statistic_Size
+   is
+      U64 : Unsigned_64;
+   begin
+      Result := OK_Result;
       U64 := Get_U64 (B, Base + Statistic_Off_Meaninertia);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Statistic_Block, 0); return; end if;
       Stat.Meaninertia := Bits_To_Real (U64);
@@ -1264,16 +1595,91 @@ package body MJ.MJB.Readers with SPARK_Mode is
       U64 := Get_U64 (B, Base + Statistic_Off_Center + 16);
       if not Is_Finite_F64 (U64) then Result := (Non_Finite_Value, Statistic_Block, 4); return; end if;
       Stat.Center (2) := Bits_To_Real (U64);
+   end Read_Statistic_1;
+
+   procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;
+                         Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) is
+      Base : Natural := Pos;
+   begin
+      Opt := (others => <>);
+      Vis := (others => <>);
+      Stat := (others => <>);
+      Gravcomp := False;
+      Surfacevel := False;
+      --  Option
+      Read_Option_1 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_2 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_3 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_4 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_5 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_6 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Option_7 (B, Base, Opt, Result);
+      if Result.Status /= OK then return; end if;
+      Base := Base + Option_Size;
+      --  Visual
+      Read_Visual_1 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_2 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_3 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_4 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_5 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_6 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_7 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_8 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_9 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_10 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_11 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_12 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_13 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_14 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_15 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_16 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_17 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_18 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_19 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Visual_20 (B, Base, Vis, Result);
+      if Result.Status /= OK then return; end if;
+      Base := Base + Visual_Size;
+      --  Statistic
+      Read_Statistic_1 (B, Base, Stat, Result);
+      if Result.Status /= OK then return; end if;
       Base := Base + Statistic_Size;
       Gravcomp := Get_U8 (B, Base) /= 0;
       Surfacevel := Get_U8 (B, Base + Bool_Size) /= 0;
       Pos := Base + 2 * Bool_Size;
    end Read_Fixed;
 
-   procedure Read_Body (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result) is
+   procedure Read_Body_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Body_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Body_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  body_parentid : int (nbody x 1)
@@ -1348,6 +1754,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Body_Dofadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Body_1;
+
+   procedure Read_Body_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Body_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Body_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  body_treeid : int (nbody x 1)
       Count  := Int64 (S.Nbody) * (1);
       Nbytes := Count * 4;
@@ -1432,6 +1850,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Body_2;
+
+   procedure Read_Body_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Body_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Body_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  body_iquat : mjtNum (nbody x 4)
       Count  := Int64 (S.Nbody) * (4);
       Nbytes := Count * 8;
@@ -1536,6 +1966,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Body_3;
+
+   procedure Read_Body_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Body_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Body_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  body_plugin : int (nbody x 1)
       Count  := Int64 (S.Nbody) * (1);
       Nbytes := Count * 4;
@@ -1581,12 +2022,26 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Body_Bvhnum.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Body_4;
+
+   procedure Read_Body (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result) is
+   begin
+      Read_Body_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Body_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Body_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Body_4 (B, Pos, S, G, Result);
    end Read_Body;
 
-   procedure Read_Joint (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result) is
+   procedure Read_Joint_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Joint_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Joint_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  jnt_type : int (njnt x 1)
@@ -1661,6 +2116,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_U8_Array (B, Pos, G.Jnt_Actfrclimited.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Joint_1;
+
+   procedure Read_Joint_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Joint_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Joint_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  jnt_actgravcomp : mjtBool (njnt x 1)
       Count  := Int64 (S.Njnt) * (1);
       Nbytes := Count * 1;
@@ -1761,6 +2228,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Joint_2;
+
+   procedure Read_Joint_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Joint_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Joint_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  jnt_actfrcrange : mjtNum (njnt x 2)
       Count  := Int64 (S.Njnt) * (2);
       Nbytes := Count * 8;
@@ -1800,9 +2279,22 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Joint_3;
+
+   procedure Read_Joint (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Joint_Arrays; Result : out Load_Result) is
+   begin
+      Read_Joint_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Joint_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Joint_3 (B, Pos, S, G, Result);
    end Read_Joint;
 
-   procedure Read_Dof (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Dof_Arrays; Result : out Load_Result) is
+   procedure Read_Dof_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Dof_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Dof_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Dof_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -1888,6 +2380,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Dof_1;
+
+   procedure Read_Dof_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Dof_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Dof_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Dof_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  dof_frictionloss : mjtNum (nv x 1)
       Count  := Int64 (S.Nv) * (1);
       Nbytes := Count * 8;
@@ -1979,9 +2483,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Dof_2;
+
+   procedure Read_Dof (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Dof_Arrays; Result : out Load_Result) is
+   begin
+      Read_Dof_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Dof_2 (B, Pos, S, G, Result);
    end Read_Dof;
 
-   procedure Read_Tree (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tree_Arrays; Result : out Load_Result) is
+   procedure Read_Tree (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tree_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -2033,10 +2545,13 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Tree;
 
-   procedure Read_Geom (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result) is
+   procedure Read_Geom_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Geom_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Geom_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  geom_type : int (ngeom x 1)
@@ -2111,6 +2626,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Geom_Group.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Geom_1;
+
+   procedure Read_Geom_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Geom_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Geom_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  geom_priority : int (ngeom x 1)
       Count  := Int64 (S.Ngeom) * (1);
       Nbytes := Count * 4;
@@ -2203,6 +2730,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Geom_2;
+
+   procedure Read_Geom_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Geom_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Geom_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  geom_rbound : mjtNum (ngeom x 1)
       Count  := Int64 (S.Ngeom) * (1);
       Nbytes := Count * 8;
@@ -2307,6 +2846,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Geom_3;
+
+   procedure Read_Geom_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Geom_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Geom_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  geom_fluid : mjtNum (ngeom x mjNFLUID)
       Count  := Int64 (S.Ngeom) * (12);
       Nbytes := Count * 8;
@@ -2346,9 +2897,24 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Geom_4;
+
+   procedure Read_Geom (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Geom_Arrays; Result : out Load_Result) is
+   begin
+      Read_Geom_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Geom_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Geom_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Geom_4 (B, Pos, S, G, Result);
    end Read_Geom;
 
-   procedure Read_Site (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result) is
+   procedure Read_Site_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Site_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Site_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -2371,6 +2937,15 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Read_I32_Array (B, Pos, G.Site_Bodyid.all);
+      Pos := Pos + Integer (Nbytes);
+      --  site_dataid : int (nsite x 1)
+      Count  := Int64 (S.Nsite) * (1);
+      Nbytes := Count * 4;
+      if Int64 (B'Length) - Int64 (Pos) < Nbytes then
+         Result := (Truncated, Site_Dataid, -1);
+         return;
+      end if;
+      Read_I32_Array (B, Pos, G.Site_Dataid.all);
       Pos := Pos + Integer (Nbytes);
       --  site_matid : int (nsite x 1)
       Count  := Int64 (S.Nsite) * (1);
@@ -2425,6 +3000,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Site_1;
+
+   procedure Read_Site_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Site_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Site_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  site_quat : mjtNum (nsite x 4)
       Count  := Int64 (S.Nsite) * (4);
       Nbytes := Count * 8;
@@ -2464,9 +3051,20 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Site_2;
+
+   procedure Read_Site (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Site_Arrays; Result : out Load_Result) is
+   begin
+      Read_Site_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Site_2 (B, Pos, S, G, Result);
    end Read_Site;
 
-   procedure Read_Camera (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Camera_Arrays; Result : out Load_Result) is
+   procedure Read_Camera_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Camera_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Camera_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Camera_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -2564,6 +3162,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Camera_1;
+
+   procedure Read_Camera_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Camera_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Camera_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Camera_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  cam_projection : int (ncam x 1)
       Count  := Int64 (S.Ncam) * (1);
       Nbytes := Count * 4;
@@ -2656,9 +3266,20 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Camera_2;
+
+   procedure Read_Camera (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Camera_Arrays; Result : out Load_Result) is
+   begin
+      Read_Camera_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Camera_2 (B, Pos, S, G, Result);
    end Read_Camera;
 
-   procedure Read_Light (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result) is
+   procedure Read_Light_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Light_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Light_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -2744,6 +3365,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Light_1;
+
+   procedure Read_Light_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Light_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Light_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  light_range : float (nlight x 1)
       Count  := Int64 (S.Nlight) * (1);
       Nbytes := Count * 4;
@@ -2844,6 +3477,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Light_2;
+
+   procedure Read_Light_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Light_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Light_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  light_cutoff : float (nlight x 1)
       Count  := Int64 (S.Nlight) * (1);
       Nbytes := Count * 4;
@@ -2922,9 +3567,22 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Light_3;
+
+   procedure Read_Light (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Light_Arrays; Result : out Load_Result) is
+   begin
+      Read_Light_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Light_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Light_3 (B, Pos, S, G, Result);
    end Read_Light;
 
-   procedure Read_Flex (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result) is
+   procedure Read_Flex_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -3018,6 +3676,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_1;
+
+   procedure Read_Flex_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  flex_margin : mjtNum (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 8;
@@ -3098,6 +3768,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flex_Matid.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_2;
+
+   procedure Read_Flex_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  flex_group : int (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 4;
@@ -3170,6 +3851,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flex_Edgeadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_3;
+
+   procedure Read_Flex_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  flex_edgenum : int (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 4;
@@ -3242,6 +3934,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flex_Shellnum.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_4;
+
+   procedure Read_Flex_5 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  flex_shelldataadr : int (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 4;
@@ -3314,6 +4017,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flex_Vertedgenum.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_5;
+
+   procedure Read_Flex_6 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  flex_vertedge : int (nflexedge x 2)
       Count  := Int64 (S.Nflexedge) * (2);
       Nbytes := Count * 4;
@@ -3386,6 +4100,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flex_Shell.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_6;
+
+   procedure Read_Flex_7 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  flex_evpair : int (nflexevpair x 2)
       Count  := Int64 (S.Nflexevpair) * (2);
       Nbytes := Count * 4;
@@ -3486,6 +4212,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_7;
+
+   procedure Read_Flex_8 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  flex_radius : mjtNum (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 8;
@@ -3574,6 +4312,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Efm0_L_Colind.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_8;
+
+   procedure Read_Flex_9 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  efm0_L : mjtNum (nefm0L x 1)
       Count  := Int64 (S.Nefm0L) * (1);
       Nbytes := Count * 8;
@@ -3662,6 +4412,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_U8_Array (B, Pos, G.Flex_Centered.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_9;
+
+   procedure Read_Flex_10 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  flex_flatskin : mjtBool (nflex x 1)
       Count  := Int64 (S.Nflex) * (1);
       Nbytes := Count * 1;
@@ -3734,6 +4495,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Flexvert_J_Rowadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_10;
+
+   procedure Read_Flex_11 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Flex_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  flexvert_J_colind : int (nJfv x 2)
       Count  := Int64 (S.NJfv) * (2);
       Nbytes := Count * 4;
@@ -3769,12 +4542,40 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Flex_11;
+
+   procedure Read_Flex (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Flex_Arrays; Result : out Load_Result) is
+   begin
+      Read_Flex_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_4 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_5 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_6 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_7 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_8 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_9 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_10 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Flex_11 (B, Pos, S, G, Result);
    end Read_Flex;
 
-   procedure Read_Mesh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result) is
+   procedure Read_Mesh_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  mesh_vertadr : int (nmesh x 1)
@@ -3849,6 +4650,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Mesh_Octnum.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Mesh_1;
+
+   procedure Read_Mesh_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  mesh_normaladr : int (nmesh x 1)
       Count  := Int64 (S.Nmesh) * (1);
       Nbytes := Count * 4;
@@ -3929,6 +4742,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Mesh_2;
+
+   procedure Read_Mesh_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  mesh_texcoord : float (nmeshtexcoord x 2)
       Count  := Int64 (S.Nmeshtexcoord) * (2);
       Nbytes := Count * 4;
@@ -4017,6 +4842,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Mesh_3;
+
+   procedure Read_Mesh_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  mesh_pathadr : int (nmesh x 1)
       Count  := Int64 (S.Nmesh) * (1);
       Nbytes := Count * 4;
@@ -4093,6 +4930,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Mesh_Polymapadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Mesh_4;
+
+   procedure Read_Mesh_5 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Mesh_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  mesh_polymapnum : int (nmeshvert x 1)
       Count  := Int64 (S.Nmeshvert) * (1);
       Nbytes := Count * 4;
@@ -4111,9 +4959,26 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Mesh_Polymap.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Mesh_5;
+
+   procedure Read_Mesh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Mesh_Arrays; Result : out Load_Result) is
+   begin
+      Read_Mesh_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Mesh_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Mesh_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Mesh_4 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Mesh_5 (B, Pos, S, G, Result);
    end Read_Mesh;
 
-   procedure Read_Skin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result) is
+   procedure Read_Skin_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Skin_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Skin_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -4199,6 +5064,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Skin_Faceadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Skin_1;
+
+   procedure Read_Skin_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Skin_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Skin_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  skin_facenum : int (nskin x 1)
       Count  := Int64 (S.Nskin) * (1);
       Nbytes := Count * 4;
@@ -4279,6 +5156,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Skin_Bonevertnum.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Skin_2;
+
+   procedure Read_Skin_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Skin_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Skin_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  skin_bonebindpos : float (nskinbone x 3)
       Count  := Int64 (S.Nskinbone) * (3);
       Nbytes := Count * 4;
@@ -4345,9 +5234,19 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Skin_Pathadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Skin_3;
+
+   procedure Read_Skin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Skin_Arrays; Result : out Load_Result) is
+   begin
+      Read_Skin_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Skin_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Skin_3 (B, Pos, S, G, Result);
    end Read_Skin;
 
-   procedure Read_Hfield (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Hfield_Arrays; Result : out Load_Result) is
+   procedure Read_Hfield (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Hfield_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -4417,7 +5316,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Hfield;
 
-   procedure Read_Texture (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Texture_Arrays; Result : out Load_Result) is
+   procedure Read_Texture (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Texture_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -4496,7 +5396,11 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Texture;
 
-   procedure Read_Material (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Material_Arrays; Result : out Load_Result) is
+   procedure Read_Material_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Material_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Material_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Material_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -4598,6 +5502,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Material_1;
+
+   procedure Read_Material_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Material_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Material_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Material_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  mat_roughness : float (nmat x 1)
       Count  := Int64 (S.Nmat) * (1);
       Nbytes := Count * 4;
@@ -4624,9 +5540,20 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Material_2;
+
+   procedure Read_Material (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Material_Arrays; Result : out Load_Result) is
+   begin
+      Read_Material_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Material_2 (B, Pos, S, G, Result);
    end Read_Material;
 
-   procedure Read_Pair (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Pair_Arrays; Result : out Load_Result) is
+   procedure Read_Pair_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Pair_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Pair_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Pair_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -4720,6 +5647,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Pair_1;
+
+   procedure Read_Pair_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Pair_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Pair_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Pair_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  pair_gap : mjtNum (npair x 1)
       Count  := Int64 (S.Npair) * (1);
       Nbytes := Count * 8;
@@ -4759,9 +5698,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Pair_2;
+
+   procedure Read_Pair (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Pair_Arrays; Result : out Load_Result) is
+   begin
+      Read_Pair_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Pair_2 (B, Pos, S, G, Result);
    end Read_Pair;
 
-   procedure Read_Exclude (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Exclude_Arrays; Result : out Load_Result) is
+   procedure Read_Exclude (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Exclude_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -4777,7 +5724,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Exclude;
 
-   procedure Read_Equality (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Equality_Arrays; Result : out Load_Result) is
+   procedure Read_Equality (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Equality_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -4869,10 +5817,13 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Equality;
 
-   procedure Read_Tendon (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result) is
+   procedure Read_Tendon_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Tendon_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  tendon_adr : int (ntendon x 1)
@@ -4947,6 +5898,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Ten_J_Rownnz.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Tendon_1;
+
+   procedure Read_Tendon_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Tendon_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  ten_J_rowadr : int (ntendon x 1)
       Count  := Int64 (S.Ntendon) * (1);
       Nbytes := Count * 4;
@@ -5035,6 +5998,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Tendon_2;
+
+   procedure Read_Tendon_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Tendon_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  tendon_solimp_fri : mjtNum (ntendon x mjNIMP)
       Count  := Int64 (S.Ntendon) * (5);
       Nbytes := Count * 8;
@@ -5139,6 +6114,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Tendon_3;
+
+   procedure Read_Tendon_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Tendon_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Tendon_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  tendon_armature : mjtNum (ntendon x 1)
       Count  := Int64 (S.Ntendon) * (1);
       Nbytes := Count * 8;
@@ -5230,12 +6217,26 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Tendon_4;
+
+   procedure Read_Tendon (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tendon_Arrays; Result : out Load_Result) is
+   begin
+      Read_Tendon_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Tendon_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Tendon_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Tendon_4 (B, Pos, S, G, Result);
    end Read_Tendon;
 
-   procedure Read_Actuator (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result) is
+   procedure Read_Actuator_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  actuator_trntype : int (nactuator x 1)
@@ -5310,6 +6311,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Actuator_Outadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Actuator_1;
+
+   procedure Read_Actuator_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  actuator_outnum : int (nactuator x 1)
       Count  := Int64 (S.Nactuator) * (1);
       Nbytes := Count * 4;
@@ -5398,6 +6411,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Actuator_2;
+
+   procedure Read_Actuator_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  actuator_actlimited : mjtBool (nactuator x 1)
       Count  := Int64 (S.Nactuator) * (1);
       Nbytes := Count * 1;
@@ -5486,6 +6511,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Actuator_3;
+
+   procedure Read_Actuator_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  actuator_armature : mjtNum (nactuator x 1)
       Count  := Int64 (S.Nactuator) * (1);
       Nbytes := Count * 8;
@@ -5574,6 +6611,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Actuator_4;
+
+   procedure Read_Actuator_5 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Actuator_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  actuator_gear : mjtNum (nout x 6)
       Count  := Int64 (S.Nout) * (6);
       Nbytes := Count * 8;
@@ -5626,12 +6675,28 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Actuator_5;
+
+   procedure Read_Actuator (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Actuator_Arrays; Result : out Load_Result) is
+   begin
+      Read_Actuator_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Actuator_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Actuator_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Actuator_4 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Actuator_5 (B, Pos, S, G, Result);
    end Read_Actuator;
 
-   procedure Read_Sensor (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result) is
+   procedure Read_Sensor_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sensor_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Sensor_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
-      Bad    : Integer;
    begin
       Result := OK_Result;
       --  sensor_type : int (nsensor x 1)
@@ -5706,6 +6771,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Sensor_Intprm.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Sensor_1;
+
+   procedure Read_Sensor_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sensor_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Sensor_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  sensor_dim : int (nsensor x 1)
       Count  := Int64 (S.Nsensor) * (1);
       Nbytes := Count * 4;
@@ -5794,6 +6871,18 @@ package body MJ.MJB.Readers with SPARK_Mode is
          return;
       end if;
       Pos := Pos + Integer (Nbytes);
+   end Read_Sensor_2;
+
+   procedure Read_Sensor_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sensor_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Sensor_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+      Bad    : Integer;
+   begin
+      Result := OK_Result;
       --  sensor_user : mjtNum (nsensor x MJ_M(nuser_sensor))
       Count  := Int64 (S.Nsensor) * (Int64 (S.Nuser_Sensor));
       Nbytes := Count * 8;
@@ -5816,9 +6905,19 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Sensor_Plugin.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Sensor_3;
+
+   procedure Read_Sensor (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sensor_Arrays; Result : out Load_Result) is
+   begin
+      Read_Sensor_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sensor_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sensor_3 (B, Pos, S, G, Result);
    end Read_Sensor;
 
-   procedure Read_Qpos (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Qpos_Arrays; Result : out Load_Result) is
+   procedure Read_Qpos (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Qpos_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -5852,7 +6951,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Qpos;
 
-   procedure Read_Bvh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Bvh_Arrays; Result : out Load_Result) is
+   procedure Read_Bvh (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Bvh_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -5944,7 +7044,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Bvh;
 
-   procedure Read_Wrap (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Wrap_Arrays; Result : out Load_Result) is
+   procedure Read_Wrap (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Wrap_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -5983,7 +7084,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Wrap;
 
-   procedure Read_Plugin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Plugin_Arrays; Result : out Load_Result) is
+   procedure Read_Plugin (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Plugin_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -6035,7 +7137,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Plugin;
 
-   procedure Read_Numeric (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Numeric_Arrays; Result : out Load_Result) is
+   procedure Read_Numeric (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Numeric_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -6074,7 +7177,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Numeric;
 
-   procedure Read_Text (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Text_Arrays; Result : out Load_Result) is
+   procedure Read_Text (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Text_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -6108,7 +7212,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Text;
 
-   procedure Read_Tuple (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tuple_Arrays; Result : out Load_Result) is
+   procedure Read_Tuple (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Tuple_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -6165,7 +7270,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Tuple;
 
-   procedure Read_Key (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Key_Arrays; Result : out Load_Result) is
+   procedure Read_Key (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Key_Arrays; Result : out Load_Result)
+   is
       Count  : Int64;
       Nbytes : Int64;
       Bad    : Integer;
@@ -6264,7 +7370,11 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Pos := Pos + Integer (Nbytes);
    end Read_Key;
 
-   procedure Read_Name (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result) is
+   procedure Read_Name_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Name_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Name_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -6341,6 +7451,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Name_Meshadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Name_1;
+
+   procedure Read_Name_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Name_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Name_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  name_skinadr : int (nskin x 1)
       Count  := Int64 (S.Nskin) * (1);
       Nbytes := Count * 4;
@@ -6413,6 +7534,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.Name_Tendonadr.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Name_2;
+
+   procedure Read_Name_3 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Name_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Name_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  name_actuatoradr : int (nactuator x 1)
       Count  := Int64 (S.Nactuator) * (1);
       Nbytes := Count * 4;
@@ -6485,6 +7617,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_U8_Array (B, Pos, G.Names.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Name_3;
+
+   procedure Read_Name_4 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Name_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Name_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  names_map : int (nnames_map x 1)
       Count  := Int64 (S.Nnames_Map) * (1);
       Nbytes := Count * 4;
@@ -6503,9 +7646,24 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_U8_Array (B, Pos, G.Paths.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Name_4;
+
+   procedure Read_Name (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Name_Arrays; Result : out Load_Result) is
+   begin
+      Read_Name_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Name_2 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Name_3 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Name_4 (B, Pos, S, G, Result);
    end Read_Name;
 
-   procedure Read_Sparse (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sparse_Arrays; Result : out Load_Result) is
+   procedure Read_Sparse_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sparse_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sparse_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Sparse_Layout_OK (S, G)
+   is
       Count  : Int64;
       Nbytes : Int64;
    begin
@@ -6582,6 +7740,17 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.D_Rownnz.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Sparse_1;
+
+   procedure Read_Sparse_2 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sparse_Arrays; Result : out Load_Result)
+   with
+     Pre  => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then Pos <= B'Length and then Sparse_Layout_OK (S, G),
+     Post => Pos <= B'Length and then Sparse_Layout_OK (S, G)
+   is
+      Count  : Int64;
+      Nbytes : Int64;
+   begin
+      Result := OK_Result;
       --  D_rowadr : int (nv x 1)
       Count  := Int64 (S.Nv) * (1);
       Nbytes := Count * 4;
@@ -6627,70 +7796,686 @@ package body MJ.MJB.Readers with SPARK_Mode is
       end if;
       Read_I32_Array (B, Pos, G.MapD2M.all);
       Pos := Pos + Integer (Nbytes);
+   end Read_Sparse_2;
+
+   procedure Read_Sparse (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Sparse_Arrays; Result : out Load_Result) is
+   begin
+      Read_Sparse_1 (B, Pos, S, G, Result);
+      if Result.Status /= OK then return; end if;
+      Read_Sparse_2 (B, Pos, S, G, Result);
    end Read_Sparse;
 
-   procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) is
+   procedure Allocate_Read_Qpos
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Qpos_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Qpos_Sizes_OK (S)
+       and then Qpos_All_Null (G),
+     Post => Pos <= B'Length and then Qpos_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Qpos
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Qpos_Arrays; Result : in out Load_Result) is
    begin
-      Read_Qpos (B, Pos, M.S, M.Qpos, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Body (B, Pos, M.S, M.Bodies, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Bvh (B, Pos, M.S, M.Bvh, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Joint (B, Pos, M.S, M.Joints, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Dof (B, Pos, M.S, M.Dofs, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Tree (B, Pos, M.S, M.Trees, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Geom (B, Pos, M.S, M.Geoms, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Site (B, Pos, M.S, M.Sites, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Camera (B, Pos, M.S, M.Cameras, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Light (B, Pos, M.S, M.Lights, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Flex (B, Pos, M.S, M.Flexes, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Mesh (B, Pos, M.S, M.Meshes, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Skin (B, Pos, M.S, M.Skins, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Hfield (B, Pos, M.S, M.Hfields, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Texture (B, Pos, M.S, M.Textures, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Material (B, Pos, M.S, M.Materials, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Pair (B, Pos, M.S, M.Pairs, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Exclude (B, Pos, M.S, M.Excludes, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Equality (B, Pos, M.S, M.Equalities, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Tendon (B, Pos, M.S, M.Tendons, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Wrap (B, Pos, M.S, M.Wraps, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Actuator (B, Pos, M.S, M.Actuators, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Sensor (B, Pos, M.S, M.Sensors, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Plugin (B, Pos, M.S, M.Plugins, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Numeric (B, Pos, M.S, M.Numerics, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Text (B, Pos, M.S, M.Texts, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Tuple (B, Pos, M.S, M.Tuples, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Key (B, Pos, M.S, M.Keys, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Name (B, Pos, M.S, M.Names, Result);
-      if Result.Status /= OK then return; end if;
-      Read_Sparse (B, Pos, M.S, M.Sparse, Result);
-      if Result.Status /= OK then return; end if;
+      Allocate_Qpos (S, G);
+      if Result.Status = OK then
+         Read_Qpos (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Qpos;
+
+   procedure Allocate_Read_Body
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Body_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Body_Sizes_OK (S)
+       and then Body_All_Null (G),
+     Post => Pos <= B'Length and then Body_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Body
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Body_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Body (S, G);
+      if Result.Status = OK then
+         Read_Body (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Body;
+
+   procedure Allocate_Read_Bvh
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Bvh_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Bvh_Sizes_OK (S)
+       and then Bvh_All_Null (G),
+     Post => Pos <= B'Length and then Bvh_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Bvh
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Bvh_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Bvh (S, G);
+      if Result.Status = OK then
+         Read_Bvh (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Bvh;
+
+   procedure Allocate_Read_Joint
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Joint_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Joint_Sizes_OK (S)
+       and then Joint_All_Null (G),
+     Post => Pos <= B'Length and then Joint_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Joint
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Joint_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Joint (S, G);
+      if Result.Status = OK then
+         Read_Joint (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Joint;
+
+   procedure Allocate_Read_Dof
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Dof_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Dof_Sizes_OK (S)
+       and then Dof_All_Null (G),
+     Post => Pos <= B'Length and then Dof_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Dof
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Dof_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Dof (S, G);
+      if Result.Status = OK then
+         Read_Dof (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Dof;
+
+   procedure Allocate_Read_Tree
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tree_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Tree_Sizes_OK (S)
+       and then Tree_All_Null (G),
+     Post => Pos <= B'Length and then Tree_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Tree
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tree_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Tree (S, G);
+      if Result.Status = OK then
+         Read_Tree (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Tree;
+
+   procedure Allocate_Read_Geom
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Geom_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Geom_Sizes_OK (S)
+       and then Geom_All_Null (G),
+     Post => Pos <= B'Length and then Geom_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Geom
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Geom_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Geom (S, G);
+      if Result.Status = OK then
+         Read_Geom (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Geom;
+
+   procedure Allocate_Read_Site
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Site_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Site_Sizes_OK (S)
+       and then Site_All_Null (G),
+     Post => Pos <= B'Length and then Site_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Site
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Site_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Site (S, G);
+      if Result.Status = OK then
+         Read_Site (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Site;
+
+   procedure Allocate_Read_Camera
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Camera_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Camera_Sizes_OK (S)
+       and then Camera_All_Null (G),
+     Post => Pos <= B'Length and then Camera_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Camera
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Camera_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Camera (S, G);
+      if Result.Status = OK then
+         Read_Camera (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Camera;
+
+   procedure Allocate_Read_Light
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Light_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Light_Sizes_OK (S)
+       and then Light_All_Null (G),
+     Post => Pos <= B'Length and then Light_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Light
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Light_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Light (S, G);
+      if Result.Status = OK then
+         Read_Light (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Light;
+
+   procedure Allocate_Read_Flex
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Flex_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Flex_Sizes_OK (S)
+       and then Flex_All_Null (G),
+     Post => Pos <= B'Length and then Flex_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Flex
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Flex_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Flex (S, G);
+      if Result.Status = OK then
+         Read_Flex (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Flex;
+
+   procedure Allocate_Read_Mesh
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Mesh_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Mesh_Sizes_OK (S)
+       and then Mesh_All_Null (G),
+     Post => Pos <= B'Length and then Mesh_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Mesh
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Mesh_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Mesh (S, G);
+      if Result.Status = OK then
+         Read_Mesh (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Mesh;
+
+   procedure Allocate_Read_Skin
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Skin_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Skin_Sizes_OK (S)
+       and then Skin_All_Null (G),
+     Post => Pos <= B'Length and then Skin_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Skin
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Skin_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Skin (S, G);
+      if Result.Status = OK then
+         Read_Skin (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Skin;
+
+   procedure Allocate_Read_Hfield
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Hfield_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Hfield_Sizes_OK (S)
+       and then Hfield_All_Null (G),
+     Post => Pos <= B'Length and then Hfield_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Hfield
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Hfield_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Hfield (S, G);
+      if Result.Status = OK then
+         Read_Hfield (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Hfield;
+
+   procedure Allocate_Read_Texture
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Texture_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Texture_Sizes_OK (S)
+       and then Texture_All_Null (G),
+     Post => Pos <= B'Length and then Texture_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Texture
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Texture_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Texture (S, G);
+      if Result.Status = OK then
+         Read_Texture (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Texture;
+
+   procedure Allocate_Read_Material
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Material_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Material_Sizes_OK (S)
+       and then Material_All_Null (G),
+     Post => Pos <= B'Length and then Material_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Material
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Material_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Material (S, G);
+      if Result.Status = OK then
+         Read_Material (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Material;
+
+   procedure Allocate_Read_Pair
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Pair_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Pair_Sizes_OK (S)
+       and then Pair_All_Null (G),
+     Post => Pos <= B'Length and then Pair_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Pair
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Pair_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Pair (S, G);
+      if Result.Status = OK then
+         Read_Pair (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Pair;
+
+   procedure Allocate_Read_Exclude
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Exclude_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Exclude_Sizes_OK (S)
+       and then Exclude_All_Null (G),
+     Post => Pos <= B'Length and then Exclude_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Exclude
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Exclude_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Exclude (S, G);
+      if Result.Status = OK then
+         Read_Exclude (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Exclude;
+
+   procedure Allocate_Read_Equality
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Equality_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Equality_Sizes_OK (S)
+       and then Equality_All_Null (G),
+     Post => Pos <= B'Length and then Equality_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Equality
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Equality_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Equality (S, G);
+      if Result.Status = OK then
+         Read_Equality (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Equality;
+
+   procedure Allocate_Read_Tendon
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tendon_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Tendon_Sizes_OK (S)
+       and then Tendon_All_Null (G),
+     Post => Pos <= B'Length and then Tendon_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Tendon
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tendon_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Tendon (S, G);
+      if Result.Status = OK then
+         Read_Tendon (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Tendon;
+
+   procedure Allocate_Read_Wrap
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Wrap_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Wrap_Sizes_OK (S)
+       and then Wrap_All_Null (G),
+     Post => Pos <= B'Length and then Wrap_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Wrap
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Wrap_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Wrap (S, G);
+      if Result.Status = OK then
+         Read_Wrap (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Wrap;
+
+   procedure Allocate_Read_Actuator
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Actuator_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Actuator_Sizes_OK (S)
+       and then Actuator_All_Null (G),
+     Post => Pos <= B'Length and then Actuator_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Actuator
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Actuator_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Actuator (S, G);
+      if Result.Status = OK then
+         Read_Actuator (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Actuator;
+
+   procedure Allocate_Read_Sensor
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Sensor_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Sensor_Sizes_OK (S)
+       and then Sensor_All_Null (G),
+     Post => Pos <= B'Length and then Sensor_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Sensor
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Sensor_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Sensor (S, G);
+      if Result.Status = OK then
+         Read_Sensor (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Sensor;
+
+   procedure Allocate_Read_Plugin
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Plugin_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Plugin_Sizes_OK (S)
+       and then Plugin_All_Null (G),
+     Post => Pos <= B'Length and then Plugin_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Plugin
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Plugin_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Plugin (S, G);
+      if Result.Status = OK then
+         Read_Plugin (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Plugin;
+
+   procedure Allocate_Read_Numeric
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Numeric_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Numeric_Sizes_OK (S)
+       and then Numeric_All_Null (G),
+     Post => Pos <= B'Length and then Numeric_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Numeric
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Numeric_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Numeric (S, G);
+      if Result.Status = OK then
+         Read_Numeric (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Numeric;
+
+   procedure Allocate_Read_Text
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Text_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Text_Sizes_OK (S)
+       and then Text_All_Null (G),
+     Post => Pos <= B'Length and then Text_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Text
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Text_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Text (S, G);
+      if Result.Status = OK then
+         Read_Text (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Text;
+
+   procedure Allocate_Read_Tuple
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tuple_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Tuple_Sizes_OK (S)
+       and then Tuple_All_Null (G),
+     Post => Pos <= B'Length and then Tuple_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Tuple
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Tuple_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Tuple (S, G);
+      if Result.Status = OK then
+         Read_Tuple (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Tuple;
+
+   procedure Allocate_Read_Key
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Key_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Key_Sizes_OK (S)
+       and then Key_All_Null (G),
+     Post => Pos <= B'Length and then Key_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Key
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Key_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Key (S, G);
+      if Result.Status = OK then
+         Read_Key (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Key;
+
+   procedure Allocate_Read_Name
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Name_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Name_Sizes_OK (S)
+       and then Name_All_Null (G),
+     Post => Pos <= B'Length and then Name_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Name
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Name_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Name (S, G);
+      if Result.Status = OK then
+         Read_Name (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Name;
+
+   procedure Allocate_Read_Sparse
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Sparse_Arrays; Result : in out Load_Result) with
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last)
+       and then Pos <= B'Length and then Sparse_Sizes_OK (S)
+       and then Sparse_All_Null (G),
+     Post => Pos <= B'Length and then Sparse_Layout_OK (S, G)
+       and then (if Result'Old.Status /= OK then Result = Result'Old and Pos = Pos'Old);
+
+   procedure Allocate_Read_Sparse
+     (B : Byte_Array; Pos : in out Natural; S : Sizes;
+      G : in out Sparse_Arrays; Result : in out Load_Result) is
+   begin
+      Allocate_Sparse (S, G);
+      if Result.Status = OK then
+         Read_Sparse (B, Pos, S, G, Result);
+      end if;
+   end Allocate_Read_Sparse;
+
+   procedure Read_Arrays (B : Byte_Array; Pos : in out Natural; M : in out Model; Result : out Load_Result) is
+      L_Bodies       : Body_Arrays;
+      L_Joints       : Joint_Arrays;
+      L_Dofs         : Dof_Arrays;
+      L_Trees        : Tree_Arrays;
+      L_Geoms        : Geom_Arrays;
+      L_Sites        : Site_Arrays;
+      L_Cameras      : Camera_Arrays;
+      L_Lights       : Light_Arrays;
+      L_Flexes       : Flex_Arrays;
+      L_Meshes       : Mesh_Arrays;
+      L_Skins        : Skin_Arrays;
+      L_Hfields      : Hfield_Arrays;
+      L_Textures     : Texture_Arrays;
+      L_Materials    : Material_Arrays;
+      L_Pairs        : Pair_Arrays;
+      L_Excludes     : Exclude_Arrays;
+      L_Equalities   : Equality_Arrays;
+      L_Tendons      : Tendon_Arrays;
+      L_Actuators    : Actuator_Arrays;
+      L_Sensors      : Sensor_Arrays;
+      L_Qpos         : Qpos_Arrays;
+      L_Bvh          : Bvh_Arrays;
+      L_Wraps        : Wrap_Arrays;
+      L_Plugins      : Plugin_Arrays;
+      L_Numerics     : Numeric_Arrays;
+      L_Texts        : Text_Arrays;
+      L_Tuples       : Tuple_Arrays;
+      L_Keys         : Key_Arrays;
+      L_Names        : Name_Arrays;
+      L_Sparse       : Sparse_Arrays;
+   begin
+      Result := (OK, None, -1);
+      Allocate_Read_Qpos (B, Pos, M.S, L_Qpos, Result);
+      Allocate_Read_Body (B, Pos, M.S, L_Bodies, Result);
+      Allocate_Read_Bvh (B, Pos, M.S, L_Bvh, Result);
+      Allocate_Read_Joint (B, Pos, M.S, L_Joints, Result);
+      Allocate_Read_Dof (B, Pos, M.S, L_Dofs, Result);
+      Allocate_Read_Tree (B, Pos, M.S, L_Trees, Result);
+      Allocate_Read_Geom (B, Pos, M.S, L_Geoms, Result);
+      Allocate_Read_Site (B, Pos, M.S, L_Sites, Result);
+      Allocate_Read_Camera (B, Pos, M.S, L_Cameras, Result);
+      Allocate_Read_Light (B, Pos, M.S, L_Lights, Result);
+      Allocate_Read_Flex (B, Pos, M.S, L_Flexes, Result);
+      Allocate_Read_Mesh (B, Pos, M.S, L_Meshes, Result);
+      Allocate_Read_Skin (B, Pos, M.S, L_Skins, Result);
+      Allocate_Read_Hfield (B, Pos, M.S, L_Hfields, Result);
+      Allocate_Read_Texture (B, Pos, M.S, L_Textures, Result);
+      Allocate_Read_Material (B, Pos, M.S, L_Materials, Result);
+      Allocate_Read_Pair (B, Pos, M.S, L_Pairs, Result);
+      Allocate_Read_Exclude (B, Pos, M.S, L_Excludes, Result);
+      Allocate_Read_Equality (B, Pos, M.S, L_Equalities, Result);
+      Allocate_Read_Tendon (B, Pos, M.S, L_Tendons, Result);
+      Allocate_Read_Wrap (B, Pos, M.S, L_Wraps, Result);
+      Allocate_Read_Actuator (B, Pos, M.S, L_Actuators, Result);
+      Allocate_Read_Sensor (B, Pos, M.S, L_Sensors, Result);
+      Allocate_Read_Plugin (B, Pos, M.S, L_Plugins, Result);
+      Allocate_Read_Numeric (B, Pos, M.S, L_Numerics, Result);
+      Allocate_Read_Text (B, Pos, M.S, L_Texts, Result);
+      Allocate_Read_Tuple (B, Pos, M.S, L_Tuples, Result);
+      Allocate_Read_Key (B, Pos, M.S, L_Keys, Result);
+      Allocate_Read_Name (B, Pos, M.S, L_Names, Result);
+      Allocate_Read_Sparse (B, Pos, M.S, L_Sparse, Result);
+      M := (S              => M.S,
+            Opt            => M.Opt,
+            Vis            => M.Vis,
+            Stat           => M.Stat,
+            Flg_Gravcomp   => M.Flg_Gravcomp,
+            Flg_Surfacevel => M.Flg_Surfacevel,
+            Flg_Adhesion   => M.Flg_Adhesion,
+            Caps           => M.Caps,
+            Bodies         => L_Bodies,
+            Joints         => L_Joints,
+            Dofs           => L_Dofs,
+            Trees          => L_Trees,
+            Geoms          => L_Geoms,
+            Sites          => L_Sites,
+            Cameras        => L_Cameras,
+            Lights         => L_Lights,
+            Flexes         => L_Flexes,
+            Meshes         => L_Meshes,
+            Skins          => L_Skins,
+            Hfields        => L_Hfields,
+            Textures       => L_Textures,
+            Materials      => L_Materials,
+            Pairs          => L_Pairs,
+            Excludes       => L_Excludes,
+            Equalities     => L_Equalities,
+            Tendons        => L_Tendons,
+            Actuators      => L_Actuators,
+            Sensors        => L_Sensors,
+            Qpos           => L_Qpos,
+            Bvh            => L_Bvh,
+            Wraps          => L_Wraps,
+            Plugins        => L_Plugins,
+            Numerics       => L_Numerics,
+            Texts          => L_Texts,
+            Tuples         => L_Tuples,
+            Keys           => L_Keys,
+            Names          => L_Names,
+            Sparse         => L_Sparse);
    end Read_Arrays;
 
 end MJ.MJB.Readers;

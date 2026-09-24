@@ -6,6 +6,7 @@ with MJ.Fields;     use MJ.Fields;
 with MJ.Models;      use MJ.Models;
 with MJ.MJB;        use MJ.MJB;
 with MJ.Bytes;
+with MJ.MJB.Readers;
 with MJB_Serialize; use MJB_Serialize;
 
 procedure Test_Parse_Raw is
@@ -24,6 +25,8 @@ procedure Test_Parse_Raw is
       S.Nq := 1;
       S.Nv := 1;
       S.Ngeom := 1;
+      S.Nsite := 2;
+      S.Nmesh := 1;
       S.Nnames := Names'Length;
       S.Nmocap := 0;
       Allocate (S, M0);
@@ -38,6 +41,9 @@ procedure Test_Parse_Raw is
       M0.Bodies.Body_Pos (3 .. 5) := [1.0, 2.0, 3.0];
       M0.Joints.Jnt_Type (0) := 3;
       M0.Geoms.Geom_Type (0) := 2;
+      M0.Sites.Site_Type.all := [7, 2];
+      M0.Sites.Site_Dataid.all := [0, -1];
+      M0.Sites.Site_Matid.all := [-1, 17];
       for K in Names'Range loop
          M0.Names.Names (K - Names'First) := Character'Pos (Names (K));
       end loop;
@@ -55,6 +61,56 @@ procedure Test_Parse_Raw is
    end Expect;
 
 begin
+   --  Layout predicates permit null arrays with an upper bound below -1.
+   --  The floating readers must still report success, not constrain their
+   --  success sentinel (-1) to the empty array's index range.
+   declare
+      Empty : Byte_Array (0 .. -1);
+      Zero_Sizes : Sizes;
+      Q : Qpos_Arrays :=
+        (Qpos0 => new Real_Array (0 .. -2),
+         Qpos_Spring => new Real_Array (0 .. Integer'First));
+      G : Geom_Arrays;
+      Pos : Natural := 0;
+      R : Load_Result;
+   begin
+      Assert (Qpos_Layout_OK (Zero_Sizes, Q), "noncanonical empty f64 layout");
+      MJ.MJB.Readers.Read_Qpos (Empty, Pos, Zero_Sizes, Q, R);
+      Assert (R = OK_Result and Pos = 0 and Qpos_Layout_OK (Zero_Sizes, Q),
+              "empty f64 arrays below upper bound -1 succeed");
+      Free_Qpos (Q);
+
+      Allocate_Geom (Zero_Sizes, G);
+      Free_Float32 (G.Geom_Rgba);
+      G.Geom_Rgba := new Float32_Array (0 .. -2);
+      Assert (Geom_Layout_OK (Zero_Sizes, G), "noncanonical empty f32 layout");
+      MJ.MJB.Readers.Read_Geom (Empty, Pos, Zero_Sizes, G, R);
+      Assert (R = OK_Result and Pos = 0 and Geom_Layout_OK (Zero_Sizes, G),
+              "empty f32 array below upper bound -1 succeeds");
+      Free_Geom (G);
+   end;
+
+   --  A correct prefix with zero qpos entries still needs allocated empty
+   --  arrays. Previously Parse_Raw called Read_Arrays with null pointers.
+   declare
+      Empty : Byte_Array (0 .. -1);
+      Prefix : Byte_Array (0 .. Header_Bytes + 8 * Size_Count
+                               + MJ.MJB.Readers.Fixed_Bytes - 1) := [others => 0];
+      Header_Values : constant array (0 .. 4) of Unsigned_32 :=
+        [MJB_ID, MJB_Precision, Size_Count, Version_Header, Pointer_Count];
+   begin
+      Expect (Empty, Truncated, Header, -1, "empty input");
+      for I in Header_Values'Range loop
+         for K in 0 .. 3 loop
+            Prefix (4 * I + K) := Unsigned_8
+              (Shift_Right (Header_Values (I), 8 * K) and 16#FF#);
+         end loop;
+      end loop;
+      Prefix (Header_Bytes + 8 * 6) := 1;  -- nbody = 1, all other sizes zero
+      Expect (Prefix, Truncated, Body_Parentid, -1,
+              "empty qpos arrays followed by truncated body arrays");
+   end;
+
    Build_Reference;
    declare
       Len : constant Int64 := Serialized_Size (M0);
@@ -79,6 +135,8 @@ begin
       Assert (M1.Bodies.Body_Mass (1) = 3.5, "body mass");
       Assert (M1.Bodies.Body_Pos (4) = 2.0, "body pos");
       Assert_Eq (M1.Joints.Jnt_Type (0), 3, "joint type");
+      Assert (M1.Sites.Site_Dataid.all = [0, -1], "mesh-site ids and sentinel round-trip");
+      Assert (M1.Sites.Site_Matid.all = [-1, 17], "field following site_dataid stays aligned");
       Assert_Eq (Integer (M1.Names.Names (6)), Character'Pos ('t'), "names bytes");
       declare
          B2 : Byte_Array (0 .. Integer (Len) - 1);
