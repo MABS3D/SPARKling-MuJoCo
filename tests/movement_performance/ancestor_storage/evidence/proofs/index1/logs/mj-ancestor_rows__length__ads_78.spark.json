@@ -1,0 +1,938 @@
+{
+  "mj-ancestor_rows.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Ancestor_Rows.Length",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 18
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Ancestor_Rows.Start",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 15
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Ancestor_Rows.Count",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 14
+          }
+        ]
+      },
+      " 4": {
+        "name": "MJ.Ancestor_Rows.Size",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 13
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "flow",
+        "line": 18,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Length\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 6,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "flow",
+        "line": 19,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 8,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014688
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 259,
+                "time": 0.01042
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 8,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "pointer dereference check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_NULL_POINTER_DEREFERENCE",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 259,
+            "max_time": 0.0104200001806021
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 21,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010366
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011944
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011487
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.007059
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 21,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0103660002350807
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 21,
+            "max_time": 0.00705899996683002
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 21,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013771
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011959
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00718
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 11,
+                "time": 0.012021
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 21,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0137710003182292
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 29,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012224
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 162,
+                "time": 0.011813
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 29,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "pointer dereference check proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_NULL_POINTER_DEREFERENCE",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 162,
+            "max_time": 0.0118129998445511
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 38,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00963
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010408
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014719
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 101,
+                "time": 0.013804
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 38,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00963000021874905
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 101,
+            "max_time": 0.0138039998710155
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 26,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018111
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.016253
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01113
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.08165
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 26,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0181109998375177
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 26,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 79,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00652
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005886
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01061
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.072094
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 26,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 79,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.010610000230372
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 35,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 20,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009909
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005878
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006658
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 43,
+                "time": 0.014748
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 35,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 20,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0099090002477169
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 17,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 21,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011369
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 10,
+                "time": 0.014965
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 17,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 21,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0113690001890063
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 17,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 21,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00976
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007852
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 17,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 21,
+        "message": {
+          "text": "invariant check proved"
+        },
+        "msg_id": 11,
+        "rule": "VC_INVARIANT_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00975999981164932
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 21,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012994
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.017131
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013583
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 91,
+                "time": 0.013683
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 21,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 12,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.013582999818027
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 51,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 21,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010265
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006269
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 51,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 21,
+        "message": {
+          "text": "invariant check proved"
+        },
+        "msg_id": 13,
+        "rule": "VC_INVARIANT_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0102650001645088
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 35,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 19,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00636
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005564
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 35,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 19,
+        "message": {
+          "text": "invariant check proved"
+        },
+        "msg_id": 14,
+        "rule": "VC_INVARIANT_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00635999999940395
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 20,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.022059
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014429
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016641
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012304
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 20,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 15,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0220589991658926
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00487599987536669,
+        "gnatwhy3.init": 0.211737006902695,
+        "gnatwhy3.register_vcs": 0.0090979989618063,
+        "gnatwhy3.run_vcs": 2.09989993891213e-05,
+        "gnatwhy3.save_session": 0.00254400004632771,
+        "gnatwhy3.schedule_vcs": 0.159200996160507,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00375999906100333,
+        "gnatwhy3.transformations.detect_polymorphism": 0.000472999003250152,
+        "gnatwhy3.transformations.discriminate_if_poly": 7.99900044512469e-06,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0134770004078746,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00181699905078858,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00271899905055761,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000675000017508864,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.0026199989952147,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.00167100003454834,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00233700009994209,
+        "gnatwhy3.transformations.eliminate_literal": 0.00431500002741814,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00273600011132658,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00119300000369549,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 3.00000010611257e-06,
+        "gnatwhy3.transformations.inline_trivial": 0.0762469992041588,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000841000000946224,
+        "gnatwhy3.transformations.remove_unused": 0.0333079993724823,
+        "gnatwhy3.transformations.simplify_formula": 0.0160629991441965,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00501100020483136,
+        "gnatwhy3.transformations.split_premise_right": 0.0126599986106157
+      },
+      "global": {
+        "flow analysis": 0.00111499999184161,
+        "globals (advanced)": 0.00044900001375936,
+        "globals (basic)": 0.00244199996814132,
+        "init_why_sections": 0.000434999994467944,
+        "marking": 0.000437000009696931,
+        "properties (advanced)": 5.7000001106644e-05,
+        "translation of standard": 0.000951999973040074
+      }
+    },
+    "warn_error": []
+  }
+}

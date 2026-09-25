@@ -1,0 +1,5133 @@
+{
+  "mj-smooth_math.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 4,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Smooth_Math.Apply",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_math.ads",
+            "line": 58
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Matrices.MulMatVec3",
+        "sloc": [
+          {
+            "column": 14,
+            "file": "mj-matrices.ads",
+            "line": 17
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Smooth_Math.Bounded",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_math.ads",
+            "line": 18
+          }
+        ]
+      },
+      " 4": {
+        "name": "MJ.Smooth_Math.Bounded",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_math.ads",
+            "line": 27
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "flow",
+        "line": 66,
+        "message": {
+          "text": "initialization of \"Result\" proved"
+        },
+        "msg_id": 0,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "flow",
+        "line": 58,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Apply\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 1,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "flow",
+        "line": 58,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 2,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 3,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 4,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 5,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 6,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 7,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 8,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 9,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 10,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 11,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 12,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 13,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 49,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 49,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 14,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 15,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 16,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 50,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 50,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 17,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 39,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 39,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 18,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 19,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 51,
+        "check_tree": {},
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 20,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 16,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 69,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009248
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010403
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 16,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 69,
+        "message": {
+          "text": "initialization check proved"
+        },
+        "msg_id": 21,
+        "rule": "VC_INITIALIZATION_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00924799963831902
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 24,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 68,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.074382
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1919,
+                "time": 0.086752
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 51853,
+                "time": 1.76218
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1.9848
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 24,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 68,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 22,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 51853,
+            "max_time": 1.76218402385712
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 1919,
+            "max_time": 0.0867519974708557
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 38,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 70,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 56955,
+                "time": 1.83399
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1.87955
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 38,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 70,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 23,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 56955,
+            "max_time": 1.83399295806885
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 38,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 71,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 57105,
+                "time": 1.99716
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 2.04515
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 38,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 71,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 24,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 57105,
+            "max_time": 1.99715900421143
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 38,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 72,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 55043,
+                "time": 1.47607
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1.57858
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 38,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 72,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 25,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 55043,
+            "max_time": 1.47607398033142
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007149
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 773,
+                "time": 0.039592
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "precondition proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 26,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00714900018647313
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7732,
+                "time": 0.192262
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.206024
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 27,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 7732,
+            "max_time": 0.19226199388504
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010982
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011992
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 28,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0109820002689958
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010794
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010347
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 29,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0107939997687936
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.059449
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1153,
+                "time": 0.058367
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 30,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1153,
+            "max_time": 0.0583669990301132
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010897
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015722
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 31,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0108970003202558
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.038788
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 851,
+                "time": 0.041994
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 32,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 851,
+            "max_time": 0.0419940017163754
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.045519
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 784,
+                "time": 0.037449
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 33,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 784,
+            "max_time": 0.0374489985406399
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011631
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.018924
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 34,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0116309998556972
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015213
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.021053
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 35,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0152129996567965
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.070508
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1162,
+                "time": 0.073101
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 36,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1162,
+            "max_time": 0.0731009989976883
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010953
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013523
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 37,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0109529998153448
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.053613
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 860,
+                "time": 0.050903
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 38,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 860,
+            "max_time": 0.0509029999375343
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.041128
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 793,
+                "time": 0.041568
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 39,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 793,
+            "max_time": 0.041567999869585
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.017948
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.017161
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 40,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0179479997605085
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01777
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013506
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 41,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0177699998021126
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.056983
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1172,
+                "time": 0.05542
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 42,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1172,
+            "max_time": 0.0554200001060963
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007474
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 267,
+                "time": 0.020087
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 43,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0074740001000464
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7827,
+                "time": 0.18049
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 869,
+                "time": 0.03776
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 44,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 869,
+            "max_time": 0.0377600006759167
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.045475
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 802,
+                "time": 0.044983
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 45,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 802,
+            "max_time": 0.0449829995632172
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 8786,
+                "time": 0.116558
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.126964
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 46,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 8786,
+            "max_time": 0.116558000445366
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.167297
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3668,
+                "time": 0.16905
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 47,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3668,
+            "max_time": 0.169049993157387
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 12821,
+                "time": 0.208981
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.205341
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 48,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 12821,
+            "max_time": 0.20898100733757
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.177633
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4023,
+                "time": 0.175782
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 49,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4023,
+            "max_time": 0.17578199505806
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.227581
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5517,
+                "time": 0.266073
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 50,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 5517,
+            "max_time": 0.266072988510132
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.179498
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4402,
+                "time": 0.184699
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 51,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4402,
+            "max_time": 0.18469899892807
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 42,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.256365
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6311,
+                "time": 0.287055
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 42,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 52,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 6311,
+            "max_time": 0.287054985761642
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 42,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 20981,
+                "time": 0.476366
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5046,
+                "time": 0.222597
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 42,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 53,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 5046,
+            "max_time": 0.222597002983093
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 43,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.377607
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8122,
+                "time": 0.39437
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 43,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 54,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 8122,
+            "max_time": 0.39436998963356
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 43,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.232414
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5511,
+                "time": 0.252768
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 43,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 55,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 5511,
+            "max_time": 0.252768009901047
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 44,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.387747
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 10037,
+                "time": 0.418089
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 44,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 56,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 10037,
+            "max_time": 0.418089002370834
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 44,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.244989
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5609,
+                "time": 0.26511
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 44,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 57,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 5609,
+            "max_time": 0.265109986066818
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.502212
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 12036,
+                "time": 0.555705
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 58,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 12036,
+            "max_time": 0.555705010890961
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.268761
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6073,
+                "time": 0.282467
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 59,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 6073,
+            "max_time": 0.282467007637024
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 37016,
+                "time": 0.559047
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.618733
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 60,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 37016,
+            "max_time": 0.559046983718872
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 37123,
+                "time": 0.862448
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8221,
+                "time": 0.34962
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 61,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 8221,
+            "max_time": 0.349620014429092
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 41055,
+                "time": 0.662389
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.723447
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 62,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 41055,
+            "max_time": 0.662388980388641
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.330816
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 10598,
+                "time": 0.337029
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:65"
+        },
+        "msg_id": 63,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 10598,
+            "max_time": 0.337029010057449
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 10,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007751
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.00685
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 10,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 64,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00775100011378527
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007185
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 743,
+                "time": 0.044277
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "precondition proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 65,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00718499999493361
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7730,
+                "time": 0.124928
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.138051
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 66,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 7730,
+            "max_time": 0.124927997589111
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011682
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014907
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 67,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0116820000112057
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013825
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013302
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 68,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0138250002637506
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.056402
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1109,
+                "time": 0.060924
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 69,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1109,
+            "max_time": 0.0609240010380745
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014023
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 265,
+                "time": 0.020664
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 70,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0140230003744364
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.038018
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 810,
+                "time": 0.045743
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 71,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 810,
+            "max_time": 0.0457429997622967
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.042983
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 754,
+                "time": 0.044642
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 72,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 754,
+            "max_time": 0.0446420013904572
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015046
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007216
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 73,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0150459995493293
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014236
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009393
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 74,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.014236000366509
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.051159
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1119,
+                "time": 0.054844
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 75,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1119,
+            "max_time": 0.0548439994454384
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014667
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019025
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 76,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0146669996902347
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7808,
+                "time": 0.193737
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 820,
+                "time": 0.045278
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 77,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 820,
+            "max_time": 0.0452780015766621
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.040105
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 763,
+                "time": 0.049148
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 78,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 763,
+            "max_time": 0.0491480007767677
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015572
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014988
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 79,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0155720002949238
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 63,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011513
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015378
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 63,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 80,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0115130003541708
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.056358
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1128,
+                "time": 0.061763
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 81,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1128,
+            "max_time": 0.0617629997432232
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 80,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011244
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 266,
+                "time": 0.020006
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 80,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 82,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0112439999356866
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.044045
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 828,
+                "time": 0.041415
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 83,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 828,
+            "max_time": 0.0414149984717369
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.038853
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 773,
+                "time": 0.043291
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 25,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "assertion proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 84,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 773,
+            "max_time": 0.0432909987866879
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 8783,
+                "time": 0.144345
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2779,
+                "time": 0.143041
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 85,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2779,
+            "max_time": 0.143040999770164
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.123638
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2648,
+                "time": 0.136359
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 86,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2648,
+            "max_time": 0.136359006166458
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.178465
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3984,
+                "time": 0.171858
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 87,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3984,
+            "max_time": 0.171857997775078
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.13026
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2914,
+                "time": 0.137493
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 88,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2914,
+            "max_time": 0.137492999434471
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 16855,
+                "time": 0.259455
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4538,
+                "time": 0.222236
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 89,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4538,
+            "max_time": 0.22223599255085
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.201483
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4759,
+                "time": 0.201529
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 90,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4759,
+            "max_time": 0.201528996229172
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 42,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.245101
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5234,
+                "time": 0.254254
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 42,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 91,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 5234,
+            "max_time": 0.254254013299942
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 42,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 20969,
+                "time": 0.416163
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3475,
+                "time": 0.145569
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 42,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 92,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3475,
+            "max_time": 0.145568996667862
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 43,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 24914,
+                "time": 0.389694
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6542,
+                "time": 0.286711
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 43,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 93,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 6542,
+            "max_time": 0.286711007356644
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 43,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.137579
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3746,
+                "time": 0.146573
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 43,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 94,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3746,
+            "max_time": 0.146573007106781
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 44,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.342188
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 7856,
+                "time": 0.365599
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 44,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 95,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 7856,
+            "max_time": 0.365599006414413
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 44,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.233063
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6576,
+                "time": 0.264177
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 44,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 96,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 6576,
+            "max_time": 0.264176994562149
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.449987
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 9493,
+                "time": 0.470228
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 97,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 9493,
+            "max_time": 0.470227986574173
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.154117
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4360,
+                "time": 0.173387
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 98,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4360,
+            "max_time": 0.173387005925179
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.567989
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 11841,
+                "time": 0.591856
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 99,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 11841,
+            "max_time": 0.591856002807617
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.181356
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4667,
+                "time": 0.182374
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 100,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4667,
+            "max_time": 0.182374000549316
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 41065,
+                "time": 0.614387
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.675304
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "float overflow check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 101,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 41065,
+            "max_time": 0.614386975765228
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 44,
+        "check_file": "mj-smooth_math.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 41151,
+                "time": 0.990499
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8514,
+                "time": 0.330361
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "range check proved, in call inlined at mj-smooth_math.adb:76"
+        },
+        "msg_id": 102,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 8514,
+            "max_time": 0.330361008644104
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 360,
+                "time": 0.025461
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.028628
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 103,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 360,
+            "max_time": 0.0254609994590282
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 19,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.028611
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 344,
+                "time": 0.02671
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 19,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 104,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 344,
+            "max_time": 0.0267099998891354
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 36,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.032136
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 343,
+                "time": 0.028026
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 105,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 343,
+            "max_time": 0.0280259996652603
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 26,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.145384
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3077,
+                "time": 0.146253
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 26,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 106,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3077,
+            "max_time": 0.146253004670143
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.030247
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 342,
+                "time": 0.032595
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 107,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 342,
+            "max_time": 0.0325950011610985
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 43,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.123628
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3045,
+                "time": 0.123595
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 43,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 108,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 3045,
+            "max_time": 0.123594999313354
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 19,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.032252
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 327,
+                "time": 0.02421
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 19,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 109,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 327,
+            "max_time": 0.024210000410676
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 36,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.033553
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 326,
+                "time": 0.030518
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 110,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 326,
+            "max_time": 0.0305179990828037
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 26,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.142678
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2812,
+                "time": 0.151701
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 26,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 111,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2812,
+            "max_time": 0.151701003313065
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.034142
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 324,
+                "time": 0.027574
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 112,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 324,
+            "max_time": 0.0275740008801222
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 43,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.122543
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2803,
+                "time": 0.124217
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 43,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 113,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2803,
+            "max_time": 0.124217003583908
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 19,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.023215
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 308,
+                "time": 0.018288
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 19,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 114,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 308,
+            "max_time": 0.0182879995554686
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 36,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.029517
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 308,
+                "time": 0.022303
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 115,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 308,
+            "max_time": 0.0223030000925064
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 26,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.141953
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2546,
+                "time": 0.144462
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 26,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 116,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2546,
+            "max_time": 0.144462004303932
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 53,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.041791
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 308,
+                "time": 0.031624
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 53,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 117,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 308,
+            "max_time": 0.0316240005195141
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 43,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.123522
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2557,
+                "time": 0.120175
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 43,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 118,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 2557,
+            "max_time": 0.120174996554852
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 13,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 59,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007558
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.000204
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 13,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 59,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 119,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00755799980834126
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 40,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 59,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.002853
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005174
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 40,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 59,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 120,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00285300007089972
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-smooth_math.ads",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 86018,
+                "time": 2.33434
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 2.43296
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 83844,
+                "time": 1.53361
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1.76309
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 121,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 86018,
+            "max_time": 2.33433604240417
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.0242880005389452,
+        "gnatwhy3.init": 0.325271010398865,
+        "gnatwhy3.register_vcs": 0.203841999173164,
+        "gnatwhy3.run_vcs": 0.000507000018842518,
+        "gnatwhy3.save_session": 0.0611770004034042,
+        "gnatwhy3.schedule_vcs": 3.85694599151611,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.0690300017595291,
+        "gnatwhy3.transformations.detect_polymorphism": 0.0179459992796183,
+        "gnatwhy3.transformations.discriminate_if_poly": 0.000102999001683202,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.215111002326012,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.0373490005731583,
+        "gnatwhy3.transformations.eliminate_builtin": 0.0304990001022816,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.0265299994498491,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.0629300028085709,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.0351799987256527,
+        "gnatwhy3.transformations.eliminate_inductive": 0.0461059994995594,
+        "gnatwhy3.transformations.eliminate_literal": 0.0739730000495911,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.032405998557806,
+        "gnatwhy3.transformations.eliminate_recursion": 0.0238140001893044,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 7.50000035623088e-05,
+        "gnatwhy3.transformations.inline_trivial": 1.68133997917175,
+        "gnatwhy3.transformations.monomorphise_goal": 0.0121999988332391,
+        "gnatwhy3.transformations.remove_unused": 0.610512971878052,
+        "gnatwhy3.transformations.simplify_formula": 0.236717998981476,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.123801998794079,
+        "gnatwhy3.transformations.split_premise_right": 0.208369001746178
+      },
+      "global": {
+        "flow analysis": 0.00331100006587803,
+        "globals (advanced)": 0.00390099990181625,
+        "globals (basic)": 0.00512399990111589,
+        "init_why_sections": 0.000805000017862767,
+        "marking": 0.00105199997778982,
+        "properties (advanced)": 0.000106999999843538,
+        "translation of standard": 0.000760999973863363
+      }
+    },
+    "warn_error": [
+      {
+        "check_tree": {},
+        "col": 32,
+        "file": "mj-smooth_math.adb",
+        "how_proved": "trivial",
+        "line": 196,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 79,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 101,
+        "message": {
+          "arguments": [
+            "Cos"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 48,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 103,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 79,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 101,
+        "message": {
+          "arguments": [
+            "Cos"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 48,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 103,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 119,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 119,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 125,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 125,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                     Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                           .           .          .
+Flow Dependencies                 .         .                                           .           .          .
+Initialization                    .         .                                           .           .          .
+Non-Aliasing                      .         .                                           .           .          .
+Run-time Checks                 104         .    104 (CVC5 37%, Trivial 15%, altergo 48%)           .          .
+Assertions                        9         .                   5 (CVC5 20%, altergo 80%)           .          4
+Functional Contracts              6         .                   6 (CVC5 45%, altergo 55%)           .          .
+LSP Verification                  .         .                                           .           .          .
+Termination                       1         1                                           .           .          .
+Concurrency                       .         .                                           .           .          .
+----------------------------------------------------------------------------------------------------------------
+Total                           121    2 (2%)                                   115 (95%)           .     4 (3%)
+
+
+max steps used for successful proof: 90076
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_math.adb:143:38: range check proved in max 2 seconds
+mj-smooth_math.ads:74:14: postcondition proved in max 2 seconds
+mj-smooth_math.adb:142:38: range check proved in max 2 seconds
+mj-smooth_math.adb:139:38: range check proved in max 1 seconds
+mj-smooth_math.adb:141:38: range check proved in max 1 seconds
+mj-smooth_math.adb:138:38: range check proved in max 1 seconds
+mj-smooth_math.adb:140:38: range check proved in max 1 seconds
+mj-smooth_math.adb:143:38: fp_overflow check proved in max 1 seconds
+mj-smooth_math.adb:142:38: fp_overflow check proved in max 1 seconds
+mj-smooth_math.adb:129:38: range check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_math, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Math.Multiply at mj-smooth_math.ads:72 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 115 checks out of 119 proved

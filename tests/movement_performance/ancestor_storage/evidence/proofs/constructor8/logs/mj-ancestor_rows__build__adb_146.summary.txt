@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    1         1                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  35         .    35 (CVC5 9%, Z3 49%, altergo 41%)           .          .
+Assertions                        4         .              3 (Z3 25%, altergo 75%)           .          1
+Functional Contracts              5         .    5 (CVC5 22%, Z3 16%, altergo 62%)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       .         .                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            46    2 (4%)                             43 (93%)           .     1 (2%)
+
+
+max steps used for successful proof: 44809
+
+============================
+Most difficult proved checks
+============================
+
+mj-ancestor_rows.ads:63:14: invariant check proved in max 1 seconds
+mj-ancestor_rows.adb:159:44: index check proved in max 1 seconds
+mj-ancestor_rows.adb:156:67: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-ancestor_rows, 1 subprograms and packages out of 1 analyzed
+  MJ.Ancestor_Rows.Build at mj-ancestor_rows.ads:63 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 43 checks out of 44 proved

@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  10         .    10 (CVC5 56%, altergo 44%)           .          .
+Assertions                        4         .     4 (CVC5 33%, altergo 67%)           .          .
+Functional Contracts              8         .     8 (CVC5 68%, altergo 32%)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            23    1 (4%)                      22 (96%)           .          .
+
+
+max steps used for successful proof: 673091
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_dynamics.adb:168:33: loop invariant after first iteration proved in max 4 seconds
+mj-smooth_dynamics.adb:165:13: precondition proved in max 1 seconds
+mj-smooth_dynamics.adb:160:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_dynamics, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Dynamics.Prove_Symmetry_After_Update at mj-smooth_dynamics.adb:153 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)

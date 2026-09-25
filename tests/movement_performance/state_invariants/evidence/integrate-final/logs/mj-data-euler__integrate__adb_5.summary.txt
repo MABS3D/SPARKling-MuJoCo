@@ -1,0 +1,41 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                    Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------
+Data Dependencies                 1           1                          .           .          .
+Flow Dependencies                 .           .                          .           .          .
+Initialization                    2           2                          .           .          .
+Non-Aliasing                      7           7                          .           .          .
+Run-time Checks                  38           .    38 (Trivial 4%, Z3 96%)           .          .
+Assertions                       11           .    7 (Trivial 10%, Z3 90%)           .          4
+Functional Contracts              6           .                     4 (Z3)           .          2
+LSP Verification                  .           .                          .           .          .
+Termination                       .           .                          .           .          .
+Concurrency                       .           .                          .           .          .
+-------------------------------------------------------------------------------------------------
+Total                            65    10 (15%)                   49 (75%)           .     6 (9%)
+
+
+max steps used for successful proof: 14846
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-euler.adb:33:32: assertion proved in max 7 seconds
+mj-data-euler.adb:31:22: assertion proved in max 6 seconds
+mj-data-euler.adb:47:7: precondition proved in max 1 seconds
+mj-data-euler.adb:39:47: length check proved in max 1 seconds
+mj-data-euler.adb:38:47: length check proved in max 1 seconds
+mj-data-euler.adb:44:22: assertion proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-euler, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Euler.Integrate at mj-data-euler.ads:22 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 49 checks out of 55 proved

@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow      Provers   Justified    Unproved
+----------------------------------------------------------------------------------
+Data Dependencies                 1         1            .           .           .
+Flow Dependencies                 .         .            .           .           .
+Initialization                    5         5            .           .           .
+Non-Aliasing                      .         .            .           .           .
+Run-time Checks                  88         .    57 (CVC5)           .          31
+Assertions                       18         .     5 (CVC5)           .          13
+Functional Contracts             12         .    11 (CVC5)           .           1
+LSP Verification                  .         .            .           .           .
+Termination                       .         .            .           .           .
+Concurrency                       .         .            .           .           .
+----------------------------------------------------------------------------------
+Total                           124    6 (5%)     73 (59%)           .    45 (36%)
+
+
+max steps used for successful proof: 30785
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-inertia.adb:345:39: loop invariant in first iteration proved in max 1 seconds
+mj-data-inertia.adb:342:36: loop invariant in first iteration proved in max 1 seconds
+mj-data-inertia.adb:359:26: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:323:43: precondition proved in max 1 seconds
+mj-data-inertia.adb:356:22: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:354:41: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:359:26: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:354:56: index check proved in max 1 seconds
+mj-data-inertia.adb:388:28: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:390:19: null pointer dereference proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-inertia, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Inertia.Solve_Compatible at mj-data-inertia.adb:315 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 73 checks out of 118 proved

@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                   Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                                         .           .          .
+Flow Dependencies                 .          .                                         .           .          .
+Initialization                    1          1                                         .           .          .
+Non-Aliasing                      .          .                                         .           .          .
+Run-time Checks                   .          .                                         .           .          .
+Assertions                        .          .                                         .           .          .
+Functional Contracts             10          .    10 (CVC5 11%, Trivial 1%, altergo 88%)           .          .
+LSP Verification                  .          .                                         .           .          .
+Termination                       .          .                                         .           .          .
+Concurrency                       .          .                                         .           .          .
+---------------------------------------------------------------------------------------------------------------
+Total                            12    2 (17%)                                  10 (83%)           .          .
+
+
+max steps used for successful proof: 10088
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-kinematics.adb:25:10: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-kinematics, 2 subprograms and packages out of 2 analyzed
+  MJ.Data.Kinematics at mj-data-kinematics.ads:2 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Data.Kinematics.Update at mj-data-kinematics.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)

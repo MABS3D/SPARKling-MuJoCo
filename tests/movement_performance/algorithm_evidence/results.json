@@ -1,0 +1,247 @@
+{
+  "complete": true,
+  "scope": "source loop counts and CRB mirror; no timings or formal proof",
+  "upstream": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "oracle": "3.14.0",
+  "numpy": "2.4.3",
+  "source_sha256": {
+    "mujoco/src/engine/engine_core_smooth.c": "00a5baf42785f6668c6abc76df563e58379b04793e6f5d3ea95fef40324420f9",
+    "mujoco/src/engine/engine_forward.c": "8f38b7516527cb17319ed812a5e1bb24b0e6106f283972f954268e277786837d",
+    "mujoco/src/engine/engine_util_spatial.c": "3c76bb55b9e7126e4dcf9636231d466c66acca5dcce526f0899c7bcf486cca98",
+    "mujoco/src/engine/engine_inline.h": "b9dafe8871c09d4860e010c5544a38a42252ebe31249cba627919e91cc73c221",
+    "experimental/smooth/src/mj-data-inertia.adb": "3ed03ca21f36539ee16148c345b2171ccbc0a28d8b573898a0a08f4cfdea1e45",
+    "experimental/smooth/src/mj-data-kinematics.adb": "f7a09dfe0159e92d40d46e76e6156f427bcc1d79f5d2e43572d1bf077ba7b11d",
+    "experimental/smooth/src/mj-data-forces.adb": "3eb7f8e6c26b925390c57bbb1aeb8bddfa8f2a6daa716150e2de52fc0e7f365d",
+    "experimental/smooth/src/mj-smooth_dynamics.adb": "e41f00f8fa642a473a1bdb80c94d613076c26aea3c2f8141daa6b9548bb7089e"
+  },
+  "oracle_library_sha256": {
+    "libmujoco.so.3.14.0": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b"
+  },
+  "script_sha256": "455263578b94b04d17c494b04428505d4b4f125d526379a924adf88bf2754592",
+  "models": [
+    {
+      "name": "hinge_motor",
+      "counts": {
+        "nv": 1,
+        "moving_and_fixed_bodies": 1,
+        "ancestor_dofs_per_body": [
+          1
+        ],
+        "ada_mass_contributions": 1,
+        "ada_inertia_vector_calls": 1,
+        "candidate_hoisted_inertia_vector_calls": 1,
+        "candidate_ancestor_only_mass_contributions": 1,
+        "candidate_ancestor_hoisted_inertia_vector_calls": 1,
+        "c_crb_inertia_vector_calls": 1,
+        "c_crb_dot6_calls": 1,
+        "ada_force_body_dof_projections": 1,
+        "c_rne_final_dot6_calls": 1,
+        "ada_stored_mass_entries": 1,
+        "c_stored_lower_mass_entries": 1,
+        "full_lower_triangle_entries": 1,
+        "ada_factorizations_per_step": 2,
+        "c_factorizations_per_step": 2,
+        "ada_condition_rhs_solves_per_step": 2,
+        "ada_physical_rhs_solves_per_step": 2,
+        "c_physical_rhs_solves_per_step": 2,
+        "c_condition_rhs_solves_per_step": 0,
+        "c_factor_scalar_update_terms": 0,
+        "ada_factor_inner_sum_terms": 0
+      },
+      "states": [
+        {
+          "state": 0,
+          "input_sha256": "24ddb3a7afd88acc47085b353acac12ff6d2284cf81eea21f640c1273891c89c",
+          "steps": 100,
+          "scalar_comparisons": 100,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 1,
+          "input_sha256": "ac4f8ddd2bb24090ae1e942b5839c796933229be5c607ebc15f7b9f8631e79c9",
+          "steps": 100,
+          "scalar_comparisons": 100,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 2,
+          "input_sha256": "b513ba0acdc0899bd0b5b62aa12affade9febc73e7a324a4f1a59897d52d5f8e",
+          "steps": 100,
+          "scalar_comparisons": 100,
+          "max_absolute_error": 0.0
+        }
+      ],
+      "rownnz": [
+        1
+      ],
+      "dof_parentid": [
+        -1
+      ],
+      "xml_sha256": "d61deb7d5bcdc3e66432bc7c9a8a53096fc1e4dfa4cc981e6c3148b9737b26be"
+    },
+    {
+      "name": "branched_multijoint",
+      "counts": {
+        "nv": 5,
+        "moving_and_fixed_bodies": 4,
+        "ancestor_dofs_per_body": [
+          3,
+          4,
+          4,
+          4
+        ],
+        "ada_mass_contributions": 60,
+        "ada_inertia_vector_calls": 60,
+        "candidate_hoisted_inertia_vector_calls": 20,
+        "candidate_ancestor_only_mass_contributions": 36,
+        "candidate_ancestor_hoisted_inertia_vector_calls": 15,
+        "c_crb_inertia_vector_calls": 5,
+        "c_crb_dot6_calls": 14,
+        "ada_force_body_dof_projections": 20,
+        "c_rne_final_dot6_calls": 5,
+        "ada_stored_mass_entries": 25,
+        "c_stored_lower_mass_entries": 14,
+        "full_lower_triangle_entries": 15,
+        "ada_factorizations_per_step": 2,
+        "c_factorizations_per_step": 2,
+        "ada_condition_rhs_solves_per_step": 10,
+        "ada_physical_rhs_solves_per_step": 2,
+        "c_physical_rhs_solves_per_step": 2,
+        "c_condition_rhs_solves_per_step": 0,
+        "c_factor_scalar_update_terms": 16,
+        "ada_factor_inner_sum_terms": 20
+      },
+      "states": [
+        {
+          "state": 0,
+          "input_sha256": "07b9138f80fae6126bec835934a13d7662dfa0ac178e76193cdca416404e6afe",
+          "steps": 100,
+          "scalar_comparisons": 1400,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 1,
+          "input_sha256": "f6e1a1e5419da279efb5e0d1eba06b802866ce0ebc738d44b61f934131215e10",
+          "steps": 100,
+          "scalar_comparisons": 1400,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 2,
+          "input_sha256": "9934c90ad1448a088bfbc6acd430d278d857963f996bfc8c60f0008d2cc076e8",
+          "steps": 100,
+          "scalar_comparisons": 1400,
+          "max_absolute_error": 0.0
+        }
+      ],
+      "rownnz": [
+        1,
+        2,
+        3,
+        4,
+        4
+      ],
+      "dof_parentid": [
+        -1,
+        0,
+        1,
+        2,
+        2
+      ],
+      "xml_sha256": "68f5c0d70a9fc327d8aee1f149b671babfefc7b37e114f775f0492b2e31a98bb"
+    },
+    {
+      "name": "chain_12",
+      "counts": {
+        "nv": 12,
+        "moving_and_fixed_bodies": 12,
+        "ancestor_dofs_per_body": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "ada_mass_contributions": 936,
+        "ada_inertia_vector_calls": 936,
+        "candidate_hoisted_inertia_vector_calls": 144,
+        "candidate_ancestor_only_mass_contributions": 364,
+        "candidate_ancestor_hoisted_inertia_vector_calls": 78,
+        "c_crb_inertia_vector_calls": 12,
+        "c_crb_dot6_calls": 78,
+        "ada_force_body_dof_projections": 144,
+        "c_rne_final_dot6_calls": 12,
+        "ada_stored_mass_entries": 144,
+        "c_stored_lower_mass_entries": 78,
+        "full_lower_triangle_entries": 78,
+        "ada_factorizations_per_step": 2,
+        "c_factorizations_per_step": 2,
+        "ada_condition_rhs_solves_per_step": 24,
+        "ada_physical_rhs_solves_per_step": 2,
+        "c_physical_rhs_solves_per_step": 2,
+        "c_condition_rhs_solves_per_step": 0,
+        "c_factor_scalar_update_terms": 286,
+        "ada_factor_inner_sum_terms": 286
+      },
+      "states": [
+        {
+          "state": 0,
+          "input_sha256": "6f6af0cd119457d1f728ccced6db07906b5ef169365c512fde28aa95e055cdfe",
+          "steps": 100,
+          "scalar_comparisons": 7800,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 1,
+          "input_sha256": "5831e20e91f0a861795b2a6a87d34572e74ac8579dc77f78a376a345b3c34da4",
+          "steps": 100,
+          "scalar_comparisons": 7800,
+          "max_absolute_error": 0.0
+        },
+        {
+          "state": 2,
+          "input_sha256": "475b534da0c0a92027ccf07bde6a583a9080713135c21cfd0ec1cad0e0eb1bbb",
+          "steps": 100,
+          "scalar_comparisons": 7800,
+          "max_absolute_error": 0.0
+        }
+      ],
+      "rownnz": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "dof_parentid": [
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "xml_sha256": "be5f09517912e9a6b19e563882382e30051d8c78ec9353e246f96081bf31afc8"
+    }
+  ]
+}

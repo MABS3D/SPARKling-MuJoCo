@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow      Provers   Justified   Unproved
+----------------------------------------------------------------------------------
+Data Dependencies                 1          1            .           .          .
+Flow Dependencies                 .          .            .           .          .
+Initialization                    3          3            .           .          .
+Non-Aliasing                      .          .            .           .          .
+Run-time Checks                  27          .    24 (CVC5)           .          3
+Assertions                        .          .            .           .          .
+Functional Contracts              8          .     3 (CVC5)           .          5
+LSP Verification                  .          .            .           .          .
+Termination                       1          .     1 (CVC5)           .          .
+Concurrency                       .          .            .           .          .
+----------------------------------------------------------------------------------
+Total                            40    4 (10%)     28 (70%)           .    8 (20%)
+
+
+max steps used for successful proof: 9283
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-pipeline.adb:159:37: loop variant proved in max 1 seconds
+mj-data-pipeline.adb:168:52: precondition proved in max 1 seconds
+mj-data-pipeline.adb:165:63: range check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-pipeline, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Pipeline.Ensure_Jacobians at mj-data-pipeline.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 28 checks out of 36 proved

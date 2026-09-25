@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                 Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                       .           .          .
+Flow Dependencies                 .         .                       .           .          .
+Initialization                    .         .                       .           .          .
+Non-Aliasing                      .         .                       .           .          .
+Run-time Checks                  96         .                 96 (Z3)           .          .
+Assertions                        .         .                       .           .          .
+Functional Contracts              4         .    3 (CVC5 33%, Z3 67%)           .          1
+LSP Verification                  .         .                       .           .          .
+Termination                       1         1                       .           .          .
+Concurrency                       .         .                       .           .          .
+--------------------------------------------------------------------------------------------
+Total                           102    2 (2%)                99 (97%)           .     1 (1%)
+
+
+max steps used for successful proof: 1
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.adb:87:68: range check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Multiply at mj-spatial_kernels.ads:75 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 99 checks out of 100 proved

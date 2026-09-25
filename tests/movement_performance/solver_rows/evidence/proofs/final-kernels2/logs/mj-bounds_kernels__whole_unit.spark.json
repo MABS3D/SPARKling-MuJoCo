@@ -1,0 +1,443 @@
+{
+  "mj-bounds_kernels.spark": {
+    "assumptions": [
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      },
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Bounds_Kernels.All_Within",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-bounds_kernels.ads",
+            "line": 6
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Bounds_Kernels",
+        "sloc": [
+          {
+            "column": 12,
+            "file": "mj-bounds_kernels.ads",
+            "line": 3
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-bounds_kernels.ads",
+        "how_proved": "flow",
+        "line": 6,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"All_Within\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 11,
+        "entity": 1,
+        "file": "mj-bounds_kernels.ads",
+        "how_proved": "flow",
+        "line": 7,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 23,
+        "check_file": "mj-bounds_kernels.adb",
+        "check_line": 9,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013438
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009422
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.002863
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010863
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00982
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013001
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008573
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 245,
+                "time": 0.014477
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-bounds_kernels.adb",
+        "how_proved": "prover",
+        "line": 9,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.01343800034374
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-bounds_kernels.adb",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 510,
+                "time": 0.01742
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.017659
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 280,
+                "time": 0.014604
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009869
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009592
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 247,
+                "time": 0.021022
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-bounds_kernels.adb",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "loop invariant initialization proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_LOOP_INVARIANT_INIT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 3,
+            "max_steps": 510,
+            "max_time": 0.0174199994653463
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-bounds_kernels.adb",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1039,
+                "time": 0.02364
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.026818
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1022,
+                "time": 0.024973
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.021416
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1022,
+                "time": 0.024862
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.033938
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-bounds_kernels.adb",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "loop invariant preservation proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 3,
+            "max_steps": 1039,
+            "max_time": 0.0249729994684458
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-bounds_kernels.ads",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007466
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.018081
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 511,
+                "time": 0.021073
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.028573
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 512,
+                "time": 0.02335
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.045209
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-bounds_kernels.ads",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 3,
+            "max_steps": 512,
+            "max_time": 0.0233500003814697
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all",
+      " 2": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.000768000027164817,
+        "gnatwhy3.init": 0.227164000272751,
+        "gnatwhy3.register_vcs": 0.0147040002048016,
+        "gnatwhy3.run_vcs": 1.29990003188141e-05,
+        "gnatwhy3.save_session": 0.00322500010952353,
+        "gnatwhy3.schedule_vcs": 0.0711869969964027,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00609599892050028,
+        "gnatwhy3.transformations.detect_polymorphism": 0.000433000008342788,
+        "gnatwhy3.transformations.discriminate_if_poly": 9.9990002127015e-06,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0139809986576438,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.000905000022612512,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00354199903085828,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000526999006979167,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00253900000825524,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.000885999004822224,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00194500002544373,
+        "gnatwhy3.transformations.eliminate_literal": 0.00256199901923537,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.000523998984135687,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00146499904803932,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 7.00000009601354e-06,
+        "gnatwhy3.transformations.inline_trivial": 0.0818279981613159,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000441999000031501,
+        "gnatwhy3.transformations.remove_unused": 0.0289859995245934,
+        "gnatwhy3.transformations.simplify_formula": 0.0170869994908571,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00890399888157845,
+        "gnatwhy3.transformations.split_premise_right": 0.0179249998182058
+      },
+      "global": {
+        "flow analysis": 0.000607000023592263,
+        "globals (advanced)": 0.000339999998686835,
+        "globals (basic)": 0.00216999999247491,
+        "init_why_sections": 0.000258999993093312,
+        "marking": 0.00023700000019744,
+        "properties (advanced)": 1.59999999596039e-05,
+        "translation of standard": 0.000905000022612512
+      }
+    },
+    "warn_error": []
+  }
+}

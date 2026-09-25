@@ -1,0 +1,1296 @@
+{
+  "mj-solver_kernels.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Solver_Kernels.Scale_Row",
+        "sloc": [
+          {
+            "column": 14,
+            "file": "mj-solver_kernels.ads",
+            "line": 35
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Solver_Kernels.Scale",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-solver_kernels.ads",
+            "line": 14
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Smooth_Dynamics.Work_Array",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_dynamics.ads",
+            "line": 87
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 59,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "flow",
+        "line": 36,
+        "message": {
+          "text": "initialization of \"Ok\" proved"
+        },
+        "msg_id": 0,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 11,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "flow",
+        "line": 37,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 31,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 42,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7767,
+                "time": 0.138179
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.141673
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 570,
+                "time": 0.019448
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.025517
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 31,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 42,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 7767,
+            "max_time": 0.138179004192352
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 31,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 43,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2367,
+                "time": 0.052724
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.055479
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2365,
+                "time": 0.056105
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.056597
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1106,
+                "time": 0.03357
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.031096
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1106,
+                "time": 0.029163
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.048498
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 31,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 43,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 2367,
+            "max_time": 0.0561049990355968
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 22,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 50,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012755
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.020835
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01421
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01898
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010169
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010238
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007418
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 265,
+                "time": 0.01657
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 22,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 50,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.0142099997028708
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 69,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 50,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015294
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015434
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011124
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 284,
+                "time": 0.017234
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012312
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006473
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011915
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 261,
+                "time": 0.018999
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 69,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 50,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.0152939995750785
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 56,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 50,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.159448
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3783,
+                "time": 0.173446
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.098039
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2451,
+                "time": 0.11284
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 56,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 50,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 3783,
+            "max_time": 0.173445999622345
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 40,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 51,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015095
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013118
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016212
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015475
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008425
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 261,
+                "time": 0.022319
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01196
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 261,
+                "time": 0.022623
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 40,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 51,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.0162119995802641
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 49,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7911,
+                "time": 0.131461
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1782,
+                "time": 0.068085
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 49,
+        "message": {
+          "text": "loop invariant initialization proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_LOOP_INVARIANT_INIT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 1782,
+            "max_time": 0.0680849999189377
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 49,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.319624
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 18369,
+                "time": 0.426127
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 49,
+        "message": {
+          "text": "loop invariant preservation proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 18369,
+            "max_time": 0.42612698674202
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 83,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012535
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 284,
+                "time": 0.025446
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010921
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 283,
+                "time": 0.02612
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.020445
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 262,
+                "time": 0.019886
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010884
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 261,
+                "time": 0.019305
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 83,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.010920999571681
+          },
+          "altergo": {
+            "count": 2,
+            "max_steps": 284,
+            "max_time": 0.0254459995776415
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.026899
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 625,
+                "time": 0.037021
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.02864
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 626,
+                "time": 0.039706
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "loop invariant initialization proved"
+        },
+        "msg_id": 11,
+        "rule": "VC_LOOP_INVARIANT_INIT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 626,
+            "max_time": 0.0397059991955757
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.281471
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 14401,
+                "time": 0.294836
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.264148
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 13173,
+                "time": 0.280166
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "loop invariant preservation proved"
+        },
+        "msg_id": 12,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 14401,
+            "max_time": 0.294836014509201
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1121,
+                "time": 0.033449
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.034323
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1116,
+                "time": 0.032654
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1557,
+                "time": 0.06058
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "loop invariant initialization proved"
+        },
+        "msg_id": 13,
+        "rule": "VC_LOOP_INVARIANT_INIT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1121,
+            "max_time": 0.0334490016102791
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 23,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 45,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2380,
+                "time": 0.062177
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.065959
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2375,
+                "time": 0.05161
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1727,
+                "time": 0.073017
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 45,
+        "message": {
+          "text": "loop invariant preservation proved"
+        },
+        "msg_id": 14,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 2380,
+            "max_time": 0.0621769987046719
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 18,
+        "check_file": "mj-solver_kernels.ads",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015602
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012512
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012128
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01152
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 18,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 15,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0156020000576973
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 42,
+        "check_file": "mj-solver_kernels.ads",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016049
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 255,
+                "time": 0.017994
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01332
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013812
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 42,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 16,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0160489995032549
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 36,
+        "check_file": "mj-solver_kernels.ads",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 8948,
+                "time": 0.149639
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.152642
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 17,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 8948,
+            "max_time": 0.149638995528221
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-solver_kernels.ads",
+        "check_line": 38,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.092525
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2111,
+                "time": 0.098172
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 7540,
+                "time": 0.10215
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.113227
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.110548
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2843,
+                "time": 0.131565
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "prover",
+        "line": 38,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 18,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 7540,
+            "max_time": 0.110547997057438
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 2111,
+            "max_time": 0.0981720015406609
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00279100006446242,
+        "gnatwhy3.init": 0.24583600461483,
+        "gnatwhy3.register_vcs": 0.168952003121376,
+        "gnatwhy3.run_vcs": 4.89990015921649e-05,
+        "gnatwhy3.save_session": 0.0283899996429682,
+        "gnatwhy3.schedule_vcs": 0.465586006641388,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.0470019988715649,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00738100009039044,
+        "gnatwhy3.transformations.discriminate_if_poly": 3.70000016118865e-05,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0786409974098206,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.0120879989117384,
+        "gnatwhy3.transformations.eliminate_builtin": 0.0160450004041195,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.00628700014203787,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.0233190003782511,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.0121710002422333,
+        "gnatwhy3.transformations.eliminate_inductive": 0.0119059989228845,
+        "gnatwhy3.transformations.eliminate_literal": 0.0217550005763769,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00766600016504526,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00718700001016259,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 2.80000003840541e-05,
+        "gnatwhy3.transformations.inline_trivial": 0.381430000066757,
+        "gnatwhy3.transformations.monomorphise_goal": 0.00803000014275312,
+        "gnatwhy3.transformations.remove_unused": 0.147809997200966,
+        "gnatwhy3.transformations.simplify_formula": 0.0868579968810081,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.0930730029940605,
+        "gnatwhy3.transformations.split_premise_right": 0.0817660018801689
+      },
+      "global": {
+        "flow analysis": 0.000906999979633838,
+        "globals (advanced)": 0.003091000020504,
+        "globals (basic)": 0.00546699995175004,
+        "init_why_sections": 0.00031999999191612,
+        "marking": 0.000395000010030344,
+        "properties (advanced)": 2.90000007225899e-05,
+        "translation of standard": 0.000878999999258667
+      }
+    },
+    "warn_error": []
+  }
+}

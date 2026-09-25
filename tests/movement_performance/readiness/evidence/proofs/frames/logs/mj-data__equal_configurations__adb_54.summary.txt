@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  12         .    12 (CVC5 56%, altergo 44%)           .          .
+Assertions                        9         .     9 (CVC5 50%, altergo 50%)           .          .
+Functional Contracts              1         .                      1 (CVC5)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            23    1 (4%)                      22 (96%)           .          .
+
+
+max steps used for successful proof: 26255
+
+============================
+Most difficult proved checks
+============================
+
+mj-data.adb:65:25: assertion proved in max 1 seconds
+mj-data.ads:455:43: postcondition proved in max 1 seconds
+mj-data.adb:61:25: assertion proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Equal_Configurations at mj-data.ads:454 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)

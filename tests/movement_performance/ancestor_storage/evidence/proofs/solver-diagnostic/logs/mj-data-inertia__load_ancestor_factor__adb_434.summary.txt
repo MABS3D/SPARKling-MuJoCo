@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                      Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                            .           .          .
+Flow Dependencies                 .          .                            .           .          .
+Initialization                    2          2                            .           .          .
+Non-Aliasing                      2          2                            .           .          .
+Run-time Checks                  15          .    14 (CVC5 92%, altergo 8%)           .          1
+Assertions                        .          .                            .           .          .
+Functional Contracts              5          .    3 (CVC5 67%, altergo 33%)           .          2
+LSP Verification                  .          .                            .           .          .
+Termination                       .          .                            .           .          .
+Concurrency                       .          .                            .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            25    5 (20%)                     17 (68%)           .    3 (12%)
+
+
+max steps used for successful proof: 20355
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-inertia.adb:456:34: null pointer dereference proved in max 1 seconds
+mj-data-inertia.adb:454:24: range check proved in max 1 seconds
+mj-data-inertia.adb:454:24: null pointer dereference proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-inertia, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Inertia.Load_Ancestor_Factor at mj-data-inertia.adb:434 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 17 checks out of 20 proved
