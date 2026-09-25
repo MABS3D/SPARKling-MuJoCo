@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                   9         .     9 (CVC5 44%, altergo 56%)           .          .
+Assertions                        .         .                             .           .          .
+Functional Contracts             14         .    13 (CVC5 12%, altergo 88%)           .          1
+LSP Verification                  .         .                             .           .          .
+Termination                       1         1                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            25    2 (8%)                      22 (88%)           .     1 (4%)
+
+
+max steps used for successful proof: 24574
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_dynamics.ads:32:12: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_dynamics, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Dynamics.Center_Acceleration at mj-smooth_dynamics.ads:25 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 22 checks out of 23 proved

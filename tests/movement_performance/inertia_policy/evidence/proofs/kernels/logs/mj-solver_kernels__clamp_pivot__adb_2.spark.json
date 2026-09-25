@@ -1,0 +1,204 @@
+{
+  "mj-solver_kernels.spark": {
+    "assumptions": [
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Solver_Kernels.Clamp_Pivot",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-solver_kernels.ads",
+            "line": 9
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "flow",
+        "line": 9,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Clamp_Pivot\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 11,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "flow",
+        "line": 10,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 44,
+        "check_file": "mj-solver_kernels.adb",
+        "check_line": 3,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 74,
+                "time": 0.014704
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007377
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 44,
+        "entity": 1,
+        "file": "mj-solver_kernels.adb",
+        "how_proved": "prover",
+        "line": 3,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 74,
+            "max_time": 0.0147040002048016
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-solver_kernels.ads",
+        "check_line": 11,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 492,
+                "time": 0.014457
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.057939
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-solver_kernels.ads",
+        "how_proved": "prover",
+        "line": 11,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 492,
+            "max_time": 0.0144570004194975
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00160900002811104,
+        "gnatwhy3.init": 0.255062013864517,
+        "gnatwhy3.register_vcs": 0.00437399884685874,
+        "gnatwhy3.run_vcs": 1.99900000552589e-06,
+        "gnatwhy3.save_session": 0.000577000027988106,
+        "gnatwhy3.schedule_vcs": 0.0491099990904331,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.0041100000962615,
+        "gnatwhy3.transformations.detect_polymorphism": 3.99989985453431e-05,
+        "gnatwhy3.transformations.discriminate_if_poly": 9.99000008050643e-07,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.00458899885416031,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00114599894732237,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00363199901767075,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000115000002551824,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00107500003650784,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.000120999000500888,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00212300010025501,
+        "gnatwhy3.transformations.eliminate_literal": 0.00173699902370572,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.000273000012384728,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00106000003870577,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643e-07,
+        "gnatwhy3.transformations.inline_trivial": 0.0121759986504912,
+        "gnatwhy3.transformations.monomorphise_goal": 9.0000003183377e-06,
+        "gnatwhy3.transformations.remove_unused": 0.00405299896374345,
+        "gnatwhy3.transformations.simplify_formula": 0.0027330000884831,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00365499895997345,
+        "gnatwhy3.transformations.split_premise_right": 0.00290299905464053
+      },
+      "global": {
+        "flow analysis": 0.000575000012759119,
+        "globals (advanced)": 0.00276000006124377,
+        "globals (basic)": 0.0183780007064342,
+        "init_why_sections": 0.000910000002477318,
+        "marking": 0.000318000005790964,
+        "properties (advanced)": 0.000354999996488914,
+        "translation of standard": 0.00232199998572469
+      }
+    },
+    "warn_error": []
+  }
+}

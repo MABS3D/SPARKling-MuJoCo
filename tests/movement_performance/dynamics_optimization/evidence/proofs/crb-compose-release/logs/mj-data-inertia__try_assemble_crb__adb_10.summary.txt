@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow      Provers   Justified    Unproved
+----------------------------------------------------------------------------------
+Data Dependencies                 1         1            .           .           .
+Flow Dependencies                 .         .            .           .           .
+Initialization                    4         4            .           .           .
+Non-Aliasing                      .         .            .           .           .
+Run-time Checks                 116         .    98 (CVC5)           .          18
+Assertions                       28         .     6 (CVC5)           .          22
+Functional Contracts             29         .    19 (CVC5)           .          10
+LSP Verification                  .         .            .           .           .
+Termination                       1         .            .           .           1
+Concurrency                       .         .            .           .           .
+----------------------------------------------------------------------------------
+Total                           179    5 (3%)    123 (69%)           .    51 (28%)
+
+
+max steps used for successful proof: 29573
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-inertia.adb:15:35: precondition proved in max 1 seconds
+mj-data-inertia.adb:124:39: loop invariant after first iteration proved in max 1 seconds
+mj-data-inertia.adb:130:33: index check proved in max 1 seconds
+mj-data-inertia.adb:127:50: index check proved in max 1 seconds
+mj-data-inertia.adb:127:82: index check proved in max 1 seconds
+mj-data-inertia.adb:75:78: index check proved in max 1 seconds
+mj-data-inertia.adb:63:37: fp_overflow check proved in max 1 seconds
+mj-data-inertia.adb:70:33: index check proved in max 1 seconds
+mj-data-inertia.adb:116:39: precondition proved in max 1 seconds
+mj-data-inertia.adb:37:90: index check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-inertia, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Inertia.Try_Assemble_CRB at mj-data-inertia.adb:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 123 checks out of 174 proved

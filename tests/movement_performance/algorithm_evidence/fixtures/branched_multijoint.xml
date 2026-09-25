@@ -1,0 +1,10 @@
+<mujoco><compiler angle="radian"/>
+    <option timestep="0.002" gravity="0 0 -9.81" integrator="Euler">
+      <flag constraint="disable" /></option>
+    <worldbody><body pos=".2 .1 .9" quat=".9 .1 -.3 .2">
+      <joint name="j" axis="1 2 3" pos=".1 .2 -.1" damping=".2" armature=".08"/>
+      <joint name="k" type="slide" axis="-2 1 1" damping=".1" armature=".05"/>
+      <joint name="l" axis="2 -1 3" pos="-.2 .1 .3" damping=".3" armature=".03"/>
+      <inertial pos=".17 -.12 .31" mass="2.3" diaginertia=".21 .32 .43" quat=".8 .2 -.3 .1"/><body pos=".4 -.2 .1"><joint name="m" axis="0 1 0" stiffness=".7" armature=".04"/><inertial pos=".17 -.12 .31" mass="2.3" diaginertia=".21 .32 .43" quat=".8 .2 -.3 .1"/>
+      <body pos=".1 .2 .4"><inertial pos=".17 -.12 .31" mass="2.3" diaginertia=".21 .32 .43" quat=".8 .2 -.3 .1"/></body></body>
+      <body pos="-.3 .2 .1" quat=".7 -.2 .1 .4"><joint name="n" type="slide" axis="0 1 2" armature=".02"/><inertial pos=".17 -.12 .31" mass="2.3" diaginertia=".21 .32 .43" quat=".8 .2 -.3 .1"/></body></body></worldbody><actuator><motor joint="j" gear="-2.3" ctrllimited="true" ctrlrange="-.8 .6" forcelimited="true" forcerange="-1.1 1.4"/><position joint="k" kp="2" kv=".4" gear="-.7"/><velocity joint="l" kv="1.3"/></actuator></mujoco>

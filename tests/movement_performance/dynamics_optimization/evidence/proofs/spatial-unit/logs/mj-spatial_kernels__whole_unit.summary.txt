@@ -1,0 +1,60 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                     Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------------
+Data Dependencies                15         15                                           .           .          .
+Flow Dependencies                 .          .                                           .           .          .
+Initialization                    6          6                                           .           .          .
+Non-Aliasing                      .          .                                           .           .          .
+Run-time Checks                 301          .    301 (CVC5 51%, Trivial 21%, altergo 27%)           .          .
+Assertions                        8          .                   7 (CVC5 67%, altergo 33%)           .          1
+Functional Contracts             74          .                  74 (CVC5 13%, altergo 87%)           .          .
+LSP Verification                  .          .                                           .           .          .
+Termination                      15         15                                           .           .          .
+Concurrency                       .          .                                           .           .          .
+-----------------------------------------------------------------------------------------------------------------
+Total                           419    36 (9%)                                   382 (91%)           .     1 (0%)
+
+
+max steps used for successful proof: 88653
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.adb:9:43: range check proved in max 6 seconds
+mj-spatial_kernels.adb:10:43: range check proved in max 5 seconds
+mj-spatial_kernels.adb:9:43: fp_overflow check proved in max 4 seconds
+mj-spatial_kernels.adb:10:43: fp_overflow check proved in max 4 seconds
+mj-spatial_kernels.adb:122:66: fp_overflow check proved in max 3 seconds
+mj-spatial_kernels.ads:106:14: postcondition proved in max 3 seconds
+mj-spatial_kernels.ads:122:14: postcondition proved in max 3 seconds
+mj-spatial_kernels.adb:8:43: range check proved in max 3 seconds
+mj-spatial_kernels.adb:122:54: fp_overflow check proved in max 3 seconds
+mj-spatial_kernels.adb:139:52: fp_overflow check proved in max 3 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 16 subprograms and packages out of 16 analyzed
+  MJ.Spatial_Kernels at mj-spatial_kernels.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Spatial_Kernels.Add at mj-spatial_kernels.ads:76 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 12 checks out of 13 proved
+  MJ.Spatial_Kernels.Add_Wrenches at mj-spatial_kernels.ads:127 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Spatial_Kernels.Angular_Component at mj-spatial_kernels.ads:83 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)
+  MJ.Spatial_Kernels.Bounded at mj-spatial_kernels.ads:9 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Spatial_Kernels.Bounded at mj-spatial_kernels.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Spatial_Kernels.Dot at mj-spatial_kernels.ads:104 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (31 checks)
+  MJ.Spatial_Kernels.Joint_Motion at mj-spatial_kernels.ads:109 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (25 checks)
+  MJ.Spatial_Kernels.Linear_Component at mj-spatial_kernels.ads:89 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
+  MJ.Spatial_Kernels.Make_Inertia at mj-spatial_kernels.ads:61 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (62 checks)
+  MJ.Spatial_Kernels.Multiply at mj-spatial_kernels.ads:92 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (100 checks)
+  MJ.Spatial_Kernels.Pack_Inertia at mj-spatial_kernels.ads:48 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Spatial_Kernels.Rotated_Entry at mj-spatial_kernels.ads:27 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (26 checks)
+  MJ.Spatial_Kernels.Shift_Diagonal at mj-spatial_kernels.ads:35 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
+  MJ.Spatial_Kernels.Shift_Offdiagonal at mj-spatial_kernels.ads:41 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Spatial_Kernels.Wrench at mj-spatial_kernels.ads:119 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (35 checks)

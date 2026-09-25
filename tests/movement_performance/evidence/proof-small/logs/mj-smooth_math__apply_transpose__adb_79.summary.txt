@@ -1,0 +1,44 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                    Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                          .           .          .
+Flow Dependencies                 .         .                                          .           .          .
+Initialization                    2         1                                   1 (CVC5)           .          .
+Non-Aliasing                      .         .                                          .           .          .
+Run-time Checks                  99         .    99 (CVC5 24%, Trivial 18%, altergo 58%)           .          .
+Assertions                       11         .                 11 (CVC5 45%, altergo 55%)           .          .
+Functional Contracts              8         .                  8 (CVC5 90%, altergo 10%)           .          .
+LSP Verification                  .         .                                          .           .          .
+Termination                       1         1                                          .           .          .
+Concurrency                       .         .                                          .           .          .
+---------------------------------------------------------------------------------------------------------------
+Total                           122    3 (2%)                                  119 (98%)           .          .
+
+
+max steps used for successful proof: 86015
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_math.adb:114:38: assertion proved in max 2 seconds
+mj-smooth_math.ads:67:14: postcondition proved in max 2 seconds
+mj-smooth_math.adb:111:24: precondition proved in max 2 seconds
+mj-smooth_math.adb:113:38: assertion proved in max 2 seconds
+mj-smooth_math.adb:115:38: assertion proved in max 1 seconds
+mj-smooth_math.adb:90:44: fp_overflow check proved in max 1 seconds
+mj-smooth_math.adb:90:44: fp_overflow check proved in max 1 seconds
+mj-smooth_math.adb:89:44: fp_overflow check proved in max 1 seconds
+mj-smooth_math.adb:89:44: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_math, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Math.Apply_Transpose at mj-smooth_math.ads:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (119 checks)

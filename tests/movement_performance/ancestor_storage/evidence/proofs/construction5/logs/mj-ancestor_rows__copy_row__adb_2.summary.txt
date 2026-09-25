@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  28         .     28 (CVC5 92%, altergo 8%)           .          .
+Assertions                        2         .     2 (CVC5 50%, altergo 50%)           .          .
+Functional Contracts             11         .    11 (CVC5 82%, altergo 18%)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            42    1 (2%)                      41 (98%)           .          .
+
+
+max steps used for successful proof: 30116
+
+============================
+Most difficult proved checks
+============================
+
+mj-ancestor_rows.adb:11:46: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-ancestor_rows, 1 subprograms and packages out of 1 analyzed
+  MJ.Ancestor_Rows.Copy_Row at mj-ancestor_rows.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (41 checks)

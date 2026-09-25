@@ -1,0 +1,41 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified    Unproved
+---------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .           .
+Flow Dependencies                 .         .                             .           .           .
+Initialization                    7         7                             .           .           .
+Non-Aliasing                      .         .                             .           .           .
+Run-time Checks                  52         .    51 (CVC5 41%, altergo 59%)           .           1
+Assertions                       10         .     6 (CVC5 84%, altergo 16%)           .           4
+Functional Contracts             27         .    15 (CVC5 82%, altergo 18%)           .          12
+LSP Verification                  .         .                             .           .           .
+Termination                       .         .                             .           .           .
+Concurrency                       .         .                             .           .           .
+---------------------------------------------------------------------------------------------------
+Total                            97    8 (8%)                      72 (74%)           .    17 (18%)
+
+
+max steps used for successful proof: 237031
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-forces.adb:64:46: index check proved in max 3 seconds
+mj-data-forces.adb:84:35: index check proved in max 1 seconds
+mj-data-forces.adb:48:47: precondition proved in max 1 seconds
+mj-data-forces.adb:47:70: precondition proved in max 1 seconds
+mj-data-forces.adb:84:42: index check proved in max 1 seconds
+mj-data-forces.adb:74:33: loop invariant in first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-forces, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Forces.Try_Recursive at mj-data-forces.adb:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 72 checks out of 89 proved

@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    1         1                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  22         .    22 (CVC5 67%, altergo 33%)           .          .
+Assertions                        6         .     6 (CVC5 40%, altergo 60%)           .          .
+Functional Contracts              1         .                   1 (altergo)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            31    2 (6%)                      29 (94%)           .          .
+
+
+max steps used for successful proof: 23499
+
+============================
+Most difficult proved checks
+============================
+
+mj-solver_kernels.adb:28:23: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-solver_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Solver_Kernels.Add_Row at mj-solver_kernels.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (29 checks)

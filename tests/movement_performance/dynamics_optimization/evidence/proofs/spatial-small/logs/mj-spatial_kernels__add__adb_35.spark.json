@@ -1,0 +1,1022 @@
+{
+  "mj-spatial_kernels.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Spatial_Kernels.Add",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-spatial_kernels.ads",
+            "line": 45
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Spatial_Kernels.Bounded",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-spatial_kernels.ads",
+            "line": 11
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "flow",
+        "line": 45,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Add\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 54,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "flow",
+        "line": 45,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 30,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 4495,
+                "time": 0.092301
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.095288
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1578,
+                "time": 0.042635
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.045803
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 30,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 4495,
+            "max_time": 0.0923010036349297
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 20,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.02187
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 263,
+                "time": 0.021088
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007298
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 262,
+                "time": 0.021203
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 572,
+                "time": 0.01589
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 247,
+                "time": 0.017559
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007983
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 246,
+                "time": 0.027876
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 20,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 3,
+            "max_steps": 572,
+            "max_time": 0.0158900003880262
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 263,
+            "max_time": 0.0210880003869534
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 61,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006552
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 264,
+                "time": 0.020404
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009321
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019996
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007974
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005119
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008293
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 251,
+                "time": 0.018154
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 61,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.00932100042700768
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 69,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007553
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 264,
+                "time": 0.02228
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00945
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009338
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008877
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005018
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008581
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.021641
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 69,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.00944999977946281
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 77,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006381
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007216
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010042
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 264,
+                "time": 0.020531
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.004002
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.021172
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008503
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 251,
+                "time": 0.018426
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 77,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 4,
+            "max_steps": 1,
+            "max_time": 0.01004199963063
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 72,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 8008,
+                "time": 0.18506
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.2101
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1559,
+                "time": 0.025826
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 255,
+                "time": 0.016403
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 72,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 8008,
+            "max_time": 0.185059994459152
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 255,
+            "max_time": 0.0164030008018017
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 33,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.037365
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 910,
+                "time": 0.044158
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2455,
+                "time": 0.055036
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.060074
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2453,
+                "time": 0.068554
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2095,
+                "time": 0.093513
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 33,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "loop invariant initialization proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_LOOP_INVARIANT_INIT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 2455,
+            "max_time": 0.0685539990663528
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 910,
+            "max_time": 0.0441580004990101
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 33,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.157561
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3322,
+                "time": 0.187595
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.14732
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2830,
+                "time": 0.17046
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.138742
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 2878,
+                "time": 0.163645
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 33,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "loop invariant preservation proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 3,
+            "max_steps": 3322,
+            "max_time": 0.187594994902611
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008912
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.003098
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00891199987381697
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 71,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 48,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 5016,
+                "time": 0.106148
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.106019
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 71,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 48,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 11,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 5016,
+            "max_time": 0.10614799708128
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 13,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007038
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006383
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 13,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 12,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0070380000397563
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 42,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 46,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007946
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.020154
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 42,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 46,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 13,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00794600043445826
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 47,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.025907
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 657,
+                "time": 0.032348
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.052481
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1412,
+                "time": 0.055975
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 47,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 14,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 1412,
+            "max_time": 0.0559750013053417
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00572199979797006,
+        "gnatwhy3.init": 0.215683996677399,
+        "gnatwhy3.register_vcs": 0.0284340009093285,
+        "gnatwhy3.run_vcs": 2.90000007225899e-05,
+        "gnatwhy3.save_session": 0.00757999904453754,
+        "gnatwhy3.schedule_vcs": 0.2360730022192,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.0120179988443851,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00156999903265387,
+        "gnatwhy3.transformations.discriminate_if_poly": 3.19989994750358e-05,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0394189991056919,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00332199898548424,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00618600007146597,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.0015419990522787,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00660499883815646,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.0035149990580976,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00496499892324209,
+        "gnatwhy3.transformations.eliminate_literal": 0.00940600037574768,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00248600007034838,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00351399905048311,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 2.30000005103648e-05,
+        "gnatwhy3.transformations.inline_trivial": 0.2343720048666,
+        "gnatwhy3.transformations.monomorphise_goal": 0.00148900004569441,
+        "gnatwhy3.transformations.remove_unused": 0.0815690010786057,
+        "gnatwhy3.transformations.simplify_formula": 0.0420319996774197,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.0163310002535582,
+        "gnatwhy3.transformations.split_premise_right": 0.0469570010900497
+      },
+      "global": {
+        "flow analysis": 0.00118899997323751,
+        "globals (advanced)": 0.0026169999036938,
+        "globals (basic)": 0.00373500003479421,
+        "init_why_sections": 0.000622000021394342,
+        "marking": 0.000677999982144684,
+        "properties (advanced)": 5.2999999752501e-05,
+        "translation of standard": 0.001276999944821
+      }
+    },
+    "warn_error": [
+      {
+        "check_tree": {},
+        "col": 10,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "trivial",
+        "line": 39,
+        "message": {
+          "text": "initialization of an array in FOR loop is handled imprecisely [array-initialization]"
+        },
+        "rule": "array-initialization",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ]
+  }
+}

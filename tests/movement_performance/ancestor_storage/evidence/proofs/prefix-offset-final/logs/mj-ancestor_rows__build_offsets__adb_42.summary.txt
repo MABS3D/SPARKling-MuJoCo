@@ -1,0 +1,40 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                   Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                         .           .          .
+Flow Dependencies                 .         .                                         .           .          .
+Initialization                    1         1                                         .           .          .
+Non-Aliasing                      .         .                                         .           .          .
+Run-time Checks                  67         .                67 (CVC5 58%, altergo 42%)           .          .
+Assertions                       13         .    13 (CVC5 73%, Trivial 18%, altergo 9%)           .          .
+Functional Contracts              1         .                 1 (CVC5 50%, altergo 50%)           .          .
+LSP Verification                  .         .                                         .           .          .
+Termination                       .         .                                         .           .          .
+Concurrency                       .         .                                         .           .          .
+--------------------------------------------------------------------------------------------------------------
+Total                            83    2 (2%)                                  81 (98%)           .          .
+
+
+max steps used for successful proof: 185511
+
+============================
+Most difficult proved checks
+============================
+
+mj-ancestor_rows.adb:63:43: loop invariant after first iteration proved in max 10 seconds
+mj-ancestor_rows.adb:61:43: loop invariant after first iteration proved in max 5 seconds
+mj-ancestor_rows.adb:56:43: loop invariant after first iteration proved in max 2 seconds
+mj-ancestor_rows.adb:59:43: loop invariant after first iteration proved in max 1 seconds
+mj-ancestor_rows.adb:65:43: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-ancestor_rows, 1 subprograms and packages out of 1 analyzed
+  MJ.Ancestor_Rows.Build_Offsets at mj-ancestor_rows.adb:42 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (81 checks)

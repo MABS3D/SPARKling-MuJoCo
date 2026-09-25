@@ -1,0 +1,75 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                     Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------------
+Data Dependencies                28         28                                           .           .          .
+Flow Dependencies                 .          .                                           .           .          .
+Initialization                    8          6                                    2 (CVC5)           .          .
+Non-Aliasing                      .          .                                           .           .          .
+Run-time Checks                 602          .    602 (CVC5 47%, Trivial 14%, altergo 40%)           .          .
+Assertions                       43          .                  43 (CVC5 44%, altergo 56%)           .          .
+Functional Contracts            104          .                 104 (CVC5 71%, altergo 29%)           .          .
+LSP Verification                  .          .                                           .           .          .
+Termination                      27         27                                           .           .          .
+Concurrency                       .          .                                           .           .          .
+-----------------------------------------------------------------------------------------------------------------
+Total                           812    61 (8%)                                   751 (92%)           .          .
+
+
+max steps used for successful proof: 258708
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_math.adb:168:37: range check proved in max 4 seconds
+mj-smooth_math.adb:168:37: fp_overflow check proved in max 4 seconds
+mj-smooth_math.adb:167:37: range check proved in max 4 seconds
+mj-smooth_math.ads:100:14: postcondition proved in max 3 seconds
+mj-smooth_math.adb:165:37: range check proved in max 2 seconds
+mj-smooth_math.ads:60:14: postcondition proved in max 2 seconds
+mj-smooth_math.ads:67:14: postcondition proved in max 2 seconds
+mj-smooth_math.adb:71:38: assertion proved in max 2 seconds
+mj-smooth_math.adb:114:38: assertion proved in max 2 seconds
+mj-smooth_math.adb:68:24: precondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_math, 31 subprograms and packages out of 31 analyzed
+  MJ.Smooth_Math at mj-smooth_math.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Smooth_Math."*" at mj-smooth_math.ads:45 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Smooth_Math."+" at mj-smooth_math.ads:35 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Smooth_Math."-" at mj-smooth_math.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Smooth_Math."-" at mj-smooth_math.ads:43 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Smooth_Math.Apply at mj-smooth_math.ads:58 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (119 checks)
+  MJ.Smooth_Math.Apply.Wide at mj-smooth_math.adb:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Apply_Transpose at mj-smooth_math.ads:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (119 checks)
+  MJ.Smooth_Math.Apply_Transpose.Wide at mj-smooth_math.adb:80 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Axis_Angle at mj-smooth_math.ads:98 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Smooth_Math.Bounded at mj-smooth_math.ads:18 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Bounded at mj-smooth_math.ads:23 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Bounded at mj-smooth_math.ads:27 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Cross at mj-smooth_math.ads:53 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (40 checks)
+  MJ.Smooth_Math.Dot at mj-smooth_math.ads:49 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.Smooth_Math.Multiply at mj-smooth_math.ads:72 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (114 checks)
+  MJ.Smooth_Math.Normalize at mj-smooth_math.ads:131 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Smooth_Math.Normalize at mj-smooth_math.ads:138 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
+  MJ.Smooth_Math.Read_Quaternion at mj-smooth_math.ads:150 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
+  MJ.Smooth_Math.Read_Vector at mj-smooth_math.ads:146 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Smooth_Math.Rotation at mj-smooth_math.ads:83 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (140 checks)
+  MJ.Smooth_Math.Scale_Of at mj-smooth_math.ads:104 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Scale_Of at mj-smooth_math.ads:106 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Smooth_Math.Scaled_Norm at mj-smooth_math.ads:117 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (21 checks)
+  MJ.Smooth_Math.Scaled_Norm at mj-smooth_math.ads:123 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (27 checks)
+  MJ.Smooth_Math.Scaled_Quaternion at mj-smooth_math.ads:113 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Smooth_Math.Scaled_Vector at mj-smooth_math.ads:109 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Smooth_Math.Unit_Quaternion at mj-smooth_math.ads:79 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Smooth_Math.Unit_Ratio at mj-smooth_math.ads:162 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Smooth_Math.Unit_Vector at mj-smooth_math.ads:94 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Smooth_Math.Write_Vector at mj-smooth_math.ads:154 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (17 checks)

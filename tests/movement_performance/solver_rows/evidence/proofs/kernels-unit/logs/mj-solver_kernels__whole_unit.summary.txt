@@ -1,0 +1,44 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                    Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------------
+Data Dependencies                 6           6                                          .           .          .
+Flow Dependencies                 .           .                                          .           .          .
+Initialization                    2           2                                          .           .          .
+Non-Aliasing                      .           .                                          .           .          .
+Run-time Checks                  44           .    44 (CVC5 63%, Trivial 11%, altergo 26%)           .          .
+Assertions                        8           .                  8 (CVC5 17%, altergo 83%)           .          .
+Functional Contracts              6           .                  6 (CVC5 60%, altergo 40%)           .          .
+LSP Verification                  .           .                                          .           .          .
+Termination                       4           4                                          .           .          .
+Concurrency                       .           .                                          .           .          .
+-----------------------------------------------------------------------------------------------------------------
+Total                            70    12 (17%)                                   58 (83%)           .          .
+
+
+max steps used for successful proof: 26026
+
+============================
+Most difficult proved checks
+============================
+
+mj-solver_kernels.adb:23:13: loop invariant after first iteration proved in max 2 seconds
+mj-solver_kernels.adb:41:13: loop invariant after first iteration proved in max 1 seconds
+mj-solver_kernels.adb:25:13: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-solver_kernels, 7 subprograms and packages out of 7 analyzed
+  MJ.Solver_Kernels at mj-solver_kernels.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Solver_Kernels.Add_Product at mj-solver_kernels.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Solver_Kernels.Add_Row at mj-solver_kernels.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (26 checks)
+  MJ.Solver_Kernels.Clamp_Pivot at mj-solver_kernels.ads:9 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Solver_Kernels.Reciprocal at mj-solver_kernels.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Solver_Kernels.Scale at mj-solver_kernels.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Solver_Kernels.Scale_Row at mj-solver_kernels.ads:35 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)

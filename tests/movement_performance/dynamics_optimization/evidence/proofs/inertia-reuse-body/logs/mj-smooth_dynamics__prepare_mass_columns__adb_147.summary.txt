@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    1         1                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  15         .    15 (CVC5 85%, altergo 15%)           .          .
+Assertions                        2         .     2 (CVC5 43%, altergo 57%)           .          .
+Functional Contracts             11         .    11 (CVC5 14%, altergo 86%)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            30    2 (7%)                      28 (93%)           .          .
+
+
+max steps used for successful proof: 26687
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_dynamics.adb:156:33: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_dynamics, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Dynamics.Prepare_Mass_Columns at mj-smooth_dynamics.ads:78 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (28 checks)

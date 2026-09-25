@@ -1,0 +1,41 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                  Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1           1                                        .           .          .
+Flow Dependencies                 .           .                                        .           .          .
+Initialization                    2           2                                        .           .          .
+Non-Aliasing                      9           9                                        .           .          .
+Run-time Checks                   6           .                                 6 (CVC5)           .          .
+Assertions                        2           .                                 2 (CVC5)           .          .
+Functional Contracts              4           .    4 (CVC5 73%, Trivial 2%, altergo 25%)           .          .
+LSP Verification                  .           .                                        .           .          .
+Termination                       .           .                                        .           .          .
+Concurrency                       .           .                                        .           .          .
+---------------------------------------------------------------------------------------------------------------
+Total                            24    12 (50%)                                 12 (50%)           .          .
+
+
+max steps used for successful proof: 59306
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-pipeline.ads:18:14: postcondition proved in max 7 seconds
+mj-data-pipeline.adb:160:32: assertion proved in max 2 seconds
+mj-data-pipeline.adb:154:16: precondition proved in max 2 seconds
+mj-data-pipeline.adb:161:7: precondition proved in max 2 seconds
+mj-data-pipeline.adb:150:10: precondition proved in max 1 seconds
+mj-data-pipeline.adb:158:32: assertion proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-pipeline, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Pipeline.Ensure_Jacobians at mj-data-pipeline.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)

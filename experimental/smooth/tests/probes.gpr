@@ -1,0 +1,17 @@
+with "../smooth.gpr";
+with "../../../sparkling_mujoco.gpr";
+
+project Probes is
+   for Source_Dirs use (".");
+   for Object_Dir use Sparkling_Mujoco.Build_Root & "/obj/smooth_tests";
+   for Exec_Dir use Sparkling_Mujoco.Build_Root & "/bin";
+   for Main use ("smooth_probe.adb");
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-O0", "-g", "-gnata", "-gnato", "-gnatVa");
+   end Compiler;
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+end Probes;

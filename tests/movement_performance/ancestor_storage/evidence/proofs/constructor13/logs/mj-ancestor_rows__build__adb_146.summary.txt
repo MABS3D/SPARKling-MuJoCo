@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                    Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                          .           .          .
+Flow Dependencies                 .         .                                          .           .          .
+Initialization                    1         1                                          .           .          .
+Non-Aliasing                      .         .                                          .           .          .
+Run-time Checks                  76         .                 75 (CVC5 43%, altergo 57%)           .          1
+Assertions                       10         .    10 (CVC5 18%, Trivial 29%, altergo 54%)           .          .
+Functional Contracts              5         .                  5 (CVC5 42%, altergo 58%)           .          .
+LSP Verification                  .         .                                          .           .          .
+Termination                       .         .                                          .           .          .
+Concurrency                       .         .                                          .           .          .
+---------------------------------------------------------------------------------------------------------------
+Total                            93    2 (2%)                                   90 (97%)           .     1 (1%)
+
+
+max steps used for successful proof: 45034
+
+============================
+Most difficult proved checks
+============================
+
+mj-ancestor_rows.adb:175:67: index check proved in max 2 seconds
+mj-ancestor_rows.adb:173:70: precondition proved in max 2 seconds
+mj-ancestor_rows.adb:162:13: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-ancestor_rows, 1 subprograms and packages out of 1 analyzed
+  MJ.Ancestor_Rows.Build at mj-ancestor_rows.ads:63 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and not proved, 90 checks out of 91 proved

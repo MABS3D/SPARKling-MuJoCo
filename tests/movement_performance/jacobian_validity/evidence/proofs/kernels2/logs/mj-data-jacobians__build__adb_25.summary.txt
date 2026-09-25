@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                       Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                             .           .          .
+Flow Dependencies                 .          .                             .           .          .
+Initialization                    6          6                             .           .          .
+Non-Aliasing                      .          .                             .           .          .
+Run-time Checks                  32          .    31 (CVC5 66%, altergo 34%)           .          1
+Assertions                       21          .     21 (CVC5 97%, altergo 3%)           .          .
+Functional Contracts              5          .     4 (CVC5 86%, altergo 14%)           .          1
+LSP Verification                  .          .                             .           .          .
+Termination                       1          .                      1 (CVC5)           .          .
+Concurrency                       .          .                             .           .          .
+---------------------------------------------------------------------------------------------------
+Total                            66    7 (11%)                      57 (86%)           .     2 (3%)
+
+
+max steps used for successful proof: 51284
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-jacobians.adb:65:50: assertion proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-jacobians, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Jacobians.Build at mj-data-jacobians.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 57 checks out of 59 proved

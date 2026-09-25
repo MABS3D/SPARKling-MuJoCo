@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                      Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                            .           .          .
+Flow Dependencies                 .          .                            .           .          .
+Initialization                    .          .                            .           .          .
+Non-Aliasing                      .          .                            .           .          .
+Run-time Checks                   7          .    7 (CVC5 86%, altergo 14%)           .          .
+Assertions                        .          .                            .           .          .
+Functional Contracts              4          .    4 (CVC5 60%, altergo 40%)           .          .
+LSP Verification                  .          .                            .           .          .
+Termination                       1          1                            .           .          .
+Concurrency                       .          .                            .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            13    2 (15%)                     11 (85%)           .          .
+
+
+max steps used for successful proof: 11269
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.ads:109:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Add_Wrenches at mj-spatial_kernels.ads:107 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
