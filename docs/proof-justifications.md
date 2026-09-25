@@ -451,3 +451,23 @@ MulMatMatT returns immediately when either output axis is empty. Its full initia
 - MJ.Poses:Compose: Hide_Info Model.Normalized — The private Normalize wrapper proves the complete tiny/near-unit/scaling relation against the ghost model. Compose applies that proved relation to the value-returning quaternion Product, whose exact ordered component contract is separately proved. Only expansion of the ghost normalization expression is hidden; no runtime body, obligation or property is suppressed or assumed.
 
 - MJ.Poses:Transform: Hide_Info MJ.Quaternions.Model.Rotation_Intermediate — The private Intermediate cell proves equality to this ghost function for each axis. Complete_Transform separately proves the ordered rotation-and-translation expression. The Transform proof composes these proved relations and bounds without expanding the intermediate arithmetic again. The quaternion ghost model body remains covered by the complete quaternion proof; no body is skipped and no property is assumed.
+
+## Transpose dispatch (2026-09-24)
+
+Transpose exposes Relaxed_Initialization together with a proved static
+R'Initialized postcondition; its ordinary executable component-equality
+postcondition remains in place. An empty axis returns immediately, where both
+properties are vacuous. Separate helpers for one through five input rows,
+paired copies for six through fifteen rows, and the two general copy loops
+all prove complete initialization and R(i,j) = A(j,i). Prefix invariants include
+initialization before reading each written component; the odd-row tail is
+proved separately from the pairs.
+
+No_Vector on short copies and Vector on the inner loop for square dimensions
+16 and 64 are code-generation hints ignored by GNATprove. The latter loop
+has the same scalar body as the unrestricted general core; dispatch thresholds
+do not restrict the public input domain. Each write reads only the distinct
+input object under SPARK's existing anti-aliasing rules. These choices add no
+assumption, suppression, trusted body, or floating-point reassociation. The
+performance evidence records their target-specific effect separately from the
+functional proof.

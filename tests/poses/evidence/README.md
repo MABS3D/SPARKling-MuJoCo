@@ -32,6 +32,17 @@ See [the contract and status report](../../../docs/poses.md).
   extracted from the exact measured pose executable. SIMD arithmetic is present
   in the Ada transform, composition and product loops; no calls or FMA in the
   measured hot loops. This is evidence for this build, not every target.
+- [Optimization follow-up](optimization-round2/README.md): six measured source
+  candidates, two unproved prototypes and one build-only probe; none accepted.
+  Focused baseline repeats and a balanced same-executable control refine the
+  remaining priorities without replacing the 70-case reference. The reusable
+  [build comparator](../compare_builds.py) retains direct Ada/Ada, C/C and both
+  Ada/C comparisons. At the end of that investigation the production kernel
+  and rebuilt binary matched this snapshot exactly.
+- [Proof refresh after the transpose optimization](../../matrix_performance/evidence/README.md):
+  the same 694 pose/quaternion/rotation checks pass with fresh receipts bound
+  to the updated matrix sources. The historical receipts here remain unchanged;
+  no new pose timing claim is made by that proof refresh.
 - `*-version.txt`: native compiler, build-tool and prover version output.
 - [Earlier complete snapshot](before-scalar-shortcut/summary.json): preserved
   before the scalar-quaternion shortcut, with 28 of 70 pose cases slower and

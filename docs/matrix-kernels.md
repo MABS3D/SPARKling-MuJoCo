@@ -92,8 +92,10 @@ be finite and numerically equal to the C result: this suite uses no tolerance.
 This compares floating-point values, not NaN payloads or the sign bit of zero,
 and is empirical evidence, not a proof of universal C equivalence.
 
-The deterministic corpus (seed 20260924) has 451 cases and 307,332 output
-comparisons. It covers fixed 3x3, rectangular and empty shapes, dimensions around
+The deterministic full-operation corpus (seed 20260924) has 535 cases and
+544,872 output comparisons. A separate transpose-only corpus adds 40 cases and
+151,125 comparisons across the 64/65 dispatch boundary and up to dimension 128,
+including distinct cell values to detect wrong permutations. It covers fixed 3x3, rectangular and empty shapes, dimensions around
 four-lane boundaries, Tier0 endpoints, subnormals, zero skips, cancellation,
 negative diagonal weights, both triangle modes, and repeated row selections.
 The Ada tests add explicit small-integer results, selected-row frame checks,
@@ -104,12 +106,13 @@ The hot matrix operations no longer materialize row/column vectors for each
 reduction. The public projection/component helpers remain available. Symmetry
 is computed once per pair; transposition, symmetrization and row-dot products
 avoid redundant output clearing. Initialization is proved with prefix
-invariants. `Symmetrize` and `MulMatMatT` explicitly expose
+invariants. `Transpose`, `Symmetrize` and `MulMatMatT` explicitly expose
 `Relaxed_Initialization => R` together with a proved `R'Initialized` postcondition;
 their outputs are fully initialized on return and their functional contracts
 and input domains are preserved.
 
-All 20 benchmark variants (17 kernels with the Gram modes distinguished) were
+The preceding optimization measured all 20 benchmark variants (17 kernels with
+the Gram modes distinguished)
 measured against the normal C SIMD path, including `-DmjUSEPLATFORMSIMD`, on
 228 size/shape/zero-pattern combinations. Each uses 11 alternating C/Ada sample
 pairs, dispersion and bootstrap intervals, with equal release/FP flags.
@@ -126,13 +129,15 @@ requirement or accept a permanent slowdown.
 
 ## Verification status
 
-The five complete numeric units pass **3,300 checks, zero unproved obligations
-and 65 reviewed warnings** on one frozen MuJoCo 3.14.0 snapshot. The three
-matrix units contribute 2,551 checks. Fresh `.spark` reports and original
+The five complete numeric units pass **3,504 checks, zero unproved obligations
+and 71 reviewed warnings** on the frozen source snapshot measured below,
+with MuJoCo 3.14.0 as the C reference. The three
+matrix units contribute 2,755 checks. Fresh `.spark` reports and original
 invocation receipts pass the source-hash and complete-unit gate. Diagnostics
 started at scalar and single-cell subprograms before composing complete units.
 
-The warning total includes messages stating that GNATprove ignores
+The six additional warnings are the new transpose loop hints ignored by
+GNATprove; existing warnings remain. The warning total includes messages stating that GNATprove ignores
 code-generation hints (`Machine_Attribute`, `Loop_Optimize`). The scalar lane
 recurrences, indexing, initialization and floating-point order are proved;
 release differential tests also check the emitted code. Remaining warnings
@@ -142,12 +147,14 @@ new application trusted body or deallocator change was introduced. The proof
 guard remains 4,000 MB per process group.
 
 Development, validation and release each pass **1,097 Ada assertions** in ten
-executables, **72 Python tests**, and **1,049,825 C comparisons** over 4,094 cases.
-The release matrix probe also passes all 451 cases / 307,332 exact finite-value
-comparisons against both scalar and actual native SIMD C references.
-Signed-zero bits and NaN payloads are not compared. Release object/probe and
-benchmark inspection finds no FMA instructions or executable ghost-model
-functions. Evidence records compiler versions, target, flags and source hashes.
+executables and **72 Python tests**. The matrix differential probes were then
+extended, rebuilt and rerun in each profile; the Python tests were repeated.
+Combined coverage is **1,438,490 C comparisons** over 4,218 cases per profile,
+including the separate transpose-only cases. The release matrix probe also
+passes 535 full-operation cases / 544,872 comparisons plus 40 transpose-only
+cases / 151,125 comparisons against the actual native SIMD C reference.
+Signed-zero bits and NaN payloads are not compared. Inspection of the measured benchmark wrappers and their resolved direct
+targets finds no FMA instructions or executable ghost-model functions. Evidence records compiler versions, target, flags and source hashes.
 
 The target is x86-64 Linux/WSL with GNAT/GNATprove 16.1.0 and GPRbuild 26.0.0,
 binary64, round-to-nearest-even and gradual underflow. These selected numeric
@@ -202,7 +209,7 @@ checks. Latest 228-case result: 78 faster, 50 overlapping
 parity, 100 slower. Performance acceptance remains open; see
 `matrix-performance.md` and the accompanying raw evidence.
 
-## Short-row matrix-transpose product (2026-09-24)
+## Short-row matrix-transpose product (2026-09-24, preceding snapshot)
 
 `MulMatMatT` returns immediately for empty outputs and specializes widths
 0 through 4 before the output loops,
@@ -215,3 +222,23 @@ historical cases. The new traversal composes separately proved short-dot
 contracts; its one new Hide_Info is documented in the justification ledger.
 See [the current report](matrix-performance.md) for the complete proof scope,
 measurements and confirmation results.
+
+## Transpose dispatch (2026-09-24)
+
+Transpose returns immediately for an empty axis. One through five input rows
+have separate helpers with explicit component copies. Six through fifteen
+rows copy pairs and then an odd final row. Square matrices with dimensions
+16 and 64 use a vector-hinted version of the original loop; other shapes
+use the original general core. These thresholds select code shape for the
+measured native build and do not narrow the supported domain.
+
+All paths prove full initialization and the same exact per-component transpose
+relation. There is no arithmetic reassociation, added assumption or suppression.
+The executable public component postcondition is retained; its additional
+static initialization postcondition permits avoiding redundant clearing.
+The [reproducible performance fixture](../tests/matrix_performance/README.md) builds
+current and frozen baseline Ada separately, each with normal SIMD C.
+A shared-executable experiment is retained as historical context; its LTO
+inlining differs from the one-version builds.
+See [the current report](matrix-performance.md) for final measurements and
+remaining performance work.

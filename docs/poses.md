@@ -145,7 +145,7 @@ finite numerical values, not the sign bits of zero.
 
 ### Performance remains an acceptance blocker
 
-The final run used an AMD Ryzen 7 9800X3D under WSL2, GNAT/GCC 16.1.0,
+The complete reference run used an AMD Ryzen 7 9800X3D under WSL2, GNAT/GCC 16.1.0,
 31 alternating C/Ada sample pairs per case and a 25 ms target per sample.
 Of 70 pose/product cases, **43 were faster, 20 within measured noise, and
 7 slower**. The earlier complete run, preserved in
@@ -182,10 +182,41 @@ multiply-add instructions. SIMD is available to the SPARK implementation;
 remaining differences require optimization of the emitted code while preserving
 the ordered arithmetic and Gold contracts.
 
-The performance gate is **OPEN**. The next optimization targets are the five
-separate-result Transform cases and two in-place Compose cases above; faster
+The performance gate is **OPEN**. The five separate-result Transform cases and
+two in-place Compose cases above remain historical slowdown flags; faster
 cases do not compensate for them. See the [complete evidence index](../tests/poses/evidence/README.md)
 for raw paired samples, source/binary hashes, compiler flags and disassembly.
+
+### Optimization follow-up
+
+The [subsequent investigation](../tests/poses/evidence/optimization-round2/README.md)
+measured six source variants and rejected all of them for promotion. Two further
+source prototypes did not finish focused proof diagnostics, and a compiler-flag
+probe produced no useful change in the relevant hot loops. The original sources,
+contracts and release settings were restored; the rebuilt executable has the
+same SHA-256 as the complete reference run at the end of that investigation.
+After the subsequent matrix-transpose optimization, the three complete units
+were proved again: 694 checks, zero unproved, nine reviewed warnings.
+[Fresh receipts](../tests/matrix_performance/evidence/README.md) bind that proof
+to the updated source tree; the historical pose receipts remain unchanged.
+This proof refresh makes no new pose performance claim.
+
+A focused baseline repeat and a balanced same-executable control give the
+strongest repeated slowdown evidence for tiny Compose in-place, nonunit Transform
+and Tier0-limit Transform. General Transform and zero-point Transform change
+classification between interleaved sample groups of identical code. Nonunit
+Compose in-place and tiny Transform are inconclusive in both new sessions.
+No historical flag is declared fixed, and these focused sessions do not replace
+the complete reference run. Intervals are individual within-session estimates;
+an interval containing 1 is inconclusive, not proof of equivalence. There is no
+universal 1.5% noise threshold.
+
+General Transform in-place still takes about 16% less time than C and general
+Inverse in-place about 25% less time in both control groups. These favorable
+cases should be preserved; their gains do not establish an aggregate workload
+speedup without representative operation frequencies and integration measurements.
+The new [build comparator](../tests/poses/compare_builds.py) compares candidate
+Ada directly with baseline Ada while also retaining C/C and both Ada/C controls.
 
 This increment supplies pose primitives. It does not migrate the experimental
 smooth kinematics, verify the body/joint pose recursion, or establish

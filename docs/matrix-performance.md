@@ -1,4 +1,106 @@
-# MuJoCo: prodotto A·Bᵀ con righe corte
+# MuJoCo: prestazioni delle matrici
+
+Il criterio corrente privilegia il movimento completo: i conteggi sotto sono
+diagnostica dei kernel, non una stima delle prestazioni del simulatore. La prima
+[prova integrata](movement-performance.md) misura separatamente il prototipo
+senza contatti e un collegamento sperimentale ai kernel Gold.
+
+## Trasposizione: aggiornamento del 2026-09-24
+
+La trasposizione generica specializza le matrici con 1–5 righe, copia due
+componenti per iterazione con 6–15 righe e mantiene un percorso SIMD dedicato
+alle quadrate 16×16 e 64×64. Le altre forme conservano il ciclo generale. Sugli assi vuoti
+ritorna immediatamente; l’output è inizializzato dalle copie, senza azzeramenti
+preventivi. Ogni percorso
+prova la stessa relazione per componente e l’inizializzazione completa, senza
+nuove assunzioni né modifiche all’ordine floating point.
+
+Il [fixture riproducibile](../tests/matrix_performance/README.md) confronta
+la baseline immutabile `2c26e49b` e il codice corrente in due eseguibili, ciascuno
+con una sola versione Ada e il normale riferimento C SIMD. I quattro slot
+sono bilanciati; i rapporti Ada/Ada, C/C e Ada/C restano tutti visibili.
+La prova completa corrente passa **3.504 obblighi, zero non provati e 71 avvisi
+revisionati** sulle cinque unità numeriche. Anche quaternioni, pose e rotazioni
+passano la riconferma completa: altri 694 obblighi, zero non provati.
+
+Development, validation e release passano ciascuno 1.097 asserzioni Ada,
+72 test Python e 1.438.490 confronti C su 4.218 casi. La parte matriciale
+comprende 535 casi completi / 544.872 confronti e 40 casi dedicati alla
+trasposizione / 151.125 confronti, ripetuti anche contro il C SIMD in release.
+
+L’esperimento con entrambe le versioni Ada nello stesso eseguibile ha rivelato
+un limite del banco: LTO introduce chiamate fuori linea anche nei kernel
+invariati. Quei risultati restano nello storico e non sostituiscono la misura
+normale. Nei due eseguibili separati, 19 kernel Ada su 20 e tutti i 20 chiamanti
+C mantengono le stesse istruzioni normalizzate fra versioni. Cambia soltanto
+la trasposizione; gli effetti di collocazione del codice restano misurabili.
+Le [evidenze](../tests/matrix_performance/evidence/README.md) conservano anche
+le varianti scartate: il percorso vettoriale su tutte le quadrate 16–64
+peggiorava la 63×63, mentre una copia a coppie era insufficiente per cinque
+righe. La versione corrente corregge entrambe le scelte.
+
+### Risultato corrente
+
+La conferma della trasposizione misura **40 casi non vuoti più veloci del C**;
+i nove casi vuoti hanno sette segnali di rallentamento e due esiti inconcludenti.
+Sono 49 casi e 47 forme distinte: 64×16 e 64×64 compaiono due volte con un
+parametro `nk` diverso, irrilevante per questa operazione. Le forme non vuote
+distinte sono 38. Rapporti inferiori a 1 significano meno tempo; le percentuali
+sotto indicano riduzione del tempo, non incremento reciproco della velocità.
+
+| Forma | Nuova/precedente Ada [IC 95%] | Ada/C [IC 95%] | Tempo in meno del C |
+|---|---:|---:|---:|
+| 3×3 | 0.513 [0.506, 0.518] | 0.879 [0.872, 0.885] | 12.1% |
+| 4×4 | 0.369 [0.366, 0.376] | 0.584 [0.569, 0.592] | 41.6% |
+| 5×7 | 0.470 [0.463, 0.483] | 0.699 [0.691, 0.729] | 30.1% |
+| 5×32 | 0.374 [0.371, 0.377] | 0.594 [0.590, 0.598] | 40.6% |
+| 7×7 | 0.696 [0.687, 0.701] | 0.925 [0.912, 0.931] | 7.5% |
+| 7×19 | 0.578 [0.575, 0.582] | 0.871 [0.860, 0.878] | 12.9% |
+| 16×16 | 0.983 [0.974, 0.993] | 0.694 [0.686, 0.697] | 30.6% |
+| 63×63 | 0.982 [0.974, 0.997] | 0.589 [0.580, 0.601] | 41.1% |
+| 64×64 | 1.007 [0.993, 1.031] | 0.626 [0.623, 0.636] | 37.4% |
+| 128×128 | 1.023 [1.007, 1.042] | 0.257 [0.254, 0.259] | 74.3% |
+
+Il guadagno delle forme grandi sul C era già presente e viene conservato; non è
+interamente attribuito a questo incremento. Nella misura generale dei 228 casi:
+
+| Versione | Più veloce del C | Inconcludente | Più lenta del C |
+|---|---:|---:|---:|
+| Baseline rimisurata | 84 | 36 | 108 |
+| Corrente | 88 | 40 | 100 |
+
+Non sono conteggi pesati per un carico reale, né otto rallentamenti sicuramente
+risolti: classificazioni e collocazione del codice possono variare. Rispetto
+alla precedente Ada, la misura generale segnala 20 miglioramenti, nove
+peggioramenti e 199 esiti inconcludenti. La riconferma separata dei nove segnali
+ne lascia uno riproducibile, sul caso vuoto della trasposizione; gli altri otto
+non si ripetono. Anche il controllo C/C mostra variazioni e resta nei dati grezzi.
+
+**Accettazione prestazionale ancora aperta.** La prova più lunga dei dodici
+segnali della trasposizione riconferma, contro la precedente Ada, **+2,8% sulla
+63×16** (IC [1.016, 1.041]) e **+2,0% sulla 128×128** (IC [1.010, 1.026]).
+Queste forme restano rispettivamente circa il 47% e il 75% più rapide del C,
+ma i peggioramenti non vengono compensati dai guadagni altrove. La 65×16 è
+inconcludente nella riconferma. Sui casi vuoti, sei dei sette segnali contro C
+si ripetono; si cronometra soprattutto il ciclo/barriera del chiamante, circa
+un decimo di nanosecondo per iterazione, senza copiare componenti. Restano
+registrati come lavoro aperto, senza applicare una soglia arbitraria di rumore.
+
+Un’ulteriore variante con `Inline_Always` sul dispatcher passa la prova locale
+e i test numerici, ma viene scartata: guadagna circa il 36% sulla 3×3 e perde
+circa il 24% sulla 4×4 e il 20% sulla 5×32 rispetto alla versione corrente.
+I [dati finali e le riconferme](../tests/matrix_performance/evidence/summary.json)
+conservano tutti i casi. Il [codice generato](../tests/matrix_performance/evidence/standalone-codegen.json)
+non contiene FMA, funzioni ghost o stack secondario nei percorsi esaminati.
+Il chiamante cronometrato della trasposizione cresce da 875 a 2.800 byte;
+l’effetto nella cache delle istruzioni dei chiamanti integrati resta da misurare.
+
+
+
+## Storico: prodotto A·Bᵀ con righe corte
+
+I dati che seguono appartengono alla precedente ottimizzazione, prima della
+modifica alla trasposizione. Non sono le misure del sorgente corrente.
 
 **La parità complessiva con C resta aperta.** Un output con uno degli assi
 vuoti ritorna immediatamente, prima della selezione della larghezza. Il prodotto generico
@@ -28,7 +130,7 @@ giustificato nel ledger, evita di riespandere il modello ricorsivo già provato
 nel ciclo corto: la composizione usa le uguaglianze dei contratti provati,
 senza assumere la correttezza di alcun corpo.
 
-## Prestazioni
+### Prestazioni
 
 | Versione, 228 casi | Più veloce di C | Intervallo include 1 | Più lenta di C |
 |---|---:|---:|---:|
@@ -98,7 +200,7 @@ codice. L'intervallo che comprende 1 è inconcludente, non prova equivalenza.
 Ogni rallentamento riproducibile resta aperto; i casi veloci non compensano
 quelli lenti. La conferma separata va letta insieme alla misura completa.
 
-## Confronto diretto tra versioni
+### Confronto diretto tra versioni
 
 Una campagna diretta alterna i quattro processi C precedente, Ada precedente,
 C nuova e Ada nuova, invertendo l'ordine a ogni campione: 21 gruppi per
@@ -135,7 +237,7 @@ Il controllo C usa lo stesso sorgente e rende visibili anche variazioni del
 riferimento tra i due binari. Queste misure identificano casi da correggere o
 riconfermare; da sole non isolano la causa di ogni differenza.
 
-## Verifica
+### Verifica
 
 | Unità completa | Proved | Unproved | Avvisi revisionati |
 |---|---:|---:|---:|
