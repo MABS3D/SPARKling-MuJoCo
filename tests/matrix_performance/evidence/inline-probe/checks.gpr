@@ -1,0 +1,14 @@
+project Checks is
+ for Source_Dirs use ("generated", "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tests");
+ for Source_Files use ("matrix_probe.adb", "mj-matrices.ads", "mj-vector_models.adb", "mj-vector_models.ads", "mj-matrix_models.adb", "mj-matrix_types.ads", "mj-blas.adb", "mj-types.ads", "mj.ads", "mj-matrices.adb", "mj-matrix_types.adb", "mj-blas.ads", "mj-matrix_models.ads");
+ for Object_Dir use "check-obj";
+ for Exec_Dir use "check-bin";
+ for Main use ("matrix_probe.adb");
+ for Create_Missing_Dirs use "True";
+ package Compiler is
+ for Default_Switches ("Ada") use ("-gnat2022", "-gnatn", "-gnatp", "-O3", "-march=native", "-flto", "-ffp-contract=off", "-ffinite-math-only", "-fno-trapping-math", "-fno-math-errno");
+ end Compiler;
+ package Linker is
+ for Default_Switches ("Ada") use ("-flto", "-ffp-contract=off");
+ end Linker;
+end Checks;
