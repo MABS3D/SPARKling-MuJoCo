@@ -55,12 +55,30 @@ in progress must not inherit the older foundation snapshot's verification claim.
 
 ## Performance against the C reference
 
-Every component must be benchmarked against its corresponding upstream MuJoCo C
-implementation while it is being built, starting with the smallest independently
-measurable subprogram. The acceptance target is at least parity within measured
-noise, or faster. A reproducible slowdown is unfinished work: do not mark the
-component complete or accept it as a permanent performance tradeoff. Missing or
-inconclusive measurements leave this requirement pending.
+**Current priority (updated by the user on 2026-09-24):** assess performance
+parity on representative integrated movement workloads before expanding scope.
+Preserve Gold while optimizing and use the normal C SIMD implementation as the
+reference. This supersedes the earlier requirement that no individual kernel
+slowdown could be compensated by gains elsewhere.
+
+The acceptance metric is measured total time for an equivalent supported
+movement workload, with correctness checked separately. Microbenchmarks remain
+diagnostic: retain reproducible regressions and their uncertainty, but do not
+use an unweighted count of faster/slower cases or an average of their percentage
+changes as an integrated performance result. A local regression may be accepted
+when representative integrated measurements establish parity or improvement;
+report workload-specific regressions rather than hiding them in a global mean.
+Missing integrated measurements leave aggregate performance pending.
+
+Measure baseline Ada, current Ada and the corresponding C workload, including
+real call frequencies, data dependencies and memory traffic. Distinguish a
+kinematic update from a complete dynamics/integration step. Report time per step
+and trajectory, dispersion and tail timings across documented models and sizes.
+The experimental smooth pipeline uses its own math routines. Identify any
+experimental bridge explicitly: its performance cannot establish the benefit of
+other kernel changes unless those kernels are actually on the measured call
+path. Its supported scope and
+pending proofs/alignment must remain explicit; it is not full MuJoCo.
 
 Use representative sizes and branches on the supported target hardware, with
 comparable release optimizations and floating-point semantics. Include the C

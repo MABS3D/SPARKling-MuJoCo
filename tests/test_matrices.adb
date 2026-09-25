@@ -12,8 +12,10 @@ begin
    Eye (Id);
    Assert (Id = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], "identity");
    Assert (Copy9 (A) = A, "copy9");
-   Assert (MulMatVec3 (A, V) = [6.0, 12.0, 21.0], "fixed mat vec");
-   Assert (MulMatTVec3 (A, V) = [14.0, 16.0, 21.0], "fixed transpose mat vec");
+   MulMatVec3 (W, A, V);
+   Assert (W = [6.0, 12.0, 21.0], "fixed mat vec");
+   MulMatTVec3 (W, A, V);
+   Assert (W = [14.0, 16.0, 21.0], "fixed transpose mat vec");
    Assert (MulMatMat3 (A, Id) = A and then MulMatMat3 (Id, A) = A, "fixed identity product");
    Transpose (T, A);
    Assert (T = [[1.0, 4.0, 7.0], [2.0, 5.0, 8.0], [3.0, 6.0, 10.0]], "transpose orientation");

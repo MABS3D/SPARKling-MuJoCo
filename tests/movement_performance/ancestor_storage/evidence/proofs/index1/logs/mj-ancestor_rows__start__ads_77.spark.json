@@ -1,0 +1,465 @@
+{
+  "mj-ancestor_rows.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Ancestor_Rows.Start",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 15
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Ancestor_Rows.Count",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 14
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Ancestor_Rows.Size",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 13
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "flow",
+        "line": 15,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Start\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 6,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "flow",
+        "line": 16,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 72,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 77,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00972
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 162,
+                "time": 0.01724
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 72,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 77,
+        "message": {
+          "text": "pointer dereference check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_NULL_POINTER_DEREFERENCE",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00972000043839216
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 81,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 77,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006308
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 103,
+                "time": 0.014987
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013809
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 101,
+                "time": 0.011351
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 81,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 77,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00630800006911159
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 101,
+            "max_time": 0.0113509995862842
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 72,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 77,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010521
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014133
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.017125
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.024416
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 72,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 77,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0171249993145466
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 29,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 17,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00344
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 35,
+                "time": 0.016503
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 29,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 17,
+        "message": {
+          "text": "invariant check proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_INVARIANT_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00343999988399446
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 35,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 16,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008202
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009294
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 35,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 16,
+        "message": {
+          "text": "invariant check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_INVARIANT_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00820199958980083
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-ancestor_rows.ads",
+        "check_line": 17,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.017567
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.018638
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-ancestor_rows.ads",
+        "how_proved": "prover",
+        "line": 17,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0175669994205236
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00549500016495585,
+        "gnatwhy3.init": 0.205595001578331,
+        "gnatwhy3.register_vcs": 0.00335699901916087,
+        "gnatwhy3.run_vcs": 6.00000021222513e-06,
+        "gnatwhy3.save_session": 0.0017519990215078,
+        "gnatwhy3.schedule_vcs": 0.0598810017108917,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00184399902354926,
+        "gnatwhy3.transformations.detect_polymorphism": 0.000159000002895482,
+        "gnatwhy3.transformations.discriminate_if_poly": 9.0000003183377e-06,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.00482700020074844,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00073999899905175,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00195299903862178,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000312999007292092,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00129899894818664,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.000732999003957957,
+        "gnatwhy3.transformations.eliminate_inductive": 0.000913998985197395,
+        "gnatwhy3.transformations.eliminate_literal": 0.00249000010080636,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00113200000487268,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00113999901805073,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643e-07,
+        "gnatwhy3.transformations.inline_trivial": 0.0233960002660751,
+        "gnatwhy3.transformations.monomorphise_goal": 6.09989983786363e-05,
+        "gnatwhy3.transformations.remove_unused": 0.0101899988949299,
+        "gnatwhy3.transformations.simplify_formula": 0.00475799897685647,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00215599895454943,
+        "gnatwhy3.transformations.split_premise_right": 0.00380000006407499
+      },
+      "global": {
+        "flow analysis": 0.001475999946706,
+        "globals (advanced)": 0.000507000018842518,
+        "globals (basic)": 0.00237099989317358,
+        "init_why_sections": 0.000601999985519797,
+        "marking": 0.000456999987363815,
+        "properties (advanced)": 5.90000017837156e-05,
+        "translation of standard": 0.00142300000879914
+      }
+    },
+    "warn_error": []
+  }
+}

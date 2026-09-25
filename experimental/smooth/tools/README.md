@@ -130,3 +130,12 @@ callee contracts. Do not call a timed-out run a pass.
 compares it with the official MuJoCo 3.14.0 C library. See
 [verification scope](../verification.md) for the command, fixtures, tolerances
 and boundaries. The numerical report is independent of GNATprove results.
+
+### Focused proof diagnostics
+
+`prove_fragments.py --proof-mode progressive` enables progressive splitting;
+the default remains `per_check`. The mode is recorded with the commands and
+source hashes. Prefer `--name` for a subprogram's postconditions: a specification
+line may select no generated obligation, even when its body is analyzed.
+A run reporting `completed_no_proof_checks` now exits nonzero. A zero exit status
+requires every selected target to complete with proof checks and none unproved.

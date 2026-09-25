@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                      Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                            .           .          .
+Flow Dependencies                 .         .                            .           .          .
+Initialization                    .         .                            .           .          .
+Non-Aliasing                      .         .                            .           .          .
+Run-time Checks                  12         .                    12 (CVC5)           .          .
+Assertions                        .         .                            .           .          .
+Functional Contracts              4         .    4 (CVC5 82%, altergo 18%)           .          .
+LSP Verification                  .         .                            .           .          .
+Termination                       .         .                            .           .          .
+Concurrency                       .         .                            .           .          .
+-------------------------------------------------------------------------------------------------
+Total                            17    1 (6%)                     16 (94%)           .          .
+
+
+max steps used for successful proof: 122915
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_dynamics.ads:119:14: postcondition proved in max 1 seconds
+mj-smooth_dynamics.adb:177:7: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_dynamics, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Dynamics.Store_Symmetric at mj-smooth_dynamics.ads:115 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)

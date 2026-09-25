@@ -1,0 +1,5293 @@
+{
+  "mj-ancestor_rows.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_EFFECTS"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Ancestor_Rows.Prove_Row_Frame",
+        "sloc": [
+          {
+            "column": 14,
+            "file": "mj-ancestor_rows.adb",
+            "line": 50
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Ancestor_Rows.Offsets_OK",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.adb",
+            "line": 17
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Ancestor_Rows.Row_OK",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-ancestor_rows.ads",
+            "line": 61
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 23,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "flow",
+        "line": 51,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 0,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 50,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006615
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013622
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013379
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 37,
+                "time": 0.01001
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 50,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 1,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00661499984562397
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 37,
+            "max_time": 0.0100100003182888
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 50,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009775
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 15,
+                "time": 0.007242
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011589
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.004666
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 50,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0115890000015497
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 15,
+            "max_time": 0.00724200019612908
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 55,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009119
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009313
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005941
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013172
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 55,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00911900028586388
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 55,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011368
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009393
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012226
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012584
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 55,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0122260004281998
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 60,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013635
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014545
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 60,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0136350002139807
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 54,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01054
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 19,
+                "time": 0.005598
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011722
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01042
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 54,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0117220003157854
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 19,
+            "max_time": 0.00559799978509545
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010429
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01462
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011422
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 42,
+                "time": 0.012866
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0114219998940825
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010901
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 17,
+                "time": 0.008097
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010301
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.0152
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0103010004386306
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 17,
+            "max_time": 0.00809700042009354
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 75,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00968
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010492
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00948
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.0132
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 75,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00968000013381243
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 89,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01161
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007883
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009782
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009923
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 89,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0116100003942847
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 61,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018863
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.020485
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016991
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.720749
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 61,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 11,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0188629999756813
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 54,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010338
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.012268
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005967
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006748
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 54,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 12,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0103380000218749
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010727
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009757
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009414
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014925
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 13,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0107270004227757
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008815
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 17,
+                "time": 0.01118
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010821
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011772
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 14,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0108209997415543
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 75,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008163
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013726
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014323
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014296
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 75,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 15,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0143229998648167
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 97,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009974
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010662
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009183
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.00982
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 97,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 16,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00997400004416704
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 100,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010207
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01485
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009517
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010286
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 100,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 17,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0102070001885295
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 100,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01125
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 104,
+                "time": 0.013094
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011199
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 43,
+                "time": 0.009592
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 100,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 18,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0112500004470348
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 43,
+            "max_time": 0.00959200039505959
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 122,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012574
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013243
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007436
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009628
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 122,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 19,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0125740002840757
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 115,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01537
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 115,
+                "time": 0.015688
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015203
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019601
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 115,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 20,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.01537000015378
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 105,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.025698
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 444,
+                "time": 0.028314
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.025918
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 476,
+                "time": 0.029367
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 105,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 21,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0259179994463921
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 140,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007377
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 35,
+                "time": 0.012264
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00917
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010362
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 140,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 22,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00917000044137239
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 130,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013017
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011364
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010858
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 35,
+                "time": 0.00949
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 130,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 23,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0130169996991754
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 35,
+            "max_time": 0.00949000008404255
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 143,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012572
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013507
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009215
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 36,
+                "time": 0.007803
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 143,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 24,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0125719998031855
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 36,
+            "max_time": 0.00780300004407763
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 62,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.437722
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 628,
+                "time": 0.035775
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 62,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 25,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 628,
+            "max_time": 0.0357749983668327
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 54,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01151
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.00811
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009328
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006973
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 54,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 26,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00932800024747849
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 21,
+            "max_time": 0.00810999982059002
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016727
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01521
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014045
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 45,
+                "time": 0.011241
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 27,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0167270004749298
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 45,
+            "max_time": 0.0112410001456738
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007682
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007913
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01361
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 235,
+                "time": 0.013591
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 28,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00768199982121587
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 235,
+            "max_time": 0.013590999878943
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 75,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012881
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008883
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013053
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009122
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 75,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 29,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0130529999732971
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 89,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013208
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009804
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010801
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009452
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 89,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 30,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0132079999893904
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.019039
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 258,
+                "time": 0.016921
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 31,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 258,
+            "max_time": 0.0169210005551577
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 54,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011137
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.0083
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009439
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 270,
+                "time": 0.018824
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 54,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 32,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00943899992853403
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 21,
+            "max_time": 0.0082999998703599
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 57,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012473
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011081
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010428
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014931
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 57,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 33,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0124730002135038
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 74,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006001
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010829
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005955
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 46,
+                "time": 0.007492
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 74,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 34,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00600099982693791
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 74,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01071
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 17,
+                "time": 0.011813
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009569
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 237,
+                "time": 0.013949
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 74,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 35,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0107100000604987
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 79,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011552
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011001
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008437
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 268,
+                "time": 0.01772
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 79,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 36,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0115520004183054
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 95,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010103
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 78,
+                "time": 0.014655
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009098
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 38,
+                "time": 0.012923
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 95,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 37,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0101030003279448
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 95,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009751
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 43,
+                "time": 0.012587
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01553
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010837
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 95,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 38,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0155300004407763
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 109,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013304
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010055
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016527
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 262,
+                "time": 0.021746
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 109,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 39,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0165270008146763
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 64,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 86,
+                "time": 0.043152
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.038617
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 64,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 40,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 86,
+            "max_time": 0.0431520007550716
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 99,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007629
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 13,
+                "time": 0.009295
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007102
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 13,
+                "time": 0.007986
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 99,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 41,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00762900011613965
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 115,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006214
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01138
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007159
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 78,
+                "time": 0.010402
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 115,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 42,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00715899979695678
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 115,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010269
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 25,
+                "time": 0.011421
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006198
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009762
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 115,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 43,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0102690001949668
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 120,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007148
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009449
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010655
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 295,
+                "time": 0.015803
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 120,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 44,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0106549998745322
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 134,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00999
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01432
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010303
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013031
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 134,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 45,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0103029999881983
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 151,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010051
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008321
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007781
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 55,
+                "time": 0.012815
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 151,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 46,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0100509999319911
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 141,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018326
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 100,
+                "time": 0.018266
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011686
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 55,
+                "time": 0.015282
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 141,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 47,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0116860000416636
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 100,
+            "max_time": 0.018265999853611
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006898
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012272
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011499
+              },
+              "altergo": {
+                "result": "Failure\n(interrupted)",
+                "steps": 1,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 48,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0114989997819066
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007336
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 18,
+                "time": 0.006535
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013699
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.010578
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 49,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 21,
+            "max_time": 0.0105779999867082
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 61,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012648
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 16,
+                "time": 0.007377
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009331
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 61,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 50,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00933100003749132
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 16,
+            "max_time": 0.00737700005993247
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 51,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012763
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007522
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006775
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.014832
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 51,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 51,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0127630000934005
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 68,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012488
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011035
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009713
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 49,
+                "time": 0.014608
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 68,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 52,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0124880000948906
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 65,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.023845
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.028622
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 65,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 53,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.023845000192523
+          },
+          "Trivial": {
+            "count": 1,
+            "max_steps": 2,
+            "max_time": 0.0
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 95,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007504
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 13,
+                "time": 0.012179
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010782
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 13,
+                "time": 0.005834
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 95,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 54,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00750399986281991
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 13,
+            "max_time": 0.00583400018513203
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 111,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007162
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012014
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01131
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008932
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 111,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 55,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0113099999725819
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 111,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007451
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 24,
+                "time": 0.008019
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007618
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 23,
+                "time": 0.003975
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 111,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 56,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00745100015774369
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 23,
+            "max_time": 0.00397500023245811
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 116,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.0135
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008858
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011749
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009585
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 116,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 57,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0135000003501773
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 130,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012955
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 68,
+                "time": 0.01005
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015351
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012741
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 130,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 58,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0153510002419353
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 68,
+            "max_time": 0.010049999691546
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 167,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008199
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007099
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007358
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01207
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 167,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 59,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.008198999799788
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 167,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008742
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.004474
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009633
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.004725
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 167,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 60,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00963300000876188
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 172,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010317
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.003375
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007543
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006851
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 172,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 61,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0103169996291399
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 172,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010214
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.016048
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010757
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 368,
+                "time": 0.016915
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 172,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 62,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0107570001855493
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 150,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009973
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 143,
+                "time": 0.017438
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018365
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.016885
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 150,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 63,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0183649994432926
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 178,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.247328
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4866,
+                "time": 0.234936
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.022631
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 725,
+                "time": 0.044239
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 178,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 64,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0226310007274151
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 4866,
+            "max_time": 0.234935998916626
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 192,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00706
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012582
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012301
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 51,
+                "time": 0.007237
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 192,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 65,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00706000020727515
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 51,
+            "max_time": 0.00723699992522597
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 182,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014945
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012918
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.020661
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019239
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 182,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 66,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0206610001623631
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 182,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.314953
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5157,
+                "time": 0.309368
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.022252
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015461
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 182,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 67,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0222520008683205
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 5157,
+            "max_time": 0.309368014335632
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01266
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.011306
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012375
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 59,
+                "time": 0.011086
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 68,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0126599995419383
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 59,
+            "max_time": 0.0110860001295805
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010921
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 18,
+                "time": 0.005611
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006255
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.012839
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 69,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00625499989837408
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 18,
+            "max_time": 0.00561100011691451
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 61,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010507
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 18,
+                "time": 0.011079
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009884
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 234,
+                "time": 0.015549
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 61,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 70,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0105069996789098
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 51,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011128
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.00912
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01245
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013541
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 51,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 71,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.0124500002712011
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 66,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.911012
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 25152,
+                "time": 0.899371
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 66,
+        "message": {
+          "text": "assertion proved"
+        },
+        "msg_id": 72,
+        "rule": "VC_ASSERT",
+        "severity": "info",
+        "stats": {
+          "Trivial": {
+            "count": 1,
+            "max_steps": 2,
+            "max_time": 0.0
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 25152,
+            "max_time": 0.899371027946472
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.110548
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 3571,
+                "time": 0.114252
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01848
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.020397
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010533
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01215
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008273
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8,
+                "time": 0.007768
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005679
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8,
+                "time": 0.011483
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005765
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 15,
+                "time": 0.007378
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008538
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.005788
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012732
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.013316
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 73,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 6,
+            "max_steps": 1,
+            "max_time": 0.0184799991548061
+          },
+          "altergo": {
+            "count": 2,
+            "max_steps": 3571,
+            "max_time": 0.114252001047134
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 83,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 52,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008303
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6,
+                "time": 0.009357
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008615
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 5,
+                "time": 0.004697
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 83,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 52,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 74,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00830299966037273
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 5,
+            "max_time": 0.00469700014218688
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 91,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 52,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003892
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.010087
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00661
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8,
+                "time": 0.009546
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 91,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 52,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 75,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00661000004038215
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 61,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009258
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 24,
+                "time": 0.006168
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012487
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 122,
+                "time": 0.015262
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 61,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 76,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0124869998544455
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 24,
+            "max_time": 0.00616799993440509
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 85,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 54,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010647
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 8,
+                "time": 0.012253
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009431
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 22,
+                "time": 0.005321
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 85,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 54,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 77,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0106469998136163
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 22,
+            "max_time": 0.00532099977135658
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 51,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.031754
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 562,
+                "time": 0.033302
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014444
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 148,
+                "time": 0.014332
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012553
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 12,
+                "time": 0.00817
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008839
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 12,
+                "time": 0.007706
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009084
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 12,
+                "time": 0.007231
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005832
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 28,
+                "time": 0.004005
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010674
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 26,
+                "time": 0.007358
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009826
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 12,
+                "time": 0.006551
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 51,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 78,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 8,
+            "max_steps": 562,
+            "max_time": 0.0333020016551018
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.012229
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 37,
+                "time": 0.010327
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008998
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 33,
+                "time": 0.010072
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 79,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 2,
+            "max_steps": 37,
+            "max_time": 0.0103270001709461
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 46,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010527
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 36,
+                "time": 0.012848
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018455
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 39,
+                "time": 0.015248
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 46,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 80,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0105269998311996
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 39,
+            "max_time": 0.0152479996904731
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 51,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.010062
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 41,
+                "time": 0.007381
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006403
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 41,
+                "time": 0.007792
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 51,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 81,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00640300009399652
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 41,
+            "max_time": 0.00738100009039044
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 66,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.013583
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 73,
+                "time": 0.014364
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012289
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 73,
+                "time": 0.01094
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 66,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 82,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.013582999818027
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 73,
+            "max_time": 0.0109400004148483
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 78,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.018534
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019032
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012229
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 73,
+                "time": 0.010955
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 78,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 83,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0185339991003275
+          },
+          "altergo": {
+            "count": 1,
+            "max_steps": 73,
+            "max_time": 0.0109550002962351
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-ancestor_rows.adb",
+        "check_line": 57,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 45,
+                "time": 0.033817
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.037718
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-ancestor_rows.adb",
+        "how_proved": "prover",
+        "line": 57,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 84,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 45,
+            "max_time": 0.0338170006871223
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.0110409995540977,
+        "gnatwhy3.init": 0.22783499956131,
+        "gnatwhy3.register_vcs": 0.0661899968981743,
+        "gnatwhy3.run_vcs": 0.000146000005770475,
+        "gnatwhy3.save_session": 0.0180329997092485,
+        "gnatwhy3.schedule_vcs": 0.778909027576447,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.040642999112606,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00922000035643578,
+        "gnatwhy3.transformations.discriminate_if_poly": 8.09990015113726e-05,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0902210026979446,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.0185150001198053,
+        "gnatwhy3.transformations.eliminate_builtin": 0.0160520002245903,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.00679299887269735,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.0241030007600784,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.0138240000233054,
+        "gnatwhy3.transformations.eliminate_inductive": 0.0142989987507463,
+        "gnatwhy3.transformations.eliminate_literal": 0.0249869991093874,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.0099769989028573,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00831599906086922,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 5.99990016780794e-05,
+        "gnatwhy3.transformations.inline_trivial": 0.568929016590118,
+        "gnatwhy3.transformations.monomorphise_goal": 0.00834299903362989,
+        "gnatwhy3.transformations.remove_unused": 0.226881995797157,
+        "gnatwhy3.transformations.simplify_formula": 0.0905729979276657,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.0320830009877682,
+        "gnatwhy3.transformations.split_premise_right": 0.0711700022220612
+      },
+      "global": {
+        "flow analysis": 0.00148900004569441,
+        "globals (advanced)": 0.00215300009585917,
+        "globals (basic)": 0.00426500011235476,
+        "init_why_sections": 0.000541999994311482,
+        "marking": 0.000728000013623387,
+        "properties (advanced)": 7.999999797903e-05,
+        "translation of standard": 0.00110200000926852
+      }
+    },
+    "warn_error": []
+  }
+}

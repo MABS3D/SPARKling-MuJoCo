@@ -39,6 +39,37 @@ def cases():
     nr,nc,nk=1,4,1
     rows.append((nr,nc,nk,[1e10,1,-1e10,1],[1e10,1,1e10,1],
                  [1e10,1,1e10,1],[2],[1e10,1,1e10,1],[3],[1],[0]))
+    # Explicit short-row dispatch boundaries, including empty and rectangular
+    # outputs. Append after existing cases to preserve the historical corpus.
+    for shape in [(7,0,11), (7,1,11), (7,2,11), (7,3,11), (16,3,7), (0,2,5), (7,4,11), (16,4,7)]:
+        for value in [0.0,-0.0,1.0,-1.0,1e10,-1e10,1e-300,5e-324]:
+            add(shape, lambda i,v=value:v)
+        add(shape, lambda i: [1e10,1.0,-1e10,1.0][i%4])
+        add(shape, lambda i: float(i%7-3))
+    # Transpose dispatch: short-row, pair, vector-core and general-core edges.
+    for shape in [(1,0,1), (2,0,1), (3,0,1), (4,0,1), (4,7,1), (5,7,1),
+                  (15,7,1), (16,7,1), (17,7,1), (15,16,1), (16,16,1),
+                  (17,16,1), (63,16,1), (64,16,1), (1,64,1), (8,64,1),
+                  (0,16,1), (16,0,1), (5,0,1), (6,0,1), (6,7,1)]:
+        for value in [0.0, -0.0, 1e10, 5e-324]:
+            add(shape, lambda i,v=value: v if i % 2 else -v)
+    return rows
+
+def transpose_cases():
+    # Cross the vector/general boundary and reach the largest timing dimension.
+    # Distinct cell values detect permutations that a sum checksum cannot detect.
+    # Only this kernel runs: runtime Gram contracts at 128 are unnecessarily
+    # expensive for a transpose regression test.
+    rows = []
+    def add(shape, sample):
+        nr,nc,nk=shape
+        arrays = [[sample(i) for i in range(n)] for n in [nr*nc,nc*nk,nk*nc,nr*nk,nc,nr,nr]]
+        rows.append((nr,nc,nk,*arrays,[]))
+    for shape in [(64,64,1), (65,16,1), (65,65,1), (128,128,1),
+                  (1,128,1), (8,128,1), (32,32,1), (48,48,1)]:
+        for value in [0.0, -0.0, 1e10, 5e-324]:
+            add(shape, lambda i,v=value: v if i % 2 else -v)
+        add(shape, lambda i: float(i - 8192) / 16.0)
     return rows
 
 def layout(row):
@@ -61,14 +92,14 @@ def serialize(rows):
                     " " + " ".join(map(str,ind)) + "\n")
     return "".join(data)
 
-def compare(rows, actual, expected):
+def compare(rows, actual, expected, transpose_only=False):
     aa=[list(map(float,line.split())) for line in actual.splitlines()]
     cc=[list(map(float,line.split())) for line in expected.splitlines()]
     if len(aa)!=len(rows) or len(cc)!=len(rows):
         raise ValueError("matrix probe returned an incomplete result set")
     total=0
     for case,(row,ada,ref) in enumerate(zip(rows,aa,cc)):
-        cols=layout(row)
+        cols=[("Transpose",row[0]*row[1])] if transpose_only else layout(row)
         if len(ada)!=sum(n for _,n in cols) or len(ref)!=len(ada):
             raise ValueError(f"case {case}: incorrect matrix output count")
         offset=0
@@ -116,6 +147,14 @@ def main() -> int:
         count = compare(rows, *outputs)
         print(f"MATRICES {args.mode}: {len(rows)} cases, {count} scalar comparisons passed "
               "against MuJoCo C (seed 20260924; exact finite numeric equality)")
+        rows = transpose_cases()
+        data = serialize(rows)
+        outputs = [subprocess.run([str(p), "--transpose-only"], input=data,
+                                 capture_output=True, text=True, cwd=ROOT, env=env,
+                                 timeout=60, check=True).stdout for p in [ada, ref]]
+        count = compare(rows, *outputs, transpose_only=True)
+        print(f"TRANSPOSE {args.mode}: {len(rows)} large/boundary cases, {count} "
+              "exact finite scalar comparisons passed against MuJoCo C")
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         print(f"MATRIX COMPARISON FAILED: {error}", file=sys.stderr)
         if isinstance(error, subprocess.CalledProcessError) and error.stderr:

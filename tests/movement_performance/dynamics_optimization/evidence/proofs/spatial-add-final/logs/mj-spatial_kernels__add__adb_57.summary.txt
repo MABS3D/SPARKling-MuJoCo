@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                      Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                            .           .          .
+Flow Dependencies                 .          .                            .           .          .
+Initialization                    .          .                            .           .          .
+Non-Aliasing                      .          .                            .           .          .
+Run-time Checks                  11          .    11 (CVC5 91%, altergo 9%)           .          .
+Assertions                        .          .                            .           .          .
+Functional Contracts              4          .                     3 (CVC5)           .          1
+LSP Verification                  .          .                            .           .          .
+Termination                       1          1                            .           .          .
+Concurrency                       .          .                            .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            17    2 (12%)                     14 (82%)           .     1 (6%)
+
+
+max steps used for successful proof: 26499
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.ads:79:71: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Add at mj-spatial_kernels.ads:76 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 14 checks out of 15 proved

@@ -33,9 +33,11 @@ matrix products, avoiding nine expanded floating-point expressions per proof.
 `Mean_2`, `Symmetric_Component`, and the generic product/Gram component
 helpers do the same for averages, dimension mapping, and triangle selection.
 `Sequential_Dot`, `Bilinear_Dot`, `Weighted_Dot`, `Gram_Value`, and `Row_Dots`
-provide independently checkable contracts for composition. The private
-`MatT_Row` and `Fill_MatT_Row` separate four-lane row calculation from matrix
-updates; the outer proof preserves every previously completed row.
+provide independently checkable contracts for composition. Hot kernels now
+read the original matrix storage directly. Scalar products, four-lane blocks,
+tails, row updates and Gram mirroring have separate proved contracts. Ghost
+prefix and unfolding helpers connect those updates to the original ordered
+recurrences without constructing runtime row/column copies.
 `MJ.Matrix_Models`
 contains the recursive ghost recurrences and their unfolding lemmas. Lemma
 bodies are proved, not assumed; `Ghost => Static` removes the recursive models
@@ -90,58 +92,153 @@ be finite and numerically equal to the C result: this suite uses no tolerance.
 This compares floating-point values, not NaN payloads or the sign bit of zero,
 and is empirical evidence, not a proof of universal C equivalence.
 
-The deterministic corpus (seed 20260924) has 371 cases and 286,012 output
-comparisons. It covers fixed 3x3, rectangular and empty shapes, dimensions around
+The deterministic full-operation corpus (seed 20260924) has 535 cases and
+544,872 output comparisons. A separate transpose-only corpus adds 40 cases and
+151,125 comparisons across the 64/65 dispatch boundary and up to dimension 128,
+including distinct cell values to detect wrong permutations. It covers fixed 3x3, rectangular and empty shapes, dimensions around
 four-lane boundaries, Tier0 endpoints, subnormals, zero skips, cancellation,
 negative diagonal weights, both triangle modes, and repeated row selections.
 The Ada tests add explicit small-integer results, selected-row frame checks,
 maximum index-list bounds, and output values above Tier1. Python gate tests
 reject incorrect, incomplete, and nonfinite outputs.
 
-The implementation currently materializes row/column vectors for its scalar
-reductions. This keeps the proof boundary small but adds temporary storage and
-copying compared with the C pointer implementation; no performance claim or
-benchmark is attached to this increment. The type and contracts allow later
-optimization while retaining the stated component recurrences.
+The hot matrix operations no longer materialize row/column vectors for each
+reduction. The public projection/component helpers remain available. Symmetry
+is computed once per pair; transposition, symmetrization and row-dot products
+avoid redundant output clearing. Initialization is proved with prefix
+invariants. `Transpose`, `Symmetrize` and `MulMatMatT` explicitly expose
+`Relaxed_Initialization => R` together with a proved `R'Initialized` postcondition;
+their outputs are fully initialized on return and their functional contracts
+and input domains are preserved.
 
-The shared performance policy requires parity with the corresponding C kernels.
-That acceptance gate remains pending: no performance measurements are included
-in this functional-proof increment, and temporary row/column copies remain an
-optimization concern.
+The preceding optimization measured all 20 benchmark variants (17 kernels with
+the Gram modes distinguished)
+measured against the normal C SIMD path, including `-DmjUSEPLATFORMSIMD`, on
+228 size/shape/zero-pattern combinations. Each uses 11 alternating C/Ada sample
+pairs, dispersion and bootstrap intervals, with equal release/FP flags.
+The transposed product now traverses source rows first. Gram uses the same
+source-first traversal and skips a zero diagonal weight before visiting the
+output triangle. Each cell retains ascending source-index accumulation and
+the original multiplication association. Proved sweep/zero-weight contracts
+compose the cell proofs; the unused former Gram-row helper was removed.
+Inlining permits specialization of constant weighting/upper-triangle modes.
+The final benchmark records gains on representative medium/large cases,
+but reproducible slowdowns remain, including small and zero-rich cases. **Performance acceptance remains pending.** This increment improves
+the implementation and preserves Gold; it does not complete the performance
+requirement or accept a permanent slowdown.
 
 ## Verification status
 
-The three new complete units (`MJ.Matrix_Types`, `MJ.Matrix_Models`, and
-`MJ.Matrices`) pass **879 checks, zero unproved obligations, and 25
-reviewed warnings**. The dense numeric integration gate also refreshes
-`MJ.BLAS` and `MJ.Vector_Models`: **1628 checks and 54 reviewed warnings
-across five complete units**, all over the same frozen core source hashes.
-The new warning occurrences concern conservative array-initialization analysis
-and recursive contract/variant context. Full zero aggregates initialize the
-destinations before traversal; initialization, component behavior, recursive
-bodies, termination and unfolding lemmas are all proved. The existing vector Sqrt
-accuracy boundary is unchanged. No assumptions, suppressions, new application
-trusted bodies or deallocator changes were introduced.
+The five complete numeric units pass **3,504 checks, zero unproved obligations
+and 71 reviewed warnings** on the frozen source snapshot measured below,
+with MuJoCo 3.14.0 as the C reference. The three
+matrix units contribute 2,755 checks. Fresh `.spark` reports and original
+invocation receipts pass the source-hash and complete-unit gate. Diagnostics
+started at scalar and single-cell subprograms before composing complete units.
 
-Every kernel has proved functional behavior in addition to runtime safety.
-Diagnostic runs selected the smallest scalar/component subprogram first;
-final evidence uses fresh complete-unit `.spark` reports and original
-`.invocation.json` receipts checked by `tools/prove_report.py`.
-The guard remained at 4,000 MB per process group.
+The six additional warnings are the new transpose loop hints ignored by
+GNATprove; existing warnings remain. The warning total includes messages stating that GNATprove ignores
+code-generation hints (`Machine_Attribute`, `Loop_Optimize`). The scalar lane
+recurrences, indexing, initialization and floating-point order are proved;
+release differential tests also check the emitted code. Remaining warnings
+concern conservative array initialization, recursive contract/variant context,
+and the unchanged vector `Sqrt` boundary. No warning is suppressed. No `Assume`,
+new application trusted body or deallocator change was introduced. The proof
+guard remains 4,000 MB per process group.
 
-All three profiles pass 1085 Ada assertions (10 executables),
-72 Python tests and 1,028,505 C scalar comparisons
-(4,014 cases) each. The new matrix suite contributes 33 Ada assertions,
-eight Python gate tests, 371 cases and 286,012 comparisons. The target checked
-is x86-64 Linux/WSL, GNAT/GNATprove 16.1.0, GPRbuild 26.0.0, binary64 with
-round-to-nearest-even and gradual underflow. Release object and linked probe
-inspection found no FMA instructions or executable ghost model functions.
-Windows/Alire and unchanged foundation proof units are outside this refresh.
+Development, validation and release each pass **1,097 Ada assertions** in ten
+executables and **72 Python tests**. The matrix differential probes were then
+extended, rebuilt and rerun in each profile; the Python tests were repeated.
+Combined coverage is **1,438,490 C comparisons** over 4,218 cases per profile,
+including the separate transpose-only cases. The release matrix probe also
+passes 535 full-operation cases / 544,872 comparisons plus 40 transpose-only
+cases / 151,125 comparisons against the actual native SIMD C reference.
+Signed-zero bits and NaN payloads are not compared. Inspection of the measured benchmark wrappers and their resolved direct
+targets finds no FMA instructions or executable ghost-model functions. Evidence records compiler versions, target, flags and source hashes.
 
-The final five-unit integration evidence is produced from an isolated 3.14.0
-snapshot, so concurrent migration edits cannot invalidate a running proof.
-The preceding coherent 3.12.0 snapshot also passed the full selected proof gate
-and all three runtime profiles. These numeric-unit results do not certify the
-foundation migration as a whole. A separate matrix-only check against 3.14.0 C
-passes both scalar and native SIMD variants (371 cases, 286,012 exact scalar
-comparisons each), with contraction disabled.
+The target is x86-64 Linux/WSL with GNAT/GNATprove 16.1.0 and GPRbuild 26.0.0,
+binary64, round-to-nearest-even and gradual underflow. These selected numeric
+unit proofs do not certify the entire foundation migration or experimental
+physics pipeline. Quantitative error/conditioning/PSD claims remain outside
+the functional floating-point specification.
+
+The earlier 1,628-check matrix snapshot remains a separate historical result.
+Its SIMD compatibility evidence was corrected on 2026-09-23 by enabling
+`mjUSEPLATFORMSIMD`; the current release and timing runs use that flag explicitly.
+
+## Performance-first increment (2026-09-23)
+
+New kernel expansion remains blocked by reproducible performance regressions.
+`MulMatVec3` and `MulMatTVec3` now take an output parameter, consistent with the
+generic matrix API: use `MulMatVec3 (R, A, V)` instead of `R := MulMatVec3 (A, V)`.
+Both routines compute all three scalar results before writing them; SPARK
+requires distinct input/output objects for this procedure API. Updating the
+input vector itself therefore requires a separate temporary result. The benchmark
+uses distinct input/output buffers. Project callers and C probes
+use the new interface. The previous returning functions have been removed.
+
+Four-lane reductions initialize the first SIMD block directly, then update the
+same four lanes in source order. The block loop is not vectorized across blocks;
+row-pair reductions also avoid unrolling that loop. Empty/short inputs and tails
+retain the specified evaluation order. Independent Gold lemmas prove the
+zero-tail and lane-combination identities. Row projections stay inside ghost
+lemma bodies: an assertion with a conditional row projection was observed to
+leave secondary-stack bookkeeping in release code and was replaced without
+weakening the property. The final timed caller has no such calls. Gram mirroring
+now writes the upper triangle by rows, preserving every lower-triangle value.
+
+The benchmark gives square-only bilinear and symmetrize operands a shared
+dimension, matching the information provided to C. Both the preceding Gold
+3,121 version and the new version were remeasured with this harness. The previous
+228-case measurements used independent, equal dimensions and remain historical
+evidence; changes between those protocols are not attributed to kernel code.
+
+Previous measurement: 72 faster, 45 overlapping parity, 111 slower out of 228 cases. Performance acceptance remains open. See `matrix-performance.md`.
+
+## Focused slow-case optimization (2026-09-23)
+
+
+The two independent column-update loops now use `Loop_Optimize (Ivdep, Vector)`.
+Their exact output, bounds and frame contracts remain proved. The source-index
+accumulation order and the public API are unchanged. SPARK non-overlap rules and
+distinct per-iteration destinations justify Ivdep; GNATprove ignores the hint
+itself. See the detailed justification in `proof-justifications.md`.
+
+The complete numerical proof still passes 3,201 checks with zero unproved
+checks. Latest 228-case result: 78 faster, 50 overlapping
+parity, 100 slower. Performance acceptance remains open; see
+`matrix-performance.md` and the accompanying raw evidence.
+
+## Short-row matrix-transpose product (2026-09-24, preceding snapshot)
+
+`MulMatMatT` returns immediately for empty outputs and specializes widths
+0 through 4 before the output loops,
+preserving the exact ordered dot contract. `MulMatVec` and `MulVecMatVec`
+retain their previous implementation. The complete
+benchmark has 82 faster, 42 inconclusive, and
+104 slower cases. All reproducible slowdowns remain open.
+The corpus appends 80 short rectangular/empty cases without changing its
+historical cases. The new traversal composes separately proved short-dot
+contracts; its one new Hide_Info is documented in the justification ledger.
+See [the current report](matrix-performance.md) for the complete proof scope,
+measurements and confirmation results.
+
+## Transpose dispatch (2026-09-24)
+
+Transpose returns immediately for an empty axis. One through five input rows
+have separate helpers with explicit component copies. Six through fifteen
+rows copy pairs and then an odd final row. Square matrices with dimensions
+16 and 64 use a vector-hinted version of the original loop; other shapes
+use the original general core. These thresholds select code shape for the
+measured native build and do not narrow the supported domain.
+
+All paths prove full initialization and the same exact per-component transpose
+relation. There is no arithmetic reassociation, added assumption or suppression.
+The executable public component postcondition is retained; its additional
+static initialization postcondition permits avoiding redundant clearing.
+The [reproducible performance fixture](../tests/matrix_performance/README.md) builds
+current and frozen baseline Ada separately, each with normal SIMD C.
+A shared-executable experiment is retained as historical context; its LTO
+inlining differs from the one-version builds.
+See [the current report](matrix-performance.md) for final measurements and
+remaining performance work.

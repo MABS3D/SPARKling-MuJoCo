@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  20         .    20 (CVC5 85%, altergo 15%)           .          .
+Assertions                        .         .                             .           .          .
+Functional Contracts              4         .     4 (CVC5 29%, altergo 71%)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       1         1                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            26    2 (8%)                      24 (92%)           .          .
+
+
+max steps used for successful proof: 25845
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.ads:78:14: postcondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Add at mj-spatial_kernels.ads:76 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)

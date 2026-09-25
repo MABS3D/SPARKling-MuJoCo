@@ -27,7 +27,7 @@ To_Matrix (Rotation, Q);
 |---|---|---|
 | `Set_Identity` | Exactly `(1,0,0,0)` | `mju_unit4` |
 | `Conjugate`, both overloads | Preserve `w`, negate `x,y,z` | `mju_negQuat` |
-| `Multiply`, both overloads | Ordered floating-point Hamilton product | `mju_mulQuat` |
+| `Multiply`, both overloads, and value-returning `Product` | Ordered floating-point Hamilton product | `mju_mulQuat` |
 | `Norm` | Ordered four-square reduction composed with runtime square root | Norm expression inside `mju_normalize4` |
 | `Normalize` | Original length; tiny-norm identity fallback; near-unit no-op; otherwise component scaling | `mju_normalize4` |
 | `Rotate` | Exact ordered reference expression, including zero-vector and positive-identity shortcuts | `mju_rotVecQuat` |
@@ -35,9 +35,12 @@ To_Matrix (Rotation, Q);
 
 Conjugation equals the inverse only for unit quaternions. `q` and `-q` encode the
 same ideal rotation, but their floating-point branches need not coincide.
-Arithmetic, normalization and conversion require components in the existing
-Tier0 domain `[-1e10,1e10]`; rotation also requires a Tier0 vector. Output bounds
-are Tier1, except rotation, which uses Tier2 to accommodate nonunit inputs.
+Multiplication and conversion require components in the existing Tier0 domain
+`[-1e10,1e10]`; rotation also requires a Tier0 vector. `Norm` and `Normalize`
+accept Tier1 inputs (`[-1e30,1e30]`) so products can be normalized by the pose
+kernel. Multiplication/conversion outputs are Tier1; rotation outputs are Tier2.
+Normalization retains a Tier1 output guarantee for Tier0 inputs and has a
+conservative Tier2 guarantee over the extended domain.
 Identity and conjugation have no Tier0 precondition. Inputs are finite values
 under the project's floating-point model; NaNs and infinities are unsupported.
 
@@ -121,7 +124,12 @@ slow case remains open and is not offset by faster cases. Run measurements with
 other proofs, builds and benchmarks stopped. This suite is separate from the
 existing test runner so it does not change other kernel work.
 
-## Formal and numerical receipt
+## Historical formal and numerical receipt
+
+The following receipts describe the original quaternion increment. The widened
+normalization domain and value-returning `Product` introduced with the pose
+kernel have fresh proof and regression evidence documented in [poses.md](poses.md).
+The earlier evidence is retained unchanged; it is not a fresh receipt for today's source tree.
 
 The final complete-unit invocation proves **413 checks**, with **zero unproved
 checks** and **25 reported entities wholly in SPARK**. The repository coverage
@@ -146,7 +154,7 @@ multiply instructions are present. The ordinary project release build also
 passes for this dependency subset. These results do not establish end-to-end
 simulator performance or complete verification of unrelated project units.
 
-## Performance receipt
+## Historical performance receipt
 
 On the AMD Ryzen 7 9800X3D under Linux/WSL, GNU/FSF GNAT and GCC 16.1.0,
 with native release optimizations and normal C SIMD, the final integrated run

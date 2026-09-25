@@ -1,5 +1,5 @@
-with MJ.Data.Forward;
-with MJ.Data.Inertia;
+with MJ.Data.Pipeline;
+with MJ.Data.Inertia_Phase;
 
 package body MJ.Data.Euler with SPARK_Mode is
    procedure Integrate (D : in out Simulation; Result : out Status) is
@@ -17,7 +17,9 @@ package body MJ.Data.Euler with SPARK_Mode is
       Next_Time : constant Real := D.Clock + D.Timestep;
       Ok : Boolean;
    begin
+      pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
       if Next_Time not in Nonneg_Tier0 then
+         pragma Assert (Static => Input_Values (D) = Initial_Inputs);
          Result := Numeric_Limit;
          return;
       end if;
@@ -45,6 +47,7 @@ package body MJ.Data.Euler with SPARK_Mode is
       Equal_Input_Images (D.State.Ctrl.all, Initial_Control, D.State.Applied.all, Initial_Applied);
       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
       Result := Success;
    end Integrate;
    procedure Step (D : in out Simulation; Result : out Status) is
@@ -72,7 +75,7 @@ package body MJ.Data.Euler with SPARK_Mode is
          Result := Numeric_Limit;
          return;
       end if;
-      Forward.Evaluate (D, Result);
+      Pipeline.Evaluate_Ready (D, Result);
       pragma Assert (Static => State_Values (D) = Initial_State);
       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
       if Result /= Success then
@@ -84,7 +87,7 @@ package body MJ.Data.Euler with SPARK_Mode is
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
       begin
-         Inertia.Solve_Euler (D, Result);
+         Inertia_Phase.Solve_Euler (D, Result);
          Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);

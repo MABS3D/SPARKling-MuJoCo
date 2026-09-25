@@ -20,6 +20,7 @@ procedure Smooth_Probe is
    Result : Status;
    Cases, Steps : Integer;
    Input_Time : Real;
+   Selected_Policy : Inertia_Policy := Compatible;
 
    procedure Check (Expected : Status := Success) is
    begin
@@ -97,7 +98,13 @@ begin
    if Loaded.Status /= OK then
       raise Program_Error with "load: " & Loaded.Status'Image;
    end if;
-   Create (M, D, Result);
+   if Ada.Command_Line.Argument_Count > 1 then
+      Selected_Policy := Inertia_Policy'Value (Ada.Command_Line.Argument (2));
+   end if;
+   Create (M, D, Result, Selected_Policy);
+   if Result = Success and then Policy (D) /= Selected_Policy then
+      raise Program_Error with "solver policy selection";
+   end if;
    Put_Line ("create " & Result'Image);
    if Result /= Success then
       MJ.Models.Free (M);
@@ -105,6 +112,7 @@ begin
    end if;
    Create (M, D, Result);
    Check (Already_Allocated);
+   if Policy (D) /= Selected_Policy then raise Program_Error with "allocated policy changed"; end if;
    MJ.Models.Free (M);  --  Exercise ownership: the snapshot must survive.
    declare
       N : constant Natural := Velocity_Count (D);
@@ -145,6 +153,8 @@ begin
       for C in 1 .. Cases loop
          Reset (D, Result); Check;
          Get_State (D, Qout, Vout, T, Result); Check;
+         if Policy (D) /= Selected_Policy then raise Program_Error with "reset changed policy"; end if;
+         if Clamped_Dof (D) /= -1 then raise Program_Error with "warning reset"; end if;
          Emit ("reset_qpos", Qout);
          Emit ("reset_qvel", Vout);
          Read_State (Q); Read_State (V); Read_State (Controls); Read_State (Applied);
@@ -167,6 +177,7 @@ begin
          end loop;
          MJ.Data.Forward.Evaluate (D, Result);
          Put_Line ("forward " & Result'Image);
+         Emit ("forward_clamped", [Real (Clamped_Dof (D))]);
          if Result = Success then
             Get_Acceleration (D, Acc, Result); Check; Emit ("qacc", Acc);
             Get_Mass_Matrix (D, Mass, Result); Check; Emit ("mass", Mass);
@@ -202,6 +213,7 @@ begin
             exit when Result /= Success;
          end loop;
          Put_Line ("step " & Result'Image);
+         Emit ("step_clamped", [Real (Clamped_Dof (D))]);
          Get_State (D, Qout, Vout, T, Result); Check;
          Emit ("qpos", Qout); Emit ("qvel", Vout); Emit ("time", [T]);
          if Steps > 0 and then not Forces_Current (D) then

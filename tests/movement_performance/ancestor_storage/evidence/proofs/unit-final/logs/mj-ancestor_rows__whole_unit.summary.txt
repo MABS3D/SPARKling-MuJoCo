@@ -1,0 +1,63 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                    Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------
+Data Dependencies                14         14                                          .           .          .
+Flow Dependencies                 .          .                                          .           .          .
+Initialization                    2          2                                          .           .          .
+Non-Aliasing                      .          .                                          .           .          .
+Run-time Checks                 506          .                506 (CVC5 59%, altergo 41%)           .          .
+Assertions                       43          .    43 (CVC5 34%, Trivial 13%, altergo 53%)           .          .
+Functional Contracts             41          .     41 (CVC5 47%, Trivial 1%, altergo 52%)           .          .
+LSP Verification                  .          .                                          .           .          .
+Termination                      11         11                                          .           .          .
+Concurrency                       .          .                                          .           .          .
+----------------------------------------------------------------------------------------------------------------
+Total                           617    27 (4%)                                  590 (96%)           .          .
+
+
+max steps used for successful proof: 151570
+
+============================
+Most difficult proved checks
+============================
+
+mj-ancestor_rows.adb:42:43: loop invariant after first iteration proved in max 7 seconds
+mj-ancestor_rows.adb:136:43: loop invariant after first iteration proved in max 2 seconds
+mj-ancestor_rows.adb:117:32: assertion proved in max 1 seconds
+mj-ancestor_rows.adb:40:43: loop invariant after first iteration proved in max 1 seconds
+mj-ancestor_rows.ads:45:14: invariant check proved in max 1 seconds
+mj-ancestor_rows.adb:66:32: assertion proved in max 1 seconds
+mj-ancestor_rows.adb:79:14: precondition proved in max 1 seconds
+mj-ancestor_rows.adb:121:67: precondition proved in max 1 seconds
+mj-ancestor_rows.adb:79:14: postcondition proved in max 1 seconds
+mj-ancestor_rows.adb:11:46: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-ancestor_rows, 19 subprograms and packages out of 19 analyzed
+  MJ.Ancestor_Rows at mj-ancestor_rows.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Ancestor_Rows.Append_Row at mj-ancestor_rows.adb:69 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (210 checks)
+  MJ.Ancestor_Rows.Build at mj-ancestor_rows.ads:45 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (44 checks)
+  MJ.Ancestor_Rows.Build_Offsets at mj-ancestor_rows.adb:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (63 checks)
+  MJ.Ancestor_Rows.Column at mj-ancestor_rows.ads:23 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
+  MJ.Ancestor_Rows.Copy_Row at mj-ancestor_rows.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (41 checks)
+  MJ.Ancestor_Rows.Count at mj-ancestor_rows.ads:15 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Ancestor_Rows.Empty at mj-ancestor_rows.ads:13 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Ancestor_Rows.Free at mj-ancestor_rows.ads:49 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Ancestor_Rows.Length at mj-ancestor_rows.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Ancestor_Rows.Offsets_OK at mj-ancestor_rows.adb:17 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.Ancestor_Rows.Parent at mj-ancestor_rows.ads:29 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Ancestor_Rows.Pattern at mj-ancestor_rows.ads:56 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Ancestor_Rows.Prove_Row_Frame at mj-ancestor_rows.adb:50 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (84 checks)
+  MJ.Ancestor_Rows.Row_OK at mj-ancestor_rows.ads:61 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (65 checks)
+  MJ.Ancestor_Rows.Size at mj-ancestor_rows.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Ancestor_Rows.Start at mj-ancestor_rows.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Ancestor_Rows.Valid at mj-ancestor_rows.ads:55 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Ancestor_Rows.Valid_Parents at mj-ancestor_rows.ads:42 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)

@@ -1,6 +1,26 @@
 # Minimal smooth dynamics — review draft
 
+**Inertia policy update:** `Create` now defaults to `Compatible`, using reverse
+`LᵀDL` with a `1e-15` pivot floor and the queryable, resettable `Clamped_Dof`
+diagnostic. Pass `Solver_Policy => Strict` to retain the previous relative
+pivot/condition rejection policy. Numeric-domain limits remain active in both
+modes. See [policy, tests and current performance](../../docs/inertia-policy.md).
+
 Current reference: MuJoCo **3.14.0**; see [migration scope and evidence](../../docs/mujoco-3.14-alignment.md). The 3.12 results below are historical evidence, not results relabelled for 3.14.
+
+The first [integrated movement benchmark](../../docs/movement-performance.md)
+compares full Euler trajectories against a native 3.14 C build. The prototype
+remains slower in the measured workloads. A proved matrix-kernel bridge added
+cost and was retained only as a reproducible experiment; the active math body
+was restored. This benchmark does not establish whole-pipeline Gold or parity.
+
+The active [articulated-dynamics optimization](../../docs/dynamics-optimization.md)
+adds CRB mass assembly and recursive gravity/bias accumulation for three or more
+DOFs, with a bounded dense fallback, scaled-diagonal reuse and no-damping Euler
+reuse. Checked numerical tests now include 24-DOF and multiple-root models
+against 3.14.0. `MJ.Spatial_Kernels` closes 413 proof obligations; composition of
+the new recursions remains open. Whole-step timings improve substantially for
+larger models but do not reach C parity.
 
 This directory contains the owned-state and scalar hinge/slide baseline of
 SPARKling MuJoCo. It remains separate from the main library for review.
@@ -32,6 +52,7 @@ source dependency closure, without including unrelated units under development.
 | Package | Intended responsibility |
 | --- | --- |
 | `MJ.Smooth_Math` | Small vector, quaternion and rotation operations |
+| `MJ.Spatial_Kernels` | Contracted spatial inertia, motion and wrench operations |
 | `MJ.Data` | Owned model snapshot, state, scratch buffers, reset, accessors and status handling |
 | `MJ.Data.Kinematics` | Body and joint poses, body motion, center-of-mass Jacobians |
 | `MJ.Data.Inertia` | Dense mass matrix, joint armature and LDL factorization/solve |
@@ -121,14 +142,14 @@ Vectors and body motion are expressed in world coordinates. Quaternions use
 `(w, x, y, z)`. Body motion is stored at the body origin; the translational
 Jacobians used to assemble inertia and forces refer to the center of mass.
 
-The dense inertia assembly is:
+The dense inertia fallback computes:
 
 ```text
 M = sum_b (mass_b * Jv_b^T * Jv_b + Jw_b^T * Iworld_b * Jw_b)
     + diag(joint_armature)
 ```
 
-The LDL solver now measures `s = ||A||_inf` for the matrix actually being
+The Strict LDL solver measures `s = ||A||_inf` for the matrix actually being
 solved (`M` or `M + h*D`). It uses the dimensionless draft threshold
 `tau = 64 * max(1, nv) * Real'Model_Epsilon`. A zero matrix or computed
 nonpositive pivot returns `Singular_Inertia`; a positive pivot with
@@ -145,9 +166,9 @@ The physical force RHS is restored before the acceleration solve.
 This policy addresses uniform scaling and accounts for coupling, but depends
 on the chosen coordinate units and does not perform diagonal equilibration.
 The computed estimate and threshold are not certified error bounds. The
-condition estimate adds `nv` triangular solves, hence additional cubic work;
+condition estimate, used only in Strict mode, adds `nv` triangular solves, hence additional cubic work;
 it is a straightforward draft implementation, not a performance optimization.
-The solver does not regularize the matrix, and existing arithmetic storage
+The Strict solver does not regularize the matrix, and existing arithmetic storage
 limits can still return `Numeric_Limit`. Divisions check the prospective
 quotient against those limits before using a small positive pivot.
 

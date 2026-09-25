@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                    Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                                          .           .          .
+Flow Dependencies                 .          .                                          .           .          .
+Initialization                    .          .                                          .           .          .
+Non-Aliasing                      .          .                                          .           .          .
+Run-time Checks                  12          .    12 (CVC5 58%, Trivial 17%, altergo 25%)           .          .
+Assertions                        .          .                                          .           .          .
+Functional Contracts              1          .                  1 (CVC5 33%, altergo 67%)           .          .
+LSP Verification                  .          .                                          .           .          .
+Termination                       1          1                                          .           .          .
+Concurrency                       .          .                                          .           .          .
+----------------------------------------------------------------------------------------------------------------
+Total                            15    2 (13%)                                   13 (87%)           .          .
+
+
+max steps used for successful proof: 92162
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.adb:15:22: fp_overflow check proved in max 3 seconds
+mj-spatial_kernels.ads:25:14: postcondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Shift_Diagonal at mj-spatial_kernels.ads:21 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)

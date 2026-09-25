@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                      Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                            .           .          .
+Flow Dependencies                 .         .                            .           .          .
+Initialization                    .         .                            .           .          .
+Non-Aliasing                      .         .                            .           .          .
+Run-time Checks                  15         .                  9 (altergo)           .          6
+Assertions                        .         .                            .           .          .
+Functional Contracts             29         .    28 (CVC5 2%, altergo 98%)           .          1
+LSP Verification                  .         .                            .           .          .
+Termination                       1         1                            .           .          .
+Concurrency                       .         .                            .           .          .
+-------------------------------------------------------------------------------------------------
+Total                            46    2 (4%)                     37 (80%)           .    7 (15%)
+
+
+max steps used for successful proof: 1280
+
+============================
+Most difficult proved checks
+============================
+
+No check found with max time greater than 1 second
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Make_Inertia at mj-spatial_kernels.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 37 checks out of 44 proved

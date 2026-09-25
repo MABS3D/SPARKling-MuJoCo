@@ -1,0 +1,628 @@
+{
+  "mj-spatial_kernels.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Spatial_Kernels.Mass_Moment",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-spatial_kernels.ads",
+            "line": 13
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Smooth_Math.Bounded",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_math.ads",
+            "line": 18
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "flow",
+        "line": 13,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Mass_Moment\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "flow",
+        "line": 13,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 19,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.14716
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 7533,
+                "time": 0.176518
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 19,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 7533,
+            "max_time": 0.176517993211746
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 38,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.103145
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4164,
+                "time": 0.132514
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 38,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4164,
+            "max_time": 0.132513999938965
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 57,
+        "check_file": "mj-spatial_kernels.adb",
+        "check_line": 8,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 5338,
+                "time": 0.102558
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.095442
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 57,
+        "entity": 1,
+        "file": "mj-spatial_kernels.adb",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 5338,
+            "max_time": 0.102558001875877
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 15,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008546
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 620,
+                "time": 0.034854
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 15,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0085460003465414
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 43,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 16,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007095
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 252,
+                "time": 0.015257
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 43,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 16,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00709499977529049
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 62,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 16,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009359
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 252,
+                "time": 0.014456
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 62,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 16,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00935900025069714
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 81,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 16,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00911
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.01312
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 81,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 16,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00910999998450279
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 13,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 14,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003911
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.00972
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 13,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 14,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00391100021079183
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-spatial_kernels.ads",
+        "check_line": 15,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 15973,
+                "time": 0.268434
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.277694
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.157687
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 7114,
+                "time": 0.168623
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.147845
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 15666,
+                "time": 0.172799
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.155109
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 11562,
+                "time": 0.189243
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.163005
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 15567,
+                "time": 0.173295
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.147128
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 7115,
+                "time": 0.160552
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.165165
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 15506,
+                "time": 0.176765
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-spatial_kernels.ads",
+        "how_proved": "prover",
+        "line": 15,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 15973,
+            "max_time": 0.26843398809433
+          },
+          "altergo": {
+            "count": 6,
+            "max_steps": 15666,
+            "max_time": 0.189243003726006
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.0103019997477531,
+        "gnatwhy3.init": 0.205222994089127,
+        "gnatwhy3.register_vcs": 0.00876399874687195,
+        "gnatwhy3.run_vcs": 1.70000002981396e-05,
+        "gnatwhy3.save_session": 0.00191999902017415,
+        "gnatwhy3.schedule_vcs": 0.142995998263359,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00495699886232615,
+        "gnatwhy3.transformations.detect_polymorphism": 0.000396999006625265,
+        "gnatwhy3.transformations.discriminate_if_poly": 1.10000000859145e-05,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0129140000790358,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.000747999001760036,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00353999901562929,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000452998996479437,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00215400010347366,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.00120000005699694,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00118300004396588,
+        "gnatwhy3.transformations.eliminate_literal": 0.0023590000346303,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.000929998990613967,
+        "gnatwhy3.transformations.eliminate_recursion": 0.000987999024800956,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 3.99900000047637e-06,
+        "gnatwhy3.transformations.inline_trivial": 0.0950049981474876,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000250000011874363,
+        "gnatwhy3.transformations.remove_unused": 0.0329810008406639,
+        "gnatwhy3.transformations.simplify_formula": 0.0174669995903969,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00564099894836545,
+        "gnatwhy3.transformations.split_premise_right": 0.0194509997963905
+      },
+      "global": {
+        "flow analysis": 0.000939999998081475,
+        "globals (advanced)": 0.00176200002897531,
+        "globals (basic)": 0.00366199994459748,
+        "init_why_sections": 0.000604000000748783,
+        "marking": 0.000669999979436398,
+        "properties (advanced)": 5.7000001106644e-05,
+        "translation of standard": 0.000854999991133809
+      }
+    },
+    "warn_error": []
+  }
+}

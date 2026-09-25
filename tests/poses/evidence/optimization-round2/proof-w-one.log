@@ -1,0 +1,34 @@
+mj-poses.ads:23 function Transformed_Component
+mj-poses.adb:16 function Complete_Transform
+mj-poses.adb:26 procedure Transform_Any (R : out Vector_3; Position : Vector_3; Q : Quaternion; Point : Vector_3) with
+mj-poses.adb:73 procedure Transform (R : out Vector_3; Position : Vector_3; Q : Quaternion; Point : Vector_3) is
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: precondition proved
+--> mj-poses.adb:76:10
+
+ info: precondition proved
+--> mj-poses.adb:78:10
+
+ info: data dependencies proved
+--> mj-poses.ads:39:50
+
+ info: initialization check proved
+--> mj-poses.ads:42:70
+
+ info: initialization check proved
+--> mj-poses.ads:43:17
+
+ medium: postcondition might fail, cannot prove R (I) = Model.Transformed_Component (Position, Q, Point, I)
+--> mj-poses.ads:43:17
+   43 |           and then R (I) = Model.Transformed_Component (Position, Q, Point, I)));
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-poses.ads:43:30
+Summary logged in /mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tests/poses/build/small/obj/proof/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 22.1 s, peak group RSS 203 MB
+

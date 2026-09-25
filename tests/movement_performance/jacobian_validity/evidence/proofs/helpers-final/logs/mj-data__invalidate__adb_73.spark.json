@@ -1,0 +1,313 @@
+{
+  "mj-data.spark": {
+    "assumptions": [
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Data.Invalidate",
+        "sloc": [
+          {
+            "column": 14,
+            "file": "mj-data.ads",
+            "line": 683
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 26,
+        "entity": 1,
+        "file": "mj-data.ads",
+        "how_proved": "flow",
+        "line": 683,
+        "message": {
+          "text": "unused initial value of \"Cache\""
+        },
+        "msg_id": 0,
+        "rule": "UNUSED_INITIAL_VALUE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 59,
+        "entity": 1,
+        "file": "mj-data.ads",
+        "how_proved": "flow",
+        "line": 683,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 14,
+        "check_file": "mj-data.ads",
+        "check_line": 684,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003524
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009327
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007015
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.009806
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007142
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006522
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.007956
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.008147
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003991
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006424
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008069
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.006853
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-data.ads",
+        "how_proved": "prover",
+        "line": 684,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 6,
+            "max_steps": 1,
+            "max_time": 0.00806900020688772
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 2.7448890209198,
+        "gnatwhy3.init": 0.230534002184868,
+        "gnatwhy3.register_vcs": 0.00815999880433083,
+        "gnatwhy3.run_vcs": 6.00000021222513e-06,
+        "gnatwhy3.save_session": 0.00203300011344254,
+        "gnatwhy3.schedule_vcs": 0.00697800004854798,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00303500005975366,
+        "gnatwhy3.transformations.detect_polymorphism": 0.000224000003072433,
+        "gnatwhy3.transformations.discriminate_if_poly": 4.99899988426478e-06,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.00222499901428819,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.000445000012405217,
+        "gnatwhy3.transformations.eliminate_builtin": 0.000847999006509781,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000243999005760998,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.000823998998384923,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.00060799898346886,
+        "gnatwhy3.transformations.eliminate_inductive": 0.000859998981468379,
+        "gnatwhy3.transformations.eliminate_literal": 0.0010819990420714,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.000178999005584046,
+        "gnatwhy3.transformations.eliminate_recursion": 0.000220999005250633,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 3.99900000047637e-06,
+        "gnatwhy3.transformations.inline_trivial": 0.00871600024402142,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000180000002728775,
+        "gnatwhy3.transformations.remove_unused": 0.00272500002756715,
+        "gnatwhy3.transformations.simplify_formula": 0.00104500004090369,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00387899903580546,
+        "gnatwhy3.transformations.split_premise_right": 0.00102199905086309
+      },
+      "global": {
+        "flow analysis": 0.207139000296593,
+        "globals (advanced)": 0.0105010000988841,
+        "globals (basic)": 0.00814200006425381,
+        "init_why_sections": 0.030137000605464,
+        "marking": 0.0119190001860261,
+        "properties (advanced)": 0.00389700010418892,
+        "translation of standard": 0.000870999996550381
+      }
+    },
+    "warn_error": [
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 125,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 125,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 119,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 73,
+        "file": "mj-smooth_math.ads",
+        "how_proved": "trivial",
+        "line": 119,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ]
+  }
+}

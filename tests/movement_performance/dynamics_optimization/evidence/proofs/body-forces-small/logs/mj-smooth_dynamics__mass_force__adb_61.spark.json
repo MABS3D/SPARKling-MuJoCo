@@ -1,0 +1,537 @@
+{
+  "mj-smooth_dynamics.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Smooth_Dynamics.Mass_Force",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_dynamics.ads",
+            "line": 33
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Smooth_Math.Bounded",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-smooth_math.ads",
+            "line": 18
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "flow",
+        "line": 33,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Mass_Force\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 11,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "flow",
+        "line": 34,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 20,
+        "check_file": "mj-smooth_dynamics.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.130095
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 7192,
+                "time": 0.159665
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 20,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 7192,
+            "max_time": 0.159665003418922
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 45,
+        "check_file": "mj-smooth_dynamics.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.133033
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4028,
+                "time": 0.147891
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 45,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 4028,
+            "max_time": 0.147890999913216
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 70,
+        "check_file": "mj-smooth_dynamics.adb",
+        "check_line": 63,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 5335,
+                "time": 0.097752
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.102204
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 70,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.adb",
+        "how_proved": "prover",
+        "line": 63,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 5335,
+            "max_time": 0.0977519974112511
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-smooth_dynamics.ads",
+        "check_line": 35,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008112
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 621,
+                "time": 0.03507
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "prover",
+        "line": 35,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00811200030148029
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 68,
+        "check_file": "mj-smooth_dynamics.ads",
+        "check_line": 36,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.052669
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 286,
+                "time": 0.017956
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 68,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "prover",
+        "line": 36,
+        "message": {
+          "text": "float overflow check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_FP_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 1,
+            "max_steps": 286,
+            "max_time": 0.0179559998214245
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 34,
+        "check_file": "mj-smooth_dynamics.ads",
+        "check_line": 34,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.004997
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 576,
+                "time": 0.026929
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 34,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "prover",
+        "line": 34,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00499700009822845
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-smooth_dynamics.ads",
+        "check_line": 35,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.04142
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 1287,
+                "time": 0.053323
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.147479
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6999,
+                "time": 0.144889
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.160875
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 14584,
+                "time": 0.175566
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.117269
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6998,
+                "time": 0.141521
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.138794
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 14482,
+                "time": 0.167479
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.142422
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 6998,
+                "time": 0.15706
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.144203
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 14422,
+                "time": 0.173666
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-smooth_dynamics.ads",
+        "how_proved": "prover",
+        "line": 35,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "altergo": {
+            "count": 7,
+            "max_steps": 14584,
+            "max_time": 0.175566002726555
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.0165619999170303,
+        "gnatwhy3.init": 0.202998995780945,
+        "gnatwhy3.register_vcs": 0.00828399881720543,
+        "gnatwhy3.run_vcs": 1.20000004244503e-05,
+        "gnatwhy3.save_session": 0.00149799895007163,
+        "gnatwhy3.schedule_vcs": 0.111704997718334,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00381599902175367,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00033099899883382,
+        "gnatwhy3.transformations.discriminate_if_poly": 7.99900044512469e-06,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.01318399887532,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00108499894849956,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00320699904114008,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000711000000592321,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00249799899756908,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.000632998999208212,
+        "gnatwhy3.transformations.eliminate_inductive": 0.0020749990362674,
+        "gnatwhy3.transformations.eliminate_literal": 0.00319999898783863,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.000967998988926411,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00173400004860014,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 6.00000021222513e-06,
+        "gnatwhy3.transformations.inline_trivial": 0.0818649977445602,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000150000007124618,
+        "gnatwhy3.transformations.remove_unused": 0.0270409993827343,
+        "gnatwhy3.transformations.simplify_formula": 0.0160189997404814,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00519300019368529,
+        "gnatwhy3.transformations.split_premise_right": 0.0167449992150068
+      },
+      "global": {
+        "flow analysis": 0.00168200000189245,
+        "globals (advanced)": 0.00242800009436905,
+        "globals (basic)": 0.0039559998549521,
+        "init_why_sections": 0.000696000002790242,
+        "marking": 0.000897000019904226,
+        "properties (advanced)": 0.000172999993083067,
+        "translation of standard": 0.000959000026341528
+      }
+    },
+    "warn_error": []
+  }
+}

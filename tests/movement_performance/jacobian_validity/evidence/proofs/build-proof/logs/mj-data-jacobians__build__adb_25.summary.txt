@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                       Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                             .           .          .
+Flow Dependencies                 .          .                             .           .          .
+Initialization                    6          6                             .           .          .
+Non-Aliasing                      .          .                             .           .          .
+Run-time Checks                  31          .    30 (CVC5 65%, altergo 35%)           .          1
+Assertions                       20          .     17 (CVC5 91%, altergo 9%)           .          3
+Functional Contracts              5          .     4 (CVC5 90%, altergo 10%)           .          1
+LSP Verification                  .          .                             .           .          .
+Termination                       1          .                      1 (CVC5)           .          .
+Concurrency                       .          .                             .           .          .
+---------------------------------------------------------------------------------------------------
+Total                            64    7 (11%)                      52 (81%)           .     5 (8%)
+
+
+max steps used for successful proof: 51747
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-jacobians.adb:38:73: index check proved in max 2 seconds
+mj-data-jacobians.adb:54:85: index check proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-jacobians, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Jacobians.Build at mj-data-jacobians.ads:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 52 checks out of 57 proved

@@ -139,3 +139,20 @@ functional contracts and flow separately. No generated checks, a timeout or a
 partially completed sweep is never a proof pass. A remaining diagnostic must be
 closed or explicitly listed as pending; it cannot be reclassified as a
 mathematical limitation merely because increasing prover effort did not help.
+
+## State invariant investigation (2026-09-24)
+
+The private `Ready_Flag` query proves equivalence to `Is_Ready` under the existing
+`Valid_State` precondition (one proof check, two flow checks, no open checks).
+It does not establish validity or replace active runtime guards. Seven repeated
+readiness scans were isolated in a full-step performance experiment; promotion
+still requires closure of state preservation across the dynamics phases.
+
+The best recorded `Euler.Integrate` diagnostic on the final source proves
+54 of 55 checks and all ten flow checks. Input preservation remains open;
+configuration preservation closes with progressive splitting. Added ghost
+assertions preserve the original contracts and runtime behavior. These are
+subprogram results, not complete-unit or whole-pipeline Gold. See the
+[state/performance report](../../docs/state-invariants-performance.md) for exact
+snapshots, incomplete attempts and measured scope. Empty check selections now
+return a nonzero exit status in the proof runner and cannot be treated as passes.

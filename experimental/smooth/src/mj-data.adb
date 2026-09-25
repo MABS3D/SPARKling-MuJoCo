@@ -1,6 +1,7 @@
 with Ada.Unchecked_Deallocation;
 with Interfaces;
 with MJ.Models.Validity;
+with MJ.Simple_Kernels;
 
 package body MJ.Data with SPARK_Mode is
    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
@@ -20,6 +21,9 @@ package body MJ.Data with SPARK_Mode is
      (Body_State_Array, Body_State_Access);
    procedure Free_Joint_State is new Ada.Unchecked_Deallocation
      (Joint_State_Array, Joint_State_Access);
+
+   procedure Prove_Readiness_Compatibility (D : Simulation) is null;
+   procedure Prove_Jacobian_Readiness (D : Simulation) is null;
 
    function Has_Flag (Flags, Flag : Integer) return Boolean is
      ((Interfaces.Unsigned_32 (Flags) and Interfaces.Unsigned_32 (Flag)) /= 0)
@@ -70,6 +74,9 @@ package body MJ.Data with SPARK_Mode is
    procedure Invalidate (Cache : in out Cache_Flags) is
    begin
       Cache.Pose_Valid := False;
+      Cache.Jacobian_Valid := False;
+      Cache.Spatial_Valid := False;
+      Cache.Cartesian_Motion_Valid := False;
       Cache.Mass_Valid := False;
       Cache.Passive_Valid := False;
       Cache.Actuation_Valid := False;
@@ -389,12 +396,27 @@ package body MJ.Data with SPARK_Mode is
 
    procedure Allocate_Kinematic (B : in out Kinematic_Buffers; Nb, Nj, Nv : Natural) with
      Global => null, Pre => Nb <= Max_Bodies and then Nj <= Max_Dofs and then Nv <= Max_Dofs
-       and then B.Bodies = null and then B.Joints = null and then B.Linear_Jacobian = null and then B.Angular_Jacobian = null,
-     Post => B.Bodies /= null and then B.Bodies'First = 0 and then B.Bodies'Length = Nb and then (for all X of B.Bodies.all => X = (others => <>)) and then B.Joints /= null and then B.Joints'First = 0 and then B.Joints'Length = Nj and then (for all X of B.Joints.all => X = (others => <>)) and then Has_Real_Layout (B.Linear_Jacobian, 3 * Nb * Nv) and then (for all X of B.Linear_Jacobian.all => X = 0.0) and then Has_Real_Layout (B.Angular_Jacobian, 3 * Nb * Nv) and then (for all X of B.Angular_Jacobian.all => X = 0.0)
+       and then B.Bodies = null and then B.Joints = null
+       and then B.Spatial_Inertias = null and then B.Spatial_Motions = null
+       and then B.Linear_Jacobian = null and then B.Angular_Jacobian = null,
+     Post => B.Bodies /= null and then B.Bodies'First = 0 and then B.Bodies'Length = Nb
+       and then (for all X of B.Bodies.all => X = (others => <>))
+       and then B.Joints /= null and then B.Joints'First = 0 and then B.Joints'Length = Nj
+       and then (for all X of B.Joints.all => X = (others => <>))
+       and then Has_Real_Layout (B.Spatial_Inertias, 10 * Nb)
+       and then (for all X of B.Spatial_Inertias.all => X = 0.0)
+       and then Has_Real_Layout (B.Spatial_Motions, 6 * Nj)
+       and then (for all X of B.Spatial_Motions.all => X = 0.0)
+       and then Has_Real_Layout (B.Linear_Jacobian, 3 * Nb * Nv)
+       and then (for all X of B.Linear_Jacobian.all => X = 0.0)
+       and then Has_Real_Layout (B.Angular_Jacobian, 3 * Nb * Nv)
+       and then (for all X of B.Angular_Jacobian.all => X = 0.0)
    is
    begin
       B.Bodies := new Body_State_Array (0 .. Integer (Nb) - 1);
       B.Joints := new Joint_State_Array (0 .. Integer (Nj) - 1);
+      B.Spatial_Inertias := Zero_Array (10 * Nb);
+      B.Spatial_Motions := Zero_Array (6 * Nj);
       B.Linear_Jacobian := Zero_Array (3 * Nb * Nv);
       B.Angular_Jacobian := Zero_Array (3 * Nb * Nv);
    end Allocate_Kinematic;
@@ -425,12 +447,16 @@ package body MJ.Data with SPARK_Mode is
       B.Force := Zero_Array (No);
    end Allocate_Actuators;
 
-   procedure Allocate_Scratch (B : in out Scratch_Buffers; Nq, Nv : Natural) with
+   procedure Allocate_Scratch (B : in out Scratch_Buffers; Nq, Nv, Nc : Natural) with
      Global => null, Pre => Nq <= Max_Dofs and then Nv <= Max_Dofs
+       and then Nc <= MJ.Ancestor_Rows.Max_Entries and then B.Ancestor_Factor = null
        and then B.Factor = null and then B.Rhs = null and then B.Solution = null and then B.Next_Qpos = null and then B.Next_Qvel = null and then B.Condition_Sums = null,
-     Post => Has_Real_Layout (B.Factor, Nv * Nv) and then (for all X of B.Factor.all => X = 0.0) and then Has_Real_Layout (B.Rhs, Nv) and then (for all X of B.Rhs.all => X = 0.0) and then Has_Real_Layout (B.Solution, Nv) and then (for all X of B.Solution.all => X = 0.0) and then Has_Real_Layout (B.Next_Qpos, Nq) and then (for all X of B.Next_Qpos.all => X = 0.0) and then Has_Real_Layout (B.Next_Qvel, Nv) and then (for all X of B.Next_Qvel.all => X = 0.0) and then Has_Real_Layout (B.Condition_Sums, Nv) and then (for all X of B.Condition_Sums.all => X = 0.0)
+     Post => Has_Real_Layout (B.Ancestor_Factor, Nc)
+       and then (for all X of B.Ancestor_Factor.all => X = 0.0)
+       and then Has_Real_Layout (B.Factor, Nv * Nv) and then (for all X of B.Factor.all => X = 0.0) and then Has_Real_Layout (B.Rhs, Nv) and then (for all X of B.Rhs.all => X = 0.0) and then Has_Real_Layout (B.Solution, Nv) and then (for all X of B.Solution.all => X = 0.0) and then Has_Real_Layout (B.Next_Qpos, Nq) and then (for all X of B.Next_Qpos.all => X = 0.0) and then Has_Real_Layout (B.Next_Qvel, Nv) and then (for all X of B.Next_Qvel.all => X = 0.0) and then Has_Real_Layout (B.Condition_Sums, Nv) and then (for all X of B.Condition_Sums.all => X = 0.0)
    is
    begin
+      B.Ancestor_Factor := Zero_Array (Nc);
       B.Factor := Zero_Array (Nv * Nv);
       B.Rhs := Zero_Array (Nv);
       B.Solution := Zero_Array (Nv);
@@ -677,6 +703,122 @@ package body MJ.Data with SPARK_Mode is
       Ok := True;
    end Copy_Actuators;
 
+   --  Freeze the model's immutable traversal links and mass constants. The
+   --  independent checks below also prevent an inconsistent imported shortcut
+   --  flag or stale dof_M0 value from changing the physical computation.
+   procedure Build_Topology (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean) with
+     Global => null,
+     Pre => Creation_Inputs (M) and then D.Nb = M.S.Nbody and then D.Nv = M.S.Nv
+       and then D.Body_Config /= null and then D.Body_Config'First = 0
+       and then D.Body_Config'Last = D.Nb - 1
+       and then D.Joint_Config /= null and then D.Joint_Config'First = 0
+       and then D.Joint_Config'Last = D.Nv - 1
+       and then MJ.Smooth_Topology.Empty (D.Topology) and then MJ.Ancestor_Rows.Empty (D.Ancestors),
+     Post => (if Ok then not MJ.Smooth_Topology.Empty (D.Topology)
+       and then MJ.Smooth_Topology.Body_Count (D.Topology) = D.Nb
+       and then MJ.Smooth_Topology.Dof_Count (D.Topology) = D.Nv
+       and then not MJ.Ancestor_Rows.Empty (D.Ancestors)
+       and then MJ.Ancestor_Rows.Size (D.Ancestors) = D.Nv)
+   is
+      package T renames MJ.Smooth_Topology;
+      Nb : constant Natural := D.Nb;
+      Nv : constant Natural := D.Nv;
+      Roots, Last : Int_Array (0 .. Nb - 1);
+      Effective, Simple : Int_Array (0 .. Nv - 1) := [others => 0];
+      Masses : Real_Array (0 .. Nb - 1) := [others => 0.0];
+      Arms, Fixed : Real_Array (0 .. Nv - 1) := [others => 0.0];
+      type Flags is array (Natural range <>) of Boolean;
+      Has_Child, Is_Simple : Flags (0 .. Nb - 1) := [others => False];
+      Added : Boolean;
+      Run : Natural := 0;
+   begin
+      Ok := False;
+      if not T.Valid_Body_Links
+        (M.Bodies.Body_Parentid.all, M.Bodies.Body_Jntadr.all, M.Bodies.Body_Jntnum.all, D.Nv)
+      then return; end if;
+      T.Build_Body_Links (M.Bodies.Body_Parentid.all, M.Bodies.Body_Jntadr.all,
+                         M.Bodies.Body_Jntnum.all, D.Nv, Roots, Last);
+      for B in 1 .. D.Nb - 1 loop
+         Has_Child (M.Bodies.Body_Parentid (B)) := True;
+         Masses (B) := D.Body_Config (B).Mass;
+      end loop;
+      for B in reverse 1 .. D.Nb - 1 loop
+         if M.Bodies.Body_Parentid (B) > 0 then
+            T.Add_Subtree (Masses, M.Bodies.Body_Parentid (B), B, Added);
+            if not Added then return; end if;
+         end if;
+      end loop;
+      for B in 1 .. D.Nb - 1 loop
+         declare
+            C : constant Body_Parameters := D.Body_Config (B);
+            Seen_Slide : array (Axis) of Boolean := [others => False];
+            Rotation_Seen : Boolean := False;
+         begin
+            if C.Parent >= B or else C.Parent /= M.Bodies.Body_Parentid (B)
+              or else C.Joint_Count /= M.Bodies.Body_Jntnum (B)
+              or else C.First_Joint /= M.Bodies.Body_Jntadr (B)
+            then return; end if;
+            Is_Simple (B) := M.Bodies.Body_Simple (B) > 0 and then not Has_Child (B)
+              and then C.Inertial_Position = Zero and then C.Inertial_Orientation = Identity_Quaternion
+              and then (C.Parent = 0 or else
+                (D.Body_Config (C.Parent).Parent = 0 and then D.Body_Config (C.Parent).Joint_Count = 0));
+            for K in 0 .. C.Joint_Count - 1 loop
+               declare
+                  J : constant Natural := C.First_Joint + K;
+                  Joint : constant Joint_Parameters := D.Joint_Config (J);
+                  A : constant Integer := MJ.Simple_Kernels.Coordinate_Axis (Joint.Direction);
+                  Parent : constant Integer := (if K = 0 then Last (C.Parent) else J - 1);
+               begin
+                  if Joint.Body_Id /= B or else Joint.Vadr /= J or else Joint.Qadr /= J
+                    or else M.Dofs.Dof_Bodyid (J) /= B or else M.Dofs.Dof_Jntid (J) /= J
+                    or else M.Dofs.Dof_Parentid (J) /= Parent
+                  then return; end if;
+                  Arms (J) := Joint.Armature;
+                  if Rotation_Seen or else Joint.Anchor /= Zero or else A < 0
+                    or else M.Dofs.Dof_Simplenum (J) <= 0
+                  then Is_Simple (B) := False; end if;
+                  if A >= 0 then
+                     if Joint.Kind = Slide_Joint then
+                        if Seen_Slide (A) then Is_Simple (B) := False; end if;
+                        Seen_Slide (A) := True;
+                     end if;
+                     if C.Inertia (A) < 0.0 then
+                        Is_Simple (B) := False;
+                     else
+                        Fixed (J) := MJ.Simple_Kernels.Fixed_Diagonal
+                          (C.Mass, C.Inertia (A), Joint.Armature, Joint.Kind = Slide_Joint);
+                     end if;
+                  end if;
+                  if Joint.Kind = Hinge_Joint then Rotation_Seen := True; end if;
+               end;
+            end loop;
+         end;
+      end loop;
+      --  Same reverse contiguous-run encoding used by the C model compiler.
+      for V in reverse 0 .. D.Nv - 1 loop
+         if M.Dofs.Dof_Bodyid (V) not in 1 .. D.Nb - 1 then return; end if;
+         Run := (if Is_Simple (M.Dofs.Dof_Bodyid (V)) then Run + 1 else 0);
+         Simple (V) := Run;
+         Effective (V) := (if Run > 0 then -1 else M.Dofs.Dof_Parentid (V));
+      end loop;
+      --  General rows must retain a full ancestor prefix. A C simple body is a
+      --  leaf with no moving ancestor, so only other simple DOFs on that body
+      --  can have a simple parent; reject the optimization if metadata disagrees.
+      for V in 0 .. D.Nv - 1 loop
+         if Effective (V) >= 0 and then
+           (Effective (V) >= V or else Simple (Effective (V)) > 0)
+         then return; end if;
+      end loop;
+      if not T.Valid_Inputs (Roots, Last, M.Dofs.Dof_Parentid.all, M.Dofs.Dof_Bodyid.all,
+        M.Dofs.Dof_Jntid.all, Simple, Masses, Arms, Fixed)
+        or else not MJ.Ancestor_Rows.Valid_Parents (Effective)
+      then return; end if;
+      T.Build (D.Topology, Roots, Last, M.Dofs.Dof_Parentid.all, M.Dofs.Dof_Bodyid.all,
+               M.Dofs.Dof_Jntid.all, Simple, Masses, Arms, Fixed);
+      MJ.Ancestor_Rows.Build (D.Ancestors, Effective);
+      Ok := True;
+   end Build_Topology;
+
    procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) with
      Global => null, Pre => Is_Empty (D) and then Creation_Inputs (M),
      Post => (if Result = Success then Is_Ready (D) and then At_Reset_State (D)
@@ -709,11 +851,13 @@ package body MJ.Data with SPARK_Mode is
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
       Copy_Actuators (M.S, M.Actuators, D.Actuator_Config, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+      Build_Topology (M, D, Normal);
+      if not Normal then Free (D); Result := Invalid_Model; return; end if;
       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
       Allocate_Dynamics (D.Dynamics, D.Nv);
       Allocate_Actuators (D.Actuators, D.No);
-      Allocate_Scratch (D.Scratch, D.Nq, D.Nv);
+      Allocate_Scratch (D.Scratch, D.Nq, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
       D.Allocated := True;
       if not Is_Ready (D) then
          Free (D);
@@ -723,7 +867,8 @@ package body MJ.Data with SPARK_Mode is
       Reset (D, Result);
    end Initialize;
 
-   procedure Create (M : MJ.Models.Model; D : in out Simulation; Result : out Status) is
+   procedure Create (M : MJ.Models.Model; D : in out Simulation; Result : out Status;
+                     Solver_Policy : Inertia_Policy := Compatible) is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Validity.Is_Valid);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Valid_Layout);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Creation_Inputs);
@@ -734,6 +879,7 @@ package body MJ.Data with SPARK_Mode is
       Result := Model_Status (M);
       if Result /= Success then return; end if;
       Initialize (M, D, Result);
+      if Result = Success then D.Solver_Policy := Solver_Policy; end if;
    end Create;
 
    procedure Free_State (S : in out State_Buffers) with
@@ -749,11 +895,13 @@ package body MJ.Data with SPARK_Mode is
    procedure Free_Kinematic (K : in out Kinematic_Buffers) with
      Global => null, Post => K.Bodies = null
        and then K.Joints = null
+       and then K.Spatial_Inertias = null and then K.Spatial_Motions = null
        and then K.Linear_Jacobian = null
        and then K.Angular_Jacobian = null
    is
    begin
       Free_Body_State (K.Bodies); Free_Joint_State (K.Joints);
+      Free_Real (K.Spatial_Inertias); Free_Real (K.Spatial_Motions);
       Free_Real (K.Linear_Jacobian); Free_Real (K.Angular_Jacobian);
    end Free_Kinematic;
    procedure Free_Forces (F : in out Force_Buffers) with
@@ -778,7 +926,7 @@ package body MJ.Data with SPARK_Mode is
       Free_Real (A.Length); Free_Real (A.Velocity); Free_Real (A.Force);
    end Free_Actuators;
    procedure Free_Scratch (S : in out Scratch_Buffers) with
-     Global => null, Post => S.Factor = null
+     Global => null, Post => S.Ancestor_Factor = null and then S.Factor = null
        and then S.Rhs = null
        and then S.Solution = null
        and then S.Next_Qpos = null
@@ -786,6 +934,7 @@ package body MJ.Data with SPARK_Mode is
        and then S.Condition_Sums = null
    is
    begin
+      Free_Real (S.Ancestor_Factor);
       Free_Real (S.Factor); Free_Real (S.Rhs); Free_Real (S.Solution);
       Free_Real (S.Next_Qpos); Free_Real (S.Next_Qvel); Free_Real (S.Condition_Sums);
    end Free_Scratch;
@@ -800,7 +949,11 @@ package body MJ.Data with SPARK_Mode is
       Free_Forces (D.Dynamics);
       Free_Actuators (D.Actuators);
       Free_Scratch (D.Scratch);
+      MJ.Ancestor_Rows.Free (D.Ancestors);
+      MJ.Smooth_Topology.Free (D.Topology);
       D.Allocated := False;
+      D.Solver_Policy := Compatible;
+      D.First_Clamped := -1;
       D.Nq := 0; D.Nv := 0; D.Nu := 0; D.Nb := 0;
       D.Nj := 0; D.Na := 0; D.No := 0;
       D.Clock := 0.0;
@@ -829,13 +982,22 @@ package body MJ.Data with SPARK_Mode is
       S.Ctrl.all := [others => 0.0]; S.Applied.all := [others => 0.0];
    end Clear_State;
    procedure Clear_Kinematic (K : in out Kinematic_Buffers) with
-     Global => null, Pre => K.Bodies /= null and then K.Joints /= null and then K.Linear_Jacobian /= null and then K.Angular_Jacobian /= null,
+     Global => null, Pre => K.Bodies /= null and then K.Joints /= null and then K.Linear_Jacobian /= null and then K.Angular_Jacobian /= null
+       and then K.Spatial_Inertias /= null and then K.Spatial_Motions /= null,
      Post => K.Bodies /= null and then K.Bodies'First = K.Bodies'First'Old
        and then K.Bodies'Last = K.Bodies'Last'Old
        and then (for all X of K.Bodies.all => X = Body_State'(others => <>))
        and then K.Joints /= null and then K.Joints'First = K.Joints'First'Old
        and then K.Joints'Last = K.Joints'Last'Old
        and then (for all X of K.Joints.all => X = Joint_State'(others => <>))
+       and then K.Spatial_Inertias /= null
+       and then K.Spatial_Inertias'First = K.Spatial_Inertias'First'Old
+       and then K.Spatial_Inertias'Last = K.Spatial_Inertias'Last'Old
+       and then (for all X of K.Spatial_Inertias.all => X = 0.0)
+       and then K.Spatial_Motions /= null
+       and then K.Spatial_Motions'First = K.Spatial_Motions'First'Old
+       and then K.Spatial_Motions'Last = K.Spatial_Motions'Last'Old
+       and then (for all X of K.Spatial_Motions.all => X = 0.0)
        and then K.Linear_Jacobian /= null and then K.Linear_Jacobian'First = K.Linear_Jacobian'First'Old
        and then K.Linear_Jacobian'Last = K.Linear_Jacobian'Last'Old
        and then (for all X of K.Linear_Jacobian.all => X = 0.0)
@@ -846,6 +1008,7 @@ package body MJ.Data with SPARK_Mode is
    begin
       K.Bodies.all := [others => (others => <>)];
       K.Joints.all := [others => (others => <>)];
+      K.Spatial_Inertias.all := [others => 0.0]; K.Spatial_Motions.all := [others => 0.0];
       K.Linear_Jacobian.all := [others => 0.0]; K.Angular_Jacobian.all := [others => 0.0];
    end Clear_Kinematic;
    procedure Clear_Forces (F : in out Force_Buffers) with
@@ -894,8 +1057,13 @@ package body MJ.Data with SPARK_Mode is
       A.Length.all := [others => 0.0]; A.Velocity.all := [others => 0.0]; A.Force.all := [others => 0.0];
    end Clear_Actuators;
    procedure Clear_Scratch (S : in out Scratch_Buffers) with
-     Global => null, Pre => S.Factor /= null and then S.Rhs /= null and then S.Solution /= null and then S.Next_Qpos /= null and then S.Next_Qvel /= null and then S.Condition_Sums /= null,
-     Post => S.Factor /= null and then S.Factor'First = S.Factor'First'Old
+     Global => null, Pre => S.Ancestor_Factor /= null
+       and then S.Factor /= null and then S.Rhs /= null and then S.Solution /= null and then S.Next_Qpos /= null and then S.Next_Qvel /= null and then S.Condition_Sums /= null,
+     Post => S.Ancestor_Factor /= null
+       and then S.Ancestor_Factor'First = S.Ancestor_Factor'First'Old
+       and then S.Ancestor_Factor'Last = S.Ancestor_Factor'Last'Old
+       and then (for all X of S.Ancestor_Factor.all => X = 0.0)
+       and then S.Factor /= null and then S.Factor'First = S.Factor'First'Old
        and then S.Factor'Last = S.Factor'Last'Old
        and then (for all X of S.Factor.all => X = 0.0)
        and then S.Rhs /= null and then S.Rhs'First = S.Rhs'First'Old
@@ -915,6 +1083,7 @@ package body MJ.Data with SPARK_Mode is
        and then (for all X of S.Condition_Sums.all => X = 0.0)
    is
    begin
+      S.Ancestor_Factor.all := [others => 0.0];
       S.Factor.all := [others => 0.0]; S.Rhs.all := [others => 0.0];
       S.Solution.all := [others => 0.0]; S.Next_Qpos.all := [others => 0.0];
       S.Next_Qvel.all := [others => 0.0]; S.Condition_Sums.all := [others => 0.0];
@@ -935,6 +1104,7 @@ package body MJ.Data with SPARK_Mode is
       Clear_Forces (D.Dynamics);
       Clear_Actuators (D.Actuators);
       Clear_Scratch (D.Scratch);
+      D.First_Clamped := -1;
       pragma Assert (Is_Ready (D));
       pragma Assert (D.State.Qpos.all =
         Real_Array'[for J in 0 .. D.Nj - 1 => Real (D.Joint_Config (J).Reference)]);

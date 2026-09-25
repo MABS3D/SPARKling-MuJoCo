@@ -1,0 +1,43 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                    Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                          .           .          .
+Flow Dependencies                 .         .                                          .           .          .
+Initialization                    .         .                                          .           .          .
+Non-Aliasing                      .         .                                          .           .          .
+Run-time Checks                  23         .    23 (CVC5 61%, Trivial 13%, altergo 26%)           .          .
+Assertions                        .         .                                          .           .          .
+Functional Contracts              3         .                                   3 (CVC5)           .          .
+LSP Verification                  .         .                                          .           .          .
+Termination                       1         1                                          .           .          .
+Concurrency                       .         .                                          .           .          .
+---------------------------------------------------------------------------------------------------------------
+Total                            28    2 (7%)                                   26 (93%)           .          .
+
+
+max steps used for successful proof: 36900
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.adb:9:43: range check proved in max 5 seconds
+mj-spatial_kernels.adb:10:43: range check proved in max 4 seconds
+mj-spatial_kernels.adb:9:43: fp_overflow check proved in max 3 seconds
+mj-spatial_kernels.adb:10:43: fp_overflow check proved in max 3 seconds
+mj-spatial_kernels.adb:8:43: range check proved in max 3 seconds
+mj-spatial_kernels.adb:8:43: fp_overflow check proved in max 2 seconds
+mj-spatial_kernels.adb:6:43: fp_overflow check proved in max 1 seconds
+mj-spatial_kernels.adb:5:43: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Rotated_Entry at mj-spatial_kernels.ads:13 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (26 checks)

@@ -25,6 +25,35 @@ MESSAGE = re.compile(r'^([^\s:]+\.ad[bs]):(\d+):(\d+): (info|warning|low|medium|
 WITH = re.compile(r'^(?:(?:limited|private)\s+)?with\s+([^;]+);', re.M | re.I)
 
 
+def diagnostic_messages(stdout: str, structured: dict) -> list[dict]:
+    """Keep unit-level flow failures even when GNATprove filters console lines.
+
+    --limit-line can suppress an error elsewhere in the selected unit from
+    stdout while that error prevents the requested proof from running at all.
+    The .spark flow records still contain the error and its actual location.
+    """
+    messages = []
+    seen = set()
+
+    def add(file, line, column, severity, text):
+        key = (file, int(line), int(column), severity, text)
+        if key not in seen:
+            seen.add(key)
+            messages.append(dict(file=file, line=int(line), column=int(column),
+                                 severity=severity, text=text))
+
+    for line in stdout.splitlines():
+        match = MESSAGE.match(line)
+        if match:
+            add(*match.groups())
+    for item in structured.values():
+        for message in item.get('flow', []):
+            if message.get('severity') in ('error', 'low', 'medium', 'high'):
+                add(message['file'], message['line'], message['col'],
+                    message['severity'], message['message']['text'])
+    return messages
+
+
 def targets(source: Path) -> list[dict]:
     groups = defaultdict(list)
     for path in sorted(source.glob('*.ad?')):
@@ -85,7 +114,7 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def isolated_project(snapshot: Path, work: Path, unit: str) -> Path:
+def isolated_project(snapshot: Path, work: Path, unit: str, extra_units: tuple[str, ...] = ()) -> Path:
     """Preserve whole source units and their dependencies, without library-wide discovery."""
     sources = {p.name: p for p in snapshot.rglob('*') if p.suffix in ('.ads', '.adb')}
     subunits = defaultdict(list)
@@ -93,7 +122,7 @@ def isolated_project(snapshot: Path, work: Path, unit: str) -> Path:
         match = re.search(r'^separate\s*\(\s*([\w.]+)\s*\)', path.read_text(), re.M | re.I)
         if match:
             subunits[match.group(1).lower().replace('.', '-')].append(path.stem)
-    pending = [unit]
+    pending = [unit, *extra_units]
     included = set()
     while pending:
         stem = pending.pop()
@@ -187,6 +216,8 @@ def main() -> int:
     parser.add_argument('--steps', type=int, default=200)
     parser.add_argument('--provers', default='cvc5', help='Comma-separated GNATprove provers')
     parser.add_argument('--level', type=int, choices=range(5), default=0)
+    parser.add_argument('--proof-mode', choices=('per_check', 'progressive'), default='per_check',
+                        help='Proof splitting strategy; recorded in the run manifest')
     parser.add_argument('--jobs', type=int, default=1)
     parser.add_argument('--cap-mb', type=int, choices=range(512, 4001), default=2000)
     args = parser.parse_args()
@@ -270,7 +301,11 @@ def main() -> int:
     project_groups = {Path(t['file']).stem:
                       ('mj-data-euler' if Path(t['file']).stem.startswith('mj-data')
                        else Path(t['file']).stem) for t in selected}
-    group_projects = {unit: isolated_project(snapshot, work, unit)
+    # Public entry wrappers need not be dependencies of the internal Euler path.
+    # Retain them in the stable shared proof project after the pipeline split.
+    data_units = tuple(sorted({p.stem for p in (snapshot / 'experimental/smooth/src').glob('mj-data*.ad?')}))
+    group_projects = {unit: isolated_project(snapshot, work, unit,
+                      data_units if unit == 'mj-data-euler' else ())
                       for unit in set(project_groups.values())}
     projects = {unit: group_projects[group] for unit, group in project_groups.items()}
     env['SPARKLING_BUILD_ROOT'] = str(work / 'build')
@@ -303,15 +338,23 @@ def main() -> int:
         summary = object_root / 'gnatprove/gnatprove.out'
         if summary.exists():
             summary.unlink()
+        analysis_file = target['file']
+        if target.get('selector') == 'line' and analysis_file.endswith('.ads'):
+            # Contract checks are emitted while analyzing the corresponding body.
+            # Analyzing only a spec can otherwise select zero obligations.
+            body = Path(analysis_file).with_suffix('.adb').name
+            if (snapshot / 'experimental/smooth/src' / body).is_file():
+                analysis_file = body
         command = [sys.executable, str(repo / 'tools/guarded.py'), '--cap-mb', str(args.cap_mb),
                    '--timeout', str(wall), '--', 'gnatprove', '-P', str(project),
                    '--mode=all', f'--level={args.level}', f'--prover={args.provers}',
+                   f'--proof={args.proof_mode}',
                    f'--timeout={args.prover_seconds}', f'--memlimit={args.prover_mb}', f'--steps={args.steps}',
                    '--counterexamples=off', f'-j{args.jobs}', '--report=all', '--output=oneline',
                    '--checks-as-errors=on',
                    *([] if target.get('selector') == 'unit' else
                      [f"--limit-{target.get('selector', 'subp')}={target['file']}:{target['line']}"]),
-                   '-u', target['file']]
+                   '-u', analysis_file]
         print(f"[{index + 1}/{len(selected)}] {target['id']} (wall {wall}s)", flush=True)
         before = time.monotonic()
         try:
@@ -338,12 +381,7 @@ def main() -> int:
             (logs / (target['id'] + '.spark.json')).write_text(json.dumps(structured, indent=2) + '\n')
         if summary.exists():
             shutil.copyfile(summary, logs / (target['id'] + '.summary.txt'))
-        messages = []
-        for line in proc.stdout.splitlines():
-            match = MESSAGE.match(line)
-            if match:
-                file, lineno, column, severity, text = match.groups()
-                messages.append(dict(file=file, line=int(lineno), column=int(column), severity=severity, text=text))
+        messages = diagnostic_messages(proc.stdout, structured)
         unproved = sum(m['severity'] in ('low', 'medium', 'high') for m in messages)
         errors = sum(m['severity'] == 'error' for m in messages)
         if proc.returncode == 99:
@@ -378,7 +416,8 @@ def main() -> int:
             break
     save_report(out, manifest, results)
     print('Report:', out / 'report.md', flush=True)
-    return 0 if all(r['status'] in ('completed_no_unproved', 'completed_no_proof_checks') for r in results) else 1
+    # Zero selected obligations is a diagnostic result, never a proof pass.
+    return 0 if all(r['status'] == 'completed_no_unproved' for r in results) else 1
 
 
 if __name__ == '__main__':

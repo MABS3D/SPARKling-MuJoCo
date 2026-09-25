@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                   Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1           1                                         .           .          .
+Flow Dependencies                 .           .                                         .           .          .
+Initialization                    2           2                                         .           .          .
+Non-Aliasing                      7           7                                         .           .          .
+Run-time Checks                  38           .    38 (CVC5 62%, Trivial 4%, altergo 34%)           .          .
+Assertions                        8           .     8 (CVC5 74%, Trivial 7%, altergo 19%)           .          .
+Functional Contracts              5           .                 3 (CVC5 67%, altergo 33%)           .          2
+LSP Verification                  .           .                                         .           .          .
+Termination                       .           .                                         .           .          .
+Concurrency                       .           .                                         .           .          .
+----------------------------------------------------------------------------------------------------------------
+Total                            61    10 (16%)                                  49 (80%)           .     2 (3%)
+
+
+max steps used for successful proof: 45570
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-euler.adb:46:32: assertion proved in max 2 seconds
+mj-data-euler.adb:45:7: precondition proved in max 1 seconds
+mj-data-euler.adb:40:22: assertion proved in max 1 seconds
+mj-data-euler.adb:41:22: assertion proved in max 1 seconds
+mj-data-euler.adb:31:32: assertion proved in max 1 seconds
+mj-data-euler.adb:42:22: assertion proved in max 1 seconds
+mj-data-euler.adb:44:22: assertion proved in max 1 seconds
+mj-data-euler.adb:36:47: length check proved in max 1 seconds
+mj-data-euler.adb:41:64: null pointer dereference proved in max 1 seconds
+mj-data-euler.adb:36:47: null pointer dereference proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-euler, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Euler.Integrate at mj-data-euler.ads:22 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 49 checks out of 51 proved

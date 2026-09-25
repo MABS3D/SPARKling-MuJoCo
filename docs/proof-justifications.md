@@ -403,3 +403,71 @@ well below Int64'Last. These warnings are retained and counted separately.
 - MJ.Models.Validity:Is_Valid: Hide_Info Site_Datas_OK — The conjunction composes this exact site-mesh reference predicate, which is proved independently under Valid_Layout. No condition is assumed or suppressed.
 - MJ.Validation:Diagnose_Assets: Hide_Info Site_Datas_OK — The diagnostic tests this exact predicate before returning OK and otherwise reports a failing site or a non-OK fallback. The element predicate is proved independently.
 - MJ.Validation:Diagnose_Assets: Hide_Info Site_Data_At — The diagnostic scans the unchanged sites for an exact failing predicate. Its body and index precondition are proved independently; hiding the body follows the existing geometry element pattern and adds no assumptions.
+
+## Dense matrix optimization proof composition
+
+- MJ.Matrix_Models:Unfold_Product_Row: Hide_Info Product_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrix_Models:Unfold_Vector_Row: Hide_Info Vector_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrix_Models:Unfold_Gram_Row: Hide_Info Gram_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Prove_Product_Cell: Hide_Info Product_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Product_Step: Hide_Info Product_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Transposed_Sweep: Hide_Info Product_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:MulMatMatT: Hide_Info MJ.Vector_Models.Dot_Value — The loop uses the separately proved row-dot component contract, including the four ordered lanes and tail. Hiding the model expression avoids expanding recursive vector reductions at each matrix cell; no property is assumed or suppressed.
+- MJ.Matrices:Prove_Gram_Cell: Hide_Info Gram_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Gram_Step: Hide_Info Gram_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Gram_Sweep: Hide_Info Gram_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Skip_Zero_Weight: Hide_Info Gram_Prefix — The separately proved entry-unfold lemma connects the ordered floating-point prefix with one update. Cell and row contracts compose that exact equality and its bounds; hiding the prefix expression avoids expanding array projections and recursive reductions in the outer proof. No property is assumed or suppressed.
+- MJ.Matrices:Advance_Gram: Hide_Info Gram_Prefix — The zero-weight branch uses the proved immutable-prefix lemma; the other branch uses the proved Gram sweep. Both establish the same next-prefix contract and bounds, without changing the floating-point operation order.
+- MJ.Matrices:Complete_Gram_Prefix: Hide_Info Gram_Prefix — Complete_Gram_Cell proves the exact full-prefix/component identity. The ghost traversal instantiates that identity for the lower triangle and the zero upper triangle. Only the already proved prefix expression is hidden; the final component relation and bounds are verified.
+- MJ.Matrices:SqrMatTD: Hide_Info Gram_Prefix — The proved initialization and completion lemmas connect zero/full prefixes to the public component model. Advance_Gram preserves the exact next prefix and bounds. The final Assert_And_Cut checks are proved, retaining the output relation and tier bound while discarding irrelevant intermediate context; no assumption is added.
+- MJ.Matrices:Rows_Dot: Hide_Info MJ.Vector_Models.Dot_Value — Unfold_Dot establishes the exact four-lane/tail model. Proved zero-tail and scalar combination lemmas discharge each branch. Only recursive expression expansion is hidden; all contracts and branches are proved. Matrix projections stay inside ghost lemma bodies to avoid residual secondary-stack setup in release callers.
+
+## Independent column updates (2026-09-23)
+
+`Accumulate_Row` and the numeric inner loop of
+`Gram_Update_Row` use `Loop_Optimize (Ivdep, Vector)`. For distinct iteration
+indices J and K, the written elements R(Target,J)/R(Target,K) or
+R(I,J)/R(I,K) are distinct. Each iteration reads only its own old output element,
+the read-only input array, and scalar parameters. SPARK anti-aliasing rules
+exclude overlap between writable output and input arrays; that restriction is
+also documented in the matrix API. Thus no iteration reads another iteration's
+write. The dependent outer source loop is unchanged and has no Ivdep hint.
+
+GNATprove ignores these compiler pragmas: the scalar safety, bound, frame and
+functional proofs are still required and pass. The independence justification
+above is a structural code-generation review, not a claim that GNATprove checks
+Ivdep. The supported calling domain continues to require SPARK's non-overlap
+rules. Release differential checks and inspection of the generated code are
+separate evidence; floating-point contraction remains disabled.
+
+## Short-row matrix product (2026-09-24)
+
+- MJ.Matrices:MulMatMatT_Short: Hide_Info MJ.Vector_Models.Dot_Value — Rows_Dot_Short (widths zero through three) and Rows_Dot (width four) separately prove exact equality to Dot_Value. MatT_Component has the same proved model contract. The traversal composes these two equalities with separately proved initialization, bounds and frame invariants. Hiding only the recursive expression prevents repeated expansion of row projections and the four-lane model in quantified loop obligations; it introduces no assumed property or trusted body. The short scalar body, full traversal and public dispatcher are all required to pass independently.
+
+The short cell loop uses No_Vector while each width-four dot retains its vector lanes. MulMatMatT requests Inline_Always to retain specialization of caller bounds. MulMatVec and MulVecMatVec keep their preceding implementation and inlining policy. Rows_Blocks updates two consecutive blocks per lane, followed by one remaining block when needed; the exact Lane_Sum invariant preserves every lane recurrence. These code-generation choices add no mathematical assumption.
+
+MulMatMatT returns immediately when either output axis is empty. Its full initialization and component postconditions are vacuous for this empty output, and are required to be proved at that return. The fast path introduces no assumption.
+
+- MJ.Poses:Compose: Hide_Info Model.Normalized — The private Normalize wrapper proves the complete tiny/near-unit/scaling relation against the ghost model. Compose applies that proved relation to the value-returning quaternion Product, whose exact ordered component contract is separately proved. Only expansion of the ghost normalization expression is hidden; no runtime body, obligation or property is suppressed or assumed.
+
+- MJ.Poses:Transform: Hide_Info MJ.Quaternions.Model.Rotation_Intermediate — The private Intermediate cell proves equality to this ghost function for each axis. Complete_Transform separately proves the ordered rotation-and-translation expression. The Transform proof composes these proved relations and bounds without expanding the intermediate arithmetic again. The quaternion ghost model body remains covered by the complete quaternion proof; no body is skipped and no property is assumed.
+
+## Transpose dispatch (2026-09-24)
+
+Transpose exposes Relaxed_Initialization together with a proved static
+R'Initialized postcondition; its ordinary executable component-equality
+postcondition remains in place. An empty axis returns immediately, where both
+properties are vacuous. Separate helpers for one through five input rows,
+paired copies for six through fifteen rows, and the two general copy loops
+all prove complete initialization and R(i,j) = A(j,i). Prefix invariants include
+initialization before reading each written component; the odd-row tail is
+proved separately from the pairs.
+
+No_Vector on short copies and Vector on the inner loop for square dimensions
+16 and 64 are code-generation hints ignored by GNATprove. The latter loop
+has the same scalar body as the unrestricted general core; dispatch thresholds
+do not restrict the public input domain. Each write reads only the distinct
+input object under SPARK's existing anti-aliasing rules. These choices add no
+assumption, suppression, trusted body, or floating-point reassociation. The
+performance evidence records their target-specific effect separately from the
+functional proof.

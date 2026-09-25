@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    .         .                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  21         .    21 (CVC5 10%, altergo 90%)           .          .
+Assertions                        .         .                             .           .          .
+Functional Contracts              4         .     4 (CVC5 80%, altergo 20%)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       1         1                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            27    2 (7%)                      25 (93%)           .          .
+
+
+max steps used for successful proof: 40873
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_kernels.adb:116:66: fp_overflow check proved in max 4 seconds
+mj-spatial_kernels.ads:100:14: postcondition proved in max 1 seconds
+mj-spatial_kernels.adb:115:66: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Kernels.Joint_Motion at mj-spatial_kernels.ads:97 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (25 checks)

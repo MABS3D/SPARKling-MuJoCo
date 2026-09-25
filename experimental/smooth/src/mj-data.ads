@@ -1,5 +1,8 @@
 --  Owned scalar-joint simulation state with executable lifecycle contracts.
 with MJ.Types;       use MJ.Types;
+with MJ.Bounds_Kernels;
+with MJ.Ancestor_Rows;
+with MJ.Smooth_Topology;
 with MJ.Models;
 with MJ.Smooth_Math;
 with MJ.Smooth_Kernels;
@@ -23,10 +26,21 @@ package MJ.Data with SPARK_Mode is
    --  Ill_Conditioned_Inertia means the relative numerical policy rejected
    --  a positive pivot or estimated condition number, not exact singularity.
 
+   type Inertia_Policy is (Compatible, Strict);
+   --  Compatible uses the C pivot floor without condition estimation.
+   --  Strict retains relative pivot and full condition-number rejection.
+   subtype Dof_Diagnostic is Integer range -1 .. Max_Dofs - 1;
+
    type State_Vector is array (Natural range <>) of Tier0_Real;
    function As_Reals (Values : State_Vector) return Real_Array is
      ([for I in Values'Range => Real (Values (I))]) with Global => null;
    type Simulation is limited private;
+
+   function Policy (D : Simulation) return Inertia_Policy with Global => null;
+   --  First clamped DOF since Create/Reset; -1 means no clamp observed.
+   --  Advisory: Success can accompany this diagnostic. It is sticky even
+   --  when a later numeric-domain check rejects a step.
+   function Clamped_Dof (D : Simulation) return Dof_Diagnostic with Global => null;
 
    --  A value snapshot, with no access values: exact configuration frames.
    type Configuration_Snapshot (<>) is private with Ghost => Static;
@@ -83,14 +97,17 @@ package MJ.Data with SPARK_Mode is
    --  Copies the supported model subset. Subsequent model edits do not affect D.
    --  A failed Create on an empty D leaves it empty. An allocated D is left
    --  unchanged and returns Already_Allocated. Storage_Error is out of scope.
-   procedure Create (M : MJ.Models.Model; D : in out Simulation; Result : out Status)
+   procedure Create (M : MJ.Models.Model; D : in out Simulation; Result : out Status;
+                     Solver_Policy : Inertia_Policy := Compatible)
      with Global => null, Pre => Valid_State (D),
      Post => (if Is_Empty (D)'Old then
                 (if Result = Success then Is_Ready (D) and then Time (D) = 0.0
+                   and then Policy (D) = Solver_Policy and then Clamped_Dof (D) = -1
                    and then At_Reset_State (D) and then not Positions_Current (D) and then not Forces_Current (D)
                    and then Shape (D) = Dimensions'(M.S.Nq, M.S.Nv, M.S.Nu, M.S.Nbody)
                  else Is_Empty (D))
               else Result = Already_Allocated
+                and then Policy (D) = Policy (D)'Old and then Clamped_Dof (D) = Clamped_Dof (D)'Old
                 and then Is_Ready (D) = Is_Ready (D)'Old
                 and then State_Values (D) = State_Values (D)'Old
                 and then Input_Values (D) = Input_Values (D)'Old);
@@ -100,7 +117,7 @@ package MJ.Data with SPARK_Mode is
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then (if Is_Ready (D)'Old then Result = Success and then Time (D) = 0.0
          and then not Positions_Current (D) and then not Forces_Current (D)
-         and then At_Reset_State (D)
+         and then At_Reset_State (D) and then Clamped_Dof (D) = -1
          else Result = Not_Allocated);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
@@ -271,6 +288,7 @@ private
       Gravity : Vector;
       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean;
       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean;
+      Solver_Policy : Inertia_Policy;
       Bodies : Body_Parameter_Array (1 .. Nb);
       Joints : Joint_Parameter_Array (1 .. Nj);
       Actuators : Actuator_Parameter_Array (1 .. Na);
@@ -279,8 +297,9 @@ private
    type Joint_Parameter_Access is access Joint_Parameter_Array;
    type Actuator_Parameter_Access is access Actuator_Parameter_Array;
 
-   --  Each body carries motion at its own origin, in world coordinates.
-   --  Bias accelerations are evaluated at qacc = 0, without gravity.
+   --  Cartesian motion is current only when Cartesian_Motion_Valid is set.
+   --  It is expressed at each body origin, in world coordinates; bias
+   --  accelerations use qacc = 0 without gravity. Pose_Valid covers geometry.
    type Body_State is record
       Position, Center : Vector := Zero;
       Orientation : Quaternion := Identity_Quaternion;
@@ -302,6 +321,9 @@ private
    type Kinematic_Buffers is record
       Bodies : Body_State_Access := null;
       Joints : Joint_State_Access := null;
+      --  Contiguous spatial caches: ten inertia components per body,
+      --  six motion components per joint. Published with Spatial_Valid.
+      Spatial_Inertias, Spatial_Motions : Real_Array_Access := null;
       --  Flat offset: 3 * (body * nv + velocity_index) + component.
       Linear_Jacobian, Angular_Jacobian : Real_Array_Access := null;
    end record;
@@ -314,12 +336,16 @@ private
    type Scratch_Buffers is record
       Factor, Rhs, Solution, Next_Qpos, Next_Qvel : Real_Array_Access := null;
       Condition_Sums : Real_Array_Access := null;
+      Ancestor_Factor : Real_Array_Access := null;
    end record;
    type Cache_Flags is record
-      Pose_Valid, Mass_Valid, Passive_Valid, Actuation_Valid, Force_Valid : Boolean := False;
+      Pose_Valid, Jacobian_Valid, Mass_Valid, Passive_Valid, Actuation_Valid, Force_Valid : Boolean := False;
+      Spatial_Valid, Cartesian_Motion_Valid : Boolean := False;
    end record;
    type Simulation is limited record
       Allocated : Boolean := False;
+      Solver_Policy : Inertia_Policy := Compatible;
+      First_Clamped : Dof_Diagnostic := -1;
       Nq, Nv, Nj : Natural range 0 .. Max_Dofs := 0;
       Nu, Na, No : Natural range 0 .. Max_Actuators := 0;
       Nb : Natural range 0 .. Max_Bodies := 0;
@@ -337,7 +363,12 @@ private
       Dynamics : Force_Buffers;
       Actuators : Actuator_Buffers;
       Scratch : Scratch_Buffers;
+      Ancestors : MJ.Ancestor_Rows.Pattern;
+      Topology : MJ.Smooth_Topology.Cache;
    end record;
+
+   function Policy (D : Simulation) return Inertia_Policy is (D.Solver_Policy);
+   function Clamped_Dof (D : Simulation) return Dof_Diagnostic is (D.First_Clamped);
 
    function Configuration (D : Simulation) return Configuration_Snapshot is
      (if D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
@@ -347,14 +378,14 @@ private
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
-         Implicit_Damping => D.Implicit_Damping,
+         Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
       else
         (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
-         Implicit_Damping => D.Implicit_Damping,
+         Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
          Bodies => [others => <>], Joints => [others => <>], Actuators => [others => <>]));
 
    function Has_Real_Layout (P : Real_Array_Access; Length : Natural) return Boolean is
@@ -367,6 +398,7 @@ private
       and then D.Actuator_Config = null and then D.State.Qpos = null
       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
+      and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
       and then D.Kinematic.Linear_Jacobian = null and then D.Kinematic.Angular_Jacobian = null
       and then D.Dynamics.Mass = null and then D.Dynamics.Bias = null
       and then D.Dynamics.Gravity = null and then D.Dynamics.Passive = null
@@ -375,7 +407,9 @@ private
       and then D.Actuators.Velocity = null and then D.Actuators.Force = null
       and then D.Scratch.Factor = null and then D.Scratch.Rhs = null
       and then D.Scratch.Solution = null and then D.Scratch.Next_Qpos = null
-      and then D.Scratch.Next_Qvel = null and then D.Scratch.Condition_Sums = null);
+      and then D.Scratch.Next_Qvel = null and then D.Scratch.Condition_Sums = null
+      and then D.Scratch.Ancestor_Factor = null and then MJ.Ancestor_Rows.Empty (D.Ancestors)
+      and then MJ.Smooth_Topology.Empty (D.Topology));
 
    function Position_Count (D : Simulation) return Natural is (D.Nq);
 
@@ -428,7 +462,8 @@ private
        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
        and then A.Damper_Enabled = B.Damper_Enabled and then A.Actuation_Enabled = B.Actuation_Enabled
        and then A.Clamp_Control = B.Clamp_Control and then A.Implicit_Damping = B.Implicit_Damping
-       and then A.Bodies = B.Bodies and then A.Joints = B.Joints and then A.Actuators = B.Actuators,
+       and then A.Solver_Policy = B.Solver_Policy
+       and then (for all I in A.Bodies'Range => A.Bodies (I) = B.Bodies (I)) and then (for all I in A.Joints'Range => A.Joints (I) = B.Joints (I)) and then (for all I in A.Actuators'Range => A.Actuators (I) = B.Actuators (I)),
      Post => A = B;
    procedure Equal_Configurations (A, B, C : Configuration_Snapshot) with Ghost => Static, Global => null,
      Pre => A = B and then B = C, Post => A = C;
@@ -465,8 +500,12 @@ private
    function Joint_Bounded (S : Joint_State) return Boolean is
      (Bounded (S.Anchor) and then Bounded (S.Direction, 1.00001));
    function Array_Bounded (P : Real_Array_Access; Limit : Real := Work_Limit) return Boolean is
-     (P /= null and then (for all X of P.all => X in -Limit .. Limit))
-     with Pre => Limit >= 0.0;
+     (P /= null and then
+        (if P'Length = 1 then P (P'First) in -Limit .. Limit
+         else MJ.Bounds_Kernels.All_Within (P.all, Limit)))
+     with Pre => Limit >= 0.0,
+     Post => Array_Bounded'Result =
+       (P /= null and then (for all X of P.all => X in -Limit .. Limit));
    function Configuration_Bounded (D : Simulation) return Boolean is
      (Bounded (D.Gravity, Max_Val)
       and then D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
@@ -474,13 +513,22 @@ private
         and then Bounded (B.Inertial_Position, Max_Val) and then Bounded (B.Inertia, Max_Val))
       and then (for all J of D.Joint_Config.all => Bounded (J.Anchor, Max_Val))
       and then (for all A of D.Actuator_Config.all => Bounded (A.Bias, Max_Val)));
-   function Kinematic_Bounded (K : Kinematic_Buffers) return Boolean is
+   function Poses_Bounded (K : Kinematic_Buffers) return Boolean is
      (K.Bodies /= null and then K.Joints /= null
       and then (for all B of K.Bodies.all => Body_Bounded (B))
-      and then (for all J of K.Joints.all => Joint_Bounded (J))
-      and then Array_Bounded (K.Linear_Jacobian) and then Array_Bounded (K.Angular_Jacobian));
+      and then (for all J of K.Joints.all => Joint_Bounded (J)));
+   function Spatial_Bounded (K : Kinematic_Buffers) return Boolean is
+     (Array_Bounded (K.Spatial_Inertias, 1.0e36)
+      and then Array_Bounded (K.Spatial_Motions, 1.0e12));
+   function Jacobians_Bounded (K : Kinematic_Buffers) return Boolean is
+     (Array_Bounded (K.Linear_Jacobian) and then Array_Bounded (K.Angular_Jacobian));
+   function Kinematic_Bounded (K : Kinematic_Buffers) return Boolean is
+     (Poses_Bounded (K) and then Jacobians_Bounded (K));
    function Caches_Bounded (D : Simulation) return Boolean is
-     ((if D.Cache.Pose_Valid then Kinematic_Bounded (D.Kinematic))
+     ((if D.Cache.Pose_Valid then Poses_Bounded (D.Kinematic))
+      and then (if D.Cache.Spatial_Valid then D.Cache.Pose_Valid and then Spatial_Bounded (D.Kinematic))
+      and then (if D.Cache.Cartesian_Motion_Valid then D.Cache.Pose_Valid)
+      and then (if D.Cache.Jacobian_Valid then D.Cache.Pose_Valid and then Jacobians_Bounded (D.Kinematic))
       and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
         and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive))
@@ -489,6 +537,18 @@ private
         and then Array_Bounded (D.Actuators.Force, 4.0e30))
       and then (if D.Cache.Force_Valid then Array_Bounded (D.Dynamics.Acceleration, Max_Val)
         and then Array_Bounded (D.Dynamics.Total)));
+
+   --  Historical cache predicate, retained only for the compatibility proof.
+   function Prior_Caches_Bounded (D : Simulation) return Boolean is
+     ((if D.Cache.Pose_Valid then Kinematic_Bounded (D.Kinematic))
+      and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
+      and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
+        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive))
+      and then (if D.Cache.Actuation_Valid then Array_Bounded (D.Dynamics.Actuator, 1.0e50)
+        and then Array_Bounded (D.Actuators.Length, 1.0e20) and then Array_Bounded (D.Actuators.Velocity, 1.0e20)
+        and then Array_Bounded (D.Actuators.Force, 4.0e30))
+      and then (if D.Cache.Force_Valid then Array_Bounded (D.Dynamics.Acceleration, Max_Val)
+        and then Array_Bounded (D.Dynamics.Total))) with Ghost => Static;
 
    function Configuration_Valid
      (Bodies : Body_Parameter_Array; Joints : Joint_Parameter_Array; Actuators : Actuator_Parameter_Array;
@@ -516,7 +576,70 @@ private
        and then Joints'First = 0 and then Joints'Last = Nj - 1
        and then Actuators'First = 0 and then Actuators'Last = Na - 1;
 
+   --  Keep immutable layout queries independent of mutable Simulation fields.
+   --  Proof clients may hide these small expressions while retaining their
+   --  frame facts across writes to kinematic and solver buffers.
+   function Ancestor_Pattern_Ready (P : MJ.Ancestor_Rows.Pattern; Nv : Natural)
+     return Boolean is
+     (not MJ.Ancestor_Rows.Empty (P) and then MJ.Ancestor_Rows.Size (P) = Nv);
+   function Topology_Layout_Ready (T : MJ.Smooth_Topology.Cache; Nb, Nv : Natural)
+     return Boolean is
+     (not MJ.Smooth_Topology.Empty (T)
+      and then MJ.Smooth_Topology.Body_Count (T) = Nb
+      and then MJ.Smooth_Topology.Dof_Count (T) = Nv);
+   function Ancestor_Storage_Ready (D : Simulation) return Boolean is
+     (Ancestor_Pattern_Ready (D.Ancestors, D.Nv)
+      and then Has_Real_Layout (D.Scratch.Ancestor_Factor, MJ.Ancestor_Rows.Count (D.Ancestors)));
+   function Topology_Storage_Ready (D : Simulation) return Boolean is
+     (Topology_Layout_Ready (D.Topology, D.Nb, D.Nv));
+
+   function Storage_Ready (D : Simulation) return Boolean is
+     (D.Allocated and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+      and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
+      and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+      and then D.Nu = D.Na and then D.No = D.Na
+      and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
+      and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+      and then D.Actuator_Config /= null and then D.Actuator_Config'First = 0 and then D.Actuator_Config'Last = D.Na - 1 and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na)
+      and then D.Kinematic.Bodies /= null and then D.Kinematic.Bodies'First = 0
+      and then Int64 (D.Kinematic.Bodies'Length) = Int64 (D.Nb)
+      and then D.Kinematic.Joints /= null and then D.Kinematic.Joints'First = 0
+      and then Int64 (D.Kinematic.Joints'Length) = Int64 (D.Nj)
+      and then Has_Real_Layout (D.State.Qpos, D.Nq) and then Has_Real_Layout (D.State.Qvel, D.Nv)
+      and then Has_Real_Layout (D.State.Ctrl, D.Nu) and then Has_Real_Layout (D.State.Applied, D.Nv)
+      and then Has_Real_Layout (D.Kinematic.Spatial_Inertias, 10 * D.Nb)
+      and then Has_Real_Layout (D.Kinematic.Spatial_Motions, 6 * D.Nj)
+      and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
+      and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
+      and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
+      and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
+      and then Has_Real_Layout (D.Dynamics.Passive, D.Nv) and then Has_Real_Layout (D.Dynamics.Actuator, D.Nv)
+      and then Has_Real_Layout (D.Dynamics.Acceleration, D.Nv) and then Has_Real_Layout (D.Dynamics.Total, D.Nv)
+      and then Has_Real_Layout (D.Actuators.Length, D.No) and then Has_Real_Layout (D.Actuators.Velocity, D.No)
+      and then Has_Real_Layout (D.Actuators.Force, D.No)
+      and then Has_Real_Layout (D.Scratch.Factor, D.Nv * D.Nv)
+      and then Has_Real_Layout (D.Scratch.Rhs, D.Nv) and then Has_Real_Layout (D.Scratch.Solution, D.Nv)
+      and then Has_Real_Layout (D.Scratch.Condition_Sums, D.Nv)
+      and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
+);
+   function Inputs_Bounded (D : Simulation) return Boolean is
+     (Array_Bounded (D.State.Qpos, Max_Val) and then Array_Bounded (D.State.Qvel, Max_Val)
+      and then Array_Bounded (D.State.Ctrl, Max_Val) and then Array_Bounded (D.State.Applied, Max_Val));
+   function Stable_Ready (D : Simulation) return Boolean is
+     (Storage_Ready (D) and then Configuration_Bounded (D)
+      and then Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all,
+        D.Nb, D.Nj, D.Na));
    function Is_Ready (D : Simulation) return Boolean is
+     (Stable_Ready (D) and then Inputs_Bounded (D) and then Caches_Bounded (D));
+
+   --  Internal phases reuse only immutable layout/configuration facts. Mutable
+   --  inputs and published caches are still checked on every phase boundary.
+   function Phase_Ready (D : Simulation) return Boolean is
+     (Inputs_Bounded (D) and then Caches_Bounded (D))
+     with Global => null, Pre => Stable_Ready (D),
+     Post => Phase_Ready'Result = Is_Ready (D);
+
+   function Original_Ready (D : Simulation) return Boolean is
      (D.Allocated and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
       and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
       and then D.Nu = D.Na and then D.No = D.Na
@@ -541,13 +664,39 @@ private
       and then Has_Real_Layout (D.Scratch.Rhs, D.Nv) and then Has_Real_Layout (D.Scratch.Solution, D.Nv)
       and then Has_Real_Layout (D.Scratch.Condition_Sums, D.Nv)
       and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
-      and then Configuration_Bounded (D) and then Caches_Bounded (D)
+      and then Configuration_Bounded (D) and then Prior_Caches_Bounded (D)
       and then (for all X of D.State.Qpos.all => X in Tier0_Real)
       and then (for all X of D.State.Qvel.all => X in Tier0_Real)
       and then (for all X of D.State.Ctrl.all => X in Tier0_Real)
       and then (for all X of D.State.Applied.all => X in Tier0_Real)
       and then Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all,
-        D.Nb, D.Nj, D.Na));
+        D.Nb, D.Nj, D.Na)) with Ghost => Static;
+   --  Invalid Jacobian storage is deliberately outside readiness. Once it is
+   --  materialized, every reader gets the same bounds as the historical path.
+   procedure Prove_Readiness_Compatibility (D : Simulation) with Ghost => Static, Global => null,
+     Pre => Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+       and then Has_Real_Layout (D.Kinematic.Spatial_Inertias, 10 * D.Nb)
+       and then Has_Real_Layout (D.Kinematic.Spatial_Motions, 6 * D.Nj)
+       and then (if D.Cache.Spatial_Valid then D.Cache.Pose_Valid and then Spatial_Bounded (D.Kinematic))
+       and then (if D.Cache.Cartesian_Motion_Valid then D.Cache.Pose_Valid),
+     Post => (if Original_Ready (D) and then (not D.Cache.Jacobian_Valid or else D.Cache.Pose_Valid)
+                then Is_Ready (D))
+       and then (if Is_Ready (D) and then (not D.Cache.Pose_Valid or else Jacobians_Bounded (D.Kinematic))
+                   then Original_Ready (D));
+   procedure Prove_Jacobian_Readiness (D : Simulation) with Ghost => Static, Global => null,
+     Pre => Is_Ready (D) and then D.Cache.Jacobian_Valid,
+     Post => D.Cache.Pose_Valid and then Kinematic_Bounded (D.Kinematic);
+
+
+
+   --  Under the existing lifecycle invariant, allocation alone distinguishes
+   --  the empty and ready cases. This lemma does not validate arbitrary state.
+   --  Ready_Flag remains confined to the historical isolated experiment.
+   --  The active phases use full or mutable-only numeric guards instead.
+   function Ready_Flag (D : Simulation) return Boolean is (D.Allocated)
+     with Global => null, Pre => Valid_State (D),
+     Post => Ready_Flag'Result = Is_Ready (D)
+       and then (if not Ready_Flag'Result then Is_Empty (D));
 
    function Acceleration (D : Simulation; Index : Natural) return Real is (D.Dynamics.Acceleration (Index));
    function Mass_Entry (D : Simulation; Row, Column : Natural) return Real is
@@ -587,7 +736,8 @@ private
    --  Limit the mutable formal to cache flags so state/configuration frames
    --  follow directly from the language's parameter and ownership rules.
    procedure Invalidate (Cache : in out Cache_Flags) with Global => null,
-     Post => not Cache.Pose_Valid and then not Cache.Mass_Valid
+     Post => not Cache.Pose_Valid and then not Cache.Jacobian_Valid
+       and then not Cache.Spatial_Valid and then not Cache.Cartesian_Motion_Valid and then not Cache.Mass_Valid
        and then not Cache.Passive_Valid and then not Cache.Actuation_Valid
        and then not Cache.Force_Valid;
    function Within_Work (X : Real) return Boolean is (X in -Work_Limit .. Work_Limit);

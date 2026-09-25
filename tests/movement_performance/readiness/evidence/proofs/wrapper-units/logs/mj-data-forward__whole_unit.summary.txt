@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                 Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                                       .           .          .
+Flow Dependencies                 .          .                                       .           .          .
+Initialization                    1          1                                       .           .          .
+Non-Aliasing                      .          .                                       .           .          .
+Run-time Checks                   .          .                                       .           .          .
+Assertions                        .          .                                       .           .          .
+Functional Contracts              4          .    4 (CVC5 7%, Trivial 2%, altergo 92%)           .          .
+LSP Verification                  .          .                                       .           .          .
+Termination                       .          .                                       .           .          .
+Concurrency                       .          .                                       .           .          .
+-------------------------------------------------------------------------------------------------------------
+Total                             6    2 (33%)                                 4 (67%)           .          .
+
+
+max steps used for successful proof: 10032
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-forward.adb:21:10: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-forward, 2 subprograms and packages out of 2 analyzed
+  MJ.Data.Forward at mj-data-forward.ads:3 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Data.Forward.Evaluate at mj-data-forward.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)

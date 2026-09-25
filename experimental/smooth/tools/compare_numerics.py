@@ -185,7 +185,7 @@ def rejection_tests(probe, out):
         mujoco.mj_saveModel(m, str(path))
         inputs = [position]*m.nq + [velocity]*m.nv + [0.]*m.nu + [force]*m.nv + [clock, 1]
         input_text = '1\n' + ' '.join(map(str, inputs[:-1])) + ' 1\n'
-        run = subprocess.run([str(probe), str(path)], input=input_text, text=True, capture_output=True, timeout=30)
+        run = subprocess.run([str(probe), str(path), "Strict"], input=input_text, text=True, capture_output=True, timeout=30)
         (out / ('reject_' + name + '.xml')).write_text(xml)
         (out / ('reject_' + name + '.input')).write_text(input_text)
         (out / ('reject_' + name + '.output')).write_text(run.stdout + run.stderr)
@@ -225,6 +225,9 @@ def main():
     parser.add_argument('--toolchain-root', type=Path)
     parser.add_argument('--samples', type=int, default=24)
     parser.add_argument('--probe', type=Path, help='Reuse an already checked executable; no build')
+    parser.add_argument('--policy', choices=('Compatible','Strict'), default='Compatible')
+    parser.add_argument('--extra-fixtures', type=Path,
+                        help='Directory of additional XML fixtures; existing names may not be replaced')
     args = parser.parse_args()
     if args.samples < 1:
         parser.error('--samples must be positive')
@@ -233,13 +236,19 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     probe = args.probe or build(args.repo.resolve(), out, args.toolchain_root)
     rng = np.random.default_rng(20260923)
-    summary = dict(status='incomplete', seed=20260923, samples_per_model=args.samples, oracle=mujoco.__version__,
+    summary = dict(status='incomplete', policy=args.policy, seed=20260923, samples_per_model=args.samples, oracle=mujoco.__version__,
                    probe=str(probe), probe_sha256=digest(probe), normalization_edge_cases=7,
                    comparisons=0, scenarios=0, fixtures=[], failures=[])
     start = time.monotonic()
     # Mixed absolute/relative tolerances, never relative error near zero alone.
     atol, rtol = 2e-10, 2e-10
-    for name, xml in fixtures().items():
+    cases = fixtures()
+    if args.extra_fixtures:
+        for path in sorted(args.extra_fixtures.glob('*.xml')):
+            if path.stem in cases:
+                parser.error('extra fixture shadows a built-in case: '+path.stem)
+            cases[path.stem] = path.read_text()
+    for name, xml in cases.items():
         print(name, flush=True)
         (out / (name + '.xml')).write_text(xml)
         m = mujoco.MjModel.from_xml_string(xml)
@@ -255,6 +264,10 @@ def main():
                 applied *= 1e-10
             if index == 0:
                 q, v, ctrl, applied = m.qpos0.copy(), v*0, ctrl*0, applied*0
+            if name == 'crb_wide_fallback':
+                # Each permitted scalar position stays inside Tier0, while
+                # their accumulated world position exceeds the CRB fast domain.
+                q += 6e9
             steps = 100 if index % 8 == 0 else 1
             clock = .125
             scenarios.append((q, v, ctrl, applied, clock, steps))
@@ -262,7 +275,7 @@ def main():
             lines.append(f'{clock} {steps}')
         input_text = '\n'.join(lines) + '\n'
         (out / (name + '.input')).write_text(input_text)
-        run = subprocess.run([str(probe), str(path)], input=input_text, text=True, capture_output=True, timeout=60)
+        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=60)
         (out / (name + '.output')).write_text(run.stdout)
         (out / (name + '.stderr')).write_text(run.stderr)
         run.check_returncode()
@@ -271,6 +284,7 @@ def main():
         record = dict(name=name, scenarios=len(scenarios), comparisons=0, max_absolute=0., max_tolerance_ratio=0.)
         for index, (row, scenario) in enumerate(zip(actual, scenarios)):
             assert row['forward'] == row['step'] == 'SUCCESS', (name, index, row)
+            assert row['forward_clamped'][0] == row['step_clamped'][0] == -1, (name, 'unexpected clamp')
             matrix = row['mass'].reshape(m.nv, m.nv)
             assert np.array_equal(matrix, matrix.T), (name, 'mass symmetry')
             if m.nv:
@@ -297,6 +311,7 @@ def main():
         summary['scenarios'] += record['scenarios']
         summary['comparisons'] += record['comparisons']
         (out / 'results.json').write_text(json.dumps(summary, indent=2) + '\n')
+    summary['policy_tests_mode'] = 'Strict'
     summary['policy_tests'] = rejection_tests(probe, out)
     summary.update(status='failed' if summary['failures'] else 'passed',
                    seconds=time.monotonic()-start, atol=atol, rtol=rtol)

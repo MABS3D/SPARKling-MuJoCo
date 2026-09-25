@@ -1,0 +1,43 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow      Provers   Justified    Unproved
+-----------------------------------------------------------------------------------
+Data Dependencies                 1          1            .           .           .
+Flow Dependencies                 .          .            .           .           .
+Initialization                    7          7            .           .           .
+Non-Aliasing                      .          .            .           .           .
+Run-time Checks                  46          .    40 (CVC5)           .           6
+Assertions                        .          .            .           .           .
+Functional Contracts             29          .     7 (CVC5)           .          22
+LSP Verification                  .          .            .           .           .
+Termination                       .          .            .           .           .
+Concurrency                       .          .            .           .           .
+-----------------------------------------------------------------------------------
+Total                            83    8 (10%)     47 (57%)           .    28 (34%)
+
+
+max steps used for successful proof: 33599
+
+============================
+Most difficult proved checks
+============================
+
+mj-data-forces.adb:55:38: null pointer dereference proved in max 1 seconds
+mj-data-forces.adb:55:52: index check proved in max 1 seconds
+mj-data-forces.adb:77:42: index check proved in max 1 seconds
+mj-data-forces.adb:71:55: null pointer dereference proved in max 1 seconds
+mj-data-forces.adb:77:26: null pointer dereference proved in max 1 seconds
+mj-data-forces.adb:70:62: index check proved in max 1 seconds
+mj-data-forces.adb:70:47: null pointer dereference proved in max 1 seconds
+mj-data-forces.adb:82:24: index check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-data-forces, 1 subprograms and packages out of 1 analyzed
+  MJ.Data.Forces.Try_Recursive at mj-data-forces.adb:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 47 checks out of 75 proved

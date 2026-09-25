@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                       Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                             .           .          .
+Flow Dependencies                 .         .                             .           .          .
+Initialization                    1         1                             .           .          .
+Non-Aliasing                      .         .                             .           .          .
+Run-time Checks                  21         .    21 (CVC5 63%, altergo 37%)           .          .
+Assertions                        4         .     4 (CVC5 17%, altergo 83%)           .          .
+Functional Contracts              1         .                   1 (altergo)           .          .
+LSP Verification                  .         .                             .           .          .
+Termination                       .         .                             .           .          .
+Concurrency                       .         .                             .           .          .
+--------------------------------------------------------------------------------------------------
+Total                            28    2 (7%)                      26 (93%)           .          .
+
+
+max steps used for successful proof: 26026
+
+============================
+Most difficult proved checks
+============================
+
+mj-solver_kernels.adb:23:13: loop invariant after first iteration proved in max 2 seconds
+mj-solver_kernels.adb:25:13: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-solver_kernels, 1 subprograms and packages out of 1 analyzed
+  MJ.Solver_Kernels.Add_Row at mj-solver_kernels.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (26 checks)
