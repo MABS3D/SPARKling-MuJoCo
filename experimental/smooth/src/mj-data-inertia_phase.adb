@@ -82,10 +82,10 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
       Nv : constant Natural := D.Nv;
       Used_CRB, Spatial_Ok : Boolean;
    begin
-      if not Phase_Ready (D) then
-         Result := Not_Allocated;
-         pragma Assert (Stable_Ready (D)); return;
-      elsif not D.Cache.Pose_Valid then
+      --  Both callers establish readiness: the public boundary checks it,
+      --  and the pipeline's proved pose update preserves it.
+      pragma Assert (Static => Phase_Ready (D));
+      if not D.Cache.Pose_Valid then
          Result := Stale_Results;
          pragma Assert (Stable_Ready (D)); return;
       end if;
@@ -573,10 +573,10 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    procedure Solve_Acceleration (D : in out Simulation; Result : out Status) is
       Value : Real;
    begin
-      if not Phase_Ready (D) then
-         Result := Not_Allocated;
-         pragma Assert (Stable_Ready (D)); return;
-      elsif not (D.Cache.Pose_Valid and then D.Cache.Mass_Valid and then D.Cache.Passive_Valid and then D.Cache.Actuation_Valid) then
+      --  The public boundary checks readiness; the proved actuation phase
+      --  preserves it before the internal pipeline reaches this call.
+      pragma Assert (Static => Phase_Ready (D));
+      if not (D.Cache.Pose_Valid and then D.Cache.Mass_Valid and then D.Cache.Passive_Valid and then D.Cache.Actuation_Valid) then
          Result := Stale_Results;
          pragma Assert (Stable_Ready (D)); return;
       end if;

@@ -1,5 +1,5 @@
 package body MJ.Data.Actuation_Phase with SPARK_Mode is
-   procedure Compute (D : in out Simulation; Result : out Status) is
+   procedure Compute_Ready (D : in out Simulation; Result : out Status) is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Phase_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
@@ -15,13 +15,10 @@ package body MJ.Data.Actuation_Phase with SPARK_Mode is
       Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
       Initial_Qpos : constant Real_Array := D.State.Qpos.all with Ghost => Static;
       Initial_Qvel : constant Real_Array := D.State.Qvel.all with Ghost => Static;
+      Initial_Position : constant Real_Array := Position_Values (D) with Ghost => Static;
+      Initial_Velocity : constant Real_Array := Velocity_Values (D) with Ghost => Static;
       Initial_Time : constant Nonneg_Tier0 := D.Clock with Ghost => Static;
    begin
-      if not Phase_Ready (D) then
-         Result := Not_Allocated;
-         pragma Assert (Static => Stable_Ready (D));
-         return;
-      end if;
       D.Cache.Force_Valid := False;
       MJ.Smooth_Actuation.Compute
         (D.Actuator_Config.all, D.State.Qpos.all, D.State.Qvel.all, D.State.Ctrl.all,
@@ -37,6 +34,27 @@ package body MJ.Data.Actuation_Phase with SPARK_Mode is
       pragma Assert (Configuration_Bounded (D));
       pragma Assert (Is_Ready (D));
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
+      pragma Assert (Static => Position_Values (D) = Initial_Position);
+      pragma Assert (Static => Velocity_Values (D) = Initial_Velocity);
       Result := Success;
+   end Compute_Ready;
+   procedure Compute (D : in out Simulation; Result : out Status) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Phase_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+   begin
+      if not Phase_Ready (D) then
+         Result := Not_Allocated;
+         pragma Assert (Static => Configuration (D) = Initial_Config);
+         return;
+      end if;
+      declare
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         pragma Assert (Static => Before_Config = Initial_Config);
+         Compute_Ready (D, Result);
+         pragma Assert (Static => Configuration (D) = Before_Config);
+         pragma Assert (Static => Configuration (D) = Initial_Config);
+      end;
    end Compute;
 end MJ.Data.Actuation_Phase;

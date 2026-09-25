@@ -1,0 +1,8 @@
+(set-logic QF_NRA)
+(set-option :timeout 10000)
+(define-fun u () Real (/ 1 9007199254740992))
+(declare-const norm Real)
+(assert (>= norm 0))
+(assert (and (>= (* norm norm) (- 1 (* 144 u))) (<= (* norm norm) (+ 1 (* 144 u)))))
+(assert (or (< norm (- 1 (* 144 u))) (> norm (+ 1 (* 144 u)))))
+(check-sat)

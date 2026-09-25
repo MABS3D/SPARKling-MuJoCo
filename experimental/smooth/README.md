@@ -1,5 +1,11 @@
 # Minimal smooth dynamics — review draft
 
+The [phase-closure update](../../docs/phase-closure.md) proves the complete
+actuation phase (81 proof checks) and removes two redundant mutable scans under
+the documented phase contracts. The integrated benchmark saves 7.8–19.2% of
+prior Ada time across the recorded cases; three mutable scans remain, and full
+dynamics proof and C parity remain pending.
+
 **Inertia policy update:** `Create` now defaults to `Compatible`, using reverse
 `LᵀDL` with a `1e-15` pivot floor and the queryable, resettable `Clamped_Dof`
 diagnostic. Pass `Solver_Policy => Strict` to retain the previous relative
@@ -38,10 +44,13 @@ Gold nor whole-subset Silver has been established**. Solver timeouts and missing
 invariants are pending proof engineering, not mathematical exceptions.
 See [verification scope](verification.md) for the claim boundaries.
 
-The complete `MJ.Smooth_Math` unit has passed 645 proof checks and 57 flow
+The complete `MJ.Smooth_Math` unit has passed 718 proof checks and 58 flow
 checks, including functional formula and frame contracts, with no open checks.
 This establishes those specified properties under the recorded runtime
 contracts; the lifecycle and dynamics units still need compositional closure.
+The [pose-tree closure report](../../docs/tree-invariants.md) records 1,617
+disjoint proof checks across the tree helpers, arithmetic units and two pose
+callers, plus checked C comparisons and repeated full-step timings.
 
 `smooth.gpr` imports the model library and keeps runtime checks enabled.
 The differential runner compiles an immutable snapshot of the probe's actual

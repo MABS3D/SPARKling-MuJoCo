@@ -1,5 +1,11 @@
 # Verification scope and acceptance criteria
 
+The [phase-closure update](../../docs/phase-closure.md) proves the complete
+actuation phase (81 proof checks) and removes two redundant mutable scans under
+the documented phase contracts. The integrated benchmark saves 7.8–19.2% of
+prior Ada time across the recorded cases; three mutable scans remain, and full
+dynamics proof and C parity remain pending.
+
 The target is SPARK Gold for useful functional properties, on top of runtime
 safety. A failed or unfinished proof is **pending**, not Silver coverage. No
 mathematical Silver-only exception is approved for this directory.
@@ -38,6 +44,17 @@ This is equivalent to the reference-position/zero-state image requirement;
 it avoids an unnecessary concatenation model inside the lifecycle proof.
 
 ## Recorded evidence (2026-09-23)
+
+The latest [pose-tree closure report (2026-09-25)](../../docs/tree-invariants.md)
+supersedes the arithmetic counts below for the current sources: 718 checks for
+complete `MJ.Smooth_Math`, 156 for complete `MJ.Pose_Arithmetic`, 177 for the ghost
+error-budget unit, 285 for 21 tree/copy helpers, 108 for eight dynamics helpers,
+133 for `Update_Poses` and 40 for `Ensure_Cartesian_Motion`. These disjoint scopes
+total 1,617 proof checks and 184 flow checks, with no open checks or analysis
+errors. The motion caller retains one unused-temporary warning. This closes
+these specified properties, not the full lifecycle or dynamics units. Exact
+snapshots, continuity checks, numerical tests and performance limits are linked
+from that report. The following older runs remain historical evidence.
 
 The full `MJ.Smooth_Math` unit completed GNATprove with **645 proof checks and
 57 flow checks, zero unproved checks and zero analysis errors**. This includes
