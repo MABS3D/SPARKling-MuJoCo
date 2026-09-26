@@ -1,22 +1,16 @@
-# Contributors and attribution
+# Contributors
 
-## SPARKling MuJoCo
+- **[MABS3D](https://github.com/MABS3D)** — author and maintainer of the independent Ada/SPARK port.
 
-**[MABS3D](https://github.com/MABS3D)** is the author and maintainer of this
-independent Ada/SPARK port. The earlier local Git identity `phobiabrixia` is
-mapped to this account in `.mailmap`, without rewriting the commit history.
+## Upstream reference attribution
 
-The repository history records individual contributions. Contributions to the
-port include implementation, contracts and proofs, regression tests, numerical
-comparison tools, and documentation.
+MuJoCo is an independent upstream project, retained in the `mujoco/` submodule
+as an implementation reference and numerical test oracle. Its authors are not
+listed as contributors to this port, and no affiliation or endorsement is implied.
+The upstream copyright notices, license and history remain in that dependency.
 
-## Upstream MuJoCo
+The port history uses MABS3D for the maintainer’s earlier local Git identity.
+MuJoCo’s inherited commits are separated from the port’s default-branch history;
+they have not been reassigned to MABS3D.
 
-The original MuJoCo engine is the work of the
-[MuJoCo authors and contributors](https://github.com/google-deepmind/mujoco/graphs/contributors).
-Its pinned sources are retained under `mujoco/` as the implementation reference
-and numerical test oracle. The upstream history, copyright notices and licenses
-remain intact; authorship of the SPARK port does not claim authorship of MuJoCo.
-
-See the root [Apache-2.0 license](LICENSE) and the upstream license and notices
-in the reference submodule.
+See [LICENSE](LICENSE) and the upstream notices in `mujoco/`.

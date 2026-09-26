@@ -1,0 +1,300 @@
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -2,6 +2,7 @@
+ with MJ.Types;       use MJ.Types;
+ with MJ.Bounds_Kernels;
+ with MJ.Ancestor_Rows;
++with MJ.Compact_Inertia;
+ with MJ.Smooth_Topology;
+ with MJ.Models;
+ with MJ.Smooth_Math;
+@@ -615,7 +616,7 @@
+       and then Has_Real_Layout (D.Kinematic.Spatial_Motions, 6 * D.Nj)
+       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
+       and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
+-      and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
++      and then Has_Real_Layout (D.Dynamics.Mass, MJ.Ancestor_Rows.Count (D.Ancestors))
+       and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Passive, D.Nv) and then Has_Real_Layout (D.Dynamics.Actuator, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Acceleration, D.Nv) and then Has_Real_Layout (D.Dynamics.Total, D.Nv)
+@@ -679,6 +680,8 @@
+    --  materialized, every reader gets the same bounds as the historical path.
+    procedure Prove_Readiness_Compatibility (D : Simulation) with Ghost => Static, Global => null,
+      Pre => Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
++       --  This historical equivalence describes the original dense storage.
++       and then MJ.Ancestor_Rows.Count (D.Ancestors) = D.Nv * D.Nv
+        --  The stronger layout invariant fixes the bounds of an empty joint
+        --  array too; length zero alone does not establish Last = -1.
+        and then (if Original_Ready (D) then D.Kinematic.Joints'Last = D.Nj - 1)
+@@ -707,7 +710,7 @@
+ 
+    function Acceleration (D : Simulation; Index : Natural) return Real is (D.Dynamics.Acceleration (Index));
+    function Mass_Entry (D : Simulation; Row, Column : Natural) return Real is
+-     (D.Dynamics.Mass (MJ.Smooth_Kernels.Matrix_Offset (D.Nv, Row, Column)));
++     (MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Mass.all, Row, Column));
+    function Force_Value (D : Simulation; Kind : Force_Kind; Index : Natural) return Real is
+      (case Kind is
+         when Gravity_Force => D.Dynamics.Gravity (Index),
+@@ -738,8 +741,8 @@
+       and then (for all X of D.State.Applied.all => X = 0.0));
+    function Symmetric_Mass (D : Simulation) return Boolean is
+      (Is_Ready (D) and then (for all I in 0 .. D.Nv - 1 =>
+-       (for all J in 0 .. D.Nv - 1 =>
+-         D.Dynamics.Mass (I * D.Nv + J) = D.Dynamics.Mass (J * D.Nv + I))));
++         (for all J in 0 .. D.Nv - 1 => MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Mass.all, I, J) =
++           MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Mass.all, J, I))));
+    --  Limit the mutable formal to cache flags so state/configuration frames
+    --  follow directly from the language's parameter and ownership rules.
+    procedure Invalidate (Cache : in out Cache_Flags) with Global => null,
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -421,13 +421,13 @@
+       B.Angular_Jacobian := Zero_Array (3 * Nb * Nv);
+    end Allocate_Kinematic;
+ 
+-   procedure Allocate_Dynamics (B : in out Force_Buffers; Nv : Natural) with
+-     Global => null, Pre => Nv <= Max_Dofs
++   procedure Allocate_Dynamics (B : in out Force_Buffers; Nv, Nm : Natural) with
++     Global => null, Pre => Nv <= Max_Dofs and then Nm <= MJ.Ancestor_Rows.Max_Entries
+        and then B.Mass = null and then B.Bias = null and then B.Gravity = null and then B.Passive = null and then B.Actuator = null and then B.Acceleration = null and then B.Total = null,
+-     Post => Has_Real_Layout (B.Mass, Nv * Nv) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
+-   is
+-   begin
+-      B.Mass := Zero_Array (Nv * Nv);
++     Post => Has_Real_Layout (B.Mass, Nm) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
++   is
++   begin
++      B.Mass := Zero_Array (Nm);
+       B.Bias := Zero_Array (Nv);
+       B.Gravity := Zero_Array (Nv);
+       B.Passive := Zero_Array (Nv);
+@@ -855,7 +855,7 @@
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+-      Allocate_Dynamics (D.Dynamics, D.Nv);
++      Allocate_Dynamics (D.Dynamics, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
+       Allocate_Actuators (D.Actuators, D.No);
+       Allocate_Scratch (D.Scratch, D.Nq, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
+       D.Allocated := True;
+@@ -1209,6 +1209,9 @@
+    end Get_Acceleration;
+ 
+    procedure Get_Mass_Matrix (D : Simulation; Dense : out Real_Array; Result : out Status) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
+    begin
+       Dense := [others => 0.0];
+       if not Is_Ready (D) then
+@@ -1218,7 +1221,10 @@
+       elsif Int64 (Dense'Length) /= Int64 (D.Nv) * Int64 (D.Nv) then
+          Result := Invalid_Size;
+       else
+-         Dense := D.Dynamics.Mass.all;
++         MJ.Compact_Inertia.Expand (D.Ancestors, D.Dynamics.Mass.all, Dense);
++         pragma Assert (Static => (for all I in 0 .. D.Nv - 1 =>
++           (for all J in 0 .. D.Nv - 1 =>
++             Dense (Dense'First + (I * D.Nv + J)) = Mass_Entry (D, I, J))));
+          Result := Success;
+       end if;
+    end Get_Mass_Matrix;
+--- a/experimental/smooth/src/mj-data-inertia_phase.adb
++++ b/experimental/smooth/src/mj-data-inertia_phase.adb
+@@ -13,21 +13,16 @@
+      renames MJ.Smooth_Kernels.Inertia_Times;
+ 
+    --  CRB and RNE share inertias/axes prepared once in the root COM frame.
+-   procedure Try_Assemble_CRB (D : Simulation; Mass : out Real_Array; Ok : out Boolean)
+-     with Global => null,
+-     Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then D.Cache.Spatial_Valid
+-       and then D.Nv <= 256
+-       and then Mass'First = 0 and then Mass'Last = D.Nv * D.Nv - 1,
+-     Post => MJ.Smooth_Dynamics.Work_Array (Mass)
+-       and then MJ.Smooth_Dynamics.Symmetric (Mass, D.Nv)
++   procedure Try_Assemble_Compact (D : in out Simulation; Ok : out Boolean)
+    is
+       package SK renames MJ.Spatial_Kernels;
+       package T renames MJ.Smooth_Topology;
++      package AR renames MJ.Ancestor_Rows;
+       type Inertia_Array is array (Natural range <>) of SK.Inertia;
+       Composite : Inertia_Array (0 .. D.Nb - 1) with Relaxed_Initialization;
+    begin
+       Ok := False;
+-      Mass := [others => 0.0];
++      D.Dynamics.Mass (0 .. AR.Count (D.Ancestors) - 1) := [others => 0.0];
+       if D.Nv = 0 then Ok := True; return; end if;
+       for B in Composite'Range loop
+          Composite (B) := MJ.Spatial_Storage.Load_Inertia (D.Kinematic.Spatial_Inertias.all, 10 * B);
+@@ -48,35 +43,35 @@
+          end;
+       end loop;
+       for I in 0 .. D.Nv - 1 loop
+-         pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Mass)
+-           and then MJ.Smooth_Dynamics.Symmetric (Mass, D.Nv));
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Mass (0 .. AR.Count (D.Ancestors) - 1)));
+          if T.Simple_Count (D.Topology, I) > 0 then
+-            MJ.Smooth_Dynamics.Store_Symmetric
+-              (Mass, D.Nv, I, I, T.Fixed_Inertia (D.Topology, I));
++            D.Dynamics.Mass (AR.Start (D.Ancestors, I) + AR.Length (D.Ancestors, I) - 1) := T.Fixed_Inertia (D.Topology, I);
+          else
+             declare
+                Product : constant SK.Motion := SK.Multiply
+                  (Composite (T.Dof_Body (D.Topology, I)),
+                   MJ.Spatial_Storage.Load_Motion (D.Kinematic.Spatial_Motions.all, 6 * T.Dof_Joint (D.Topology, I)));
+                J : Integer := I;
++               Address : Integer := AR.Start (D.Ancestors, I) + AR.Length (D.Ancestors, I) - 1;
+                Value : Real;
+             begin
+                while J >= 0 loop
+                   pragma Loop_Variant (Decreases => J);
+                   pragma Loop_Invariant (J in 0 .. I);
+-                  pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Mass)
+-                    and then MJ.Smooth_Dynamics.Symmetric (Mass, D.Nv));
++                  pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Mass (0 .. AR.Count (D.Ancestors) - 1)));
+                   Value := (if J = I then T.Armature (D.Topology, I) else 0.0)
+                     + SK.Dot (MJ.Spatial_Storage.Load_Motion (D.Kinematic.Spatial_Motions.all, 6 * T.Dof_Joint (D.Topology, J)), Product);
+                   if not Within_Work (Value) then return; end if;
+-                  MJ.Smooth_Dynamics.Store_Symmetric (Mass, D.Nv, I, J, Value);
++                  D.Dynamics.Mass (Address) := Value;
++                  Address := Address - 1;
+                   J := T.Parent_Dof (D.Topology, J);
+                end loop;
+             end;
+          end if;
+       end loop;
+       Ok := True;
+-   end Try_Assemble_CRB;
++   end Try_Assemble_Compact;
++   pragma Inline_Always (Try_Assemble_Compact);
+ 
+    procedure Assemble (D : in out Simulation; Result : out Status) is
+       Nv : constant Natural := D.Nv;
+@@ -91,24 +86,18 @@
+       end if;
+       D.Cache.Mass_Valid := False;
+       D.Cache.Force_Valid := False;
+-      D.Dynamics.Mass.all := [others => 0.0];
+       Result := Numeric_Limit;
+       Used_CRB := False;
+       if D.Nv >= 3 then
+-         declare
+-            Candidate : Real_Array (0 .. Nv * Nv - 1) with Relaxed_Initialization;
+-         begin
+-            Spatial.Prepare (D, Spatial_Ok);
+-            if Spatial_Ok then Try_Assemble_CRB (D, Candidate, Used_CRB); end if;
+-            if Used_CRB then D.Dynamics.Mass.all := Candidate; end if;
+-         end;
++         Spatial.Prepare (D, Spatial_Ok);
++         if Spatial_Ok then Try_Assemble_Compact (D, Used_CRB); end if;
+       end if;
+       if Used_CRB then
+          D.Cache.Mass_Valid := True;
+          Result := Success;
+          pragma Assert (Stable_Ready (D)); return;
+       end if;
+-      D.Dynamics.Mass.all := [others => 0.0];
++      D.Scratch.Factor.all := [others => 0.0];
+       Pipeline.Ensure_Jacobians (D, Result);
+       if Result /= Success then pragma Assert (Stable_Ready (D)); return; end if;
+       Prove_Jacobian_Readiness (D);
+@@ -117,7 +106,7 @@
+       for B in 1 .. D.Nb - 1 loop
+          pragma Loop_Invariant (Static => Stable_Ready (D));
+          pragma Loop_Invariant (Static => Shape (D) = Shape (D)'Loop_Entry);
+-         pragma Loop_Invariant (Symmetric_Mass (D));
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Symmetric (D.Scratch.Factor.all, D.Nv));
+          declare
+             C : constant Body_Parameters := D.Body_Config (B);
+             R : constant Matrix := D.Kinematic.Bodies (B).Inertial_Rotation;
+@@ -130,7 +119,7 @@
+             for I in 0 .. D.Nv - 1 loop
+                pragma Loop_Invariant (Static => Stable_Ready (D));
+                pragma Loop_Invariant (Static => Shape (D) = Shape (D)'Loop_Entry);
+-               pragma Loop_Invariant (Symmetric_Mass (D));
++               pragma Loop_Invariant (MJ.Smooth_Dynamics.Symmetric (D.Scratch.Factor.all, D.Nv));
+                declare
+                   Li : constant Vector := Read_Vector (D.Kinematic.Linear_Jacobian.all, First + 3 * I);
+                   Ai : constant Vector := Read_Vector (D.Kinematic.Angular_Jacobian.all, First + 3 * I);
+@@ -138,15 +127,15 @@
+                   for J in 0 .. I loop
+                      pragma Loop_Invariant (Static => Stable_Ready (D));
+                      pragma Loop_Invariant (Static => Shape (D) = Shape (D)'Loop_Entry);
+-                     pragma Loop_Invariant (Symmetric_Mass (D));
++                     pragma Loop_Invariant (MJ.Smooth_Dynamics.Symmetric (D.Scratch.Factor.all, D.Nv));
+                      declare
+                         Lj : constant Vector := Read_Vector (D.Kinematic.Linear_Jacobian.all, First + 3 * J);
+                         Value : constant Real := MJ.Smooth_Dynamics.Prepared_Mass_Contribution
+-                          (D.Dynamics.Mass (I * D.Nv + J), C.Mass, Li, Lj, Ai, Columns (J));
++                          (D.Scratch.Factor (I * D.Nv + J), C.Mass, Li, Lj, Ai, Columns (J));
+                      begin
+                         if not Within_Work (Value) then pragma Assert (Stable_Ready (D)); return; end if;
+-                        D.Dynamics.Mass (I * D.Nv + J) := Value;
+-                        D.Dynamics.Mass (J * D.Nv + I) := Value;
++                        D.Scratch.Factor (I * D.Nv + J) := Value;
++                        D.Scratch.Factor (J * D.Nv + I) := Value;
+                      end;
+                   end loop;
+                end;
+@@ -156,18 +145,19 @@
+       for J in 0 .. D.Nj - 1 loop
+          pragma Loop_Invariant (Static => Stable_Ready (D));
+          pragma Loop_Invariant (Static => Shape (D) = Shape (D)'Loop_Entry);
+-         pragma Loop_Invariant (Symmetric_Mass (D));
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Symmetric (D.Scratch.Factor.all, D.Nv));
+          declare
+             V : constant Natural := D.Joint_Config (J).Vadr;
+             I : constant Natural := V * D.Nv + V;
+-            Value : constant Real := D.Dynamics.Mass (I) + D.Joint_Config (J).Armature;
++            Value : constant Real := D.Scratch.Factor (I) + D.Joint_Config (J).Armature;
+          begin
+             if not Within_Work (Value) then
+                pragma Assert (Stable_Ready (D)); return;
+             end if;
+-            D.Dynamics.Mass (I) := Value;
++            D.Scratch.Factor (I) := Value;
+          end;
+       end loop;
++      MJ.Ancestor_Rows.Copy_Matrix (D.Ancestors, D.Scratch.Factor.all, D.Dynamics.Mass.all);
+       D.Cache.Mass_Valid := True;
+       Result := Success;
+       pragma Assert (Stable_Ready (D));
+@@ -412,8 +402,8 @@
+       pragma Assert (Stable_Ready (D));
+    end Solve_Compatible;
+ 
+-   --  Keep the public dense mass and the strict solver unchanged. Pack only
+-   --  structural entries, once per physical solve; no tolerance drops terms.
++   --  CRB already produces ancestor rows. The dense fallback still needs
++   --  packing; no tolerance drops terms in either representation.
+    procedure Load_Ancestor_Factor (D : in out Simulation; Damping_Step : Real;
+                                    Result : out Status) with
+      Global => null,
+@@ -436,7 +426,7 @@
+       Value : Real;
+    begin
+       Result := Numeric_Limit;
+-      AR.Copy_Matrix (D.Ancestors, D.Dynamics.Mass.all, D.Scratch.Ancestor_Factor.all);
++      D.Scratch.Ancestor_Factor.all := D.Dynamics.Mass.all;
+       if Damping_Step > 0.0 then
+          for I in 0 .. D.Nv - 1 loop
+             declare
+@@ -474,7 +464,7 @@
+          if Result = Success then Solve_Compatible (D, Result); end if;
+          pragma Assert (Stable_Ready (D)); return;
+       end if;
+-      D.Scratch.Factor.all := D.Dynamics.Mass.all;
++      MJ.Compact_Inertia.Expand (D.Ancestors, D.Dynamics.Mass.all, D.Scratch.Factor.all);
+       if N = 0 then
+          Result := Success;
+          pragma Assert (Stable_Ready (D)); return;
+--- a/experimental/smooth/tests/smooth_probe.adb
++++ b/experimental/smooth/tests/smooth_probe.adb
+@@ -132,6 +132,7 @@
+       --  Explicit lifecycle/error checks; no assertions depend on optimization.
+       Get_Acceleration (D, Acc, Result); Check (Stale_Results);
+       Get_Mass_Matrix (D, Mass, Result); Check (Stale_Results);
++      if not Symmetric_Mass (D) then raise Program_Error with "initial zero mass is symmetric"; end if;
+       Set_State (D, Bad, Empty, 0.0, Result); Check (Invalid_Size);
+       Set_Control (D, U, 0.0, Result); Check (Invalid_Index);
+       Set_Applied_Force (D, N, 0.0, Result); Check (Invalid_Index);

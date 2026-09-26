@@ -132,6 +132,7 @@ begin
       --  Explicit lifecycle/error checks; no assertions depend on optimization.
       Get_Acceleration (D, Acc, Result); Check (Stale_Results);
       Get_Mass_Matrix (D, Mass, Result); Check (Stale_Results);
+      if not Symmetric_Mass (D) then raise Program_Error with "initial zero mass is symmetric"; end if;
       Set_State (D, Bad, Empty, 0.0, Result); Check (Invalid_Size);
       Set_Control (D, U, 0.0, Result); Check (Invalid_Index);
       Set_Applied_Force (D, N, 0.0, Result); Check (Invalid_Index);

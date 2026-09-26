@@ -4,7 +4,7 @@ package body MJ.Bounds_Kernels with SPARK_Mode is
       Rejected : Int64 := 0;
    begin
       for I in Values'Range loop
-         Rejected := Rejected + Boolean'Pos (not (abs Values (I) <= Limit));
+         Rejected := Rejected + Boolean'Pos (Values (I) not in -Limit .. Limit);
          pragma Loop_Invariant
            (Static => Rejected in 0 .. Int64 (I) - Int64 (Values'First) + 1);
          pragma Loop_Invariant
