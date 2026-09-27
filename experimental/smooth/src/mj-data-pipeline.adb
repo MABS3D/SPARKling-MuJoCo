@@ -74,7 +74,9 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       pragma Assert (Static => S.Linear_Bias = Zero and then S.Angular_Bias = Zero);
       S.Rotation := Rotation (S.Orientation);
       Widen_Rotation_Bounds (S.Rotation);
-      Ok := Motion_Bounded (S);
+      pragma Assert (Static => Bounded (S.Center));
+      pragma Assert (Static => Motion_Bounded (S) = Bounded (S.Position));
+      Ok := Bounded (S.Position);
    end Fixed_Position;
    pragma Inline_Always (Fixed_Position);
 
@@ -102,7 +104,9 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       S.Angular_Bias := P.Angular_Bias;
       S.Linear_Velocity := Velocity;
       S.Linear_Bias := Bias;
-      Ok := Motion_Bounded (S);
+      pragma Assert (Static => Motion_Bounded (S) =
+        (Bounded (S.Linear_Velocity) and then Bounded (S.Linear_Bias)));
+      Ok := Bounded (S.Linear_Velocity) and then Bounded (S.Linear_Bias);
    end Fixed_Frame;
 
    procedure Store_Body_Pose
@@ -293,7 +297,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Inertial_Rotation := Rotation (IQ);
          Widen_Rotation_Bounds (Inertial_Rotation);
          S := (S with delta Center => Center, Inertial_Rotation => Inertial_Rotation);
-         if not Motion_Bounded (S) then return; end if;
+         pragma Assert (Static => Motion_Bounded (S) = Bounded (Center));
+         if not Bounded (Center) then return; end if;
          Establish_Body_Bounds (S);
       end;
       Ok := True;
@@ -683,30 +688,68 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
    end Ensure_Cartesian_Motion;
 
+   procedure Refresh_Jacobian_Buffers
+     (Bodies : Body_Parameter_Array; Joints : Joint_Parameter_Array;
+      Body_Poses : Body_State_Array; Joint_Poses : Joint_State_Array;
+      Linear, Angular : in out Real_Array; Valid : in out Boolean; Result : out Status)
+     with Global => null,
+     Pre => Bodies'First = 0 and then Bodies'Length in 1 .. Max_Bodies
+       and then Joints'First = 0 and then Joints'Length <= Max_Dofs
+       and then Jacobians.Topology (Bodies, Joints)
+       and then Body_Poses'First = 0 and then Body_Poses'Length = Bodies'Length
+       and then Joint_Poses'First = 0 and then Joint_Poses'Length = Joints'Length
+       and then (for all B of Body_Poses => Bounded (B.Center))
+       and then (for all J of Joint_Poses => Joint_Bounded (J))
+       and then Linear'First = 0 and then Angular'First = 0
+       and then Linear'Last = 3 * Bodies'Length * Joints'Length - 1
+       and then Angular'Last = Linear'Last
+       and then (if Valid then (for all X of Linear => Within_Work (X))
+         and then (for all X of Angular => Within_Work (X))),
+     Post => (for all X of Linear => Within_Work (X))
+       and then (for all X of Angular => Within_Work (X))
+       and then Valid = (Result = Success)
+   is
+   begin
+      if Valid then Result := Success; return; end if;
+      Jacobians.Build (Bodies, Joints, Body_Poses, Joint_Poses, Linear, Angular, Valid);
+      Result := (if Valid then Success else Numeric_Limit);
+   end Refresh_Jacobian_Buffers;
+   pragma Inline_Always (Refresh_Jacobian_Buffers);
+
    procedure Ensure_Jacobians (D : in out Simulation; Result : out Status) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
       Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
-      Accepted : Boolean;
+      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
    begin
-      if D.Cache.Jacobian_Valid then
-         Prove_Configuration_Equality (Configuration (D), Initial_Config);
-         Result := Success;
-         return;
-      end if;
-      Jacobians.Build
+      Refresh_Jacobian_Buffers
         (D.Body_Config.all, D.Joint_Config.all,
          D.Kinematic.Bodies.all, D.Kinematic.Joints.all,
-         D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all, Accepted);
-      pragma Assert (Static => Is_Ready (D));
-      D.Cache.Jacobian_Valid := Accepted;
-      pragma Assert (Static => Is_Ready (D));
+         D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all,
+         D.Cache.Jacobian_Valid, Result);
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
-      Result := (if Accepted then Success else Numeric_Limit);
+      pragma Assert (Static => State_Values (D) = Initial_State);
    end Ensure_Jacobians;
 
-   procedure Evaluate_Ready (D : in out Simulation; Result : out Status) is
+   procedure Evaluate_Inertia_Forces (D : in out Simulation; Result : out Status)
+     with Global => null, Pre => Is_Ready (D) and then Stable_Ready (D),
+       Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+         and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+         and then State_Values (D) = State_Values (D)'Old
+         and then Input_Values (D) = Input_Values (D)'Old
+         and then Positions_Current (D) = Positions_Current (D)'Old
+         and then Configuration (D) = Configuration (D)'Old
+         and then Position_Values (D) = Position_Values (D)'Old
+         and then Velocity_Values (D) = Velocity_Values (D)'Old
+         and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old)
+   is
       --  Compose phase contracts without expanding their representation.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
@@ -725,6 +768,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
       Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
    begin
+      pragma Assert (Static => State_Values (D) = Initial_State);
       declare
          Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
@@ -732,7 +776,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-      Update_Poses (D, Result);
+         Inertia_Phase.Assemble (D, Result);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
@@ -751,7 +795,62 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-      Inertia_Phase.Assemble (D, Result);
+         Forces_Phase.Compute (D, Result);
+         MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+         MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+      end;
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+   end Evaluate_Inertia_Forces;
+   pragma Inline_Always (Evaluate_Inertia_Forces);
+
+   procedure Evaluate_Actuation_Acceleration (D : in out Simulation; Result : out Status)
+     with Global => null, Pre => Is_Ready (D) and then Stable_Ready (D),
+       Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+         and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+         and then State_Values (D) = State_Values (D)'Old
+         and then Input_Values (D) = Input_Values (D)'Old
+         and then Positions_Current (D) = Positions_Current (D)'Old
+         and then Configuration (D) = Configuration (D)'Old
+         and then Position_Values (D) = Position_Values (D)'Old
+         and then Velocity_Values (D) = Velocity_Values (D)'Old
+         and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+         and then (if Result = Success then Forces_Current (D)))
+   is
+      --  Compose phase contracts without expanding their representation.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Shape);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Positions_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Forces_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Position_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Velocity_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Time);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Step_Size);
+      Initial_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+      Initial_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
+      Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+   begin
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      declare
+         Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+         Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         Actuation_Phase.Compute (D, Result);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
@@ -770,7 +869,50 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-      Forces_Phase.Compute (D, Result);
+         Inertia_Phase.Solve_Acceleration (D, Result);
+         MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+         MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+      end;
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+   end Evaluate_Actuation_Acceleration;
+   pragma Inline_Always (Evaluate_Actuation_Acceleration);
+
+   procedure Evaluate_Ready (D : in out Simulation; Result : out Status) is
+      --  Compose phase contracts without expanding their representation.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Shape);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Positions_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Forces_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Position_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Velocity_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Time);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Step_Size);
+      Initial_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+      Initial_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
+      Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+   begin
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      declare
+         Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+         Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         Update_Poses (D, Result);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
@@ -789,7 +931,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-      Actuation_Phase.Compute (D, Result);
+         Evaluate_Inertia_Forces (D, Result);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
@@ -808,7 +950,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-      Inertia_Phase.Solve_Acceleration (D, Result);
+         Evaluate_Actuation_Acceleration (D, Result);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);

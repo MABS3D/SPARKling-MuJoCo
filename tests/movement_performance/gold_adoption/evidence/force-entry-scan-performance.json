@@ -1,0 +1,3233 @@
+{
+  "scope": "Two quiet integrated sessions: complete supported smooth Euler movement workload; active Ada baseline vs all adopted mass/spatial/scan changes vs pinned normal SIMD C. Not an isolated timing attribution to one guard.",
+  "reference": "MuJoCo 3.14.0, 9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "sessions": 2,
+  "models": 11,
+  "cases_per_session": 33,
+  "blocks_per_case": 24,
+  "samples_per_block": 4,
+  "steps_per_trajectory": 100,
+  "cpu": 12,
+  "ci95": "Paired block-median bootstrap, per case within session; no multiplicity correction. All 33 cases have CI95 upper bound below 1 in both sessions.",
+  "all_cases_faster_in_both_sessions": true,
+  "max_ada_absolute_error": 0.0,
+  "model_ranges": [
+    {
+      "model": "hinge_motor",
+      "reduction_percent_range": [
+        2.1994638919874188,
+        3.0531868146681296
+      ],
+      "ada_over_c_range": [
+        1.0782262658494597,
+        1.0895126619144655
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          0.503985,
+          0.5093
+        ],
+        "current": [
+          0.49217,
+          0.494025
+        ],
+        "c": [
+          0.45373497414402664,
+          0.45730004785582423
+        ]
+      }
+    },
+    {
+      "model": "branched_multijoint",
+      "reduction_percent_range": [
+        4.391692530833257,
+        4.754365235842584
+      ],
+      "ada_over_c_range": [
+        1.439324031862076,
+        1.4528087238824492
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          1.60353,
+          1.61477
+        ],
+        "current": [
+          1.524805,
+          1.5389000000000002
+        ],
+        "c": [
+          1.0575950727798045,
+          1.0629200551193208
+        ]
+      }
+    },
+    {
+      "model": "chain_12",
+      "reduction_percent_range": [
+        6.869361639038107,
+        7.614767562037561
+      ],
+      "ada_over_c_range": [
+        1.8294648404101252,
+        1.8563146830783332
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          4.22999,
+          4.29517
+        ],
+        "current": [
+          3.885145,
+          3.98371
+        ],
+        "c": [
+          2.0849799329880625,
+          2.1620950428768992
+        ]
+      }
+    },
+    {
+      "model": "crb_no_damping",
+      "reduction_percent_range": [
+        8.022683018975963,
+        8.331652845413128
+      ],
+      "ada_over_c_range": [
+        1.8227564492886863,
+        1.8512617502945565
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          1.934435,
+          1.9391950000000002
+        ],
+        "current": [
+          1.7766849999999998,
+          1.78488
+        ],
+        "c": [
+          0.9696399501990527,
+          0.9751849574968219
+        ]
+      }
+    },
+    {
+      "model": "crb_chain_24",
+      "reduction_percent_range": [
+        6.449936845480908,
+        7.434952624660984
+      ],
+      "ada_over_c_range": [
+        1.833122004433274,
+        1.854804845708538
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          9.61784,
+          9.658115
+        ],
+        "current": [
+          8.97718,
+          9.03239
+        ],
+        "c": [
+          4.89824014948681,
+          4.908580012852326
+        ]
+      }
+    },
+    {
+      "model": "ancestor_star_24",
+      "reduction_percent_range": [
+        9.640623592114128,
+        10.619334966277949
+      ],
+      "ada_over_c_range": [
+        2.2754551453484884,
+        2.303943396538613
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          10.631060000000002,
+          10.77398
+        ],
+        "current": [
+          9.62467,
+          9.682360000000001
+        ],
+        "c": [
+          4.1315300040878356,
+          4.264830058673397
+        ]
+      }
+    },
+    {
+      "model": "ancestor_forest_24",
+      "reduction_percent_range": [
+        8.644406414594608,
+        10.104744330119175
+      ],
+      "ada_over_c_range": [
+        2.087221990831449,
+        2.110331249334972
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          8.20177,
+          8.3126
+        ],
+        "current": [
+          7.473445,
+          7.609065
+        ],
+        "c": [
+          3.5095350176561624,
+          3.624860109994188
+        ]
+      }
+    },
+    {
+      "model": "ancestor_branches_24",
+      "reduction_percent_range": [
+        8.17625221456051,
+        9.772836713028843
+      ],
+      "ada_over_c_range": [
+        2.0439629820788765,
+        2.0861075527498416
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          8.377275,
+          8.513545
+        ],
+        "current": [
+          7.651485000000001,
+          7.76386
+        ],
+        "c": [
+          3.6674200964625925,
+          3.793935029534623
+        ]
+      }
+    },
+    {
+      "model": "simple_hinges_6",
+      "reduction_percent_range": [
+        6.693515217647827,
+        7.235770946604192
+      ],
+      "ada_over_c_range": [
+        2.3298857233264902,
+        2.354506616015729
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          1.680925,
+          1.688585
+        ],
+        "current": [
+          1.56074,
+          1.571115
+        ],
+        "c": [
+          0.6674249016214162,
+          0.6714451592415571
+        ]
+      }
+    },
+    {
+      "model": "simple_sliders_6",
+      "reduction_percent_range": [
+        3.0388945249267163,
+        3.6758328399910667
+      ],
+      "ada_over_c_range": [
+        1.5116116429231174,
+        1.5391597588996784
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          0.96186,
+          0.9641000000000001
+        ],
+        "current": [
+          0.92758,
+          0.9305150000000001
+        ],
+        "c": [
+          0.6081200262997299,
+          0.6146699888631701
+        ]
+      }
+    },
+    {
+      "model": "simple_mixed_8",
+      "reduction_percent_range": [
+        7.5898950363495254,
+        8.072402523029753
+      ],
+      "ada_over_c_range": [
+        1.5526434437164096,
+        1.569648876796065
+      ],
+      "median_microseconds_per_step_ranges": {
+        "baseline": [
+          1.35825,
+          1.36144
+        ],
+        "current": [
+          1.25184,
+          1.2577000000000003
+        ],
+        "c": [
+          0.8027898729778826,
+          0.8102948777377605
+        ]
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case": "hinge_motor-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9748386448701007,
+            "ci95": [
+              0.970035043259617,
+              0.9774887246242364
+            ]
+          },
+          "current_over_c": {
+            "median": 1.085146182082983,
+            "ci95": [
+              1.0812698389492537,
+              1.089543524469123
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 505.675,
+              "mad": 2.1299999999999955,
+              "p95": 722.6999999999999,
+              "minimum": 500.13,
+              "maximum": 926.32
+            },
+            "current": {
+              "median": 493.105,
+              "mad": 2.085000000000008,
+              "p95": 639.205,
+              "minimum": 486.28,
+              "maximum": 775.67
+            },
+            "c": {
+              "median": 453.73497414402664,
+              "mad": 1.920125214383006,
+              "p95": 502.28743930347264,
+              "minimum": 447.1800639294088,
+              "maximum": 1421.3501708582044
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9780053610801258,
+            "ci95": [
+              0.9755765813170775,
+              0.9801300183613717
+            ]
+          },
+          "current_over_c": {
+            "median": 1.0895126619144655,
+            "ci95": [
+              1.0831403284964132,
+              1.093680049160665
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 503.985,
+              "mad": 1.6550000000000011,
+              "p95": 597.9075,
+              "minimum": 498.55,
+              "maximum": 776.37
+            },
+            "current": {
+              "median": 493.24,
+              "mad": 2.3000000000000114,
+              "p95": 652.7400000000001,
+              "minimum": 484.71,
+              "maximum": 943.12
+            },
+            "c": {
+              "median": 454.2600072454661,
+              "mad": 2.184970071539283,
+              "p95": 535.4823952075094,
+              "minimum": 448.829960078001,
+              "maximum": 669.6701166220009
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        }
+      ]
+    },
+    {
+      "case": "hinge_motor-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9694681318533187,
+            "ci95": [
+              0.964969098353049,
+              0.9738104166255501
+            ]
+          },
+          "current_over_c": {
+            "median": 1.0782262658494597,
+            "ci95": [
+              1.073644104535027,
+              1.0811929709173915
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 509.29999999999995,
+              "mad": 2.665000000000049,
+              "p95": 662.7525,
+              "minimum": 504.08,
+              "maximum": 1024.03
+            },
+            "current": {
+              "median": 493.05,
+              "mad": 1.9699999999999704,
+              "p95": 646.4475,
+              "minimum": 487.25,
+              "maximum": 745.62
+            },
+            "c": {
+              "median": 457.30004785582423,
+              "mad": 1.809967216104269,
+              "p95": 468.1423888541758,
+              "minimum": 453.3599712885916,
+              "maximum": 775.560038164258
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.971055510452798,
+            "ci95": [
+              0.9673623839649973,
+              0.9741193670110831
+            ]
+          },
+          "current_over_c": {
+            "median": 1.0816026240601584,
+            "ci95": [
+              1.0777146003354312,
+              1.0854303410502515
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 508.46,
+              "mad": 2.184999999999974,
+              "p95": 670.895,
+              "minimum": 503.14,
+              "maximum": 1458.08
+            },
+            "current": {
+              "median": 494.025,
+              "mad": 2.759999999999991,
+              "p95": 640.2825,
+              "minimum": 487.8,
+              "maximum": 911.82
+            },
+            "c": {
+              "median": 457.1898898575455,
+              "mad": 2.0749575924128294,
+              "p95": 538.2474046200514,
+              "minimum": 451.27992052584887,
+              "maximum": 853.8900874555111
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        }
+      ]
+    },
+    {
+      "case": "hinge_motor-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9756103839232886,
+            "ci95": [
+              0.9732056566931618,
+              0.9777821900129058
+            ]
+          },
+          "current_over_c": {
+            "median": 1.0826572935117094,
+            "ci95": [
+              1.0814255693550434,
+              1.0888778858878305
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 505.40999999999997,
+              "mad": 2.0249999999999773,
+              "p95": 538.9175,
+              "minimum": 499.28,
+              "maximum": 871.03
+            },
+            "current": {
+              "median": 493.0,
+              "mad": 1.8600000000000136,
+              "p95": 622.5875,
+              "minimum": 487.35,
+              "maximum": 672.31
+            },
+            "c": {
+              "median": 454.3198156170547,
+              "mad": 1.9198341760784388,
+              "p95": 595.3099753241986,
+              "minimum": 447.06976041197777,
+              "maximum": 772.259954828769
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 5.551115123125783e-17
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9736185457564576,
+            "ci95": [
+              0.9678736343952414,
+              0.9769162561576354
+            ]
+          },
+          "current_over_c": {
+            "median": 1.08205037056849,
+            "ci95": [
+              1.0773921558887254,
+              1.087474122635548
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 506.32500000000005,
+              "mad": 3.300000000000068,
+              "p95": 675.85,
+              "minimum": 499.84,
+              "maximum": 936.31
+            },
+            "current": {
+              "median": 492.17,
+              "mad": 2.344999999999999,
+              "p95": 646.405,
+              "minimum": 475.13,
+              "maximum": 827.16
+            },
+            "c": {
+              "median": 455.0049197860062,
+              "mad": 2.6648922357708216,
+              "p95": 640.3675797628239,
+              "minimum": 449.1402069106698,
+              "maximum": 1319.5400242693722
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 5.551115123125783e-17
+        }
+      ]
+    },
+    {
+      "case": "branched_multijoint-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9527248828684927,
+            "ci95": [
+              0.9458216669922388,
+              0.9575891136540466
+            ]
+          },
+          "current_over_c": {
+            "median": 1.4444281933240708,
+            "ci95": [
+              1.4342658995114648,
+              1.4579406894084717
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1610.79,
+              "mad": 19.549999999999955,
+              "p95": 1886.3975,
+              "minimum": 1585.11,
+              "maximum": 2516.87
+            },
+            "current": {
+              "median": 1534.6599999999999,
+              "mad": 11.829999999999927,
+              "p95": 1811.6100000000001,
+              "minimum": 1510.85,
+              "maximum": 2526.89
+            },
+            "c": {
+              "median": 1060.204958776012,
+              "mad": 6.60496880300343,
+              "p95": 1295.1398821314797,
+              "minimum": 1045.019889716059,
+              "maximum": 1868.5299437493086
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.7763568394002505e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9535255720163114,
+            "ci95": [
+              0.9467937227366591,
+              0.9603235638479864
+            ]
+          },
+          "current_over_c": {
+            "median": 1.449563227217128,
+            "ci95": [
+              1.4358602275310046,
+              1.4627151062600978
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1610.725,
+              "mad": 22.469999999999914,
+              "p95": 2116.3849999999998,
+              "minimum": 1580.96,
+              "maximum": 2568.06
+            },
+            "current": {
+              "median": 1532.295,
+              "mad": 13.469999999999914,
+              "p95": 1875.1425,
+              "minimum": 1508.55,
+              "maximum": 2339.01
+            },
+            "c": {
+              "median": 1057.6500790193677,
+              "mad": 8.520146366208792,
+              "p95": 1262.6800162252039,
+              "minimum": 1038.6400390416384,
+              "maximum": 1403.3497427590191
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.7763568394002505e-15
+        }
+      ]
+    },
+    {
+      "case": "branched_multijoint-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9524563476415742,
+            "ci95": [
+              0.9450383150096643,
+              0.9581377496444886
+            ]
+          },
+          "current_over_c": {
+            "median": 1.4397623096607939,
+            "ci95": [
+              1.4351488911602028,
+              1.4460737603827807
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1607.97,
+              "mad": 16.409999999999968,
+              "p95": 1883.8700000000001,
+              "minimum": 1585.32,
+              "maximum": 3466.1
+            },
+            "current": {
+              "median": 1524.805,
+              "mad": 9.965000000000146,
+              "p95": 1827.985,
+              "minimum": 1505.73,
+              "maximum": 2306.12
+            },
+            "c": {
+              "median": 1057.5950727798045,
+              "mad": 4.905014066025615,
+              "p95": 1247.037507710047,
+              "minimum": 1047.5801536813378,
+              "maximum": 1748.549984768033
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9560830746916674,
+            "ci95": [
+              0.9453466563990461,
+              0.9627060221037143
+            ]
+          },
+          "current_over_c": {
+            "median": 1.441449576092061,
+            "ci95": [
+              1.4317522268375276,
+              1.4578357641589312
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1603.53,
+              "mad": 15.8599999999999,
+              "p95": 1999.6299999999999,
+              "minimum": 1582.34,
+              "maximum": 2615.13
+            },
+            "current": {
+              "median": 1528.78,
+              "mad": 13.149999999999977,
+              "p95": 1730.9975,
+              "minimum": 1504.82,
+              "maximum": 2178.97
+            },
+            "c": {
+              "median": 1058.924972312525,
+              "mad": 6.864866008982062,
+              "p95": 1370.5950550502166,
+              "minimum": 1046.3097714819014,
+              "maximum": 1754.320110194385
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "branched_multijoint-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9558922870132152,
+            "ci95": [
+              0.9497429201521862,
+              0.9916746456544602
+            ]
+          },
+          "current_over_c": {
+            "median": 1.439324031862076,
+            "ci95": [
+              1.4300194501311223,
+              1.4623310018357678
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1604.775,
+              "mad": 17.58000000000004,
+              "p95": 2055.115,
+              "minimum": 1585.64,
+              "maximum": 2421.73
+            },
+            "current": {
+              "median": 1535.675,
+              "mad": 16.779999999999973,
+              "p95": 1971.585,
+              "minimum": 1512.34,
+              "maximum": 2561.73
+            },
+            "c": {
+              "median": 1062.9200551193208,
+              "mad": 8.895003702491522,
+              "p95": 1462.65490911901,
+              "minimum": 1045.1299021951854,
+              "maximum": 1778.070000000298
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9525347853734629,
+            "ci95": [
+              0.9512100092262425,
+              0.9552899693908976
+            ]
+          },
+          "current_over_c": {
+            "median": 1.4528087238824492,
+            "ci95": [
+              1.4408598941226758,
+              1.4621137114947158
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1614.77,
+              "mad": 19.440000000000055,
+              "p95": 1861.5075000000002,
+              "minimum": 1585.41,
+              "maximum": 2692.92
+            },
+            "current": {
+              "median": 1538.9,
+              "mad": 17.780000000000086,
+              "p95": 1709.1175,
+              "minimum": 1507.04,
+              "maximum": 2138.66
+            },
+            "c": {
+              "median": 1061.1049947328866,
+              "mad": 7.40503310225904,
+              "p95": 1253.9000454125926,
+              "minimum": 1043.749798554927,
+              "maximum": 1485.0200386717916
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        }
+      ]
+    },
+    {
+      "case": "chain_12-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9280268017267709,
+            "ci95": [
+              0.9204245963491093,
+              0.934992384477416
+            ]
+          },
+          "current_over_c": {
+            "median": 1.845985102455566,
+            "ci95": [
+              1.8266454777480388,
+              1.8725341734338272
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4286.42,
+              "mad": 121.14499999999998,
+              "p95": 4752.5650000000005,
+              "minimum": 4135.34,
+              "maximum": 5787.14
+            },
+            "current": {
+              "median": 3983.5,
+              "mad": 123.17000000000007,
+              "p95": 4370.9975,
+              "minimum": 3829.86,
+              "maximum": 4987.61
+            },
+            "c": {
+              "median": 2101.2300567235798,
+              "mad": 35.585107980296016,
+              "p95": 2405.3899687714875,
+              "minimum": 2060.739789158106,
+              "maximum": 2550.2199423499405
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.1102230246251565e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9307446370278276,
+            "ci95": [
+              0.9256849148548341,
+              0.9353794966322353
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8478862083508942,
+            "ci95": [
+              1.8093435730968412,
+              1.8912677905442938
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4290.155,
+              "mad": 136.84500000000025,
+              "p95": 4651.3675,
+              "minimum": 4132.7,
+              "maximum": 5042.389999999999
+            },
+            "current": {
+              "median": 3981.045,
+              "mad": 115.3900000000001,
+              "p95": 4360.202499999999,
+              "minimum": 3827.27,
+              "maximum": 5407.89
+            },
+            "c": {
+              "median": 2148.7798949237913,
+              "mad": 75.50508598797023,
+              "p95": 2529.689809307456,
+              "minimum": 2064.4301548600197,
+              "maximum": 3178.810002282262
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.1102230246251565e-15
+        }
+      ]
+    },
+    {
+      "case": "chain_12-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9293939548902534,
+            "ci95": [
+              0.9265191674388211,
+              0.9363369927778884
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8563146830783332,
+            "ci95": [
+              1.832759064058857,
+              1.9035880313465505
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4286.205,
+              "mad": 118.2199999999998,
+              "p95": 4644.175,
+              "minimum": 4127.76,
+              "maximum": 7237.47
+            },
+            "current": {
+              "median": 3980.62,
+              "mad": 107.40000000000009,
+              "p95": 4347.2275,
+              "minimum": 3825.91,
+              "maximum": 4579.74
+            },
+            "c": {
+              "median": 2084.9799329880625,
+              "mad": 21.469895727932453,
+              "p95": 2480.752591509372,
+              "minimum": 2059.880062006414,
+              "maximum": 2831.190067809075
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.1094237467877974e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9304598884494459,
+            "ci95": [
+              0.9212893561927765,
+              0.9406933195843806
+            ]
+          },
+          "current_over_c": {
+            "median": 1.835881710899393,
+            "ci95": [
+              1.803016452782298,
+              1.8712597745909787
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4278.28,
+              "mad": 128.91499999999996,
+              "p95": 4989.455,
+              "minimum": 4130.14,
+              "maximum": 8175.73
+            },
+            "current": {
+              "median": 3972.3199999999997,
+              "mad": 129.1799999999996,
+              "p95": 4381.4,
+              "minimum": 3825.24,
+              "maximum": 5737.49
+            },
+            "c": {
+              "median": 2162.0950428768992,
+              "mad": 86.31512173451483,
+              "p95": 2583.327441243455,
+              "minimum": 2062.410057988018,
+              "maximum": 3178.9200147613883
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.1094237467877974e-15
+        }
+      ]
+    },
+    {
+      "case": "chain_12-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9313063836096189,
+            "ci95": [
+              0.9244786852999543,
+              0.9413318791662356
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8527367595029527,
+            "ci95": [
+              1.8425014310840817,
+              1.8939639073777355
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4295.17,
+              "mad": 105.09000000000015,
+              "p95": 4621.3075,
+              "minimum": 4133.41,
+              "maximum": 7948.79
+            },
+            "current": {
+              "median": 3983.71,
+              "mad": 100.73500000000013,
+              "p95": 4360.2225,
+              "minimum": 3828.58,
+              "maximum": 4941.01
+            },
+            "c": {
+              "median": 2151.755033992231,
+              "mad": 79.22004442662,
+              "p95": 2681.05257418938,
+              "minimum": 2064.360014628619,
+              "maximum": 4202.930140309036
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9238523243796244,
+            "ci95": [
+              0.9122337592869162,
+              0.9271421706298705
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8294648404101252,
+            "ci95": [
+              1.8101627377129408,
+              1.8531489081416668
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 4229.99,
+              "mad": 86.10499999999956,
+              "p95": 4644.56,
+              "minimum": 4134.61,
+              "maximum": 5016.829999999999
+            },
+            "current": {
+              "median": 3885.145,
+              "mad": 51.27999999999997,
+              "p95": 4269.1775,
+              "minimum": 3827.91,
+              "maximum": 4575.3
+            },
+            "c": {
+              "median": 2136.2100960686803,
+              "mad": 53.570111049339175,
+              "p95": 2428.0625075334683,
+              "minimum": 2069.440088234842,
+              "maximum": 3020.659787580371
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        }
+      ]
+    },
+    {
+      "case": "crb_no_damping-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9194342958178743,
+            "ci95": [
+              0.9102149069862866,
+              0.9222782487925208
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8461992443195192,
+            "ci95": [
+              1.8303981314860396,
+              1.8583498977345552
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1936.725,
+              "mad": 6.709999999999923,
+              "p95": 2247.4025,
+              "minimum": 1924.69,
+              "maximum": 2913.29
+            },
+            "current": {
+              "median": 1782.65,
+              "mad": 9.270000000000095,
+              "p95": 2009.46,
+              "minimum": 1767.2,
+              "maximum": 2285.43
+            },
+            "c": {
+              "median": 969.6399501990527,
+              "mad": 7.940107025206089,
+              "p95": 1244.607483386062,
+              "minimum": 943.8602137379348,
+              "maximum": 1562.7199900336564
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9195388910556961,
+            "ci95": [
+              0.9154009489335462,
+              0.9262893851013602
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8512617502945565,
+            "ci95": [
+              1.8315648174891652,
+              1.878006008406539
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1937.915,
+              "mad": 10.174999999999955,
+              "p95": 2163.0475,
+              "minimum": 1920.56,
+              "maximum": 2966.3
+            },
+            "current": {
+              "median": 1784.88,
+              "mad": 12.8900000000001,
+              "p95": 2077.0775,
+              "minimum": 1766.77,
+              "maximum": 2676.79
+            },
+            "c": {
+              "median": 972.5800191517919,
+              "mad": 11.499942047521472,
+              "p95": 1170.667601400055,
+              "minimum": 949.0901720710099,
+              "maximum": 1279.079879168421
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "crb_no_damping-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9179907488095284,
+            "ci95": [
+              0.9149114764259977,
+              0.9215363774583827
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8227564492886863,
+            "ci95": [
+              1.7940403113235668,
+              1.8529291092498048
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1934.435,
+              "mad": 8.414999999999964,
+              "p95": 2224.745,
+              "minimum": 1921.38,
+              "maximum": 2750.91
+            },
+            "current": {
+              "median": 1776.685,
+              "mad": 6.504999999999882,
+              "p95": 2035.635,
+              "minimum": 1766.56,
+              "maximum": 2409.08
+            },
+            "c": {
+              "median": 974.8649608809501,
+              "mad": 11.61490217782557,
+              "p95": 1298.5999637749046,
+              "minimum": 947.3698446527123,
+              "maximum": 1924.0399706177413
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 3.3306690738754696e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9166834715458687,
+            "ci95": [
+              0.9074498585978746,
+              0.9201938827515365
+            ]
+          },
+          "current_over_c": {
+            "median": 1.831554116969158,
+            "ci95": [
+              1.8244140765321524,
+              1.8440594427663544
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1939.1950000000002,
+              "mad": 9.480000000000132,
+              "p95": 2314.115,
+              "minimum": 1925.56,
+              "maximum": 2942.81
+            },
+            "current": {
+              "median": 1780.62,
+              "mad": 7.990000000000009,
+              "p95": 2265.5,
+              "minimum": 1769.23,
+              "maximum": 2609.37
+            },
+            "c": {
+              "median": 972.3099356051534,
+              "mad": 8.255010470747948,
+              "p95": 1203.1674850732088,
+              "minimum": 951.009860727936,
+              "maximum": 1334.8300126381218
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 3.3306690738754696e-16
+        }
+      ]
+    },
+    {
+      "case": "crb_no_damping-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9177469445072177,
+            "ci95": [
+              0.9096981364624873,
+              0.9239138318706027
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8395267060174327,
+            "ci95": [
+              1.8201839659239494,
+              1.8948959866229267
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1936.145,
+              "mad": 6.875,
+              "p95": 2436.42,
+              "minimum": 1923.4,
+              "maximum": 2661.4
+            },
+            "current": {
+              "median": 1784.0349999999999,
+              "mad": 14.8599999999999,
+              "p95": 2281.695,
+              "minimum": 1766.35,
+              "maximum": 2684.84
+            },
+            "c": {
+              "median": 975.1849574968219,
+              "mad": 10.709918569773436,
+              "p95": 1200.7876648567617,
+              "minimum": 947.6899867877364,
+              "maximum": 1607.149897608906
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 8.881784197001252e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9197731698102404,
+            "ci95": [
+              0.9166635323970644,
+              0.9379009487823613
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8393135005877874,
+            "ci95": [
+              1.8224729596114322,
+              1.881734287154512
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1936.5900000000001,
+              "mad": 6.290000000000191,
+              "p95": 2120.6349999999998,
+              "minimum": 1921.41,
+              "maximum": 2953.04
+            },
+            "current": {
+              "median": 1777.905,
+              "mad": 7.980000000000018,
+              "p95": 2215.8175,
+              "minimum": 1765.28,
+              "maximum": 2640.8
+            },
+            "c": {
+              "median": 974.7050353325903,
+              "mad": 8.624920155853033,
+              "p95": 1280.3000572603196,
+              "minimum": 953.9999882690609,
+              "maximum": 1712.139928713441
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 8.881784197001252e-16
+        }
+      ]
+    },
+    {
+      "case": "crb_chain_24-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9307172025910179,
+            "ci95": [
+              0.9221691546769953,
+              0.9378695668407269
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8397946006414827,
+            "ci95": [
+              1.8175642522328859,
+              1.8693579041042392
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9617.84,
+              "mad": 177.51999999999953,
+              "p95": 10163.772500000001,
+              "minimum": 9292.59,
+              "maximum": 10918.49
+            },
+            "current": {
+              "median": 8977.18,
+              "mad": 163.45499999999993,
+              "p95": 9797.0025,
+              "minimum": 8682.67,
+              "maximum": 13613.99
+            },
+            "c": {
+              "median": 4901.804932160303,
+              "mad": 156.03989595547318,
+              "p95": 5434.28490345832,
+              "minimum": 4695.410025306046,
+              "maximum": 7046.630198601633
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 9.992007221626409e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9256504737533902,
+            "ci95": [
+              0.9196639646798019,
+              0.9352398953923539
+            ]
+          },
+          "current_over_c": {
+            "median": 1.833122004433274,
+            "ci95": [
+              1.8127136428073094,
+              1.8564748161654865
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9658.115,
+              "mad": 179.07499999999982,
+              "p95": 10308.32,
+              "minimum": 9301.51,
+              "maximum": 11959.13
+            },
+            "current": {
+              "median": 8990.005000000001,
+              "mad": 125.875,
+              "p95": 9553.337500000001,
+              "minimum": 8686.92,
+              "maximum": 9860.820000000002
+            },
+            "c": {
+              "median": 4899.159976048395,
+              "mad": 136.21494872495532,
+              "p95": 5452.190016512759,
+              "minimum": 4721.100267488509,
+              "maximum": 6606.819806620479
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 9.992007221626409e-15
+        }
+      ]
+    },
+    {
+      "case": "crb_chain_24-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9355006315451909,
+            "ci95": [
+              0.9297518065598251,
+              0.9450764557424001
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8474363933675408,
+            "ci95": [
+              1.8152554525529034,
+              1.867370378242803
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9620.08,
+              "mad": 150.19500000000062,
+              "p95": 10189.782500000001,
+              "minimum": 9298.24,
+              "maximum": 10550.13
+            },
+            "current": {
+              "median": 9010.69,
+              "mad": 136.59500000000025,
+              "p95": 9798.035,
+              "minimum": 8688.42,
+              "maximum": 12256.91
+            },
+            "c": {
+              "median": 4908.580012852326,
+              "mad": 111.84005415998399,
+              "p95": 5458.177474793047,
+              "minimum": 4719.819989986718,
+              "maximum": 7656.119996681809
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 3.8913317013111737e-14
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9350481282059688,
+            "ci95": [
+              0.9220998330613702,
+              0.9413157115574975
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8411281971159446,
+            "ci95": [
+              1.8040558950850225,
+              1.8472032180982227
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9642.615,
+              "mad": 186.84500000000025,
+              "p95": 10409.0675,
+              "minimum": 9286.71,
+              "maximum": 14460.13
+            },
+            "current": {
+              "median": 9010.615,
+              "mad": 156.28499999999985,
+              "p95": 9598.9525,
+              "minimum": 8690.0,
+              "maximum": 11551.83
+            },
+            "c": {
+              "median": 4905.060050077736,
+              "mad": 113.5347702074796,
+              "p95": 5479.352621478029,
+              "minimum": 4724.500176962465,
+              "maximum": 5882.3899598792195
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 3.8913317013111737e-14
+        }
+      ]
+    },
+    {
+      "case": "crb_chain_24-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9340070933339881,
+            "ci95": [
+              0.9302641116563037,
+              0.9378682861612011
+            ]
+          },
+          "current_over_c": {
+            "median": 1.8467372579591974,
+            "ci95": [
+              1.823930300816062,
+              1.8616140727190678
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9634.57,
+              "mad": 128.29000000000087,
+              "p95": 10094.3475,
+              "minimum": 9310.16,
+              "maximum": 10264.460000000001
+            },
+            "current": {
+              "median": 8977.925,
+              "mad": 127.32999999999993,
+              "p95": 9615.3125,
+              "minimum": 8689.81,
+              "maximum": 14580.76
+            },
+            "c": {
+              "median": 4898.24014948681,
+              "mad": 135.69995644502342,
+              "p95": 5392.864914028905,
+              "minimum": 4715.769900940359,
+              "maximum": 9801.909909583628
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.4210854715202004e-14
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9300145302406666,
+            "ci95": [
+              0.9248116969200165,
+              0.9476750951825331
+            ]
+          },
+          "current_over_c": {
+            "median": 1.854804845708538,
+            "ci95": [
+              1.8404515301781854,
+              1.8724490125681157
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 9641.07,
+              "mad": 148.39999999999964,
+              "p95": 10341.42,
+              "minimum": 9291.39,
+              "maximum": 15092.62
+            },
+            "current": {
+              "median": 9032.39,
+              "mad": 156.59999999999854,
+              "p95": 9644.54,
+              "minimum": 8688.2,
+              "maximum": 14960.89
+            },
+            "c": {
+              "median": 4900.809872196987,
+              "mad": 126.09496479853988,
+              "p95": 5429.112497949973,
+              "minimum": 4706.8201820366085,
+              "maximum": 9709.70984781161
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.4210854715202004e-14
+        }
+      ]
+    },
+    {
+      "case": "ancestor_star_24-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.8961850077916119,
+            "ci95": [
+              0.8865670289482032,
+              0.903233653604616
+            ]
+          },
+          "current_over_c": {
+            "median": 2.2905131228281634,
+            "ci95": [
+              2.2708254815746653,
+              2.298882099280375
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10758.869999999999,
+              "mad": 119.02500000000146,
+              "p95": 11424.1725,
+              "minimum": 10344.91,
+              "maximum": 14409.63
+            },
+            "current": {
+              "median": 9682.36,
+              "mad": 157.92000000000007,
+              "p95": 10292.462500000001,
+              "minimum": 9354.27,
+              "maximum": 10429.19
+            },
+            "c": {
+              "median": 4253.529768902808,
+              "mad": 130.1550946664065,
+              "p95": 4639.7123514907435,
+              "minimum": 4090.180154889822,
+              "maximum": 5185.240006539971
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.9984014443252818e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.8938066503372205,
+            "ci95": [
+              0.8849925801368195,
+              0.900243586240025
+            ]
+          },
+          "current_over_c": {
+            "median": 2.2754551453484884,
+            "ci95": [
+              2.260011214463389,
+              2.322528082591095
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10745.705,
+              "mad": 197.44500000000062,
+              "p95": 11311.39,
+              "minimum": 10336.12,
+              "maximum": 13504.49
+            },
+            "current": {
+              "median": 9662.105,
+              "mad": 146.7450000000008,
+              "p95": 10310.2375,
+              "minimum": 9299.06,
+              "maximum": 15538.32
+            },
+            "c": {
+              "median": 4250.379861332476,
+              "mad": 131.09500287100673,
+              "p95": 4741.860029753298,
+              "minimum": 4084.570100530982,
+              "maximum": 5244.740168564022
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.9984014443252818e-15
+        }
+      ]
+    },
+    {
+      "case": "ancestor_star_24-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.90025527964142,
+            "ci95": [
+              0.892554682193826,
+              0.9087518726489565
+            ]
+          },
+          "current_over_c": {
+            "median": 2.2813257051542184,
+            "ci95": [
+              2.231595696655267,
+              2.295509144645201
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10742.779999999999,
+              "mad": 177.3100000000013,
+              "p95": 11323.16,
+              "minimum": 10321.47,
+              "maximum": 15294.66
+            },
+            "current": {
+              "median": 9669.085,
+              "mad": 142.15000000000146,
+              "p95": 10238.835,
+              "minimum": 9374.41,
+              "maximum": 10449.019999999999
+            },
+            "c": {
+              "median": 4264.830058673397,
+              "mad": 154.87501514144242,
+              "p95": 5972.442522761412,
+              "minimum": 4090.9400559030473,
+              "maximum": 8248.189988080412
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.4432899320127035e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9035937640788587,
+            "ci95": [
+              0.8995178419056038,
+              0.9093124870239875
+            ]
+          },
+          "current_over_c": {
+            "median": 2.277106272350176,
+            "ci95": [
+              2.2597811732732027,
+              2.3027451765134006
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10631.060000000001,
+              "mad": 164.7500000000009,
+              "p95": 11240.2975,
+              "minimum": 10334.840000000002,
+              "maximum": 12373.18
+            },
+            "current": {
+              "median": 9624.67,
+              "mad": 132.6949999999997,
+              "p95": 10268.9,
+              "minimum": 9263.38,
+              "maximum": 13402.37
+            },
+            "c": {
+              "median": 4258.845001459122,
+              "mad": 113.41515346430242,
+              "p95": 4780.415038112551,
+              "minimum": 4095.5402073450387,
+              "maximum": 5184.569745324552
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.4432899320127035e-15
+        }
+      ]
+    },
+    {
+      "case": "ancestor_star_24-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.8979219052641494,
+            "ci95": [
+              0.8949218347150014,
+              0.9056731881032862
+            ]
+          },
+          "current_over_c": {
+            "median": 2.281723615370616,
+            "ci95": [
+              2.265979119085861,
+              2.298103061928547
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10714.445,
+              "mad": 161.10499999999956,
+              "p95": 11442.2825,
+              "minimum": 10326.9,
+              "maximum": 13888.69
+            },
+            "current": {
+              "median": 9661.74,
+              "mad": 122.10999999999967,
+              "p95": 10210.0375,
+              "minimum": 9262.85,
+              "maximum": 10352.269999999999
+            },
+            "c": {
+              "median": 4249.220073688775,
+              "mad": 93.91995263285935,
+              "p95": 4783.452677656896,
+              "minimum": 4082.6198528520763,
+              "maximum": 5661.859759129584
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.1102230246251565e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.8988077415220348,
+            "ci95": [
+              0.8915191055723112,
+              0.9048330900316146
+            ]
+          },
+          "current_over_c": {
+            "median": 2.303943396538613,
+            "ci95": [
+              2.283562286746703,
+              2.3303125603220782
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 10773.98,
+              "mad": 203.51499999999942,
+              "p95": 11313.9225,
+              "minimum": 10341.56,
+              "maximum": 13305.56
+            },
+            "current": {
+              "median": 9677.28,
+              "mad": 157.07999999999993,
+              "p95": 10329.330000000002,
+              "minimum": 9247.62,
+              "maximum": 11405.45
+            },
+            "c": {
+              "median": 4131.530004087836,
+              "mad": 40.95010808669031,
+              "p95": 5201.577369007282,
+              "minimum": 4075.299948453903,
+              "maximum": 6516.409921459854
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.1102230246251565e-15
+        }
+      ]
+    },
+    {
+      "case": "ancestor_forest_24-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.908895966509403,
+            "ci95": [
+              0.9011788594435283,
+              0.9262370032776048
+            ]
+          },
+          "current_over_c": {
+            "median": 2.1006395052803883,
+            "ci95": [
+              2.086756848531183,
+              2.1237435152066455
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8294.39,
+              "mad": 169.3799999999992,
+              "p95": 10701.35,
+              "minimum": 7977.92,
+              "maximum": 13718.04
+            },
+            "current": {
+              "median": 7582.655000000001,
+              "mad": 149.22500000000082,
+              "p95": 8858.2775,
+              "minimum": 7276.47,
+              "maximum": 11056.95
+            },
+            "c": {
+              "median": 3624.860109994188,
+              "mad": 126.47506082430482,
+              "p95": 4143.274927628227,
+              "minimum": 3471.320087555796,
+              "maximum": 5009.000014979392
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9123257915335315,
+            "ci95": [
+              0.9011439219046865,
+              0.9190633300974814
+            ]
+          },
+          "current_over_c": {
+            "median": 2.1049194703027494,
+            "ci95": [
+              2.088256392330037,
+              2.12442829755543
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8201.77,
+              "mad": 194.3100000000004,
+              "p95": 11402.4675,
+              "minimum": 7984.36,
+              "maximum": 12560.4
+            },
+            "current": {
+              "median": 7473.445,
+              "mad": 173.2199999999998,
+              "p95": 8968.01,
+              "minimum": 7278.4,
+              "maximum": 11036.65
+            },
+            "c": {
+              "median": 3509.5350176561624,
+              "mad": 36.844867281615734,
+              "p95": 5214.755001361482,
+              "minimum": 3467.6300128921866,
+              "maximum": 5333.349981810898
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "ancestor_forest_24-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9135559358540539,
+            "ci95": [
+              0.906414706811166,
+              0.9226789785598634
+            ]
+          },
+          "current_over_c": {
+            "median": 2.0899522616596933,
+            "ci95": [
+              2.0731785223305566,
+              2.1318847079659857
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8270.09,
+              "mad": 129.36500000000024,
+              "p95": 8896.8925,
+              "minimum": 7985.17,
+              "maximum": 11209.44
+            },
+            "current": {
+              "median": 7485.955,
+              "mad": 114.71000000000004,
+              "p95": 8079.68,
+              "minimum": 7278.5,
+              "maximum": 8709.73
+            },
+            "c": {
+              "median": 3617.725014919415,
+              "mad": 117.26486263796687,
+              "p95": 4039.4601819571108,
+              "minimum": 3469.079965725541,
+              "maximum": 4139.629891142249
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9110982882465383,
+            "ci95": [
+              0.902599400326207,
+              0.921069783791191
+            ]
+          },
+          "current_over_c": {
+            "median": 2.110331249334972,
+            "ci95": [
+              2.092057965973841,
+              2.123607664090394
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8300.224999999999,
+              "mad": 141.5349999999985,
+              "p95": 8908.555,
+              "minimum": 7986.92,
+              "maximum": 9339.52
+            },
+            "current": {
+              "median": 7609.0650000000005,
+              "mad": 154.04500000000007,
+              "p95": 8033.0225,
+              "minimum": 7281.06,
+              "maximum": 8174.78
+            },
+            "c": {
+              "median": 3566.410014173016,
+              "mad": 74.75988240912557,
+              "p95": 3914.652479579672,
+              "minimum": 3467.949863988906,
+              "maximum": 4281.160072423518
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "ancestor_forest_24-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.8989525566988082,
+            "ci95": [
+              0.894760409556314,
+              0.9066633388555706
+            ]
+          },
+          "current_over_c": {
+            "median": 2.09517076877097,
+            "ci95": [
+              2.0794169319246736,
+              2.1249994392367286
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8312.6,
+              "mad": 168.51500000000033,
+              "p95": 10285.075,
+              "minimum": 7972.59,
+              "maximum": 11835.71
+            },
+            "current": {
+              "median": 7509.08,
+              "mad": 129.35999999999967,
+              "p95": 8059.432500000001,
+              "minimum": 7281.16,
+              "maximum": 8271.9
+            },
+            "c": {
+              "median": 3557.044983608648,
+              "mad": 79.43497621454298,
+              "p95": 4027.420000056736,
+              "minimum": 3463.6500640772283,
+              "maximum": 4139.840020798147
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 8.881784197001252e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9038095764556502,
+            "ci95": [
+              0.8987353866399864,
+              0.9124002091304508
+            ]
+          },
+          "current_over_c": {
+            "median": 2.087221990831449,
+            "ci95": [
+              2.0724182945372944,
+              2.1071012362569332
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8299.325,
+              "mad": 132.7500000000009,
+              "p95": 8771.44,
+              "minimum": 7976.26,
+              "maximum": 8948.36
+            },
+            "current": {
+              "median": 7476.424999999999,
+              "mad": 101.86500000000069,
+              "p95": 8141.135,
+              "minimum": 7259.12,
+              "maximum": 8589.05
+            },
+            "c": {
+              "median": 3612.8399369772524,
+              "mad": 118.90006135217845,
+              "p95": 4083.485036971979,
+              "minimum": 3466.990019660443,
+              "maximum": 4710.550128947943
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 8.881784197001252e-16
+        }
+      ]
+    },
+    {
+      "case": "ancestor_branches_24-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9089795259494067,
+            "ci95": [
+              0.9057807398400209,
+              0.9290905537372559
+            ]
+          },
+          "current_over_c": {
+            "median": 2.0442382525895826,
+            "ci95": [
+              2.0362169008484647,
+              2.0825590429108285
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8482.134999999998,
+              "mad": 140.54999999999836,
+              "p95": 9105.7125,
+              "minimum": 8166.62,
+              "maximum": 12266.51
+            },
+            "current": {
+              "median": 7721.28,
+              "mad": 90.7849999999994,
+              "p95": 8304.48,
+              "minimum": 7481.38,
+              "maximum": 10948.69
+            },
+            "c": {
+              "median": 3782.614949159324,
+              "mad": 125.4149537999183,
+              "p95": 4249.1150088608265,
+              "minimum": 3612.2900201007724,
+              "maximum": 4744.429897982627
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.911285324796443,
+            "ci95": [
+              0.9048328775719849,
+              0.9143754729000936
+            ]
+          },
+          "current_over_c": {
+            "median": 2.0439629820788765,
+            "ci95": [
+              2.028346702591191,
+              2.057034820575784
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8513.545,
+              "mad": 162.30000000000018,
+              "p95": 9136.244999999999,
+              "minimum": 8171.9,
+              "maximum": 13308.76
+            },
+            "current": {
+              "median": 7763.860000000001,
+              "mad": 124.76500000000033,
+              "p95": 8408.035,
+              "minimum": 7454.86,
+              "maximum": 8505.77
+            },
+            "c": {
+              "median": 3793.935029534623,
+              "mad": 137.8600427415222,
+              "p95": 4409.410030348226,
+              "minimum": 3615.229798015207,
+              "maximum": 5407.140124589205
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "ancestor_branches_24-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9022716328697116,
+            "ci95": [
+              0.8988032394312528,
+              0.9171785356624612
+            ]
+          },
+          "current_over_c": {
+            "median": 2.0507849067986506,
+            "ci95": [
+              2.0028894404508417,
+              2.0864058002373946
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8487.835,
+              "mad": 156.10499999999865,
+              "p95": 9058.3825,
+              "minimum": 8166.94,
+              "maximum": 14681.76
+            },
+            "current": {
+              "median": 7651.485000000001,
+              "mad": 144.53999999999996,
+              "p95": 8331.8575,
+              "minimum": 7446.21,
+              "maximum": 8510.69
+            },
+            "c": {
+              "median": 3781.5500400029123,
+              "mad": 148.52994354441762,
+              "p95": 5401.840098784305,
+              "minimum": 3605.7899706065655,
+              "maximum": 6460.47992631793
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9076599689283539,
+            "ci95": [
+              0.9036471206406848,
+              0.919832115716262
+            ]
+          },
+          "current_over_c": {
+            "median": 2.064385441160793,
+            "ci95": [
+              2.0353371683732813,
+              2.0841687244239098
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8377.275,
+              "mad": 184.61000000000058,
+              "p95": 9020.5725,
+              "minimum": 8149.0,
+              "maximum": 9627.18
+            },
+            "current": {
+              "median": 7664.4400000000005,
+              "mad": 128.85999999999967,
+              "p95": 8149.1625,
+              "minimum": 7456.14,
+              "maximum": 13500.13
+            },
+            "c": {
+              "median": 3667.4200964625925,
+              "mad": 53.73003659769893,
+              "p95": 4246.622629580088,
+              "minimum": 3610.1197474636137,
+              "maximum": 4669.229965656996
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 6.661338147750939e-16
+        }
+      ]
+    },
+    {
+      "case": "ancestor_branches_24-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9182374778543949,
+            "ci95": [
+              0.9078269442672389,
+              0.9254295040625268
+            ]
+          },
+          "current_over_c": {
+            "median": 2.0861075527498416,
+            "ci95": [
+              2.062821868597951,
+              2.1155597000988444
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8389.695,
+              "mad": 163.23999999999978,
+              "p95": 8957.175,
+              "minimum": 8179.63,
+              "maximum": 12472.26
+            },
+            "current": {
+              "median": 7716.219999999999,
+              "mad": 197.4449999999997,
+              "p95": 8615.675,
+              "minimum": 7481.8,
+              "maximum": 10437.93
+            },
+            "c": {
+              "median": 3677.234926726669,
+              "mad": 52.424875320866704,
+              "p95": 4178.197486908175,
+              "minimum": 3615.0601226836443,
+              "maximum": 5779.229977633804
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9079442577332695,
+            "ci95": [
+              0.9024804019728457,
+              0.9230788552222783
+            ]
+          },
+          "current_over_c": {
+            "median": 2.078182944420509,
+            "ci95": [
+              2.030036360774898,
+              2.1121045596827446
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 8504.115,
+              "mad": 152.20499999999993,
+              "p95": 9119.1625,
+              "minimum": 8170.28,
+              "maximum": 10777.18
+            },
+            "current": {
+              "median": 7752.635,
+              "mad": 138.9699999999998,
+              "p95": 8623.765,
+              "minimum": 7462.36,
+              "maximum": 9490.12
+            },
+            "c": {
+              "median": 3768.525057239458,
+              "mad": 122.36516340635717,
+              "p95": 4305.257607484236,
+              "minimum": 3611.049905885011,
+              "maximum": 5872.150068171322
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 1.3322676295501878e-15
+        }
+      ]
+    },
+    {
+      "case": "simple_hinges_6-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9276422905339581,
+            "ci95": [
+              0.9245383553012319,
+              0.9307369500295065
+            ]
+          },
+          "current_over_c": {
+            "median": 2.3481401648368756,
+            "ci95": [
+              2.331584198643577,
+              2.3699229732402625
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1687.9250000000002,
+              "mad": 9.96500000000026,
+              "p95": 2241.66,
+              "minimum": 1672.68,
+              "maximum": 2426.77
+            },
+            "current": {
+              "median": 1568.365,
+              "mad": 7.720000000000027,
+              "p95": 2085.69,
+              "minimum": 1555.37,
+              "maximum": 2202.04
+            },
+            "c": {
+              "median": 670.0099038425833,
+              "mad": 6.125192157924175,
+              "p95": 976.0325337992981,
+              "minimum": 653.9199966937304,
+              "maximum": 1217.4900621175766
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9293076792196626,
+            "ci95": [
+              0.925286586871599,
+              0.9305599961752568
+            ]
+          },
+          "current_over_c": {
+            "median": 2.3298857233264902,
+            "ci95": [
+              2.314350407880822,
+              2.3623892788243004
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1680.925,
+              "mad": 6.114999999999895,
+              "p95": 1929.225,
+              "minimum": 1666.08,
+              "maximum": 2389.1
+            },
+            "current": {
+              "median": 1560.74,
+              "mad": 5.375,
+              "p95": 1777.7325,
+              "minimum": 1551.91,
+              "maximum": 2981.24
+            },
+            "c": {
+              "median": 668.540014885366,
+              "mad": 6.3801417127251625,
+              "p95": 843.4926712652668,
+              "minimum": 653.2200495712459,
+              "maximum": 1378.6798808723688
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_hinges_6-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.928394782491967,
+            "ci95": [
+              0.9193574813608143,
+              0.9330037559940024
+            ]
+          },
+          "current_over_c": {
+            "median": 2.341789756295982,
+            "ci95": [
+              2.326425565010818,
+              2.359314384322642
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1688.585,
+              "mad": 8.404999999999973,
+              "p95": 2022.9950000000001,
+              "minimum": 1677.64,
+              "maximum": 2643.55
+            },
+            "current": {
+              "median": 1569.84,
+              "mad": 9.194999999999936,
+              "p95": 1777.585,
+              "minimum": 1553.53,
+              "maximum": 1997.57
+            },
+            "c": {
+              "median": 671.4451592415571,
+              "mad": 4.580069798976183,
+              "p95": 867.4075070302933,
+              "minimum": 660.1199856959283,
+              "maximum": 1398.0999938212335
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9293615570110955,
+            "ci95": [
+              0.9270439353933253,
+              0.9334402613796687
+            ]
+          },
+          "current_over_c": {
+            "median": 2.3346849814195347,
+            "ci95": [
+              2.3264632364385154,
+              2.3502445941764702
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1685.925,
+              "mad": 5.904999999999973,
+              "p95": 1946.2525,
+              "minimum": 1668.1,
+              "maximum": 2498.38
+            },
+            "current": {
+              "median": 1571.115,
+              "mad": 10.055000000000064,
+              "p95": 1826.5175,
+              "minimum": 1553.4,
+              "maximum": 2361.12
+            },
+            "c": {
+              "median": 670.9850276820362,
+              "mad": 4.530011210590601,
+              "p95": 1008.3150846185163,
+              "minimum": 659.2899444513023,
+              "maximum": 1857.6098955236375
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_hinges_6-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9307419929638354,
+            "ci95": [
+              0.9271731779947561,
+              0.9336143226493051
+            ]
+          },
+          "current_over_c": {
+            "median": 2.347428681871696,
+            "ci95": [
+              2.335429396639651,
+              2.374662038035981
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1683.865,
+              "mad": 7.4500000000000455,
+              "p95": 2143.6949999999997,
+              "minimum": 1666.68,
+              "maximum": 2442.39
+            },
+            "current": {
+              "median": 1564.975,
+              "mad": 6.379999999999882,
+              "p95": 2007.7725,
+              "minimum": 1555.67,
+              "maximum": 2613.21
+            },
+            "c": {
+              "median": 668.3649553451687,
+              "mad": 4.469911800697446,
+              "p95": 887.8849621396512,
+              "minimum": 652.9799429699779,
+              "maximum": 1044.129894580692
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9330648478235217,
+            "ci95": [
+              0.927993640718456,
+              0.9381607504904923
+            ]
+          },
+          "current_over_c": {
+            "median": 2.354506616015729,
+            "ci95": [
+              2.347474904429533,
+              2.3708669714750674
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1682.895,
+              "mad": 5.3250000000000455,
+              "p95": 2044.9375,
+              "minimum": 1667.46,
+              "maximum": 2638.73
+            },
+            "current": {
+              "median": 1567.23,
+              "mad": 8.299999999999955,
+              "p95": 1882.805,
+              "minimum": 1554.15,
+              "maximum": 2124.16
+            },
+            "c": {
+              "median": 667.4249016214162,
+              "mad": 4.205066943541169,
+              "p95": 845.837639644742,
+              "minimum": 650.9898230433464,
+              "maximum": 994.2497126758099
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_sliders_6-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9696110547507328,
+            "ci95": [
+              0.9621051320507964,
+              0.9742175810147641
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5391597588996784,
+            "ci95": [
+              1.524482183247482,
+              1.5589827206050098
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 963.355,
+              "mad": 6.710000000000036,
+              "p95": 1132.8725,
+              "minimum": 941.1,
+              "maximum": 1663.37
+            },
+            "current": {
+              "median": 929.93,
+              "mad": 4.099999999999966,
+              "p95": 1168.69,
+              "minimum": 919.39,
+              "maximum": 1650.4
+            },
+            "c": {
+              "median": 608.12002629973,
+              "mad": 7.985072443261743,
+              "p95": 811.1198985716328,
+              "minimum": 593.2699423283339,
+              "maximum": 984.419893939048
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9632416716000893,
+            "ci95": [
+              0.9566209455019583,
+              0.9645685435615652
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5116116429231174,
+            "ci95": [
+              1.4995925556699812,
+              1.5275285843711295
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 962.965,
+              "mad": 8.94500000000005,
+              "p95": 1143.365,
+              "minimum": 932.0,
+              "maximum": 1952.84
+            },
+            "current": {
+              "median": 928.06,
+              "mad": 3.349999999999966,
+              "p95": 1075.3249999999998,
+              "minimum": 913.69,
+              "maximum": 1400.39
+            },
+            "c": {
+              "median": 613.475131103769,
+              "mad": 7.23011908121407,
+              "p95": 777.6026905048639,
+              "minimum": 590.1200347580016,
+              "maximum": 1307.9200289212167
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_sliders_6-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9651817770317999,
+            "ci95": [
+              0.9628234590929234,
+              0.9768087989991658
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5191190759097963,
+            "ci95": [
+              1.5163306090973496,
+              1.534304854389851
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 964.1,
+              "mad": 5.374999999999943,
+              "p95": 979.635,
+              "minimum": 943.98,
+              "maximum": 1152.06
+            },
+            "current": {
+              "median": 930.5150000000001,
+              "mad": 5.220000000000084,
+              "p95": 1133.9950000000001,
+              "minimum": 916.84,
+              "maximum": 1791.52
+            },
+            "c": {
+              "median": 614.6699888631701,
+              "mad": 5.220063030719757,
+              "p95": 781.2625699443743,
+              "minimum": 595.8299152553082,
+              "maximum": 1100.539811886847
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9682364884387166,
+            "ci95": [
+              0.9610170284188044,
+              0.97537160340098
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5211419658376213,
+            "ci95": [
+              1.507307857816712,
+              1.5365018122687761
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 962.11,
+              "mad": 7.605000000000018,
+              "p95": 1126.185,
+              "minimum": 932.42,
+              "maximum": 1261.53
+            },
+            "current": {
+              "median": 927.5799999999999,
+              "mad": 3.509999999999934,
+              "p95": 1210.8075,
+              "minimum": 910.62,
+              "maximum": 1615.96
+            },
+            "c": {
+              "median": 612.9950634203851,
+              "mad": 6.27493136562407,
+              "p95": 886.5375275490806,
+              "minimum": 591.5100337006152,
+              "maximum": 1455.0797641277313
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_sliders_6-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9657745299539151,
+            "ci95": [
+              0.9613429551047591,
+              0.9687772057030055
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5371583108033964,
+            "ci95": [
+              1.5215938234253454,
+              1.5485126064342642
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 961.86,
+              "mad": 5.535000000000025,
+              "p95": 1126.94,
+              "minimum": 944.3,
+              "maximum": 1514.37
+            },
+            "current": {
+              "median": 928.23,
+              "mad": 2.8249999999999886,
+              "p95": 1094.0825,
+              "minimum": 916.1,
+              "maximum": 1980.08
+            },
+            "c": {
+              "median": 609.874987276271,
+              "mad": 7.7199365478008986,
+              "p95": 796.959939179942,
+              "minimum": 596.1500573903322,
+              "maximum": 1465.0900266133249
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9666728910186997,
+            "ci95": [
+              0.955334885349925,
+              0.9710619995615455
+            ]
+          },
+          "current_over_c": {
+            "median": 1.518467132872755,
+            "ci95": [
+              1.5157879701073242,
+              1.5311705253057408
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 962.5350000000001,
+              "mad": 8.995000000000005,
+              "p95": 1388.7175000000002,
+              "minimum": 942.0,
+              "maximum": 1997.32
+            },
+            "current": {
+              "median": 927.79,
+              "mad": 4.994999999999948,
+              "p95": 1206.4425,
+              "minimum": 913.27,
+              "maximum": 1346.34
+            },
+            "c": {
+              "median": 610.6551154516637,
+              "mad": 5.695037543773651,
+              "p95": 970.7601566333324,
+              "minimum": 594.4797885604203,
+              "maximum": 1202.2699229419231
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 0.0
+        }
+      ]
+    },
+    {
+      "case": "simple_mixed_8-0",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9221124475873107,
+            "ci95": [
+              0.9202181029873812,
+              0.9293806101805245
+            ]
+          },
+          "current_over_c": {
+            "median": 1.569648876796065,
+            "ci95": [
+              1.5563059485273287,
+              1.5825251272299576
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1359.56,
+              "mad": 7.610000000000014,
+              "p95": 1540.125,
+              "minimum": 1346.41,
+              "maximum": 2072.52
+            },
+            "current": {
+              "median": 1257.595,
+              "mad": 5.534999999999968,
+              "p95": 1457.665,
+              "minimum": 1244.23,
+              "maximum": 2958.7
+            },
+            "c": {
+              "median": 804.7648589126766,
+              "mad": 8.350034477189183,
+              "p95": 970.0899681774899,
+              "minimum": 787.419849075377,
+              "maximum": 1734.6898675896227
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9208750114753532,
+            "ci95": [
+              0.9167092110187424,
+              0.9285667017154287
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5689328750146765,
+            "ci95": [
+              1.5599274581350693,
+              1.5800197097377466
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1361.44,
+              "mad": 6.914999999999964,
+              "p95": 1669.9975,
+              "minimum": 1348.47,
+              "maximum": 2114.58
+            },
+            "current": {
+              "median": 1255.46,
+              "mad": 8.615000000000123,
+              "p95": 1561.7250000000001,
+              "minimum": 1240.2499999999998,
+              "maximum": 2107.02
+            },
+            "c": {
+              "median": 803.0900789890438,
+              "mad": 6.705085979774594,
+              "p95": 976.0975808603689,
+              "minimum": 785.5801959522069,
+              "maximum": 1018.7202133238316
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        }
+      ]
+    },
+    {
+      "case": "simple_mixed_8-1",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9241010496365047,
+            "ci95": [
+              0.9207570270609147,
+              0.9300611729243318
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5596133912844952,
+            "ci95": [
+              1.5418218344378962,
+              1.5892484695746334
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1359.825,
+              "mad": 5.2700000000000955,
+              "p95": 1540.4724999999999,
+              "minimum": 1346.52,
+              "maximum": 1867.52
+            },
+            "current": {
+              "median": 1257.7000000000003,
+              "mad": 8.41000000000031,
+              "p95": 1550.7925,
+              "minimum": 1243.49,
+              "maximum": 2131.16
+            },
+            "c": {
+              "median": 810.2948777377605,
+              "mad": 9.840005077421665,
+              "p95": 999.2449486162513,
+              "minimum": 789.4399459473789,
+              "maximum": 1717.9801943711936
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9192759747697025,
+            "ci95": [
+              0.9109312628053658,
+              0.9250130575192921
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5526434437164096,
+            "ci95": [
+              1.5426459550963365,
+              1.5633526565374043
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1361.3400000000001,
+              "mad": 10.480000000000132,
+              "p95": 1685.87,
+              "minimum": 1342.19,
+              "maximum": 2653.73
+            },
+            "current": {
+              "median": 1253.9800000000002,
+              "mad": 6.385000000000105,
+              "p95": 1468.2450000000001,
+              "minimum": 1242.1599999999999,
+              "maximum": 1974.87
+            },
+            "c": {
+              "median": 809.0450137387961,
+              "mad": 6.385089363902807,
+              "p95": 1113.2325016660616,
+              "minimum": 793.4600580483675,
+              "maximum": 1296.2199980393052
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.220446049250313e-16
+        }
+      ]
+    },
+    {
+      "case": "simple_mixed_8-2",
+      "sessions": [
+        {
+          "session": 1,
+          "current_over_baseline": {
+            "median": 0.9212537732602395,
+            "ci95": [
+              0.9168935625349542,
+              0.9235541939734582
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5630710931613256,
+            "ci95": [
+              1.5570332997657896,
+              1.5732199605272854
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1358.865,
+              "mad": 5.905000000000086,
+              "p95": 1637.8075,
+              "minimum": 1345.77,
+              "maximum": 2016.32
+            },
+            "current": {
+              "median": 1251.8400000000001,
+              "mad": 5.370000000000118,
+              "p95": 1441.825,
+              "minimum": 1242.2099999999998,
+              "maximum": 1676.9
+            },
+            "c": {
+              "median": 802.7898729778826,
+              "mad": 6.649934221059084,
+              "p95": 1016.1424870602787,
+              "minimum": 791.1399006843567,
+              "maximum": 1277.3400521837175
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.7755575615628914e-16
+        },
+        {
+          "session": 2,
+          "current_over_baseline": {
+            "median": 0.9219084758016809,
+            "ci95": [
+              0.9174629924678681,
+              0.9275889386318836
+            ]
+          },
+          "current_over_c": {
+            "median": 1.5595471303658943,
+            "ci95": [
+              1.549703740353073,
+              1.5647482731746976
+            ]
+          },
+          "nanoseconds_per_step": {
+            "baseline": {
+              "median": 1358.25,
+              "mad": 6.69500000000005,
+              "p95": 1581.3899999999999,
+              "minimum": 1345.59,
+              "maximum": 2720.98
+            },
+            "current": {
+              "median": 1254.725,
+              "mad": 7.399999999999977,
+              "p95": 1469.6100000000001,
+              "minimum": 1243.4499999999998,
+              "maximum": 1758.76
+            },
+            "c": {
+              "median": 804.8450399655849,
+              "mad": 6.815098458901048,
+              "p95": 995.1699757948518,
+              "minimum": 791.0100976005197,
+              "maximum": 2678.0899497680366
+            }
+          },
+          "max_ada_absolute_error": 0.0,
+          "max_absolute_error_vs_c": 2.7755575615628914e-16
+        }
+      ]
+    }
+  ],
+  "aggregation": "Ranges over the three scenarios and two sessions of each model; no unweighted overall average or summed speedup.",
+  "tail_scope": "p95 of trajectory-average step cost, not individual-step latency",
+  "remaining_gap": "C is still faster on every measured model."
+}

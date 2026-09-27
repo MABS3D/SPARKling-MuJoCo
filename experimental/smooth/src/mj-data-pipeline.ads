@@ -1,3 +1,4 @@
+with MJ.Smooth_Dynamics;
 --  Internal composition: callers establish readiness before entering.
 --  Jacobians are materialized only by the public kinematics API or a fallback.
 private package MJ.Data.Pipeline with SPARK_Mode is
@@ -37,16 +38,22 @@ private package MJ.Data.Pipeline with SPARK_Mode is
 
    procedure Ensure_Jacobians (D : in out Simulation; Result : out Status)
      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D),
-     Post => Is_Ready (D) and then Positions_Current (D)
-       and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
-       and then State_Values (D) = State_Values (D)'Old
-       and then Input_Values (D) = Input_Values (D)'Old
-       and then Mass_Current (D) = Mass_Current (D)'Old
-       and then Passive_Current (D) = Passive_Current (D)'Old
-       and then Actuation_Current (D) = Actuation_Current (D)'Old
-       and then Forces_Current (D) = Forces_Current (D)'Old
-       and then (if Result = Success then D.Cache.Jacobian_Valid);
+     Post => Is_Ready (D) and then Positions_Current (D);
+   pragma Postcondition (Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
+   pragma Postcondition (Mass_Current (D) = Mass_Current (D)'Old);
+   pragma Postcondition (Passive_Current (D) = Passive_Current (D)'Old);
+   pragma Postcondition (Actuation_Current (D) = Actuation_Current (D)'Old);
+   pragma Postcondition (Forces_Current (D) = Forces_Current (D)'Old);
+   pragma Postcondition ((if Result = Success then D.Cache.Jacobian_Valid));
    pragma Postcondition (Stable_Ready (D));
+   pragma Postcondition (Static => D.Dynamics.Mass.all = D.Dynamics.Mass.all'Old);
+   pragma Postcondition (Static =>
+     (if MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Mass.all)'Old
+      then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Mass.all))
+     and then (if MJ.Smooth_Dynamics.Symmetric (D.Dynamics.Mass.all, D.Nv)'Old
+      then MJ.Smooth_Dynamics.Symmetric (D.Dynamics.Mass.all, D.Nv)));
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
      and then Position_Values (D) = Position_Values (D)'Old
      and then Velocity_Values (D) = Velocity_Values (D)'Old

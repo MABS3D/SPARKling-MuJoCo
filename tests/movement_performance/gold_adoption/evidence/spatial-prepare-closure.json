@@ -1,0 +1,74 @@
+{
+  "date": "2026-09-27",
+  "status": "isolated_candidate_not_adopted",
+  "source": "closed-source/experimental/smooth/src/mj-data-spatial.adb",
+  "source_sha256": "9d4b55db46cc45bfc5d6e7e89b392fffb9050d3db827c3cc75c42553fff983fe",
+  "whole_unit": {
+    "unit": "MJ.Data.Spatial",
+    "proof": 391,
+    "flow": 55,
+    "unproved": 0,
+    "assume": 0,
+    "scope": "Existing safety, bounds, cache and frame contracts plus exact local helper formulas; not the complete ordered center accumulation or global buffer functional model, and not full dynamics.",
+    "cache": "Final successful invocation adds z3 to the first whole-unit attempt on identical sources and existing valid proof cache. Initial attempt and final command/results retained."
+  },
+  "new_local_scopes": [
+    {
+      "name": "Prepare_Buffers",
+      "proof": 34,
+      "flow": 3,
+      "unproved": 0
+    },
+    {
+      "name": "Prepare",
+      "proof": 8,
+      "flow": 20,
+      "unproved": 0
+    }
+  ],
+  "counting": "Local checks are included in whole-unit checks; do not sum them again.",
+  "numerics": [
+    {
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "normalization_edge_cases": 7,
+      "probe_sha256": "e32686d7b11168e2cc05b7d050fc628b3b0e2569a528804aa616ae8869a428a1"
+    },
+    {
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "normalization_edge_cases": 7,
+      "probe_sha256": "e32686d7b11168e2cc05b7d050fc628b3b0e2569a528804aa616ae8869a428a1"
+    }
+  ],
+  "numerical_source_matches_proved_snapshot": true,
+  "runtime_source_review": {
+    "prior_spatial_sha256": "3aa8b1f2603a659540bd28b1270e6d9d1a5539a33ff8072e36028be8adad4b67",
+    "closed_spatial_sha256": "9d4b55db46cc45bfc5d6e7e89b392fffb9050d3db827c3cc75c42553fff983fe",
+    "all_preexisting_helpers_byte_identical": true,
+    "runtime_statement_tokens_equal_after_parameter_substitution_and_removing_ghost_proof_instrumentation": true,
+    "normalization_sha256": "4f8c66cca1c4c81299a7a01d48f7723a60801e27f60cd6f659bf74b97a781846",
+    "scope": "Source-level comparison of Prepare control/call statements. Preserves cached success, failed center construction, partial buffer writes and publication flag behavior. Not a binary or complete functional equivalence proof. Runtime/debug contracts may differ."
+  },
+  "upstream": {
+    "version": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "file": "src/engine/engine_core_smooth.c",
+    "sha256": "ee1c621c3d1c94a1096178325316237ca0bc226a06ca7afebb10206d3323c861",
+    "reviewed_functions": [
+      "mj_comPos",
+      "mj_crb"
+    ]
+  },
+  "additional_exact_inertia_model_draft": "Separate draft only: small model/reveal helpers close 6+8 proof checks, body/composer timed out. Not the whole-unit-proved candidate.",
+  "active_source_files_unchanged": 100,
+  "new_scans_removed": 0,
+  "integrated_timings": "Not run for this candidate; no speedup/adoption claimed.",
+  "remaining": "Close global functional models and remaining mass/solver callers; measure integrated runtime before adopting any runtime refactoring.",
+  "archive": "spatial-prepare-closure.zip",
+  "archive_sha256": "e3cdb729ccd380e91ac1259913ed1213a4894d262812da6dd550d3847b5acb38"
+}

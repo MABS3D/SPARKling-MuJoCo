@@ -1,0 +1,185 @@
+{
+  "date": "2026-09-27",
+  "status": "crb_caller_preconditions_closed_isolated_candidate",
+  "scope": "Proved exact composite loading and zero initialization, safety/bounds/symmetry of the extracted mass fill, full direct producer contract, and the selected upstream call preconditions. Not a full functional model of mass assembly or full dynamics.",
+  "complete_subprograms": [
+    {
+      "name": "Load_Composite",
+      "unit": "mj-data-inertia_phase",
+      "report": "load-composite-exact",
+      "proof": 23,
+      "flow": 1,
+      "open": 0
+    },
+    {
+      "name": "Zero_CRB_Mass",
+      "unit": "mj-data-inertia_phase",
+      "report": "zero-mass-final",
+      "proof": 4,
+      "flow": 2,
+      "open": 0
+    },
+    {
+      "name": "Fill_CRB_Mass",
+      "unit": "mj-data-inertia_phase",
+      "report": "direct-caller-final",
+      "proof": 37,
+      "flow": 2,
+      "open": 0
+    },
+    {
+      "name": "Try_Assemble_CRB",
+      "unit": "mj-data-inertia_phase",
+      "report": "direct-caller-final",
+      "proof": 14,
+      "flow": 3,
+      "open": 0
+    },
+    {
+      "name": "Assemble",
+      "unit": "mj-data-inertia",
+      "report": "public-boundary",
+      "proof": 2,
+      "flow": 2,
+      "open": 0
+    }
+  ],
+  "complete_new_producer_scopes_total": {
+    "proof": 78,
+    "flow": 8,
+    "open": 0
+  },
+  "assembly_call_preconditions": [
+    {
+      "proof_snapshot_line": 579,
+      "final_source_line": 578,
+      "statement": "Spatial.Prepare (D, Spatial_Ok);",
+      "proof": 1,
+      "open": 0,
+      "scope": "Selected call precondition only, not the whole Assemble subprogram."
+    },
+    {
+      "proof_snapshot_line": 580,
+      "final_source_line": 579,
+      "statement": "if Spatial_Ok then Try_Assemble_CRB (D, Candidate, Used_CRB); end if;",
+      "proof": 1,
+      "open": 0,
+      "scope": "Selected call precondition only, not the whole Assemble subprogram."
+    }
+  ],
+  "assembly_entry_readiness": {
+    "report": "assembly-entry-readiness",
+    "line": 564,
+    "proof": 2,
+    "open": 0,
+    "scope": "The Static Phase_Ready assertion preceding both calls, including its function precondition."
+  },
+  "public_boundary": {
+    "report": "public-boundary",
+    "proof": 2,
+    "flow": 2,
+    "open": 0
+  },
+  "pipeline_call_precondition": {
+    "file": "mj-data-pipeline.adb",
+    "line": 759,
+    "proved": true,
+    "scope": "The call to Inertia_Phase.Assemble in the unchanged Evaluate_Ready body."
+  },
+  "pipeline_full_contract": {
+    "proof_total": 41,
+    "proof_open": 1,
+    "remaining": "State_Values(D) = State_Values(D) Old postcondition; the full Evaluate_Ready contract is not closed by this run."
+  },
+  "assemble_full_contract": "The full-subprogram attempt timed out at 160 seconds without a final proof result. The two subsequent successful selected-line runs prove only the call preconditions.",
+  "inherited_proofs": [
+    {
+      "scope": "Accumulate_Composite",
+      "proof": 99,
+      "flow": 3,
+      "source_prefix_identical": true,
+      "receipt": "crb-accumulation-closure.zip/json"
+    },
+    {
+      "scope": "MJ.Data.Spatial whole unit",
+      "proof": 391,
+      "flow": 55,
+      "source_file_identical": true,
+      "receipt": "spatial-prepare-closure.zip/json"
+    }
+  ],
+  "assumptions": "Existing Is_Ready/Pose_Valid/Spatial_Valid contracts supply 1..4096 bodies, parents before children, and initial inertia components within +/-1e36. No public preconditions were strengthened.",
+  "no_assume_or_new_suppression": true,
+  "existing_package_specs_unchanged": 30,
+  "source_review": {
+    "accumulation_and_existing_lemmas_identical": true,
+    "try_assemble_contract_identical": true,
+    "assemble_and_solver_equal_ignoring_proof_pragmas": true,
+    "existing_package_specs_identical": 30,
+    "runtime_statement_comparison_equal_after_inlining_three_helpers": true,
+    "runtime_comparison_scope": "Comparison to the preceding isolated CRB candidate, stripping pragmas and expanding only the three new helpers. Not a binary equivalence proof or active-runtime adoption.",
+    "spatial_candidate_exactly_matches_prior_whole_unit_proof": true,
+    "active_source_files_unchanged": 100,
+    "closed_helper_continuity": [
+      {
+        "name": "Load_Composite",
+        "report": "load-composite-exact",
+        "proof": 23,
+        "flow": 1,
+        "body_contract_identical": true
+      },
+      {
+        "name": "Zero_CRB_Mass",
+        "report": "zero-mass-final",
+        "proof": 4,
+        "flow": 2,
+        "body_contract_identical": true
+      },
+      {
+        "name": "Fill_CRB_Mass",
+        "report": "direct-caller-final",
+        "proof": 37,
+        "flow": 2,
+        "body_contract_identical": true
+      },
+      {
+        "name": "Try_Assemble_CRB",
+        "report": "direct-caller-final",
+        "proof": 14,
+        "flow": 3,
+        "body_contract_identical": true
+      }
+    ],
+    "candidate_inertia_sha256": "87a80dc2b981118b89764df0449c92710fc2cf5fc71b3816e45a806f1c4edfdb"
+  },
+  "numerics": [
+    {
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "df5d4041b9375aa799953abf4e11c3301a2cd455f86f2e748b36f256b3cf5dfd"
+    },
+    {
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "df5d4041b9375aa799953abf4e11c3301a2cd455f86f2e748b36f256b3cf5dfd"
+    }
+  ],
+  "numerical_source_matches_final_proof_snapshot": true,
+  "runtime_adopted": false,
+  "active_sources_unchanged": 100,
+  "new_scans_removed": 0,
+  "integrated_timings": "Not run in this precondition-proof task; no speedup claimed.",
+  "remaining": "Full assembly/state-frame composition and full ordered mass model, followed by two integrated performance sessions before runtime adoption. Active CRB guard and three internal scans remain.",
+  "upstream": {
+    "version": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "reviewed": "mj_crb reverse accumulation and forward DOF/ancestor pass",
+    "source_sha256": "ee1c621c3d1c94a1096178325316237ca0bc226a06ca7afebb10206d3323c861"
+  },
+  "archive": "crb-callers-closure.zip",
+  "archive_sha256": "4d25266b2eca13311084a056a3c8c166e8b19764c373cdccc340e920e7297f03"
+}

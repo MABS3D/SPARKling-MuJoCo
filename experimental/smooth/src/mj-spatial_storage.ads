@@ -21,6 +21,11 @@ package MJ.Spatial_Storage with SPARK_Mode is
        and then (for all K in Inertia'Range => Target (Base + K) = Value (K))
        and then (for all K in Target'Range =>
          (if K < Base or else K > Base + 9 then Target (K) = Target'Old (K)));
+   pragma Postcondition (Static =>
+     (for all K in Inertia'Range => Target (Base + K) in -1.0e36 .. 1.0e36)
+     and then (for all K in Target'Range =>
+       (if K in Base .. Base + 9 or else Target'Old (K) in -1.0e36 .. 1.0e36
+        then Target (K) in -1.0e36 .. 1.0e36)));
    pragma Inline (Store_Inertia);
    function Load_Motion (Source : Real_Array; Base : Natural) return Motion
      with Global => null,
@@ -38,5 +43,10 @@ package MJ.Spatial_Storage with SPARK_Mode is
        and then (for all K in Motion'Range => Target (Base + K) = Value (K))
        and then (for all K in Target'Range =>
          (if K < Base or else K > Base + 5 then Target (K) = Target'Old (K)));
+   pragma Postcondition (Static =>
+     (for all K in Motion'Range => Target (Base + K) in -1.0e12 .. 1.0e12)
+     and then (for all K in Target'Range =>
+       (if K in Base .. Base + 5 or else Target'Old (K) in -1.0e12 .. 1.0e12
+        then Target (K) in -1.0e12 .. 1.0e12)));
    pragma Inline (Store_Motion);
 end MJ.Spatial_Storage;

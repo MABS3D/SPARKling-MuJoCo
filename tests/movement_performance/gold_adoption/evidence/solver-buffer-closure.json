@@ -1,0 +1,148 @@
+{
+  "scope": "Safety, bounds, sticky pivot diagnostic and full public/cache frame; exact row/store helpers. Not a functional refinement of the entire linear solver. No readiness scan removed.",
+  "counts": {
+    "Solve_Compatible_Buffers": [
+      {
+        "status": "completed_no_unproved",
+        "proof_checks": 80,
+        "flow_checks": 6,
+        "unproved": 0,
+        "errors": 0
+      }
+    ],
+    "Store_Work_Entry": [
+      {
+        "status": "completed_no_unproved",
+        "proof_checks": 4,
+        "flow_checks": 1,
+        "unproved": 0,
+        "errors": 0
+      }
+    ],
+    "Solve_Compatible": [
+      {
+        "status": "completed_no_unproved",
+        "proof_checks": 8,
+        "flow_checks": 11,
+        "unproved": 0,
+        "errors": 0
+      }
+    ],
+    "Add_Prefix_Row": [
+      {
+        "status": "completed_no_unproved",
+        "proof_checks": 12,
+        "flow_checks": 2,
+        "unproved": 0,
+        "errors": 0
+      }
+    ]
+  },
+  "source_continuity": [
+    {
+      "proof": "buffers-end-invariant",
+      "subprogram": "Solve_Compatible_Buffers",
+      "exact_declaration_and_body": true,
+      "sha256": "e631c03e714f8eae673077ce72e94dd67377404b51f7c4aa8b48a1b1a9f026b7"
+    },
+    {
+      "proof": "store-leaf-grouped",
+      "subprogram": "Store_Work_Entry",
+      "exact_declaration_and_body": true,
+      "sha256": "dc1c6cd3650cc0d62bf43bd7541689f111f04306b669c4ede9e139edb9628304"
+    },
+    {
+      "proof": "wrapper-frame",
+      "subprogram": "Solve_Compatible",
+      "exact_declaration_and_body": true,
+      "sha256": "e24a02512095cdb40ecd852940a13a73a9b185af79ce6ed6dfe92e5867fffac9"
+    },
+    {
+      "proof": "prefix-leaf-index-range",
+      "subprogram": "Add_Prefix_Row",
+      "exact_declaration_and_body": true,
+      "sha256": "8cf518ebcda4fbd4a7c89cca3e9754553f0a16469f56d5e6f9327c568e1fcadc"
+    }
+  ],
+  "dependencies": [
+    {
+      "unit": "mj-ancestor_rows",
+      "proof_report": "tests/movement_performance/c_parity_six/evidence/proofs/ancestors.json",
+      "files": [
+        {
+          "path": "experimental/smooth/src/mj-ancestor_rows.ads",
+          "proof_sha256": "98f9a78e6b84ce99cf421749efe739e333d740cc2abb874995e5df87ebb73fc2",
+          "candidate_sha256": "afaae8f2245d13a81851abb1cf9c172c98c712ea49c0c836db45aaef0ef275f0",
+          "exact": false,
+          "comment_only_if_different": true
+        },
+        {
+          "path": "experimental/smooth/src/mj-ancestor_rows.adb",
+          "proof_sha256": "6736597b73c71561ff343b493676fa3962201f968113404fcd4a1b12c47395e8",
+          "candidate_sha256": "6736597b73c71561ff343b493676fa3962201f968113404fcd4a1b12c47395e8",
+          "exact": true,
+          "comment_only_if_different": true
+        }
+      ]
+    },
+    {
+      "unit": "mj-solver_kernels",
+      "proof_report": "tests/movement_performance/c_parity_six/evidence/proofs/solver_rows.json",
+      "files": [
+        {
+          "path": "experimental/smooth/src/mj-solver_kernels.ads",
+          "proof_sha256": "d6f24b7f7a29b7e5b29df331fe6e5fad539913bcef8eae566e354fe7efd8e906",
+          "candidate_sha256": "4241dec106f5fb798e8f12c1518913b2fbe109e0f255751b1e50ad6af66a6678",
+          "exact": false,
+          "comment_only_if_different": true
+        },
+        {
+          "path": "experimental/smooth/src/mj-solver_kernels.adb",
+          "proof_sha256": "4f09b8611012543ca93ee526d9be5f236b788214f298ca6a6a4294bd6cff6a48",
+          "candidate_sha256": "4f09b8611012543ca93ee526d9be5f236b788214f298ca6a6a4294bd6cff6a48",
+          "exact": true,
+          "comment_only_if_different": true
+        }
+      ]
+    },
+    {
+      "unit": "mj-solver_reductions",
+      "proof_report": "tests/movement_performance/c_parity_six/evidence/proofs/reductions.json",
+      "files": [
+        {
+          "path": "experimental/smooth/src/mj-solver_reductions.ads",
+          "proof_sha256": "a37af1670c08f37b732a17ce19f7ebe64e935a6e183f9a3bb768d995ee1e1305",
+          "candidate_sha256": "a37af1670c08f37b732a17ce19f7ebe64e935a6e183f9a3bb768d995ee1e1305",
+          "exact": true,
+          "comment_only_if_different": true
+        },
+        {
+          "path": "experimental/smooth/src/mj-solver_reductions.adb",
+          "proof_sha256": "1b94c9637db165f5402c15af708cc3c8697a8e47879958e41d531cd8987793d7",
+          "candidate_sha256": "1b94c9637db165f5402c15af708cc3c8697a8e47879958e41d531cd8987793d7",
+          "exact": true,
+          "comment_only_if_different": true
+        }
+      ]
+    },
+    {
+      "unit": "mj-bounds_kernels",
+      "proof_report": "tests/movement_performance/bounds_validation/evidence/proof-index.json",
+      "files": [
+        {
+          "path": "experimental/smooth/src/mj-bounds_kernels.ads",
+          "proof_sha256": "bebd70ee248a1c4107315d48d8afc785226fa32eb6285828e85789430b20c293",
+          "candidate_sha256": "bebd70ee248a1c4107315d48d8afc785226fa32eb6285828e85789430b20c293",
+          "exact": true
+        },
+        {
+          "path": "experimental/smooth/src/mj-bounds_kernels.adb",
+          "proof_sha256": "9961df62693145478b25162449c48016778a06e68aff8bd86e9d84f1a1dac8ad",
+          "candidate_sha256": "9961df62693145478b25162449c48016778a06e68aff8bd86e9d84f1a1dac8ad",
+          "exact": true
+        }
+      ]
+    }
+  ],
+  "decision": "Isolated proof prerequisite, not adopted into active runtime: repeatable regression on simple_sliders_6 in both sessions."
+}

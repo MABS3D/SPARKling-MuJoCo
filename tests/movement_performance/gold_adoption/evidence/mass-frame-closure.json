@@ -1,0 +1,518 @@
+{
+  "date": "2026-09-27",
+  "status": "assembly_and_pipeline_frame_contracts_closed_isolated",
+  "scope": "All current Assemble contracts and the composition of Evaluate_Ready, with separately proved mass/CRB/dense/Jacobian frame helpers. These are modular proofs under the called contracts, not the full ordered mass model, physical accuracy, or complete dynamics.",
+  "complete_scopes": [
+    {
+      "name": "Evaluate_Inertia_Forces",
+      "unit": "mj-data-pipeline",
+      "report": "pipeline-first-pair-final",
+      "proof": 18,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Evaluate_Actuation_Acceleration",
+      "unit": "mj-data-pipeline",
+      "report": "pipeline-two-phase-helpers",
+      "proof": 18,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Evaluate_Ready",
+      "unit": "mj-data-pipeline",
+      "report": "pipeline-composed",
+      "proof": 26,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Refresh_Jacobian_Buffers",
+      "unit": "mj-data-pipeline",
+      "report": "jacobian-narrow-buffers",
+      "proof": 8,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Ensure_Jacobians",
+      "unit": "mj-data-pipeline",
+      "report": "jacobians-mass-properties",
+      "proof": 18,
+      "flow": 17,
+      "runner_flow": 17,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Assemble_Dense_Mass",
+      "unit": "mj-data-inertia_phase",
+      "report": "dense-final",
+      "proof": 59,
+      "flow": 3,
+      "runner_flow": 3,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Prove_Dense_Inputs",
+      "unit": "mj-data-inertia_phase",
+      "report": "mass-boundaries",
+      "proof": 12,
+      "flow": 1,
+      "runner_flow": 1,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Expose_Assembly_Layout",
+      "unit": "mj-data-inertia_phase",
+      "report": "layout-and-dense-frame",
+      "proof": 15,
+      "flow": 1,
+      "runner_flow": 1,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Reset_Mass",
+      "unit": "mj-data-inertia_phase",
+      "report": "assembly-split-helpers",
+      "proof": 8,
+      "flow": 1,
+      "runner_flow": 1,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Ready_Properties",
+      "unit": "mj-data-inertia_phase",
+      "report": "crb-position-frame",
+      "proof": 1,
+      "flow": 1,
+      "runner_flow": 1,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Build_And_Publish_CRB",
+      "unit": "mj-data-inertia_phase",
+      "report": "mass-frame-properties",
+      "proof": 15,
+      "flow": 3,
+      "runner_flow": 3,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Assemble_CRB_Path",
+      "unit": "mj-data-inertia_phase",
+      "report": "crb-config-cuts",
+      "proof": 19,
+      "flow": 3,
+      "runner_flow": 3,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Fill_Dense_Ready",
+      "unit": "mj-data-inertia_phase",
+      "report": "dense-groups",
+      "proof": 27,
+      "flow": 7,
+      "runner_flow": 7,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Fill_And_Mark_Mass",
+      "unit": "mj-data-inertia_phase",
+      "report": "dense-groups",
+      "proof": 17,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Assemble_Dense_Path",
+      "unit": "mj-data-inertia_phase",
+      "report": "dense-path-final",
+      "proof": 26,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Assemble_Ready",
+      "unit": "mj-data-inertia_phase",
+      "report": "assemble-ready-closed",
+      "proof": 34,
+      "flow": 3,
+      "runner_flow": 3,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Assemble",
+      "unit": "mj-data-inertia_phase",
+      "report": "assemble-boundary",
+      "proof": 2,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Prepared_Mass_Contribution",
+      "unit": "mj-smooth_dynamics",
+      "report": "dense-kernel-dependencies",
+      "proof": 18,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Prepare_Mass_Columns",
+      "unit": "mj-smooth_dynamics",
+      "report": "dense-kernel-dependencies",
+      "proof": 28,
+      "flow": 2,
+      "runner_flow": 2,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "Store_Symmetric",
+      "unit": "mj-smooth_dynamics",
+      "report": "dense-kernel-dependencies",
+      "proof": 16,
+      "flow": 1,
+      "runner_flow": 1,
+      "open": 0,
+      "source_body_and_contract_equal_ignoring_whitespace": true
+    },
+    {
+      "name": "whole unit",
+      "unit": "mj-data-mass_publication",
+      "report": "publication-whole-unit",
+      "proof": 74,
+      "flow": 10,
+      "open": 0,
+      "whole_source_identical": true
+    }
+  ],
+  "integration": {
+    "report": "final-callers",
+    "all_four_targets_closed": true,
+    "source_identical_to_numerical_build": true
+  },
+  "totals_excluding_repeated_integration_and_prior_crb_spatial": {
+    "proof": 459,
+    "flow": 69,
+    "open": 0
+  },
+  "inherited": [
+    {
+      "scope": "Accumulate_Composite",
+      "proof": 99,
+      "flow": 3,
+      "receipt": "crb-accumulation-closure.zip/json",
+      "unchanged": true
+    },
+    {
+      "scope": "CRB producer/load/fill/zero",
+      "proof": 78,
+      "flow": 8,
+      "receipt": "crb-callers-closure.zip/json",
+      "unchanged": true
+    },
+    {
+      "scope": "MJ.Data.Spatial whole unit",
+      "proof": 391,
+      "flow": 55,
+      "receipt": "spatial-prepare-closure.zip/json",
+      "unchanged": true
+    },
+    {
+      "scope": "Matrix_Offset and Prove_Configuration_Equality",
+      "proof": 34,
+      "receipt": "mass-publication-closed.zip",
+      "inputs_verified": true
+    }
+  ],
+  "no_new_assume_suppression_or_trusted_body": true,
+  "public_preconditions_unchanged": true,
+  "source_review": {
+    "complete_scopes": [
+      {
+        "name": "Evaluate_Inertia_Forces",
+        "unit": "mj-data-pipeline",
+        "report": "pipeline-first-pair-final",
+        "proof": 18,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Evaluate_Actuation_Acceleration",
+        "unit": "mj-data-pipeline",
+        "report": "pipeline-two-phase-helpers",
+        "proof": 18,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Evaluate_Ready",
+        "unit": "mj-data-pipeline",
+        "report": "pipeline-composed",
+        "proof": 26,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Refresh_Jacobian_Buffers",
+        "unit": "mj-data-pipeline",
+        "report": "jacobian-narrow-buffers",
+        "proof": 8,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Ensure_Jacobians",
+        "unit": "mj-data-pipeline",
+        "report": "jacobians-mass-properties",
+        "proof": 18,
+        "flow": 17,
+        "runner_flow": 17,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Assemble_Dense_Mass",
+        "unit": "mj-data-inertia_phase",
+        "report": "dense-final",
+        "proof": 59,
+        "flow": 3,
+        "runner_flow": 3,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Prove_Dense_Inputs",
+        "unit": "mj-data-inertia_phase",
+        "report": "mass-boundaries",
+        "proof": 12,
+        "flow": 1,
+        "runner_flow": 1,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Expose_Assembly_Layout",
+        "unit": "mj-data-inertia_phase",
+        "report": "layout-and-dense-frame",
+        "proof": 15,
+        "flow": 1,
+        "runner_flow": 1,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Reset_Mass",
+        "unit": "mj-data-inertia_phase",
+        "report": "assembly-split-helpers",
+        "proof": 8,
+        "flow": 1,
+        "runner_flow": 1,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Ready_Properties",
+        "unit": "mj-data-inertia_phase",
+        "report": "crb-position-frame",
+        "proof": 1,
+        "flow": 1,
+        "runner_flow": 1,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Build_And_Publish_CRB",
+        "unit": "mj-data-inertia_phase",
+        "report": "mass-frame-properties",
+        "proof": 15,
+        "flow": 3,
+        "runner_flow": 3,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Assemble_CRB_Path",
+        "unit": "mj-data-inertia_phase",
+        "report": "crb-config-cuts",
+        "proof": 19,
+        "flow": 3,
+        "runner_flow": 3,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Fill_Dense_Ready",
+        "unit": "mj-data-inertia_phase",
+        "report": "dense-groups",
+        "proof": 27,
+        "flow": 7,
+        "runner_flow": 7,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Fill_And_Mark_Mass",
+        "unit": "mj-data-inertia_phase",
+        "report": "dense-groups",
+        "proof": 17,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Assemble_Dense_Path",
+        "unit": "mj-data-inertia_phase",
+        "report": "dense-path-final",
+        "proof": 26,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Assemble_Ready",
+        "unit": "mj-data-inertia_phase",
+        "report": "assemble-ready-closed",
+        "proof": 34,
+        "flow": 3,
+        "runner_flow": 3,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Assemble",
+        "unit": "mj-data-inertia_phase",
+        "report": "assemble-boundary",
+        "proof": 2,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Prepared_Mass_Contribution",
+        "unit": "mj-smooth_dynamics",
+        "report": "dense-kernel-dependencies",
+        "proof": 18,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Prepare_Mass_Columns",
+        "unit": "mj-smooth_dynamics",
+        "report": "dense-kernel-dependencies",
+        "proof": 28,
+        "flow": 2,
+        "runner_flow": 2,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "Store_Symmetric",
+        "unit": "mj-smooth_dynamics",
+        "report": "dense-kernel-dependencies",
+        "proof": 16,
+        "flow": 1,
+        "runner_flow": 1,
+        "open": 0,
+        "source_body_and_contract_equal_ignoring_whitespace": true
+      },
+      {
+        "name": "whole unit",
+        "unit": "mj-data-mass_publication",
+        "report": "publication-whole-unit",
+        "proof": 74,
+        "flow": 10,
+        "open": 0,
+        "whole_source_identical": true
+      }
+    ],
+    "producer_accumulation_unchanged": true,
+    "spatial_whole_unit_source_unchanged": true,
+    "solver_tail_unchanged": true,
+    "active_sources_unchanged": 100,
+    "existing_changed_specs": [
+      "experimental/smooth/src/mj-data-pipeline.ads"
+    ],
+    "public_preconditions_unchanged": true,
+    "jacobian_spec_change": "Equivalent split of previous conjunction, plus Static exact raw mass preservation and conditional preservation of mass bounds and symmetry. These added clauses are proved in jacobians-mass-properties.",
+    "flow_counts": "Confirmed against the saved GNATprove summary tables; raw runner counters are retained.",
+    "ordered_fallback_arithmetic_checked": true,
+    "phase_sequence_checked": true,
+    "runtime_review_limits": "Source ordering audit after argument substitution and the proved Matrix_Offset/Store_Symmetric contracts; the diagonal double store is normalized to the same final write. Helper boundaries, cache flag rewrites and candidate allocation lifetime changed. No binary or timing equivalence is claimed.",
+    "functional_scope": "Bounds, symmetry, status/cache publication and preservation of public state under the called contracts. The full ordered mass model and the complete dynamics proof are still separate open work."
+  },
+  "numerics": [
+    {
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "1d845c519cfc29c938170e6c7b3c665dfaa85a4a454db1c9e2faac1286581e1e",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "1d845c519cfc29c938170e6c7b3c665dfaa85a4a454db1c9e2faac1286581e1e",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    }
+  ],
+  "runtime_adopted": false,
+  "active_source_files_unchanged": 100,
+  "new_scans_removed": 0,
+  "integrated_timings": "Not run; two quiet integrated sessions remain required before runtime adoption. No speedup is claimed.",
+  "remaining": "Full ordered mass construction model and proofs of the force, actuation, solve and integration bodies as needed for the complete dynamics chain. Active CRB guard and three internal Phase_Ready scans remain.",
+  "upstream": {
+    "version": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "reviewed": "mj_crb reverse composite accumulation and forward DOF/ancestor traversal",
+    "source_sha256": "ee1c621c3d1c94a1096178325316237ca0bc226a06ca7afebb10206d3323c861"
+  },
+  "archive": "mass-frame-closure.zip",
+  "archive_sha256": "1ad989a7d759da717b9e2a7a13eee2ed74e841da704568bbb2da8d3e6c831498",
+  "archive_bytes": 6601601
+}

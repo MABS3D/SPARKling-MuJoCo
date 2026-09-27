@@ -1,0 +1,113 @@
+{
+  "date": "2026-09-27",
+  "status": "complete_accumulation_theorem_isolated_candidate",
+  "scope": "Accumulate_Composite: runtime safety, weighted floating-point bounds, initialization and preservation of every loop invariant, exact final equality to the original checked accumulation model, and successful model status under unchanged preconditions.",
+  "assumptions": "Bodies and composite arrays start at zero with 1..4096 entries; each non-world parent precedes its child; each input inertia component has magnitude at most 1e36.",
+  "result": "All output components have magnitude at most 1e40; the original controlled accumulation model succeeds and returns the same floating-point component values.",
+  "full_subprogram": {
+    "proof_checks": 99,
+    "flow_checks": 3,
+    "unproved": 0,
+    "errors": 0,
+    "exit_code": 0,
+    "seconds": 222.99
+  },
+  "new_helpers": {
+    "proof_checks": 163,
+    "flow_checks": 8,
+    "subprograms": [
+      {
+        "name": "Prove_Inertia_Sums_Equal",
+        "report": "sums-unrolled",
+        "proof": 21,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Transfer_Inertia_Bound",
+        "report": "weighted-prefix",
+        "proof": 3,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Preserve_Weighted_Prefix",
+        "report": "weighted-prefix",
+        "proof": 32,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Reveal_Accumulation_Values",
+        "report": "advance-model",
+        "proof": 22,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Advance_Accumulation_Model",
+        "report": "advance-model",
+        "proof": 37,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Retire_Weight",
+        "report": "final-bridges",
+        "proof": 19,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Expose_Inertia_Equality",
+        "report": "final-bridges",
+        "proof": 1,
+        "flow": 1,
+        "source_body_contract_identical": true
+      },
+      {
+        "name": "Describe_Model_Update",
+        "report": "final-bridges",
+        "proof": 28,
+        "flow": 1,
+        "source_body_contract_identical": true
+      }
+    ]
+  },
+  "no_assume": true,
+  "original_pre_post_preserved": true,
+  "original_model_preserved": true,
+  "candidate_source_sha256": "c6a0708b37327b0b36afc9edb6bf4ae8fb85aed33bfdebb211cde95042139c46",
+  "proof_source_files_verified": 104,
+  "dependency_continuity": "dependency-continuity.json and inherited-proof-receipts; reused subprograms are byte-identical at body/contract level and retained package dependencies match their proved sources.",
+  "numerics": [
+    {
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "69d2bdc048d21db21e2e406397e878d873a5bfcc24b6c698761a72a006160a13"
+    },
+    {
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "69d2bdc048d21db21e2e406397e878d873a5bfcc24b6c698761a72a006160a13"
+    }
+  ],
+  "numerical_source_matches_proved_snapshot": true,
+  "active_source_files_unchanged": 100,
+  "new_scans_removed": 0,
+  "runtime_adopted": false,
+  "remaining": "Integration with the active mass producer/callers and integrated performance validation before removing its numeric guard; mass assembly, whole state pipeline, and full dynamics are not established by this theorem.",
+  "source_review_scope": "Source comparison with the previous isolated 79/83 CRB draft, omitting ghost code and contract instrumentation. Not binary equivalence or active-runtime adoption.",
+  "upstream": {
+    "version": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "reviewed": "mj_crb reverse body accumulation",
+    "source_sha256": "ee1c621c3d1c94a1096178325316237ca0bc226a06ca7afebb10206d3323c861"
+  },
+  "archive": "crb-accumulation-closure.zip",
+  "archive_sha256": "e4995e4b75befee9bf395705331ab1b116f65c77c30add602b94e993904038f4"
+}

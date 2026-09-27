@@ -216,9 +216,12 @@ def main() -> int:
     parser.add_argument('--steps', type=int, default=200)
     parser.add_argument('--provers', default='cvc5', help='Comma-separated GNATprove provers')
     parser.add_argument('--level', type=int, choices=range(5), default=0)
-    parser.add_argument('--proof-mode', choices=('per_check', 'progressive'), default='per_check',
+    parser.add_argument('--proof-mode', choices=('per_check', 'per_path', 'progressive',
+                                                'per_check:all', 'per_path:all'), default='per_check',
                         help='Proof splitting strategy; recorded in the run manifest')
     parser.add_argument('--jobs', type=int, default=1)
+    parser.add_argument('--save-vcs', action='store_true',
+                        help='Retain intermediate prover tasks for diagnosis')
     parser.add_argument('--cap-mb', type=int, choices=range(512, 4001), default=2000)
     args = parser.parse_args()
     if min(args.wall_seconds, args.prepare_seconds, args.total_seconds, args.prover_seconds) <= 0 or args.steps < 0:
@@ -351,6 +354,7 @@ def main() -> int:
                    f'--proof={args.proof_mode}',
                    f'--timeout={args.prover_seconds}', f'--memlimit={args.prover_mb}', f'--steps={args.steps}',
                    '--counterexamples=off', f'-j{args.jobs}', '--report=all', '--output=oneline',
+                   *(['--debug-save-vcs'] if args.save_vcs else []),
                    '--checks-as-errors=on',
                    *([] if target.get('selector') == 'unit' else
                      [f"--limit-{target.get('selector', 'subp')}={target['file']}:{target['line']}"]),
@@ -391,6 +395,8 @@ def main() -> int:
                 status = ('proof_timeout' if 'Phase 3 of 3' in proc.stdout else 'preparation_timeout')
             else:
                 status = 'resource_limit'
+        elif 'GNAT BUG DETECTED' in proc.stdout or 'compilation abandoned' in proc.stdout:
+            status = 'tool_error'
         elif errors:
             status = 'analysis_error'
         elif unproved:

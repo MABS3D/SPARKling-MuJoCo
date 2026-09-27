@@ -1,0 +1,214 @@
+{
+  "date": "2026-09-27",
+  "status": "adopted",
+  "scope": "Dead entry scan removal in Forces_Phase.Compute under the private Is_Ready precondition established by both callers. Adopted with the previously proved mass-frame candidate; does not close the full force unit or global dynamics.",
+  "changes": {
+    "adopted": true,
+    "changed_source_files": [
+      "mj-composite_bounds.adb",
+      "mj-composite_bounds.ads",
+      "mj-composite_weights.adb",
+      "mj-composite_weights.ads",
+      "mj-data-forces_phase.adb",
+      "mj-data-forces_phase.ads",
+      "mj-data-inertia_phase.adb",
+      "mj-data-mass_publication.adb",
+      "mj-data-mass_publication.ads",
+      "mj-data-pipeline.adb",
+      "mj-data-pipeline.ads",
+      "mj-data-spatial.adb"
+    ],
+    "active_source_hashes_matched": 106,
+    "baseline_source_manifest": "pre-force-entry-scan-active-source-match.json",
+    "proof_scopes": [
+      {
+        "report": "proof-scan-nested",
+        "scope": {
+          "id": "mj-data-forces_phase__adb_line_129",
+          "file": "mj-data-forces_phase.adb",
+          "line": 129,
+          "name": "line 129",
+          "selector": "line"
+        },
+        "proof": 2,
+        "flow": 13,
+        "status": "completed_no_unproved"
+      },
+      {
+        "report": "proof-final-callers",
+        "scope": {
+          "id": "mj-data-inertia__assemble__adb_4",
+          "file": "mj-data-inertia.adb",
+          "line": 4,
+          "name": "Assemble"
+        },
+        "proof": 2,
+        "flow": 2,
+        "status": "completed_no_unproved"
+      },
+      {
+        "report": "proof-final-callers",
+        "scope": {
+          "id": "mj-data-inertia_phase__assemble__adb_1141",
+          "file": "mj-data-inertia_phase.adb",
+          "line": 1141,
+          "name": "Assemble"
+        },
+        "proof": 2,
+        "flow": 2,
+        "status": "completed_no_unproved"
+      },
+      {
+        "report": "proof-final-callers",
+        "scope": {
+          "id": "mj-data-forces__compute__adb_4",
+          "file": "mj-data-forces.adb",
+          "line": 4,
+          "name": "Compute"
+        },
+        "proof": 2,
+        "flow": 2,
+        "status": "completed_no_unproved"
+      },
+      {
+        "report": "proof-final-callers",
+        "scope": {
+          "id": "mj-data-pipeline__evaluate_inertia_forces__adb_737",
+          "file": "mj-data-pipeline.adb",
+          "line": 737,
+          "name": "Evaluate_Inertia_Forces"
+        },
+        "proof": 18,
+        "flow": 2,
+        "status": "completed_no_unproved"
+      },
+      {
+        "report": "proof-final-callers",
+        "scope": {
+          "id": "mj-data-pipeline__evaluate_ready__adb_884",
+          "file": "mj-data-pipeline.adb",
+          "line": 884,
+          "name": "Evaluate_Ready"
+        },
+        "proof": 26,
+        "flow": 2,
+        "status": "completed_no_unproved"
+      }
+    ],
+    "no_public_precondition_changes": true,
+    "no_new_assume_or_suppression": true
+  },
+  "source_audit": {
+    "changes_from_mass_frame": [
+      "experimental/smooth/src/mj-data-forces_phase.adb",
+      "experimental/smooth/src/mj-data-forces_phase.ads"
+    ],
+    "all_other_candidate_ada_files_identical": true,
+    "private_precondition": "Stable_Ready -> Is_Ready, established by both callers",
+    "public_contracts_unchanged": true,
+    "force_executable_changes": "Remove dead Phase_Ready false branch; nest publication in its producer branch, preserving operation order. No new runtime initialization.",
+    "build_sources_and_numeric_probe_match": true,
+    "prior_mass_frame_archive": "mass-frame-closure.zip",
+    "prior_mass_frame_archive_sha256": "1ad989a7d759da717b9e2a7a13eee2ed74e841da704568bbb2da8d3e6c831498",
+    "active_manifest_matches": true,
+    "scope": "Proof of this entry guard redundancy and caller composition under their contracts, not a new whole force-unit or dynamics theorem."
+  },
+  "proof_totals": {
+    "proof": 52,
+    "flow": 23,
+    "open": 0,
+    "note": "Includes rechecked caller scopes. Entry check is selected (2 proof), with file-level flow (13), not whole Forces_Phase."
+  },
+  "prior_proofs": [
+    "mass-frame-closure.zip/json",
+    "crb-callers-closure.zip/json",
+    "crb-accumulation-closure.zip/json",
+    "spatial-prepare-closure.zip/json"
+  ],
+  "numerics": [
+    {
+      "report": "numerics-compatible",
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "dfa9ed4d35a3e3d59dc4880a2166590b5162c91aa1ae2105d795e484b508b4f3",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "report": "numerics-strict",
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 624,
+      "comparisons": 168192,
+      "probe_sha256": "dfa9ed4d35a3e3d59dc4880a2166590b5162c91aa1ae2105d795e484b508b4f3",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "report": "boundary-v2-checked-compatible",
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 26,
+      "comparisons": 7008,
+      "probe_sha256": "594e59163ad662ffd917710dc330bda76c29e9d349a780ef7c2351dc18651420",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "report": "boundary-v2-checked-strict",
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 26,
+      "comparisons": 7008,
+      "probe_sha256": "594e59163ad662ffd917710dc330bda76c29e9d349a780ef7c2351dc18651420",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "report": "boundary-v2-release-compatible",
+      "policy": "Compatible",
+      "status": "passed",
+      "scenarios": 26,
+      "comparisons": 7008,
+      "probe_sha256": "4f5ce408d8699e92ba1434d747371cfba3ce5bd6cc8c98ba4b1241ec71664b67",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    {
+      "report": "boundary-v2-release-strict",
+      "policy": "Strict",
+      "status": "passed",
+      "scenarios": 26,
+      "comparisons": 7008,
+      "probe_sha256": "4f5ce408d8699e92ba1434d747371cfba3ce5bd6cc8c98ba4b1241ec71664b67",
+      "atol": 2e-10,
+      "rtol": 2e-10
+    }
+  ],
+  "readiness_scans_per_successful_step": {
+    "Is_Ready": 1,
+    "Phase_Ready": 2
+  },
+  "guard_count_models": 11,
+  "performance_summary": "force-entry-scan-performance.json",
+  "all_33_cases_improve_in_both_sessions": true,
+  "performance_scope": "Two quiet integrated sessions: complete supported smooth Euler movement workload; active Ada baseline vs all adopted mass/spatial/scan changes vs pinned normal SIMD C. Not an isolated timing attribution to one guard.",
+  "remaining": [
+    "Actuation_Phase.Compute readiness scan",
+    "Inertia_Phase.Solve_Euler readiness scan",
+    "Full ordered mass-construction model",
+    "Remaining force, acceleration/solve and integration bodies for global dynamics",
+    "Direct compact mass assembly"
+  ],
+  "superseded_attempts": [
+    "proof-scan-assertion: selected proof passed but two pre-existing initialization flow diagnostics remained; fixed by nesting publication.",
+    "boundary-checked-results: test incorrectly expected a return for deliberately corrupted input violating the public precondition; corrected test expects Assertion_Error only in checked mode."
+  ],
+  "release_binary_sha256": "a971ed89c04c4fe89b7b0df8e2a6b18059d8ecc3fea9459045ecae193a46b27c",
+  "reference": "MuJoCo 3.14.0, 9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "archive": "force-entry-scan-adoption.zip",
+  "archive_sha256": "94bd00cf5741e2a70967250f6f2b902e074427857ec8d966d35acb0e38b3e570",
+  "archive_bytes": 18408779
+}

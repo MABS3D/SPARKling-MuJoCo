@@ -27,6 +27,7 @@ parser.add_argument('--out', type=Path, required=True)
 parser.add_argument('--toolchain-root', type=Path, required=True)
 parser.add_argument('--fixtures', type=Path, required=True)
 parser.add_argument('--mutable-per-step', type=int, default=3)
+parser.add_argument('--full-per-step', type=int, default=1)
 a = parser.parse_args()
 a.out.mkdir(parents=True, exist_ok=False)
 src = a.out/'source'
@@ -40,26 +41,30 @@ end Guard_Counts;
 ''')
 p = smooth/'mj-data.ads'
 s = 'with Guard_Counts;\n' + p.read_text()
-s = s.replace('end MJ.Data;', '''   function Counted_Full (D : Simulation) return Boolean;
-   function Counted_Mutable (D : Simulation) return Boolean;
-end MJ.Data;''')
+# Instrument the predicate implementations themselves, so calls are counted
+# regardless of whether a caller spells them as an if, assignment or expression.
+full_expression = """   function Is_Ready (D : Simulation) return Boolean is
+     (Stable_Ready (D) and then Inputs_Bounded (D) and then Caches_Bounded (D));
+"""
+phase_expression = """   function Phase_Ready (D : Simulation) return Boolean is
+     (Inputs_Bounded (D) and then Caches_Bounded (D))
+"""
+assert s.count(full_expression) == 1, 'full readiness definition changed'
+assert s.count(phase_expression) == 1, 'phase readiness definition changed'
+s = s.replace(full_expression, '')
+s = s.replace(phase_expression, '   function Phase_Ready (D : Simulation) return Boolean\n')
 p.write_text(s)
-for p in smooth.glob('mj-data*.adb'):
-    s = p.read_text().replace('if not Is_Ready (D) then', 'if not Counted_Full (D) then')
-    s = s.replace('if not Phase_Ready (D) then', 'if not Counted_Mutable (D) then')
-    s = s.replace('if Phase_Ready (D) then', 'if Counted_Mutable (D) then')
-    p.write_text(s)
 p = smooth/'mj-data.adb'
-s = p.read_text().replace('end MJ.Data;', '''   function Counted_Full (D : Simulation) return Boolean is
+s = p.read_text().replace('end MJ.Data;', '''   function Is_Ready (D : Simulation) return Boolean is
    begin
       if Guard_Counts.Enabled then Guard_Counts.Full_Checks := Guard_Counts.Full_Checks + 1; end if;
-      return Is_Ready (D);
-   end Counted_Full;
-   function Counted_Mutable (D : Simulation) return Boolean is
+      return Stable_Ready (D) and then Inputs_Bounded (D) and then Caches_Bounded (D);
+   end Is_Ready;
+   function Phase_Ready (D : Simulation) return Boolean is
    begin
       if Guard_Counts.Enabled then Guard_Counts.Mutable_Checks := Guard_Counts.Mutable_Checks + 1; end if;
-      return Phase_Ready (D);
-   end Counted_Mutable;
+      return Inputs_Bounded (D) and then Caches_Bounded (D);
+   end Phase_Ready;
 end MJ.Data;''')
 p.write_text(s)
 s = 'with Guard_Counts;\n' + main.read_text()
@@ -88,7 +93,7 @@ for data in sorted(a.fixtures.glob('*-0.input')):
     (a.out/(model+'.output')).write_text(current.stdout+current.stderr)
     lines = current.stdout.splitlines()
     counts = [float(v) for line in lines if line.startswith('guards ') for v in line.split()[1:]]
-    assert counts == [400,400*a.mutable_per_step], (model, counts)
+    assert counts == [400*a.full_per_step,400*a.mutable_per_step], (model, counts)
     old = parse(reference.stdout)
     new = parse('\n'.join(line for line in lines if not line.startswith('guards ')))
     assert len(old) == len(new) == 4
@@ -98,5 +103,5 @@ for data in sorted(a.fixtures.glob('*-0.input')):
     results.append(dict(model=model,steps=400,full_checks=int(counts[0]),mutable_checks=int(counts[1])))
 assert results, 'no movement fixture inputs found'
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
-(a.out/'results.json').write_text(json.dumps(dict(status='passed',source_build=str(a.build),binary_sha256=sha(a.out/'bin/movement_bench'),sources={str(p.relative_to(src)):sha(p) for p in src.rglob('*.ad?')},results=results),indent=2)+'\n')
-print('Verified one full and', a.mutable_per_step, 'mutable-only checks per step:',len(results),'models; exact release outputs')
+(a.out/'results.json').write_text(json.dumps(dict(status='passed',instrumentation='predicate implementations',expected_per_step=dict(full=a.full_per_step,mutable=a.mutable_per_step),source_build=str(a.build),binary_sha256=sha(a.out/'bin/movement_bench'),sources={str(p.relative_to(src)):sha(p) for p in src.rglob('*.ad?')},results=results),indent=2)+'\n')
+print('Verified', a.full_per_step, 'full and', a.mutable_per_step, 'mutable-only checks per step:',len(results),'models; exact release outputs')

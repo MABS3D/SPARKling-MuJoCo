@@ -11,7 +11,7 @@ private package MJ.Data.Actuation_Phase with SPARK_Mode is
      Ghost => Static, Global => null, Pre => Is_Ready (D) and then Index < Control_Count (D);
    function Expected_Generalized (D : Simulation; Index : Natural) return Real with
      Ghost => Static, Global => null, Pre => Is_Ready (D) and then Actuation_Current (D) and then Index < Velocity_Count (D);
-   procedure Compute (D : in out Simulation; Result : out Status) with Global => null, Pre => Stable_Ready (D),
+   procedure Compute (D : in out Simulation; Result : out Status) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old;
    pragma Postcondition (Stable_Ready (D));
    pragma Postcondition (Is_Ready (D) = Is_Ready (D)'Old);

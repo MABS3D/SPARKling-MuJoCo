@@ -1,0 +1,44 @@
+{
+  "git_head": "70800df9384470eade7d25ae5ba51f22673a1797",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "cpu": "Architecture:                         x86_64\nCPU op-mode(s):                       32-bit, 64-bit\nAddress sizes:                        48 bits physical, 48 bits virtual\nByte Order:                           Little Endian\nCPU(s):                               16\nOn-line CPU(s) list:                  0-15\nVendor ID:                            AuthenticAMD\nModel name:                           AMD Ryzen 7 9800X3D 8-Core Processor\nCPU family:                           26\nModel:                                68\nThread(s) per core:                   2\nCore(s) per socket:                   8\nSocket(s):                            1\nStepping:                             0\nBogoMIPS:                             9399.79\nFlags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm avx512_vp2intersect\nVirtualization:                       AMD-V\nHypervisor vendor:                    Microsoft\nVirtualization type:                  full\nL1d cache:                            384 KiB (8 instances)\nL1i cache:                            256 KiB (8 instances)\nL2 cache:                             8 MiB (8 instances)\nL3 cache:                             96 MiB (1 instance)\nNUMA node(s):                         1\nNUMA node0 CPU(s):                    0-15\nVulnerability Gather data sampling:   Not affected\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Not affected\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Not affected\nVulnerability Spec rstack overflow:   Not affected\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected\n",
+  "reference": {
+    "command": [
+      "gcc",
+      "-std=c11",
+      "-O3",
+      "-march=native",
+      "-flto",
+      "-ffat-lto-objects",
+      "-ffp-contract=off",
+      "-ffinite-math-only",
+      "-fno-trapping-math",
+      "-fno-math-errno",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-I/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/include",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tests/movement_performance/movement_c.c",
+      "/var/tmp/sparkling-movement-c/build/lib/libmujoco.so.3.14.0",
+      "/var/tmp/sparkling-matrix-recovery/toolchains/gnat/gnat-x86_64-linux-16.1.0-1/lib64/libstdc++.so.6.0.35",
+      "-Wl,-rpath,/var/tmp/sparkling-movement-c/build/lib:/var/tmp/sparkling-matrix-recovery/toolchains/gnat/gnat-x86_64-linux-16.1.0-1/lib64",
+      "-o",
+      "/var/tmp/sparkling-movement-final/movement_c"
+    ],
+    "binary_sha256": "bb2b93b040a1d910f15e11cbf929e6ee699f49ad6749f7d23b69c049ede82058",
+    "library": "/var/tmp/sparkling-movement-c/build/lib/libmujoco.so.3.14.0",
+    "library_sha256": "5ef8812ebfa01f6a9cd2917307463624375dfc6dd4d85e31c11930658e3ad755",
+    "cpp_runtime": "/var/tmp/sparkling-matrix-recovery/toolchains/gnat/gnat-x86_64-linux-16.1.0-1/lib64/libstdc++.so.6.0.35",
+    "cpp_runtime_sha256": "f214e3118de8631d282a650c2e8edfb79d00502acb633d28b94f45d0281d9c9e"
+  },
+  "gnat": "GNATLS 16.1.0\nCopyright (C) 1992-2025, Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "active_source_differences": [
+    "mj-compact_inertia.ads and .adb: unused helper extension; active dynamics source matches frozen baseline",
+    "standalone compact_inertia_test.adb: not benchmark main"
+  ],
+  "timing_harness_change_after_measurement": "Added optional C library hash validation, no timing or numeric logic change.",
+  "scripts_sha256": {
+    "build.py": "8488449abd4a94e4566241adc81accc8d62777397d8c1d2c839de6297d111072",
+    "measure.py": "03f585f92f66b7b1cda914949ab36f502da6bad90f24cef000642599bcd3bdeb",
+    "summarize.py": "4d9252e983ddd69fc0b20e46400f1236438601580ee3ea67643fe757b4f71426"
+  }
+}
