@@ -1,0 +1,870 @@
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-fluid_phase.adb
+@@ -0,0 +1,227 @@
++with MJ.Spatial_Kernels;
++with Ada.Unchecked_Deallocation;
++with Ada.Numerics.Long_Elementary_Functions;
++with MJ.Fluid_Kernels;
++package body MJ.Data.Fluid_Phase with SPARK_Mode is
++   package FK renames MJ.Fluid_Kernels;
++   procedure Free_Elements is new Ada.Unchecked_Deallocation (FK.Element_Array, FK.Element_Access);
++   procedure Release (D : in out Simulation) is
++   begin
++      Free_Elements (D.Fluid_Elements);
++      D.Fluid := (others => <>);
++   end Release;
++
++   procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) is
++      use Ada.Numerics.Long_Elementary_Functions;
++      type Flags is array (Natural range <>) of Boolean;
++      Ellipsoids : Flags (0 .. D.Nb-1) := [others => False];
++      Count : Natural := 0;
++      Next : Natural := 0;
++      Ok : Boolean;
++      Q : Quaternion;
++   begin
++      Result := Invalid_Model;
++      if M.Opt.Density not in Nonneg_Tier0 or else M.Opt.Viscosity not in Nonneg_Tier0
++        or else not Bounded (Read_Vector (M.Opt.Wind, 0), Max_Val) then return; end if;
++      D.Fluid := (M.Opt.Density, M.Opt.Viscosity, Read_Vector (M.Opt.Wind, 0));
++      if (D.Fluid.Density = 0.0 and then D.Fluid.Viscosity = 0.0)
++        or else (not D.Spring_Enabled and then not D.Damper_Enabled) then
++         Result := Success; return;
++      end if;
++      for G in 0 .. M.S.Ngeom-1 loop
++         if M.Geoms.Geom_Bodyid(G) not in 0 .. D.Nb-1 then return; end if;
++         if M.Geoms.Geom_Fluid(12*G) > 0.0 then
++            Ellipsoids (M.Geoms.Geom_Bodyid(G)) := True;
++         end if;
++      end loop;
++      for B in 1 .. D.Nb-1 loop
++         if D.Body_Config(B).Mass >= Min_Val then
++            if not Ellipsoids(B) then Count := Count + 1;
++            else
++               for G in 0 .. M.S.Ngeom-1 loop
++                  if M.Geoms.Geom_Bodyid(G) = B and then M.Geoms.Geom_Fluid(12*G) /= 0.0 then
++                     Count := Count + 1;
++                  end if;
++               end loop;
++            end if;
++         end if;
++      end loop;
++      D.Fluid_Elements := new FK.Element_Array (0 .. Integer(Count)-1);
++      for B in 1 .. D.Nb-1 loop
++         if D.Body_Config(B).Mass >= Min_Val then
++            if not Ellipsoids(B) then
++               declare
++                  E : FK.Element;
++                  C : Body_Parameters renames D.Body_Config(B);
++               begin
++                  E.Body_Id := B; E.Inverse_Mass := 1.0/D.Body_Config(B).Mass;
++                  E.Position := C.Inertial_Position;
++                  E.Rotation := Rotation(C.Inertial_Orientation);
++                  E.Box := [
++                    Sqrt(Real'Max(Min_Val, C.Inertia(1)+C.Inertia(2)-C.Inertia(0))/C.Mass*6.0),
++                    Sqrt(Real'Max(Min_Val, C.Inertia(0)+C.Inertia(2)-C.Inertia(1))/C.Mass*6.0),
++                    Sqrt(Real'Max(Min_Val, C.Inertia(0)+C.Inertia(1)-C.Inertia(2))/C.Mass*6.0)];
++                  if not Bounded(E.Box,1.0e14) then return; end if;
++                  E.Box_Data := FK.Prepare_Box(E.Box,D.Fluid.Density,D.Fluid.Viscosity);
++                  D.Fluid_Elements(Next) := E; Next := Next+1;
++               end;
++            else
++               for G in 0 .. M.S.Ngeom-1 loop
++                  if M.Geoms.Geom_Bodyid(G) = B and then M.Geoms.Geom_Fluid(12*G) /= 0.0 then
++                     declare
++                        E : FK.Element;
++                        P : FK.Ellipsoid_Parameters renames E.Parameters;
++                        A : constant Natural := 12*G;
++                     begin
++                        E.Body_Id := B; E.Inverse_Mass := 1.0/D.Body_Config(B).Mass; E.Is_Ellipsoid := True;
++                        E.Position := Read_Vector(M.Geoms.Geom_Pos.all,3*G);
++                        if not Bounded(E.Position,Max_Val) then return; end if;
++                        Q := Read_Quaternion(M.Geoms.Geom_Quat.all,4*G);
++                        Normalize(Q,Ok); if not Ok then return; end if;
++                        E.Rotation := Rotation(Q);
++                        for K in 0 .. 5 loop
++                           if M.Geoms.Geom_Fluid(A+K) not in Nonneg_Tier0 then return; end if;
++                        end loop;
++                        P.Interaction := M.Geoms.Geom_Fluid(A);
++                        P.Blunt := M.Geoms.Geom_Fluid(A+1);
++                        P.Slender := M.Geoms.Geom_Fluid(A+2);
++                        P.Angular := M.Geoms.Geom_Fluid(A+3);
++                        P.Kutta := M.Geoms.Geom_Fluid(A+4);
++                        P.Magnus := M.Geoms.Geom_Fluid(A+5);
++                        P.Virtual_Mass := Read_Vector(M.Geoms.Geom_Fluid.all,A+6);
++                        P.Virtual_Inertia := Read_Vector(M.Geoms.Geom_Fluid.all,A+9);
++                        P.Size := Read_Vector(M.Geoms.Geom_Size.all,3*G);
++                        case M.Geoms.Geom_Type(G) is
++                           when 2 => P.Size := [others => P.Size(0)];
++                           when 3 => P.Size := [P.Size(0),P.Size(0),P.Size(1)+P.Size(0)];
++                           when 5 => P.Size := [P.Size(0),P.Size(0),P.Size(1)];
++                           when others => null;
++                        end case;
++                        if (for some X of P.Size => X not in Nonneg_Tier0)
++                          or else not Bounded(P.Virtual_Mass,Max_Val)
++                          or else not Bounded(P.Virtual_Inertia,Max_Val) then return; end if;
++                        E.Ellipsoid_Data := FK.Prepare_Ellipsoid(P);
++                        D.Fluid_Elements(Next) := E; Next := Next+1;
++                     end;
++                  end if;
++               end loop;
++            end if;
++         end if;
++      end loop;
++      Result := Success;
++   end Initialize;
++
++   procedure Accumulate (D : in out Simulation; Result : out Status;
++                         Root_Velocity : MJ.Fluid_Kernels.Motion_Array := MJ.Fluid_Kernels.No_Motions) is
++      type Vectors is array (Natural range <>) of Vector;
++      Linear, Angular : Vectors (0 .. (if Root_Velocity'Length = 0 then D.Nb-1 else -1)) := [others => Zero];
++      Forces, Torques : Vectors (0 .. D.Nb-1) := [others => Zero];
++      R : Matrix;
++      Offset, LV, AV, F, T : Vector;
++      W : FK.Wrench;
++      Value : Real;
++   begin
++      Result := Success;
++      if D.Fluid_Elements = null or else D.Fluid_Elements'Length = 0 then return; end if;
++      Result := Numeric_Limit;
++      if Root_Velocity'Length = 0 then
++      --  Velocities at body origins, constructed once in topological order.
++      for B in 1 .. D.Nb-1 loop
++         declare
++            C : Body_Parameters renames D.Body_Config(B);
++            Parent : constant Natural := C.Parent;
++         begin
++            Angular(B) := Angular(Parent);
++            Linear(B) := Linear(Parent) + Cross(Angular(Parent),
++              D.Kinematic.Bodies(B).Position-D.Kinematic.Bodies(Parent).Position);
++            for K in 0 .. C.Joint_Count-1 loop
++               declare
++                  J : constant Natural := C.First_Joint+K;
++                  Speed : constant Real := D.State.Qvel(D.Joint_Config(J).Vadr);
++                  Axis : Vector := D.Kinematic.Joints(J).Direction;
++               begin
++                  if D.Joint_Config(J).Kind = Hinge_Joint then
++                     Angular(B) := Angular(B) + Speed*Axis;
++                     Axis := Cross(Axis,D.Kinematic.Bodies(B).Position-D.Kinematic.Joints(J).Anchor);
++                  end if;
++                  Linear(B) := Linear(B) + Speed*Axis;
++               end;
++            end loop;
++            if not Bounded(Linear(B),1.0e12) or else not Bounded(Angular(B),1.0e12) then return; end if;
++         end;
++      end loop;
++      end if;
++      for E of D.Fluid_Elements.all loop
++         declare
++            B : constant Natural := E.Body_Id;
++            BR : Matrix renames D.Kinematic.Bodies(B).Rotation;
++         begin
++            Offset := Apply(BR,E.Position);
++            if E.Is_Ellipsoid then
++            --  Preserve C's subtraction in the local frame, including wind.
++            for I in Axis loop
++               for J in Axis loop
++                  R(I,J) := BR(I,0)*E.Rotation(0,J) + BR(I,1)*E.Rotation(1,J) + BR(I,2)*E.Rotation(2,J);
++               end loop;
++            end loop;
++            else
++               R := D.Kinematic.Bodies(B).Inertial_Rotation;
++            end if;
++            if Root_Velocity'Length > 0 then
++               declare
++                  V : MJ.Spatial_Kernels.Motion renames Root_Velocity(B);
++                  Center_Offset : constant Vector := [D.Kinematic.Spatial_Inertias(10*B+6)*E.Inverse_Mass,
++                    D.Kinematic.Spatial_Inertias(10*B+7)*E.Inverse_Mass,D.Kinematic.Spatial_Inertias(10*B+8)*E.Inverse_Mass];
++                  Point_Offset : constant Vector := (Offset + (D.Kinematic.Bodies(B).Position-D.Kinematic.Bodies(B).Center)) + Center_Offset;
++                  Omega : constant Vector := [V(0),V(1),V(2)];
++                  Speed : constant Vector := [V(3),V(4),V(5)];
++               begin
++                  AV := Apply_Transpose(R,Omega);
++                  LV := Apply_Transpose(R,Speed+Cross(Omega,Point_Offset)) - Apply_Transpose(R,D.Fluid.Wind);
++               end;
++            else
++               AV := Apply_Transpose(R,Angular(B));
++               LV := Apply_Transpose(R,Linear(B)+Cross(Angular(B),Offset)) - Apply_Transpose(R,D.Fluid.Wind);
++            end if;
++            if not Bounded(LV,1.0e12) or else not Bounded(AV,1.0e12) then return; end if;
++            W := (if E.Is_Ellipsoid then FK.Ellipsoid(E.Parameters,E.Ellipsoid_Data,D.Fluid.Density,D.Fluid.Viscosity,LV,AV)
++                  else FK.Apply_Box(E.Box_Data,LV,AV));
++            F := Apply(R,W.Force); T := Apply(R,W.Torque);
++            Forces(B) := Forces(B)+F;
++            Torques(B) := Torques(B)+(T+Cross(Offset,F));
++            if not Bounded(Forces(B)) or else not Bounded(Torques(B)) then return; end if;
++         end;
++      end loop;
++      --  Accumulate each subtree's wrench once. Equivalent to summing each
++      --  element's ancestor Jacobian projection, with a different FP order.
++      for B in reverse 1 .. D.Nb-1 loop
++         declare
++            C : Body_Parameters renames D.Body_Config(B);
++            Parent : constant Natural := C.Parent;
++         begin
++            for K in 0 .. C.Joint_Count-1 loop
++               declare
++                  J : constant Natural := C.First_Joint+K;
++                  V : constant Natural := D.Joint_Config(J).Vadr;
++                  Axis : Vector renames D.Kinematic.Joints(J).Direction;
++               begin
++                  if D.Joint_Config(J).Kind = Hinge_Joint then
++                     T := Torques(B) + Cross(D.Kinematic.Bodies(B).Position-D.Kinematic.Joints(J).Anchor,Forces(B));
++                     Value := Dot(Axis,T);
++                  else Value := Dot(Axis,Forces(B)); end if;
++                  Value := D.Dynamics.Passive(V) + Value;
++                  if not Within_Work(Value) then return; end if;
++                  D.Dynamics.Passive(V) := Value;
++               end;
++            end loop;
++            if Parent > 0 then
++               Forces(Parent) := Forces(Parent)+Forces(B);
++               Torques(Parent) := Torques(Parent)+(Torques(B)+Cross(
++                 D.Kinematic.Bodies(B).Position-D.Kinematic.Bodies(Parent).Position,Forces(B)));
++               if not Bounded(Forces(Parent)) or else not Bounded(Torques(Parent)) then return; end if;
++            end if;
++         end;
++      end loop;
++      Result := Success;
++   end Accumulate;
++end MJ.Data.Fluid_Phase;
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-fluid_phase.ads
+@@ -0,0 +1,10 @@
++private package MJ.Data.Fluid_Phase with SPARK_Mode is
++   procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status)
++     with Global => null;
++   procedure Release (D : in out Simulation) with Global => null,
++     Post => D.Fluid_Elements = null;
++   procedure Accumulate (D : in out Simulation; Result : out Status;
++                         Root_Velocity : MJ.Fluid_Kernels.Motion_Array := MJ.Fluid_Kernels.No_Motions)
++     with Global => null,
++     Pre => Is_Ready (D) and then Positions_Current (D);
++end MJ.Data.Fluid_Phase;
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -1,4 +1,6 @@
+ with MJ.Gravity_Bounds;
++with MJ.Data.Fluid_Phase;
++with MJ.Fluid_Kernels;
+ with MJ.Composite_Weights;
+ with MJ.Smooth_Dynamics;
+ with MJ.Spatial_Kernels;
+@@ -32,7 +34,7 @@
+    use type SK.Motion;
+    package SD renames MJ.Spatial_Dynamics;
+    package T renames MJ.Smooth_Topology;
+-   type Motion_Array is array (Natural range <>) of SK.Motion;
++   subtype Motion_Array is MJ.Fluid_Kernels.Motion_Array;
+ 
+    procedure Transfer_Motion_Bound (Left, Right : SK.Motion; Limit : Real)
+      with Ghost => Static, Global => null,
+@@ -194,9 +196,10 @@
+    procedure Forward_Bodies
+      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
+       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array; Gravity_Vector : Vector;
+-      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean)
++      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean; Velocity : in out Motion_Array)
+      with Global => null, Relaxed_Initialization => (Bias, Gravity),
+-     Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
++     Pre => Velocity'First = 0 and then Velocity'Length = Body_Config'Length
++       and then Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
+        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
+        and then Qvel'First = 0 and then Qvel'Last = Joint_Config'Last
+        and then (for all X of Qvel => X in Tier0_Real)
+@@ -220,7 +223,7 @@
+        and then (for all X of Bias => SK.Bounded (X, 1.0e54))
+        and then (for all X of Gravity => SK.Bounded (X, 1.0e48)))
+    is
+-      Velocity, Acceleration : Motion_Array (Body_Config'Range) with Relaxed_Initialization;
++      Acceleration : Motion_Array (Body_Config'Range) with Relaxed_Initialization;
+       V, A, G, F : SK.Motion with Relaxed_Initialization;
+       Accepted : Boolean;
+    begin
+@@ -367,9 +370,10 @@
+      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
+       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array;
+       Topology : MJ.Smooth_Topology.Cache; Gravity_Vector : Vector;
+-      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean)
+-     with Global => null,
+-     Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
++      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
++     with Global => null,
++     Pre => Velocity'First = 0 and then Velocity'Length = Body_Config'Length
++       and then Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
+        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
+        and then Qvel'First = 0 and then Qvel'Last = Joint_Config'Last
+        and then (for all X of Qvel => X in Tier0_Real)
+@@ -399,7 +403,7 @@
+       Gravity_Out := [others => 0.0];
+       Bias_Out := [others => 0.0];
+       Forward_Bodies (Body_Config, Joint_Config, Qvel, Spatial_Inertias, Spatial_Motions,
+-                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok);
++                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok, Velocity);
+       if not Ok then return; end if;
+       Backward_Bodies (Body_Config, Bias, Gravity, Ok);
+       if not Ok then return; end if;
+@@ -408,9 +412,10 @@
+    pragma Inline_Always (Recursive_Forces_Buffers);
+ 
+    procedure Try_Recursive
+-     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean)
+-     with Global => null,
+-     Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then D.Cache.Spatial_Valid
++     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
++     with Global => null,
++     Pre => Velocity'First = 0 and then Velocity'Length = D.Nb
++       and then Is_Ready (D) and then D.Cache.Pose_Valid and then D.Cache.Spatial_Valid
+        and then Gravity_Out'First = 0 and then Gravity_Out'Last = D.Nv - 1
+        and then Bias_Out'First = 0 and then Bias_Out'Last = D.Nv - 1,
+      Post => MJ.Smooth_Dynamics.Work_Array (Gravity_Out)
+@@ -423,7 +428,7 @@
+       Recursive_Forces_Buffers
+         (D.Body_Config.all, D.Joint_Config.all, D.State.Qvel.all,
+          D.Kinematic.Spatial_Inertias.all, D.Kinematic.Spatial_Motions.all,
+-         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok);
++         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok, Velocity);
+    end Try_Recursive;
+ 
+    procedure Passive_Buffers
+@@ -703,7 +708,7 @@
+       null;
+    end Establish_Readiness;
+ 
+-   procedure Complete_Passive (D : in out Simulation; Result : out Status)
++   procedure Complete_Passive (D : in out Simulation; Result : out Status; Velocity : Motion_Array; Reuse : Boolean)
+      with Global => null, Pre => Is_Ready (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all);
+    pragma Postcondition (Static => Is_Ready (D));
+@@ -720,7 +725,7 @@
+    pragma Postcondition (Static => Step_Size (D) = Step_Size (D)'Old);
+    pragma Postcondition (Static => (if Result = Success then Passive_Current (D)));
+ 
+-   procedure Complete_Passive (D : in out Simulation; Result : out Status)
++   procedure Complete_Passive (D : in out Simulation; Result : out Status; Velocity : Motion_Array; Reuse : Boolean)
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+@@ -735,6 +740,9 @@
+       pragma Assert (Static => Configuration_Bounded (D));
+       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
+ 
++      if Result = Success and then D.Fluid_Elements /= null then
++         MJ.Data.Fluid_Phase.Accumulate (D, Result, (if Reuse then Velocity else MJ.Fluid_Kernels.No_Motions));
++      end if;
+       if Result = Success then D.Cache.Passive_Valid := True; end if;
+       pragma Assert (Static => Inputs_Bounded (D));
+       pragma Assert (Static => Caches_Bounded (D));
+@@ -815,7 +823,7 @@
+    end Publish_Gravity_Bias;
+    pragma Inline_Always (Publish_Gravity_Bias);
+ 
+-   procedure Recursive_Path (D : in out Simulation; Used : out Boolean)
++   procedure Recursive_Path (D : in out Simulation; Used : out Boolean; Velocity : in out Motion_Array)
+      with Global => null,
+      Pre => Is_Ready (D) and then Positions_Current (D) and then not D.Cache.Passive_Valid;
+    pragma Postcondition (Static => Is_Ready (D));
+@@ -833,7 +841,7 @@
+    pragma Postcondition (Static => not D.Cache.Passive_Valid);
+    pragma Postcondition (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)));
+ 
+-   procedure Recursive_Path (D : in out Simulation; Used : out Boolean)
++   procedure Recursive_Path (D : in out Simulation; Used : out Boolean; Velocity : in out Motion_Array)
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stable_Ready);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
+@@ -893,7 +901,7 @@
+          Nv : constant Natural := D.Nv;
+          Gravity, Bias : Real_Array (0 .. Nv - 1);
+       begin
+-         Try_Recursive (D, Gravity, Bias, Used);
++         Try_Recursive (D, Gravity, Bias, Used, Velocity);
+          if Used then
+             declare
+                Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+@@ -1057,6 +1065,7 @@
+       Initial_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+       Initial_Config : constant Configuration_Snapshot := Capture_Configuration (D) with Ghost => Static;
+       Used : Boolean;
++      Velocity : Motion_Array (0 .. D.Nb-1) := [others => [others => 0.0]];
+    begin
+       Ready_Properties (D);
+       declare
+@@ -1081,7 +1090,7 @@
+          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+       begin
+-         Recursive_Path (D, Used);
++         Recursive_Path (D, Used, Velocity);
+          Ready_Properties (D);
+          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+@@ -1114,7 +1123,7 @@
+          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+       begin
+-         Complete_Passive (D, Result);
++         Complete_Passive (D, Result, Velocity, Used);
+          Ready_Properties (D);
+          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -2,6 +2,7 @@
+ with Interfaces;
+ with MJ.Models.Validity;
+ with MJ.Simple_Kernels;
++with MJ.Data.Fluid_Phase;
+ 
+ package body MJ.Data with SPARK_Mode is
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
+@@ -313,7 +314,6 @@
+         or else M.Opt.Disableactuator /= 0
+         or else M.S.Ntendon /= 0 or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
+         or else M.S.Nmocap /= 0 or else M.S.Na /= 0 or else M.S.Nhistory /= 0
+-        or else M.Opt.Density /= 0.0 or else M.Opt.Viscosity /= 0.0
+         or else M.Flg_Adhesion
+       then
+          return Unsupported_Feature;
+@@ -851,6 +851,8 @@
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Copy_Actuators (M.S, M.Actuators, D.Actuator_Config, Normal);
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
++      MJ.Data.Fluid_Phase.Initialize (M, D, Result);
++      if Result /= Success then Free (D); return; end if;
+       Build_Topology (M, D, Normal);
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
+@@ -941,6 +943,7 @@
+ 
+    procedure Free (D : in out Simulation) is
+    begin
++      MJ.Data.Fluid_Phase.Release (D);
+       Free_Body_Config (D.Body_Config);
+       Free_Joint_Config (D.Joint_Config);
+       Free_Actuator_Config (D.Actuator_Config);
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -7,6 +7,7 @@
+ with MJ.Smooth_Math;
+ with MJ.Smooth_Kernels;
+ with MJ.Smooth_Actuation;
++with MJ.Fluid_Kernels;
+ 
+ package MJ.Data with SPARK_Mode is
+    use type MJ.Smooth_Math.Vector;
+@@ -282,10 +283,18 @@
+    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
+    use type Actuator_Parameters;
+    use type Actuator_Parameter_Array;
+-   type Configuration_Snapshot (Nb, Nj, Na : Natural) is record
++   type Fluid_Options is record
++      Density, Viscosity : Nonneg_Tier0 := 0.0;
++      Wind : Vector := Zero;
++   end record;
++   use type MJ.Fluid_Kernels.Element_Access;
++   use type MJ.Fluid_Kernels.Element_Array;
++   type Configuration_Snapshot (Nb, Nj, Na, Nf : Natural) is record
+       Nq, Nv, Nu, No : Natural;
+       Timestep : Nonneg_Tier0;
+       Gravity : Vector;
++      Fluid : Fluid_Options;
++      Fluid_Elements : MJ.Fluid_Kernels.Element_Array (1 .. Nf);
+       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean;
+       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean;
+       Solver_Policy : Inertia_Policy;
+@@ -352,6 +361,8 @@
+       Clock : Nonneg_Tier0 := 0.0;
+       Timestep : Nonneg_Tier0 := 0.0;
+       Gravity : Vector := Zero;
++      Fluid : Fluid_Options;
++      Fluid_Elements : MJ.Fluid_Kernels.Element_Access := null;
+       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean := True;
+       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean := True;
+       Cache : Cache_Flags;
+@@ -374,14 +385,16 @@
+      (if D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
+         and then Int64 (D.Body_Config'Length) = Int64 (D.Nb) and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+         and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na) then
+-        (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++        (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nf => (if D.Fluid_Elements = null then 0 else D.Fluid_Elements'Length), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Fluid => D.Fluid, Fluid_Elements => (if D.Fluid_Elements = null then [1 .. 0 => <>] else D.Fluid_Elements.all),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+          Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
+          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
+       else
+-        (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++        (Nb => 0, Nj => 0, Na => 0, Nf => (if D.Fluid_Elements = null then 0 else D.Fluid_Elements'Length), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Fluid => D.Fluid, Fluid_Elements => (if D.Fluid_Elements = null then [1 .. 0 => <>] else D.Fluid_Elements.all),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+@@ -394,7 +407,7 @@
+      with Global => null;
+ 
+    function Is_Empty (D : Simulation) return Boolean is
+-     (not D.Allocated and then D.Body_Config = null and then D.Joint_Config = null
++     (not D.Allocated and then D.Fluid_Elements = null and then D.Body_Config = null and then D.Joint_Config = null
+       and then D.Actuator_Config = null and then D.State.Qpos = null
+       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
+       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
+@@ -456,7 +469,8 @@
+        and then C1 = C2 and then F1 = F2,
+      Post => Input_Image (C1, F1) = Input_Image (C2, F2);
+    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) with Ghost => Static, Global => null,
+-     Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
++     Pre => A.Nf = B.Nf and then A.Fluid = B.Fluid and then A.Fluid_Elements = B.Fluid_Elements
++       and then A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
+        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
+        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
+        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
+@@ -507,7 +521,7 @@
+      Post => Array_Bounded'Result =
+        (P /= null and then (for all X of P.all => X in -Limit .. Limit));
+    function Configuration_Bounded (D : Simulation) return Boolean is
+-     (Bounded (D.Gravity, Max_Val)
++     (Bounded (D.Fluid.Wind, Max_Val) and then Bounded (D.Gravity, Max_Val)
+       and then D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
+       and then (for all B of D.Body_Config.all => Bounded (B.Position, Max_Val)
+         and then Bounded (B.Inertial_Position, Max_Val) and then Bounded (B.Inertia, Max_Val))
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_added_mass.adb
+@@ -0,0 +1,22 @@
++package body MJ.Fluid_Added_Mass with SPARK_Mode is
++   function Momentum (Density : Nonneg_Tier0; Virtual : Tier0_Real; V : Rate) return Momentum_Value is
++   begin
++      return Density*Virtual*V;
++   end Momentum;
++   function Cross_Term (A1,A2 : Momentum_Value; B1,B2 : Rate) return Cross_Value is
++   begin
++      return A1*B2-A2*B1;
++   end Cross_Term;
++   function Evaluate (Density : Nonneg_Tier0; Virtual_Mass, Virtual_Inertia, Linear, Angular : Vector) return Wrench is
++      type Moments is array (Axis) of Momentum_Value;
++      LM : constant Moments := [Momentum(Density,Virtual_Mass(0),Linear(0)),Momentum(Density,Virtual_Mass(1),Linear(1)),Momentum(Density,Virtual_Mass(2),Linear(2))];
++      AM : constant Moments := [Momentum(Density,Virtual_Inertia(0),Angular(0)),Momentum(Density,Virtual_Inertia(1),Angular(1)),Momentum(Density,Virtual_Inertia(2),Angular(2))];
++   begin
++      return (Force => [Cross_Term(LM(1),LM(2),Angular(1),Angular(2)),
++                        Cross_Term(LM(2),LM(0),Angular(2),Angular(0)),
++                        Cross_Term(LM(0),LM(1),Angular(0),Angular(1))],
++              Torque => [Cross_Term(LM(1),LM(2),Linear(1),Linear(2))+Cross_Term(AM(1),AM(2),Angular(1),Angular(2)),
++                         Cross_Term(LM(2),LM(0),Linear(2),Linear(0))+Cross_Term(AM(2),AM(0),Angular(2),Angular(0)),
++                         Cross_Term(LM(0),LM(1),Linear(0),Linear(1))+Cross_Term(AM(0),AM(1),Angular(0),Angular(1))]);
++   end Evaluate;
++end MJ.Fluid_Added_Mass;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_added_mass.ads
+@@ -0,0 +1,33 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++with MJ.Fluid_Box;
++package MJ.Fluid_Added_Mass with SPARK_Mode is
++   subtype Momentum_Value is Real range -1.0e34 .. 1.0e34;
++   subtype Rate is Real range -1.0e12 .. 1.0e12;
++   subtype Cross_Value is Real range -1.0e48 .. 1.0e48;
++   subtype Wrench is MJ.Fluid_Box.Wrench;
++   function Momentum (Density : Nonneg_Tier0; Virtual : Tier0_Real; V : Rate) return Momentum_Value
++     with Global => null, Post => Momentum'Result = Density*Virtual*V;
++   function Cross_Term (A1,A2 : Momentum_Value; B1,B2 : Rate) return Cross_Value
++     with Global => null, Post => Cross_Term'Result = A1*B2-A2*B1;
++   function Evaluate (Density : Nonneg_Tier0; Virtual_Mass, Virtual_Inertia, Linear, Angular : Vector) return Wrench
++     with Global => null,
++     Pre => Bounded(Virtual_Mass,Max_Val) and then Bounded(Virtual_Inertia,Max_Val)
++       and then Bounded(Linear,1.0e12) and then Bounded(Angular,1.0e12),
++     Post => Bounded(Evaluate'Result.Force,1.0e50) and then Bounded(Evaluate'Result.Torque,1.0e50);
++   pragma Postcondition (Evaluate'Result.Force(0) = Cross_Term(
++     Momentum(Density,Virtual_Mass(1),Linear(1)),Momentum(Density,Virtual_Mass(2),Linear(2)),Angular(1),Angular(2)));
++   pragma Postcondition (Evaluate'Result.Torque(0) = Cross_Term(
++     Momentum(Density,Virtual_Mass(1),Linear(1)),Momentum(Density,Virtual_Mass(2),Linear(2)),Linear(1),Linear(2)) + Cross_Term(
++     Momentum(Density,Virtual_Inertia(1),Angular(1)),Momentum(Density,Virtual_Inertia(2),Angular(2)),Angular(1),Angular(2)));
++   pragma Postcondition (Evaluate'Result.Force(1) = Cross_Term(
++     Momentum(Density,Virtual_Mass(2),Linear(2)),Momentum(Density,Virtual_Mass(0),Linear(0)),Angular(2),Angular(0)));
++   pragma Postcondition (Evaluate'Result.Torque(1) = Cross_Term(
++     Momentum(Density,Virtual_Mass(2),Linear(2)),Momentum(Density,Virtual_Mass(0),Linear(0)),Linear(2),Linear(0)) + Cross_Term(
++     Momentum(Density,Virtual_Inertia(2),Angular(2)),Momentum(Density,Virtual_Inertia(0),Angular(0)),Angular(2),Angular(0)));
++   pragma Postcondition (Evaluate'Result.Force(2) = Cross_Term(
++     Momentum(Density,Virtual_Mass(0),Linear(0)),Momentum(Density,Virtual_Mass(1),Linear(1)),Angular(0),Angular(1)));
++   pragma Postcondition (Evaluate'Result.Torque(2) = Cross_Term(
++     Momentum(Density,Virtual_Mass(0),Linear(0)),Momentum(Density,Virtual_Mass(1),Linear(1)),Linear(0),Linear(1)) + Cross_Term(
++     Momentum(Density,Virtual_Inertia(0),Angular(0)),Momentum(Density,Virtual_Inertia(1),Angular(1)),Angular(0),Angular(1)));
++end MJ.Fluid_Added_Mass;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_box.adb
+@@ -0,0 +1,45 @@
++package body MJ.Fluid_Box with SPARK_Mode is
++   function Viscous_Linear (Diameter : Dimension; Viscosity : Nonneg_Tier0) return Coefficient is
++   begin
++      return -3.0*Pi*Diameter*Viscosity;
++   end Viscous_Linear;
++   function Viscous_Angular (Diameter : Dimension; Viscosity : Nonneg_Tier0) return Coefficient is
++   begin
++      return -Pi*Diameter*Diameter*Diameter*Viscosity;
++   end Viscous_Angular;
++   function Drag_Linear (S1, S2 : Dimension; Density : Nonneg_Tier0) return Coefficient is
++   begin
++      return 0.5*Density*S1*S2;
++   end Drag_Linear;
++   function Drag_Angular (S0, S1, S2 : Dimension; Density : Nonneg_Tier0) return Coefficient is
++      subtype P4 is Real range 0.0 .. 2.0e56;
++      A : constant P4 := S1*S1*S1*S1;
++      B : constant P4 := S2*S2*S2*S2;
++   begin
++      return Density*S0*(A+B);
++   end Drag_Angular;
++   function Component (Viscous, Quadratic : Coefficient; V : Rate; Rotation : Boolean) return Force_Value is
++      subtype Partial_Value is Real range -1.0e116 .. 1.0e116;
++      F : constant Partial_Value := Viscous*V;
++      D : constant Partial_Value := Quadratic*abs(V)*V;
++   begin
++      return F - (if Rotation then D/64.0 else D);
++   end Component;
++   function Prepare (Box : Vector; Density, Viscosity : Nonneg_Tier0) return Coefficients is
++      Diameter : constant Dimension := (Box(0)+Box(1)+Box(2))/3.0;
++   begin
++      return (Linear_Viscous => Viscous_Linear(Diameter,Viscosity),
++              Angular_Viscous => Viscous_Angular(Diameter,Viscosity),
++              Linear_Drag => [Drag_Linear(Box(1),Box(2),Density),Drag_Linear(Box(0),Box(2),Density),Drag_Linear(Box(0),Box(1),Density)],
++              Angular_Drag => [Drag_Angular(Box(0),Box(1),Box(2),Density),Drag_Angular(Box(1),Box(0),Box(2),Density),Drag_Angular(Box(2),Box(0),Box(1),Density)]);
++   end Prepare;
++   function Evaluate (C : Coefficients; Linear, Angular : Vector) return Wrench is
++   begin
++      return (Force => [Component(C.Linear_Viscous,C.Linear_Drag(0),Linear(0),False),
++                        Component(C.Linear_Viscous,C.Linear_Drag(1),Linear(1),False),
++                        Component(C.Linear_Viscous,C.Linear_Drag(2),Linear(2),False)],
++              Torque => [Component(C.Angular_Viscous,C.Angular_Drag(0),Angular(0),True),
++                         Component(C.Angular_Viscous,C.Angular_Drag(1),Angular(1),True),
++                         Component(C.Angular_Viscous,C.Angular_Drag(2),Angular(2),True)]);
++   end Evaluate;
++end MJ.Fluid_Box;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_box.ads
+@@ -0,0 +1,50 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++with Ada.Numerics;
++package MJ.Fluid_Box with SPARK_Mode is
++   Pi : constant Real := Ada.Numerics.Pi;
++   subtype Dimension is Real range 0.0 .. 1.0e14;
++   subtype Coefficient is Real range -1.0e90 .. 1.0e90;
++   subtype Rate is Real range -1.0e12 .. 1.0e12;
++   subtype Force_Value is Real range -1.0e120 .. 1.0e120;
++   type Coefficient_Vector is array (Axis) of Coefficient;
++   type Coefficients is record
++      Linear_Viscous, Angular_Viscous : Coefficient := 0.0;
++      Linear_Drag, Angular_Drag : Coefficient_Vector := [others => 0.0];
++   end record;
++   type Wrench is record
++      Force, Torque : Vector := Zero;
++   end record;
++   function Viscous_Linear (Diameter : Dimension; Viscosity : Nonneg_Tier0) return Coefficient
++     with Global => null, Post => Viscous_Linear'Result = -3.0*Pi*Diameter*Viscosity;
++   function Viscous_Angular (Diameter : Dimension; Viscosity : Nonneg_Tier0) return Coefficient
++     with Global => null, Post => Viscous_Angular'Result = -Pi*Diameter*Diameter*Diameter*Viscosity;
++   function Drag_Linear (S1, S2 : Dimension; Density : Nonneg_Tier0) return Coefficient
++     with Global => null, Post => Drag_Linear'Result = 0.5*Density*S1*S2;
++   function Drag_Angular (S0, S1, S2 : Dimension; Density : Nonneg_Tier0) return Coefficient
++     with Global => null, Post => Drag_Angular'Result = Density*S0*(S1*S1*S1*S1+S2*S2*S2*S2);
++   function Component (Viscous, Quadratic : Coefficient; V : Rate; Rotation : Boolean) return Force_Value
++     with Global => null, Post => Component'Result = Viscous*V -
++       (if Rotation then Quadratic*abs(V)*V/64.0 else Quadratic*abs(V)*V);
++   function Prepare (Box : Vector; Density, Viscosity : Nonneg_Tier0) return Coefficients
++     with Global => null,
++     Pre => (for all X of Box => X in Dimension) and then (Box(0)+Box(1)+Box(2))/3.0 in Dimension,
++     Post => Prepare'Result.Linear_Viscous = Viscous_Linear((Box(0)+Box(1)+Box(2))/3.0,Viscosity);
++   pragma Postcondition (Prepare'Result.Angular_Viscous = Viscous_Angular((Box(0)+Box(1)+Box(2))/3.0,Viscosity));
++   pragma Postcondition (Prepare'Result.Linear_Drag(0) = Drag_Linear(Box(1),Box(2),Density));
++   pragma Postcondition (Prepare'Result.Angular_Drag(0) = Drag_Angular(Box(0),Box(1),Box(2),Density));
++   pragma Postcondition (Prepare'Result.Linear_Drag(1) = Drag_Linear(Box(0),Box(2),Density));
++   pragma Postcondition (Prepare'Result.Angular_Drag(1) = Drag_Angular(Box(1),Box(0),Box(2),Density));
++   pragma Postcondition (Prepare'Result.Linear_Drag(2) = Drag_Linear(Box(0),Box(1),Density));
++   pragma Postcondition (Prepare'Result.Angular_Drag(2) = Drag_Angular(Box(2),Box(0),Box(1),Density));
++   function Evaluate (C : Coefficients; Linear, Angular : Vector) return Wrench
++     with Global => null,
++     Pre => Bounded(Linear,1.0e12) and then Bounded(Angular,1.0e12),
++     Post => Bounded(Evaluate'Result.Force,1.0e120) and then Bounded(Evaluate'Result.Torque,1.0e120);
++   pragma Postcondition (Evaluate'Result.Force(0) = Component(C.Linear_Viscous,C.Linear_Drag(0),Linear(0),False));
++   pragma Postcondition (Evaluate'Result.Torque(0) = Component(C.Angular_Viscous,C.Angular_Drag(0),Angular(0),True));
++   pragma Postcondition (Evaluate'Result.Force(1) = Component(C.Linear_Viscous,C.Linear_Drag(1),Linear(1),False));
++   pragma Postcondition (Evaluate'Result.Torque(1) = Component(C.Angular_Viscous,C.Angular_Drag(1),Angular(1),True));
++   pragma Postcondition (Evaluate'Result.Force(2) = Component(C.Linear_Viscous,C.Linear_Drag(2),Linear(2),False));
++   pragma Postcondition (Evaluate'Result.Torque(2) = Component(C.Angular_Viscous,C.Angular_Drag(2),Angular(2),True));
++end MJ.Fluid_Box;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_kernels.adb
+@@ -0,0 +1,88 @@
++with Ada.Numerics.Long_Elementary_Functions;
++with MJ.Fluid_Added_Mass;
++package body MJ.Fluid_Kernels with SPARK_Mode is
++   function Prepare_Ellipsoid (P : Ellipsoid_Parameters) return Ellipsoid_Cache is
++      S : Vector renames P.Size;
++      R : Ellipsoid_Cache;
++      Dmin, Dmid, Inv_Dmax, Diameter, Imax : Real;
++      SN : Vector;
++   begin
++      R.Volume := 4.0/3.0*Pi*S(0)*S(1)*S(2);
++      R.Dmax := Real'Max (Real'Max(S(0),S(1)),S(2));
++      Dmin := Real'Min (Real'Min(S(0),S(1)),S(2));
++      Dmid := S(0)+S(1)+S(2)-R.Dmax-Dmin;
++      R.Amax := Pi*R.Dmax*Dmid;
++      Inv_Dmax := (if R.Dmax > Min_Val then 1.0/R.Dmax else 0.0);
++      SN := Inv_Dmax*S;
++      R.Surface := [(SN(1)*SN(2))*(SN(1)*SN(2)),
++                    (SN(2)*SN(0))*(SN(2)*SN(0)),
++                    (SN(0)*SN(1))*(SN(0)*SN(1))];
++      Diameter := 2.0/3.0*(S(0)+S(1)+S(2));
++      R.Lin_Visc := 3.0*Pi*Diameter;
++      R.Ang_Visc := Pi*Diameter*Diameter*Diameter;
++      Imax := 8.0/15.0*Pi*Dmid*Fourth(R.Dmax);
++      for I in Axis loop
++         declare
++            II : constant Real := 8.0/15.0*Pi*S(I)*Fourth(Real'Max(S((I+1) mod 3),S((I+2) mod 3)));
++         begin
++            R.Angular_Moment(I) := P.Angular*II + P.Slender*(Imax-II);
++         end;
++      end loop;
++      return R;
++   end Prepare_Ellipsoid;
++
++   function Blend_Force (Added, Magnus, Kutta, Drag : Blend_Input;
++                         Speed : Rate; Interaction : Nonneg_Tier0) return Blend_Value is
++   begin
++      return (Added + (Magnus+Kutta-Drag*Speed))*Interaction;
++   end Blend_Force;
++   function Blend_Torque (Added, Drag : Blend_Input; Speed : Rate;
++                          Interaction : Nonneg_Tier0) return Blend_Value is
++   begin
++      return (Added-Drag*Speed)*Interaction;
++   end Blend_Torque;
++
++   function Ellipsoid (P : Ellipsoid_Parameters; Cache : Ellipsoid_Cache; Density, Viscosity : Nonneg_Tier0;
++                        Linear, Angular : Vector) return Wrench is
++      use Ada.Numerics.Long_Elementary_Functions;
++      Volume : constant Real := Cache.Volume;
++      Dmax : constant Real := Cache.Dmax;
++      Amax : constant Real := Cache.Amax;
++      Speed : constant Real := Sqrt (Dot (Linear, Linear));
++      Inv_Speed : constant Real := (if Speed > Min_Val then 1.0/Speed else 0.0);
++      V : constant Vector := Inv_Speed * Linear;
++      Araw : constant Real := Cache.Surface(0);
++      Braw : constant Real := Cache.Surface(1);
++      Craw : constant Real := Cache.Surface(2);
++      PN : constant Real := Araw*V(0)*V(0) + Braw*V(1)*V(1) + Craw*V(2)*V(2);
++      Inv_PN : constant Real := (if PN > Min_Val then 1.0/PN else 0.0);
++      A : constant Real := Araw*Inv_PN;
++      B : constant Real := Braw*Inv_PN;
++      C : constant Real := Craw*Inv_PN;
++      PD : constant Real := A*A*V(0)*V(0) + B*B*V(1)*V(1) + C*C*V(2)*V(2);
++      Aproj : constant Real := Pi*Dmax*Dmax*Sqrt (PN*PD);
++      Normal : constant Vector := [A*V(0),B*V(1),C*V(2)];
++      Cos_Alpha : constant Real := (if PD > Min_Val then 1.0/PD else 0.0);
++      Magnus : constant Vector := (P.Magnus*Density*Volume) * Cross (Angular, Linear);
++      Circulation : constant Vector := (P.Kutta*Density*Cos_Alpha*Aproj) * Cross (Normal, Linear);
++      Kutta : constant Vector := Cross (Circulation, Linear);
++      Lin_Visc : constant Real := Cache.Lin_Visc;
++      Ang_Visc : constant Real := Cache.Ang_Visc;
++      Mom : Vector;
++      R : Wrench;
++      Drag_Lin : constant Real := Viscosity*Lin_Visc + Density*Speed*
++        (Aproj*P.Blunt + P.Slender*(Amax-Aproj));
++      Drag_Ang : Real;
++   begin
++      for I in Axis loop
++         Mom(I) := Angular(I)*Cache.Angular_Moment(I);
++      end loop;
++      Drag_Ang := Viscosity*Ang_Visc + Density*Sqrt (Dot (Mom,Mom));
++      R := MJ.Fluid_Added_Mass.Evaluate (Density,P.Virtual_Mass,P.Virtual_Inertia,Linear,Angular);
++      for I in Axis loop
++         R.Torque(I) := Blend_Torque(R.Torque(I),Drag_Ang,Angular(I),P.Interaction);
++         R.Force(I) := Blend_Force(R.Force(I),Magnus(I),Kutta(I),Drag_Lin,Linear(I),P.Interaction);
++      end loop;
++      return R;
++   end Ellipsoid;
++end MJ.Fluid_Kernels;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_kernels.ads
+@@ -0,0 +1,73 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++with Ada.Numerics;
++with MJ.Fluid_Box;
++with MJ.Spatial_Kernels;
++package MJ.Fluid_Kernels with SPARK_Mode is
++   type Motion_Array is array (Natural range <>) of MJ.Spatial_Kernels.Motion;
++   No_Motions : constant Motion_Array := [1 .. 0 => [others => 0.0]];
++   Pi : constant Real := Ada.Numerics.Pi;
++   subtype Dimension is Real range 0.0 .. 1.0e14;
++   subtype Rate is Real range -1.0e12 .. 1.0e12;
++   subtype Fluid_Value is Real range -1.0e110 .. 1.0e110;
++   subtype Wrench is MJ.Fluid_Box.Wrench;
++   use type MJ.Fluid_Box.Wrench;
++   subtype Box_Coefficients is MJ.Fluid_Box.Coefficients;
++   type Ellipsoid_Cache is record
++      Volume, Dmax, Amax, Lin_Visc, Ang_Visc : Real := 0.0;
++      Surface, Angular_Moment : Vector := Zero;
++   end record;
++   type Ellipsoid_Parameters is record
++      Size : Vector := Zero;
++      Interaction, Blunt, Slender, Angular, Kutta, Magnus : Nonneg_Tier0 := 0.0;
++      Virtual_Mass, Virtual_Inertia : Vector := Zero;
++   end record;
++   function Fourth (X : Dimension) return Real is ((X*X)*(X*X))
++     with Global => null, Post => Fourth'Result in 0.0 .. 2.0e56;
++   function Prepare_Box (Box : Vector; Density, Viscosity : Nonneg_Tier0) return Box_Coefficients
++     renames MJ.Fluid_Box.Prepare;
++   function Apply_Box (C : Box_Coefficients; Linear, Angular : Vector) return Wrench
++     renames MJ.Fluid_Box.Evaluate;
++   function Cache_Bounded (C : Ellipsoid_Cache) return Boolean is
++     (C.Volume in 0.0 .. 1.0e32 and then C.Dmax in 0.0 .. Max_Val
++      and then C.Amax in -1.0e24 .. 1.0e24
++      and then C.Lin_Visc in 0.0 .. 1.0e13 and then C.Ang_Visc in 0.0 .. 1.0e33
++      and then (for all X of C.Surface => X in 0.0 .. 2.0)
++      and then Bounded(C.Angular_Moment,1.0e63)) with Global => null;
++   function Prepare_Ellipsoid (P : Ellipsoid_Parameters) return Ellipsoid_Cache
++     with Global => null, Pre => (for all X of P.Size => X in Nonneg_Tier0),
++     Post => Cache_Bounded(Prepare_Ellipsoid'Result)
++       and then Prepare_Ellipsoid'Result.Volume = 4.0/3.0*Pi*P.Size(0)*P.Size(1)*P.Size(2)
++       and then Prepare_Ellipsoid'Result.Dmax = Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2));
++   subtype Blend_Value is Real range -1.0e250 .. 1.0e250;
++   subtype Blend_Input is Real range -1.0e100 .. 1.0e100;
++   function Blend_Force (Added, Magnus, Kutta, Drag : Blend_Input;
++                         Speed : Rate; Interaction : Nonneg_Tier0) return Blend_Value
++     with Global => null,
++     Post => Blend_Force'Result = (Added + (Magnus+Kutta-Drag*Speed))*Interaction;
++   function Blend_Torque (Added, Drag : Blend_Input; Speed : Rate;
++                          Interaction : Nonneg_Tier0) return Blend_Value
++     with Global => null,
++     Post => Blend_Torque'Result = (Added-Drag*Speed)*Interaction;
++   function Ellipsoid (P : Ellipsoid_Parameters; Cache : Ellipsoid_Cache; Density, Viscosity : Nonneg_Tier0;
++                        Linear, Angular : Vector) return Wrench
++     with Global => null,
++     Pre => Cache_Bounded(Cache)
++       and then Bounded (Linear, 1.0e12) and then Bounded (Angular, 1.0e12)
++       and then (for all X of P.Size => X in Nonneg_Tier0)
++       and then Bounded (P.Virtual_Mass, Max_Val) and then Bounded (P.Virtual_Inertia, Max_Val);
++   --  Metadata is frozen at Create, so geometric quantities are computed once.
++   type Element is record
++      Body_Id : Natural := 0;
++      Inverse_Mass : Real := 0.0;
++      Position : Vector := Zero;
++      Rotation : Matrix := Identity;
++      Is_Ellipsoid : Boolean := False;
++      Box : Vector := Zero;
++      Parameters : Ellipsoid_Parameters;
++      Box_Data : Box_Coefficients;
++      Ellipsoid_Data : Ellipsoid_Cache;
++   end record;
++   type Element_Array is array (Natural range <>) of Element;
++   type Element_Access is access Element_Array;
++end MJ.Fluid_Kernels;
+--- a/experimental/smooth/tools/compare_numerics.py
++++ b/experimental/smooth/tools/compare_numerics.py
+@@ -212,7 +212,6 @@
+         'ipc': (ordinary.replace('integrator="Euler"', 'integrator="discrete" solver="CG"')
+                 .replace('constraint="disable"', 'constraint="disable" ipc="enable"'), 'UNSUPPORTED_FEATURE'),
+         'constraints': (ordinary.replace('constraint="disable"', 'constraint="enable"'), 'UNSUPPORTED_FEATURE'),
+-        'fluid': (ordinary.replace('integrator="Euler"', 'integrator="Euler" viscosity=".01"'), 'UNSUPPORTED_FEATURE'),
+     }
+     for name, (xml, status) in unsupported.items():
+         path = out / ('unsupported_' + name + '.mjb')

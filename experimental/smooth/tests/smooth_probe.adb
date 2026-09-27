@@ -11,6 +11,7 @@ with MJ.Data; use MJ.Data;
 with MJ.Data.Forward;
 with MJ.Data.Euler;
 with MJ.Smooth_Math;
+with MJ.External_Forces;
 
 procedure Smooth_Probe is
    package Numbers is new Ada.Text_IO.Float_IO (Real);
@@ -21,6 +22,8 @@ procedure Smooth_Probe is
    Cases, Steps : Integer;
    Input_Time : Real;
    Selected_Policy : Inertia_Policy := Compatible;
+   With_External : constant Boolean := Ada.Command_Line.Argument_Count >= 3
+     and then Ada.Command_Line.Argument (3) = "external";
 
    procedure Check (Expected : Status := Success) is
    begin
@@ -125,6 +128,10 @@ begin
       Len, Vel, Force : Real_Array (0 .. Integer (U) - 1);
       Empty : State_Vector (1 .. 0);
       Bad : State_Vector (0 .. Integer (N)) := [others => 0.0];
+      Loads : MJ.External_Forces.Wrench_Array
+        (0 .. (if With_External then Integer (Body_Count (D)) - 1 else -1));
+      Bad_Loads : MJ.External_Forces.Wrench_Array (0 .. Body_Count (D));
+      Shifted_Loads : MJ.External_Forces.Wrench_Array (1 .. Body_Count (D));
       T : Real;
       Pos : MJ.Smooth_Math.Vector;
       Quat : MJ.Smooth_Math.Quaternion;
@@ -159,6 +166,10 @@ begin
          Emit ("reset_qpos", Qout);
          Emit ("reset_qvel", Vout);
          Read_State (Q); Read_State (V); Read_State (Controls); Read_State (Applied);
+         for W of Loads loop
+            for X of W.Force loop Numbers.Get (Input_Time); X := Input_Time; end loop;
+            for X of W.Torque loop Numbers.Get (Input_Time); X := Input_Time; end loop;
+         end loop;
          Numbers.Get (Input_Time);
          Ada.Integer_Text_IO.Get (Steps);
          Set_State (D, Q, V, Input_Time, Result); Check;
@@ -176,11 +187,36 @@ begin
          for I in Applied'Range loop
             Set_Applied_Force (D, I, Applied (I), Result); Check;
          end loop;
-         MJ.Data.Forward.Evaluate (D, Result);
+         declare
+            Before : constant Real_Array := State_Values (D);
+            Inputs : constant Real_Array := Input_Values (D);
+         begin
+            MJ.Data.Forward.Evaluate (D, Result, Bad_Loads); Check (Invalid_Size);
+            MJ.Data.Euler.Step (D, Result, Bad_Loads); Check (Invalid_Size);
+            MJ.Data.Forward.Evaluate (D, Result, Shifted_Loads); Check (Invalid_Size);
+            MJ.Data.Euler.Step (D, Result, Shifted_Loads); Check (Invalid_Size);
+            if State_Values (D) /= Before or else Input_Values (D) /= Inputs then
+               raise Program_Error with "invalid external loads changed inputs/state";
+            end if;
+         end;
+         MJ.Data.Forward.Evaluate (D, Result, Loads);
          Put_Line ("forward " & Result'Image);
          Emit ("forward_clamped", [Real (Clamped_Dof (D))]);
          if Result = Success then
             Get_Acceleration (D, Acc, Result); Check; Emit ("qacc", Acc);
+            if With_External then
+               declare
+                  Expected : constant Real_Array := Acc;
+               begin
+                  MJ.Data.Forward.Evaluate (D, Result); Check;
+                  Get_Acceleration (D, Acc, Result); Check; Emit ("removed_qacc", Acc);
+                  MJ.Data.Forward.Evaluate (D, Result, Loads); Check;
+                  Get_Acceleration (D, Acc, Result); Check;
+                  if Acc /= Expected then
+                     raise Program_Error with "external load replacement accumulated or reused stale force";
+                  end if;
+               end;
+            end if;
             Get_Mass_Matrix (D, Mass, Result); Check; Emit ("mass", Mass);
             --  Exercise the dense API independently of private storage,
             --  including caller arrays ending at Integer'Last.
@@ -222,7 +258,7 @@ begin
             declare
                Before : constant Real_Array := State_Values (D);
             begin
-               MJ.Data.Euler.Step (D, Result);
+               MJ.Data.Euler.Step (D, Result, Loads);
                if Result /= Success and then State_Values (D) /= Before then
                   raise Program_Error with "failed Step changed state";
                end if;

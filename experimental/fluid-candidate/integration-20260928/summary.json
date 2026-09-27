@@ -1,0 +1,1626 @@
+{
+  "status": "partial_formal_integration",
+  "changes": [
+    {
+      "path": "experimental/smooth/src/mj-data-fluid_phase.adb",
+      "baseline_sha256": "53d4fa8ec09e39a8cc10fad6c849d7c8a4d641ddc2aaf0f68b816c278ee04c8a",
+      "new_sha256": "770d200991bacfed129ad43dc6d1b265096868ce2bef2aebc38c83e48230c56b"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data-fluid_phase.ads",
+      "baseline_sha256": "38144ede84802fed782343c39853acc1c7fa664cc5baa574d846e8025860272e",
+      "new_sha256": "0adcdc67a27668af6a47fa2b1e157b296ca3967190eaf9c521f03988912e4a14"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data-fluid_tree.adb",
+      "baseline_sha256": null,
+      "new_sha256": "ff538ecb29458302ac06988b910ba78fcd9382026cab948cb7d85c9b3d4814dd"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data-fluid_tree.ads",
+      "baseline_sha256": null,
+      "new_sha256": "13d49b860189d1aa0515e91e70bdd44f1bfc19c98b22f245639b111a09c38c02"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data-forces_phase.adb",
+      "baseline_sha256": "13f2a1e387ffc7fb3613e2e61445b98b7f8f42dffe1c9aa57a15d7b0721ff393",
+      "new_sha256": "934c678154c5b0d39be976cc9ce78d76276431c849f0ce598a158d85776e6b16"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data.adb",
+      "baseline_sha256": "fa08e0e1ec5e60ccb613e7f99a23aff7e431d6083b84b46375571c05ca38161a",
+      "new_sha256": "a0599238019d524feaf1865e7dce84a25464736b7db66c6da3d945df8c324f4d"
+    },
+    {
+      "path": "experimental/smooth/src/mj-data.ads",
+      "baseline_sha256": "ebb238bb9890dd5f810ba7ba3692e7ea251b8742a81e37aeab7d1222e2537c6c",
+      "new_sha256": "cc81bd1e2cd1f3461c32c673737a43499aa1988cfb75304d89cbbb5c10c68f9a"
+    },
+    {
+      "path": "experimental/smooth/src/mj-fluid_kernels.ads",
+      "baseline_sha256": "3f3b5a138d26d2f3402a28b693a15df7caf09736e59dd75e8164c07165ac478f",
+      "new_sha256": "91f0980438073e016081790a1c90db1b6be2bcfaa1e0dd3b0a662596a8bd2dfb"
+    },
+    {
+      "path": "experimental/smooth/src/mj-fluid_metadata.adb",
+      "baseline_sha256": null,
+      "new_sha256": "4522e22015e9efcb1999b5046e13056f7e9b150b24132ee09cf0d73f9b2c2844"
+    },
+    {
+      "path": "experimental/smooth/src/mj-fluid_metadata.ads",
+      "baseline_sha256": null,
+      "new_sha256": "56415a394717e1b32f1cd2bf7e835a3c94e66928032dc6e692f5db4c3a6333a0"
+    },
+    {
+      "path": "experimental/smooth/src/mj-fluid_transport.adb",
+      "baseline_sha256": null,
+      "new_sha256": "2004a70ddd83ffb067ecf1ec2d5509530801e4a9d82c1686207df6a40ddf8527"
+    },
+    {
+      "path": "experimental/smooth/src/mj-fluid_transport.ads",
+      "baseline_sha256": null,
+      "new_sha256": "8ce98f4f11a4d1931da3a92b6d55dd060afb2f7259f0ee158d75616c5e71c6f9"
+    },
+    {
+      "path": "experimental/smooth/tests/fluid_lifecycle_probe.adb",
+      "baseline_sha256": null,
+      "new_sha256": "c90b57931b45456f3df82da44eedc56b3bf3c81880a07f3a348d0e0b4e843540"
+    }
+  ],
+  "numerical": {
+    "verified-compatible": {
+      "status": "passed",
+      "policy": "Compatible",
+      "external": true,
+      "seed": 20260923,
+      "samples_per_model": 12,
+      "oracle": "3.14.0",
+      "probe": "/tmp/sparkling-smooth-numerical-gkjj2bl0/bin/smooth_probe",
+      "probe_sha256": "0c024943f20865214c3b524e00dd224672fff93b7ea2a83109a67752998e524c",
+      "normalization_edge_cases": 7,
+      "comparisons": 132072,
+      "scenarios": 816,
+      "fixtures": [
+        {
+          "name": "world",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fixed",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "slide",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "hinge_motor",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 8.17663627296103e-06
+        },
+        {
+          "name": "hinge_affine",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 2.1316282072803006e-14,
+          "max_tolerance_ratio": 9.420416092336489e-06
+        },
+        {
+          "name": "branched_multijoint",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.5091040356528538e-14,
+          "max_tolerance_ratio": 5.039295010090066e-05
+        },
+        {
+          "name": "shared_actuators",
+          "scenarios": 12,
+          "comparisons": 408,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.301946035968327e-05
+        },
+        {
+          "name": "disable_gravity",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.1316282072803006e-14,
+          "max_tolerance_ratio": 1.779703242485158e-05
+        },
+        {
+          "name": "disable_spring",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 4.263256414560601e-14,
+          "max_tolerance_ratio": 4.2059849965713316e-05
+        },
+        {
+          "name": "disable_damper",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 4.618527782440651e-14,
+          "max_tolerance_ratio": 3.883778596209727e-05
+        },
+        {
+          "name": "disable_actuation",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.842170943040401e-14,
+          "max_tolerance_ratio": 2.4479197750152608e-05
+        },
+        {
+          "name": "disable_clampctrl",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.842170943040401e-14,
+          "max_tolerance_ratio": 4.137707456396766e-05
+        },
+        {
+          "name": "disable_eulerdamp",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.4868995751603507e-14,
+          "max_tolerance_ratio": 2.6861668754621625e-05
+        },
+        {
+          "name": "small_inertia",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "chain_12",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 3.0730973321624333e-13,
+          "max_tolerance_ratio": 0.0004593309964640047
+        },
+        {
+          "name": "fluid_box_branched_multijoint_drag",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 6.927791673660977e-14,
+          "max_tolerance_ratio": 0.00012215943439737522
+        },
+        {
+          "name": "fluid_box_branched_multijoint_viscous",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.6645352591003757e-14,
+          "max_tolerance_ratio": 5.280966069179662e-05
+        },
+        {
+          "name": "fluid_box_branched_multijoint_wind",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.4868995751603507e-14,
+          "max_tolerance_ratio": 8.162530637779602e-05
+        },
+        {
+          "name": "fluid_box_branches24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 6.661338147750939e-14,
+          "max_tolerance_ratio": 0.0002012801565027641
+        },
+        {
+          "name": "fluid_box_chain24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 7.325695605686633e-12,
+          "max_tolerance_ratio": 0.005309641921195813
+        },
+        {
+          "name": "fluid_box_chain_12_drag",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 3.268496584496461e-13,
+          "max_tolerance_ratio": 0.0006360305490658654
+        },
+        {
+          "name": "fluid_box_chain_12_viscous",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 5.115907697472721e-13,
+          "max_tolerance_ratio": 0.00032295170918864984
+        },
+        {
+          "name": "fluid_box_chain_12_wind",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 2.993161274389422e-13,
+          "max_tolerance_ratio": 0.0004970120506195911
+        },
+        {
+          "name": "fluid_box_fixed_drag",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_fixed_viscous",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_fixed_wind",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_hinge_motor_drag",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 6.661338147750939e-15,
+          "max_tolerance_ratio": 9.788288257663583e-06
+        },
+        {
+          "name": "fluid_box_hinge_motor_viscous",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.172832263474117e-05
+        },
+        {
+          "name": "fluid_box_hinge_motor_wind",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 3.552713678800501e-15,
+          "max_tolerance_ratio": 1.0038636940302265e-05
+        },
+        {
+          "name": "fluid_box_massless_carrier",
+          "scenarios": 12,
+          "comparisons": 1596,
+          "max_absolute": 2.1316282072803006e-14,
+          "max_tolerance_ratio": 5.4554779718838764e-05
+        },
+        {
+          "name": "fluid_box_slide_drag",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 2.220446049250313e-16,
+          "max_tolerance_ratio": 4.2100797202851424e-07
+        },
+        {
+          "name": "fluid_box_slide_viscous",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 8.881784197001252e-16,
+          "max_tolerance_ratio": 4.973400937459853e-07
+        },
+        {
+          "name": "fluid_box_slide_wind",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 4.440892098500626e-16,
+          "max_tolerance_ratio": 6.793210664922532e-07
+        },
+        {
+          "name": "fluid_box_star24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 5.1514348342607263e-14,
+          "max_tolerance_ratio": 6.596617227267789e-05
+        },
+        {
+          "name": "fluid_box_world_drag",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_world_viscous",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_world_wind",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_ellipsoid_box_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 4.9960036108132044e-15,
+          "max_tolerance_ratio": 2.022338627876618e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.316962628886649e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.756819691567481e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.955692715367732e-05
+        },
+        {
+          "name": "fluid_ellipsoid_branches24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 6.039613253960852e-14,
+          "max_tolerance_ratio": 0.00019901588450083692
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.567484613579459e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.458728805777661e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.993605777301127e-15,
+          "max_tolerance_ratio": 1.2943471530221544e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.7700779614059047e-05
+        },
+        {
+          "name": "fluid_ellipsoid_chain24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 6.764366844436154e-12,
+          "max_tolerance_ratio": 0.007653669276317472
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.43769498715119e-15,
+          "max_tolerance_ratio": 2.109566995268237e-05
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.217248937900877e-15,
+          "max_tolerance_ratio": 1.1678937546028994e-05
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.0615115829110567e-05
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.7026039712395745e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.10702591327572e-15,
+          "max_tolerance_ratio": 1.2981782855079497e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.8997730556876036e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.215650382226158e-15,
+          "max_tolerance_ratio": 2.1957828235583734e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.5188216758736544e-05
+        },
+        {
+          "name": "fluid_ellipsoid_multiple",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.094762422361361e-05
+        },
+        {
+          "name": "fluid_ellipsoid_quadratic",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.661338147750939e-15,
+          "max_tolerance_ratio": 2.1090338352617472e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.773159728050814e-15,
+          "max_tolerance_ratio": 9.351389397898162e-06
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.516219595920999e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.217248937900877e-15,
+          "max_tolerance_ratio": 1.457408935192588e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.060141186149274e-05
+        },
+        {
+          "name": "fluid_ellipsoid_star24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 4.263256414560601e-14,
+          "max_tolerance_ratio": 6.253742137490729e-05
+        },
+        {
+          "name": "fluid_ellipsoid_stokes",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.5701044640404942e-05
+        },
+        {
+          "name": "fluid_ellipsoid_tiny_wind",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.217248937900877e-15,
+          "max_tolerance_ratio": 2.1882450268300223e-05
+        },
+        {
+          "name": "fluid_ellipsoid_zero_wind",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.217248937900877e-15,
+          "max_tolerance_ratio": 8.655925770211092e-06
+        },
+        {
+          "name": "fluid_flags_both_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 4.218847493575595e-15,
+          "max_tolerance_ratio": 1.2199003282638943e-05
+        },
+        {
+          "name": "fluid_flags_damper_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.1228048191330392e-05
+        },
+        {
+          "name": "fluid_flags_spring_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 4.3298697960381105e-15,
+          "max_tolerance_ratio": 1.2181330829565332e-05
+        }
+      ],
+      "failures": [],
+      "policy_tests_mode": "Strict",
+      "policy_tests": [
+        {
+          "name": "time_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "position_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "velocity_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "acceleration_limit",
+          "forward": "NUMERIC_LIMIT",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "singular",
+          "forward": "SINGULAR_INERTIA",
+          "step": "SINGULAR_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "ill_conditioned",
+          "forward": "ILL_CONDITIONED_INERTIA",
+          "step": "ILL_CONDITIONED_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "coupled_condition",
+          "forward": "ILL_CONDITIONED_INERTIA",
+          "step": "ILL_CONDITIONED_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "ball",
+          "create": "UNSUPPORTED_JOINT"
+        },
+        {
+          "name": "free",
+          "create": "UNSUPPORTED_JOINT"
+        },
+        {
+          "name": "rk4",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "discrete",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "ipc",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "constraints",
+          "create": "UNSUPPORTED_FEATURE"
+        }
+      ],
+      "seconds": 59.26377524502459,
+      "atol": 2e-10,
+      "rtol": 2e-10
+    },
+    "verified-strict": {
+      "status": "passed",
+      "policy": "Strict",
+      "external": true,
+      "seed": 20260923,
+      "samples_per_model": 12,
+      "oracle": "3.14.0",
+      "probe": "/tmp/sparkling-smooth-numerical-gkjj2bl0/bin/smooth_probe",
+      "probe_sha256": "0c024943f20865214c3b524e00dd224672fff93b7ea2a83109a67752998e524c",
+      "normalization_edge_cases": 7,
+      "comparisons": 132072,
+      "scenarios": 816,
+      "fixtures": [
+        {
+          "name": "world",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fixed",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "slide",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "hinge_motor",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 8.17663627296103e-06
+        },
+        {
+          "name": "hinge_affine",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 2.1316282072803006e-14,
+          "max_tolerance_ratio": 9.916227465617357e-06
+        },
+        {
+          "name": "branched_multijoint",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.5091040356528538e-14,
+          "max_tolerance_ratio": 5.039295010090066e-05
+        },
+        {
+          "name": "shared_actuators",
+          "scenarios": 12,
+          "comparisons": 408,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.301946035968327e-05
+        },
+        {
+          "name": "disable_gravity",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.1316282072803006e-14,
+          "max_tolerance_ratio": 1.9774480472057313e-05
+        },
+        {
+          "name": "disable_spring",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 4.263256414560601e-14,
+          "max_tolerance_ratio": 4.2059849965713316e-05
+        },
+        {
+          "name": "disable_damper",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 4.618527782440651e-14,
+          "max_tolerance_ratio": 3.883778596209727e-05
+        },
+        {
+          "name": "disable_actuation",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.842170943040401e-14,
+          "max_tolerance_ratio": 2.4479197750152608e-05
+        },
+        {
+          "name": "disable_clampctrl",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 2.842170943040401e-14,
+          "max_tolerance_ratio": 4.137707456396766e-05
+        },
+        {
+          "name": "disable_eulerdamp",
+          "scenarios": 12,
+          "comparisons": 1476,
+          "max_absolute": 4.3520742565306136e-14,
+          "max_tolerance_ratio": 4.5407573236455246e-05
+        },
+        {
+          "name": "small_inertia",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 1.7763568394002505e-15,
+          "max_tolerance_ratio": 8.346005990116283e-07
+        },
+        {
+          "name": "chain_12",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 2.8421709430404007e-13,
+          "max_tolerance_ratio": 0.00038599626461088024
+        },
+        {
+          "name": "fluid_box_branched_multijoint_drag",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 5.5067062021407764e-14,
+          "max_tolerance_ratio": 9.793816723237841e-05
+        },
+        {
+          "name": "fluid_box_branched_multijoint_viscous",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.4868995751603507e-14,
+          "max_tolerance_ratio": 5.426504504157054e-05
+        },
+        {
+          "name": "fluid_box_branched_multijoint_wind",
+          "scenarios": 12,
+          "comparisons": 1512,
+          "max_absolute": 2.4868995751603507e-14,
+          "max_tolerance_ratio": 6.699734224027012e-05
+        },
+        {
+          "name": "fluid_box_branches24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 6.794564910705958e-14,
+          "max_tolerance_ratio": 0.0001907968150182451
+        },
+        {
+          "name": "fluid_box_chain24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 4.774847184307873e-12,
+          "max_tolerance_ratio": 0.0058778499648142355
+        },
+        {
+          "name": "fluid_box_chain_12_drag",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 3.268496584496461e-13,
+          "max_tolerance_ratio": 0.0008180027680901701
+        },
+        {
+          "name": "fluid_box_chain_12_viscous",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 5.115907697472721e-13,
+          "max_tolerance_ratio": 0.00032295170918864984
+        },
+        {
+          "name": "fluid_box_chain_12_wind",
+          "scenarios": 12,
+          "comparisons": 4428,
+          "max_absolute": 2.877698079828406e-13,
+          "max_tolerance_ratio": 0.00042053006317024016
+        },
+        {
+          "name": "fluid_box_fixed_drag",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_fixed_viscous",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_fixed_wind",
+          "scenarios": 12,
+          "comparisons": 192,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_hinge_motor_drag",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 6.661338147750939e-15,
+          "max_tolerance_ratio": 9.788288257663583e-06
+        },
+        {
+          "name": "fluid_box_hinge_motor_viscous",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.1917489128849899e-05
+        },
+        {
+          "name": "fluid_box_hinge_motor_wind",
+          "scenarios": 12,
+          "comparisons": 372,
+          "max_absolute": 3.552713678800501e-15,
+          "max_tolerance_ratio": 1.0038636940302265e-05
+        },
+        {
+          "name": "fluid_box_massless_carrier",
+          "scenarios": 12,
+          "comparisons": 1596,
+          "max_absolute": 2.0872192862952943e-14,
+          "max_tolerance_ratio": 5.827442379057777e-05
+        },
+        {
+          "name": "fluid_box_slide_drag",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 2.220446049250313e-16,
+          "max_tolerance_ratio": 4.2100797202851424e-07
+        },
+        {
+          "name": "fluid_box_slide_viscous",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 8.881784197001252e-16,
+          "max_tolerance_ratio": 4.973400937459853e-07
+        },
+        {
+          "name": "fluid_box_slide_wind",
+          "scenarios": 12,
+          "comparisons": 336,
+          "max_absolute": 4.440892098500626e-16,
+          "max_tolerance_ratio": 6.793210664922532e-07
+        },
+        {
+          "name": "fluid_box_star24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 4.085620730620576e-14,
+          "max_tolerance_ratio": 4.897589302301136e-05
+        },
+        {
+          "name": "fluid_box_world_drag",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_world_viscous",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_box_world_wind",
+          "scenarios": 12,
+          "comparisons": 108,
+          "max_absolute": 0.0,
+          "max_tolerance_ratio": 0.0
+        },
+        {
+          "name": "fluid_ellipsoid_box_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.907433024019992e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.2024441394182447e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 2.1762947058138183e-05
+        },
+        {
+          "name": "fluid_ellipsoid_box_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.077923510078215e-05
+        },
+        {
+          "name": "fluid_ellipsoid_branches24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 6.23945339839338e-14,
+          "max_tolerance_ratio": 0.00020560096891446755
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.9017332451402258e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.458728805777661e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.2943471530221544e-05
+        },
+        {
+          "name": "fluid_ellipsoid_capsule_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.1132975460450798e-05
+        },
+        {
+          "name": "fluid_ellipsoid_chain24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 1.376321279167314e-11,
+          "max_tolerance_ratio": 0.005705986537980397
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.109566995268237e-05
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.1678937546028994e-05
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 9.55360424619951e-06
+        },
+        {
+          "name": "fluid_ellipsoid_cylinder_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.6431348570959198e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 4.884981308350689e-15,
+          "max_tolerance_ratio": 1.2981782855079497e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.8997730556876036e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.993605777301127e-15,
+          "max_tolerance_ratio": 2.1364373418405793e-05
+        },
+        {
+          "name": "fluid_ellipsoid_ellipsoid_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 1.3832125976706496e-05
+        },
+        {
+          "name": "fluid_ellipsoid_multiple",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 8.881784197001252e-15,
+          "max_tolerance_ratio": 1.0871232921582612e-05
+        },
+        {
+          "name": "fluid_ellipsoid_quadratic",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.439293542825908e-15,
+          "max_tolerance_ratio": 2.446479248903627e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_all",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 8.632051751905995e-06
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_drag",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 9.769962616701378e-15,
+          "max_tolerance_ratio": 1.516219595920999e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_kutta",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 6.217248937900877e-15,
+          "max_tolerance_ratio": 1.457408935192588e-05
+        },
+        {
+          "name": "fluid_ellipsoid_sphere_magnus",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.105427357601002e-15,
+          "max_tolerance_ratio": 2.1030607941940506e-05
+        },
+        {
+          "name": "fluid_ellipsoid_star24",
+          "scenarios": 12,
+          "comparisons": 12204,
+          "max_absolute": 4.973799150320701e-14,
+          "max_tolerance_ratio": 6.253742137490729e-05
+        },
+        {
+          "name": "fluid_ellipsoid_stokes",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 7.549516567451064e-15,
+          "max_tolerance_ratio": 2.395860093597071e-05
+        },
+        {
+          "name": "fluid_ellipsoid_tiny_wind",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.8515919457792497e-05
+        },
+        {
+          "name": "fluid_ellipsoid_zero_wind",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.329070518200751e-15,
+          "max_tolerance_ratio": 1.0067002529825852e-05
+        },
+        {
+          "name": "fluid_flags_both_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 3.885780586188048e-15,
+          "max_tolerance_ratio": 1.1235924076114817e-05
+        },
+        {
+          "name": "fluid_flags_damper_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 5.773159728050814e-15,
+          "max_tolerance_ratio": 1.1228048191330392e-05
+        },
+        {
+          "name": "fluid_flags_spring_off",
+          "scenarios": 12,
+          "comparisons": 696,
+          "max_absolute": 4.773959005888173e-15,
+          "max_tolerance_ratio": 1.2587333340312543e-05
+        }
+      ],
+      "failures": [],
+      "policy_tests_mode": "Strict",
+      "policy_tests": [
+        {
+          "name": "time_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "position_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "velocity_limit",
+          "forward": "SUCCESS",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "acceleration_limit",
+          "forward": "NUMERIC_LIMIT",
+          "step": "NUMERIC_LIMIT",
+          "state_unchanged": true
+        },
+        {
+          "name": "singular",
+          "forward": "SINGULAR_INERTIA",
+          "step": "SINGULAR_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "ill_conditioned",
+          "forward": "ILL_CONDITIONED_INERTIA",
+          "step": "ILL_CONDITIONED_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "coupled_condition",
+          "forward": "ILL_CONDITIONED_INERTIA",
+          "step": "ILL_CONDITIONED_INERTIA",
+          "state_unchanged": true
+        },
+        {
+          "name": "ball",
+          "create": "UNSUPPORTED_JOINT"
+        },
+        {
+          "name": "free",
+          "create": "UNSUPPORTED_JOINT"
+        },
+        {
+          "name": "rk4",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "discrete",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "ipc",
+          "create": "UNSUPPORTED_FEATURE"
+        },
+        {
+          "name": "constraints",
+          "create": "UNSUPPORTED_FEATURE"
+        }
+      ],
+      "seconds": 40.903414717002306,
+      "atol": 2e-10,
+      "rtol": 2e-10
+    }
+  },
+  "lifecycle": [
+    {
+      "fixture": "fluid_box_chain24",
+      "exit": 0,
+      "stdout": "PASS: 100 create/reject/recreate cycles; repeated free; invalid options and element metadata\n",
+      "stderr": ""
+    },
+    {
+      "fixture": "fluid_ellipsoid_multiple",
+      "exit": 0,
+      "stdout": "PASS: 100 create/reject/recreate cycles; repeated free; invalid options and element metadata\n",
+      "stderr": ""
+    }
+  ],
+  "proofs": [
+    {
+      "run": "transport2",
+      "name": "Lever_Component",
+      "file": "mj-fluid_transport.adb",
+      "line": 5,
+      "status": "completed_no_unproved",
+      "checks": 13,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "transport2",
+      "name": "Lever_Torque",
+      "file": "mj-fluid_transport.adb",
+      "line": 15,
+      "status": "completed_no_unproved",
+      "checks": 32,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "transport2",
+      "name": "Project",
+      "file": "mj-fluid_transport.adb",
+      "line": 21,
+      "status": "completed_no_unproved",
+      "checks": 10,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "transport2",
+      "name": "Merge",
+      "file": "mj-fluid_transport.adb",
+      "line": 26,
+      "status": "completed_no_unproved",
+      "checks": 16,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "transport2",
+      "name": "Project_Into",
+      "file": "mj-data-fluid_tree.adb",
+      "line": 2,
+      "status": "completed_no_unproved",
+      "checks": 15,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "transport2",
+      "name": "Fold",
+      "file": "mj-data-fluid_tree.adb",
+      "line": 12,
+      "status": "unproved_checks",
+      "checks": 47,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "local-lifecycle",
+      "name": "Append_Element",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 97,
+      "status": "unproved_checks",
+      "checks": 10,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "local-lifecycle",
+      "name": "Build",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 113,
+      "status": "unproved_checks",
+      "checks": 74,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "local-lifecycle",
+      "name": "Fold",
+      "file": "mj-data-fluid_tree.adb",
+      "line": 12,
+      "status": "completed_no_unproved",
+      "checks": 58,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "metadata",
+      "name": "Inverse_Mass",
+      "file": "mj-fluid_metadata.adb",
+      "line": 2,
+      "status": "completed_no_unproved",
+      "checks": 6,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "metadata",
+      "name": "Box_Length",
+      "file": "mj-fluid_metadata.adb",
+      "line": 6,
+      "status": "completed_no_unproved",
+      "checks": 17,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "metadata",
+      "name": "Make_Box",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 18,
+      "status": "unproved_checks",
+      "checks": 25,
+      "unproved": 2,
+      "errors": 0
+    },
+    {
+      "run": "metadata",
+      "name": "Make_Ellipsoid",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 45,
+      "status": "proof_timeout",
+      "checks": 0,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "velocity-store",
+      "name": "Store_Velocity",
+      "file": "mj-data-forces_phase.adb",
+      "line": 197,
+      "status": "completed_no_unproved",
+      "checks": 9,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "velocity-store",
+      "name": "Forward_Bodies",
+      "file": "mj-data-forces_phase.adb",
+      "line": 211,
+      "status": "completed_no_unproved",
+      "checks": 80,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Ready_Properties",
+      "file": "mj-data-forces_phase.adb",
+      "line": 788,
+      "status": "completed_no_unproved",
+      "checks": 2,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Forward_Bodies",
+      "file": "mj-data-forces_phase.adb",
+      "line": 196,
+      "status": "unproved_checks",
+      "checks": 79,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Recursive_Forces_Buffers",
+      "file": "mj-data-forces_phase.adb",
+      "line": 369,
+      "status": "completed_no_unproved",
+      "checks": 33,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Try_Recursive",
+      "file": "mj-data-forces_phase.adb",
+      "line": 415,
+      "status": "completed_no_unproved",
+      "checks": 9,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Publish_Gravity_Bias",
+      "file": "mj-data-forces_phase.adb",
+      "line": 799,
+      "status": "completed_no_unproved",
+      "checks": 21,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Recursive_Path",
+      "file": "mj-data-forces_phase.adb",
+      "line": 830,
+      "status": "unproved_checks",
+      "checks": 38,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Recursive_Path",
+      "file": "mj-data-forces_phase.adb",
+      "line": 852,
+      "status": "unproved_checks",
+      "checks": 38,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "reuse-final",
+      "name": "Compute_Ready",
+      "file": "mj-data-forces_phase.adb",
+      "line": 1040,
+      "status": "unproved_checks",
+      "checks": 36,
+      "unproved": 2,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Make_Box",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 18,
+      "status": "unproved_checks",
+      "checks": 27,
+      "unproved": 3,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Make_Ellipsoid",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 46,
+      "status": "proof_timeout",
+      "checks": 0,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Append_Element",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 102,
+      "status": "completed_no_unproved",
+      "checks": 8,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Build",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 118,
+      "status": "proof_timeout",
+      "checks": 0,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Initialize",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 205,
+      "status": "completed_no_unproved",
+      "checks": 7,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-final",
+      "name": "Release",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 12,
+      "status": "completed_no_unproved",
+      "checks": 1,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-callers",
+      "name": "Initialize",
+      "file": "mj-data.adb",
+      "line": 823,
+      "status": "proof_timeout",
+      "checks": 0,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-callers",
+      "name": "Create",
+      "file": "mj-data.adb",
+      "line": 874,
+      "status": "unproved_checks",
+      "checks": 2,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "lifecycle-callers",
+      "name": "Free",
+      "file": "mj-data.adb",
+      "line": 946,
+      "status": "completed_no_unproved",
+      "checks": 1,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "frame-details2",
+      "name": "Accumulate",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 312,
+      "status": "unproved_checks",
+      "checks": 20,
+      "unproved": 1,
+      "errors": 0
+    },
+    {
+      "run": "frame-details2",
+      "name": "Make_Box",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 18,
+      "status": "completed_no_unproved",
+      "checks": 25,
+      "unproved": 0,
+      "errors": 0
+    },
+    {
+      "run": "passive-callers",
+      "name": "Complete_Passive",
+      "file": "mj-data-forces_phase.adb",
+      "line": 713,
+      "status": "unproved_checks",
+      "checks": 21,
+      "unproved": 3,
+      "errors": 0
+    },
+    {
+      "run": "passive-callers",
+      "name": "Complete_Passive",
+      "file": "mj-data-forces_phase.adb",
+      "line": 732,
+      "status": "unproved_checks",
+      "checks": 21,
+      "unproved": 3,
+      "errors": 0
+    },
+    {
+      "run": "passive-callers",
+      "name": "Compute_Ready",
+      "file": "mj-data-forces_phase.adb",
+      "line": 1040,
+      "status": "analysis_error",
+      "checks": 0,
+      "unproved": 0,
+      "errors": 4
+    },
+    {
+      "run": "passive-callers",
+      "name": "Forward_Bodies",
+      "file": "mj-data-forces_phase.adb",
+      "line": 196,
+      "status": "not_run_analysis",
+      "checks": null,
+      "unproved": null,
+      "errors": null
+    },
+    {
+      "run": "remaining-diagnostics",
+      "name": "Make_Ellipsoid",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 46,
+      "status": "unproved_checks",
+      "checks": 87,
+      "unproved": 45,
+      "errors": 0
+    },
+    {
+      "run": "remaining-diagnostics",
+      "name": "Build",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 118,
+      "status": "unproved_checks",
+      "checks": 80,
+      "unproved": 16,
+      "errors": 0
+    },
+    {
+      "run": "remaining-diagnostics",
+      "name": "Build_Wrenches",
+      "file": "mj-data-fluid_phase.adb",
+      "line": 214,
+      "status": "unproved_checks",
+      "checks": 163,
+      "unproved": 104,
+      "errors": 0
+    }
+  ]
+}

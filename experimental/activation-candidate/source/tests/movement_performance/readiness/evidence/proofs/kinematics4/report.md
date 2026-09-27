@@ -1,0 +1,20 @@
+# Smooth dynamics: fragmented GNATprove results
+
+Each row is one bounded subprogram, line or whole-unit invocation on unchanged sources.
+A completed row is limited to the emitted obligations and their contracts;
+it is not a proof of physical correctness or of the complete simulator.
+An unproved check is not, by itself, a demonstrated runtime failure.
+Timeouts and jobs not yet run must not be counted as passes.
+
+Source snapshot: `/tmp/sparkling-smooth-fragments-y1znquo8/source`
+
+| Subprogram | Location | Result | Proof checks | Unproved/flow | Errors | Seconds |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `Update` | `mj-data-kinematics.adb:4` | [unproved_checks](logs/mj-data-kinematics__update__adb_4.log) | 8 | 1 | 0 | 36.1 |
+
+## Diagnostics
+
+### mj-data-kinematics__update__adb_4
+
+- `mj-data-kinematics.ads:11` (medium): postcondition might fail, cannot prove Position_Values (D) = Position_Values (D)'Old [provers reached time limit before completing the proof]
+

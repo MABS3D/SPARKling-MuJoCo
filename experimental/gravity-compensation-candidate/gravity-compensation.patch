@@ -1,0 +1,409 @@
+diff --git a/experimental/smooth/src/mj-data-forces_phase.adb b/experimental/smooth/src/mj-data-forces_phase.adb
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -1,3 +1,5 @@
++with MJ.Data.Jacobians;
++with MJ.Data.Gravity_Compensation;
+ with MJ.Gravity_Bounds;
+ with MJ.Composite_Weights;
+ with MJ.Smooth_Dynamics;
+@@ -703,8 +705,19 @@
+       null;
+    end Establish_Readiness;
+ 
++   procedure Expose_Compensation_Inputs (D : Simulation)
++     with Ghost => Static, Global => null,
++     Pre => Is_Ready (D) and then D.Cache.Pose_Valid,
++     Post => MJ.Data.Jacobians.Topology (D.Body_Config.all, D.Joint_Config.all)
++       and then (for all B of D.Kinematic.Bodies.all => Bounded (B.Center))
++       and then (for all J of D.Kinematic.Joints.all => Joint_Bounded (J))
++   is
++   begin
++      null;
++   end Expose_Compensation_Inputs;
++
+    procedure Complete_Passive (D : in out Simulation; Result : out Status)
+-     with Global => null, Pre => Is_Ready (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
++     with Global => null, Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all);
+    pragma Postcondition (Static => Is_Ready (D));
+    pragma Postcondition (Static => Stable_Ready (D));
+@@ -722,6 +735,7 @@
+ 
+    procedure Complete_Passive (D : in out Simulation; Result : out Status)
+    is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Data.Jacobians.Topology);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+@@ -731,6 +745,21 @@
+       Expose_Passive_Inputs (D);
+       Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
+                        D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
++      if Result = Success and then D.Gravcomp_Enabled and then D.Gravity_Enabled
++        and then (D.Spring_Enabled or else D.Damper_Enabled)
++        and then Dot (D.Gravity, D.Gravity) > 0.0
++      then
++         Expose_Compensation_Inputs (D);
++         declare
++            Nv : constant Natural := D.Nv;
++            Passive : Real_Array (0 .. Nv - 1) := D.Dynamics.Passive.all;
++         begin
++            Gravity_Compensation.Apply_Buffers
++              (D.Body_Config.all, D.Joint_Config.all, D.Kinematic.Bodies.all,
++               D.Kinematic.Joints.all, D.Gravity, Passive, Result);
++            D.Dynamics.Passive.all := Passive;
++         end;
++      end if;
+       pragma Assert (Static => Storage_Ready (D));
+       pragma Assert (Static => Configuration_Bounded (D));
+       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
+@@ -786,7 +815,7 @@
+ 
+    procedure Publish_Gravity_Bias (D : in out Simulation; Gravity, Bias : Real_Array)
+      with Global => null,
+-     Pre => Is_Ready (D) and then not D.Cache.Passive_Valid
++     Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then not D.Cache.Passive_Valid
+        and then Gravity'First = 0 and then Gravity'Last = D.Nv - 1
+        and then Bias'First = 0 and then Bias'Last = D.Nv - 1
+        and then MJ.Smooth_Dynamics.Work_Array (Gravity) and then MJ.Smooth_Dynamics.Work_Array (Bias),
+diff --git a/experimental/smooth/src/mj-data-gravity_compensation.adb b/experimental/smooth/src/mj-data-gravity_compensation.adb
+new file mode 100644
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-gravity_compensation.adb
+@@ -0,0 +1,78 @@
++with MJ.Gravcomp_Kernels;
++package body MJ.Data.Gravity_Compensation with SPARK_Mode is
++   procedure Accumulate_Column
++     (Total : in out Real_Array; Index : Natural; Linear, Force : Vector; Result : out Status)
++   is
++      Value : constant Real := Total (Index) + MJ.Smooth_Dynamics.Dot_Motion (Linear, Force);
++   begin
++      if not Within_Work (Value) then Result := Numeric_Limit; return; end if;
++      Total (Index) := Value;
++      Result := Success;
++   end Accumulate_Column;
++
++   procedure Add_Compensation (Total : in out Real_Array; Compensation : Real_Array;
++                               Result : out Status)
++   is
++   begin
++      Result := Numeric_Limit;
++      for I in Total'Range loop
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Total));
++         pragma Loop_Invariant (for all K in 0 .. I - 1 =>
++           Total (K) = Total'Loop_Entry (K) + Compensation (K));
++         pragma Loop_Invariant (for all K in I .. Total'Last => Total (K) = Total'Loop_Entry (K));
++         declare
++            Value : constant Real := Total (I) + Compensation (I);
++         begin
++            if not Within_Work (Value) then return; end if;
++            Total (I) := Value;
++         end;
++      end loop;
++      Result := Success;
++   end Add_Compensation;
++
++   procedure Apply_Buffers
++     (Bodies : Body_Parameter_Array; Joints : Joint_Parameter_Array;
++      Body_Poses : Body_State_Array; Joint_Poses : Joint_State_Array;
++      Gravity : Vector;
++      Total : in out Real_Array; Result : out Status)
++   is
++      Compensation : Real_Array (Total'Range) := [others => 0.0];
++   begin
++      Result := Success;
++      --  C outer body order, skipping the world and zero coefficients.
++      for B in 1 .. Bodies'Last loop
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Compensation));
++         if Bodies (B).Gravcomp /= 0.0 then
++            declare
++               Ancestor : Natural := B;
++               Force : constant Vector := MJ.Gravcomp_Kernels.Body_Force (Bodies (B).Mass, Bodies (B).Gravcomp, Gravity);
++            begin
++               while Ancestor > 0 loop
++                  pragma Loop_Variant (Decreases => Ancestor);
++                  pragma Loop_Invariant (Ancestor in 1 .. B);
++                  pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Compensation));
++                  declare
++                     C : constant Body_Parameters := Bodies (Ancestor);
++                  begin
++                     for Offset in 0 .. C.Joint_Count - 1 loop
++                        pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Compensation));
++                        declare
++                           J : constant Natural := C.First_Joint + Offset;
++                           Linear : constant Vector := MJ.Gravcomp_Kernels.Linear_Column
++                             (Joints (J).Kind = Hinge_Joint, Body_Poses (B).Center,
++                              Joint_Poses (J).Anchor, Joint_Poses (J).Direction);
++                        begin
++                           Accumulate_Column (Compensation, Joints (J).Vadr, Linear, Force, Result);
++                           if Result /= Success then return; end if;
++                        end;
++                     end loop;
++                     Ancestor := C.Parent;
++                  end;
++               end loop;
++            end;
++         end if;
++      end loop;
++      --  As in C, finish qfrc_gravcomp before adding it to qfrc_passive.
++      Add_Compensation (Total, Compensation, Result);
++   end Apply_Buffers;
++end MJ.Data.Gravity_Compensation;
+diff --git a/experimental/smooth/src/mj-data-gravity_compensation.ads b/experimental/smooth/src/mj-data-gravity_compensation.ads
+new file mode 100644
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-gravity_compensation.ads
+@@ -0,0 +1,47 @@
++with MJ.Smooth_Dynamics;
++with MJ.Data.Jacobians;
++
++private package MJ.Data.Gravity_Compensation with SPARK_Mode is
++   procedure Accumulate_Column
++     (Total : in out Real_Array; Index : Natural; Linear, Force : Vector; Result : out Status)
++     with Global => null,
++     Pre => Index in Total'Range and then MJ.Smooth_Dynamics.Work_Array (Total)
++       and then Bounded (Linear, 1.0e62) and then Bounded (Force),
++     Post => MJ.Smooth_Dynamics.Work_Array (Total)
++       and then Result in Success | Numeric_Limit
++       and then (if Result = Success then
++         (for all K in Total'Range => Total (K) =
++           (if K = Index then Total'Old (K) + MJ.Smooth_Dynamics.Dot_Motion (Linear, Force)
++            else Total'Old (K)))
++         else Total = Total'Old);
++   pragma Inline_Always (Accumulate_Column);
++   procedure Add_Compensation (Total : in out Real_Array; Compensation : Real_Array;
++                               Result : out Status)
++     with Global => null, Inline_Always,
++     Pre => Total'First = 0 and then Total'Length <= Max_Dofs
++       and then Compensation'First = 0 and then Compensation'Last = Total'Last
++       and then MJ.Smooth_Dynamics.Work_Array (Total)
++       and then MJ.Smooth_Dynamics.Work_Array (Compensation),
++     Post => MJ.Smooth_Dynamics.Work_Array (Total) and then Result in Success | Numeric_Limit
++       and then (if Result = Success then
++         (for all I in Total'Range => Total (I) = Total'Old (I) + Compensation (I)));
++
++   procedure Apply_Buffers
++     (Bodies : Body_Parameter_Array; Joints : Joint_Parameter_Array;
++      Body_Poses : Body_State_Array; Joint_Poses : Joint_State_Array;
++      Gravity : Vector;
++      Total : in out Real_Array; Result : out Status)
++     with Global => null,
++     Pre => Bodies'First = 0 and then Bodies'Length in 1 .. Max_Bodies
++       and then Joints'First = 0 and then Joints'Length <= Max_Dofs
++       and then MJ.Data.Jacobians.Topology (Bodies, Joints)
++       and then Body_Poses'First = 0 and then Body_Poses'Last = Bodies'Last
++       and then Joint_Poses'First = 0 and then Joint_Poses'Last = Joints'Last
++       and then (for all B of Body_Poses => Bounded (B.Center))
++       and then (for all J of Joint_Poses => Joint_Bounded (J))
++       and then Total'First = 0 and then Total'Last = Joints'Last
++       and then MJ.Smooth_Dynamics.Work_Array (Total)
++       and then Bounded (Gravity, Max_Val),
++     Post => MJ.Smooth_Dynamics.Work_Array (Total);
++   pragma Postcondition (Result in Success | Numeric_Limit);
++end MJ.Data.Gravity_Compensation;
+diff --git a/experimental/smooth/src/mj-data.adb b/experimental/smooth/src/mj-data.adb
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -87,17 +87,17 @@
+      Global => null,
+      Pre => S.Nbody >= 1 and then MJ.Models.Sizes_In_Range (S) and then MJ.Models.Body_Layout_OK (S, Fields),
+      Post => (Body_Status'Result = Success) =
+-       (Fields.Body_Jntnum (0) = 0 and then (for all K in 0 .. S.Nbody - 1 => Fields.Body_Gravcomp (K) = 0.0))
++       (Fields.Body_Jntnum (0) = 0 and then (for all K in 0 .. S.Nbody - 1 => Fields.Body_Gravcomp (K) in Tier0_Real))
+    is
+    begin
+       if Fields.Body_Jntnum (0) /= 0 then
+          return Unsupported_Feature;
+       end if;
+       for B in 0 .. S.Nbody - 1 loop
+-         if Fields.Body_Gravcomp (B) /= 0.0 then
+-            return Unsupported_Feature;
++         if Fields.Body_Gravcomp (B) not in Tier0_Real then
++            return Invalid_Model;
+          end if;
+-         pragma Loop_Invariant (for all K in 0 .. B => Fields.Body_Gravcomp (K) = 0.0);
++         pragma Loop_Invariant (for all K in 0 .. B => Fields.Body_Gravcomp (K) in Tier0_Real);
+       end loop;
+       return Success;
+    end Body_Status;
+@@ -362,6 +362,7 @@
+      Post => Is_Empty (D) and then Shape (D) = Shape (D)'Old
+        and then D.Nj = D.Nj'Old and then D.Na = D.Na'Old and then D.No = D.No'Old
+        and then D.Timestep = M.Opt.Timestep and then D.Gravity = Read_Vector (M.Opt.Gravity, 0)
++       and then D.Gravcomp_Enabled = M.Flg_Gravcomp
+        and then D.Gravity_Enabled = not Has_Flag (M.Opt.Disableflags, Dsbl_Gravity)
+        and then D.Spring_Enabled = not Has_Flag (M.Opt.Disableflags, Dsbl_Spring)
+        and then D.Damper_Enabled = not Has_Flag (M.Opt.Disableflags, Dsbl_Damper)
+@@ -374,6 +375,7 @@
+    begin
+       D.Timestep := M.Opt.Timestep;
+       D.Gravity := Read_Vector (M.Opt.Gravity, 0);
++      D.Gravcomp_Enabled := M.Flg_Gravcomp;
+       D.Gravity_Enabled := not Has_Flag (Flags, Dsbl_Gravity);
+       D.Spring_Enabled := not Has_Flag (Flags, Dsbl_Spring);
+       D.Damper_Enabled := not Has_Flag (Flags, Dsbl_Damper);
+@@ -476,7 +478,8 @@
+        and then Item.Position = Read_Vector (Source.Body_Pos.all, 3 * Index)
+        and then Item.Inertial_Position = Read_Vector (Source.Body_Ipos.all, 3 * Index)
+        and then Item.Inertia = Read_Vector (Source.Body_Inertia.all, 3 * Index)
+-       and then Item.Mass = Source.Body_Mass (Index)) with Global => null,
++       and then Item.Mass = Source.Body_Mass (Index)
++       and then Item.Gravcomp = Source.Body_Gravcomp (Index)) with Global => null,
+      Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Body_Layout_OK (S, Source)
+        and then S.Nbody <= Max_Bodies and then Index < S.Nbody;
+ 
+@@ -489,6 +492,7 @@
+      Post => MJ.Models.Body_Layout_OK (S, Source)
+        and then (if Ok then Matches_Body (S, Source, Index, Item))
+    is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
+       Normal : Boolean;
+       Position : constant Vector := Read_Vector (Source.Body_Pos.all, 3 * Index);
+       Ipos : constant Vector := Read_Vector (Source.Body_Ipos.all, 3 * Index);
+@@ -497,6 +501,7 @@
+       Item := (others => <>); Ok := False;
+       if Source.Body_Parentid (Index) < 0 or else Source.Body_Jntnum (Index) < 0
+         or else Source.Body_Mass (Index) not in Nonneg_Tier0
++        or else Source.Body_Gravcomp (Index) not in Tier0_Real
+         or else not Bounded (Position, Max_Val) or else not Bounded (Ipos, Max_Val)
+         or else not Bounded (Inertia, Max_Val)
+       then
+@@ -506,7 +511,7 @@
+         Joint_Count => Source.Body_Jntnum (Index), Position => Position, Inertial_Position => Ipos,
+         Orientation => Read_Quaternion (Source.Body_Quat.all, 4 * Index),
+         Inertial_Orientation => Read_Quaternion (Source.Body_Iquat.all, 4 * Index),
+-        Mass => Source.Body_Mass (Index), Inertia => Inertia);
++        Mass => Source.Body_Mass (Index), Gravcomp => Source.Body_Gravcomp (Index), Inertia => Inertia);
+       Normalize (Item.Orientation, Normal);
+       if not Normal then return; end if;
+       Normalize (Item.Inertial_Orientation, Normal);
+diff --git a/experimental/smooth/src/mj-data.ads b/experimental/smooth/src/mj-data.ads
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -267,6 +267,7 @@
+       Position, Inertial_Position : Vector := Zero;
+       Orientation, Inertial_Orientation : Quaternion := Identity_Quaternion;
+       Mass : Nonneg_Tier0 := 0.0;
++      Gravcomp : Tier0_Real := 0.0;
+       Inertia : Vector := Zero;
+    end record;
+    type Joint_Parameters is record
+@@ -287,6 +288,7 @@
+       Timestep : Nonneg_Tier0;
+       Gravity : Vector;
+       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean;
++      Gravcomp_Enabled : Boolean;
+       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean;
+       Solver_Policy : Inertia_Policy;
+       Bodies : Body_Parameter_Array (1 .. Nb);
+@@ -353,6 +355,7 @@
+       Timestep : Nonneg_Tier0 := 0.0;
+       Gravity : Vector := Zero;
+       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean := True;
++      Gravcomp_Enabled : Boolean := False;
+       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean := True;
+       Cache : Cache_Flags;
+       Body_Config : Body_Parameter_Access := null;
+@@ -377,6 +380,7 @@
+         (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
++         Gravcomp_Enabled => D.Gravcomp_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+          Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
+          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
+@@ -384,6 +388,7 @@
+         (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
++         Gravcomp_Enabled => D.Gravcomp_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+          Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
+          Bodies => [others => <>], Joints => [others => <>], Actuators => [others => <>]));
+@@ -459,6 +464,7 @@
+      Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
+        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
+        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
++       and then A.Gravcomp_Enabled = B.Gravcomp_Enabled
+        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
+        and then A.Damper_Enabled = B.Damper_Enabled and then A.Actuation_Enabled = B.Actuation_Enabled
+        and then A.Clamp_Control = B.Clamp_Control and then A.Implicit_Damping = B.Implicit_Damping
+diff --git a/experimental/smooth/src/mj-gravcomp_kernels.adb b/experimental/smooth/src/mj-gravcomp_kernels.adb
+new file mode 100644
+--- /dev/null
++++ b/experimental/smooth/src/mj-gravcomp_kernels.adb
+@@ -0,0 +1,35 @@
++package body MJ.Gravcomp_Kernels with SPARK_Mode is
++   function Body_Force (Mass : Nonneg_Tier0; Coefficient : Tier0_Real; Gravity : Vector)
++     return Vector is
++      Scale : constant Real := -(Mass * Coefficient);
++   begin
++      pragma Assert (Static => Scale in -1.0e21 .. 1.0e21);
++      return [Gravity (0) * Scale, Gravity (1) * Scale, Gravity (2) * Scale];
++   end Body_Force;
++
++   function Difference (A, B : Real) return Offset_Value is
++   begin
++      return A - B;
++   end Difference;
++
++   function Cross_Component (A, B : Real; X, Y : Offset_Value) return Column_Value is
++   begin
++      return A * X - B * Y;
++   end Cross_Component;
++
++   function Linear_Column (Hinge : Boolean; Center, Anchor, Direction : Vector)
++     return Vector is
++   begin
++      if not Hinge then return Direction; end if;
++      declare
++         X : constant Offset_Value := Difference (Center (0), Anchor (0));
++         Y : constant Offset_Value := Difference (Center (1), Anchor (1));
++         Z : constant Offset_Value := Difference (Center (2), Anchor (2));
++      begin
++         return [Cross_Component (Direction (1), Direction (2), Z, Y),
++                 Cross_Component (Direction (2), Direction (0), X, Z),
++                 Cross_Component (Direction (0), Direction (1), Y, X)];
++      end;
++   end Linear_Column;
++
++end MJ.Gravcomp_Kernels;
+diff --git a/experimental/smooth/src/mj-gravcomp_kernels.ads b/experimental/smooth/src/mj-gravcomp_kernels.ads
+new file mode 100644
+--- /dev/null
++++ b/experimental/smooth/src/mj-gravcomp_kernels.ads
+@@ -0,0 +1,33 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++
++package MJ.Gravcomp_Kernels with SPARK_Mode is
++   --  C order: first mass * coefficient, then multiply each gravity axis.
++   function Body_Force (Mass : Nonneg_Tier0; Coefficient : Tier0_Real; Gravity : Vector)
++     return Vector with Global => null, Inline_Always,
++     Pre => Bounded (Gravity, Max_Val),
++     Post => Bounded (Body_Force'Result, 1.0e32)
++       and then (for all K in Axis =>
++         Body_Force'Result (K) = Gravity (K) * (-(Mass * Coefficient)));
++   subtype Offset_Value is Real range -1.0e61 .. 1.0e61;
++   subtype Column_Value is Real range -1.0e62 .. 1.0e62;
++   function Difference (A, B : Real) return Offset_Value
++     with Global => null, Inline_Always,
++     Pre => A in -Work_Limit .. Work_Limit and then B in -Work_Limit .. Work_Limit,
++     Post => Difference'Result = A - B;
++   function Cross_Component (A, B : Real; X, Y : Offset_Value) return Column_Value
++     with Global => null, Inline_Always,
++     Pre => A in -1.00001 .. 1.00001 and then B in -1.00001 .. 1.00001,
++     Post => Cross_Component'Result = A * X - B * Y;
++   --  A transient Jacobian column need not fit the narrower stored-state bound.
++   function Linear_Column (Hinge : Boolean; Center, Anchor, Direction : Vector)
++     return Vector with Global => null, Inline_Always,
++     Pre => Bounded (Center) and then Bounded (Anchor) and then Bounded (Direction, 1.00001),
++     Post => Bounded (Linear_Column'Result, 1.0e62)
++       and then Linear_Column'Result =
++         (if Hinge then
++            [Cross_Component (Direction (1), Direction (2), Difference (Center (2), Anchor (2)), Difference (Center (1), Anchor (1))),
++             Cross_Component (Direction (2), Direction (0), Difference (Center (0), Anchor (0)), Difference (Center (2), Anchor (2))),
++             Cross_Component (Direction (0), Direction (1), Difference (Center (1), Anchor (1)), Difference (Center (0), Anchor (0)))]
++          else Direction);
++end MJ.Gravcomp_Kernels;

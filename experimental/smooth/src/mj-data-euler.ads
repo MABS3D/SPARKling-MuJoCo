@@ -1,10 +1,15 @@
+with MJ.External_Forces;
 --  Review draft. Semi-implicit Euler, including optional implicit linear
 --  damping as in mj_Euler. A returned failure leaves qpos/qvel/time unchanged;
 --  derived buffers and scratch may have been recomputed.
 package MJ.Data.Euler with SPARK_Mode is
    --  These total value queries are safe to snapshot unconditionally on entry.
    pragma Unevaluated_Use_Of_Old (Allow);
-   procedure Step (D : in out Simulation; Result : out Status) with Global => null, Pre => Valid_State (D),
+   --  External: world-frame force/torque at each body COM for this call.
+   --  Empty means no loads; a nonempty array must cover 0 .. Body_Count - 1.
+   procedure Step
+     (D : in out Simulation; Result : out Status;
+      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Valid_State (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old;
    pragma Postcondition (Is_Ready (D) = Is_Ready (D)'Old);
    pragma Postcondition (Shape (D) = Shape (D)'Old);

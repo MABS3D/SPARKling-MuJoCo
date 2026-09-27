@@ -1,0 +1,1731 @@
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -1,4 +1,5 @@
+ with MJ.Smooth_Dynamics;
++with MJ.Data.Tendon_Phase;
+ with MJ.Spatial_Kernels;
+ with MJ.Fused_RNE;
+ with MJ.Spatial_Storage;
+@@ -670,8 +671,12 @@
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Joint_Bounded);
+    begin
+       Expose_Passive_Inputs (D);
+-      Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
+-                       D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
++      if D.Tendon_Config = null then
++         Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
++                          D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
++      else
++         Tendon_Phase.Passive (D, Result);
++      end if;
+       pragma Assert (Static => Storage_Ready (D));
+       pragma Assert (Static => Configuration_Bounded (D));
+       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
+--- a/experimental/smooth/src/mj-data-inertia_phase.adb
++++ b/experimental/smooth/src/mj-data-inertia_phase.adb
+@@ -1,3 +1,4 @@
++with MJ.Data.Tendon_Phase;
+ with MJ.Data.Mass_Publication;
+ with MJ.Composite_Bounds;
+ with MJ.Composite_Weights;
+@@ -1117,7 +1118,10 @@
+          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+          Prove_Configuration_Equality (Configuration (D), Initial_Config);
+       end;
+-      if Used_CRB then Result := Success; return; end if;
++      if Used_CRB then
++         Tendon_Phase.Inertia (D, Result);
++         return;
++      end if;
+       declare
+          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+@@ -1135,6 +1139,7 @@
+          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+          Prove_Configuration_Equality (Configuration (D), Initial_Config);
+       end;
++      if Result = Success then Tendon_Phase.Inertia (D, Result); end if;
+    end Assemble_Ready;
+    pragma Inline_Always (Assemble_Ready);
+ 
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-tendon_phase.adb
+@@ -0,0 +1,46 @@
++with MJ.Smooth_Dynamics;
++package body MJ.Data.Tendon_Phase with SPARK_Mode is
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Dynamics.Symmetric);
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
++   procedure Passive (D : in out Simulation; Result : out Status) is
++      Nv : constant Natural := D.Nv;
++      Springs, Dampers : Real_Array (0 .. Nv - 1) with Relaxed_Initialization;
++      Ok : Boolean;
++      Value : Real;
++   begin
++      Result := Numeric_Limit;
++      for J in 0 .. D.Nj - 1 loop
++         Springs (J) := MJ.Smooth_Kernels.Passive_Force
++           (D.State.Qpos (J), D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
++            D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping, D.Spring_Enabled, False);
++         Dampers (J) := MJ.Smooth_Kernels.Passive_Force
++           (D.State.Qpos (J), D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
++            D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping, False, D.Damper_Enabled);
++         pragma Loop_Invariant (for all I in 0 .. J => Springs (I)'Initialized and then Dampers (I)'Initialized);
++         pragma Loop_Invariant (for all I in 0 .. J => Springs (I) in -1.0e60 .. 1.0e60
++           and then Dampers (I) in -1.0e60 .. 1.0e60);
++      end loop;
++      MJ.Fixed_Tendons.Add_Passive
++        (D.Tendon_Config.all, D.State.Qpos.all, D.State.Qvel.all,
++         D.Spring_Enabled, D.Damper_Enabled, Springs, Dampers, Ok);
++      if not Ok then return; end if;
++      for J in 0 .. D.Nv - 1 loop
++         Value := Springs (J) + Dampers (J);
++         if not Within_Work (Value) then return; end if;
++         D.Dynamics.Passive (J) := Value;
++      end loop;
++      Result := Success;
++   end Passive;
++
++   procedure Inertia (D : in out Simulation; Result : out Status) is
++      Ok : Boolean;
++   begin
++      Result := Success;
++      if D.Tendon_Config = null then return; end if;
++      MJ.Fixed_Tendons.Add_Mass (D.Tendon_Config.all, D.Nv, D.Dynamics.Mass.all, Ok);
++      pragma Assert (Static => Ok);
++   end Inertia;
++end MJ.Data.Tendon_Phase;
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-tendon_phase.ads
+@@ -0,0 +1,16 @@
++private package MJ.Data.Tendon_Phase with SPARK_Mode is
++   pragma Unevaluated_Use_Of_Old (Allow);
++   procedure Passive (D : in out Simulation; Result : out Status)
++     with Global => null, Pre => Is_Ready (D) and then D.Tendon_Config /= null,
++     Post => Is_Ready (D) and then (if Result = Success then Array_Bounded (D.Dynamics.Passive))
++       and then D.Cache = D.Cache'Old;
++   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
++     and then State_Values (D) = State_Values (D)'Old
++     and then Input_Values (D) = Input_Values (D)'Old);
++   procedure Inertia (D : in out Simulation; Result : out Status)
++     with Global => null, Pre => Is_Ready (D) and then Mass_Current (D) and then Symmetric_Mass (D),
++     Post => Is_Ready (D) and then (if Result = Success then Mass_Current (D) and then Symmetric_Mass (D));
++   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
++     and then State_Values (D) = State_Values (D)'Old
++     and then Input_Values (D) = Input_Values (D)'Old);
++end MJ.Data.Tendon_Phase;
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -236,7 +236,7 @@
+    end Actuator_Status;
+ 
+    function Creation_Inputs (M : MJ.Models.Model) return Boolean is
+-     (MJ.Models.Sizes_In_Range (M.S)
++     (MJ.Models.Valid_Layout (M) and then MJ.Models.Sizes_In_Range (M.S)
+       and then MJ.Models.Body_Layout_OK (M.S, M.Bodies)
+       and then MJ.Models.Joint_Layout_OK (M.S, M.Joints)
+       and then MJ.Models.Dof_Layout_OK (M.S, M.Dofs)
+@@ -311,7 +311,7 @@
+       if not Has_Flag (Flags, Dsbl_Constraint)
+         or else M.Opt.Integrator /= 0 or else M.Opt.Enableflags /= 0
+         or else M.Opt.Disableactuator /= 0
+-        or else M.S.Ntendon /= 0 or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
++        or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
+         or else M.S.Nmocap /= 0 or else M.S.Na /= 0 or else M.S.Nhistory /= 0
+         or else M.Opt.Density /= 0.0 or else M.Opt.Viscosity /= 0.0
+         or else M.Flg_Adhesion
+@@ -853,6 +853,17 @@
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Build_Topology (M, D, Normal);
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
++      declare
++         Loaded : MJ.Fixed_Tendons.Load_Status;
++      begin
++         MJ.Fixed_Tendons.Load (M, D.Tendon_Config, Loaded);
++         case Loaded is
++            when MJ.Fixed_Tendons.Success => null;
++            when MJ.Fixed_Tendons.Unsupported => Free (D); Result := Unsupported_Feature; return;
++            when MJ.Fixed_Tendons.Capacity => Free (D); Result := Capacity_Exceeded; return;
++            when MJ.Fixed_Tendons.Invalid => Free (D); Result := Invalid_Model; return;
++         end case;
++      end;
+       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+       Allocate_Dynamics (D.Dynamics, D.Nv);
+@@ -941,6 +952,7 @@
+ 
+    procedure Free (D : in out Simulation) is
+    begin
++      MJ.Fixed_Tendons.Free (D.Tendon_Config);
+       Free_Body_Config (D.Body_Config);
+       Free_Joint_Config (D.Joint_Config);
+       Free_Actuator_Config (D.Actuator_Config);
+@@ -1281,4 +1293,11 @@
+          Result := Success;
+       end if;
+    end Get_Body_Pose;
++   function Tendon_Value (D : Simulation; Kind : Tendon_Quantity; Index : Natural) return Real is
++      Length, Velocity : MJ.Fixed_Tendons.TK.Coordinate;
++   begin
++      MJ.Fixed_Tendons.Kinematics (D.Tendon_Config.all, Index + 1,
++        D.State.Qpos.all, D.State.Qvel.all, Length, Velocity);
++      return (if Kind = Tendon_Length then Length else Velocity);
++   end Tendon_Value;
+ end MJ.Data;
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -7,8 +7,11 @@
+ with MJ.Smooth_Math;
+ with MJ.Smooth_Kernels;
+ with MJ.Smooth_Actuation;
++with MJ.Fixed_Tendons;
+ 
+ package MJ.Data with SPARK_Mode is
++   use type MJ.Fixed_Tendons.Description_Access;
++   use type MJ.Fixed_Tendons.Description;
+    use type MJ.Smooth_Math.Vector;
+    use type MJ.Smooth_Math.Quaternion;
+    --  These total value queries are safe to snapshot unconditionally on entry.
+@@ -198,6 +201,11 @@
+      Global => null, Pre => Is_Ready (D)
+        and then (if Kind = Actuator_Force then Actuation_Current (D) else Passive_Current (D))
+        and then Index < Velocity_Count (D);
++   function Tendon_Count (D : Simulation) return Natural with Global => null;
++   type Tendon_Quantity is (Tendon_Length, Tendon_Velocity);
++   function Tendon_Value (D : Simulation; Kind : Tendon_Quantity; Index : Natural) return Real
++     with Global => null, Pre => Is_Ready (D) and then Index < Tendon_Count (D),
++     Post => Tendon_Value'Result in -1.0e30 .. 1.0e30;
+    type Actuator_Quantity is (Transmission_Length, Transmission_Velocity, Output_Force);
+    function Actuator_Value (D : Simulation; Kind : Actuator_Quantity; Index : Natural) return Real with
+      Global => null, Pre => Is_Ready (D) and then Actuation_Current (D) and then Index < Control_Count (D);
+@@ -282,7 +290,7 @@
+    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
+    use type Actuator_Parameters;
+    use type Actuator_Parameter_Array;
+-   type Configuration_Snapshot (Nb, Nj, Na : Natural) is record
++   type Configuration_Snapshot (Nb, Nj, Na, Nt, Nw, Nz, Nm : Natural) is record
+       Nq, Nv, Nu, No : Natural;
+       Timestep : Nonneg_Tier0;
+       Gravity : Vector;
+@@ -292,6 +300,7 @@
+       Bodies : Body_Parameter_Array (1 .. Nb);
+       Joints : Joint_Parameter_Array (1 .. Nj);
+       Actuators : Actuator_Parameter_Array (1 .. Na);
++      Tendons : MJ.Fixed_Tendons.Description (Nt, Nw, Nz, Nm);
+    end record;
+    type Body_Parameter_Access is access Body_Parameter_Array;
+    type Joint_Parameter_Access is access Joint_Parameter_Array;
+@@ -358,6 +367,7 @@
+       Body_Config : Body_Parameter_Access := null;
+       Joint_Config : Joint_Parameter_Access := null;
+       Actuator_Config : Actuator_Parameter_Access := null;
++      Tendon_Config : MJ.Fixed_Tendons.Description_Access := null;
+       State : State_Buffers;
+       Kinematic : Kinematic_Buffers;
+       Dynamics : Force_Buffers;
+@@ -375,6 +385,11 @@
+         and then Int64 (D.Body_Config'Length) = Int64 (D.Nb) and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+         and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na) then
+         (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Nt => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nt,
++         Nw => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nw,
++         Nz => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nz,
++         Nm => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nm,
++         Tendons => MJ.Fixed_Tendons.Image (D.Tendon_Config),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+@@ -382,6 +397,11 @@
+          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
+       else
+         (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Nt => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nt,
++         Nw => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nw,
++         Nz => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nz,
++         Nm => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nm,
++         Tendons => MJ.Fixed_Tendons.Image (D.Tendon_Config),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+@@ -395,7 +415,7 @@
+ 
+    function Is_Empty (D : Simulation) return Boolean is
+      (not D.Allocated and then D.Body_Config = null and then D.Joint_Config = null
+-      and then D.Actuator_Config = null and then D.State.Qpos = null
++      and then D.Actuator_Config = null and then D.Tendon_Config = null and then D.State.Qpos = null
+       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
+       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
+       and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
+@@ -415,6 +435,7 @@
+ 
+    function Velocity_Count (D : Simulation) return Natural is (D.Nv);
+ 
++   function Tendon_Count (D : Simulation) return Natural is (MJ.Fixed_Tendons.Count (D.Tendon_Config));
+    function Control_Count (D : Simulation) return Natural is (D.Nu);
+    function Position (D : Simulation; Index : Natural) return Real is (D.State.Qpos (Index));
+    function Velocity (D : Simulation; Index : Natural) return Real is (D.State.Qvel (Index));
+@@ -457,6 +478,8 @@
+      Post => Input_Image (C1, F1) = Input_Image (C2, F2);
+    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) with Ghost => Static, Global => null,
+      Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
++       and then A.Nt = B.Nt and then A.Nw = B.Nw and then A.Nz = B.Nz and then A.Nm = B.Nm
++       and then A.Tendons = B.Tendons
+        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
+        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
+        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
+@@ -597,7 +620,8 @@
+      (Topology_Layout_Ready (D.Topology, D.Nb, D.Nv));
+ 
+    function Storage_Ready (D : Simulation) return Boolean is
+-     (D.Allocated and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
++     (D.Allocated and then MJ.Fixed_Tendons.Ready (D.Tendon_Config, D.Nv)
++      and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+       and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
+       and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+@@ -644,7 +668,8 @@
+      Post => Phase_Ready'Result = Is_Ready (D);
+ 
+    function Original_Ready (D : Simulation) return Boolean is
+-     (D.Allocated and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
++     (D.Allocated and then MJ.Fixed_Tendons.Ready (D.Tendon_Config, D.Nv)
++      and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
+       and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
+--- /dev/null
++++ b/experimental/smooth/src/mj-fixed_tendons.adb
+@@ -0,0 +1,244 @@
++with MJ.Smooth_Kernels;
++package body MJ.Fixed_Tendons with SPARK_Mode is
++   procedure Load (M : MJ.Models.Model; C : in out Description_Access;
++                   Result : out Load_Status)
++   is
++      Plan : Mass_Plan (0 .. Max_Terms - 1);
++      Used : Natural := 0;
++      Coefs : Real_Array (0 .. 255) := [others => 0.0];
++      Temp : Description_Access := null;
++   begin
++      Result := Invalid;
++      if M.S.Ntendon = 0 then Result := Success; return; end if;
++      if M.S.Ntendon > Max_Tendons or else M.S.Nwrap > Max_Terms
++        or else M.S.Njten > Max_Terms or else M.S.Nv > 256
++      then Result := Capacity; return; end if;
++      --  The first runtime tranche is fixed tendons. Spatial wrapping needs
++      --  site poses and a changing Jacobian, and is explicitly rejected here.
++      for K in 0 .. M.S.Nwrap - 1 loop
++         if M.Wraps.Wrap_Type (K) /= 1 then Result := Unsupported; return; end if;
++      end loop;
++      Temp := new Description (M.S.Ntendon, M.S.Nwrap, M.S.Njten, 0);
++      for I in 0 .. M.S.Ntendon - 1 loop
++         declare
++            Adr : constant Integer := M.Tendons.Tendon_Adr (I);
++            Num : constant Integer := M.Tendons.Tendon_Num (I);
++            Ja : constant Integer := M.Tendons.Ten_J_Rowadr (I);
++            Jn : constant Integer := M.Tendons.Ten_J_Rownnz (I);
++         begin
++            if Adr not in 0 .. M.S.Nwrap or else Num not in 0 .. M.S.Nwrap - Adr
++              or else Ja not in 0 .. M.S.Njten or else Jn not in 0 .. M.S.Njten - Ja
++              or else M.Tendons.Tendon_Lengthspring (2 * I) not in Tier0_Real
++              or else M.Tendons.Tendon_Lengthspring (2 * I + 1) not in Tier0_Real
++              or else M.Tendons.Tendon_Lengthspring (2 * I) > M.Tendons.Tendon_Lengthspring (2 * I + 1)
++              or else M.Tendons.Tendon_Stiffness (I) not in Nonneg_Tier0
++              or else M.Tendons.Tendon_Damping (I) not in Nonneg_Tier0
++              or else M.Tendons.Tendon_Armature (I) not in Nonneg_Tier0
++              or else M.Tendons.Tendon_Stiffnesspoly (2 * I) not in Tier0_Real
++              or else M.Tendons.Tendon_Stiffnesspoly (2 * I + 1) not in Tier0_Real
++              or else M.Tendons.Tendon_Dampingpoly (2 * I) not in Tier0_Real
++              or else M.Tendons.Tendon_Dampingpoly (2 * I + 1) not in Tier0_Real
++            then Free (Temp); return; end if;
++            Temp.Tendons (I + 1) :=
++              (Law => (Lower => M.Tendons.Tendon_Lengthspring (2 * I),
++                       Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
++                       Stiffness => M.Tendons.Tendon_Stiffness (I),
++                       Damping => M.Tendons.Tendon_Damping (I),
++                       Armature => M.Tendons.Tendon_Armature (I),
++                       Spring_Poly => [M.Tendons.Tendon_Stiffnesspoly (2 * I), M.Tendons.Tendon_Stiffnesspoly (2 * I + 1)],
++                       Damper_Poly => [M.Tendons.Tendon_Dampingpoly (2 * I), M.Tendons.Tendon_Dampingpoly (2 * I + 1)]),
++               Terms => (Adr + 1, Num), Jacobian => (Ja + 1, Jn));
++            Coefs := [others => 0.0];
++            for K in Adr .. Adr + Num - 1 loop
++               declare
++                  J : constant Integer := M.Wraps.Wrap_Objid (K);
++               begin
++                  if J not in 0 .. M.S.Njnt - 1 or else M.Wraps.Wrap_Prm (K) not in Tier0_Real then
++                     Free (Temp); return;
++                  end if;
++                  declare
++                     V : constant Integer := M.Joints.Jnt_Dofadr (J);
++                  begin
++                     if V not in 0 .. M.S.Nv - 1 or else M.Joints.Jnt_Qposadr (J) /= V
++                       or else M.Joints.Jnt_Type (J) not in 2 .. 3
++                     then Free (Temp); return; end if;
++                     Temp.Terms (K + 1) := (V, M.Wraps.Wrap_Prm (K));
++                     Coefs (V) := Coefs (V) + M.Wraps.Wrap_Prm (K);
++                  end;
++               end;
++            end loop;
++            for K in Ja .. Ja + Jn - 1 loop
++               declare
++                  V : constant Integer := M.Tendons.Ten_J_Colind (K);
++               begin
++                  if V not in 0 .. M.S.Nv - 1
++                    or else (K > Ja and then V < M.Tendons.Ten_J_Colind (K - 1))
++                    or else Coefs (V) not in Tier0_Real
++                  then Free (Temp); return; end if;
++                  Temp.Jacobian (K + 1) := (V, Coefs (V));
++                  Coefs (V) := 0.0;
++               end;
++            end loop;
++            if (for some X of Coefs => X /= 0.0) then Free (Temp); return; end if;
++            --  mj_tendonArmature adds only at the existing M sparsity pattern.
++            --  In particular C 3.14 does NOT insert cross-branch entries.
++            --  Fixed Jacobians permit caching each product (not regrouping
++            --  different tendons' sums); retain C's tendon/row order.
++            if Temp.Tendons (I + 1).Law.Armature /= 0.0 then
++               for K in Ja .. Ja + Jn - 1 loop
++                  declare
++                     V : constant Natural := Temp.Jacobian (K + 1).Dof;
++                     A : constant Integer := M.Sparse.M_Rowadr (V);
++                     N : constant Integer := M.Sparse.M_Rownnz (V);
++                  begin
++                     if A not in 0 .. M.S.Nc or else N not in 0 .. M.S.Nc - A then
++                        Free (Temp); return;
++                     end if;
++                     if Temp.Jacobian (K + 1).Coefficient /= 0.0 then
++                        for H in A .. A + N - 1 loop
++                           for L in Ja .. Ja + Jn - 1 loop
++                              if M.Sparse.M_Colind (H) = Temp.Jacobian (L + 1).Dof then
++                                 declare
++                                    W : constant Natural := Temp.Jacobian (L + 1).Dof;
++                                    Delta_M : constant Real := TK.Mass_Entry
++                                      (0.0, Temp.Tendons (I + 1).Law.Armature,
++                                       Temp.Jacobian (K + 1).Coefficient, Temp.Jacobian (L + 1).Coefficient);
++                                 begin
++                                    if Used = Max_Terms then
++                                       Free (Temp); Result := Capacity; return;
++                                    end if;
++                                    Plan (Used) := (V * M.S.Nv + W, W * M.S.Nv + V, Delta_M);
++                                    Used := Used + 1;
++                                 end;
++                                 exit;
++                              end if;
++                           end loop;
++                        end loop;
++                     end if;
++                  end;
++               end loop;
++            end if;
++         end;
++      end loop;
++      C := new Description'(Nt => Temp.Nt, Nw => Temp.Nw, Nz => Temp.Nz, Nm => Used,
++        Tendons => Temp.Tendons, Terms => Temp.Terms, Jacobian => Temp.Jacobian,
++        Mass => Plan (0 .. Used - 1));
++      Free (Temp);
++      if not Ready (C, M.S.Nv) then Free (C); return; end if;
++      Result := Success;
++   end Load;
++
++   procedure Kinematics (C : Description; I : Natural; Q, V : Real_Array;
++                         Length, Velocity : out TK.Coordinate)
++   is
++      T : constant Tendon := C.Tendons (I);
++   begin
++      TK.Fixed_Kinematics
++        (C.Terms (T.Terms.First .. T.Terms.First + T.Terms.Count - 1),
++         C.Jacobian (T.Jacobian.First .. T.Jacobian.First + T.Jacobian.Count - 1),
++         Q, V, Length, Velocity);
++   end Kinematics;
++
++   procedure Project_Pair
++     (Spring, Damper : in out Real_Array; Index : Natural; J : Tier0_Real;
++      Fs, Fd : TK.Tendon_Force; Ok : out Boolean)
++   is
++      S : constant Real := TK.Project (Spring (Index), J, Fs);
++      D : constant Real := TK.Project (Damper (Index), J, Fd);
++   begin
++      Ok := S in TK.Mass_Value and then D in TK.Mass_Value;
++      if Ok then
++         Spring (Index) := S;
++         Damper (Index) := D;
++      end if;
++   end Project_Pair;
++
++   procedure Project_Small_Pair
++     (Spring, Damper : in out Real_Array; Index : Natural; J : Tier0_Real;
++      Fs, Fd : TK.Small_Force)
++   is
++   begin
++      Spring (Index) := TK.Project_Small (Spring (Index), J, Fs);
++      Damper (Index) := TK.Project_Small (Damper (Index), J, Fd);
++   end Project_Small_Pair;
++
++   procedure Add_Passive
++     (C : Description; Q, V : Real_Array; Spring_Enabled, Damper_Enabled : Boolean;
++      Spring, Damper : in out Real_Array; Ok : out Boolean)
++   is
++      Length, Velocity : TK.Coordinate;
++      Fs, Fd : TK.Tendon_Force;
++      First, Last : Integer;
++   begin
++      Ok := False;
++      for I in C.Tendons'Range loop
++         Kinematics (C, I, Q, V, Length, Velocity);
++         TK.Spring_Damper (C.Tendons (I).Law, Length, Velocity,
++                          Spring_Enabled, Damper_Enabled, Fs, Fd);
++         if Fs /= 0.0 or else Fd /= 0.0 then
++            First := C.Tendons (I).Jacobian.First;
++            Last := First + C.Tendons (I).Jacobian.Count - 1;
++            if Fs in TK.Small_Force and then Fd in TK.Small_Force then
++               --  This gate is per tendon. The scalar kernel proves that
++               --  every rounded update stays bounded, including at the
++               --  work interval endpoints, without a per-DOF runtime guard.
++               for K in First .. Last loop
++                  Project_Small_Pair (Spring, Damper, C.Jacobian (K).Dof,
++                    C.Jacobian (K).Coefficient, Fs, Fd);
++                  pragma Loop_Invariant (for all X of Spring => X in TK.Mass_Value);
++                  pragma Loop_Invariant (for all X of Damper => X in TK.Mass_Value);
++               end loop;
++            else
++               for K in First .. Last loop
++                  Project_Pair (Spring, Damper, C.Jacobian (K).Dof,
++                    C.Jacobian (K).Coefficient, Fs, Fd, Ok);
++                  if not Ok then return; end if;
++                  pragma Loop_Invariant (for all X of Spring => X in -1.0e60 .. 1.0e60);
++                  pragma Loop_Invariant (for all X of Damper => X in -1.0e60 .. 1.0e60);
++               end loop;
++            end if;
++         end if;
++         pragma Loop_Invariant (for all X of Spring => X in -1.0e60 .. 1.0e60);
++         pragma Loop_Invariant (for all X of Damper => X in -1.0e60 .. 1.0e60);
++      end loop;
++      Ok := True;
++   end Add_Passive;
++
++   procedure Unfold_Mass (C : Description; Initial : Real_Array; Nv, Count : Natural) is
++   begin
++      null;
++   end Unfold_Mass;
++
++   procedure Store_Mass_Pair (Mass : in out Real_Array; Nv, Target, Mirror : Natural;
++                              Change : TK.Mass_Change) is
++      X : constant TK.Mass_Value := TK.Accumulate_Mass (Mass (Target), Change);
++      Original : constant Real_Array := Mass with Ghost => Static;
++   begin
++      pragma Assert (Static => Target = (Target / Nv) * Nv + (Target mod Nv));
++      pragma Assert (Static => Mass (MJ.Smooth_Kernels.Matrix_Offset (Nv, Target / Nv, Target mod Nv)) =
++        Mass (MJ.Smooth_Kernels.Matrix_Offset (Nv, Target mod Nv, Target / Nv)));
++      pragma Assert (Static => Mass (Target) = Mass (Mirror));
++      Mass (Target) := X;
++      Mass (Mirror) := X;
++      MJ.Smooth_Dynamics.Prove_Symmetry_After_Update
++        (Mass, Original, Nv, Target / Nv, Target mod Nv, X);
++   end Store_Mass_Pair;
++
++   procedure Add_Mass (C : Description; Nv : Natural;
++                       Mass : in out Real_Array; Ok : out Boolean)
++   is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mass_Model);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Dynamics.Symmetric);
++      Initial : constant Real_Array := Mass with Ghost => Static;
++   begin
++      for K in C.Mass'Range loop
++         Unfold_Mass (C, Initial, Nv, K);
++         Store_Mass_Pair (Mass, Nv, C.Mass (K).Index, C.Mass (K).Mirror, C.Mass (K).Value);
++         pragma Loop_Invariant (for all X of Mass => X in TK.Mass_Value);
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Symmetric (Mass, Nv));
++         pragma Loop_Invariant (Static => (for all I in Mass'Range =>
++           Mass (I) = Mass_Model (C, Initial, Nv, I, K)));
++      end loop;
++      Ok := True;
++   end Add_Mass;
++end MJ.Fixed_Tendons;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fixed_tendons.ads
+@@ -0,0 +1,166 @@
++with MJ.Types; use MJ.Types;
++with MJ.Tendon_Kernels;
++with MJ.Models;
++with MJ.Smooth_Dynamics;
++with Ada.Unchecked_Deallocation;
++
++package MJ.Fixed_Tendons with SPARK_Mode is
++   pragma Unevaluated_Use_Of_Old (Allow);
++   package TK renames MJ.Tendon_Kernels;
++   Max_Tendons : constant := 1024;
++   Max_Terms : constant := TK.Max_Terms;
++   type Segment is record
++      First, Count : Natural := 0;
++   end record;
++   type Tendon is record
++      Law : TK.Parameters;
++      Terms, Jacobian : Segment;
++   end record;
++   type Tendon_Array is array (Natural range <>) of Tendon;
++   type Mass_Term is record
++      Index, Mirror : Natural := 0;
++      Value : Real := 0.0;
++   end record;
++   type Mass_Plan is array (Natural range <>) of Mass_Term;
++   type Description (Nt, Nw, Nz, Nm : Natural) is record
++      Tendons : Tendon_Array (1 .. Nt);
++      Terms : TK.Row (1 .. Nw);
++      Jacobian : TK.Row (1 .. Nz);
++      Mass : Mass_Plan (1 .. Nm);
++   end record;
++   type Description_Access is access Description;
++   procedure Free is new Ada.Unchecked_Deallocation (Description, Description_Access);
++   function Image (C : Description_Access) return Description is
++     (if C = null then Description'(0, 0, 0, 0, others => <>) else C.all)
++     with Ghost => Static, Global => null;
++   function Count (C : Description_Access) return Natural is
++     (if C = null then 0 else C.Nt) with Global => null;
++   function Valid_Segment (S : Segment; N : Natural) return Boolean is
++     (N <= Max_Terms and then S.First in 1 .. N + 1 and then S.Count <= N + 1 - S.First) with Global => null;
++   function Kinematic_Layout (C : Description; Nv : Natural) return Boolean is
++     (Nv <= 256 and then C.Nt <= Max_Tendons and then C.Nw <= Max_Terms
++      and then C.Nz <= Max_Terms
++      and then (for all T of C.Tendons => T.Law.Lower <= T.Law.Upper
++        and then Valid_Segment (T.Terms, C.Nw)
++        and then Valid_Segment (T.Jacobian, C.Nz))
++      and then (for all E of C.Terms => E.Dof < Nv)
++      and then (for all E of C.Jacobian => E.Dof < Nv)) with Global => null;
++   function Valid (C : Description; Nv : Natural) return Boolean is
++     (Kinematic_Layout (C, Nv) and then C.Nm <= Max_Terms
++      and then (if C.Nm > 0 then Nv > 0)
++      and then (for all E of C.Mass => E.Index < Nv * Nv
++        and then E.Mirror = (E.Index mod Nv) * Nv + E.Index / Nv
++        and then E.Value in -1.0e31 .. 1.0e31)) with Global => null;
++   function Ready (C : Description_Access; Nv : Natural) return Boolean is
++     (C = null or else Valid (C.all, Nv)) with Global => null;
++   type Load_Status is (Success, Unsupported, Invalid, Capacity);
++   procedure Load (M : MJ.Models.Model; C : in out Description_Access;
++                   Result : out Load_Status)
++     with Global => null, Pre => C = null and then MJ.Models.Valid_Layout (M),
++     Post => (if Result = Success then Ready (C, M.S.Nv) else C = null);
++
++   procedure Kinematics (C : Description; I : Natural; Q, V : Real_Array;
++                         Length, Velocity : out TK.Coordinate)
++     with Global => null,
++     Pre => Q'Length <= 256 and then Kinematic_Layout (C, Q'Length) and then I in C.Tendons'Range
++       and then Q'First = 0 and then V'First = 0 and then V'Length = Q'Length
++       and then (for all X of Q => X in Tier0_Real)
++       and then (for all X of V => X in Tier0_Real),
++     Post => Length in -5.0e29 .. 5.0e29;
++   pragma Postcondition (Static => Length = TK.Reduction
++     (C.Terms (C.Tendons (I).Terms.First .. C.Tendons (I).Terms.First + C.Tendons (I).Terms.Count - 1),
++      Q, C.Tendons (I).Terms.Count)
++     and then Velocity = TK.Sparse_Model
++     (C.Jacobian (C.Tendons (I).Jacobian.First .. C.Tendons (I).Jacobian.First + C.Tendons (I).Jacobian.Count - 1),
++      V, C.Tendons (I).Jacobian.Count mod 4));
++   --  Keep springs and dampers separate until all tendons have been projected,
++   --  as mj_passive does. Both arrays may already contain joint contributions.
++   procedure Project_Pair
++     (Spring, Damper : in out Real_Array; Index : Natural; J : Tier0_Real;
++      Fs, Fd : TK.Tendon_Force; Ok : out Boolean)
++     with Global => null,
++     Pre => Index in Spring'Range and then Index in Damper'Range
++       and then (for all X of Spring => X in TK.Mass_Value)
++       and then (for all X of Damper => X in TK.Mass_Value),
++     Post => (for all X of Spring => X in TK.Mass_Value)
++       and then (for all X of Damper => X in TK.Mass_Value)
++       and then Ok = (TK.Project (Spring'Old (Index), J, Fs) in TK.Mass_Value
++         and then TK.Project (Damper'Old (Index), J, Fd) in TK.Mass_Value)
++       and then (for all I in Spring'Range => Spring (I) =
++         (if Ok and then I = Index then TK.Project (Spring'Old (I), J, Fs) else Spring'Old (I)))
++       and then (for all I in Damper'Range => Damper (I) =
++         (if Ok and then I = Index then TK.Project (Damper'Old (I), J, Fd) else Damper'Old (I)));
++   pragma Inline_Always (Project_Pair);
++   procedure Project_Small_Pair
++     (Spring, Damper : in out Real_Array; Index : Natural; J : Tier0_Real;
++      Fs, Fd : TK.Small_Force)
++     with Global => null,
++     Pre => Index in Spring'Range and then Index in Damper'Range
++       and then (for all X of Spring => X in TK.Mass_Value)
++       and then (for all X of Damper => X in TK.Mass_Value),
++     Post => (for all X of Spring => X in TK.Mass_Value)
++       and then (for all X of Damper => X in TK.Mass_Value)
++       and then (for all I in Spring'Range => Spring (I) =
++         (if I = Index then TK.Project_Small (Spring'Old (I), J, Fs) else Spring'Old (I)))
++       and then (for all I in Damper'Range => Damper (I) =
++         (if I = Index then TK.Project_Small (Damper'Old (I), J, Fd) else Damper'Old (I)));
++   pragma Inline_Always (Project_Small_Pair);
++   procedure Add_Passive
++     (C : Description; Q, V : Real_Array; Spring_Enabled, Damper_Enabled : Boolean;
++      Spring, Damper : in out Real_Array; Ok : out Boolean)
++     with Global => null,
++     Pre => Q'Length <= 256 and then Kinematic_Layout (C, Q'Length) and then Q'First = 0 and then V'First = 0
++       and then V'Length = Q'Length and then Spring'First = 0 and then Damper'First = 0
++       and then Spring'Length = Q'Length and then Damper'Length = Q'Length
++       and then (for all X of Q => X in Tier0_Real)
++       and then (for all X of V => X in Tier0_Real)
++       and then (for all X of Spring => X in -1.0e60 .. 1.0e60)
++       and then (for all X of Damper => X in -1.0e60 .. 1.0e60),
++     Post => (for all X of Spring => X in -1.0e60 .. 1.0e60)
++       and then (for all X of Damper => X in -1.0e60 .. 1.0e60);
++   function Mass_Model (C : Description; Initial : Real_Array;
++                        Nv, Index, Count : Natural) return TK.Mass_Value is
++     (if Count = 0 then Initial (Index)
++      elsif C.Mass (Count).Index = Index or else C.Mass (Count).Mirror = Index then
++        TK.Accumulate_Mass (Mass_Model (C, Initial, Nv, Index, Count - 1), C.Mass (Count).Value)
++      else Mass_Model (C, Initial, Nv, Index, Count - 1))
++     with Ghost => Static, Global => null,
++     Pre => Nv <= 256 and then Valid (C, Nv) and then Count <= C.Nm
++       and then MJ.Smooth_Dynamics.Square_Layout (Initial, Nv)
++       and then Index in Initial'Range
++       and then (for all X of Initial => X in TK.Mass_Value),
++     Post => (if Count = 0 then Mass_Model'Result = Initial (Index)),
++     Subprogram_Variant => (Decreases => Count);
++   procedure Unfold_Mass (C : Description; Initial : Real_Array; Nv, Count : Natural)
++     with Ghost => Static, Global => null,
++     Pre => Nv <= 256 and then Valid (C, Nv) and then Count in 1 .. C.Nm
++       and then MJ.Smooth_Dynamics.Square_Layout (Initial, Nv)
++       and then (for all X of Initial => X in TK.Mass_Value),
++     Post => (for all I in Initial'Range => Mass_Model (C, Initial, Nv, I, Count) =
++       (if C.Mass (Count).Index = I or else C.Mass (Count).Mirror = I then
++          TK.Accumulate_Mass (Mass_Model (C, Initial, Nv, I, Count - 1), C.Mass (Count).Value)
++        else Mass_Model (C, Initial, Nv, I, Count - 1)));
++   procedure Store_Mass_Pair (Mass : in out Real_Array; Nv, Target, Mirror : Natural;
++                              Change : TK.Mass_Change)
++     with Global => null,
++     Pre => Nv in 1 .. 256 and then MJ.Smooth_Dynamics.Square_Layout (Mass, Nv)
++       and then Target in Mass'Range and then Mirror = (Target mod Nv) * Nv + Target / Nv
++       and then (for all X of Mass => X in TK.Mass_Value)
++       and then MJ.Smooth_Dynamics.Symmetric (Mass, Nv),
++     Post => (for all X of Mass => X in TK.Mass_Value)
++       and then MJ.Smooth_Dynamics.Symmetric (Mass, Nv)
++       and then (for all I in Mass'Range => Mass (I) =
++         (if I = Target or else I = Mirror then TK.Accumulate_Mass (Mass'Old (I), Change)
++          else Mass'Old (I)));
++   pragma Inline_Always (Store_Mass_Pair);
++   procedure Add_Mass (C : Description; Nv : Natural;
++                       Mass : in out Real_Array; Ok : out Boolean)
++     with Global => null,
++     Pre => Nv <= 256 and then Mass'Length <= 65_536 and then Valid (C, Nv) and then MJ.Smooth_Dynamics.Square_Layout (Mass, Nv)
++       and then MJ.Smooth_Dynamics.Symmetric (Mass, Nv)
++       and then (for all X of Mass => X in -1.0e60 .. 1.0e60),
++     Post => Ok and then (for all X of Mass => X in -1.0e60 .. 1.0e60)
++       and then MJ.Smooth_Dynamics.Symmetric (Mass, Nv);
++   pragma Postcondition (Static => (for all I in Mass'Range =>
++     Mass (I) = Mass_Model (C, Mass'Old, Nv, I, C.Nm)));
++end MJ.Fixed_Tendons;
+--- a/experimental/smooth/src/mj-smooth_dynamics.adb
++++ b/experimental/smooth/src/mj-smooth_dynamics.adb
+@@ -188,12 +188,6 @@
+    end Prove_Symmetric_Element;
+    procedure Prove_Symmetry_After_Update
+      (A, Original : Real_Array; N, Row, Column : Natural; Value : Work_Real)
+-     with Ghost => Static, Global => null,
+-     Pre => Square_Layout (A, N) and then Square_Layout (Original, N)
+-       and then Row < N and then Column < N and then Symmetric (Original, N)
+-       and then (for all K in A'Range => A (K) =
+-         (if K = Row * N + Column or else K = Column * N + Row then Value else Original (K))),
+-     Post => Symmetric (A, N)
+    is
+    begin
+       for I in 0 .. N - 1 loop
+--- a/experimental/smooth/src/mj-smooth_dynamics.ads
++++ b/experimental/smooth/src/mj-smooth_dynamics.ads
+@@ -118,6 +118,14 @@
+    procedure Offset_Identity (N, I, J, Row, Column : Natural) with Ghost => Static, Global => null,
+      Pre => N <= 256 and then I < N and then J < N and then Row < N and then Column < N,
+      Post => (I * N + J = Row * N + Column) = (I = Row and then J = Column);
++   procedure Prove_Symmetry_After_Update
++     (A, Original : Real_Array; N, Row, Column : Natural; Value : Work_Real)
++     with Ghost => Static, Global => null,
++     Pre => Square_Layout (A, N) and then Square_Layout (Original, N)
++       and then Row < N and then Column < N and then Symmetric (Original, N)
++       and then (for all K in A'Range => A (K) =
++         (if K = Row * N + Column or else K = Column * N + Row then Value else Original (K))),
++     Post => Symmetric (A, N);
+    procedure Store_Symmetric (A : in out Real_Array; N, Row, Column : Natural; Value : Work_Real)
+      with Global => null,
+      Pre => Square_Layout (A, N) and then Row < N and then Column < N
+--- /dev/null
++++ b/experimental/smooth/src/mj-tendon_kernels.adb
+@@ -0,0 +1,168 @@
++package body MJ.Tendon_Kernels with SPARK_Mode is
++   function Polynomial_First (Linear : Nonneg_Tier0; P : Tier0_Real; X : Coordinate)
++     return Real is
++   begin
++      return Linear + P * X;
++   end Polynomial_First;
++   function Polynomial_Second (P : Tier0_Real; X : Coordinate) return Real is
++      X2 : constant Real := X * X;
++   begin
++      pragma Assert (Static => X2 in 0.0 .. 1.1e60);
++      return P * X2;
++   end Polynomial_Second;
++   function Poly_Value (Linear : Nonneg_Tier0; P : Polynomial;
++                        X : Coordinate; Odd : Boolean) return Force_Coefficient is
++   begin
++      return Polynomial_First (Linear, P (0), (if Odd then abs X else X))
++        + Polynomial_Second (P (1), X);
++   end Poly_Value;
++
++   procedure Spring_Damper
++     (C : Parameters; Length, Velocity : Coordinate;
++      Spring_Enabled, Damper_Enabled : Boolean; Spring, Damper : out Tendon_Force)
++   is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Displacement);
++      X : Coordinate;
++   begin
++      Spring := 0.0;
++      Damper := 0.0;
++      if Spring_Enabled and then
++        (C.Stiffness /= 0.0 or else C.Spring_Poly /= Polynomial'[0.0, 0.0])
++      then
++         X := Displacement (Length, C.Lower, C.Upper);
++         Spring := -X * Poly_Value (C.Stiffness, C.Spring_Poly, X, False);
++      end if;
++      if Damper_Enabled and then
++        (C.Damping /= 0.0 or else C.Damper_Poly /= Polynomial'[0.0, 0.0])
++      then
++         Damper := -Velocity * Poly_Value (C.Damping, C.Damper_Poly, Velocity, True);
++      end if;
++   end Spring_Damper;
++
++   function Sum_Step (Acc : Coordinate; Coefficient, Q : Tier0_Real;
++                      Count : Natural) return Coordinate is
++   begin
++      return Acc + Coefficient * Q;
++   end Sum_Step;
++
++   procedure Reduced_Bound (Value : Coordinate; Count : Natural) is
++   begin
++      pragma Assert (Static => Real (Count) <= Real (Max_Terms));
++      pragma Assert (Static => Real (Count) * Step_Bound <= 2.0 ** 84);
++   end Reduced_Bound;
++
++   function Dot (R : Row; Q : Real_Array) return Reduced_Coordinate is
++      Acc : Coordinate := 0.0;
++   begin
++      for I in 0 .. R'Length - 1 loop
++         Acc := Sum_Step (Acc, R (R'First + I).Coefficient, Q (R (R'First + I).Dof), I);
++         pragma Loop_Invariant (abs Acc <= Real (I + 1) * Step_Bound);
++         pragma Loop_Invariant (Static => Acc = Reduction (R, Q, I + 1));
++      end loop;
++      Reduced_Bound (Acc, R'Length);
++      return Acc;
++   end Dot;
++
++   function Combine (A, B, C, D : Coordinate; Blocks : Natural) return Coordinate is
++      AC : constant Real := A + C;
++      BD : constant Real := B + D;
++   begin
++      pragma Assert (Static => abs A <= 2.0 ** 83 and then abs B <= 2.0 ** 83
++        and then abs C <= 2.0 ** 83 and then abs D <= 2.0 ** 83);
++      pragma Assert (Static => abs AC <= 2.0 ** 84 and then abs BD <= 2.0 ** 84);
++      return AC + BD;
++   end Combine;
++   function Tail_Add (Acc : Coordinate; Coefficient, Q : Tier0_Real; Count : Natural)
++     return Coordinate is
++   begin
++      return Acc + Coefficient * Q;
++   end Tail_Add;
++   procedure Unfold_Lane (R : Row; Q : Real_Array; Count, Lane : Natural) is
++   begin
++      null;
++   end Unfold_Lane;
++   procedure Unfold_Sparse (R : Row; Q : Real_Array; Tail : Natural) is
++   begin
++      null;
++   end Unfold_Sparse;
++   procedure Advance_Lane (R : Row; Q : Real_Array; Count, Lane : Natural; Acc : in out Coordinate) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Value);
++      Offset : constant Natural := R'First + (4 * Count + Lane);
++   begin
++      Unfold_Lane (R, Q, Count, Lane);
++      pragma Assert (Static => Sum_Step (Acc, R (Offset).Coefficient, Q (R (Offset).Dof), Count)
++        = Lane_Value (R, Q, Count + 1, Lane));
++      Acc := Sum_Step (Acc, R (Offset).Coefficient, Q (R (Offset).Dof), Count);
++   end Advance_Lane;
++   procedure Advance_Tail (R : Row; Q : Real_Array; Count : Natural; Acc : in out Coordinate) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Model);
++      Offset : constant Natural := R'First + (4 * (R'Length / 4) + Count);
++   begin
++      Unfold_Sparse (R, Q, Count + 1);
++      pragma Assert (Static => Tail_Add (Acc, R (Offset).Coefficient, Q (R (Offset).Dof), Count)
++        = Sparse_Model (R, Q, Count + 1));
++      Acc := Tail_Add (Acc, R (Offset).Coefficient, Q (R (Offset).Dof), Count);
++   end Advance_Tail;
++   procedure Tail_Bound (Value : Coordinate; Count : Natural) is
++   begin
++      pragma Assert (Static => Real (Count) <= 3.0);
++      pragma Assert (Static => 2.0 ** 85 + Real (Count) * Step_Bound <= 1.0e27);
++   end Tail_Bound;
++   function Sparse_Dot (R : Row; Q : Real_Array) return Coordinate is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Value);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Model);
++      A, B, C, D : Coordinate := 0.0;
++      Value : Coordinate;
++      Blocks : constant Natural := R'Length / 4;
++   begin
++      for K in 0 .. Blocks - 1 loop
++         Advance_Lane (R, Q, K, 0, A); Advance_Lane (R, Q, K, 1, B);
++         Advance_Lane (R, Q, K, 2, C); Advance_Lane (R, Q, K, 3, D);
++         pragma Loop_Invariant (abs A <= Real (K + 1) * Step_Bound and then abs B <= Real (K + 1) * Step_Bound
++           and then abs C <= Real (K + 1) * Step_Bound and then abs D <= Real (K + 1) * Step_Bound);
++         pragma Loop_Invariant (Static => A = Lane_Value (R, Q, K + 1, 0)
++           and then B = Lane_Value (R, Q, K + 1, 1) and then C = Lane_Value (R, Q, K + 1, 2)
++           and then D = Lane_Value (R, Q, K + 1, 3));
++      end loop;
++      Unfold_Sparse (R, Q, 0);
++      pragma Assert (Static => Combine (A, B, C, D, Blocks) = Sparse_Model (R, Q, 0));
++      Value := Combine (A, B, C, D, Blocks);
++      for K in 0 .. R'Length mod 4 - 1 loop
++         Advance_Tail (R, Q, K, Value);
++         pragma Loop_Invariant (abs Value <= 2.0 ** 85 + Real (K + 1) * Step_Bound);
++         pragma Loop_Invariant (Static => Value = Sparse_Model (R, Q, K + 1));
++      end loop;
++      Tail_Bound (Value, R'Length mod 4);
++      return Value;
++   end Sparse_Dot;
++
++   procedure Fixed_Kinematics
++     (Terms, Jacobian : Row; Q, V : Real_Array; Length, Velocity : out Coordinate)
++   is
++   begin
++      Length := Dot (Terms, Q);
++      Velocity := Sparse_Dot (Jacobian, V);
++   end Fixed_Kinematics;
++
++   function Project (Previous : Real; J : Tier0_Real; Force : Tendon_Force)
++     return Real is
++   begin
++      return Previous + J * Force;
++   end Project;
++
++   function Mass_Entry (Previous : Real; Armature : Nonneg_Tier0;
++                        Ji, Jj : Tier0_Real) return Real is
++   begin
++      return Previous + Jj * (Armature * Ji);
++   end Mass_Entry;
++   function Accumulate_Mass (Previous : Mass_Value; Change : Mass_Change)
++     return Mass_Value is
++   begin
++      return Previous + Change;
++   end Accumulate_Mass;
++   function Project_Small (Previous : Mass_Value; J : Tier0_Real; Force : Small_Force)
++     return Mass_Value is
++   begin
++      return Previous + J * Force;
++   end Project_Small;
++end MJ.Tendon_Kernels;
+--- /dev/null
++++ b/experimental/smooth/src/mj-tendon_kernels.ads
+@@ -0,0 +1,213 @@
++with MJ.Types; use MJ.Types;
++
++--  MuJoCo 3.14.0 tendon arithmetic. No allocation or validation scans in the
++--  hot path: the owner validates indices and bounds when constructing a row.
++package MJ.Tendon_Kernels with SPARK_Mode is
++   Max_Terms : constant := 65_536;
++   subtype Coordinate is Real range -1.0e30 .. 1.0e30;
++   subtype Reduced_Coordinate is Coordinate range -5.0e29 .. 5.0e29;
++   subtype Force_Coefficient is Real range -3.0e70 .. 3.0e70;
++   subtype Tendon_Force is Real range -1.0e103 .. 1.0e103;
++   type Polynomial is array (0 .. 1) of Tier0_Real;
++   type Parameters is record
++      Lower, Upper : Tier0_Real := 0.0;
++      Stiffness, Damping, Armature : Nonneg_Tier0 := 0.0;
++      Spring_Poly, Damper_Poly : Polynomial := [others => 0.0];
++   end record;
++   type Term is record
++      Dof : Natural := 0;
++      Coefficient : Tier0_Real := 0.0;
++   end record;
++   type Row is array (Natural range <>) of Term;
++
++   function Displacement (Length : Coordinate; Lower, Upper : Tier0_Real)
++     return Coordinate is
++     (if Length > Upper then Length - Upper
++      elsif Length < Lower then Length - Lower else 0.0)
++     with Global => null, Pre => Lower <= Upper
++       and then Length in -5.0e29 .. 5.0e29;
++
++   function Polynomial_First (Linear : Nonneg_Tier0; P : Tier0_Real; X : Coordinate)
++     return Real with Global => null,
++     Post => Polynomial_First'Result = Linear + P * X
++       and then Polynomial_First'Result in -1.2e40 .. 1.2e40;
++   function Polynomial_Second (P : Tier0_Real; X : Coordinate) return Real
++     with Global => null,
++     Post => Polynomial_Second'Result = P * (X * X)
++       and then Polynomial_Second'Result in -1.2e70 .. 1.2e70;
++   function Poly_Value (Linear : Nonneg_Tier0; P : Polynomial;
++                        X : Coordinate; Odd : Boolean) return Force_Coefficient
++     with Global => null,
++     Post => Poly_Value'Result =
++       (Polynomial_First (Linear, P (0), (if Odd then abs X else X))
++        + Polynomial_Second (P (1), X));
++
++   function Spring_Model (C : Parameters; Length : Coordinate;
++                          Enabled : Boolean) return Tendon_Force is
++     (if not Enabled or else
++          (C.Stiffness = 0.0 and then C.Spring_Poly = Polynomial'[0.0, 0.0])
++      then 0.0 else
++        -Displacement (Length, C.Lower, C.Upper) *
++          Poly_Value (C.Stiffness, C.Spring_Poly,
++                      Displacement (Length, C.Lower, C.Upper), False))
++     with Ghost => Static, Global => null,
++     Pre => C.Lower <= C.Upper and then Length in -5.0e29 .. 5.0e29;
++
++   function Damper_Model (C : Parameters; Velocity : Coordinate;
++                          Enabled : Boolean) return Tendon_Force is
++     (if not Enabled or else
++          (C.Damping = 0.0 and then C.Damper_Poly = Polynomial'[0.0, 0.0])
++      then 0.0 else -Velocity * Poly_Value (C.Damping, C.Damper_Poly, Velocity, True))
++     with Ghost => Static, Global => null;
++
++   procedure Spring_Damper
++     (C : Parameters; Length, Velocity : Coordinate;
++      Spring_Enabled, Damper_Enabled : Boolean; Spring, Damper : out Tendon_Force)
++     with Global => null,
++     Pre => C.Lower <= C.Upper and then Length in -5.0e29 .. 5.0e29,
++     Post => (Static => Spring = Spring_Model (C, Length, Spring_Enabled)
++       and then Damper = Damper_Model (C, Velocity, Damper_Enabled));
++
++   function Valid_Row (R : Row; Q : Real_Array) return Boolean is
++     (R'Length <= Max_Terms
++      and then (for all E of R => E.Dof in Q'Range)
++      and then (for all X of Q => X in Tier0_Real)) with Global => null;
++   Step_Bound : constant Real := 2.0 ** 68;
++   function Sum_Step (Acc : Coordinate; Coefficient, Q : Tier0_Real;
++                      Count : Natural) return Coordinate
++     with Global => null,
++     Pre => Count < Max_Terms and then abs Acc <= Real (Count) * Step_Bound,
++     Post => Sum_Step'Result = Acc + Coefficient * Q
++       and then abs Sum_Step'Result <= Real (Count + 1) * Step_Bound;
++   function Reduction (R : Row; Q : Real_Array; Count : Natural) return Coordinate is
++     (if Count = 0 then 0.0 else
++        Sum_Step (Reduction (R, Q, Count - 1), R (R'First + (Count - 1)).Coefficient,
++                  Q (R (R'First + (Count - 1)).Dof), Count - 1))
++     with Ghost => Static, Global => null,
++     Pre => Valid_Row (R, Q) and then Count <= R'Length,
++     Post => abs Reduction'Result <= Real (Count) * Step_Bound,
++     Subprogram_Variant => (Decreases => Count);
++   procedure Reduced_Bound (Value : Coordinate; Count : Natural)
++     with Ghost => Static, Global => null,
++     Pre => Count <= Max_Terms and then abs Value <= Real (Count) * Step_Bound,
++     Post => Value in Reduced_Coordinate;
++   function Dot (R : Row; Q : Real_Array) return Reduced_Coordinate
++     with Global => null, Pre => Valid_Row (R, Q),
++     Post => (Static => Dot'Result = Reduction (R, Q, R'Length)
++       and then abs Dot'Result <= Real (R'Length) * Step_Bound);
++
++   function Lane_Value (R : Row; Q : Real_Array; Count, Lane : Natural) return Coordinate is
++     (if Count = 0 then 0.0 else
++        Sum_Step (Lane_Value (R, Q, Count - 1, Lane),
++          R (R'First + (4 * (Count - 1) + Lane)).Coefficient,
++          Q (R (R'First + (4 * (Count - 1) + Lane)).Dof), Count - 1))
++     with Ghost => Static, Global => null,
++     Pre => Valid_Row (R, Q) and then Lane < 4 and then Count <= R'Length / 4,
++     Post => abs Lane_Value'Result <= Real (Count) * Step_Bound
++       and then (if Count = 0 then Lane_Value'Result = 0.0),
++     Subprogram_Variant => (Decreases => Count);
++   function Combine (A, B, C, D : Coordinate; Blocks : Natural) return Coordinate
++     with Global => null,
++     Pre => Blocks <= Max_Terms / 4
++       and then abs A <= Real (Blocks) * Step_Bound and then abs B <= Real (Blocks) * Step_Bound
++       and then abs C <= Real (Blocks) * Step_Bound and then abs D <= Real (Blocks) * Step_Bound,
++     Post => Combine'Result = (A + C) + (B + D)
++       and then abs Combine'Result <= 2.0 ** 85;
++   function Tail_Add (Acc : Coordinate; Coefficient, Q : Tier0_Real; Count : Natural)
++     return Coordinate with Global => null,
++     Pre => Count < 3 and then abs Acc <= 2.0 ** 85 + Real (Count) * Step_Bound,
++     Post => Tail_Add'Result = Acc + Coefficient * Q
++       and then abs Tail_Add'Result <= 2.0 ** 85 + Real (Count + 1) * Step_Bound;
++   pragma Inline_Always (Tail_Add);
++   function Sparse_Model (R : Row; Q : Real_Array; Tail : Natural) return Coordinate is
++     (if Tail = 0 then
++        Combine (Lane_Value (R, Q, R'Length / 4, 0), Lane_Value (R, Q, R'Length / 4, 1),
++                 Lane_Value (R, Q, R'Length / 4, 2), Lane_Value (R, Q, R'Length / 4, 3), R'Length / 4)
++      else Tail_Add (Sparse_Model (R, Q, Tail - 1),
++        R (R'First + (4 * (R'Length / 4) + Tail - 1)).Coefficient,
++        Q (R (R'First + (4 * (R'Length / 4) + Tail - 1)).Dof), Tail - 1))
++     with Ghost => Static, Global => null,
++     Pre => Valid_Row (R, Q) and then Tail <= R'Length mod 4,
++     Post => abs Sparse_Model'Result <= 2.0 ** 85 + Real (Tail) * Step_Bound,
++     Subprogram_Variant => (Decreases => Tail);
++   procedure Unfold_Lane (R : Row; Q : Real_Array; Count, Lane : Natural)
++     with Ghost => Static, Global => null,
++     Pre => Valid_Row (R, Q) and then Lane < 4 and then Count < R'Length / 4,
++     Post => Lane_Value (R, Q, Count + 1, Lane) = Sum_Step
++       (Lane_Value (R, Q, Count, Lane), R (R'First + (4 * Count + Lane)).Coefficient,
++        Q (R (R'First + (4 * Count + Lane)).Dof), Count);
++   procedure Unfold_Sparse (R : Row; Q : Real_Array; Tail : Natural)
++     with Ghost => Static, Global => null,
++     Pre => Valid_Row (R, Q) and then Tail <= R'Length mod 4,
++     Post => Sparse_Model (R, Q, Tail) =
++       (if Tail = 0 then
++          Combine (Lane_Value (R, Q, R'Length / 4, 0), Lane_Value (R, Q, R'Length / 4, 1),
++                   Lane_Value (R, Q, R'Length / 4, 2), Lane_Value (R, Q, R'Length / 4, 3), R'Length / 4)
++        else Tail_Add (Sparse_Model (R, Q, Tail - 1),
++          R (R'First + (4 * (R'Length / 4) + Tail - 1)).Coefficient,
++          Q (R (R'First + (4 * (R'Length / 4) + Tail - 1)).Dof), Tail - 1));
++   procedure Advance_Lane (R : Row; Q : Real_Array; Count, Lane : Natural; Acc : in out Coordinate)
++     with Global => null,
++     Pre => Valid_Row (R, Q) and then Lane < 4 and then Count < R'Length / 4
++       and then abs Acc <= Real (Count) * Step_Bound,
++     Post => abs Acc <= Real (Count + 1) * Step_Bound;
++   pragma Precondition (Static => Acc = Lane_Value (R, Q, Count, Lane));
++   pragma Postcondition (Static => Acc = Lane_Value (R, Q, Count + 1, Lane));
++   pragma Inline_Always (Advance_Lane);
++   procedure Advance_Tail (R : Row; Q : Real_Array; Count : Natural; Acc : in out Coordinate)
++     with Global => null,
++     Pre => Valid_Row (R, Q) and then Count < R'Length mod 4
++       and then abs Acc <= 2.0 ** 85 + Real (Count) * Step_Bound,
++     Post => abs Acc <= 2.0 ** 85 + Real (Count + 1) * Step_Bound;
++   pragma Precondition (Static => Acc = Sparse_Model (R, Q, Count));
++   pragma Postcondition (Static => Acc = Sparse_Model (R, Q, Count + 1));
++   pragma Inline_Always (Advance_Tail);
++   procedure Tail_Bound (Value : Coordinate; Count : Natural)
++     with Ghost => Static, Global => null,
++     Pre => Count <= 3 and then abs Value <= 2.0 ** 85 + Real (Count) * Step_Bound,
++     Post => abs Value <= 1.0e27;
++   function Sparse_Dot (R : Row; Q : Real_Array) return Coordinate
++     with Global => null, Pre => Valid_Row (R, Q),
++     Post => abs Sparse_Dot'Result <= 1.0e27;
++   pragma Postcondition (Static => Sparse_Dot'Result = Sparse_Model (R, Q, R'Length mod 4));
++   pragma Inline_Always (Combine);
++
++   --  Length uses the original wrap order; velocity uses the sorted,
++   --  sparse Jacobian row (including zero duplicate slots). They cannot in general share one reduction.
++   procedure Fixed_Kinematics
++     (Terms, Jacobian : Row; Q, V : Real_Array; Length, Velocity : out Coordinate)
++     with Global => null, Pre => Valid_Row (Terms, Q) and then Valid_Row (Jacobian, V),
++     Post => (Static => Length = Reduction (Terms, Q, Terms'Length)
++       and then Velocity = Sparse_Model (Jacobian, V, Jacobian'Length mod 4)
++       and then abs Length <= Real (Terms'Length) * Step_Bound
++       and then abs Velocity <= 1.0e27
++       and then Length in -5.0e29 .. 5.0e29);
++
++   --  Scalars below preserve C's multiplication order. Bounds leave room for
++   --  accumulation; the caller's reduction proves its own tighter envelope.
++   function Project (Previous : Real; J : Tier0_Real; Force : Tendon_Force)
++     return Real with Global => null, Pre => Previous in -1.0e120 .. 1.0e120,
++     Post => Project'Result = Previous + J * Force
++       and then Project'Result in -2.0e120 .. 2.0e120;
++   function Mass_Entry (Previous : Real; Armature : Nonneg_Tier0;
++                        Ji, Jj : Tier0_Real) return Real
++     with Global => null, Pre => Previous in -1.0e120 .. 1.0e120,
++     Post => Mass_Entry'Result = Previous + Jj * (Armature * Ji)
++       and then Mass_Entry'Result in -2.0e120 .. 2.0e120;
++   subtype Mass_Value is Real range -1.0e60 .. 1.0e60;
++   subtype Mass_Change is Real range -1.0e31 .. 1.0e31;
++   subtype Small_Force is Real range -1.0e30 .. 1.0e30;
++   function Project_Small (Previous : Mass_Value; J : Tier0_Real; Force : Small_Force)
++     return Mass_Value with Global => null,
++     Post => Project_Small'Result = Previous + J * Force;
++   pragma Inline_Always (Project_Small);
++   function Accumulate_Mass (Previous : Mass_Value; Change : Mass_Change)
++     return Mass_Value with Global => null,
++     Post => Accumulate_Mass'Result = Previous + Change;
++   pragma Inline_Always (Polynomial_First);
++   pragma Inline_Always (Polynomial_Second);
++   pragma Inline_Always (Accumulate_Mass);
++   pragma Inline_Always (Sum_Step);
++   pragma Inline_Always (Project);
++   pragma Inline_Always (Mass_Entry);
++end MJ.Tendon_Kernels;
+--- a/experimental/smooth/tests/smooth_probe.adb
++++ b/experimental/smooth/tests/smooth_probe.adb
+@@ -202,6 +202,15 @@
+             Emit ("gravity", G); Emit ("bias", B); Emit ("passive", P); Emit ("actuation", A);
+             Get_Actuator_Outputs (D, Len, Vel, Force, Result); Check;
+             Emit ("length", Len); Emit ("velocity", Vel); Emit ("force", Force);
++            declare
++               Tlen, Tvel : Real_Array (0 .. Integer (Tendon_Count (D)) - 1);
++            begin
++               for T in Tlen'Range loop
++                  Tlen (T) := Tendon_Value (D, Tendon_Length, T);
++                  Tvel (T) := Tendon_Value (D, Tendon_Velocity, T);
++               end loop;
++               Emit ("tendon_length", Tlen); Emit ("tendon_velocity", Tvel);
++            end;
+             for Body_Id in 0 .. Body_Count (D) - 1 loop
+                Get_Body_Pose (D, Body_Id, Pos, Quat, Result); Check;
+                Emit ("position", Real_Array (Pos));
+--- a/experimental/smooth/tools/compare_numerics.py
++++ b/experimental/smooth/tools/compare_numerics.py
+@@ -147,6 +147,7 @@
+                   bias=(d.qfrc_bias - rest.qfrc_bias).copy(), passive=d.qfrc_passive.copy(),
+                   actuation=d.qfrc_actuator.copy(), length=d.actuator_length.copy(),
+                   velocity=d.actuator_velocity.copy(), force=d.actuator_force.copy(),
++                  tendon_length=d.ten_length.copy(), tendon_velocity=d.ten_velocity.copy(),
+                   position=d.xpos.copy(), quaternion=d.xquat.copy(), unchanged_qpos=q,
+                   unchanged_qvel=v, unchanged_time=np.array([clock]))
+     for _ in range(steps):
+@@ -165,7 +166,11 @@
+     inertial = '<inertial pos="0 0 0" mass="1" diaginertia=".1 .1 .1"/>'
+     slide = '<body><joint type="slide"/>' + inertial + '</body>'
+     ordinary = model_xml(slide, gravity='0 0 0')
++    excessive_tendon = model_xml(slide.replace('<joint ', '<joint name="j" ').replace('mass="1"', 'mass="1e6"'), gravity='0 0 0').replace(
++        '</mujoco>', '<tendon><fixed stiffness="0 0 1e10" springlength="0">'
++        '<joint joint="j" coef="1e6"/></fixed></tendon></mujoco>')
+     requests = [
++        ('tendon_force_limit', excessive_tendon, 'NUMERIC_LIMIT', 'NUMERIC_LIMIT', 1e10, 0., 0., .25),
+         ('time_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 0., 0., 0., 1e10),
+         ('position_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 1e10, 1., 0., .25),
+         ('velocity_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 0., 1e10, 1e10, .25),
+@@ -197,6 +202,14 @@
+         assert row['time'][0] == clock, name
+         results.append(dict(name=name, forward=forward, step=step, state_unchanged=True))
+     unsupported = {
++        'spatial_tendon': (model_xml(
++            '<site name="s0" pos="1 0 0"/><body><joint type="slide"/>' + inertial +
++            '<site name="s1"/></body>').replace('</mujoco>',
++            '<tendon><spatial><site site="s0"/><site site="s1"/></spatial></tendon></mujoco>'),
++            'UNSUPPORTED_FEATURE'),
++        'tendon_actuator': (model_xml(slide.replace('<joint ', '<joint name="j" ')).replace('</mujoco>',
++            '<tendon><fixed name="t"><joint joint="j" coef="1"/></fixed></tendon>'
++            '<actuator><motor tendon="t"/></actuator></mujoco>'), 'UNSUPPORTED_ACTUATOR'),
+         'ball': (model_xml('<body><joint type="ball"/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
+         'free': (model_xml('<body><freejoint/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
+         'rk4': (ordinary.replace('integrator="Euler"', 'integrator="RK4"'), 'UNSUPPORTED_FEATURE'),
+@@ -224,6 +237,7 @@
+     parser.add_argument('--report-dir', type=Path, required=True)
+     parser.add_argument('--toolchain-root', type=Path)
+     parser.add_argument('--samples', type=int, default=24)
++    parser.add_argument('--case-timeout', type=int, default=60, help='Checked executable timeout per model')
+     parser.add_argument('--probe', type=Path, help='Reuse an already checked executable; no build')
+     parser.add_argument('--policy', choices=('Compatible','Strict'), default='Compatible')
+     parser.add_argument('--extra-fixtures', type=Path,
+@@ -264,6 +278,9 @@
+                 applied *= 1e-10
+             if index == 0:
+                 q, v, ctrl, applied = m.qpos0.copy(), v*0, ctrl*0, applied*0
++            if name == 'tendon_large_cancellation':
++                v = -q.copy()
++                applied[:] = 0
+             if name == 'crb_wide_fallback':
+                 # Each permitted scalar position stays inside Tier0, while
+                 # their accumulated world position exceeds the CRB fast domain.
+@@ -275,7 +292,7 @@
+             lines.append(f'{clock} {steps}')
+         input_text = '\n'.join(lines) + '\n'
+         (out / (name + '.input')).write_text(input_text)
+-        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=60)
++        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=args.case_timeout)
+         (out / (name + '.output')).write_text(run.stdout)
+         (out / (name + '.stderr')).write_text(run.stderr)
+         run.check_returncode()
+--- a/src/mj-models-validity.ads
++++ b/src/mj-models-validity.ads
+@@ -322,7 +322,8 @@
+    --  and strictly increasing within each row.
+    ----------------------------------------------------------------------------
+ 
+-   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer) return Boolean is
++   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer;
++                    Strict : Boolean := True) return Boolean is
+      (Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
+       and then Int64 (Rownnz'Length) = Int64 (N)
+       and then Int64 (Rowadr'Length) = Int64 (N)
+@@ -335,7 +336,8 @@
+       and then (for all K in 0 .. Nnz - 1 => Colind (K) in 0 .. Ncols - 1)
+       and then (for all I in 0 .. N - 1 =>
+                   (for all K in Rowadr (I) .. (Rowadr (I) + Rownnz (I)) - 2 =>
+-                     Colind (K) < Colind (K + 1))))
++                     (if Strict then Colind (K) < Colind (K + 1)
++                      else Colind (K) <= Colind (K + 1)))))
+    with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
+ 
+    --  The CSR inertia is the reduced form of mj_makeDofDofSparse: a simple dof
+@@ -356,9 +358,12 @@
+               M.S.Nv, M.S.Nd, M.S.Nv))
+    with Pre => Valid_Layout (M);
+ 
++   --  The C compiler retains duplicate columns for repeated fixed-tendon
++   --  joints. mj_tendon accumulates in the first slot and leaves later ones
++   --  zero. Keep strict column ordering for all other sparse structures.
+    function Sparse_Ten_J_OK (M : Model) return Boolean is
+      (CSR_OK (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+-              M.S.Ntendon, M.S.Njten, M.S.Nv))
++              M.S.Ntendon, M.S.Njten, M.S.Nv, Strict => False))
+    with Pre => Valid_Layout (M);
+ 
+    --  Row I of the CSR inertia: one entry for a simple dof, else the length
+--- /dev/null
++++ b/tests/tendons/README.md
+@@ -0,0 +1,129 @@
++# Fixed tendons: implementation and acceptance evidence
++
++This is an isolated integration draft based on commit
++`677e75474f81e76cc0c99dd7eeb2edb22d5f6af9`. It has not been merged into the
++concurrently edited main checkout. Numerical agreement, performance and SPARK
++proof completion are separate acceptance criteria; see `evidence/results.md`
++for the recorded status of each.
++
++## Implemented scope
++
++The experimental smooth pipeline now accepts fixed tendons over its supported
++scalar hinge/slide joints. The owned configuration survives destruction of the
++input model. It includes:
++
++- Length in the original wrap order and velocity from the sparse Jacobian.
++- Dead-band spring ranges and linear/polynomial spring and damper forces.
++- Separate projection of spring and damper contributions, followed by their
++  combination with the existing joint contributions.
++- Tendon armature contributions to the existing mass sparsity pattern, including
++  the dense mirror required by the pipeline's public matrix representation.
++- Euler integration with explicit tendon damping, matching the reference.
++- Repeated joint entries and their duplicate sparse columns, negative
++  coefficients, cross-branch tendons, and spring/damper disable flags.
++
++The repeated-coefficient bound is checked after ordered accumulation, so a
++temporarily larger prefix that later cancels does not reject an otherwise
++supported final Jacobian. A dedicated differential fixture covers that case.
++
++The layout, constant Jacobian and ordered armature products are prepared at
++creation. The timestep does not reconstruct or validate the tendon layout.
++Different tendons' armature additions are not regrouped: their rounding order
++remains observable. One rounded addition updates both symmetric mass entries.
++The velocity reduction has four accumulators with C's lane combination and
++sequential tail. Ghost models and proof helpers do not run in release builds.
++For spring and damper magnitudes at most `1e30`, a proved rounded projection
++kernel replaces per-DOF numeric guards with one gate per tendon. Larger forces
++retain the checked path. A large-force cancellation fixture exercises that
++path successfully; a separate policy test checks rejection without changing
++state when a projected contribution exceeds the work interval.
++
++The general tendon task is **not complete**: spatial paths, site/geom wrapping,
++their varying Jacobians and Jdot, tendon actuator transmissions and their
++inherited damping/armature and force limits remain unsupported. Constraints,
++friction loss, contacts and other features outside the smooth pipeline are not
++added by this change. Unsupported spatial tendons and tendon transmissions are
++rejected explicitly and covered by rejection tests. This scope cannot establish
++performance parity for full MuJoCo or for those missing contributions.
++The public tendon value query currently recomputes its kinematics. API query
++and model-creation performance are outside the measured timestep workload.
++
++## C reference and details that affect equivalence
++
++Reference: MuJoCo **3.14.0**, source commit
++`9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`, using the normal C SIMD paths.
++
++- [`mj_tendon`](https://github.com/google-deepmind/mujoco/blob/9ecbb9d7b5ee623f54745638d36799ff90e6f7cd/src/engine/engine_core_smooth.c#L931)
++  accumulates fixed length in wrap order and combines repeated joints into the
++  first matching Jacobian slot. Duplicate columns emitted by the compiler must
++  remain valid. Only the tendon CSR validator was relaxed to nondecreasing
++  columns; other CSR structures retain strict ordering.
++- [`mju_dotSparse`](https://github.com/google-deepmind/mujoco/blob/9ecbb9d7b5ee623f54745638d36799ff90e6f7cd/src/engine/engine_util_sparse.h#L197)
++  uses four lanes and combines `(s0+s2)+(s1+s3)` before the tail. The AVX initial
++  product can differ from an initial addition to positive zero in signed-zero
++  bits; the tests establish numerical tolerance agreement, not bitwise identity.
++- [`mj_tendonSpringDamper`](https://github.com/google-deepmind/mujoco/blob/9ecbb9d7b5ee623f54745638d36799ff90e6f7cd/src/engine/engine_core_util.c#L1120)
++  applies the spring range, polynomial laws and disable flags. Projection stays
++  separate for springs and dampers as in `mj_passive`.
++- [`mj_tendonArmature`](https://github.com/google-deepmind/mujoco/blob/9ecbb9d7b5ee623f54745638d36799ff90e6f7cd/src/engine/engine_core_smooth.c#L1849)
++  adds `Jj * (armature * Ji)` only where M already has a sparse entry. It does not
++  insert cross-branch mass entries. This behavior was checked against C,
++  including a two-root example; a mathematical dense outer product would differ.
++- `mj_tendonDot` returns zero for fixed tendons. Therefore their armature does
++  not add a Jdot bias term. `mj_EulerSkip` treats joint damping implicitly and
++  tendon damping explicitly.
++
++The creation caps are 256 DOFs, 1024 tendons and 65536 entries per stored terms,
++Jacobian or mass plan. Exceeding a cap returns `Capacity_Exceeded`. Runtime
++numeric limits remain explicit; no assumption or new trusted body substitutes
++for a proof. Solver timeouts and missing functional driver contracts are open
++proof engineering, not mathematical Silver exceptions.
++
++## Reproduction
++
++Use Python with `mujoco==3.14.0` and NumPy, and the recorded GNAT/GPRbuild/
++GNATprove 16.1 toolchains. Run from the repository root. Replace paths with the
++local toolchain and a validated C movement build; the reference build must have
++`build.json` and `movement_c`, including matching C binary/library hashes.
++
++```sh
++ulimit -s 65536
++python3 tests/tendons/generate_fixtures.py
++PYTHON_WITH_MUJOCO experimental/smooth/tools/compare_numerics.py \
++  --repo "$PWD" --toolchain-root TOOLCHAINS --report-dir NEW_NUMERICS \
++  --samples 24 --case-timeout 300 --extra-fixtures tests/tendons/fixtures
++PYTHON_WITH_MUJOCO experimental/smooth/tools/compare_numerics.py \
++  --repo "$PWD" --probe CHECKED_PROBE --report-dir NEW_STRICT \
++  --policy Strict --samples 24 --case-timeout 300 \
++  --extra-fixtures tests/tendons/fixtures
++PYTHON_WITH_MUJOCO tests/tendons/measure.py \
++  --build NEW_BUILD --toolchain TOOLCHAINS --reference C_REFERENCE --build-only
++PYTHON_WITH_MUJOCO tests/tendons/measure.py \
++  --build NEW_BUILD --out NEW_SESSION_1 --blocks 24 --samples 5 --steps 500 --states 3
++PYTHON_WITH_MUJOCO tests/tendons/measure.py \
++  --build NEW_BUILD --out NEW_SESSION_2 --blocks 24 --samples 5 --steps 500 --states 3
++```
++
++The fixed seed records every generated state. Timing excludes input preparation
++and output, alternates execution order, and checks every trajectory endpoint.
++The baseline Ada executable predates tendon support, so it is compared only on
++the no-tendon controls; there is no reduced-physics tendon baseline.
++Timings are complete Euler trajectories, not isolated tendon microbenchmarks.
++The p95 is over trajectory-average step times, not individual-step latency.
++Within-session bootstrap intervals do not measure all between-session/system
++uncertainty. Background load is recorded and quiet-session acceptance remains
++separate from collecting a timing file.
++
++Small-subprogram proof example:
++
++```sh
++python3 experimental/smooth/tools/prove_fragments.py \
++  --repo "$PWD" --toolchain-root TOOLCHAINS --report-dir NEW_PROOF \
++  --unit mj-fixed_tendons --name Store_Mass_Pair --name Add_Mass \
++  --prover-seconds 8 --provers cvc5,z3 --steps 0 --jobs 2 \
++  --wall-seconds 60 --total-seconds 180
++```
++
++Passing callers are conditional on callees' contracts. Neither a fragment pass
++nor differential agreement closes the loader, entire dynamics pipeline, or
++universal equivalence to C. The report lists remaining obligations explicitly.
+--- /dev/null
++++ b/tests/tendons/collect_evidence.py
+@@ -0,0 +1,163 @@
++#!/usr/bin/env python3
++"""Archive a completed run without executables, object files or stale claims."""
++import argparse
++from collections import Counter, defaultdict
++import hashlib
++import json
++from pathlib import Path
++import re
++import random
++import statistics
++import subprocess
++import zipfile
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def digest(path):
++    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++
++def read(path):
++    return json.loads(Path(path).read_text())
++
++
++def save(path, value):
++    Path(path).write_text(json.dumps(value, indent=2) + '\n')
++
++
++def archive(target, directories):
++    with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED) as z:
++        for directory in directories:
++            for file in sorted(directory.rglob('*')):
++                if file.is_file():
++                    z.write(file, directory.name + '/' + str(file.relative_to(directory)))
++
++
++def baseline_ratios(session):
++    """Independent resampling RNG keeps the recorded workload states intact."""
++    rows = {}
++    for record in session['records']:
++        rows.setdefault(record['case'], {})[record['block'], record['variant']] = statistics.median(
++            sample['seconds'] for sample in record['samples'])
++    rng = random.Random(20260928)
++    result = {}
++    for case, times in rows.items():
++        if (0, 'baseline') not in times:
++            continue
++        paired = [times[b, 'baseline']/times[b, 'c'] for b in range(session['blocks'])]
++        boot = sorted(statistics.median(rng.choices(paired, k=len(paired))) for _ in range(2000))
++        result[case] = dict(median=statistics.median(paired), ci95=[boot[49], boot[1949]])
++    return result
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--build', type=Path, required=True)
++    parser.add_argument('--proof', type=Path, action='append', required=True,
++                        help='Chronological order; later completed attempts replace earlier ones')
++    parser.add_argument('--numerics', type=Path, action='append', required=True)
++    parser.add_argument('--session', type=Path, action='append', required=True)
++    parser.add_argument('--out', type=Path, required=True)
++    a = parser.parse_args()
++    a.out = a.out.resolve()
++    a.out.mkdir(parents=True, exist_ok=False)
++    build = read(a.build/'build.json')
++    current = build['builds']['current']['sources']
++    for rel, expected in current.items():
++        assert digest(ROOT/rel) == expected, ('unmeasured source change', rel)
++    save(a.out/'build.json', build)
++    proofs = {}
++    for directory in a.proof:
++        result = read(directory/'results.json')
++        # Validate the dependency closure actually selected in each project,
++        # not unrelated files also copied into a proof snapshot.
++        names = set()
++        for project in result['projects'].values():
++            names.update(re.findall(r'"([^"/]+\.ad[bs])"', project['content']))
++        for rel, expected in result['source_sha256'].items():
++            if Path(rel).name in names:
++                assert digest(ROOT/rel) == expected, ('stale proof dependency', rel)
++        for row in result['results']:
++            if not row['status'].startswith('not_run'):
++                row['report'] = directory.name
++                proofs[row['target']['id']] = row
++    save(a.out/'proof-index.json', proofs)
++    archive(a.out/'proofs.zip', a.proof)
++    numerics = [read(p/'results.json') for p in a.numerics]
++    assert all(x['status'] == 'passed' and not x['failures'] for x in numerics)
++    save(a.out/'numerics.json', numerics)
++    archive(a.out/'numerics.zip', a.numerics)
++    sessions = [read(p/'measurements.json') for p in a.session]
++    for s in sessions:
++        assert s['complete'] and s['build_sha256'] == digest(a.build/'build.json')
++    save(a.out/'timings.json', [{k:v for k,v in s.items() if k != 'records'} for s in sessions])
++    baseline = [baseline_ratios(s) for s in sessions]
++    save(a.out/'baseline-over-c.json', baseline)
++    archive(a.out/'timings.zip', a.session)
++    changed = set(subprocess.check_output(['git','diff','--name-only'],cwd=ROOT,text=True).splitlines())
++    changed.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines())
++    changed = sorted(p for p in changed if not p.startswith(str(a.out.relative_to(ROOT))+'/'))
++    with zipfile.ZipFile(a.out/'changed-sources.zip','w',zipfile.ZIP_DEFLATED) as z:
++        for rel in changed:
++            z.write(ROOT/rel, rel)
++    save(a.out/'changed-source-sha256.json', {rel:digest(ROOT/rel) for rel in changed})
++    (a.out/'tracked.patch').write_bytes(subprocess.check_output(['git','diff','--binary'],cwd=ROOT))
++    counts = Counter(x['status'] for x in proofs.values())
++    lines = ['# Fixed-tendon acceptance results', '',
++             '**Integration draft: full Gold and performance parity across all supported workloads are not established.**', '',
++             'The supported implementation is described in [the scope and reproduction guide](../README.md).', '',
++             '## Checked numerical agreement', '',
++             '| Policy | Scenarios | Scalar comparisons | Policy/rejection tests | Result |',
++             '|---|---:|---:|---:|---|']
++    for n in numerics:
++        lines.append(f"| {n['policy']} | {n['scenarios']} | {n['comparisons']} | {len(n['policy_tests'])} | {n['status']} |")
++    lines += ['', 'Tolerance: `2e-10 + 2e-10*abs(reference)`. This is sampled agreement, not a universal equivalence proof.', '',
++              '## Integrated performance', '',
++              'All ratios are **Ada time / C time**, lower is faster. The range below spans the individual state/session median ratios; it is not a pooled mean or a confidence interval.', '',
++              '| Workload | DOFs | Tendons | Range of median ratios |', '|---|---:|---:|---:|']
++    grouped = defaultdict(list)
++    for s in sessions:
++        for row in s['summary']:
++            grouped[row['case'].rsplit('-',1)[0]].append(row)
++    for name, rows in grouped.items():
++        ratios=[r['current_over_c']['median'] for r in rows]
++        lines.append(f"| {name} | {rows[0]['nv']} | {rows[0]['ntendon']} | {min(ratios):.4f}–{max(ratios):.4f} |")
++    lines += ['', 'The CPU, compiler, release flags, hashes and raw paired samples are archived. Baseline Ada is compared only on the no-tendon controls.', '',
++              'No own proof/build jobs ran concurrently with the final timing sessions. Other activity on this shared machine was not controlled. Load averages are recorded below; a low average alone cannot certify an interference-free session.', '']
++    for i,s in enumerate(sessions,1):
++        lines.append(f"- Session {i}: {s['blocks']} alternating blocks, {s['samples']} samples × {s['steps']} Euler steps, {s['states']} states per model, CPU {s['cpu']}; load averages start `{s.get('loadavg_start')}`, end `{s.get('loadavg_end')}`.")
++    lines += ['', '### Individual results', '',
++              'MAD and p95 refer to trajectory-average ns/step. Ratio confidence intervals use paired block medians and bootstrap resampling within a session.', '',
++              '| Session | Case/state | Ada median ns | C median ns | Ada MAD ns | Ada p95 ns | Ratio [95% CI] |', '|---:|---|---:|---:|---:|---:|---|']
++    for i,s in enumerate(sessions,1):
++        for row in s['summary']:
++            x=row['ns_per_step']['current']; c=row['ns_per_step']['c']; r=row['current_over_c']; lo,hi=r['ci95']
++            lines.append(f"| {i} | {row['case']} | {x['median']:.1f} | {c['median']:.1f} | {x['mad']:.1f} | {x['p95']:.1f} | {r['median']:.4f} [{lo:.4f}, {hi:.4f}] |")
++    lines += ['', '### Controls against the pre-change Ada baseline', '',
++              'Baseline/C is calculated directly from paired blocks, with a separate 2000-resample bootstrap. These are no-tendon workloads; they identify a pre-existing whole-pipeline gap, not the causal cost of individual tendon operations.', '',
++              '| Session | Case/state | Baseline/C [95% CI] | Current/baseline [95% CI] |', '|---:|---|---|---|']
++    for i, s in enumerate(sessions):
++        for row in s['summary']:
++            if row['case'] not in baseline[i]:
++                continue
++            b=baseline[i][row['case']]; r=row['current_over_baseline']
++            lines.append(f"| {i+1} | {row['case']} | {b['median']:.4f} [{b['ci95'][0]:.4f}, {b['ci95'][1]:.4f}] | {r['median']:.4f} [{r['ci95'][0]:.4f}, {r['ci95'][1]:.4f}] |")
++    lines += ['', '## Formal proof status', '',
++              f'Latest attempts per selected subprogram: `{dict(counts)}`. A timeout with zero reported checks is not a pass. A successful fragment is conditional on its preconditions and called contracts; zero-check expression functions are not counted as proved obligations.', '',
++              '| Unit/subprogram | Result | Checks | Unproved/flow |', '|---|---|---:|---:|']
++    for row in proofs.values():
++        t=row['target']
++        lines.append(f"| `{t['file']}:{t['name']}` | {row['status']} | {row['proof_checks']} | {row['unproved']} |")
++    lines += ['', 'Functional scopes include rounded polynomial terms, ordered length/velocity models, scalar projection with frame preservation, and ordered mass additions with symmetry. Read the diagnostics in `proofs.zip` for the obligations still open.', '',
++              '**Still open:** loader proof; remaining kernel/driver obligations; a full functional fold for the passive driver; caller integration and creation/readiness proof closure after adding tendon ownership; the changed tendon CSR validator. These are unfinished proof engineering, not mathematical Silver exceptions. Old whole-pipeline proofs are not automatically inherited by this changed configuration.', '',
++              'Spatial paths, tendon actuation/inherited actuator contributions and constraints remain outside this implementation. Performance acceptance for them is therefore absent. The 24-DOF workload must be assessed from both sessions and their uncertainty; an interval containing one establishes neither a speedup nor guaranteed non-inferiority.', '',
++              '## Evidence', '',
++              '`build.json`, `proof-index.json`, `numerics.json` and `timings.json` provide summaries. Zip archives contain raw logs, structured proof output, fixtures, inputs and timing samples. `changed-sources.zip` holds complete changed files to apply on the recorded baseline; `tracked.patch` omits new files by design. Binaries and object directories are excluded. `SHA256SUMS` covers the evidence files.', '']
++    (a.out/'results.md').write_text('\n'.join(lines))
++    (a.out/'SHA256SUMS').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in sorted(a.out.iterdir()) if p.is_file() and p.name!='SHA256SUMS'))
++    print(a.out/'results.md')
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ b/tests/tendons/generate_fixtures.py
+@@ -0,0 +1,54 @@
++"""Fixed-tendon numerical and integrated movement cases, pinned to MuJoCo 3.14."""
++from pathlib import Path
++
++def fixture(n=6, topology='chain', nonlinear=False, armature=.2, flag='', duplicate=False, include_tendons=True):
++    inertia='<inertial pos=".1 .02 -.03" mass="1.5" diaginertia=".2 .3 .4"/>'
++    bodies=[]
++    for i in range(n):
++        joint=f'<joint name="j{i}" type="{("hinge" if i%2 else "slide")}" axis="1 2 3" damping=".1" stiffness=".2" armature=".05"/>'
++        bodies.append(f'<body pos=".13 -.07 .2">{joint}{inertia}')
++    body=''.join(bodies)+('</body>'*n) if topology=='chain' else ''.join(x+'</body>' for x in bodies)
++    tendons=[]
++    for t in range(max(1,n//2) if include_tendons else 0):
++        terms=''.join(f'<joint joint="j{i}" coef="{(-1 if i%2 else 1)*(.4+.1*t)}"/>' for i in range(t,n))
++        if duplicate: terms += '<joint joint="j0" coef="-.125"/>'
++        law='stiffness="2 .03 .002" damping=".2 .02 .001"' if nonlinear else 'stiffness="2" damping=".2"'
++        tendons.append(f'<fixed name="t{t}" {law} armature="{armature}" springlength="-.1 .2">{terms}</fixed>')
++    return f'''<mujoco><compiler angle="radian"/>
++<option timestep=".001" integrator="Euler"><flag constraint="disable" {flag}/></option>
++<worldbody>{body}</worldbody><tendon>{''.join(tendons)}</tendon>
++<actuator><motor joint="j0" gear="-.7"/></actuator></mujoco>'''
++
++def generate(out):
++    out.mkdir(parents=True,exist_ok=True)
++    cases={
++        'tendon_scalar': fixture(n=1),
++        'tendon_chain_6': fixture(),
++        'tendon_branches_6': fixture(topology='branches'),
++        'tendon_nonlinear': fixture(nonlinear=True),
++        'tendon_no_armature': fixture(armature=0),
++        'tendon_duplicates': fixture(duplicate=True),
++        'tendon_chain_24': fixture(n=24),
++        # Spring and damper individually exceed the fast-projection envelope.
++        # Matching qvel=-qpos makes their C contributions cancel exactly.
++        'tendon_large_cancellation': '''<mujoco><compiler angle="radian"/>
++<option timestep="1e-24" gravity="0 0 0"><flag constraint="disable"/></option>
++<worldbody><body><joint name="j" type="slide" ref="6e9"/>
++<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/></body></worldbody>
++<tendon><fixed stiffness="0 0 10" damping="0 0 10" springlength="0">
++<joint joint="j" coef="1"/></fixed></tendon></mujoco>''',
++        'tendon_coefficient_cancellation': '''<mujoco>
++<option gravity="0 0 0"><flag constraint="disable"/></option>
++<worldbody><body><joint name="j" type="slide"/>
++<inertial pos="0 0 0" mass="1e10" diaginertia="1 1 1"/></body></worldbody>
++<tendon><fixed><joint joint="j" coef="9e9"/><joint joint="j" coef="9e9"/>
++<joint joint="j" coef="-9e9"/></fixed></tendon></mujoco>''',
++    }
++    for flag in ['spring','damper','eulerdamp']:
++        cases['tendon_disable_'+flag]=fixture(nonlinear=True,flag=f'{flag}="disable"')
++    for name, xml in cases.items(): (out/(name+'.xml')).write_text(xml+'\n')
++
++if __name__=='__main__':
++    generate(Path(__file__).parent/'fixtures')
++    controls=Path(__file__).parent/'performance-fixtures'; controls.mkdir(exist_ok=True)
++    (controls/'chain_24_without_tendons.xml').write_text(fixture(n=24,include_tendons=False)+'\n')
+--- /dev/null
++++ b/tests/tendons/measure.py
+@@ -0,0 +1,123 @@
++#!/usr/bin/env python3
++"""Frozen release builds and paired full Euler trajectories against pinned C.
++
++New tendon workloads have no pre-change Ada implementation. The baseline is
++therefore measured only on workloads without tendons, never as a fictitious
++zero-cost or reduced-physics tendon comparator.
++"""
++import argparse, hashlib, importlib.util, json, os, platform, shutil, subprocess, sys
++from pathlib import Path
++import mujoco
++import numpy as np
++ROOT=Path(__file__).resolve().parents[2]
++sys.path.insert(0,str(ROOT/'experimental/smooth/tools'))
++from prove_fragments import isolated_project
++from compare_numerics import fixtures, reference
++spec=importlib.util.spec_from_file_location('movement',ROOT/'tests/movement_performance/run.py')
++movement=importlib.util.module_from_spec(spec);spec.loader.exec_module(movement)
++FLAGS=['-gnat2022','-gnatn','-gnatp','-O3','-march=native','-flto','-ffat-lto-objects',
++       '-ffp-contract=off','-ffinite-math-only','-fno-trapping-math','-fno-math-errno',
++       '-ffunction-sections','-fdata-sections']
++def digest(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
++def save(p,x): Path(p).write_text(json.dumps(x,indent=2)+'\n')
++def build(a):
++    out=a.build.resolve();out.mkdir(parents=True,exist_ok=False)
++    env=os.environ.copy();env['PATH']=':'.join(str(next((a.toolchain/t).glob('*/bin'))) for t in ('gnat','gprbuild','gnatprove'))+':'+env['PATH']
++    ref=json.loads((a.reference/'build.json').read_text())['builds']['c']
++    cb=a.reference/'movement_c'
++    assert digest(cb)==ref['binary_sha256'] and digest(ref['library'])==ref['library_sha256']
++    meta=dict(c=ref,flags=FLAGS,platform=platform.platform(),cpu=Path('/proc/cpuinfo').read_text(),
++              baseline_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
++              compiler=subprocess.check_output(['gcc','--version'],env=env,text=True), builds={})
++    snap=out/'snapshot';snap.mkdir()
++    files=[p for d in ('src','experimental/smooth/src') for p in (ROOT/d).rglob('*.ad?')]
++    files += [ROOT/'tests/movement_performance/movement_bench.adb']
++    for p in files:
++        target=snap/p.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,target)
++    for variant in ['baseline','current']:
++        work=out/variant;src=work/'source';shutil.copytree(snap,src)
++        if variant=='baseline':
++            for p in src.rglob('*.ad?'):
++                rel=str(p.relative_to(src))
++                old=subprocess.run(['git','show','HEAD:'+rel],cwd=ROOT,capture_output=True)
++                if old.returncode==0: p.write_bytes(old.stdout)
++        project=isolated_project(src,work,'movement_bench')
++        txt=project.read_text().replace('project Fragment is','project Fragment is\n   for Main use ("movement_bench.adb");\n   for Exec_Dir use "bin";')
++        start=txt.index('        ("-gnat2022"');stop=txt.index(';',start)
++        txt=txt[:start]+'('+','.join('"'+f+'"' for f in FLAGS)+')'+txt[stop:]
++        txt=txt.replace('end Fragment;', '   package Linker is\n      for Default_Switches ("Ada") use ("-flto", "-Wl,--gc-sections");\n   end Linker;\nend Fragment;')
++        project.write_text(txt)
++        cmd=['gprbuild','-P',str(project),'-j2']
++        with (work/'build.log').open('w') as log: subprocess.run(cmd,env=env,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=600)
++        binary=work/'bin/movement_bench'
++        meta['builds'][variant]=dict(binary=str(binary),sha256=digest(binary),command=cmd,
++             sources={str(p.relative_to(src)):digest(p) for p in src.rglob('*.ad?')})
++        print('built',variant,flush=True)
++    (out/'movement_c').symlink_to(cb.resolve())
++    save(out/'build.json',meta)
++def measure(a):
++    assert mujoco.__version__=='3.14.0'
++    load_start=os.getloadavg()
++    out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
++    meta=json.loads((a.build/'build.json').read_text())
++    bins={k:Path(v['binary']) for k,v in meta['builds'].items()}
++    for k,p in bins.items(): assert digest(p)==meta['builds'][k]['sha256']
++    bins['c']=a.build/'movement_c';assert digest(bins['c'])==meta['c']['binary_sha256']
++    assert digest(meta['c']['library'])==meta['c']['library_sha256']
++    os.sched_setaffinity(0,{a.cpu});rng=np.random.default_rng(20260927)
++    cases=fixtures();cases.update({p.stem:p.read_text() for p in (ROOT/'tests/tendons/fixtures').glob('*.xml')})
++    cases.update({p.stem:p.read_text() for p in (ROOT/'tests/tendons/performance-fixtures').glob('*.xml')})
++    names=a.model or ['tendon_scalar','tendon_chain_6','tendon_branches_6','tendon_nonlinear','tendon_chain_24','hinge_motor','branched_multijoint','chain_24_without_tendons']
++    rows=[];summary=[]
++    for name in names:
++        xml=cases[name];(out/(name+'.xml')).write_text(xml)
++        m=mujoco.MjModel.from_xml_string(xml);path=out/(name+'.mjb');mujoco.mj_saveModel(m,str(path))
++        variants=['current','c'] if m.ntendon else ['baseline','current','c']
++        for state in range(a.states):
++            q=m.qpos0+rng.uniform(-.25,.25,m.nq);v=rng.uniform(-.5,.5,m.nv)
++            u=rng.uniform(-.4,.4,m.nu);f=rng.uniform(-.1,.1,m.nv)
++            data=' '.join(format(float(x),'.17g') for x in np.concatenate((q,v,u,f)))+'\n'
++            key=f'{name}-{state}';(out/(key+'.input')).write_text(data)
++            expected=reference(m,q,v,u,f,.125,a.steps)
++            times={k:[] for k in variants};all_times={k:[] for k in variants}
++            for block in range(a.blocks):
++                order=variants if block%2==0 else list(reversed(variants))
++                for variant in order:
++                    cmd=[str(bins[variant]),str(path),str(a.steps),str(a.samples),'2']
++                    run=subprocess.run(cmd,input=data,text=True,capture_output=True,timeout=60)
++                    (out/f'{key}-{block}-{variant}.txt').write_text(run.stdout+run.stderr);run.check_returncode()
++                    samples=movement.parse(run.stdout);assert len(samples)==a.samples
++                    for sample in samples:
++                        assert np.isfinite(sample['seconds']) and sample['seconds']>0
++                        for field in ['qpos','qvel','time']:
++                            got=np.asarray(sample[field]);want=expected[field]
++                            assert got.shape==want.shape and np.all(np.isfinite(got)) and np.all(abs(got-want)<=2e-10+2e-10*abs(want)),(key,variant,field,got,want)
++                    ns=[s['seconds']*1e9/a.steps for s in samples]
++                    times[variant].append(float(np.median(ns)));all_times[variant].extend(ns)
++                    rows.append(dict(case=key,block=block,variant=variant,order=order,samples=samples,
++                                     loadavg=os.getloadavg()))
++            result=dict(case=key,nv=m.nv,ntendon=m.ntendon,ns_per_step={k:movement.stats(v) for k,v in all_times.items()},
++                        current_over_c=movement.ratio(times['current'],times['c'],rng))
++            if 'baseline' in variants: result['current_over_baseline']=movement.ratio(times['current'],times['baseline'],rng)
++            summary.append(result);print(key,result['current_over_c'],flush=True)
++            save(out/'measurements.json',dict(complete=False,summary=summary,records=rows))
++    save(out/'measurements.json',dict(complete=True,summary=summary,records=rows,command=sys.argv,
++         build=str(a.build.resolve()),build_sha256=digest(a.build/'build.json'),cpu=a.cpu,
++         steps=a.steps,blocks=a.blocks,samples=a.samples,states=a.states,
++         loadavg_start=load_start,loadavg_end=os.getloadavg(),runner_sha256=digest(__file__),
++         uncertainty='paired block medians, bootstrap 95%; within-session only',
++         tails='p95 of trajectory-average step time, not individual-step latency',
++         acceptance='requires repeat in a quiet session; measurements alone do not establish Gold'))
++if __name__=='__main__':
++    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--build',type=Path,required=True)
++    p.add_argument('--toolchain',type=Path);p.add_argument('--reference',type=Path);p.add_argument('--build-only',action='store_true')
++    p.add_argument('--out',type=Path);p.add_argument('--cpu',type=int,default=12);p.add_argument('--blocks',type=int,default=12)
++    p.add_argument('--samples',type=int,default=4);p.add_argument('--steps',type=int,default=200);p.add_argument('--states',type=int,default=3)
++    p.add_argument('--model',action='append');a=p.parse_args()
++    if a.blocks<2 or a.blocks%2 or min(a.steps,a.samples,a.states)<1: p.error('positive sizes and even block count required')
++    if a.build_only:
++        if not a.toolchain or not a.reference:p.error('build requires toolchain and reference')
++        build(a)
++    else:
++        if not a.out:p.error('measurement requires out')
++        measure(a)

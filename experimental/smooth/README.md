@@ -1,5 +1,9 @@
 # Minimal smooth dynamics — review draft
 
+**External body loads:** `Forward.Evaluate` and `Euler.Step` accept optional
+world-frame forces/torques at body centres of mass, projected directly onto
+ancestor DOFs. See [API, proof scope and C comparisons](../../docs/external-body-forces.md).
+
 The [phase-closure update](../../docs/phase-closure.md) proves the complete
 actuation phase (81 proof checks) and removes two redundant mutable scans under
 the documented phase contracts. The integrated benchmark saves 7.8–19.2% of
@@ -67,6 +71,7 @@ source dependency closure, without including unrelated units under development.
 | `MJ.Data.Inertia` | Dense mass matrix, joint armature and LDL factorization/solve |
 | `MJ.Data.Forces` | Gravity, velocity-dependent inertial bias, linear springs and damping |
 | `MJ.Data.Actuation` | Scalar joint transmissions, fixed gain, optional affine bias and clamping |
+| `MJ.External_Forces` | World-frame body loads at COM and exact projection formulas |
 | `MJ.Data.Forward` | Current-state acceleration pipeline |
 | `MJ.Data.Euler` | Semi-implicit Euler, with optional implicit linear damping |
 

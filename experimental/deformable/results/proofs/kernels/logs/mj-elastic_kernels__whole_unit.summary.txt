@@ -1,0 +1,59 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                            Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                16          16                                                  .           .          .
+Flow Dependencies                 .           .                                                  .           .          .
+Initialization                    4           4                                                  .           .          .
+Non-Aliasing                      .           .                                                  .           .          .
+Run-time Checks                 105           .    105 (CVC5 19%, Trivial 42%, Z3 38%, altergo 2%)           .          .
+Assertions                        .           .                                                  .           .          .
+Functional Contracts             39           .                  39 (CVC5 35%, Z3 59%, altergo 6%)           .          .
+LSP Verification                  .           .                                                  .           .          .
+Termination                      15          15                                                  .           .          .
+Concurrency                       .           .                                                  .           .          .
+-------------------------------------------------------------------------------------------------------------------------
+Total                           179    35 (20%)                                          144 (80%)           .          .
+
+
+max steps used for successful proof: 53762
+
+============================
+Most difficult proved checks
+============================
+
+mj-elastic_kernels.ads:89:61: fp_overflow check proved in max 2 seconds
+mj-elastic_kernels.ads:65:14: postcondition proved in max 1 seconds
+mj-elastic_kernels.adb:41:37: fp_overflow check proved in max 1 seconds
+mj-elastic_kernels.ads:104:12: fp_overflow check proved in max 1 seconds
+mj-elastic_kernels.ads:54:14: postcondition proved in max 1 seconds
+mj-elastic_kernels.adb:40:37: fp_overflow check proved in max 1 seconds
+mj-elastic_kernels.adb:55:52: fp_overflow check proved in max 1 seconds
+mj-elastic_kernels.ads:132:35: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-elastic_kernels, 17 subprograms and packages out of 17 analyzed
+  MJ.Elastic_Kernels at mj-elastic_kernels.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Elastic_Kernels.Add_Force at mj-elastic_kernels.ads:92 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Elastic_Kernels.Add_Vertex at mj-elastic_kernels.ads:94 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)
+  MJ.Elastic_Kernels.Advance_Coordinate at mj-elastic_kernels.ads:134 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Kernels.Advance_Position at mj-elastic_kernels.ads:131 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Elastic_Kernels.Advance_Velocity at mj-elastic_kernels.ads:117 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Elastic_Kernels.Apply_Delta at mj-elastic_kernels.ads:114 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Elastic_Kernels.Bounded at mj-elastic_kernels.ads:18 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Elastic_Kernels.Direction at mj-elastic_kernels.ads:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Elastic_Kernels.Direction_Component at mj-elastic_kernels.ads:45 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Elastic_Kernels.Edge_Length at mj-elastic_kernels.ads:35 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Elastic_Kernels.Force at mj-elastic_kernels.ads:80 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (20 checks)
+  MJ.Elastic_Kernels.Inverse_Length at mj-elastic_kernels.ads:42 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Elastic_Kernels.Measure at mj-elastic_kernels.ads:63 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Elastic_Kernels.Project_Force at mj-elastic_kernels.ads:50 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Elastic_Kernels.Project_Velocity at mj-elastic_kernels.ads:58 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Elastic_Kernels.Squared_Length at mj-elastic_kernels.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)

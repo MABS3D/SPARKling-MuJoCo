@@ -7,6 +7,7 @@ with MJ.Models;
 with MJ.MJB;
 with MJ.Data; use MJ.Data;
 with MJ.Data.Euler;
+with MJ.External_Forces;
 
 --  Benchmark boundary only; no whole-simulation formal assurance claim.
 procedure Movement_Bench is
@@ -18,6 +19,8 @@ procedure Movement_Bench is
    Steps : constant Positive := Positive'Value (Ada.Command_Line.Argument (2));
    Samples : constant Positive := Positive'Value (Ada.Command_Line.Argument (3));
    Warmups : constant Natural := Natural'Value (Ada.Command_Line.Argument (4));
+   With_External : constant Boolean := Ada.Command_Line.Argument_Count >= 5
+     and then Ada.Command_Line.Argument (5) = "external";
    Timings : array (1 .. Samples) of Duration;
    Started : Ada.Real_Time.Time;
 
@@ -60,6 +63,9 @@ begin
       Controls : State_Vector (0 .. Integer (U) - 1);
       Qout, Vout : Real_Array (Q'Range);
       Final_Time : Real;
+      Loads : MJ.External_Forces.Wrench_Array
+        (0 .. (if With_External then Integer (Body_Count (D)) - 1 else -1));
+      Value : Real;
       --  Save every trajectory's result outside the timed interval.
       type Outputs is array (1 .. Samples) of Real_Array (Q'Range);
       Positions, Velocities : Outputs;
@@ -67,6 +73,10 @@ begin
    begin
       Read_Values (Q); Read_Values (V);
       Read_Values (Controls); Read_Values (Applied);
+      for W of Loads loop
+         for X of W.Force loop Numbers.Get (Value); X := Value; end loop;
+         for X of W.Torque loop Numbers.Get (Value); X := Value; end loop;
+      end loop;
       for Run in 1 .. Warmups + Samples loop
          Reset (D, Result); Check;
          Set_State (D, Q, V, 0.125, Result); Check;
@@ -77,9 +87,15 @@ begin
             Set_Applied_Force (D, I, Applied (I), Result); Check;
          end loop;
          Started := Clock;
-         for Step in 1 .. Steps loop
-            MJ.Data.Euler.Step (D, Result); Check;
-         end loop;
+         if With_External then
+            for Step in 1 .. Steps loop
+               MJ.Data.Euler.Step (D, Result, Loads); Check;
+            end loop;
+         else
+            for Step in 1 .. Steps loop
+               MJ.Data.Euler.Step (D, Result); Check;
+            end loop;
+         end if;
          declare
             Elapsed : constant Duration := To_Duration (Clock - Started);
          begin

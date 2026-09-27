@@ -1,3 +1,4 @@
+with MJ.Data.External_Loads;
 with MJ.Data.Mass_Publication;
 with MJ.Composite_Bounds;
 with MJ.Composite_Weights;
@@ -1870,6 +1871,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
      with Ghost => Static, Global => null, Pre => Is_Ready (D),
      Post => Stable_Ready (D) and then Phase_Ready (D) and then D.Allocated
        and then Forces_Current (D) = D.Cache.Force_Valid
+       and then Positions_Current (D) = D.Cache.Pose_Valid
    is
    begin
       null;
@@ -2024,6 +2026,50 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    end Fill_Total;
    pragma Inline_Always (Fill_Total);
 
+   procedure Apply_External_Total
+     (D : in out Simulation; Result : out Status;
+      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads)
+     with Global => null,
+     Pre => Is_Ready (D) and then Positions_Current (D) and then D.Cache.Mass_Valid
+       and then not D.Cache.Force_Valid and then Array_Bounded (D.Dynamics.Total);
+   pragma Postcondition (Static => Is_Ready (D));
+   pragma Postcondition (Static => Stable_Ready (D));
+   pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
+   pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
+   pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
+   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
+   pragma Postcondition (Static => Position_Values (D) = Position_Values (D)'Old);
+   pragma Postcondition (Static => Velocity_Values (D) = Velocity_Values (D)'Old);
+   pragma Postcondition (Static => Time (D) = Time (D)'Old);
+   pragma Postcondition (Static => Step_Size (D) = Step_Size (D)'Old);
+   pragma Postcondition (Static => not D.Cache.Force_Valid);
+   pragma Postcondition (Static => D.Cache.Mass_Valid);
+   pragma Postcondition (Static => (if Result = Success then Array_Bounded (D.Dynamics.Total)));
+
+   procedure Apply_External_Total
+     (D : in out Simulation; Result : out Status;
+      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads)
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+   begin
+      MJ.Data.External_Loads.Apply_Buffers
+        (D.Body_Config.all, D.Joint_Config.all, D.Kinematic.Bodies.all,
+         D.Kinematic.Joints.all, External, D.Dynamics.Total.all, Result);
+      pragma Assert (Static => MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Total.all));
+      Prove_Work_Bounded (D);
+      Prove_Configuration_Equality (Configuration (D), Initial_Config);
+      Solver_Ready_Properties (D);
+   end Apply_External_Total;
+   pragma Inline_Always (Apply_External_Total);
+
    procedure Publish_Acceleration (D : in out Simulation; Result : out Status)
      with Global => null,
      Pre => Is_Ready (D) and then not D.Cache.Force_Valid and then Array_Bounded (D.Dynamics.Total);
@@ -2064,7 +2110,9 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    end Publish_Acceleration;
    pragma Inline_Always (Publish_Acceleration);
 
-   procedure Solve_Acceleration (D : in out Simulation; Result : out Status) is
+   procedure Solve_Acceleration
+     (D : in out Simulation; Result : out Status;
+      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stable_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
@@ -2112,6 +2160,23 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
          Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
       end;
       if Result /= Success then return; end if;
+      if External'Length > 0 then
+         declare
+            Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+            Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+            Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+            Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+            Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+         begin
+            Apply_External_Total (D, Result, External);
+            MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+            MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+            MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+            MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+            Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+         end;
+         if Result /= Success then return; end if;
+      end if;
       declare
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;

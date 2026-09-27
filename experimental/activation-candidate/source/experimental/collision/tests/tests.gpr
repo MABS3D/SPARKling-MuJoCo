@@ -1,0 +1,9 @@
+with "../collision.gpr";
+project Tests is
+   for Source_Dirs use (".");
+   for Object_Dir use Collision.Build_Root & "/tests-obj";
+   for Exec_Dir use Collision.Build_Root & "/bin";
+   for Main use ("collision_probe.adb");
+   for Create_Missing_Dirs use "True";
+   package Compiler renames Collision.Compiler;
+end Tests;

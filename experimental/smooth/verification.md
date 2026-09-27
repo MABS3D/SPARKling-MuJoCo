@@ -1,5 +1,10 @@
 # Verification scope and acceptance criteria
 
+The optional [external-body-load path](../../docs/external-body-forces.md) adds
+exact projection/update contracts and preserves the phase interfaces. Its
+[scoped proof and numerical evidence](../../tests/movement_performance/external_forces/README.md)
+is separate from a complete ordered-traversal or whole-dynamics theorem.
+
 The [phase-closure update](../../docs/phase-closure.md) proves the complete
 actuation phase (81 proof checks) and removes two redundant mutable scans under
 the documented phase contracts. The integrated benchmark saves 7.8–19.2% of

@@ -1,0 +1,564 @@
+{
+  "status": "passed",
+  "policy": "Strict",
+  "external": true,
+  "seed": 20260923,
+  "samples_per_model": 12,
+  "oracle": "3.14.0",
+  "probe": "/tmp/sparkling-smooth-numerical-gkjj2bl0/bin/smooth_probe",
+  "probe_sha256": "0c024943f20865214c3b524e00dd224672fff93b7ea2a83109a67752998e524c",
+  "normalization_edge_cases": 7,
+  "comparisons": 132072,
+  "scenarios": 816,
+  "fixtures": [
+    {
+      "name": "world",
+      "scenarios": 12,
+      "comparisons": 108,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fixed",
+      "scenarios": 12,
+      "comparisons": 192,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "slide",
+      "scenarios": 12,
+      "comparisons": 336,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "hinge_motor",
+      "scenarios": 12,
+      "comparisons": 372,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 8.17663627296103e-06
+    },
+    {
+      "name": "hinge_affine",
+      "scenarios": 12,
+      "comparisons": 372,
+      "max_absolute": 2.1316282072803006e-14,
+      "max_tolerance_ratio": 9.916227465617357e-06
+    },
+    {
+      "name": "branched_multijoint",
+      "scenarios": 12,
+      "comparisons": 1512,
+      "max_absolute": 2.5091040356528538e-14,
+      "max_tolerance_ratio": 5.039295010090066e-05
+    },
+    {
+      "name": "shared_actuators",
+      "scenarios": 12,
+      "comparisons": 408,
+      "max_absolute": 8.881784197001252e-15,
+      "max_tolerance_ratio": 1.301946035968327e-05
+    },
+    {
+      "name": "disable_gravity",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 2.1316282072803006e-14,
+      "max_tolerance_ratio": 1.9774480472057313e-05
+    },
+    {
+      "name": "disable_spring",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 4.263256414560601e-14,
+      "max_tolerance_ratio": 4.2059849965713316e-05
+    },
+    {
+      "name": "disable_damper",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 4.618527782440651e-14,
+      "max_tolerance_ratio": 3.883778596209727e-05
+    },
+    {
+      "name": "disable_actuation",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 2.842170943040401e-14,
+      "max_tolerance_ratio": 2.4479197750152608e-05
+    },
+    {
+      "name": "disable_clampctrl",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 2.842170943040401e-14,
+      "max_tolerance_ratio": 4.137707456396766e-05
+    },
+    {
+      "name": "disable_eulerdamp",
+      "scenarios": 12,
+      "comparisons": 1476,
+      "max_absolute": 4.3520742565306136e-14,
+      "max_tolerance_ratio": 4.5407573236455246e-05
+    },
+    {
+      "name": "small_inertia",
+      "scenarios": 12,
+      "comparisons": 336,
+      "max_absolute": 1.7763568394002505e-15,
+      "max_tolerance_ratio": 8.346005990116283e-07
+    },
+    {
+      "name": "chain_12",
+      "scenarios": 12,
+      "comparisons": 4428,
+      "max_absolute": 2.8421709430404007e-13,
+      "max_tolerance_ratio": 0.00038599626461088024
+    },
+    {
+      "name": "fluid_box_branched_multijoint_drag",
+      "scenarios": 12,
+      "comparisons": 1512,
+      "max_absolute": 5.5067062021407764e-14,
+      "max_tolerance_ratio": 9.793816723237841e-05
+    },
+    {
+      "name": "fluid_box_branched_multijoint_viscous",
+      "scenarios": 12,
+      "comparisons": 1512,
+      "max_absolute": 2.4868995751603507e-14,
+      "max_tolerance_ratio": 5.426504504157054e-05
+    },
+    {
+      "name": "fluid_box_branched_multijoint_wind",
+      "scenarios": 12,
+      "comparisons": 1512,
+      "max_absolute": 2.4868995751603507e-14,
+      "max_tolerance_ratio": 6.699734224027012e-05
+    },
+    {
+      "name": "fluid_box_branches24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 6.794564910705958e-14,
+      "max_tolerance_ratio": 0.0001907968150182451
+    },
+    {
+      "name": "fluid_box_chain24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 4.774847184307873e-12,
+      "max_tolerance_ratio": 0.0058778499648142355
+    },
+    {
+      "name": "fluid_box_chain_12_drag",
+      "scenarios": 12,
+      "comparisons": 4428,
+      "max_absolute": 3.268496584496461e-13,
+      "max_tolerance_ratio": 0.0008180027680901701
+    },
+    {
+      "name": "fluid_box_chain_12_viscous",
+      "scenarios": 12,
+      "comparisons": 4428,
+      "max_absolute": 5.115907697472721e-13,
+      "max_tolerance_ratio": 0.00032295170918864984
+    },
+    {
+      "name": "fluid_box_chain_12_wind",
+      "scenarios": 12,
+      "comparisons": 4428,
+      "max_absolute": 2.877698079828406e-13,
+      "max_tolerance_ratio": 0.00042053006317024016
+    },
+    {
+      "name": "fluid_box_fixed_drag",
+      "scenarios": 12,
+      "comparisons": 192,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_box_fixed_viscous",
+      "scenarios": 12,
+      "comparisons": 192,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_box_fixed_wind",
+      "scenarios": 12,
+      "comparisons": 192,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_box_hinge_motor_drag",
+      "scenarios": 12,
+      "comparisons": 372,
+      "max_absolute": 6.661338147750939e-15,
+      "max_tolerance_ratio": 9.788288257663583e-06
+    },
+    {
+      "name": "fluid_box_hinge_motor_viscous",
+      "scenarios": 12,
+      "comparisons": 372,
+      "max_absolute": 8.881784197001252e-15,
+      "max_tolerance_ratio": 1.1917489128849899e-05
+    },
+    {
+      "name": "fluid_box_hinge_motor_wind",
+      "scenarios": 12,
+      "comparisons": 372,
+      "max_absolute": 3.552713678800501e-15,
+      "max_tolerance_ratio": 1.0038636940302265e-05
+    },
+    {
+      "name": "fluid_box_massless_carrier",
+      "scenarios": 12,
+      "comparisons": 1596,
+      "max_absolute": 2.0872192862952943e-14,
+      "max_tolerance_ratio": 5.827442379057777e-05
+    },
+    {
+      "name": "fluid_box_slide_drag",
+      "scenarios": 12,
+      "comparisons": 336,
+      "max_absolute": 2.220446049250313e-16,
+      "max_tolerance_ratio": 4.2100797202851424e-07
+    },
+    {
+      "name": "fluid_box_slide_viscous",
+      "scenarios": 12,
+      "comparisons": 336,
+      "max_absolute": 8.881784197001252e-16,
+      "max_tolerance_ratio": 4.973400937459853e-07
+    },
+    {
+      "name": "fluid_box_slide_wind",
+      "scenarios": 12,
+      "comparisons": 336,
+      "max_absolute": 4.440892098500626e-16,
+      "max_tolerance_ratio": 6.793210664922532e-07
+    },
+    {
+      "name": "fluid_box_star24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 4.085620730620576e-14,
+      "max_tolerance_ratio": 4.897589302301136e-05
+    },
+    {
+      "name": "fluid_box_world_drag",
+      "scenarios": 12,
+      "comparisons": 108,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_box_world_viscous",
+      "scenarios": 12,
+      "comparisons": 108,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_box_world_wind",
+      "scenarios": 12,
+      "comparisons": 108,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fluid_ellipsoid_box_all",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 1.907433024019992e-05
+    },
+    {
+      "name": "fluid_ellipsoid_box_drag",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 1.2024441394182447e-05
+    },
+    {
+      "name": "fluid_ellipsoid_box_kutta",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 8.881784197001252e-15,
+      "max_tolerance_ratio": 2.1762947058138183e-05
+    },
+    {
+      "name": "fluid_ellipsoid_box_magnus",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 2.077923510078215e-05
+    },
+    {
+      "name": "fluid_ellipsoid_branches24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 6.23945339839338e-14,
+      "max_tolerance_ratio": 0.00020560096891446755
+    },
+    {
+      "name": "fluid_ellipsoid_capsule_all",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 1.9017332451402258e-05
+    },
+    {
+      "name": "fluid_ellipsoid_capsule_drag",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 2.458728805777661e-05
+    },
+    {
+      "name": "fluid_ellipsoid_capsule_kutta",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 8.881784197001252e-15,
+      "max_tolerance_ratio": 1.2943471530221544e-05
+    },
+    {
+      "name": "fluid_ellipsoid_capsule_magnus",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 1.1132975460450798e-05
+    },
+    {
+      "name": "fluid_ellipsoid_chain24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 1.376321279167314e-11,
+      "max_tolerance_ratio": 0.005705986537980397
+    },
+    {
+      "name": "fluid_ellipsoid_cylinder_all",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 2.109566995268237e-05
+    },
+    {
+      "name": "fluid_ellipsoid_cylinder_drag",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 1.1678937546028994e-05
+    },
+    {
+      "name": "fluid_ellipsoid_cylinder_kutta",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 9.55360424619951e-06
+    },
+    {
+      "name": "fluid_ellipsoid_cylinder_magnus",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 1.6431348570959198e-05
+    },
+    {
+      "name": "fluid_ellipsoid_ellipsoid_all",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 4.884981308350689e-15,
+      "max_tolerance_ratio": 1.2981782855079497e-05
+    },
+    {
+      "name": "fluid_ellipsoid_ellipsoid_drag",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 1.8997730556876036e-05
+    },
+    {
+      "name": "fluid_ellipsoid_ellipsoid_kutta",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.993605777301127e-15,
+      "max_tolerance_ratio": 2.1364373418405793e-05
+    },
+    {
+      "name": "fluid_ellipsoid_ellipsoid_magnus",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 1.3832125976706496e-05
+    },
+    {
+      "name": "fluid_ellipsoid_multiple",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 8.881784197001252e-15,
+      "max_tolerance_ratio": 1.0871232921582612e-05
+    },
+    {
+      "name": "fluid_ellipsoid_quadratic",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 6.439293542825908e-15,
+      "max_tolerance_ratio": 2.446479248903627e-05
+    },
+    {
+      "name": "fluid_ellipsoid_sphere_all",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 8.632051751905995e-06
+    },
+    {
+      "name": "fluid_ellipsoid_sphere_drag",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 9.769962616701378e-15,
+      "max_tolerance_ratio": 1.516219595920999e-05
+    },
+    {
+      "name": "fluid_ellipsoid_sphere_kutta",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 6.217248937900877e-15,
+      "max_tolerance_ratio": 1.457408935192588e-05
+    },
+    {
+      "name": "fluid_ellipsoid_sphere_magnus",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.105427357601002e-15,
+      "max_tolerance_ratio": 2.1030607941940506e-05
+    },
+    {
+      "name": "fluid_ellipsoid_star24",
+      "scenarios": 12,
+      "comparisons": 12204,
+      "max_absolute": 4.973799150320701e-14,
+      "max_tolerance_ratio": 6.253742137490729e-05
+    },
+    {
+      "name": "fluid_ellipsoid_stokes",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 7.549516567451064e-15,
+      "max_tolerance_ratio": 2.395860093597071e-05
+    },
+    {
+      "name": "fluid_ellipsoid_tiny_wind",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 1.8515919457792497e-05
+    },
+    {
+      "name": "fluid_ellipsoid_zero_wind",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.329070518200751e-15,
+      "max_tolerance_ratio": 1.0067002529825852e-05
+    },
+    {
+      "name": "fluid_flags_both_off",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 3.885780586188048e-15,
+      "max_tolerance_ratio": 1.1235924076114817e-05
+    },
+    {
+      "name": "fluid_flags_damper_off",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 5.773159728050814e-15,
+      "max_tolerance_ratio": 1.1228048191330392e-05
+    },
+    {
+      "name": "fluid_flags_spring_off",
+      "scenarios": 12,
+      "comparisons": 696,
+      "max_absolute": 4.773959005888173e-15,
+      "max_tolerance_ratio": 1.2587333340312543e-05
+    }
+  ],
+  "failures": [],
+  "policy_tests_mode": "Strict",
+  "policy_tests": [
+    {
+      "name": "time_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "position_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "velocity_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "acceleration_limit",
+      "forward": "NUMERIC_LIMIT",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "singular",
+      "forward": "SINGULAR_INERTIA",
+      "step": "SINGULAR_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "ill_conditioned",
+      "forward": "ILL_CONDITIONED_INERTIA",
+      "step": "ILL_CONDITIONED_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "coupled_condition",
+      "forward": "ILL_CONDITIONED_INERTIA",
+      "step": "ILL_CONDITIONED_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "ball",
+      "create": "UNSUPPORTED_JOINT"
+    },
+    {
+      "name": "free",
+      "create": "UNSUPPORTED_JOINT"
+    },
+    {
+      "name": "rk4",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "discrete",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "ipc",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "constraints",
+      "create": "UNSUPPORTED_FEATURE"
+    }
+  ],
+  "seconds": 40.903414717002306,
+  "atol": 2e-10,
+  "rtol": 2e-10
+}

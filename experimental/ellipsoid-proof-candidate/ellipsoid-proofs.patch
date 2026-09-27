@@ -1,0 +1,570 @@
+--- a/experimental/smooth/src/mj-fluid_added_mass.adb
++++ b/experimental/smooth/src/mj-fluid_added_mass.adb
+@@ -7,6 +7,10 @@
+    begin
+       return A1*B2-A2*B1;
+    end Cross_Term;
++   function Torque_Sum (A,B : Cross_Value) return Torque_Value is
++   begin
++      return A+B;
++   end Torque_Sum;
+    function Evaluate (Density : Nonneg_Tier0; Virtual_Mass, Virtual_Inertia, Linear, Angular : Vector) return Wrench is
+       type Moments is array (Axis) of Momentum_Value;
+       LM : constant Moments := [Momentum(Density,Virtual_Mass(0),Linear(0)),Momentum(Density,Virtual_Mass(1),Linear(1)),Momentum(Density,Virtual_Mass(2),Linear(2))];
+@@ -15,8 +19,8 @@
+       return (Force => [Cross_Term(LM(1),LM(2),Angular(1),Angular(2)),
+                         Cross_Term(LM(2),LM(0),Angular(2),Angular(0)),
+                         Cross_Term(LM(0),LM(1),Angular(0),Angular(1))],
+-              Torque => [Cross_Term(LM(1),LM(2),Linear(1),Linear(2))+Cross_Term(AM(1),AM(2),Angular(1),Angular(2)),
+-                         Cross_Term(LM(2),LM(0),Linear(2),Linear(0))+Cross_Term(AM(2),AM(0),Angular(2),Angular(0)),
+-                         Cross_Term(LM(0),LM(1),Linear(0),Linear(1))+Cross_Term(AM(0),AM(1),Angular(0),Angular(1))]);
++              Torque => [Torque_Sum(Cross_Term(LM(1),LM(2),Linear(1),Linear(2)),Cross_Term(AM(1),AM(2),Angular(1),Angular(2))),
++                         Torque_Sum(Cross_Term(LM(2),LM(0),Linear(2),Linear(0)),Cross_Term(AM(2),AM(0),Angular(2),Angular(0))),
++                         Torque_Sum(Cross_Term(LM(0),LM(1),Linear(0),Linear(1)),Cross_Term(AM(0),AM(1),Angular(0),Angular(1)))]);
+    end Evaluate;
+ end MJ.Fluid_Added_Mass;
+--- a/experimental/smooth/src/mj-fluid_added_mass.ads
++++ b/experimental/smooth/src/mj-fluid_added_mass.ads
+@@ -10,11 +10,19 @@
+      with Global => null, Post => Momentum'Result = Density*Virtual*V;
+    function Cross_Term (A1,A2 : Momentum_Value; B1,B2 : Rate) return Cross_Value
+      with Global => null, Post => Cross_Term'Result = A1*B2-A2*B1;
++   subtype Torque_Value is Real range -1.0e50 .. 1.0e50;
++   function Torque_Sum (A,B : Cross_Value) return Torque_Value
++     with Global => null, Inline, Post => Torque_Sum'Result = A+B;
+    function Evaluate (Density : Nonneg_Tier0; Virtual_Mass, Virtual_Inertia, Linear, Angular : Vector) return Wrench
+      with Global => null,
+      Pre => Bounded(Virtual_Mass,Max_Val) and then Bounded(Virtual_Inertia,Max_Val)
+        and then Bounded(Linear,1.0e12) and then Bounded(Angular,1.0e12),
+-     Post => Bounded(Evaluate'Result.Force,1.0e50) and then Bounded(Evaluate'Result.Torque,1.0e50);
++     Post => Evaluate'Result.Force(0) in -1.0e50 .. 1.0e50;
++   pragma Postcondition (Evaluate'Result.Force(1) in -1.0e50 .. 1.0e50);
++   pragma Postcondition (Evaluate'Result.Force(2) in -1.0e50 .. 1.0e50);
++   pragma Postcondition (Evaluate'Result.Torque(0) in -1.0e50 .. 1.0e50);
++   pragma Postcondition (Evaluate'Result.Torque(1) in -1.0e50 .. 1.0e50);
++   pragma Postcondition (Evaluate'Result.Torque(2) in -1.0e50 .. 1.0e50);
+    pragma Postcondition (Evaluate'Result.Force(0) = Cross_Term(
+      Momentum(Density,Virtual_Mass(1),Linear(1)),Momentum(Density,Virtual_Mass(2),Linear(2)),Angular(1),Angular(2)));
+    pragma Postcondition (Evaluate'Result.Torque(0) = Cross_Term(
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_geometry.adb
+@@ -0,0 +1,62 @@
++package body MJ.Fluid_Geometry with SPARK_Mode is
++   function Volume (X,Y,Z : Nonneg_Tier0) return Volume_Value is
++   begin
++      return 4.0/3.0*Pi*X*Y*Z;
++   end Volume;
++   function Middle (X,Y,Z : Nonneg_Tier0) return Mid_Value is
++   begin
++      return X+Y+Z-Real'Max(Real'Max(X,Y),Z)-Real'Min(Real'Min(X,Y),Z);
++   end Middle;
++   function Area (Dmax : Nonneg_Tier0; Dmid : Mid_Value) return Area_Value is
++   begin
++      return Pi*Dmax*Dmid;
++   end Area;
++   function Normalize_Axis (X,Dmax : Nonneg_Tier0) return Normalized_Axis is
++      Inv : Real;
++   begin
++      if Dmax > Min_Val then
++         Inv := 1.0/Dmax;
++         pragma Assert (Inv*Dmax <= 1.1);
++         return Inv*X;
++      else
++         return 0.0;
++      end if;
++   end Normalize_Axis;
++   function Surface (X,Y : Normalized_Axis) return Surface_Value is
++   begin
++      return (X*Y)*(X*Y);
++   end Surface;
++   function Diameter (X,Y,Z : Nonneg_Tier0) return Diameter_Value is
++   begin
++      return 2.0/3.0*(X+Y+Z);
++   end Diameter;
++   function Linear_Viscosity (D : Diameter_Value) return Linear_Viscous is
++   begin
++      return 3.0*Pi*D;
++   end Linear_Viscosity;
++   function Angular_Viscosity (D : Diameter_Value) return Angular_Viscous is
++   begin
++      return Pi*D*D*D;
++   end Angular_Viscosity;
++   function Moment (Dmid : Mid_Value; Dmax : Nonneg_Tier0) return Moment_Value is
++   begin
++      return 8.0/15.0*Pi*Dmid*((Dmax*Dmax)*(Dmax*Dmax));
++   end Moment;
++   function Angular_Moment (Angular,Slender : Nonneg_Tier0; II,Imax : Moment_Value) return Angular_Value is
++   begin
++      return Angular*II+Slender*(Imax-II);
++   end Angular_Moment;
++   function Surface_From_Size (X,Y,Z : Nonneg_Tier0) return Surface_Value is
++      Dmax : constant Nonneg_Tier0 := Real'Max(Real'Max(X,Y),Z);
++      NY : constant Normalized_Axis := Normalize_Axis(Y,Dmax);
++      NZ : constant Normalized_Axis := Normalize_Axis(Z,Dmax);
++   begin
++      return Surface(NY,NZ);
++   end Surface_From_Size;
++   function Moment_From_Size (Angular,Slender,X,Y,Z : Nonneg_Tier0;
++                              Imax : Moment_Value) return Angular_Value is
++      II : constant Moment_Value := Moment(X,Real'Max(Y,Z));
++   begin
++      return Angular_Moment(Angular,Slender,II,Imax);
++   end Moment_From_Size;
++end MJ.Fluid_Geometry;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_geometry.ads
+@@ -0,0 +1,57 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++with Ada.Numerics;
++package MJ.Fluid_Geometry with SPARK_Mode is
++   Pi : constant Real := Ada.Numerics.Pi;
++   subtype Mid_Value is Real range -1.0e11 .. 1.0e11;
++   subtype Volume_Value is Real range 0.0 .. 1.0e32;
++   subtype Area_Value is Real range -1.0e24 .. 1.0e24;
++   subtype Diameter_Value is Real range 0.0 .. 3.0e10;
++   subtype Linear_Viscous is Real range 0.0 .. 1.0e13;
++   subtype Angular_Viscous is Real range 0.0 .. 1.0e33;
++   subtype Normalized_Axis is Real range 0.0 .. 1.1;
++   subtype Surface_Value is Real range 0.0 .. 2.0;
++   subtype Moment_Value is Real range -1.0e52 .. 1.0e52;
++   subtype Angular_Value is Real range -1.0e63 .. 1.0e63;
++   function Volume (X,Y,Z : Nonneg_Tier0) return Volume_Value
++     with Global => null, Inline,
++     Post => Volume'Result = 4.0/3.0*Pi*X*Y*Z;
++   function Middle (X,Y,Z : Nonneg_Tier0) return Mid_Value
++     with Global => null, Inline,
++     Post => Middle'Result = X+Y+Z-Real'Max(Real'Max(X,Y),Z)-Real'Min(Real'Min(X,Y),Z);
++   function Area (Dmax : Nonneg_Tier0; Dmid : Mid_Value) return Area_Value
++     with Global => null, Inline,
++     Post => Area'Result = Pi*Dmax*Dmid;
++   function Normalize_Axis (X,Dmax : Nonneg_Tier0) return Normalized_Axis
++     with Global => null, Inline,
++     Pre => X <= Dmax,
++     Post => Normalize_Axis'Result = (if Dmax > Min_Val then (1.0/Dmax)*X else 0.0);
++   function Surface (X,Y : Normalized_Axis) return Surface_Value
++     with Global => null, Inline,
++     Post => Surface'Result = (X*Y)*(X*Y);
++   function Diameter (X,Y,Z : Nonneg_Tier0) return Diameter_Value
++     with Global => null, Inline,
++     Post => Diameter'Result = 2.0/3.0*(X+Y+Z);
++   function Linear_Viscosity (D : Diameter_Value) return Linear_Viscous
++     with Global => null, Inline,
++     Post => Linear_Viscosity'Result = 3.0*Pi*D;
++   function Angular_Viscosity (D : Diameter_Value) return Angular_Viscous
++     with Global => null, Inline,
++     Post => Angular_Viscosity'Result = Pi*D*D*D;
++   function Moment (Dmid : Mid_Value; Dmax : Nonneg_Tier0) return Moment_Value
++     with Global => null, Inline,
++     Post => Moment'Result = 8.0/15.0*Pi*Dmid*((Dmax*Dmax)*(Dmax*Dmax));
++   function Angular_Moment (Angular,Slender : Nonneg_Tier0; II,Imax : Moment_Value) return Angular_Value
++     with Global => null, Inline,
++     Post => Angular_Moment'Result = Angular*II+Slender*(Imax-II);
++   function Surface_From_Size (X,Y,Z : Nonneg_Tier0) return Surface_Value
++     with Global => null, Inline,
++     Post => Surface_From_Size'Result = Surface(
++       Normalize_Axis(Y,Real'Max(Real'Max(X,Y),Z)),
++       Normalize_Axis(Z,Real'Max(Real'Max(X,Y),Z)));
++   function Moment_From_Size (Angular,Slender,X,Y,Z : Nonneg_Tier0;
++                              Imax : Moment_Value) return Angular_Value
++     with Global => null, Inline,
++     Post => Moment_From_Size'Result =
++       Angular_Moment(Angular,Slender,Moment(X,Real'Max(Y,Z)),Imax);
++end MJ.Fluid_Geometry;
+--- a/experimental/smooth/src/mj-fluid_kernels.adb
++++ b/experimental/smooth/src/mj-fluid_kernels.adb
+@@ -1,34 +1,24 @@
+ with Ada.Numerics.Long_Elementary_Functions;
+ with MJ.Fluid_Added_Mass;
++with MJ.Fluid_Lift;
++with MJ.Fluid_Projection;
+ package body MJ.Fluid_Kernels with SPARK_Mode is
+    function Prepare_Ellipsoid (P : Ellipsoid_Parameters) return Ellipsoid_Cache is
++      package G renames MJ.Fluid_Geometry;
+       S : Vector renames P.Size;
+-      R : Ellipsoid_Cache;
+-      Dmin, Dmid, Inv_Dmax, Diameter, Imax : Real;
+-      SN : Vector;
++      Dmax : constant Nonneg_Tier0 := Real'Max(Real'Max(S(0),S(1)),S(2));
++      Dmid : constant G.Mid_Value := G.Middle(S(0),S(1),S(2));
++      D : constant G.Diameter_Value := G.Diameter(S(0),S(1),S(2));
++      Imax : constant G.Moment_Value := G.Moment(Dmid,Dmax);
+    begin
+-      R.Volume := 4.0/3.0*Pi*S(0)*S(1)*S(2);
+-      R.Dmax := Real'Max (Real'Max(S(0),S(1)),S(2));
+-      Dmin := Real'Min (Real'Min(S(0),S(1)),S(2));
+-      Dmid := S(0)+S(1)+S(2)-R.Dmax-Dmin;
+-      R.Amax := Pi*R.Dmax*Dmid;
+-      Inv_Dmax := (if R.Dmax > Min_Val then 1.0/R.Dmax else 0.0);
+-      SN := Inv_Dmax*S;
+-      R.Surface := [(SN(1)*SN(2))*(SN(1)*SN(2)),
+-                    (SN(2)*SN(0))*(SN(2)*SN(0)),
+-                    (SN(0)*SN(1))*(SN(0)*SN(1))];
+-      Diameter := 2.0/3.0*(S(0)+S(1)+S(2));
+-      R.Lin_Visc := 3.0*Pi*Diameter;
+-      R.Ang_Visc := Pi*Diameter*Diameter*Diameter;
+-      Imax := 8.0/15.0*Pi*Dmid*Fourth(R.Dmax);
+-      for I in Axis loop
+-         declare
+-            II : constant Real := 8.0/15.0*Pi*S(I)*Fourth(Real'Max(S((I+1) mod 3),S((I+2) mod 3)));
+-         begin
+-            R.Angular_Moment(I) := P.Angular*II + P.Slender*(Imax-II);
+-         end;
+-      end loop;
+-      return R;
++      return (Volume => G.Volume(S(0),S(1),S(2)), Dmax => Dmax,
++              Amax => G.Area(Dmax,Dmid), Lin_Visc => G.Linear_Viscosity(D),
++              Ang_Visc => G.Angular_Viscosity(D),
++              Surface => [G.Surface_From_Size(S(0),S(1),S(2)),G.Surface_From_Size(S(1),S(2),S(0)),G.Surface_From_Size(S(2),S(0),S(1))],
++              Angular_Moment => [
++                G.Moment_From_Size(P.Angular,P.Slender,S(0),S(1),S(2),Imax),
++                G.Moment_From_Size(P.Angular,P.Slender,S(1),S(2),S(0),Imax),
++                G.Moment_From_Size(P.Angular,P.Slender,S(2),S(0),S(1),Imax)]);
+    end Prepare_Ellipsoid;
+ 
+    function Blend_Force (Added, Magnus, Kutta, Drag : Blend_Input;
+@@ -45,39 +35,43 @@
+    function Ellipsoid (P : Ellipsoid_Parameters; Cache : Ellipsoid_Cache; Density, Viscosity : Nonneg_Tier0;
+                         Linear, Angular : Vector) return Wrench is
+       use Ada.Numerics.Long_Elementary_Functions;
+-      Volume : constant Real := Cache.Volume;
+-      Dmax : constant Real := Cache.Dmax;
+-      Amax : constant Real := Cache.Amax;
+-      Speed : constant Real := Sqrt (Dot (Linear, Linear));
+-      Inv_Speed : constant Real := (if Speed > Min_Val then 1.0/Speed else 0.0);
+-      V : constant Vector := Inv_Speed * Linear;
+-      Araw : constant Real := Cache.Surface(0);
+-      Braw : constant Real := Cache.Surface(1);
+-      Craw : constant Real := Cache.Surface(2);
+-      PN : constant Real := Araw*V(0)*V(0) + Braw*V(1)*V(1) + Craw*V(2)*V(2);
+-      Inv_PN : constant Real := (if PN > Min_Val then 1.0/PN else 0.0);
+-      A : constant Real := Araw*Inv_PN;
+-      B : constant Real := Braw*Inv_PN;
+-      C : constant Real := Craw*Inv_PN;
+-      PD : constant Real := A*A*V(0)*V(0) + B*B*V(1)*V(1) + C*C*V(2)*V(2);
+-      Aproj : constant Real := Pi*Dmax*Dmax*Sqrt (PN*PD);
+-      Normal : constant Vector := [A*V(0),B*V(1),C*V(2)];
+-      Cos_Alpha : constant Real := (if PD > Min_Val then 1.0/PD else 0.0);
+-      Magnus : constant Vector := (P.Magnus*Density*Volume) * Cross (Angular, Linear);
+-      Circulation : constant Vector := (P.Kutta*Density*Cos_Alpha*Aproj) * Cross (Normal, Linear);
+-      Kutta : constant Vector := Cross (Circulation, Linear);
+-      Lin_Visc : constant Real := Cache.Lin_Visc;
+-      Ang_Visc : constant Real := Cache.Ang_Visc;
++      package F renames MJ.Fluid_Projection;
++      type Magnus_Vector is array (Axis) of MJ.Fluid_Lift.Magnus_Value;
++      type Kutta_Vector is array (Axis) of MJ.Fluid_Lift.Lift_Value;
++      Volume : constant MJ.Fluid_Geometry.Volume_Value := Cache.Volume;
++      Dmax : constant Nonneg_Tier0 := Cache.Dmax;
++      Amax : constant MJ.Fluid_Geometry.Area_Value := Cache.Amax;
++      Speed : constant Real := F.Norm(Linear(0),Linear(1),Linear(2));
++      Inv_Speed : constant F.Inverse_Value := F.Inverse(Speed);
++      V : constant Vector := [F.Normalize(Inv_Speed,Linear(0)),F.Normalize(Inv_Speed,Linear(1)),F.Normalize(Inv_Speed,Linear(2))];
++      Araw : constant F.Surface := Cache.Surface(0);
++      Braw : constant F.Surface := Cache.Surface(1);
++      Craw : constant F.Surface := Cache.Surface(2);
++      PN : constant F.Numerator_Value := F.Numerator(Araw,Braw,Craw,V(0),V(1),V(2));
++      Inv_PN : constant F.Numerator_Value := F.Inverse(PN);
++      A : constant F.Projection_Coefficient := F.Coefficient(Araw,Inv_PN);
++      B : constant F.Projection_Coefficient := F.Coefficient(Braw,Inv_PN);
++      C : constant F.Projection_Coefficient := F.Coefficient(Craw,Inv_PN);
++      PD : constant F.Denominator_Value := F.Denominator(A,B,C,V(0),V(1),V(2));
++      Aproj : constant F.Area_Value := F.Projected_Area(Dmax,Sqrt(F.Projection_Product(PN,PD)));
++      Normal : constant Vector := [F.Normal(A,V(0)),F.Normal(B,V(1)),F.Normal(C,V(2))];
++      Cos_Alpha : constant F.Inverse_Value := F.Inverse(PD);
++      Magnus_Raw : constant Vector := MJ.Fluid_Lift.Magnus(P.Magnus,Density,Volume,Linear,Angular);
++      Magnus : constant Magnus_Vector := [Magnus_Raw(0),Magnus_Raw(1),Magnus_Raw(2)];
++      Circulation : constant Vector := MJ.Fluid_Lift.Circulation(P.Kutta,Density,Cos_Alpha,Aproj,Normal,Linear);
++      Kutta_Raw : constant Vector := MJ.Fluid_Lift.Kutta(Circulation,Linear);
++      Kutta : constant Kutta_Vector := [Kutta_Raw(0),Kutta_Raw(1),Kutta_Raw(2)];
++      Lin_Visc : constant MJ.Fluid_Geometry.Linear_Viscous := Cache.Lin_Visc;
++      Ang_Visc : constant MJ.Fluid_Geometry.Angular_Viscous := Cache.Ang_Visc;
+       Mom : Vector;
+       R : Wrench;
+-      Drag_Lin : constant Real := Viscosity*Lin_Visc + Density*Speed*
+-        (Aproj*P.Blunt + P.Slender*(Amax-Aproj));
+-      Drag_Ang : Real;
++      Drag_Lin : constant F.Drag_Value := F.Linear_Drag(Viscosity,Density,P.Blunt,P.Slender,Lin_Visc,Speed,Aproj,Amax);
++      Drag_Ang : F.Drag_Value;
+    begin
+       for I in Axis loop
+-         Mom(I) := Angular(I)*Cache.Angular_Moment(I);
++         Mom(I) := F.Moment(Angular(I),Cache.Angular_Moment(I));
+       end loop;
+-      Drag_Ang := Viscosity*Ang_Visc + Density*Sqrt (Dot (Mom,Mom));
++      Drag_Ang := F.Angular_Drag(Viscosity,Density,Ang_Visc,F.Norm(Mom(0),Mom(1),Mom(2)));
+       R := MJ.Fluid_Added_Mass.Evaluate (Density,P.Virtual_Mass,P.Virtual_Inertia,Linear,Angular);
+       for I in Axis loop
+          R.Torque(I) := Blend_Torque(R.Torque(I),Drag_Ang,Angular(I),P.Interaction);
+--- a/experimental/smooth/src/mj-fluid_kernels.ads
++++ b/experimental/smooth/src/mj-fluid_kernels.ads
+@@ -2,6 +2,7 @@
+ with MJ.Smooth_Math; use MJ.Smooth_Math;
+ with Ada.Numerics;
+ with MJ.Fluid_Box;
++with MJ.Fluid_Geometry;
+ with MJ.Spatial_Kernels;
+ package MJ.Fluid_Kernels with SPARK_Mode is
+    type Motion_Array is array (Natural range <>) of MJ.Spatial_Kernels.Motion;
+@@ -35,12 +36,21 @@
+       and then (for all X of C.Surface => X in 0.0 .. 2.0)
+       and then Bounded(C.Angular_Moment,1.0e63)) with Global => null;
+    function Prepare_Ellipsoid (P : Ellipsoid_Parameters) return Ellipsoid_Cache
+-     with Global => null, Pre => (for all X of P.Size => X in Nonneg_Tier0),
++     with Global => null, Pre => (P.Size(0) in Nonneg_Tier0 and then P.Size(1) in Nonneg_Tier0 and then P.Size(2) in Nonneg_Tier0),
+      Post => Cache_Bounded(Prepare_Ellipsoid'Result)
+-       and then Prepare_Ellipsoid'Result.Volume = 4.0/3.0*Pi*P.Size(0)*P.Size(1)*P.Size(2)
++       and then Prepare_Ellipsoid'Result.Volume = MJ.Fluid_Geometry.Volume(P.Size(0),P.Size(1),P.Size(2))
++       and then Prepare_Ellipsoid'Result.Amax = MJ.Fluid_Geometry.Area(Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2)),MJ.Fluid_Geometry.Middle(P.Size(0),P.Size(1),P.Size(2)))
++       and then Prepare_Ellipsoid'Result.Lin_Visc = MJ.Fluid_Geometry.Linear_Viscosity(MJ.Fluid_Geometry.Diameter(P.Size(0),P.Size(1),P.Size(2)))
++       and then Prepare_Ellipsoid'Result.Ang_Visc = MJ.Fluid_Geometry.Angular_Viscosity(MJ.Fluid_Geometry.Diameter(P.Size(0),P.Size(1),P.Size(2)))
+        and then Prepare_Ellipsoid'Result.Dmax = Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Surface(0) = MJ.Fluid_Geometry.Surface_From_Size(P.Size(0),P.Size(1),P.Size(2)));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Angular_Moment(0) = MJ.Fluid_Geometry.Moment_From_Size(P.Angular,P.Slender,P.Size(0),P.Size(1),P.Size(2),MJ.Fluid_Geometry.Moment(MJ.Fluid_Geometry.Middle(P.Size(0),P.Size(1),P.Size(2)),Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2)))));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Surface(1) = MJ.Fluid_Geometry.Surface_From_Size(P.Size(1),P.Size(2),P.Size(0)));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Angular_Moment(1) = MJ.Fluid_Geometry.Moment_From_Size(P.Angular,P.Slender,P.Size(1),P.Size(2),P.Size(0),MJ.Fluid_Geometry.Moment(MJ.Fluid_Geometry.Middle(P.Size(0),P.Size(1),P.Size(2)),Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2)))));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Surface(2) = MJ.Fluid_Geometry.Surface_From_Size(P.Size(2),P.Size(0),P.Size(1)));
++   pragma Postcondition (Prepare_Ellipsoid'Result.Angular_Moment(2) = MJ.Fluid_Geometry.Moment_From_Size(P.Angular,P.Slender,P.Size(2),P.Size(0),P.Size(1),MJ.Fluid_Geometry.Moment(MJ.Fluid_Geometry.Middle(P.Size(0),P.Size(1),P.Size(2)),Real'Max(Real'Max(P.Size(0),P.Size(1)),P.Size(2)))));
+    subtype Blend_Value is Real range -1.0e250 .. 1.0e250;
+-   subtype Blend_Input is Real range -1.0e100 .. 1.0e100;
++   subtype Blend_Input is Real range -1.0e220 .. 1.0e220;
+    function Blend_Force (Added, Magnus, Kutta, Drag : Blend_Input;
+                          Speed : Rate; Interaction : Nonneg_Tier0) return Blend_Value
+      with Global => null,
+@@ -54,7 +64,7 @@
+      with Global => null,
+      Pre => Cache_Bounded(Cache)
+        and then Bounded (Linear, 1.0e12) and then Bounded (Angular, 1.0e12)
+-       and then (for all X of P.Size => X in Nonneg_Tier0)
++       and then (P.Size(0) in Nonneg_Tier0 and then P.Size(1) in Nonneg_Tier0 and then P.Size(2) in Nonneg_Tier0)
+        and then Bounded (P.Virtual_Mass, Max_Val) and then Bounded (P.Virtual_Inertia, Max_Val);
+    --  Metadata is frozen at Create, so geometric quantities are computed once.
+    type Element is record
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_lift.adb
+@@ -0,0 +1,48 @@
++package body MJ.Fluid_Lift with SPARK_Mode is
++   function Magnus_Factor (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value) return Magnus_Scale is
++   begin
++      return Coefficient*Density*Volume;
++   end Magnus_Factor;
++   function Rate_Cross (A1,A2,B1,B2 : Rate) return Rate_Cross_Value is
++   begin
++      return A1*B2-A2*B1;
++   end Rate_Cross;
++   function Circulation_Factor (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value) return Circulation_Scale is
++   begin
++      return Coefficient*Density*Cos_Alpha*Area;
++   end Circulation_Factor;
++   function Normal_Cross (N1,N2 : Normal_Value; V1,V2 : Rate) return Cross_Value is
++   begin
++      return N1*V2-N2*V1;
++   end Normal_Cross;
++   function Magnus_Component (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value; W1,W2,V1,V2 : Rate) return Magnus_Value is
++   begin
++      return Magnus_Factor(Coefficient,Density,Volume)*Rate_Cross(W1,W2,V1,V2);
++   end Magnus_Component;
++   function Circulation_Component (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value; N1,N2 : Normal_Value; V1,V2 : Rate) return Circulation_Value is
++   begin
++      return Circulation_Factor(Coefficient,Density,Cos_Alpha,Area)*Normal_Cross(N1,N2,V1,V2);
++   end Circulation_Component;
++   function Kutta_Component (C1,C2 : Circulation_Value; V1,V2 : Rate) return Lift_Value is
++   begin
++      return C1*V2-C2*V1;
++   end Kutta_Component;
++   function Magnus (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value; Linear,Angular : Vector) return Vector is
++   begin
++      return [Magnus_Component(Coefficient,Density,Volume,Angular(1),Angular(2),Linear(1),Linear(2)),
++              Magnus_Component(Coefficient,Density,Volume,Angular(2),Angular(0),Linear(2),Linear(0)),
++              Magnus_Component(Coefficient,Density,Volume,Angular(0),Angular(1),Linear(0),Linear(1))];
++   end Magnus;
++   function Circulation (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value; Normal,Linear : Vector) return Vector is
++   begin
++      return [Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(1),Normal(2),Linear(1),Linear(2)),
++              Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(2),Normal(0),Linear(2),Linear(0)),
++              Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(0),Normal(1),Linear(0),Linear(1))];
++   end Circulation;
++   function Kutta (Circ,Linear : Vector) return Vector is
++   begin
++      return [Kutta_Component(Circ(1),Circ(2),Linear(1),Linear(2)),
++              Kutta_Component(Circ(2),Circ(0),Linear(2),Linear(0)),
++              Kutta_Component(Circ(0),Circ(1),Linear(0),Linear(1))];
++   end Kutta;
++end MJ.Fluid_Lift;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_lift.ads
+@@ -0,0 +1,48 @@
++with MJ.Types; use MJ.Types;
++with MJ.Smooth_Math; use MJ.Smooth_Math;
++package MJ.Fluid_Lift with SPARK_Mode is
++   subtype Rate is Real range -1.0e12 .. 1.0e12;
++   subtype Volume_Value is Real range 0.0 .. 1.0e32;
++   subtype Area_Value is Real range 0.0 .. 1.0e98;
++   subtype Inverse_Value is Real range 0.0 .. 2.0e15;
++   subtype Normal_Value is Real range -1.0e44 .. 1.0e44;
++   subtype Cross_Value is Real range -1.0e58 .. 1.0e58;
++   subtype Magnus_Value is Real range -1.0e85 .. 1.0e85;
++   subtype Circulation_Value is Real range -1.0e195 .. 1.0e195;
++   subtype Lift_Value is Real range -1.0e210 .. 1.0e210;
++   subtype Magnus_Scale is Real range 0.0 .. 1.0e54;
++   subtype Rate_Cross_Value is Real range -1.0e26 .. 1.0e26;
++   subtype Circulation_Scale is Real range 0.0 .. 1.0e135;
++   function Magnus_Factor (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value) return Magnus_Scale
++     with Global => null, Inline, Post => Magnus_Factor'Result = Coefficient*Density*Volume;
++   function Rate_Cross (A1,A2,B1,B2 : Rate) return Rate_Cross_Value
++     with Global => null, Inline, Post => Rate_Cross'Result = A1*B2-A2*B1;
++   function Circulation_Factor (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value) return Circulation_Scale
++     with Global => null, Inline, Post => Circulation_Factor'Result = Coefficient*Density*Cos_Alpha*Area;
++   function Normal_Cross (N1,N2 : Normal_Value; V1,V2 : Rate) return Cross_Value
++     with Global => null, Inline, Post => Normal_Cross'Result = N1*V2-N2*V1;
++   function Magnus_Component (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value; W1,W2,V1,V2 : Rate) return Magnus_Value
++     with Global => null, Inline, Post => Magnus_Component'Result = Magnus_Factor(Coefficient,Density,Volume)*Rate_Cross(W1,W2,V1,V2);
++   function Circulation_Component (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value; N1,N2 : Normal_Value; V1,V2 : Rate) return Circulation_Value
++     with Global => null, Inline, Post => Circulation_Component'Result = Circulation_Factor(Coefficient,Density,Cos_Alpha,Area)*Normal_Cross(N1,N2,V1,V2);
++   function Kutta_Component (C1,C2 : Circulation_Value; V1,V2 : Rate) return Lift_Value
++     with Global => null, Inline, Post => Kutta_Component'Result = C1*V2-C2*V1;
++   function Magnus (Coefficient,Density : Nonneg_Tier0; Volume : Volume_Value; Linear,Angular : Vector) return Vector
++     with Global => null, Inline, Pre => Bounded(Linear,1.0e12) and then Bounded(Angular,1.0e12),
++     Post => Bounded(Magnus'Result,1.0e85)
++       and then Magnus'Result(0) = Magnus_Component(Coefficient,Density,Volume,Angular(1),Angular(2),Linear(1),Linear(2))
++       and then Magnus'Result(1) = Magnus_Component(Coefficient,Density,Volume,Angular(2),Angular(0),Linear(2),Linear(0))
++       and then Magnus'Result(2) = Magnus_Component(Coefficient,Density,Volume,Angular(0),Angular(1),Linear(0),Linear(1));
++   function Circulation (Coefficient,Density : Nonneg_Tier0; Cos_Alpha : Inverse_Value; Area : Area_Value; Normal,Linear : Vector) return Vector
++     with Global => null, Inline, Pre => Bounded(Normal,1.0e44) and then Bounded(Linear,1.0e12),
++     Post => Bounded(Circulation'Result,1.0e195)
++       and then Circulation'Result(0) = Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(1),Normal(2),Linear(1),Linear(2))
++       and then Circulation'Result(1) = Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(2),Normal(0),Linear(2),Linear(0))
++       and then Circulation'Result(2) = Circulation_Component(Coefficient,Density,Cos_Alpha,Area,Normal(0),Normal(1),Linear(0),Linear(1));
++   function Kutta (Circ,Linear : Vector) return Vector
++     with Global => null, Inline, Pre => Bounded(Circ,1.0e195) and then Bounded(Linear,1.0e12),
++     Post => Bounded(Kutta'Result,1.0e210)
++       and then Kutta'Result(0) = Kutta_Component(Circ(1),Circ(2),Linear(1),Linear(2))
++       and then Kutta'Result(1) = Kutta_Component(Circ(2),Circ(0),Linear(2),Linear(0))
++       and then Kutta'Result(2) = Kutta_Component(Circ(0),Circ(1),Linear(0),Linear(1));
++end MJ.Fluid_Lift;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_projection.adb
+@@ -0,0 +1,62 @@
++package body MJ.Fluid_Projection with SPARK_Mode is
++   function Inverse (X : Real) return Inverse_Value is
++   begin
++      return (if X > Min_Val then 1.0/X else 0.0);
++   end Inverse;
++   function Normalize (Inv : Inverse_Value; V : Rate) return Normalized_Rate is
++   begin
++      return Inv*V;
++   end Normalize;
++   function Numerator_Part (S : Surface; V : Normalized_Rate) return Numerator_Term is
++   begin
++      return S*V*V;
++   end Numerator_Part;
++   function Numerator (S0,S1,S2 : Surface; V0,V1,V2 : Normalized_Rate) return Numerator_Value is
++   begin
++      return Numerator_Part(S0,V0)+Numerator_Part(S1,V1)+Numerator_Part(S2,V2);
++   end Numerator;
++   function Coefficient (S : Surface; Inv : Inverse_Value) return Projection_Coefficient is
++   begin
++      return S*Inv;
++   end Coefficient;
++   function Denominator_Part (C : Projection_Coefficient; V : Normalized_Rate) return Denominator_Term is
++   begin
++      return C*C*V*V;
++   end Denominator_Part;
++   function Denominator (C0,C1,C2 : Projection_Coefficient; V0,V1,V2 : Normalized_Rate) return Denominator_Value is
++   begin
++      return Denominator_Part(C0,V0)+Denominator_Part(C1,V1)+Denominator_Part(C2,V2);
++   end Denominator;
++   function Normal (C : Projection_Coefficient; V : Normalized_Rate) return Normal_Value is
++   begin
++      return C*V;
++   end Normal;
++   function Norm_Squared (X,Y,Z : Norm_Input) return Norm_Squared_Value is
++   begin
++      return (X*X+Y*Y)+Z*Z;
++   end Norm_Squared;
++   function Projected_Area (Dmax : Nonneg_Tier0; Root : Area_Root) return Area_Value is
++   begin
++      return Pi*Dmax*Dmax*Root;
++   end Projected_Area;
++   function Linear_Drag (Viscosity,Density,Blunt,Slender : Nonneg_Tier0; Lin_Visc : MJ.Fluid_Geometry.Linear_Viscous; Speed : Speed_Value; Aproj : Area_Value; Amax : MJ.Fluid_Geometry.Area_Value) return Drag_Value is
++   begin
++      return Viscosity*Lin_Visc+Density*Speed*(Aproj*Blunt+Slender*(Amax-Aproj));
++   end Linear_Drag;
++   function Moment (W : Rate; M : Angular_Moment) return Norm_Input is
++   begin
++      return W*M;
++   end Moment;
++   function Angular_Drag (Viscosity,Density : Nonneg_Tier0; Ang_Visc : MJ.Fluid_Geometry.Angular_Viscous; Root : Area_Root) return Drag_Value is
++   begin
++      return Viscosity*Ang_Visc+Density*Root;
++   end Angular_Drag;
++   function Norm (X,Y,Z : Norm_Input) return Real is
++   begin
++      return Ada.Numerics.Long_Elementary_Functions.Sqrt(Norm_Squared(X,Y,Z));
++   end Norm;
++   function Projection_Product (PN : Numerator_Value; PD : Denominator_Value) return Root_Argument is
++   begin
++      return PN*PD;
++   end Projection_Product;
++end MJ.Fluid_Projection;
+--- /dev/null
++++ b/experimental/smooth/src/mj-fluid_projection.ads
+@@ -0,0 +1,59 @@
++with MJ.Types; use MJ.Types;
++with Ada.Numerics;
++with Ada.Numerics.Long_Elementary_Functions;
++with MJ.Fluid_Geometry;
++package MJ.Fluid_Projection with SPARK_Mode is
++   Pi : constant Real := Ada.Numerics.Pi;
++   subtype Rate is Real range -1.0e12 .. 1.0e12;
++   subtype Normalized_Rate is Real range -1.0e28 .. 1.0e28;
++   subtype Surface is Real range 0.0 .. 2.0;
++   subtype Inverse_Value is Real range 0.0 .. 2.0e15;
++   subtype Projection_Coefficient is Real range 0.0 .. 5.0e15;
++   subtype Numerator_Term is Real range 0.0 .. 1.0e57;
++   subtype Numerator_Value is Real range 0.0 .. 1.0e58;
++   subtype Denominator_Term is Real range 0.0 .. 1.0e88;
++   subtype Denominator_Value is Real range 0.0 .. 1.0e89;
++   subtype Normal_Value is Real range -1.0e44 .. 1.0e44;
++   subtype Norm_Input is Real range -1.0e76 .. 1.0e76;
++   subtype Norm_Squared_Value is Real range 0.0 .. 1.0e154;
++   subtype Root_Argument is Real range 0.0 .. 1.0e149;
++   subtype Area_Root is Real range 0.0 .. 1.0e76;
++   subtype Area_Value is Real range 0.0 .. 1.0e98;
++   subtype Speed_Value is Real range 0.0 .. 1.0e14;
++   subtype Drag_Value is Real range -1.0e135 .. 1.0e135;
++   subtype Angular_Moment is Real range -1.0e63 .. 1.0e63;
++   function Inverse (X : Real) return Inverse_Value
++     with Global => null, Inline, Post => Inverse'Result = (if X > Min_Val then 1.0/X else 0.0);
++   function Normalize (Inv : Inverse_Value; V : Rate) return Normalized_Rate
++     with Global => null, Inline, Post => Normalize'Result = Inv*V;
++   function Numerator_Part (S : Surface; V : Normalized_Rate) return Numerator_Term
++     with Global => null, Inline, Post => Numerator_Part'Result = S*V*V;
++   function Numerator (S0,S1,S2 : Surface; V0,V1,V2 : Normalized_Rate) return Numerator_Value
++     with Global => null, Inline, Post => Numerator'Result = Numerator_Part(S0,V0)+Numerator_Part(S1,V1)+Numerator_Part(S2,V2);
++   function Coefficient (S : Surface; Inv : Inverse_Value) return Projection_Coefficient
++     with Global => null, Inline, Post => Coefficient'Result = S*Inv;
++   function Denominator_Part (C : Projection_Coefficient; V : Normalized_Rate) return Denominator_Term
++     with Global => null, Inline, Post => Denominator_Part'Result = C*C*V*V;
++   function Denominator (C0,C1,C2 : Projection_Coefficient; V0,V1,V2 : Normalized_Rate) return Denominator_Value
++     with Global => null, Inline, Post => Denominator'Result = Denominator_Part(C0,V0)+Denominator_Part(C1,V1)+Denominator_Part(C2,V2);
++   function Normal (C : Projection_Coefficient; V : Normalized_Rate) return Normal_Value
++     with Global => null, Inline, Post => Normal'Result = C*V;
++   function Norm_Squared (X,Y,Z : Norm_Input) return Norm_Squared_Value
++     with Global => null, Inline, Post => Norm_Squared'Result = (X*X+Y*Y)+Z*Z;
++   function Projected_Area (Dmax : Nonneg_Tier0; Root : Area_Root) return Area_Value
++     with Global => null, Inline, Post => Projected_Area'Result = Pi*Dmax*Dmax*Root;
++   function Linear_Drag (Viscosity,Density,Blunt,Slender : Nonneg_Tier0; Lin_Visc : MJ.Fluid_Geometry.Linear_Viscous; Speed : Speed_Value; Aproj : Area_Value; Amax : MJ.Fluid_Geometry.Area_Value) return Drag_Value
++     with Global => null, Inline, Post => Linear_Drag'Result = Viscosity*Lin_Visc+Density*Speed*(Aproj*Blunt+Slender*(Amax-Aproj));
++   function Moment (W : Rate; M : Angular_Moment) return Norm_Input
++     with Global => null, Inline, Post => Moment'Result = W*M;
++   function Angular_Drag (Viscosity,Density : Nonneg_Tier0; Ang_Visc : MJ.Fluid_Geometry.Angular_Viscous; Root : Area_Root) return Drag_Value
++     with Global => null, Inline, Post => Angular_Drag'Result = Viscosity*Ang_Visc+Density*Root;
++   function Projection_Product (PN : Numerator_Value; PD : Denominator_Value) return Root_Argument
++     with Global => null, Inline, Post => Projection_Product'Result = PN*PD;
++   -- The runtime contract supplies nonnegativity, but no quantitative upper
++   -- bound. Callers must still establish the range of each square-root result.
++   function Norm (X,Y,Z : Norm_Input) return Real
++     with Global => null, Inline,
++     Post => Norm'Result >= 0.0 and then Norm'Result =
++       Ada.Numerics.Long_Elementary_Functions.Sqrt(Norm_Squared(X,Y,Z));
++end MJ.Fluid_Projection;

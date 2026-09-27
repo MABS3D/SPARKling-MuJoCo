@@ -1,0 +1,743 @@
+--- a/experimental/smooth/README.md
++++ b/experimental/smooth/README.md
+@@ -65,10 +65,10 @@
+ | `MJ.Data` | Owned model snapshot, state, scratch buffers, reset, accessors and status handling |
+ | `MJ.Data.Kinematics` | Body and joint poses, body motion, center-of-mass Jacobians |
+ | `MJ.Data.Inertia` | Dense mass matrix, joint armature and LDL factorization/solve |
+-| `MJ.Data.Forces` | Gravity, velocity-dependent inertial bias, linear springs and damping |
++| `MJ.Data.Forces` | Gravity, velocity-dependent inertial bias, polynomial springs and damping (scalar joints) |
+ | `MJ.Data.Actuation` | Scalar joint transmissions, fixed gain, optional affine bias and clamping |
+ | `MJ.Data.Forward` | Current-state acceleration pipeline |
+-| `MJ.Data.Euler` | Semi-implicit Euler, with optional implicit linear damping |
++| `MJ.Data.Euler` | Semi-implicit Euler, with optional implicit polynomial damping |
+ 
+ ## Supported model subset
+ 
+@@ -97,7 +97,8 @@
+ 
+ Other excluded features include free/ball joints, activation dynamics, tendons,
+ flex bodies, plugins, mocap, history, fluid forces, gravity compensation,
+-nonlinear stiffness/damping and joint-level aggregate actuator force limits.
++nonlinear tendon stiffness/damping, actuator damping, and joint-level aggregate
++actuator force limits.
+ Unsupported enable flags and actuator-group disabling are rejected. Geometry
+ and site world transforms, sensors and rendering are not computed by this API.
+ 
+@@ -185,7 +186,10 @@
+ 
+ ```text
+ M * qacc = gravity - bias + passive + actuation + applied
+-passive_j = -stiffness_j * (qpos_j - qpos_spring_j) - damping_j * qvel_j
++x = qpos_j - qpos_spring_j
++v = qvel_j
++passive_j = -x * (stiffness_j + stiffnesspoly_j[0]*x + stiffnesspoly_j[1]*x*x)
++            -v * (damping_j + dampingpoly_j[0]*abs(v) + dampingpoly_j[1]*abs(v)*abs(v))
+ ```
+ 
+ Here `bias` includes velocity-dependent inertial terms and excludes gravity.
+@@ -212,7 +216,7 @@
+ qpos_next = qpos + h * qvel_next
+ ```
+ 
+-`D` is the diagonal joint damping matrix when implicit Euler damping is
++`D` is the diagonal derivative `damping + 2*dampingpoly[0]*abs(v) + 3*dampingpoly[1]*v*v` when implicit Euler damping is
+ enabled; otherwise `a_effective` is the ordinary forward acceleration.
+ The right-hand side already includes the current state's passive damping.
+ The step stages positions and velocities in scratch buffers before committing
+@@ -257,3 +261,6 @@
+ approved Silver-only mathematical exception. Dense storage/algorithms, optimized
+ sparse dynamics, free/ball joints, collisions/constraints and integration into
+ the main build are separate future work. No performance-parity claim is made.
++
++The scalar polynomial implementation and its scoped evidence are documented in
++[`tests/nonlinear_passive/README.md`](../../tests/nonlinear_passive/README.md).
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -1,3 +1,4 @@
++with MJ.Nonlinear_Passive;
+ with MJ.Smooth_Dynamics;
+ with MJ.Spatial_Kernels;
+ with MJ.Fused_RNE;
+@@ -380,22 +381,28 @@
+        and then MJ.Smooth_Kernels.All_Tier0 (Qpos)
+        and then MJ.Smooth_Kernels.All_Tier0 (Qvel),
+      Post => (if Result = Success then MJ.Smooth_Dynamics.Work_Array (Passive) and then
+-         (for all J in Joints'Range => Passive (J) = MJ.Smooth_Kernels.Passive_Force
++         (for all J in Joints'Range => Passive (J) = MJ.Nonlinear_Passive.Passive_Force
+            (Qpos (J), Joints (J).Spring_Reference, Qvel (J),
+-            Joints (J).Stiffness, Joints (J).Damping, Spring_Enabled, Damper_Enabled)))
++            Joints (J).Stiffness, Joints (J).Damping,
++            Joints (J).Stiffness_Quadratic, Joints (J).Stiffness_Cubic,
++            Joints (J).Damping_Quadratic, Joints (J).Damping_Cubic, Spring_Enabled, Damper_Enabled)))
+    is
+    begin
+       Result := Numeric_Limit;
+       for J in Joints'Range loop
+          pragma Loop_Invariant (for all K in 0 .. J - 1 => Passive (K) in MJ.Smooth_Dynamics.Work_Real);
+-         pragma Loop_Invariant (for all K in 0 .. J - 1 => Passive (K) = MJ.Smooth_Kernels.Passive_Force
++         pragma Loop_Invariant (for all K in 0 .. J - 1 => Passive (K) = MJ.Nonlinear_Passive.Passive_Force
+            (Qpos (K), Joints (K).Spring_Reference, Qvel (K),
+-            Joints (K).Stiffness, Joints (K).Damping, Spring_Enabled, Damper_Enabled));
++            Joints (K).Stiffness, Joints (K).Damping,
++            Joints (K).Stiffness_Quadratic, Joints (K).Stiffness_Cubic,
++            Joints (K).Damping_Quadratic, Joints (K).Damping_Cubic, Spring_Enabled, Damper_Enabled));
+          declare
+             C : constant Joint_Parameters := Joints (J);
+-            Value : constant Real := MJ.Smooth_Kernels.Passive_Force
++            Value : constant Real := MJ.Nonlinear_Passive.Passive_Force
+               (Qpos (C.Qadr), C.Spring_Reference, Qvel (C.Vadr),
+-               C.Stiffness, C.Damping, Spring_Enabled, Damper_Enabled);
++               C.Stiffness, C.Damping,
++            C.Stiffness_Quadratic, C.Stiffness_Cubic,
++            C.Damping_Quadratic, C.Damping_Cubic, Spring_Enabled, Damper_Enabled);
+          begin
+             if not Within_Work (Value) then return; end if;
+             Passive (C.Vadr) := Value;
+--- a/experimental/smooth/src/mj-data-inertia_phase.adb
++++ b/experimental/smooth/src/mj-data-inertia_phase.adb
+@@ -1,3 +1,4 @@
++with MJ.Nonlinear_Passive;
+ with MJ.Data.Mass_Publication;
+ with MJ.Composite_Bounds;
+ with MJ.Composite_Weights;
+@@ -1599,11 +1600,13 @@
+    pragma Inline_Always (Factor_Strict_Row);
+ 
+    procedure Solve_Strict_Buffers
+-     (N : Natural; Joints : Joint_Parameter_Array; Mass, Total : Real_Array;
++     (N : Natural; Joints : Joint_Parameter_Array; Mass, Total, Qvel : Real_Array;
+       Factor, Rhs, Solution, Condition_Sums : in out Real_Array;
+       Damping_Step : Nonneg_Tier0; Result : out Status)
+      with Global => null,
+-     Pre => N <= Max_Dofs and then MJ.Smooth_Dynamics.Square_Layout (Factor, N)
++     Pre => Qvel'First = Joints'First and then Qvel'Last = Joints'Last
++       and then MJ.Smooth_Kernels.All_Tier0 (Qvel)
++       and then N <= Max_Dofs and then MJ.Smooth_Dynamics.Square_Layout (Factor, N)
+        and then Rhs'First = 0 and then Rhs'Last = N - 1
+        and then Solution'First = 0 and then Solution'Last = N - 1
+        and then Condition_Sums'First = 0 and then Condition_Sums'Last = N - 1
+@@ -1635,7 +1638,9 @@
+                V : constant Natural := Joints (J).Vadr;
+                Index : constant Natural := V * N + V;
+             begin
+-               Value := Factor (Index) + Damping_Step * Joints (J).Damping;
++               Value := Factor (Index) + Damping_Step * MJ.Nonlinear_Passive.Damping_Derivative
++                 (Joints (J).Damping, Joints (J).Damping_Quadratic,
++                  Joints (J).Damping_Cubic, Qvel (V));
+                if not Within_Work (Value) then
+                   return;
+                end if;
+@@ -1646,11 +1651,12 @@
+       --  Measure the matrix actually solved: M, or M + h*diag(damping).
+       --  A row has at most Max_Dofs entries of magnitude Work_Limit.
+       for I in 0 .. N - 1 loop
++         Row_Sum := Row_Norm (Factor (Off (N, I, 0) .. Off (N, I, N - 1)));
++         Matrix_Norm := Real'Max (Matrix_Norm, Row_Sum);
++         pragma Loop_Invariant (MJ.Smooth_Dynamics.Square_Layout (Factor, N));
+          pragma Loop_Invariant (Matrix_Norm in 0.0 .. Real (Max_Dofs) * Sum_Unit);
+-         pragma Loop_Invariant (for all K in 0 .. I - 1 =>
++         pragma Loop_Invariant (for all K in 0 .. I =>
+            abs Factor (Off (N, K, K)) <= Matrix_Norm);
+-         Row_Sum := Row_Norm (Factor (I * N .. I * N + N - 1));
+-         Matrix_Norm := Real'Max (Matrix_Norm, Row_Sum);
+       end loop;
+       if Matrix_Norm = 0.0 then
+          Result := Singular_Inertia;
+@@ -1832,10 +1838,12 @@
+    --  Keep the public dense mass and the strict solver unchanged. Pack only
+    --  structural entries, once per physical solve; no tolerance drops terms.
+    procedure Load_Ancestor_Buffers
+-     (Rows : MJ.Ancestor_Rows.Pattern; Mass : Real_Array; Joints : Joint_Parameter_Array;
++     (Rows : MJ.Ancestor_Rows.Pattern; Mass : Real_Array; Joints : Joint_Parameter_Array; Qvel : Real_Array;
+       Factor : in out Real_Array; Damping_Step : Nonneg_Tier0; Result : out Status)
+      with Global => null,
+-     Pre => MJ.Smooth_Dynamics.Square_Layout (Mass, MJ.Ancestor_Rows.Size (Rows))
++     Pre => Qvel'First = Joints'First and then Qvel'Last = Joints'Last
++       and then MJ.Smooth_Kernels.All_Tier0 (Qvel)
++       and then MJ.Smooth_Dynamics.Square_Layout (Mass, MJ.Ancestor_Rows.Size (Rows))
+        and then MJ.Smooth_Dynamics.Work_Array (Mass)
+        and then Factor'First = 0 and then Factor'Last = MJ.Ancestor_Rows.Count (Rows) - 1
+        and then Joints'First = 0 and then Joints'Last = MJ.Ancestor_Rows.Size (Rows) - 1,
+@@ -1852,7 +1860,9 @@
+             declare
+                Last : constant Natural := AR.Start (Rows, I) + AR.Length (Rows, I) - 1;
+             begin
+-               Value := Factor (Last) + Damping_Step * Joints (I).Damping;
++               Value := Factor (Last) + Damping_Step * MJ.Nonlinear_Passive.Damping_Derivative
++                 (Joints (I).Damping, Joints (I).Damping_Quadratic,
++                  Joints (I).Damping_Cubic, Qvel (I));
+                if not Within_Work (Value) then return; end if;
+                Store_Work_Entry (Factor, Last, Value);
+             end;
+@@ -1877,11 +1887,13 @@
+ 
+    procedure Solve_Workspace
+      (N : Natural; Rows : MJ.Ancestor_Rows.Pattern; Joints : Joint_Parameter_Array;
+-      Mass, Total : Real_Array; Policy : Inertia_Policy; Damping_Step : Nonneg_Tier0;
++      Mass, Total, Qvel : Real_Array; Policy : Inertia_Policy; Damping_Step : Nonneg_Tier0;
+       Factor, Ancestor_Factor, Rhs, Solution, Condition_Sums : in out Real_Array;
+       First_Clamped : in out Dof_Diagnostic; Result : out Status)
+      with Global => null,
+-     Pre => N <= Max_Dofs and then MJ.Ancestor_Rows.Size (Rows) = N
++     Pre => Qvel'First = Joints'First and then Qvel'Last = Joints'Last
++       and then MJ.Smooth_Kernels.All_Tier0 (Qvel)
++       and then N <= Max_Dofs and then MJ.Ancestor_Rows.Size (Rows) = N
+        and then MJ.Smooth_Dynamics.Square_Layout (Mass, N)
+        and then MJ.Smooth_Dynamics.Square_Layout (Factor, N)
+        and then Joints'First = 0 and then Joints'Last = N - 1
+@@ -1897,13 +1909,13 @@
+    is
+    begin
+       if Policy = Compatible then
+-         Load_Ancestor_Buffers (Rows, Mass, Joints, Ancestor_Factor, Damping_Step, Result);
++         Load_Ancestor_Buffers (Rows, Mass, Joints, Qvel, Ancestor_Factor, Damping_Step, Result);
+          if Result = Success then
+             Solve_Compatible_Buffers (Rows, Total, Ancestor_Factor, Solution, First_Clamped, Result);
+          end if;
+       else
+          Solve_Strict_Buffers
+-           (N, Joints, Mass, Total, Factor, Rhs, Solution, Condition_Sums, Damping_Step, Result);
++           (N, Joints, Mass, Total, Qvel, Factor, Rhs, Solution, Condition_Sums, Damping_Step, Result);
+       end if;
+    end Solve_Workspace;
+    pragma Inline_Always (Solve_Workspace);
+@@ -1930,12 +1942,15 @@
+ 
+    procedure Solve (D : in out Simulation; Damping_Step : Real; Result : out Status)
+    is
+-   begin
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
++   begin
++      Solver_Ready_Properties (D);
+       Solve_Workspace
+-        (D.Nv, D.Ancestors, D.Joint_Config.all, D.Dynamics.Mass.all, D.Dynamics.Total.all,
++        (D.Nv, D.Ancestors, D.Joint_Config.all, D.Dynamics.Mass.all, D.Dynamics.Total.all, D.State.Qvel.all,
+          D.Solver_Policy, Damping_Step, D.Scratch.Factor.all, D.Scratch.Ancestor_Factor.all,
+          D.Scratch.Rhs.all, D.Scratch.Solution.all, D.Scratch.Condition_Sums.all,
+          D.First_Clamped, Result);
++      pragma Assert (Static => Phase_Ready (D));
+    end Solve;
+ 
+    procedure Total_Forces_Buffers
+@@ -2145,12 +2160,18 @@
+ 
+    function Damping_Present (D : Simulation) return Boolean
+      with Global => null, Pre => Is_Ready (D),
+-     Post => Damping_Present'Result = (for some J in 0 .. D.Nj - 1 => D.Joint_Config (J).Damping > 0.0)
++     Post => Damping_Present'Result = (for some J in 0 .. D.Nj - 1 => (D.Joint_Config (J).Damping > 0.0
++           or else D.Joint_Config (J).Damping_Quadratic /= 0.0
++           or else D.Joint_Config (J).Damping_Cubic /= 0.0))
+    is
+    begin
+       for J in 0 .. D.Nj - 1 loop
+-         if D.Joint_Config (J).Damping > 0.0 then return True; end if;
+-         pragma Loop_Invariant (for all K in 0 .. J => D.Joint_Config (K).Damping = 0.0);
++         if (D.Joint_Config (J).Damping > 0.0
++           or else D.Joint_Config (J).Damping_Quadratic /= 0.0
++           or else D.Joint_Config (J).Damping_Cubic /= 0.0) then return True; end if;
++         pragma Loop_Invariant (for all K in 0 .. J => D.Joint_Config (K).Damping = 0.0
++           and then D.Joint_Config (K).Damping_Quadratic = 0.0
++           and then D.Joint_Config (K).Damping_Cubic = 0.0);
+       end loop;
+       return False;
+    end Damping_Present;
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -108,7 +108,7 @@
+        and then J < S.Njnt,
+      Post => (Joint_Element'Result = Success) = (Fields.Jnt_Type (J) in 2 .. 3
+           and then Fields.Jnt_Actfrclimited (J) = 0 and then Fields.Jnt_Actgravcomp (J) = 0
+-          and then Fields.Jnt_Stiffnesspoly (2 * J) = 0.0 and then Fields.Jnt_Stiffnesspoly (2 * J + 1) = 0.0
++          and then Fields.Jnt_Stiffnesspoly (2 * J) in Tier0_Real and then Fields.Jnt_Stiffnesspoly (2 * J + 1) in Tier0_Real
+           and then Fields.Jnt_Stiffness (J) in Nonneg_Tier0)
+    is
+    begin
+@@ -116,12 +116,12 @@
+             return Unsupported_Joint;
+          end if;
+          if Fields.Jnt_Actfrclimited (J) /= 0 or else Fields.Jnt_Actgravcomp (J) /= 0
+-           or else Fields.Jnt_Stiffnesspoly (2 * J) /= 0.0
+-           or else Fields.Jnt_Stiffnesspoly (2 * J + 1) /= 0.0
+          then
+             return Unsupported_Feature;
+          end if;
+-         if Fields.Jnt_Stiffness (J) not in Nonneg_Tier0 then
++         if Fields.Jnt_Stiffness (J) not in Nonneg_Tier0
++           or else Fields.Jnt_Stiffnesspoly (2 * J) not in Tier0_Real
++           or else Fields.Jnt_Stiffnesspoly (2 * J + 1) not in Tier0_Real then
+             return Invalid_Model;
+          end if;
+       return Success;
+@@ -149,14 +149,14 @@
+      Global => null,
+      Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Dof_Layout_OK (S, Fields)
+        and then V < S.Nv,
+-     Post => (Dof_Element'Result = Success) = (Fields.Dof_Dampingpoly (2 * V) = 0.0 and then Fields.Dof_Dampingpoly (2 * V + 1) = 0.0
++     Post => (Dof_Element'Result = Success) = (Fields.Dof_Dampingpoly (2 * V) in Tier0_Real and then Fields.Dof_Dampingpoly (2 * V + 1) in Tier0_Real
+           and then Fields.Dof_Armature (V) in Nonneg_Tier0 and then Fields.Dof_Damping (V) in Nonneg_Tier0)
+    is
+    begin
+-         if Fields.Dof_Dampingpoly (2 * V) /= 0.0
+-           or else Fields.Dof_Dampingpoly (2 * V + 1) /= 0.0
++         if Fields.Dof_Dampingpoly (2 * V) not in Tier0_Real
++           or else Fields.Dof_Dampingpoly (2 * V + 1) not in Tier0_Real
+          then
+-            return Unsupported_Feature;
++            return Invalid_Model;
+          end if;
+          if Fields.Dof_Armature (V) not in Nonneg_Tier0
+            or else Fields.Dof_Damping (V) not in Nonneg_Tier0
+@@ -525,6 +525,10 @@
+        and then Item.Anchor = Read_Vector (Source.Jnt_Pos.all, 3 * Index)
+        and then Item.Reference = Positions.Qpos0 (Item.Qadr)
+        and then Item.Spring_Reference = Positions.Qpos_Spring (Item.Qadr)
++       and then Item.Stiffness_Quadratic = Source.Jnt_Stiffnesspoly (2 * Index)
++       and then Item.Stiffness_Cubic = Source.Jnt_Stiffnesspoly (2 * Index + 1)
++       and then Item.Damping_Quadratic = Dofs.Dof_Dampingpoly (2 * Item.Vadr)
++       and then Item.Damping_Cubic = Dofs.Dof_Dampingpoly (2 * Item.Vadr + 1)
+        and then Item.Stiffness = Source.Jnt_Stiffness (Index)
+        and then Item.Damping = Dofs.Dof_Damping (Item.Vadr)
+        and then Item.Armature = Dofs.Dof_Armature (Item.Vadr)) with Global => null,
+@@ -545,24 +549,33 @@
+       Q : constant Integer := Source.Jnt_Qposadr (Index);
+       V : constant Integer := Source.Jnt_Dofadr (Index);
+       Anchor : constant Vector := Read_Vector (Source.Jnt_Pos.all, 3 * Index);
++      Direction : Vector := Read_Vector (Source.Jnt_Axis.all, 3 * Index);
+       Normal : Boolean;
+    begin
+       Item := (others => <>); Ok := False;
+       if Q not in 0 .. S.Nq - 1 or else V not in 0 .. S.Nv - 1
+         or else Source.Jnt_Bodyid (Index) < 0 or else not Bounded (Anchor, Max_Val)
+         or else Source.Jnt_Stiffness (Index) not in Nonneg_Tier0
++        or else Source.Jnt_Stiffnesspoly (2 * Index) not in Tier0_Real
++        or else Source.Jnt_Stiffnesspoly (2 * Index + 1) not in Tier0_Real
++        or else Dofs.Dof_Dampingpoly (2 * V) not in Tier0_Real
++        or else Dofs.Dof_Dampingpoly (2 * V + 1) not in Tier0_Real
+         or else Dofs.Dof_Damping (V) not in Nonneg_Tier0 or else Dofs.Dof_Armature (V) not in Nonneg_Tier0
+         or else Positions.Qpos0 (Q) not in Tier0_Real or else Positions.Qpos_Spring (Q) not in Tier0_Real
+       then
+          return;
+       end if;
++      Normalize (Direction, Normal);
++      if not Normal then return; end if;
+       Item := (Kind => (if Source.Jnt_Type (Index) = 2 then Slide_Joint else Hinge_Joint),
+         Body_Id => Source.Jnt_Bodyid (Index), Qadr => Q, Vadr => V, Anchor => Anchor,
+-        Direction => Read_Vector (Source.Jnt_Axis.all, 3 * Index), Reference => Positions.Qpos0 (Q),
++        Direction => Direction, Reference => Positions.Qpos0 (Q),
+         Spring_Reference => Positions.Qpos_Spring (Q), Stiffness => Source.Jnt_Stiffness (Index),
+-        Damping => Dofs.Dof_Damping (V), Armature => Dofs.Dof_Armature (V));
+-      Normalize (Item.Direction, Normal);
+-      if not Normal then return; end if;
++        Damping => Dofs.Dof_Damping (V), Armature => Dofs.Dof_Armature (V),
++        Stiffness_Quadratic => Source.Jnt_Stiffnesspoly (2 * Index),
++        Stiffness_Cubic => Source.Jnt_Stiffnesspoly (2 * Index + 1),
++        Damping_Quadratic => Dofs.Dof_Dampingpoly (2 * V),
++        Damping_Cubic => Dofs.Dof_Dampingpoly (2 * V + 1));
+       Ok := True;
+    end Read_Joint_Config;
+ 
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -275,6 +275,8 @@
+       Anchor, Direction : Vector := Zero;  --  Direction is normalized by Create.
+       Reference, Spring_Reference : Tier0_Real := 0.0;
+       Stiffness, Damping, Armature : Nonneg_Tier0 := 0.0;
++      Stiffness_Quadratic, Stiffness_Cubic : Tier0_Real := 0.0;
++      Damping_Quadratic, Damping_Cubic : Tier0_Real := 0.0;
+    end record;
+    subtype Actuator_Parameters is MJ.Smooth_Actuation.Parameters;
+    type Body_Parameter_Array is array (Natural range <>) of Body_Parameters;
+--- /dev/null
++++ b/experimental/smooth/src/mj-nonlinear_passive.adb
+@@ -0,0 +1,44 @@
++package body MJ.Nonlinear_Passive with SPARK_Mode is
++   function Polynomial (Linear : Nonneg_Tier0; Quadratic, Cubic : Polynomial_Input;
++                        X : Displacement) return Coefficient is
++   begin
++      return (Linear + Quadratic * X) + Cubic * (X * X);
++   end Polynomial;
++
++   function Damping_Derivative
++     (Linear : Nonneg_Tier0; Quadratic, Cubic, Velocity : Tier0_Real)
++      return Coefficient is
++      X : constant Tier0_Real := abs Velocity;
++   begin
++      return Polynomial (Linear, 2.0 * Quadratic, 3.0 * Cubic, X);
++   end Damping_Derivative;
++
++   function Force_Component (X : Displacement; Linear : Nonneg_Tier0;
++                             Quadratic, Cubic : Tier0_Real) return Component is
++   begin
++      return -X * Polynomial (Linear, Quadratic, Cubic, X);
++   end Force_Component;
++
++   function Damper_Component (Velocity : Tier0_Real; Linear : Nonneg_Tier0;
++                              Quadratic, Cubic : Tier0_Real) return Component is
++   begin
++      return -Velocity * Polynomial (Linear, Quadratic, Cubic, abs Velocity);
++   end Damper_Component;
++
++   function Passive_Force
++     (Qpos, Reference, Velocity : Tier0_Real; Stiffness, Damping : Nonneg_Tier0;
++      Stiffness_Quadratic, Stiffness_Cubic, Damping_Quadratic, Damping_Cubic : Tier0_Real;
++      Spring_Enabled, Damper_Enabled : Boolean) return Force is
++      Spring, Damper : Component := 0.0;
++   begin
++      if Spring_Enabled then
++         Spring := Force_Component
++           (Qpos - Reference, Stiffness, Stiffness_Quadratic, Stiffness_Cubic);
++      end if;
++      if Damper_Enabled then
++         Damper := Damper_Component
++           (Velocity, Damping, Damping_Quadratic, Damping_Cubic);
++      end if;
++      return Spring + Damper;
++   end Passive_Force;
++end MJ.Nonlinear_Passive;
+--- /dev/null
++++ b/experimental/smooth/src/mj-nonlinear_passive.ads
+@@ -0,0 +1,42 @@
++--  MuJoCo 3.14 scalar joint polynomial laws (mjNPOLY = 2).
++--  Preserve C power accumulation and addition order, including the derivative.
++with MJ.Types; use MJ.Types;
++package MJ.Nonlinear_Passive with SPARK_Mode is
++   subtype Displacement is Real range -2.0e10 .. 2.0e10;
++   subtype Polynomial_Input is Real range -3.0e10 .. 3.0e10;
++   subtype Component is Real range -3.0e42 .. 3.0e42;
++   subtype Coefficient is Real range -1.0e32 .. 1.0e32;
++   subtype Force is Real range -1.0e43 .. 1.0e43;
++   function Polynomial (Linear : Nonneg_Tier0; Quadratic, Cubic : Polynomial_Input;
++                        X : Displacement) return Coefficient with
++     Global => null,
++     Post => Polynomial'Result = (Linear + Quadratic * X) + Cubic * (X * X);
++   pragma Inline_Always (Polynomial);
++   function Damping_Derivative
++     (Linear : Nonneg_Tier0; Quadratic, Cubic, Velocity : Tier0_Real)
++      return Coefficient with Global => null,
++     Post => Damping_Derivative'Result =
++       Polynomial (Linear, 2.0 * Quadratic, 3.0 * Cubic, abs Velocity);
++   pragma Inline_Always (Damping_Derivative);
++   function Force_Component (X : Displacement; Linear : Nonneg_Tier0;
++                             Quadratic, Cubic : Tier0_Real) return Component with
++     Global => null,
++     Post => Force_Component'Result = -X * Polynomial (Linear, Quadratic, Cubic, X);
++   pragma Inline_Always (Force_Component);
++   function Damper_Component (Velocity : Tier0_Real; Linear : Nonneg_Tier0;
++                              Quadratic, Cubic : Tier0_Real) return Component with
++     Global => null,
++     Post => Damper_Component'Result =
++       -Velocity * Polynomial (Linear, Quadratic, Cubic, abs Velocity);
++   pragma Inline_Always (Damper_Component);
++   function Passive_Force
++     (Qpos, Reference, Velocity : Tier0_Real; Stiffness, Damping : Nonneg_Tier0;
++      Stiffness_Quadratic, Stiffness_Cubic, Damping_Quadratic, Damping_Cubic : Tier0_Real;
++      Spring_Enabled, Damper_Enabled : Boolean) return Force with Global => null,
++     Post => Passive_Force'Result =
++       (if Spring_Enabled then Force_Component
++          (Qpos - Reference, Stiffness, Stiffness_Quadratic, Stiffness_Cubic) else 0.0)
++       + (if Damper_Enabled then Damper_Component
++          (Velocity, Damping, Damping_Quadratic, Damping_Cubic) else 0.0);
++   pragma Inline_Always (Passive_Force);
++end MJ.Nonlinear_Passive;
+--- /dev/null
++++ b/tests/nonlinear_passive/README.md
+@@ -0,0 +1,145 @@
++# Scalar polynomial elasticity and damping
++
++Implemented for the smooth pipeline's hinge and slide joints, against MuJoCo
++3.14.0, commit `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. The latest stable
++release was checked on 2026-09-27. Upstream sources:
++
++- [Spring/damper forces](https://github.com/google-deepmind/mujoco/blob/3.14.0/src/engine/engine_passive.c)
++- [Polynomial evaluation and derivative](https://github.com/google-deepmind/mujoco/blob/3.14.0/src/engine/engine_util_misc.c)
++- [Euler implicit damping](https://github.com/google-deepmind/mujoco/blob/3.14.0/src/engine/engine_forward.c)
++
++With `x = q - q_spring` and `a = abs(v)`:
++
++```
++spring = -x * ((k + k2*x) + k3*(x*x))
++damper = -v * ((b + b2*a) + b3*(a*a))
++implicit diagonal increment = h * ((b + (2*b2)*a) + (3*b3)*(a*a))
++```
++
++The two coefficients come from `jnt_stiffnesspoly` and `dof_dampingpoly` in
++MJB; XML uses three values in `stiffness`/`damping`. The additions and products
++retain the upstream floating-point evaluation order. Euler uses the derivative
++at the current velocity, including when the linear damping coefficient is zero.
++The existing spring, damper and Euler-damping flags remain effective.
++
++Coefficients use the existing Tier0 domain (absolute value at most 1e10), with
++nonnegative linear coefficients as before. Higher coefficients can be negative.
++Initialization checks these bounds; an out-of-domain coefficient returns
++`Invalid_Model` from `Create`. The MJB loader can reject it earlier with
++`Invalid_Parameter` in its general model validation. Negative polynomial coefficients do not imply dissipativity or
++positive effective inertia. The existing Strict rejection / Compatible pivot
++policy still governs the solve. No universal stability claim is made.
++
++The implementation adds no separate array traversal. Passive forces are evaluated
++in the existing joint loop; the derivative is evaluated in the existing diagonal
++update for both dense and ancestor solvers. The existing damping-presence search
++now includes both polynomial coefficients. No per-step allocation is added.
++
++This does not add free/ball joints, nonlinear tendons or actuator damping. Those
++features remain outside this scalar-joint change.
++
++## Isolation
++
++This feature was developed in a separate worktree based on `677e7547`, to avoid
++changing the active main-thread checkout. It does not include that checkout's
++uncommitted external-force and gravity-guard work. It has not been merged or
++pushed. Integration must preserve those concurrent changes.
++
++## Validation
++
++See `evidence-summary.json` and the archived evidence for final statuses. Proofs,
++numerical differential tests and timings are separate claims. A timed-out proof
++is unfinished engineering, not a Silver exception. Closed kernel contracts
++specify exact floating-point formulas, not error bounds against real arithmetic.
++
++The numerical suite includes mixed linear/polynomial terms, pure nonlinear
++terms, signed coefficients, zero and negative velocities, scalar and branched
++models, a 12-DOF chain, flag combinations and 100-step trajectories. Both Strict
++and Compatible modes use the normal MuJoCo 3.14 C oracle. The scalar boundary
++suite directly calls C `mju_polyForce` and `mjd_xPolyForce` and checks exact
++floating-point equality, including the limits of the admitted domain.
++
++`benchmark.py` measures complete Euler trajectories, not just the new kernel.
++Input preparation and output formatting are outside the timed interval; every
++trajectory's final state is checked against C. Release Ada uses GNAT 16.1 with
++O3, native ISA, LTO and disabled runtime assertions; floating-point contraction
++is off. C uses the pinned normal library with its SIMD paths. The manifest
++records flags, compiler versions, CPU, hashes and C library identity.
++
++Each case uses three initial states and 18 blocks, eight trajectories of 100
++steps per block after three warmups. Variant order is rotated and reversed.
++Confidence intervals bootstrap paired block ratios. Workload ratios are reported
++separately; there is no average of unrelated percentage changes. Background
++activity can affect these measurements and is documented with the evidence.
++
++## Reproduction
++
++Run from the repository root using a Python environment with MuJoCo 3.14 and
++NumPy. Use fresh report directories.
++
++```
++python tests/nonlinear_passive/make_fixtures.py
++python experimental/smooth/tools/compare_numerics.py \
++  --toolchain-root TOOLCHAINS --report-dir REPORT --samples 24 \
++  --extra-fixtures tests/nonlinear_passive/fixtures --policy Compatible
++python tests/nonlinear_passive/check_kernels.py \
++  --toolchain-root TOOLCHAINS --out SCALAR_REPORT
++python tests/nonlinear_passive/benchmark.py --out BENCH --build \
++  --toolchain-root TOOLCHAINS --c-library LIBMUJOCO
++python tests/nonlinear_passive/benchmark.py --out BENCH --cpu 12 \
++  --blocks 18 --session session1
++```
++
++Repeat the numerical command with `--policy Strict`; `--probe` can reuse the
++checked executable from its first report. Start GNATprove at the individual
++subprograms of `mj-nonlinear_passive` before its integration callers.
++
++## Integrated measurements on the isolated feature branch
++
++Final release session: 18 paired blocks per initial state, three states per model.
++Other proof/build work was active on the host; these are diagnostic measurements,
++not a quiet-machine performance acceptance. The baseline is commit `677e7547`,
++not the concurrent main-thread working tree.
++
++| Workload | Ada/C time ratio across states | Interpretation |
++| --- | ---: | --- |
++| hinge_motor | 0.723–0.728 | faster than C in this session |
++| slide | 0.760–0.802 | faster than C in this session |
++| branched_multijoint | 0.932–0.956 | faster than C in this session |
++| chain_12 | 1.257–1.318 | slower than C |
++| nonlinear_hinge_motor_both | 0.691–0.708 | faster than C in this session |
++| nonlinear_slide_both | 0.784–0.815 | faster than C in this session |
++| nonlinear_branched_multijoint_both | 0.907–1.010 | some uncertainty intervals overlap parity |
++| nonlinear_chain_12_both | 1.270–1.363 | slower than C |
++| nonlinear_chain_12_pure | 1.265–1.293 | slower than C |
++
++All timed final states passed the C differential check; maximum absolute error
++was 3.11e-15. The 12-DOF chain remains slower.
++The performance requirement is **not met for every workload**. The initial pilot
++also showed the chain slower; its build manifest is retained separately.
++The change must not be presented as establishing general C performance parity.
++
++## Formal proof closure
++
++12 selected distinct scopes closed, 195 emitted proof checks. 2 scopes remain pending. Duplicate declarations/bodies are counted once.
++
++| Subprogram | Result | Checks | Report |
++| --- | --- | ---: | --- |
++| `mj-nonlinear_passive.adb:Polynomial` | completed_no_unproved | 12 | kernels3 |
++| `mj-nonlinear_passive.adb:Damping_Derivative` | completed_no_unproved | 11 | kernels3 |
++| `mj-nonlinear_passive.adb:Force_Component` | completed_no_unproved | 4 | kernels3 |
++| `mj-nonlinear_passive.adb:Damper_Component` | completed_no_unproved | 6 | kernels3 |
++| `mj-nonlinear_passive.adb:Passive_Force` | completed_no_unproved | 8 | kernels3 |
++| `mj-data.adb:Joint_Element` | completed_no_unproved | 31 | integration |
++| `mj-data.adb:Dof_Element` | completed_no_unproved | 23 | integration |
++| `mj-data.adb:Read_Joint_Config` | unproved_checks | 79 | reader-final |
++| `mj-data-forces_phase.adb:Passive_Buffers` | completed_no_unproved | 39 | integration |
++| `mj-data-inertia_phase.adb:Damping_Present` | completed_no_unproved | 21 | integration |
++| `mj-data-inertia_phase.adb:Load_Ancestor_Buffers` | completed_no_unproved | 17 | integration |
++| `mj-data-inertia_phase.adb:Solve_Strict_Buffers` | unproved_checks | 51 | strict-final |
++| `mj-data-inertia_phase.adb:Solve_Workspace` | completed_no_unproved | 4 | integration |
++| `mj-data-inertia_phase.adb:Solve` | completed_no_unproved | 19 | solver3 |
++
++The kernel report concerns the final scalar source. Intermediate integration
++reports retain their exact source snapshots; later reports supersede failed
++trials where listed. The complete dynamics proof is not claimed.
+--- /dev/null
++++ b/tests/nonlinear_passive/benchmark.py
+@@ -0,0 +1,76 @@
++#!/usr/bin/env python3
++"""Reproducible whole Euler-step measurements; setup and I/O outside timer."""
++import argparse, hashlib, json, os, shutil, subprocess, sys
++from pathlib import Path
++import mujoco
++import numpy as np
++REPO=Path(__file__).resolve().parents[2]
++sys.path.insert(0,str(REPO/'experimental/smooth/tools'))
++from prove_fragments import isolated_project
++from compare_numerics import fixtures
++FLAGS=['-O3','-march=native','-flto','-ffat-lto-objects','-ffp-contract=off','-ffinite-math-only','-fno-trapping-math','-fno-math-errno','-ffunction-sections','-fdata-sections']
++def digest(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
++def build(out,tc,lib):
++ env=os.environ.copy();env['PATH']=':'.join(str(next((tc/t).glob('*/bin'))) for t in ('gnat','gprbuild','gnatprove'))+':'+env['PATH']
++ meta={'base_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip(),'oracle':mujoco.__version__,'cpu':Path('/proc/cpuinfo').read_text(),'builds':{}}
++ for variant in ['baseline','current']:
++  work=out/variant;work.mkdir(parents=True);snapshot=work/'source'
++  files=list((REPO/'src').rglob('*.ad?'))+list((REPO/'experimental/smooth/src').glob('*.ad?'))+[REPO/'tests/movement_performance/movement_bench.adb']
++  for p in files:
++   rel=p.relative_to(REPO);dest=snapshot/rel;dest.parent.mkdir(parents=True,exist_ok=True)
++   if variant=='baseline':
++    proc=subprocess.run(['git','show','HEAD:'+str(rel)],cwd=REPO,capture_output=True)
++    if proc.returncode: continue
++    dest.write_bytes(proc.stdout)
++   else: shutil.copy2(p,dest)
++  proj=isolated_project(snapshot,work,'movement_bench');t=proj.read_text().replace('project Fragment is','project Fragment is\n   for Main use ("movement_bench.adb");\n   for Exec_Dir use "bin";')
++  a=t.index('        ("-gnat2022"');b=t.index(';',a)
++  flags=['-gnat2022','-gnatn','-gnatp',*FLAGS]
++  t=t[:a]+'('+', '.join('"'+f+'"' for f in flags)+')'+t[b:]
++  t=t.replace('end Fragment;','   package Linker is\n      for Default_Switches ("Ada") use ("-flto", "-Wl,--gc-sections");\n   end Linker;\nend Fragment;');proj.write_text(t)
++  with (work/'build.log').open('w') as log: subprocess.run(['gprbuild','-P',str(proj),'-j2'],env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
++  meta['builds'][variant]={'binary_sha256':digest(work/'bin/movement_bench'),'flags':flags,'sources':{str(p.relative_to(snapshot)):digest(p) for p in snapshot.rglob('*.ad?')}}
++ cpp=Path(subprocess.check_output(['g++','-print-file-name=libstdc++.so'],env=env,text=True).strip()).resolve()
++ cmd=['gcc','-std=c11',*FLAGS,'-I'+str(Path(mujoco.__file__).parent/'include'),str(REPO/'tests/movement_performance/movement_c.c'),str(lib),str(cpp),'-Wl,-rpath,'+str(lib.parent)+':'+str(cpp.parent),'-o',str(out/'movement_c')]
++ subprocess.run(cmd,env=env,check=True)
++ meta['builds']['c']={'command':cmd,'binary_sha256':digest(out/'movement_c'),'library_sha256':digest(lib)}
++ meta['tools']={n:subprocess.check_output([n,'--version'],env=env,text=True).splitlines()[0] for n in ['gcc','gprbuild','gnatprove']}
++ (out/'build.json').write_text(json.dumps(meta,indent=2)+'\n')
++def measure(out,cpu,blocks,session):
++ rng=np.random.default_rng(20260927);cases={n:fixtures()[n] for n in ['hinge_motor','slide','branched_multijoint','chain_12']}
++ for n in ['nonlinear_hinge_motor_both','nonlinear_slide_both','nonlinear_branched_multijoint_both','nonlinear_chain_12_both','nonlinear_chain_12_pure']:
++  cases[n]=(REPO/'tests/nonlinear_passive/fixtures'/f'{n}.xml').read_text()
++ bins={'baseline':out/'baseline/bin/movement_bench','current':out/'current/bin/movement_bench','c':out/'movement_c'}
++ out=out/session;out.mkdir(parents=True,exist_ok=False)
++ results={'background_load_start':Path('/proc/loadavg').read_text().strip(),'blocks':blocks,'steps':100,'samples_per_block':8,'cpu':cpu,'cases':[]}
++ for name,xml in cases.items():
++  m=mujoco.MjModel.from_xml_string(xml);mp=out/(name+'.mjb');mujoco.mj_saveModel(m,str(mp));(out/(name+'.xml')).write_text(xml)
++  variants=['current','c'] if name.startswith('nonlinear_') else ['baseline','current','c']
++  for state in range(3):
++   q=m.qpos0+rng.uniform(-.4,.4,m.nq);v=rng.uniform(-1,1,m.nv);u=rng.uniform(-.2,.2,m.nu);f=rng.uniform(-.1,.1,m.nv)
++   data=' '.join(format(float(x),'.17g') for x in np.concatenate([q,v,u,f]))+'\n';(out/f'{name}-{state}.input').write_text(data)
++   times={k:[] for k in variants};maxerr=0
++   for block in range(blocks):
++    outputs={}
++    order=variants[block%len(variants):]+variants[:block%len(variants)]
++    if (block//len(variants))%2: order=order[::-1]
++    for variant in order:
++     p=subprocess.run(['taskset','-c',str(cpu),str(bins[variant]),str(mp),'100','8','3'],input=data,text=True,capture_output=True,check=True)
++     (out/f'{name}-{state}-{block}-{variant}.output').write_text(p.stdout)
++     fields={}
++     for line in p.stdout.splitlines():
++      a=line.split();fields.setdefault(a[0],[]).append([float(x) for x in a[1:]])
++     times[variant].append(float(np.median(fields['sample']))/100)
++     outputs[variant]=fields
++    for variant in variants:
++     for field in ['qpos','qvel','time']:
++      got=np.asarray(outputs[variant][field]);want=np.asarray(outputs['c'][field]);np.testing.assert_allclose(got,want,rtol=2e-10,atol=2e-10);maxerr=max(maxerr,float(np.max(np.abs(got-want),initial=0)))
++   record={'name':name,'state':state,'seconds_per_step':times,'max_error_C':maxerr,'medians_us':{k:float(np.median(a))*1e6 for k,a in times.items()},'p95_us':{k:float(np.percentile(a,95))*1e6 for k,a in times.items()}}
++   ratios=np.array(times['current'])/np.array(times['c']);boot=np.median(rng.choice(ratios,(5000,len(ratios)),replace=True),axis=1)
++   record['Ada_C_ratio']=float(np.median(ratios));record['ratio_CI95']=np.percentile(boot,[2.5,97.5]).tolist()
++   if 'baseline' in times: record['current_baseline_ratio']=float(np.median(np.array(times['current'])/times['baseline']))
++   results['cases'].append(record);(out/'results.json').write_text(json.dumps(results,indent=2)+'\n');print(name,state,record['Ada_C_ratio'],flush=True)
++if __name__=='__main__':
++ p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--toolchain-root',type=Path);p.add_argument('--c-library',type=Path);p.add_argument('--build',action='store_true');p.add_argument('--cpu',type=int,default=12);p.add_argument('--blocks',type=int,default=18);p.add_argument('--session',default='session2');a=p.parse_args();a.out=a.out.resolve()
++ if a.build:a.out.mkdir(parents=True,exist_ok=False);build(a.out,a.toolchain_root,a.c_library.resolve())
++ else:measure(a.out,a.cpu,a.blocks,a.session)
+--- /dev/null
++++ b/tests/nonlinear_passive/check_kernels.py
+@@ -0,0 +1,26 @@
++import argparse,ctypes,json,os,subprocess,sys
++from pathlib import Path
++import mujoco,numpy as np
++p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--toolchain-root',type=Path,required=True);a=p.parse_args();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
++r=Path(__file__).resolve().parents[2];env=os.environ.copy();env['PATH']=':'.join(str(next((a.toolchain_root/n).glob('*/bin'))) for n in ['gnat','gprbuild'])+':'+env['PATH']
++proj=out/'kernel.gpr';proj.write_text('project Kernel is\n for Source_Dirs use ("'+str(r/'src')+'", "'+str(r/'experimental/smooth/src')+'", "'+str(Path(__file__).parent)+'");\n for Object_Dir use "obj";\n for Exec_Dir use "bin";\n for Create_Missing_Dirs use "True";\n for Main use ("nonlinear_probe.adb");\n package Compiler is\n for Default_Switches ("Ada") use ("-gnat2022", "-O0", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");\n end Compiler;\n end Kernel;')
++with (out/'build.log').open('w') as log:subprocess.run(['gprbuild','-P',str(proj),'-j2'],env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
++lib=ctypes.CDLL(str(next(Path(mujoco.__file__).parent.glob('libmujoco.so*'))));T=ctypes.c_double;Ptr=ctypes.POINTER(T)
++for name in ['mju_polyForce','mjd_xPolyForce']:
++ f=getattr(lib,name);f.argtypes=[T,Ptr,T,ctypes.c_int,ctypes.c_int];f.restype=T
++rng=np.random.default_rng(20260927);cases=[]
++for scale in [1e-100,1.,1e5,1e10]:
++ for i in range(128):
++  row=rng.uniform(-scale,scale,9);row[3:5]=abs(row[3:5]);cases.append([*row,i%2,(i//2)%2])
++for q,r,v in [(1e10,-1e10,1e10),(-1e10,1e10,-1e10),(0,0,0),(0,0,-0.0)]:
++ for sign in [-1,1]:
++  for flags in [(0,0),(0,1),(1,0),(1,1)]: cases.append([q,r,v,1e10,1e10,*([sign*1e10]*4),*flags])
++expected=[]
++for q,r,v,k,b,k2,k3,b2,b3,s,d in cases:
++ sp=(T*2)(k2,k3);dp=(T*2)(b2,b3);x=q-r
++ force=(-x*lib.mju_polyForce(k,sp,x,2,0) if s else 0.)+(-v*lib.mju_polyForce(b,dp,v,2,1) if d else 0.)
++ expected.append([force,lib.mjd_xPolyForce(b,dp,v,2,1)])
++text=str(len(cases))+'\n'+'\n'.join(' '.join(format(x,'.17g') for x in row) for row in cases)+'\n';(out/'input.txt').write_text(text)
++run=subprocess.run([str(out/'bin/nonlinear_probe')],input=text,text=True,capture_output=True,check=True);(out/'output.txt').write_text(run.stdout);got=np.array([[float(x) for x in l.split()] for l in run.stdout.splitlines()]);want=np.asarray(expected)
++np.testing.assert_array_equal(got,want)
++(out/'results.json').write_text(json.dumps({'status':'passed','cases':len(cases),'comparisons':got.size,'exact_float_equality':True,'oracle':mujoco.__version__},indent=2)+'\n');print((out/'results.json').read_text())
+--- /dev/null
++++ b/tests/nonlinear_passive/make_fixtures.py
+@@ -0,0 +1,16 @@
++from pathlib import Path
++import sys
++sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'experimental/smooth/tools'))
++from compare_numerics import fixtures
++import xml.etree.ElementTree as ET
++out=Path(__file__).with_name('fixtures')
++for name in ['hinge_motor','slide','branched_multijoint','chain_12','disable_spring','disable_damper','disable_eulerdamp']:
++ for mode in ['both','pure','signed']:
++  tree=ET.fromstring(fixtures()[name])
++  for j in tree.findall('.//joint'):
++   if 'joint' in j.attrib: continue
++   stiffness = '0' if mode == 'pure' else j.get('stiffness', '0')
++   damping = '0' if mode == 'pure' else j.get('damping', '0')
++   j.set('stiffness', stiffness + (' .3 .7' if mode != 'signed' else ' -.3 .7'))
++   j.set('damping', damping + (' .4 .6' if mode != 'signed' else ' -.05 .6'))
++  (out/f'nonlinear_{name}_{mode}.xml').write_text(ET.tostring(tree,encoding='unicode')+'\n')
+--- /dev/null
++++ b/tests/nonlinear_passive/nonlinear_probe.adb
+@@ -0,0 +1,24 @@
++with Ada.Text_IO; use Ada.Text_IO;
++with Ada.Integer_Text_IO;
++with MJ.Types; use MJ.Types;
++with MJ.Nonlinear_Passive;
++procedure Nonlinear_Probe is
++   package FIO is new Ada.Text_IO.Float_IO (Real);
++   N, S, D : Integer;
++   Q, R, V, K, B, K2, K3, B2, B3 : Real;
++   procedure Emit (X : Real) is
++   begin
++      FIO.Put (X, Fore => 1, Aft => 17, Exp => 3); Put (' ');
++   end Emit;
++begin
++   Ada.Integer_Text_IO.Get (N);
++   for I in 1 .. N loop
++      FIO.Get (Q); FIO.Get (R); FIO.Get (V); FIO.Get (K); FIO.Get (B);
++      FIO.Get (K2); FIO.Get (K3); FIO.Get (B2); FIO.Get (B3);
++      Ada.Integer_Text_IO.Get (S); Ada.Integer_Text_IO.Get (D);
++      Emit (MJ.Nonlinear_Passive.Passive_Force
++        (Q, R, V, K, B, K2, K3, B2, B3, S /= 0, D /= 0));
++      Emit (MJ.Nonlinear_Passive.Damping_Derivative (B, B2, B3, V));
++      New_Line;
++   end loop;
++end Nonlinear_Probe;

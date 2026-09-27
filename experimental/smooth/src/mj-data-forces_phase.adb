@@ -1,3 +1,5 @@
+with MJ.Gravity_Bounds;
+with MJ.Composite_Weights;
 with MJ.Smooth_Dynamics;
 with MJ.Spatial_Kernels;
 with MJ.Fused_RNE;
@@ -32,6 +34,44 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    package T renames MJ.Smooth_Topology;
    type Motion_Array is array (Natural range <>) of SK.Motion;
 
+   procedure Transfer_Motion_Bound (Left, Right : SK.Motion; Limit : Real)
+     with Ghost => Static, Global => null,
+       Pre => Limit >= 0.0 and then Left = Right and then SK.Bounded (Left, Limit),
+       Post => SK.Bounded (Right, Limit)
+   is
+   begin
+      null;
+   end Transfer_Motion_Bound;
+
+   procedure Preserve_Gravity_Prefix
+     (Before, After : Motion_Array; Old_Weights, New_Weights : MJ.Composite_Weights.Weight_Array;
+      B, P : Natural)
+     with Ghost => Static, Global => null,
+       Pre => Before'First = 0 and then After'First = 0
+         and then After'Last = Before'Last
+         and then Old_Weights'First = 0 and then Old_Weights'Last = Before'Last
+         and then New_Weights'First = 0 and then New_Weights'Last = Before'Last
+         and then P < B and then B <= Before'Last
+         and then (for all K in 0 .. B => Old_Weights (K) > 0
+           and then SK.Bounded (Before (K), MJ.Gravity_Bounds.Budget (Old_Weights (K))))
+         and then (if P > 0 then New_Weights (P) > 0
+           and then SK.Bounded (After (P), MJ.Gravity_Bounds.Budget (New_Weights (P))))
+         and then (for all K in 0 .. B - 1 =>
+           (if P = 0 or else K /= P then
+              New_Weights (K) = Old_Weights (K) and then After (K) = Before (K))),
+       Post => (for all K in 0 .. B - 1 => New_Weights (K) > 0
+         and then SK.Bounded (After (K), MJ.Gravity_Bounds.Budget (New_Weights (K))))
+   is
+   begin
+      for K in 0 .. B - 1 loop
+         if P = 0 or else K /= P then
+            Transfer_Motion_Bound (Before (K), After (K), MJ.Gravity_Bounds.Budget (Old_Weights (K)));
+         end if;
+         pragma Loop_Invariant (for all I in 0 .. K => New_Weights (I) > 0
+           and then SK.Bounded (After (I), MJ.Gravity_Bounds.Budget (New_Weights (I))));
+      end loop;
+   end Preserve_Gravity_Prefix;
+
    procedure Advance_Joint (Vel, Delta_Acc : in out SK.Motion; Axis : SK.Motion;
                             Speed : Tier0_Real; Ok : out Boolean)
      with Global => null,
@@ -59,7 +99,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      with Global => null, Relaxed_Initialization => Gravity,
      Pre => SK.Bounded (I, 1.0e36) and then SK.Bounded (Velocity, 1.0e12)
        and then SK.Bounded (Acceleration, 1.0e12) and then Bounded (Gravity_Vector, Max_Val),
-     Post => (if Ok then Gravity'Initialized and then SK.Bounded (Bias, 1.0e54) and then SK.Bounded (Gravity, 1.0e54))
+     Post => (if Ok then Gravity'Initialized and then SK.Bounded (Bias, 1.0e54) and then SK.Bounded (Gravity, 1.0e48))
    is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Fused_RNE.Gyroscopic_Model);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Fused_RNE.Body_Force_Model);
@@ -91,7 +131,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
        and then SK.Bounded (Parent_Acceleration, 1.0e12) and then Bounded (Gravity_Vector, Max_Val),
      Post => (if Ok then Vel'Initialized and then Acc'Initialized and then Bias_Out'Initialized and then Gravity_Out'Initialized
        and then SK.Bounded (Vel, 1.0e12) and then SK.Bounded (Acc, 1.0e12)
-       and then SK.Bounded (Bias_Out, 1.0e54) and then SK.Bounded (Gravity_Out, 1.0e54))
+       and then SK.Bounded (Bias_Out, 1.0e54) and then SK.Bounded (Gravity_Out, 1.0e48))
    is
       Current_Velocity : SK.Motion := Parent_Velocity;
       Delta_Acc : SK.Motion := [others => 0.0];
@@ -117,12 +157,13 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
                      Gravity_Enabled, Bias_Out, Gravity_Out, Ok);
       if not Ok then return; end if;
       Vel := Current_Velocity;
+      Transfer_Motion_Bound (Current_Velocity, Vel, 1.0e12);
       Acc := Current_Acceleration;
       pragma Assert (Static => Vel'Initialized and then Acc'Initialized and then Bias_Out'Initialized and then Gravity_Out'Initialized);
       pragma Assert (Static => SK.Bounded (Vel, 1.0e12));
       pragma Assert (Static => SK.Bounded (Acc, 1.0e12));
       pragma Assert (Static => SK.Bounded (Bias_Out, 1.0e54));
-      pragma Assert (Static => SK.Bounded (Gravity_Out, 1.0e54));
+      pragma Assert (Static => SK.Bounded (Gravity_Out, 1.0e48));
    end Forward_One_Body;
    pragma Inline_Always (Forward_One_Body);
 
@@ -177,7 +218,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
        and then Gravity'First = 0 and then Gravity'Last = Body_Config'Last,
      Post => (if Ok then Bias'Initialized and then Gravity'Initialized
        and then (for all X of Bias => SK.Bounded (X, 1.0e54))
-       and then (for all X of Gravity => SK.Bounded (X, 1.0e54)))
+       and then (for all X of Gravity => SK.Bounded (X, 1.0e48)))
    is
       Velocity, Acceleration : Motion_Array (Body_Config'Range) with Relaxed_Initialization;
       V, A, G, F : SK.Motion with Relaxed_Initialization;
@@ -204,7 +245,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
             Store_Motion_Prefix (Velocity, B, V, 1.0e12);
             Store_Motion_Prefix (Acceleration, B, A, 1.0e12);
             Store_Motion_Prefix (Bias, B, F, 1.0e54);
-            Store_Motion_Prefix (Gravity, B, G, 1.0e54);
+            Store_Motion_Prefix (Gravity, B, G, 1.0e48);
          pragma Loop_Invariant (for all K in 0 .. B => Velocity (K)'Initialized
            and then SK.Bounded (Velocity (K), 1.0e12));
          pragma Loop_Invariant (for all K in 0 .. B => Acceleration (K)'Initialized
@@ -212,12 +253,12 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
          pragma Loop_Invariant (for all K in 0 .. B => Bias (K)'Initialized
            and then SK.Bounded (Bias (K), 1.0e54));
          pragma Loop_Invariant (for all K in 0 .. B => Gravity (K)'Initialized
-           and then SK.Bounded (Gravity (K), 1.0e54));
+           and then SK.Bounded (Gravity (K), 1.0e48));
       end loop;
       Finish_Initialization (Bias);
       Finish_Initialization (Gravity);
       pragma Assert (Static => (for all X of Bias => SK.Bounded (X, 1.0e54)));
-      pragma Assert (Static => (for all X of Gravity => SK.Bounded (X, 1.0e54)));
+      pragma Assert (Static => (for all X of Gravity => SK.Bounded (X, 1.0e48)));
       Ok := True;
    end Forward_Bodies;
    pragma Inline_Always (Forward_Bodies);
@@ -226,31 +267,49 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      (Body_Config : Body_Parameter_Array; Bias, Gravity : in out Motion_Array; Ok : out Boolean)
      with Global => null,
      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
-       and then (for all B in Body_Config'Range => Body_Config (B).Parent <= B)
+       and then (for all B in Body_Config'Range => (if B = 0 then Body_Config (B).Parent = 0 else Body_Config (B).Parent < B))
        and then Bias'First = 0 and then Bias'Last = Body_Config'Last
        and then Gravity'First = 0 and then Gravity'Last = Body_Config'Last
        and then (for all X of Bias => SK.Bounded (X, 1.0e54))
-       and then (for all X of Gravity => SK.Bounded (X, 1.0e54)),
+       and then (for all X of Gravity => SK.Bounded (X, 1.0e48)),
      Post => (for all X of Bias => SK.Bounded (X, 1.0e54))
        and then (for all X of Gravity => SK.Bounded (X, 1.0e54))
    is
+      package GB renames MJ.Gravity_Bounds;
+      package CW renames MJ.Composite_Weights;
+      Weights : CW.Weight_Array (Gravity'Range) with Ghost => Static;
    begin
+      CW.Initialize (Weights);
+      GB.Budget_Bounds (1);
       Ok := False;
       for B in reverse 1 .. Body_Config'Length - 1 loop
          pragma Loop_Invariant (for all K in Bias'Range => SK.Bounded (Bias (K), 1.0e54)
            and then SK.Bounded (Gravity (K), 1.0e54));
+         pragma Loop_Invariant (Static => CW.Prefix_Sum (Weights, Weights'Length) <= Max_Bodies);
+         pragma Loop_Invariant (Static => (for all K in Weights'Range =>
+           (if K <= B then Weights (K) > 0 else Weights (K) = 0)));
+         pragma Loop_Invariant (Static => (for all K in 0 .. B =>
+           Weights (K) > 0 and then SK.Bounded (Gravity (K), GB.Budget (Weights (K)))));
          declare
             P : constant Natural := Body_Config (B).Parent;
             Sum : SK.Motion;
+            Old_Gravity : constant Motion_Array := Gravity with Ghost => Static;
+            Old_Weights : constant CW.Weight_Array := Weights with Ghost => Static;
          begin
             if P > 0 then
                Sum := SK.Add_Wrenches (Bias (P), Bias (B));
                if not SK.Bounded (Sum, 1.0e54) then return; end if;
                Bias (P) := Sum;
+               CW.Pair_Bound (Weights, Weights'Length, P, B);
+               GB.Bound_Wrench_Sum (Gravity (P), Gravity (B), Weights (P), Weights (B));
+               GB.Budget_Bounds (Weights (P) + Weights (B));
                Sum := SK.Add_Wrenches (Gravity (P), Gravity (B));
-               if not SK.Bounded (Sum, 1.0e54) then return; end if;
                Gravity (P) := Sum;
+               CW.Transfer (Weights, B, P);
+            else
+               CW.Discard (Weights, B);
             end if;
+            Preserve_Gravity_Prefix (Old_Gravity, Gravity, Old_Weights, Weights, B, P);
          end;
       end loop;
       pragma Assert (Static => (for all X of Bias => SK.Bounded (X, 1.0e54)));

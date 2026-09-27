@@ -128,12 +128,14 @@ def parse_output(text):
     return rows
 
 
-def reference(m, q, v, ctrl, applied, clock, steps):
+def reference(m, q, v, ctrl, applied, clock, steps, external=None):
     d = mujoco.MjData(m)
     d.qpos[:] = q
     d.qvel[:] = v
     d.ctrl[:] = ctrl
     d.qfrc_applied[:] = applied
+    if external is not None:
+        d.xfrc_applied[:] = external
     d.time = clock
     mujoco.mj_forward(m, d)
     mass = np.zeros((m.nv, m.nv))
@@ -149,6 +151,17 @@ def reference(m, q, v, ctrl, applied, clock, steps):
                   velocity=d.actuator_velocity.copy(), force=d.actuator_force.copy(),
                   position=d.xpos.copy(), quaternion=d.xquat.copy(), unchanged_qpos=q,
                   unchanged_qvel=v, unchanged_time=np.array([clock]))
+    if external is not None:
+        projected = np.zeros(m.nv)
+        for body in range(1, m.nbody):
+            mujoco.mj_applyFT(m, d, external[body, :3], external[body, 3:],
+                             d.xipos[body], body, projected)
+        values['_external'] = projected
+        d.xfrc_applied[:] = 0
+        mujoco.mj_forward(m, d)
+        values['removed_qacc'] = d.qacc.copy()
+        d.xfrc_applied[:] = external
+        mujoco.mj_forward(m, d)
     for _ in range(steps):
         mujoco.mj_step(m, d)
     values.update(qpos=d.qpos.copy(), qvel=d.qvel.copy(), time=np.array([d.time]))
@@ -196,6 +209,23 @@ def rejection_tests(probe, out):
         assert np.array_equal(row['qvel'], [velocity]*m.nv), name
         assert row['time'][0] == clock, name
         results.append(dict(name=name, forward=forward, step=step, state_unchanged=True))
+    # A representable external input may still produce an out-of-domain
+    # acceleration. It must fail without committing qpos/qvel/time.
+    xml = ordinary.replace('mass="1"', 'mass=".1"')
+    path = out / 'reject_external_acceleration.mjb'
+    mujoco.mj_saveModel(mujoco.MjModel.from_xml_string(xml), str(path))
+    data = '1\n0 0 0\n0 0 0 0 0 0 0 0 1e10 0 0 0\n.25 1\n'
+    run = subprocess.run([str(probe), str(path), 'Strict', 'external'], input=data,
+                         text=True, capture_output=True, timeout=30)
+    (out / 'reject_external_acceleration.input').write_text(data)
+    (out / 'reject_external_acceleration.output').write_text(run.stdout + run.stderr)
+    run.check_returncode()
+    row, = parse_output(run.stdout)
+    assert row['forward'] == row['step'] == 'NUMERIC_LIMIT'
+    assert np.array_equal(row['qpos'], [0.]) and np.array_equal(row['qvel'], [0.])
+    assert row['time'][0] == .25
+    results.append(dict(name='external_acceleration', forward='NUMERIC_LIMIT',
+                        step='NUMERIC_LIMIT', state_unchanged=True))
     unsupported = {
         'ball': (model_xml('<body><joint type="ball"/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
         'free': (model_xml('<body><freejoint/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
@@ -224,19 +254,23 @@ def main():
     parser.add_argument('--report-dir', type=Path, required=True)
     parser.add_argument('--toolchain-root', type=Path)
     parser.add_argument('--samples', type=int, default=24)
+    parser.add_argument('--trajectory-steps', type=int, default=100, help='Length of repeated trajectories (one in eight scenarios)')
+    parser.add_argument('--probe-timeout', type=int, default=60, help='Wall-clock cap for a checked model invocation')
+    parser.add_argument('--model', action='append', default=[], help='Run selected fixture names; repeat to select several')
+    parser.add_argument('--external', action='store_true', help='Exercise nonzero world-frame body forces and torques')
     parser.add_argument('--probe', type=Path, help='Reuse an already checked executable; no build')
     parser.add_argument('--policy', choices=('Compatible','Strict'), default='Compatible')
     parser.add_argument('--extra-fixtures', type=Path,
                         help='Directory of additional XML fixtures; existing names may not be replaced')
     args = parser.parse_args()
-    if args.samples < 1:
-        parser.error('--samples must be positive')
+    if min(args.samples, args.trajectory_steps, args.probe_timeout) < 1:
+        parser.error('samples, trajectory steps and probe timeout must be positive')
     assert mujoco.__version__ == '3.14.0', 'Pinned oracle version is required'
     out = args.report_dir.resolve()
     out.mkdir(parents=True, exist_ok=False)
     probe = args.probe or build(args.repo.resolve(), out, args.toolchain_root)
     rng = np.random.default_rng(20260923)
-    summary = dict(status='incomplete', policy=args.policy, seed=20260923, samples_per_model=args.samples, oracle=mujoco.__version__,
+    summary = dict(status='incomplete', policy=args.policy, external=args.external, trajectory_steps=args.trajectory_steps, seed=20260923, samples_per_model=args.samples, oracle=mujoco.__version__,
                    probe=str(probe), probe_sha256=digest(probe), normalization_edge_cases=7,
                    comparisons=0, scenarios=0, fixtures=[], failures=[])
     start = time.monotonic()
@@ -248,6 +282,11 @@ def main():
             if path.stem in cases:
                 parser.error('extra fixture shadows a built-in case: '+path.stem)
             cases[path.stem] = path.read_text()
+    if args.model:
+        unknown = set(args.model) - cases.keys()
+        if unknown:
+            parser.error('unknown fixtures: ' + ', '.join(sorted(unknown)))
+        cases = {name: xml for name, xml in cases.items() if name in args.model}
     for name, xml in cases.items():
         print(name, flush=True)
         (out / (name + '.xml')).write_text(xml)
@@ -268,14 +307,28 @@ def main():
                 # Each permitted scalar position stays inside Tier0, while
                 # their accumulated world position exceeds the CRB fast domain.
                 q += 6e9
-            steps = 100 if index % 8 == 0 else 1
+            steps = args.trajectory_steps if index % 8 == 0 else 1
             clock = .125
-            scenarios.append((q, v, ctrl, applied, clock, steps))
+            external = None
+            if args.external:
+                external = rng.uniform(-.4, .4, (m.nbody, 6))
+                # Include empty physical loads, world-only, force-only, torque-only,
+                # sparse and simultaneous loads, and cancellation across bodies.
+                mode = index % 6
+                if mode == 0: external[1:] = 0
+                elif mode == 1: external[:, 3:] = 0
+                elif mode == 2: external[:, :3] = 0
+                elif mode == 3: external[1:-1] = 0
+                elif mode == 4 and m.nbody > 2: external[2] = -external[1]
+                if name in ('small_inertia', 'crb_wide_fallback'): external *= 1e-10
+            scenarios.append((q, v, ctrl, applied, clock, steps, external))
             lines.append(' '.join(format(float(x), '.17g') for x in np.concatenate((q, v, ctrl, applied))))
+            if external is not None:
+                lines.append(' '.join(format(float(x), '.17g') for x in external.ravel()))
             lines.append(f'{clock} {steps}')
         input_text = '\n'.join(lines) + '\n'
         (out / (name + '.input')).write_text(input_text)
-        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=60)
+        run = subprocess.run([str(probe), str(path), args.policy] + (['external'] if args.external else []), input=input_text, text=True, capture_output=True, timeout=args.probe_timeout)
         (out / (name + '.output')).write_text(run.stdout)
         (out / (name + '.stderr')).write_text(run.stderr)
         run.check_returncode()
@@ -289,11 +342,11 @@ def main():
             assert np.array_equal(matrix, matrix.T), (name, 'mass symmetry')
             if m.nv:
                 np.linalg.cholesky(matrix)
-            rhs = row['gravity'] - row['bias'] + row['passive'] + row['actuation'] + scenario[3]
+            expected = reference(m, *scenario)
+            rhs = row['gravity'] - row['bias'] + row['passive'] + row['actuation'] + scenario[3] + expected.pop('_external', 0.0)
             residual = matrix @ row['qacc'] - rhs
             residual_scale = np.abs(matrix) @ np.abs(row['qacc']) + np.abs(rhs)
             assert np.all(np.abs(residual) <= 1e-11*(1+residual_scale)), (name, 'dynamics residual')
-            expected = reference(m, *scenario)
             for field, want in expected.items():
                 got = np.asarray(row[field])
                 assert got.shape == want.shape, (field, got.shape, want.shape)

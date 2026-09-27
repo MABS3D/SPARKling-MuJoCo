@@ -1,0 +1,14 @@
+project Elastic is
+   for Source_Dirs use ("../smooth/src", "../../src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-elastic_kernels.ads",
+     "mj-elastic_kernels.adb", "mj-elastic_network.ads", "mj-elastic_network.adb",
+     "elastic_probe.adb");
+   for Main use ("elastic_probe.adb");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-O2", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");
+   end Compiler;
+end Elastic;

@@ -1,0 +1,397 @@
+diff --git a/experimental/smooth/src/mj-data-forces_phase.adb b/experimental/smooth/src/mj-data-forces_phase.adb
+index a77e2e42..cc66523b 100644
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -1,4 +1,5 @@
+ with MJ.Smooth_Dynamics;
++with MJ.Data.Tendon_Phase;
+ with MJ.Spatial_Kernels;
+ with MJ.Fused_RNE;
+ with MJ.Spatial_Storage;
+@@ -670,8 +671,12 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Joint_Bounded);
+    begin
+       Expose_Passive_Inputs (D);
+-      Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
+-                       D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
++      if D.Tendon_Config = null then
++         Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
++                          D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
++      else
++         Tendon_Phase.Passive (D, Result);
++      end if;
+       pragma Assert (Static => Storage_Ready (D));
+       pragma Assert (Static => Configuration_Bounded (D));
+       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
+diff --git a/experimental/smooth/src/mj-data-inertia_phase.adb b/experimental/smooth/src/mj-data-inertia_phase.adb
+index 45a0f588..19d39b0c 100644
+--- a/experimental/smooth/src/mj-data-inertia_phase.adb
++++ b/experimental/smooth/src/mj-data-inertia_phase.adb
+@@ -1,3 +1,4 @@
++with MJ.Data.Tendon_Phase;
+ with MJ.Data.Mass_Publication;
+ with MJ.Composite_Bounds;
+ with MJ.Composite_Weights;
+@@ -1117,7 +1118,10 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
+          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+          Prove_Configuration_Equality (Configuration (D), Initial_Config);
+       end;
+-      if Used_CRB then Result := Success; return; end if;
++      if Used_CRB then
++         Tendon_Phase.Inertia (D, Result);
++         return;
++      end if;
+       declare
+          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+@@ -1135,6 +1139,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
+          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+          Prove_Configuration_Equality (Configuration (D), Initial_Config);
+       end;
++      if Result = Success then Tendon_Phase.Inertia (D, Result); end if;
+    end Assemble_Ready;
+    pragma Inline_Always (Assemble_Ready);
+ 
+diff --git a/experimental/smooth/src/mj-data.adb b/experimental/smooth/src/mj-data.adb
+index 23133e82..cc67bd8e 100644
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -236,7 +236,7 @@ package body MJ.Data with SPARK_Mode is
+    end Actuator_Status;
+ 
+    function Creation_Inputs (M : MJ.Models.Model) return Boolean is
+-     (MJ.Models.Sizes_In_Range (M.S)
++     (MJ.Models.Valid_Layout (M) and then MJ.Models.Sizes_In_Range (M.S)
+       and then MJ.Models.Body_Layout_OK (M.S, M.Bodies)
+       and then MJ.Models.Joint_Layout_OK (M.S, M.Joints)
+       and then MJ.Models.Dof_Layout_OK (M.S, M.Dofs)
+@@ -311,7 +311,7 @@ package body MJ.Data with SPARK_Mode is
+       if not Has_Flag (Flags, Dsbl_Constraint)
+         or else M.Opt.Integrator /= 0 or else M.Opt.Enableflags /= 0
+         or else M.Opt.Disableactuator /= 0
+-        or else M.S.Ntendon /= 0 or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
++        or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
+         or else M.S.Nmocap /= 0 or else M.S.Na /= 0 or else M.S.Nhistory /= 0
+         or else M.Opt.Density /= 0.0 or else M.Opt.Viscosity /= 0.0
+         or else M.Flg_Adhesion
+@@ -853,6 +853,17 @@ package body MJ.Data with SPARK_Mode is
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Build_Topology (M, D, Normal);
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
++      declare
++         Loaded : MJ.Fixed_Tendons.Load_Status;
++      begin
++         MJ.Fixed_Tendons.Load (M, D.Tendon_Config, Loaded);
++         case Loaded is
++            when MJ.Fixed_Tendons.Success => null;
++            when MJ.Fixed_Tendons.Unsupported => Free (D); Result := Unsupported_Feature; return;
++            when MJ.Fixed_Tendons.Capacity => Free (D); Result := Capacity_Exceeded; return;
++            when MJ.Fixed_Tendons.Invalid => Free (D); Result := Invalid_Model; return;
++         end case;
++      end;
+       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+       Allocate_Dynamics (D.Dynamics, D.Nv);
+@@ -941,6 +952,7 @@ package body MJ.Data with SPARK_Mode is
+ 
+    procedure Free (D : in out Simulation) is
+    begin
++      MJ.Fixed_Tendons.Free (D.Tendon_Config);
+       Free_Body_Config (D.Body_Config);
+       Free_Joint_Config (D.Joint_Config);
+       Free_Actuator_Config (D.Actuator_Config);
+@@ -1281,4 +1293,11 @@ package body MJ.Data with SPARK_Mode is
+          Result := Success;
+       end if;
+    end Get_Body_Pose;
++   function Tendon_Value (D : Simulation; Kind : Tendon_Quantity; Index : Natural) return Real is
++      Length, Velocity : MJ.Fixed_Tendons.TK.Coordinate;
++   begin
++      MJ.Fixed_Tendons.Kinematics (D.Tendon_Config.all, Index + 1,
++        D.State.Qpos.all, D.State.Qvel.all, Length, Velocity);
++      return (if Kind = Tendon_Length then Length else Velocity);
++   end Tendon_Value;
+ end MJ.Data;
+diff --git a/experimental/smooth/src/mj-data.ads b/experimental/smooth/src/mj-data.ads
+index 2235062f..668c9c34 100644
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -7,8 +7,11 @@ with MJ.Models;
+ with MJ.Smooth_Math;
+ with MJ.Smooth_Kernels;
+ with MJ.Smooth_Actuation;
++with MJ.Fixed_Tendons;
+ 
+ package MJ.Data with SPARK_Mode is
++   use type MJ.Fixed_Tendons.Description_Access;
++   use type MJ.Fixed_Tendons.Description;
+    use type MJ.Smooth_Math.Vector;
+    use type MJ.Smooth_Math.Quaternion;
+    --  These total value queries are safe to snapshot unconditionally on entry.
+@@ -198,6 +201,11 @@ package MJ.Data with SPARK_Mode is
+      Global => null, Pre => Is_Ready (D)
+        and then (if Kind = Actuator_Force then Actuation_Current (D) else Passive_Current (D))
+        and then Index < Velocity_Count (D);
++   function Tendon_Count (D : Simulation) return Natural with Global => null;
++   type Tendon_Quantity is (Tendon_Length, Tendon_Velocity);
++   function Tendon_Value (D : Simulation; Kind : Tendon_Quantity; Index : Natural) return Real
++     with Global => null, Pre => Is_Ready (D) and then Index < Tendon_Count (D),
++     Post => Tendon_Value'Result in -1.0e30 .. 1.0e30;
+    type Actuator_Quantity is (Transmission_Length, Transmission_Velocity, Output_Force);
+    function Actuator_Value (D : Simulation; Kind : Actuator_Quantity; Index : Natural) return Real with
+      Global => null, Pre => Is_Ready (D) and then Actuation_Current (D) and then Index < Control_Count (D);
+@@ -282,7 +290,7 @@ private
+    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
+    use type Actuator_Parameters;
+    use type Actuator_Parameter_Array;
+-   type Configuration_Snapshot (Nb, Nj, Na : Natural) is record
++   type Configuration_Snapshot (Nb, Nj, Na, Nt, Nw, Nz, Nm : Natural) is record
+       Nq, Nv, Nu, No : Natural;
+       Timestep : Nonneg_Tier0;
+       Gravity : Vector;
+@@ -292,6 +300,7 @@ private
+       Bodies : Body_Parameter_Array (1 .. Nb);
+       Joints : Joint_Parameter_Array (1 .. Nj);
+       Actuators : Actuator_Parameter_Array (1 .. Na);
++      Tendons : MJ.Fixed_Tendons.Description (Nt, Nw, Nz, Nm);
+    end record;
+    type Body_Parameter_Access is access Body_Parameter_Array;
+    type Joint_Parameter_Access is access Joint_Parameter_Array;
+@@ -358,6 +367,7 @@ private
+       Body_Config : Body_Parameter_Access := null;
+       Joint_Config : Joint_Parameter_Access := null;
+       Actuator_Config : Actuator_Parameter_Access := null;
++      Tendon_Config : MJ.Fixed_Tendons.Description_Access := null;
+       State : State_Buffers;
+       Kinematic : Kinematic_Buffers;
+       Dynamics : Force_Buffers;
+@@ -375,6 +385,11 @@ private
+         and then Int64 (D.Body_Config'Length) = Int64 (D.Nb) and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+         and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na) then
+         (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Nt => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nt,
++         Nw => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nw,
++         Nz => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nz,
++         Nm => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nm,
++         Tendons => MJ.Fixed_Tendons.Image (D.Tendon_Config),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+@@ -382,6 +397,11 @@ private
+          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
+       else
+         (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
++         Nt => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nt,
++         Nw => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nw,
++         Nz => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nz,
++         Nm => MJ.Fixed_Tendons.Image (D.Tendon_Config).Nm,
++         Tendons => MJ.Fixed_Tendons.Image (D.Tendon_Config),
+          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
+          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
+          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
+@@ -395,7 +415,7 @@ private
+ 
+    function Is_Empty (D : Simulation) return Boolean is
+      (not D.Allocated and then D.Body_Config = null and then D.Joint_Config = null
+-      and then D.Actuator_Config = null and then D.State.Qpos = null
++      and then D.Actuator_Config = null and then D.Tendon_Config = null and then D.State.Qpos = null
+       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
+       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
+       and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
+@@ -415,6 +435,7 @@ private
+ 
+    function Velocity_Count (D : Simulation) return Natural is (D.Nv);
+ 
++   function Tendon_Count (D : Simulation) return Natural is (MJ.Fixed_Tendons.Count (D.Tendon_Config));
+    function Control_Count (D : Simulation) return Natural is (D.Nu);
+    function Position (D : Simulation; Index : Natural) return Real is (D.State.Qpos (Index));
+    function Velocity (D : Simulation; Index : Natural) return Real is (D.State.Qvel (Index));
+@@ -457,6 +478,8 @@ private
+      Post => Input_Image (C1, F1) = Input_Image (C2, F2);
+    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) with Ghost => Static, Global => null,
+      Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
++       and then A.Nt = B.Nt and then A.Nw = B.Nw and then A.Nz = B.Nz and then A.Nm = B.Nm
++       and then A.Tendons = B.Tendons
+        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
+        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
+        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
+@@ -597,7 +620,8 @@ private
+      (Topology_Layout_Ready (D.Topology, D.Nb, D.Nv));
+ 
+    function Storage_Ready (D : Simulation) return Boolean is
+-     (D.Allocated and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
++     (D.Allocated and then MJ.Fixed_Tendons.Ready (D.Tendon_Config, D.Nv)
++      and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+       and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
+       and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+@@ -644,7 +668,8 @@ private
+      Post => Phase_Ready'Result = Is_Ready (D);
+ 
+    function Original_Ready (D : Simulation) return Boolean is
+-     (D.Allocated and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
++     (D.Allocated and then MJ.Fixed_Tendons.Ready (D.Tendon_Config, D.Nv)
++      and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
+       and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
+diff --git a/experimental/smooth/src/mj-smooth_dynamics.adb b/experimental/smooth/src/mj-smooth_dynamics.adb
+index 4ca0cb28..5146bfc5 100644
+--- a/experimental/smooth/src/mj-smooth_dynamics.adb
++++ b/experimental/smooth/src/mj-smooth_dynamics.adb
+@@ -188,12 +188,6 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
+    end Prove_Symmetric_Element;
+    procedure Prove_Symmetry_After_Update
+      (A, Original : Real_Array; N, Row, Column : Natural; Value : Work_Real)
+-     with Ghost => Static, Global => null,
+-     Pre => Square_Layout (A, N) and then Square_Layout (Original, N)
+-       and then Row < N and then Column < N and then Symmetric (Original, N)
+-       and then (for all K in A'Range => A (K) =
+-         (if K = Row * N + Column or else K = Column * N + Row then Value else Original (K))),
+-     Post => Symmetric (A, N)
+    is
+    begin
+       for I in 0 .. N - 1 loop
+diff --git a/experimental/smooth/src/mj-smooth_dynamics.ads b/experimental/smooth/src/mj-smooth_dynamics.ads
+index 3881fae6..4c3c7417 100644
+--- a/experimental/smooth/src/mj-smooth_dynamics.ads
++++ b/experimental/smooth/src/mj-smooth_dynamics.ads
+@@ -118,6 +118,14 @@ package MJ.Smooth_Dynamics with SPARK_Mode is
+    procedure Offset_Identity (N, I, J, Row, Column : Natural) with Ghost => Static, Global => null,
+      Pre => N <= 256 and then I < N and then J < N and then Row < N and then Column < N,
+      Post => (I * N + J = Row * N + Column) = (I = Row and then J = Column);
++   procedure Prove_Symmetry_After_Update
++     (A, Original : Real_Array; N, Row, Column : Natural; Value : Work_Real)
++     with Ghost => Static, Global => null,
++     Pre => Square_Layout (A, N) and then Square_Layout (Original, N)
++       and then Row < N and then Column < N and then Symmetric (Original, N)
++       and then (for all K in A'Range => A (K) =
++         (if K = Row * N + Column or else K = Column * N + Row then Value else Original (K))),
++     Post => Symmetric (A, N);
+    procedure Store_Symmetric (A : in out Real_Array; N, Row, Column : Natural; Value : Work_Real)
+      with Global => null,
+      Pre => Square_Layout (A, N) and then Row < N and then Column < N
+diff --git a/experimental/smooth/tests/smooth_probe.adb b/experimental/smooth/tests/smooth_probe.adb
+index 35078054..80479c02 100644
+--- a/experimental/smooth/tests/smooth_probe.adb
++++ b/experimental/smooth/tests/smooth_probe.adb
+@@ -202,6 +202,15 @@ begin
+             Emit ("gravity", G); Emit ("bias", B); Emit ("passive", P); Emit ("actuation", A);
+             Get_Actuator_Outputs (D, Len, Vel, Force, Result); Check;
+             Emit ("length", Len); Emit ("velocity", Vel); Emit ("force", Force);
++            declare
++               Tlen, Tvel : Real_Array (0 .. Integer (Tendon_Count (D)) - 1);
++            begin
++               for T in Tlen'Range loop
++                  Tlen (T) := Tendon_Value (D, Tendon_Length, T);
++                  Tvel (T) := Tendon_Value (D, Tendon_Velocity, T);
++               end loop;
++               Emit ("tendon_length", Tlen); Emit ("tendon_velocity", Tvel);
++            end;
+             for Body_Id in 0 .. Body_Count (D) - 1 loop
+                Get_Body_Pose (D, Body_Id, Pos, Quat, Result); Check;
+                Emit ("position", Real_Array (Pos));
+diff --git a/experimental/smooth/tools/compare_numerics.py b/experimental/smooth/tools/compare_numerics.py
+index 54ebda42..f440dcfb 100644
+--- a/experimental/smooth/tools/compare_numerics.py
++++ b/experimental/smooth/tools/compare_numerics.py
+@@ -147,6 +147,7 @@ def reference(m, q, v, ctrl, applied, clock, steps):
+                   bias=(d.qfrc_bias - rest.qfrc_bias).copy(), passive=d.qfrc_passive.copy(),
+                   actuation=d.qfrc_actuator.copy(), length=d.actuator_length.copy(),
+                   velocity=d.actuator_velocity.copy(), force=d.actuator_force.copy(),
++                  tendon_length=d.ten_length.copy(), tendon_velocity=d.ten_velocity.copy(),
+                   position=d.xpos.copy(), quaternion=d.xquat.copy(), unchanged_qpos=q,
+                   unchanged_qvel=v, unchanged_time=np.array([clock]))
+     for _ in range(steps):
+@@ -165,7 +166,11 @@ def rejection_tests(probe, out):
+     inertial = '<inertial pos="0 0 0" mass="1" diaginertia=".1 .1 .1"/>'
+     slide = '<body><joint type="slide"/>' + inertial + '</body>'
+     ordinary = model_xml(slide, gravity='0 0 0')
++    excessive_tendon = model_xml(slide.replace('<joint ', '<joint name="j" ').replace('mass="1"', 'mass="1e6"'), gravity='0 0 0').replace(
++        '</mujoco>', '<tendon><fixed stiffness="0 0 1e10" springlength="0">'
++        '<joint joint="j" coef="1e6"/></fixed></tendon></mujoco>')
+     requests = [
++        ('tendon_force_limit', excessive_tendon, 'NUMERIC_LIMIT', 'NUMERIC_LIMIT', 1e10, 0., 0., .25),
+         ('time_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 0., 0., 0., 1e10),
+         ('position_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 1e10, 1., 0., .25),
+         ('velocity_limit', ordinary, 'SUCCESS', 'NUMERIC_LIMIT', 0., 1e10, 1e10, .25),
+@@ -197,6 +202,14 @@ def rejection_tests(probe, out):
+         assert row['time'][0] == clock, name
+         results.append(dict(name=name, forward=forward, step=step, state_unchanged=True))
+     unsupported = {
++        'spatial_tendon': (model_xml(
++            '<site name="s0" pos="1 0 0"/><body><joint type="slide"/>' + inertial +
++            '<site name="s1"/></body>').replace('</mujoco>',
++            '<tendon><spatial><site site="s0"/><site site="s1"/></spatial></tendon></mujoco>'),
++            'UNSUPPORTED_FEATURE'),
++        'tendon_actuator': (model_xml(slide.replace('<joint ', '<joint name="j" ')).replace('</mujoco>',
++            '<tendon><fixed name="t"><joint joint="j" coef="1"/></fixed></tendon>'
++            '<actuator><motor tendon="t"/></actuator></mujoco>'), 'UNSUPPORTED_ACTUATOR'),
+         'ball': (model_xml('<body><joint type="ball"/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
+         'free': (model_xml('<body><freejoint/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
+         'rk4': (ordinary.replace('integrator="Euler"', 'integrator="RK4"'), 'UNSUPPORTED_FEATURE'),
+@@ -224,6 +237,7 @@ def main():
+     parser.add_argument('--report-dir', type=Path, required=True)
+     parser.add_argument('--toolchain-root', type=Path)
+     parser.add_argument('--samples', type=int, default=24)
++    parser.add_argument('--case-timeout', type=int, default=60, help='Checked executable timeout per model')
+     parser.add_argument('--probe', type=Path, help='Reuse an already checked executable; no build')
+     parser.add_argument('--policy', choices=('Compatible','Strict'), default='Compatible')
+     parser.add_argument('--extra-fixtures', type=Path,
+@@ -264,6 +278,9 @@ def main():
+                 applied *= 1e-10
+             if index == 0:
+                 q, v, ctrl, applied = m.qpos0.copy(), v*0, ctrl*0, applied*0
++            if name == 'tendon_large_cancellation':
++                v = -q.copy()
++                applied[:] = 0
+             if name == 'crb_wide_fallback':
+                 # Each permitted scalar position stays inside Tier0, while
+                 # their accumulated world position exceeds the CRB fast domain.
+@@ -275,7 +292,7 @@ def main():
+             lines.append(f'{clock} {steps}')
+         input_text = '\n'.join(lines) + '\n'
+         (out / (name + '.input')).write_text(input_text)
+-        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=60)
++        run = subprocess.run([str(probe), str(path), args.policy], input=input_text, text=True, capture_output=True, timeout=args.case_timeout)
+         (out / (name + '.output')).write_text(run.stdout)
+         (out / (name + '.stderr')).write_text(run.stderr)
+         run.check_returncode()
+diff --git a/src/mj-models-validity.ads b/src/mj-models-validity.ads
+index e7607c7c..2148b930 100644
+--- a/src/mj-models-validity.ads
++++ b/src/mj-models-validity.ads
+@@ -322,7 +322,8 @@ package MJ.Models.Validity with SPARK_Mode is
+    --  and strictly increasing within each row.
+    ----------------------------------------------------------------------------
+ 
+-   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer) return Boolean is
++   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer;
++                    Strict : Boolean := True) return Boolean is
+      (Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
+       and then Int64 (Rownnz'Length) = Int64 (N)
+       and then Int64 (Rowadr'Length) = Int64 (N)
+@@ -335,7 +336,8 @@ package MJ.Models.Validity with SPARK_Mode is
+       and then (for all K in 0 .. Nnz - 1 => Colind (K) in 0 .. Ncols - 1)
+       and then (for all I in 0 .. N - 1 =>
+                   (for all K in Rowadr (I) .. (Rowadr (I) + Rownnz (I)) - 2 =>
+-                     Colind (K) < Colind (K + 1))))
++                     (if Strict then Colind (K) < Colind (K + 1)
++                      else Colind (K) <= Colind (K + 1)))))
+    with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
+ 
+    --  The CSR inertia is the reduced form of mj_makeDofDofSparse: a simple dof
+@@ -356,9 +358,12 @@ package MJ.Models.Validity with SPARK_Mode is
+               M.S.Nv, M.S.Nd, M.S.Nv))
+    with Pre => Valid_Layout (M);
+ 
++   --  The C compiler retains duplicate columns for repeated fixed-tendon
++   --  joints. mj_tendon accumulates in the first slot and leaves later ones
++   --  zero. Keep strict column ordering for all other sparse structures.
+    function Sparse_Ten_J_OK (M : Model) return Boolean is
+      (CSR_OK (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+-              M.S.Ntendon, M.S.Njten, M.S.Nv))
++              M.S.Ntendon, M.S.Njten, M.S.Nv, Strict => False))
+    with Pre => Valid_Layout (M);
+ 
+    --  Row I of the CSR inertia: one entry for a simple dof, else the length

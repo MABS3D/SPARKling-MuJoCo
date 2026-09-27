@@ -1,0 +1,61 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                           Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------------------
+Data Dependencies                20         20                                                 .           .          .
+Flow Dependencies                 .          .                                                 .           .          .
+Initialization                    8          8                                                 .           .          .
+Non-Aliasing                      1          1                                                 .           .          .
+Run-time Checks                 405          .    405 (CVC5 73%, Trivial 2%, Z3 24%, altergo 0%)           .          .
+Assertions                       49          .                 49 (CVC5 54%, Z3 45%, altergo 1%)           .          .
+Functional Contracts            161          .    161 (CVC5 72%, Trivial 2%, Z3 25%, altergo 0%)           .          .
+LSP Verification                  .          .                                                 .           .          .
+Termination                       8          7                                          1 (CVC5)           .          .
+Concurrency                       .          .                                                 .           .          .
+-----------------------------------------------------------------------------------------------------------------------
+Total                           652    36 (6%)                                         616 (94%)           .          .
+
+
+max steps used for successful proof: 92344
+
+============================
+Most difficult proved checks
+============================
+
+mj-elastic_network.ads:84:36: postcondition proved in max 2 seconds
+mj-elastic_network.adb:305:14: postcondition proved in max 1 seconds
+mj-elastic_network.adb:373:43: loop invariant after first iteration proved in max 1 seconds
+mj-elastic_network.adb:307:47: precondition proved in max 1 seconds
+mj-elastic_network.adb:382:10: precondition proved in max 1 seconds
+mj-elastic_network.adb:332:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-elastic_network, 21 subprograms and packages out of 21 analyzed
+  MJ.Elastic_Network at mj-elastic_network.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Elastic_Network.Accumulate_Edge at mj-elastic_network.adb:31 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)
+  MJ.Elastic_Network.Accumulate_Next at mj-elastic_network.adb:221 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (52 checks)
+  MJ.Elastic_Network.Advance_Particle at mj-elastic_network.adb:301 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Network.Bound_Add at mj-elastic_network.ads:26 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Elastic_Network.Budget at mj-elastic_network.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Elastic_Network.Component at mj-elastic_network.ads:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Elastic_Network.Evaluate_Edge at mj-elastic_network.adb:208 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Elastic_Network.Forces at mj-elastic_network.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (75 checks)
+  MJ.Elastic_Network.Load at mj-elastic_network.ads:31 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Elastic_Network.Model_Add at mj-elastic_network.ads:46 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Elastic_Network.Prefix at mj-elastic_network.ads:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Elastic_Network.Prove_Accumulation at mj-elastic_network.adb:167 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (89 checks)
+  MJ.Elastic_Network.Prove_Add_Equality at mj-elastic_network.adb:69 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Elastic_Network.Prove_Component at mj-elastic_network.adb:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Network.Prove_Edge_Relation at mj-elastic_network.adb:75 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (137 checks)
+  MJ.Elastic_Network.Prove_Prefix_Add at mj-elastic_network.adb:151 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Network.Prove_Velocity_Replacement at mj-elastic_network.adb:326 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Elastic_Network.Prove_Vertex_Step at mj-elastic_network.adb:337 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (29 checks)
+  MJ.Elastic_Network.Step at mj-elastic_network.ads:79 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (107 checks)
+  MJ.Elastic_Network.Valid at mj-elastic_network.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)

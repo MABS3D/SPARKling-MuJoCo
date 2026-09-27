@@ -1,0 +1,8 @@
+project Proof is
+   for Source_Dirs use ("../../src", "../../src/gen");
+   for Object_Dir use external ("MATRIX_PROOF_ROOT", Proof'Project_Dir & "build/minimal") & "/obj";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-ffp-contract=off");
+   end Compiler;
+end Proof;

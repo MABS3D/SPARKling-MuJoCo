@@ -1,0 +1,20 @@
+project Standalone is
+   for Languages use ("Ada", "C");
+   Build_Root := external ("MATRIX_BENCH_ROOT");
+   for Source_Dirs use (Build_Root & "/generated", "../../mujoco/src/engine");
+   for Source_Files use ("bench_main.adb", "bench_ada.ads", "bench_ada.adb", "bench_c.c", "engine_util_blas.c", "mj-matrices.ads", "mj-vector_models.adb", "mj-vector_models.ads", "mj-matrix_models.adb", "mj-matrix_types.ads", "mj-blas.adb", "mj-types.ads", "mj.ads", "mj-matrices.adb", "mj-matrix_types.adb", "mj-blas.ads", "mj-matrix_models.ads");
+   for Main use ("bench_main.adb");
+   for Object_Dir use Build_Root & "/obj";
+   for Exec_Dir use Build_Root & "/bin";
+   for Create_Missing_Dirs use "True";
+   Common := ("-O3", "-march=native", "-flto", "-ffat-lto-objects", "-ffp-contract=off",
+              "-ffinite-math-only", "-fno-trapping-math", "-fno-math-errno", "-ffunction-sections", "-fdata-sections");
+   package Compiler is
+      for Default_Switches ("Ada") use Common & ("-gnat2022", "-gnatn", "-gnatp");
+      for Default_Switches ("C") use Common & ("-std=gnu11", "-DmjUSEPLATFORMSIMD",
+        "-I" & Standalone'Project_Dir & "../../mujoco/include", "-I" & Standalone'Project_Dir & "../../mujoco/src");
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-flto", "-fuse-linker-plugin", "-ffp-contract=off", "-Wl,--gc-sections", "-lm");
+   end Linker;
+end Standalone;

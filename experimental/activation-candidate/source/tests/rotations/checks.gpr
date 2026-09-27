@@ -1,0 +1,36 @@
+project Checks is
+ type Mode_Type is ("development", "validation", "release");
+ Mode : Mode_Type := external ("ROTATION_MODE", "release");
+ for Languages use ("Ada", "C");
+ for Source_Dirs use (".", "../../src", "../../mujoco/src/engine");
+ for Source_Files use ("main.adb", "adapter.ads", "adapter.adb", "driver.c",
+   "engine_util_spatial.c", "engine_util_blas.c", "mj.ads", "mj-types.ads",
+   "mj-quaternion_math.ads", "mj-quaternions.ads", "mj-quaternions.adb", "mj-blas.ads", "mj-blas.adb",
+   "mj-rotations.ads", "mj-rotations.adb", "mj-matrices.ads", "mj-matrices.adb",
+   "mj-matrix_models.ads", "mj-matrix_models.adb", "mj-vector_models.ads", "mj-vector_models.adb", "mj-matrix_types.ads", "mj-matrix_types.adb");
+ for Main use ("main.adb");
+ for Object_Dir use "build/" & Mode & "/obj";
+ for Exec_Dir use "build/" & Mode & "/bin";
+ for Create_Missing_Dirs use "True";
+ Common := ("-ffp-contract=off", "-ffunction-sections", "-fdata-sections");
+ case Mode is
+  when "release" => Common := Common & ("-O3", "-march=native", "-flto", "-ffat-lto-objects",
+    "-ffinite-math-only", "-fno-trapping-math", "-fno-math-errno");
+  when "validation" => Common := Common & ("-O2", "-g");
+  when "development" => Common := Common & ("-O0", "-g");
+ end case;
+ Ada_Flags := ("-gnat2022");
+ case Mode is
+  when "release" => Ada_Flags := Ada_Flags & ("-gnatn", "-gnatp");
+  when others => Ada_Flags := Ada_Flags & ("-gnata", "-gnato", "-gnatVa");
+ end case;
+ package Compiler is
+  for Default_Switches ("Ada") use Common & Ada_Flags;
+  for Default_Switches ("C") use Common & ("-std=gnu11", "-DmjUSEPLATFORMSIMD",
+   "-I" & Checks'Project_Dir & "../../mujoco/include",
+   "-I" & Checks'Project_Dir & "../../mujoco/src");
+ end Compiler;
+ package Linker is
+  for Default_Switches ("Ada") use Common & ("-Wl,--gc-sections", "-lm");
+ end Linker;
+end Checks;
