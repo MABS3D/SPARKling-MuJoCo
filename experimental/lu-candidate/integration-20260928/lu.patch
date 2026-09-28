@@ -1,0 +1,405 @@
+--- /dev/null
++++ b/src/mj-lu.adb
+@@ -0,0 +1,260 @@
++package body MJ.LU with SPARK_Mode is
++   procedure Analyze (N : Order; Row_Start, Column : Int_Array;
++                      Diagonal : out Int_Array; Result : out Status) is
++   begin
++      Diagonal := [others => -1]; Result := Invalid_Structure;
++      if Row_Start'First /= 0 or else Row_Start'Last /= N
++        or else Column'First /= 0 or else Column'Last >= Max_Size
++        or else Row_Start (0) /= 0 or else Row_Start (N) /= Column'Length then return; end if;
++      for I in 0 .. N-1 loop
++         if Row_Start (I) < 0 or else Row_Start (I+1) <= Row_Start (I)
++           or else Row_Start (I+1) > Column'Length then return; end if;
++         for K in Row_Start (I) .. Row_Start (I+1)-1 loop
++            if Column (K) = I then Diagonal (I) := K; end if;
++         end loop;
++      end loop;
++      if CSR_Valid (N, Row_Start, Column, Diagonal) then Result := Success; end if;
++   end Analyze;
++
++   procedure Subtract_Product (X : in out Value; A, B : Value; Result : out Status) is
++      Product : constant Real := A*B;
++      Next : constant Real := X-Product;
++   begin
++      Result := Numeric_Limit;
++      if Next in Value then X := Next; Result := Success; end if;
++   end Subtract_Product;
++   procedure Multiply (X : in out Value; A : Value; Result : out Status) is
++      Next : constant Real := X*A;
++   begin
++      Result := Numeric_Limit;
++      if Next in Value then X := Next; Result := Success; end if;
++   end Multiply;
++   procedure Divide (X : in out Value; Pivot : Value; Result : out Status) is
++      Next : constant Real := X/Pivot;
++   begin
++      Result := Numeric_Limit;
++      if Next in Value then X := Next; Result := Success; end if;
++   end Divide;
++   function Clamped (Pivot : Value) return Value is
++   begin
++      return (if abs Pivot >= Min_Val then Pivot elsif Pivot < 0.0 then -Min_Val else Min_Val);
++   end Clamped;
++
++   procedure Swap_Entries (A : in out Real_Array; I, J : Natural) is
++      Temp : constant Real := A (I);
++   begin
++      A (I) := A (J); A (J) := Temp;
++   end Swap_Entries;
++
++   procedure Swap_Rows (A : in out Real_Array; N : Order; I, J : Natural) is
++      BI : constant Natural := I*N;
++      BJ : constant Natural := J*N;
++   begin
++      if I = J then return; end if;
++      pragma Assert (Static => BI+N <= BJ or else BJ+N <= BI);
++      for C in 0 .. N-1 loop
++         Swap_Entries (A, BI+C, BJ+C);
++         pragma Loop_Invariant (Bounded (A));
++         pragma Loop_Invariant (for all K in A'Range => A (K) =
++           (if K in BI .. BI+C then A'Loop_Entry (BJ+(K-BI))
++            elsif K in BJ .. BJ+C then A'Loop_Entry (BI+(K-BJ)) else A'Loop_Entry (K)));
++      end loop;
++   end Swap_Rows;
++
++   function Fast_Subtract (X, Y : Small_Value; M : Multiplier_Value) return Value is
++   begin
++      return X-M*Y;
++   end Fast_Subtract;
++
++   function Magnitude (A : Real_Array) return Value is
++      Bound : Value := 2.0;
++   begin
++      for I in A'Range loop
++         Bound := Real'Max (Bound, abs A (I));
++         pragma Loop_Invariant (Bound >= 2.0);
++         pragma Loop_Invariant (for all J in A'First .. I => abs A (J) <= Bound);
++      end loop;
++      return Bound;
++   end Magnitude;
++
++   function Find_Pivot (A : Real_Array; N : Order; K : Natural) return Natural is
++      Best : Natural := K;
++   begin
++      for I in K+1 .. N-1 loop
++         if abs A (I*N+K) > abs A (Best*N+K) then Best := I; end if;
++         pragma Loop_Invariant (Best in K .. I);
++         pragma Loop_Invariant (for all J in K .. I => abs A (J*N+K) <= abs A (Best*N+K));
++      end loop;
++      return Best;
++   end Find_Pivot;
++
++   procedure Eliminate_Row (A : in out Real_Array; N : Order; K, I : Natural;
++                            Reciprocal : Value; Result : out Status; Input_Limit : Value := Value'Last) is
++      T : Value := A (I*N+K);
++   begin
++      Multiply (T, Reciprocal, Result);
++      if Result /= Success then return; end if;
++      A (I*N+K) := T;
++      if Input_Limit <= 1.0e98 then
++         if abs T > 2.0 then Result := Numeric_Limit; return; end if;
++         -- The stage bound provides 100x headroom; this loop has no data-dependent
++         -- exits and can be vectorized without contracting multiply/subtract.
++         for J in K+1 .. N-1 loop
++            A (I*N+J) := Fast_Subtract (A (I*N+J), A (K*N+J), T);
++         end loop;
++         return;
++      end if;
++      for J in K+1 .. N-1 loop
++         T := A (I*N+J); Subtract_Product (T, A (I*N+K), A (K*N+J), Result);
++         if Result /= Success then return; end if;
++         A (I*N+J) := T;
++         pragma Loop_Invariant (Bounded (A) and then Result = Success);
++         pragma Loop_Invariant (A (I*N+K) = A'Loop_Entry (I*N+K));
++         pragma Loop_Invariant (for all V in A'Range => A (V) =
++           (if V in I*N+K+1 .. I*N+J then A'Loop_Entry (V) - A (I*N+K)*A'Loop_Entry (K*N+(V-I*N))
++            else A'Loop_Entry (V)));
++      end loop;
++   end Eliminate_Row;
++
++   procedure Factor_Dense (A : in out Real_Array; N : Order;
++                           P : out Int_Array; Result : out Status) is
++      Max_Row : Natural;
++      Reciprocal : Value;
++      Stage_Limit : Value := Magnitude (A);
++   begin
++      P := [for I in P'Range => I]; Result := Success;
++      for K in 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (A) and then Pivots_Valid (P, N) and then Result = Success);
++         pragma Loop_Invariant (for all I in 0 .. K-1 => abs A (I*N+I) >= Min_Val);
++         if Stage_Limit > 1.0e98 then
++            Stage_Limit := Magnitude (A);
++            if Stage_Limit > 1.0e98 then Stage_Limit := Value'Last; end if;
++         end if;
++         Max_Row := Find_Pivot (A, N, K);
++         if abs A (Max_Row*N+K) < Min_Val then Result := Singular; return; end if;
++         P (K) := Max_Row;
++         if Max_Row /= K then Swap_Rows (A, N, K, Max_Row); end if;
++         Reciprocal := 1.0/A (K*N+K);
++         for I in K+1 .. N-1 loop
++            Eliminate_Row (A, N, K, I, Reciprocal, Result, Stage_Limit);
++            if Result /= Success then return; end if;
++            pragma Loop_Invariant (Bounded (A) and then Result = Success);
++            pragma Loop_Invariant (for all J in 0 .. K => abs A (J*N+J) >= Min_Val);
++         end loop;
++         -- Partial pivoting bounds multipliers near one. Use a factor four
++         -- to leave rounding margin, and refresh before the bound gets large.
++         if Stage_Limit <= 1.0e98 then Stage_Limit := 4.0*Stage_Limit; end if;
++      end loop;
++   end Factor_Dense;
++
++   procedure Solve_Dense (A : Real_Array; N : Order; P : Int_Array;
++                          B : Real_Array; X : out Real_Array; Result : out Status) is
++      T : Value;
++   begin
++      X := B; Result := Success;
++      for I in 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (X));
++         Swap_Entries (X, I, P (I));
++         T := X (I);
++         for J in 0 .. I-1 loop
++            Subtract_Product (T, A (I*N+J), X (J), Result);
++            if Result /= Success then return; end if;
++         end loop;
++         X (I) := T;
++
++      end loop;
++      for I in reverse 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (X));
++         T := X (I);
++         for J in I+1 .. N-1 loop
++            Subtract_Product (T, A (I*N+J), X (J), Result);
++            if Result /= Success then return; end if;
++         end loop;
++         Divide (T, A (I*N+I), Result);
++         if Result /= Success then return; end if;
++         X (I) := T;
++
++      end loop;
++   end Solve_Dense;
++
++   procedure Factor_Sparse
++     (A : in out Real_Array; N : Order; Row_Start, Column, Diagonal : Int_Array;
++      Remaining : out Int_Array; First_Clamped : out Integer; Result : out Status) is
++      II, JI, IC, JC : Integer;
++      T, Multiplier : Value;
++   begin
++      Remaining := [for I in Remaining'Range => Row_Start (I+1)-Row_Start (I)];
++      First_Clamped := -1; Result := Success;
++      for I in reverse 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (A) and then Result = Success);
++         pragma Loop_Invariant (First_Clamped in -1 .. N-1);
++         pragma Loop_Invariant (for all R in 0 .. N-1 => Remaining (R) in 0 .. Row_Start (R+1)-Row_Start (R));
++         II := Row_Start (I)+Remaining (I)-1;
++         if Remaining (I) <= 0 or else II /= Diagonal (I) then Result := Invalid_Structure; return; end if;
++         Remaining (I) := Remaining (I)-1;
++         if abs A (II) < Min_Val then
++            A (II) := Clamped (A (II));
++            if First_Clamped = -1 then First_Clamped := I; end if;
++         end if;
++         for J in reverse 0 .. I-1 loop
++         pragma Loop_Invariant (Bounded (A) and then Result = Success);
++         pragma Loop_Invariant (First_Clamped in -1 .. N-1);
++         pragma Loop_Invariant (for all R in 0 .. N-1 => Remaining (R) in 0 .. Row_Start (R+1)-Row_Start (R));
++            if Remaining (J) > 0 then
++               JI := Row_Start (J)+Remaining (J)-1;
++               if Column (JI) = I then
++                  Remaining (J) := Remaining (J)-1;
++                  T := A (JI); Divide (T, A (II), Result);
++                  if Result /= Success then return; end if;
++                  A (JI) := T; Multiplier := T;
++                  IC := Row_Start (I); JC := Row_Start (J);
++                  while JC < Row_Start (J)+Remaining (J) loop
++                     pragma Loop_Invariant (Bounded (A) and then Result = Success);
++                     pragma Loop_Invariant (JC in Row_Start (J) .. Row_Start (J)+Remaining (J));
++                     pragma Loop_Invariant (IC in Row_Start (I) .. Row_Start (I)+Remaining (I));
++                     -- Unlike C, never read past the remaining part of row I.
++                     if IC >= Row_Start (I)+Remaining (I) then exit; end if;
++                     if Column (IC) = Column (JC) then
++                        T := A (JC); Subtract_Product (T, A (IC), Multiplier, Result);
++                        if Result /= Success then return; end if;
++                        A (JC) := T; IC := IC+1; JC := JC+1;
++                     elsif Column (IC) > Column (JC) then JC := JC+1;
++                     else Result := Fill_Required; return;
++                     end if;
++                  end loop;
++                  if IC /= Row_Start (I)+Remaining (I) then Result := Fill_Required; return; end if;
++               end if;
++            end if;
++         end loop;
++      end loop;
++   end Factor_Sparse;
++
++   procedure Solve_Sparse
++     (A : Real_Array; N : Order; Row_Start, Column, Diagonal : Int_Array;
++      B : Real_Array; X : out Real_Array; Result : out Status) is
++      T : Value;
++   begin
++      X := B; Result := Success;
++      -- Ordered scalar reductions; C's SIMD dot may round differently.
++      for I in reverse 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (X));
++         T := X (I);
++         for K in Diagonal (I)+1 .. Row_Start (I+1)-1 loop
++            Subtract_Product (T, A (K), X (Column (K)), Result);
++            if Result /= Success then return; end if;
++         end loop;
++         X (I) := T;
++      end loop;
++      for I in 0 .. N-1 loop
++         pragma Loop_Invariant (Bounded (X));
++         T := X (I);
++         for K in Row_Start (I) .. Diagonal (I)-1 loop
++            Subtract_Product (T, A (K), X (Column (K)), Result);
++            if Result /= Success then return; end if;
++         end loop;
++         Divide (T, A (Diagonal (I)), Result);
++         if Result /= Success then return; end if;
++         X (I) := T;
++      end loop;
++   end Solve_Sparse;
++end MJ.LU;
+--- /dev/null
++++ b/src/mj-lu.ads
+@@ -0,0 +1,139 @@
++with MJ.Types; use MJ.Types;
++package MJ.LU with SPARK_Mode is
++   pragma Unevaluated_Use_Of_Old (Allow);
++   Max_Order : constant := 4096;
++   subtype Order is Natural range 0 .. Max_Order;
++   subtype Value is Real range -1.0e100 .. 1.0e100;
++   type Status is (Success, Singular, Invalid_Structure, Fill_Required, Numeric_Limit);
++   function Bounded (A : Real_Array) return Boolean is
++     (for all X of A => X in Value) with Global => null;
++   function Dense_Shape (A : Real_Array; N : Order) return Boolean is
++     (A'First = 0 and then A'Last = N*N-1) with Global => null;
++   function Vector_Shape (A : Real_Array; N : Order) return Boolean is
++     (A'First = 0 and then A'Last = N-1) with Global => null;
++   function Index_Shape (A : Int_Array; N : Order) return Boolean is
++     (A'First = 0 and then A'Last = N-1) with Global => null;
++   function Pivots_Valid (P : Int_Array; N : Order) return Boolean is
++     (Index_Shape (P, N) and then (for all I in P'Range => P (I) in I .. N-1))
++     with Global => null;
++   -- Canonical zero-based CSR: sorted unique columns, no overlapping rows.
++   function CSR_Valid (N : Order; Row_Start, Column, Diagonal : Int_Array) return Boolean is
++     (Row_Start'First = 0 and then Row_Start'Last = N
++      and then Column'First = 0 and then Column'Last < Max_Size
++      and then Index_Shape (Diagonal, N) and then Row_Start (0) = 0
++      and then Row_Start (N) = Column'Length
++      and then (for all I in 0 .. N-1 =>
++        Row_Start (I) >= 0 and then Row_Start (I+1) > Row_Start (I)
++        and then Row_Start (I+1) <= Column'Length
++        and then Diagonal (I) in Row_Start (I) .. Row_Start (I+1)-1
++        and then Column (Diagonal (I)) = I
++        and then (for all K in Row_Start (I) .. Row_Start (I+1)-1 =>
++          Column (K) in 0 .. N-1
++          and then (if K > Row_Start (I) then Column (K) > Column (K-1)))))
++     with Global => null;
++   procedure Analyze (N : Order; Row_Start, Column : Int_Array;
++                      Diagonal : out Int_Array; Result : out Status)
++     with Global => null, Pre => Diagonal'First = 0 and then Diagonal'Last = N-1,
++     Post => (if Result = Success then CSR_Valid (N, Row_Start, Column, Diagonal));
++   -- Local arithmetic: unchanged output when the result exceeds Value.
++   procedure Subtract_Product (X : in out Value; A, B : Value; Result : out Status)
++     with Global => null,
++     Post => Result in Success | Numeric_Limit and then
++       (if Result = Success then X = X'Old - A*B else X = X'Old);
++   procedure Multiply (X : in out Value; A : Value; Result : out Status)
++     with Global => null,
++     Post => Result in Success | Numeric_Limit and then
++       (if Result = Success then X = X'Old*A else X = X'Old);
++   procedure Divide (X : in out Value; Pivot : Value; Result : out Status)
++     with Global => null, Pre => abs Pivot >= Min_Val,
++     Post => Result in Success | Numeric_Limit and then
++       (if Result = Success then X = X'Old/Pivot else X = X'Old);
++   pragma Inline_Always (Subtract_Product);
++   pragma Inline_Always (Multiply);
++   pragma Inline_Always (Divide);
++   function Clamped (Pivot : Value) return Value
++     with Global => null,
++     Post => Clamped'Result =
++       (if abs Pivot >= Min_Val then Pivot elsif Pivot < 0.0 then -Min_Val else Min_Val)
++       and then abs Clamped'Result >= Min_Val;
++   procedure Swap_Entries (A : in out Real_Array; I, J : Natural)
++     with Global => null, Pre => Bounded (A) and then I in A'Range and then J in A'Range,
++     Post => Bounded (A) and then (for all K in A'Range => A (K) =
++       (if K=I then A'Old (J) elsif K=J then A'Old (I) else A'Old (K)));
++   pragma Inline_Always (Swap_Entries);
++   procedure Swap_Rows (A : in out Real_Array; N : Order; I, J : Natural)
++     with Global => null, Pre => Dense_Shape (A, N) and then Bounded (A)
++       and then I < N and then J < N,
++     Post => Bounded (A) and then
++       (for all T in A'Range => A (T) =
++         (if T in I*N .. I*N+N-1 then A'Old (J*N+(T-I*N))
++          elsif T in J*N .. J*N+N-1 then A'Old (I*N+(T-J*N)) else A'Old (T)));
++   subtype Small_Value is Real range -1.0e98 .. 1.0e98;
++   subtype Multiplier_Value is Real range -2.0 .. 2.0;
++   function Fast_Subtract (X, Y : Small_Value; M : Multiplier_Value) return Value
++     with Global => null, Post => Fast_Subtract'Result = X-M*Y;
++   pragma Inline_Always (Fast_Subtract);
++   function Magnitude (A : Real_Array) return Value
++     with Global => null, Pre => Bounded (A),
++     Post => Magnitude'Result in 2.0 .. Value'Last
++       and then (for all X of A => abs X <= Magnitude'Result);
++   function Find_Pivot (A : Real_Array; N : Order; K : Natural) return Natural
++     with Global => null, Pre => Dense_Shape (A, N) and then Bounded (A) and then K < N,
++     Post => Find_Pivot'Result in K .. N-1
++       and then (for all I in K .. N-1 => abs A (I*N+K) <= abs A (Find_Pivot'Result*N+K));
++   procedure Eliminate_Row (A : in out Real_Array; N : Order; K, I : Natural;
++                            Reciprocal : Value; Result : out Status; Input_Limit : Value := Value'Last)
++     with Global => null, Pre => Dense_Shape (A, N) and then Bounded (A)
++       and then K < I and then I < N and then Input_Limit >= 2.0
++       and then (for all J in 0 .. N-1 => abs A (I*N+J) <= Input_Limit
++         and then abs A (K*N+J) <= Input_Limit),
++     Post => Bounded (A) and then Result in Success | Numeric_Limit
++       and then (for all T in A'Range =>
++         (if T not in I*N+K .. I*N+N-1 then A (T) = A'Old (T)))
++       and then (if Result = Success then A (I*N+K) = A'Old (I*N+K)*Reciprocal
++         and then (for all J in K+1 .. N-1 =>
++           A (I*N+J) = A'Old (I*N+J) - A (I*N+K)*A'Old (K*N+J)));
++   -- Packed L (unit diagonal implicit) and U. P records sequential row swaps.
++   -- Singular/Numeric_Limit leave a bounded, partially modified factorization.
++   procedure Factor_Dense (A : in out Real_Array; N : Order;
++                           P : out Int_Array; Result : out Status)
++     with Global => null,
++     Pre => Dense_Shape (A, N) and then Bounded (A) and then P'First = 0 and then P'Last = N-1,
++     Post => Bounded (A) and then Pivots_Valid (P, N)
++       and then Result in Success | Singular | Numeric_Limit
++       and then (if Result = Success then (for all I in 0 .. N-1 => abs A (I*N+I) >= Min_Val));
++   procedure Solve_Dense (A : Real_Array; N : Order; P : Int_Array;
++                          B : Real_Array; X : out Real_Array; Result : out Status)
++     with Global => null,
++     Pre => Dense_Shape (A, N) and then Bounded (A) and then Pivots_Valid (P, N)
++       and then (for all I in 0 .. N-1 => abs A (I*N+I) >= Min_Val)
++       and then Vector_Shape (B, N) and then Bounded (B) and then X'First = 0 and then X'Last = N-1,
++     Post => Bounded (X) and then Result in Success | Numeric_Limit;
++   -- Reverse elimination, A=(I+U)*L. No pivot permutations or fill allocation.
++   -- Remaining is caller-owned scratch, length N. First_Clamped is the first
++   -- row visited in reverse order whose pivot was clamped, or -1.
++   procedure Factor_Sparse
++     (A : in out Real_Array; N : Order; Row_Start, Column, Diagonal : Int_Array;
++      Remaining : out Int_Array; First_Clamped : out Integer; Result : out Status)
++     with Global => null,
++     Pre => CSR_Valid (N, Row_Start, Column, Diagonal)
++       and then A'First = 0 and then A'Last = Column'Last and then Bounded (A)
++       and then Remaining'First = 0 and then Remaining'Last = N-1,
++     Post => Bounded (A) and then First_Clamped in -1 .. N-1
++       and then Result in Success | Fill_Required | Invalid_Structure | Numeric_Limit
++       and then (if Result = Success then
++         (for all I in 0 .. N-1 => abs A (Diagonal (I)) >= Min_Val));
++   procedure Solve_Sparse
++     (A : Real_Array; N : Order; Row_Start, Column, Diagonal : Int_Array;
++      B : Real_Array; X : out Real_Array; Result : out Status)
++     with Global => null,
++     Pre => CSR_Valid (N, Row_Start, Column, Diagonal)
++       and then A'First = 0 and then A'Last = Column'Last and then Bounded (A)
++       and then (for all I in 0 .. N-1 => abs A (Diagonal (I)) >= Min_Val)
++       and then Vector_Shape (B, N) and then Bounded (B) and then X'First = 0 and then X'Last = N-1,
++     Post => Bounded (X) and then Result in Success | Numeric_Limit;
++   pragma Inline_Always (Find_Pivot);
++   pragma Inline_Always (Magnitude);
++   pragma Inline_Always (Eliminate_Row);
++   pragma Inline_Always (Swap_Rows);
++end MJ.LU;

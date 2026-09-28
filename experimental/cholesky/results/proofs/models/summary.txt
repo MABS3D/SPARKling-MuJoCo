@@ -1,0 +1,46 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                               Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------
+Data Dependencies                 6          6                                     .           .          .
+Flow Dependencies                 .          .                                     .           .          .
+Initialization                    .          .                                     .           .          .
+Non-Aliasing                      .          .                                     .           .          .
+Run-time Checks                  90          .    83 (CVC5 31%, Trivial 19%, Z3 49%)           .          7
+Assertions                        .          .                                     .           .          .
+Functional Contracts             14          .    13 (CVC5 15%, Z3 15%, altergo 69%)           .          1
+LSP Verification                  .          .                                     .           .          .
+Termination                       6          5                                1 (Z3)           .          .
+Concurrency                       .          .                                     .           .          .
+-----------------------------------------------------------------------------------------------------------
+Total                           116    11 (9%)                              97 (84%)           .     8 (7%)
+
+
+max steps used for successful proof: 24618
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky_models.ads:60:14: postcondition proved in max 2 seconds
+mj-cholesky_models.ads:26:14: postcondition proved in max 2 seconds
+mj-cholesky_models.ads:64:9: precondition proved in max 2 seconds
+mj-cholesky_models.ads:65:10: precondition proved in max 1 seconds
+mj-cholesky_models.ads:66:11: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky_models, 7 subprograms and packages out of 7 analyzed
+  MJ.Cholesky_Models at mj-cholesky_models.ads:3 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky_Models.Dot_Value at mj-cholesky_models.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 13 checks out of 14 proved
+  MJ.Cholesky_Models.Lane_Sum at mj-cholesky_models.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 16 checks out of 17 proved
+  MJ.Cholesky_Models.Model_Add at mj-cholesky_models.ads:21 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Cholesky_Models.Tail at mj-cholesky_models.ads:48 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 37 checks out of 43 proved
+  MJ.Cholesky_Models.Unfold_Lane at mj-cholesky_models.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Cholesky_Models.Valid_Dot at mj-cholesky_models.ads:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)

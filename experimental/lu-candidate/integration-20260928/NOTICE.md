@@ -1,0 +1,1 @@
+The C reference in tests/reference.c is extracted from Google DeepMind MuJoCo 3.14.0, Copyright 2021 DeepMind Technologies Limited, under Apache License 2.0 (LICENSE-MuJoCo). MJ.LU implements the corresponding dense and reverse sparse algorithms in Ada/SPARK. Original notices are preserved in the extracted C source.

@@ -1,0 +1,28 @@
+project Benchmark is
+   Build_Root := external ("CHOLESKY_BUILD_ROOT", "/tmp/sparkling-cholesky");
+   for Languages use ("Ada", "C");
+   for Source_Dirs use ("src", "tests", "../../src", "../../mujoco/src/engine");
+   for Source_Files use
+     ("cholesky_bench.adb", "mj.ads", "mj-types.ads", "mj-quaternion_math.ads",
+      "mj-cholesky_models.ads", "mj-cholesky_models.adb", "mj-cholesky.ads", "mj-cholesky.adb", "mj-cholesky_steps.ads", "mj-cholesky_steps.adb",
+      "engine_util_solve.c", "engine_util_blas.c");
+   for Object_Dir use Build_Root & "/obj/benchmark";
+   for Exec_Dir use Build_Root & "/bin/benchmark";
+   for Main use ("cholesky_bench.adb");
+   for Create_Missing_Dirs use "True";
+   Common := ("-O3", "-march=native", "-flto", "-ffat-lto-objects", "-ffp-contract=off",
+              "-ffinite-math-only", "-fno-trapping-math", "-fno-math-errno",
+              "-ffunction-sections", "-fdata-sections");
+   package Compiler is
+      for Default_Switches ("Ada") use Common & ("-gnat2022", "-gnatp", "-gnatn");
+      for Switches ("mj-cholesky.adb") use Common &
+        ("-gnat2022", "-gnatp", "-gnatn");
+      for Default_Switches ("C") use Common & ("-std=gnu11", "-DmjUSEPLATFORMSIMD",
+        "-I" & Benchmark'Project_Dir & "../../mujoco/include",
+        "-I" & Benchmark'Project_Dir & "../../mujoco/src");
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use
+        ("-flto", "-fuse-linker-plugin", "-ffp-contract=off", "-Wl,--gc-sections", "-lm");
+   end Linker;
+end Benchmark;

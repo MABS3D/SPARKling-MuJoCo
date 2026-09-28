@@ -1,0 +1,44 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                      Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------
+Data Dependencies                 7           7                            .           .          .
+Flow Dependencies                 .           .                            .           .          .
+Initialization                    .           .                            .           .          .
+Non-Aliasing                      .           .                            .           .          .
+Run-time Checks                  34           .    34 (CVC5 9%, Trivial 91%)           .          .
+Assertions                        .           .                            .           .          .
+Functional Contracts              9           .         9 (CVC5 50%, Z3 50%)           .          .
+LSP Verification                  .           .                            .           .          .
+Termination                       7           7                            .           .          .
+Concurrency                       .           .                            .           .          .
+---------------------------------------------------------------------------------------------------
+Total                            57    14 (25%)                     43 (75%)           .          .
+
+
+max steps used for successful proof: 17205
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky_steps.adb:6:27: range check proved in max 3 seconds
+mj-cholesky_steps.ads:37:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky_steps, 8 subprograms and packages out of 8 analyzed
+  MJ.Cholesky_Steps at mj-cholesky_steps.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky_Steps.Clamp at mj-cholesky_steps.ads:21 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Cholesky_Steps.Factor_Entry at mj-cholesky_steps.ads:30 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Cholesky_Steps.Product at mj-cholesky_steps.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Cholesky_Steps.Root at mj-cholesky_steps.ads:26 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Cholesky_Steps.Update_Entry at mj-cholesky_steps.ads:34 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.Cholesky_Steps.Update_Square at mj-cholesky_steps.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Cholesky_Steps.Update_Vector at mj-cholesky_steps.ads:41 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)

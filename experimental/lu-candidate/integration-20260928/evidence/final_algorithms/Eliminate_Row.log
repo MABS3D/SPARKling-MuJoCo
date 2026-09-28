@@ -1,0 +1,357 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-lu.adb:93:20
+
+ info: overflow check proved
+--> mj-lu.adb:93:24
+
+ info: overflow check proved
+--> mj-lu.adb:93:26
+
+ info: index check proved
+--> mj-lu.adb:93:26
+
+ info: overflow check proved
+--> mj-lu.adb:97:11
+
+ info: overflow check proved
+--> mj-lu.adb:97:13
+
+ info: index check proved
+--> mj-lu.adb:97:13
+
+ info: overflow check proved
+--> mj-lu.adb:102:20
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-lu.adb:102:30
+
+ info: overflow check proved
+--> mj-lu.adb:103:17
+
+ info: overflow check proved
+--> mj-lu.adb:103:19
+
+ info: index check proved
+--> mj-lu.adb:103:19
+
+ medium: range check might fail
+--> mj-lu.adb:103:41
+  103 |                A (I*N+J) := Fast_Subtract (A (I*N+J), A (K*N+J), T);
+      |                                            ^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + possible fix: loop at line 102 should mention A in a loop invariant
+  102 |             for J in K+1 .. N-1 loop
+      |                                 ^
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.adb:103:45
+
+ info: overflow check proved
+--> mj-lu.adb:103:47
+
+ info: index check proved
+--> mj-lu.adb:103:47
+
+ medium: range check might fail
+--> mj-lu.adb:103:52
+  103 |                A (I*N+J) := Fast_Subtract (A (I*N+J), A (K*N+J), T);
+      |                                                       ^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + possible fix: loop at line 102 should mention A in a loop invariant
+  102 |             for J in K+1 .. N-1 loop
+      |                                 ^
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.adb:103:56
+
+ info: overflow check proved
+--> mj-lu.adb:103:58
+
+ info: index check proved
+--> mj-lu.adb:103:58
+
+ info: range check proved
+--> mj-lu.adb:103:63
+
+ info: overflow check proved
+--> mj-lu.adb:107:17
+
+ info: range check proved
+--> mj-lu.adb:108:15
+
+ info: overflow check proved
+--> mj-lu.adb:108:19
+
+ info: overflow check proved
+--> mj-lu.adb:108:21
+
+ info: index check proved
+--> mj-lu.adb:108:21
+
+ info: range check proved
+--> mj-lu.adb:108:47
+
+ info: overflow check proved
+--> mj-lu.adb:108:51
+
+ info: overflow check proved
+--> mj-lu.adb:108:53
+
+ info: index check proved
+--> mj-lu.adb:108:53
+
+ info: range check proved
+--> mj-lu.adb:108:58
+
+ info: overflow check proved
+--> mj-lu.adb:108:62
+
+ info: overflow check proved
+--> mj-lu.adb:108:64
+
+ info: index check proved
+--> mj-lu.adb:108:64
+
+ info: overflow check proved
+--> mj-lu.adb:110:14
+
+ info: overflow check proved
+--> mj-lu.adb:110:16
+
+ info: index check proved
+--> mj-lu.adb:110:16
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:111:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-lu.adb:111:33
+  111 |             pragma Loop_Invariant (Bounded (A) and then Result = Success);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:112:33
+
+ info: loop invariant preservation proved
+--> mj-lu.adb:112:33
+
+ info: overflow check proved
+--> mj-lu.adb:112:37
+
+ info: overflow check proved
+--> mj-lu.adb:112:39
+
+ info: index check proved
+--> mj-lu.adb:112:39
+
+ info: overflow check proved
+--> mj-lu.adb:112:60
+
+ info: overflow check proved
+--> mj-lu.adb:112:62
+
+ info: index check proved
+--> mj-lu.adb:112:62
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:113:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove A (V) = (if V in I*N+K+1 .. I*N+J then A'Loop_Entry (V) - A (I*N+K)*A'Loop_Entry (K*N+(V-I*N)) else A'Loop_Entry (V))
+--> mj-lu.adb:113:57
+  113 |             pragma Loop_Invariant (for all V in A'Range => A (V) =
+      |                                                            ^~~~~~~
+      :
+  115 |                else A'Loop_Entry (V)));
+      |                ~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-lu.adb:113:60
+
+ info: overflow check proved
+--> mj-lu.adb:114:22
+
+ info: overflow check proved
+--> mj-lu.adb:114:24
+
+ info: overflow check proved
+--> mj-lu.adb:114:26
+
+ info: overflow check proved
+--> mj-lu.adb:114:33
+
+ info: overflow check proved
+--> mj-lu.adb:114:35
+
+ info: index check proved
+--> mj-lu.adb:114:57
+
+ medium: float overflow check might fail
+--> mj-lu.adb:114:60
+  114 |               (if V in I*N+K+1 .. I*N+J then A'Loop_Entry (V) - A (I*N+K)*A'Loop_Entry (K*N+(V-I*N))
+      |                                              ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.adb:114:66
+
+ info: overflow check proved
+--> mj-lu.adb:114:68
+
+ info: index check proved
+--> mj-lu.adb:114:68
+
+ medium: float overflow check might fail
+--> mj-lu.adb:114:71
+  114 |               (if V in I*N+K+1 .. I*N+J then A'Loop_Entry (V) - A (I*N+K)*A'Loop_Entry (K*N+(V-I*N))
+      |                                                                 ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.adb:114:87
+
+ info: overflow check proved
+--> mj-lu.adb:114:89
+
+ info: index check proved
+--> mj-lu.adb:114:89
+
+ info: overflow check proved
+--> mj-lu.adb:114:92
+
+ info: overflow check proved
+--> mj-lu.adb:114:94
+
+ info: index check proved
+--> mj-lu.adb:115:32
+
+ info: initialization of "Result" proved
+--> mj-lu.ads:85:49
+
+ info: data dependencies proved
+--> mj-lu.ads:86:11
+
+ info: overflow check proved
+--> mj-lu.ads:88:51
+
+ info: overflow check proved
+--> mj-lu.ads:88:53
+
+ info: index check proved
+--> mj-lu.ads:88:53
+
+ info: overflow check proved
+--> mj-lu.ads:89:27
+
+ info: overflow check proved
+--> mj-lu.ads:89:29
+
+ info: index check proved
+--> mj-lu.ads:89:29
+
+ medium: postcondition might fail
+--> mj-lu.ads:90:14
+   90 |         Post => Bounded (A) and then Result in Success | Numeric_Limit
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+   95 |               A (I*N+J) = A'Old (I*N+J) - A (I*N+K)*A'Old (K*N+J)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.ads:92:24
+
+ info: overflow check proved
+--> mj-lu.ads:92:26
+
+ info: overflow check proved
+--> mj-lu.ads:92:33
+
+ info: overflow check proved
+--> mj-lu.ads:92:35
+
+ info: index check proved
+--> mj-lu.ads:92:48
+
+ info: index check proved
+--> mj-lu.ads:92:60
+
+ info: overflow check proved
+--> mj-lu.ads:93:47
+
+ info: overflow check proved
+--> mj-lu.ads:93:49
+
+ info: index check proved
+--> mj-lu.ads:93:49
+
+ info: overflow check proved
+--> mj-lu.ads:93:63
+
+ info: overflow check proved
+--> mj-lu.ads:93:65
+
+ info: index check proved
+--> mj-lu.ads:93:65
+
+ info: float overflow check proved
+--> mj-lu.ads:93:68
+
+ info: overflow check proved
+--> mj-lu.ads:94:34
+
+ info: overflow check proved
+--> mj-lu.ads:95:16
+
+ info: overflow check proved
+--> mj-lu.ads:95:18
+
+ info: index check proved
+--> mj-lu.ads:95:18
+
+ info: overflow check proved
+--> mj-lu.ads:95:32
+
+ info: overflow check proved
+--> mj-lu.ads:95:34
+
+ medium: array index check might fail
+--> mj-lu.ads:95:34
+   95 |               A (I*N+J) = A'Old (I*N+J) - A (I*N+K)*A'Old (K*N+J)));
+      |                                  ~~~^~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-lu.ads:95:38
+
+ info: overflow check proved
+--> mj-lu.ads:95:44
+
+ info: overflow check proved
+--> mj-lu.ads:95:46
+
+ info: index check proved
+--> mj-lu.ads:95:46
+
+ info: float overflow check proved
+--> mj-lu.ads:95:49
+
+ info: overflow check proved
+--> mj-lu.ads:95:58
+
+ info: overflow check proved
+--> mj-lu.ads:95:60
+
+ info: index check proved
+--> mj-lu.ads:95:60
+Summary logged in /var/tmp/sparkling-lu-20260928/evidence/final_algorithms/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors

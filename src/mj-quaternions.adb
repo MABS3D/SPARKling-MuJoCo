@@ -180,4 +180,157 @@ package body MJ.Quaternions with SPARK_Mode is
                [Matrix_Component (Q, 2, 0), Matrix_Component (Q, 2, 1), Matrix_Component (Q, 2, 2)]];
       end if;
    end To_Matrix;
+
+   function Select_Matrix_Branch (D0, D1, D2 : Tier0_Real) return Component with
+     Inline_Always, Global => null,
+     Post => (Static => Select_Matrix_Branch'Result = Model.Matrix_Branch (D0, D1, D2))
+   is
+   begin
+      if (D0 + D1) + D2 > 0.0 then
+         return W;
+      elsif D0 > D1 and then D0 > D2 then
+         return X;
+      elsif D1 > D2 then
+         return Y;
+      else
+         return Z;
+      end if;
+   end Select_Matrix_Branch;
+
+   function Conversion_Radicand (D0, D1, D2 : Tier0_Real;
+                                Branch : Component) return Real with
+     Inline_Always, Global => null,
+     Pre => (Static => Branch = Model.Matrix_Branch (D0, D1, D2)),
+     Post => (Static => Conversion_Radicand'Result = Model.Matrix_Radicand (D0, D1, D2, Branch))
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Radicand);
+   begin
+      case Branch is
+         when W => return ((1.0 + D0) + D1) + D2;
+         when X => return ((1.0 + D0) - D1) - D2;
+         when Y => return ((1.0 - D0) + D1) - D2;
+         when Z => return ((1.0 - D0) - D1) + D2;
+      end case;
+   end Conversion_Radicand;
+
+   function Conversion_Quotient (Left, Right : Tier0_Real;
+                                 Pivot : Real; Subtract : Boolean) return Tier1_Real with
+     Inline_Always, Global => null, Pre => Pivot in Min_Val .. 1.0e15,
+     Post => (Static => Conversion_Quotient'Result =
+       Model.Matrix_Quotient (Left, Right, Pivot, Subtract))
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Quotient);
+   begin
+      if Subtract then
+         return (0.25 * (Left - Right)) / Pivot;
+      else
+         return (0.25 * (Left + Right)) / Pivot;
+      end if;
+   end Conversion_Quotient;
+
+   procedure Convert_Raw (R : out Quaternion; A : Matrix_3;
+                          Branch : Component; Pivot : Real) with
+     Inline_Always, Global => null,
+     Pre => (Static => MJ.Matrix_Types.In_Tier0 (A) and then Pivot in Min_Val .. 1.0e15
+       and then Branch = Model.Matrix_Branch (A (0, 0), A (1, 1), A (2, 2))),
+     Post => (Static => In_Tier1 (R) and then R = Model.Matrix_Raw (A, Pivot))
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Raw);
+   begin
+      case Branch is
+         when W => R := [Pivot,
+           Conversion_Quotient (A (2, 1), A (1, 2), Pivot, True),
+           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, True),
+           Conversion_Quotient (A (1, 0), A (0, 1), Pivot, True)];
+         when X => R := [Conversion_Quotient (A (2, 1), A (1, 2), Pivot, True), Pivot,
+           Conversion_Quotient (A (0, 1), A (1, 0), Pivot, False),
+           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, False)];
+         when Y => R := [Conversion_Quotient (A (0, 2), A (2, 0), Pivot, True),
+           Conversion_Quotient (A (0, 1), A (1, 0), Pivot, False), Pivot,
+           Conversion_Quotient (A (1, 2), A (2, 1), Pivot, False)];
+         when Z => R := [Conversion_Quotient (A (1, 0), A (0, 1), Pivot, True),
+           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, False),
+           Conversion_Quotient (A (1, 2), A (2, 1), Pivot, False), Pivot];
+      end case;
+   end Convert_Raw;
+
+   function Conversion_Length (Q : Quaternion) return Nonnegative_Real with
+     Inline_Always, Global => null, Pre => In_Tier1 (Q),
+     Post => (Static => Conversion_Length'Result = Model.Normalization_Length (Q))
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Normalization_Length);
+   begin
+      return MJ.Quaternion_Math.Sqrt
+        (abs (((Q (W)*Q (W) + Q (X)*Q (X)) + Q (Y)*Q (Y)) + Q (Z)*Q (Z)));
+   end Conversion_Length;
+
+   --  Keep C's scalar norm/threshold path here. The public Normalize's exact
+   --  zero/one shortcuts and SIMD square packing add cost to this conversion.
+   --  Both paths implement the same ordered normalization model.
+   procedure Normalize_Conversion (Q : in out Quaternion) with
+     Inline_Always, Global => null, Pre => In_Tier1 (Q),
+     Post => (Static => In_Tier2 (Q) and then Q = Model.Normalized (Q'Old))
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Normalized);
+      Original : constant Quaternion := Q;
+      Expected : constant Quaternion := Model.Normalized (Original) with Ghost => Static;
+      Length : constant Nonnegative_Real := Conversion_Length (Original);
+      Inv : Real range 0.0 .. 1.0e15;
+   begin
+      if Length < Min_Val then
+         Q := Identity;
+      elsif abs (Length - 1.0) > Min_Val then
+         Inv := 1.0 / Length;
+         Q := [Scale_Component (Original (W), Inv), Scale_Component (Original (X), Inv),
+               Scale_Component (Original (Y), Inv), Scale_Component (Original (Z), Inv)];
+      end if;
+      pragma Assert (Static => Q (W) = Expected (W));
+      pragma Assert (Static => Q (X) = Expected (X));
+      pragma Assert (Static => Q (Y) = Expected (Y));
+      pragma Assert (Static => Q (Z) = Expected (Z));
+   end Normalize_Conversion;
+
+   --  Array equality is component-wise numerical equality, not identity of
+   --  the prover's array objects. Prove that normalization respects it before
+   --  substituting the independently specified raw quaternion at the caller.
+   procedure Equal_Normalization (A, B : Quaternion) with
+     Ghost => Static, Global => null,
+     Pre => In_Tier1 (A) and then In_Tier1 (B) and then A = B,
+     Post => Model.Normalized (A) = Model.Normalized (B)
+   is
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Normalized);
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Normalization_Length);
+   begin
+      pragma Assert (Model.Normalization_Length (A) = Model.Normalization_Length (B));
+      pragma Assert (Model.Normalized_Component (A, W) = Model.Normalized_Component (B, W));
+      pragma Assert (Model.Normalized_Component (A, X) = Model.Normalized_Component (B, X));
+      pragma Assert (Model.Normalized_Component (A, Y) = Model.Normalized_Component (B, Y));
+      pragma Assert (Model.Normalized_Component (A, Z) = Model.Normalized_Component (B, Z));
+   end Equal_Normalization;
+
+   procedure From_Matrix (R : out Quaternion; A : Matrix_3;
+                          Result : out Conversion_Status) is
+      Branch : constant Component := Select_Matrix_Branch (A (0, 0), A (1, 1), A (2, 2));
+      Radicand : constant Real := Conversion_Radicand (A (0, 0), A (1, 1), A (2, 2), Branch);
+      --  Radicand is proved nonnegative. Abs is redundant numerically and lets
+      --  the compiler discard the runtime elementary function's domain branch.
+      Pivot : constant Nonnegative_Real := 0.5 * MJ.Quaternion_Math.Sqrt (abs Radicand);
+      Raw : Quaternion;
+   begin
+      pragma Assert (Static => Pivot = Model.Matrix_Pivot (A));
+      if Pivot not in Min_Val .. 1.0e15 then
+         R := Identity;
+         Result := Numeric_Limit;
+         return;
+      end if;
+      Convert_Raw (Raw, A, Branch, Pivot);
+      pragma Assert_And_Cut (Static => MJ.Matrix_Types.In_Tier0 (A)
+        and then Model.Matrix_Conversion_Safe (A)
+        and then In_Tier1 (Raw)
+        and then Raw = Model.Matrix_Raw (A, Model.Matrix_Pivot (A)));
+      Equal_Normalization (Raw, Model.Matrix_Raw (A, Model.Matrix_Pivot (A)));
+      R := Raw;
+      Normalize_Conversion (R);
+      Result := Success;
+   end From_Matrix;
 end MJ.Quaternions;

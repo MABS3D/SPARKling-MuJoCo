@@ -1,0 +1,20 @@
+{
+  "steps": {
+    "env": {
+      "CHOLESKY_BUILD_ROOT": "/tmp/cholesky-proof-final-steps"
+    },
+    "command": "gnatprove -P experimental/cholesky/checks.gpr -u mj-cholesky_steps.adb --level=2 --timeout=10 --counterexamples=off -j2 --report=all --checks-as-errors=on"
+  },
+  "models": {
+    "env": {
+      "CHOLESKY_BUILD_ROOT": "/tmp/cholesky-proof-typed-models"
+    },
+    "command": "gnatprove -P experimental/cholesky/checks.gpr -u mj-cholesky_models.adb --level=0 --proof=per_path --prover=cvc5,z3,altergo --timeout=3 --steps=0 --counterexamples=off --memlimit=512 -j2 --report=all"
+  },
+  "algorithms": {
+    "env": {
+      "CHOLESKY_BUILD_ROOT": "/tmp/cholesky-proof-complete"
+    },
+    "command": "gnatprove -P experimental/cholesky/checks.gpr -u mj-cholesky.adb --level=0 --proof=per_check --prover=cvc5,z3 --timeout=2 --steps=0 --counterexamples=off --memlimit=512 -j2 --report=all --checks-as-errors=on"
+  }
+}

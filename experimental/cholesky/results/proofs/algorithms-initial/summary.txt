@@ -1,0 +1,53 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                            Provers   Justified    Unproved
+-------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 7          7                                                  .           .           .
+Flow Dependencies                 .          .                                                  .           .           .
+Initialization                   12         12                                                  .           .           .
+Non-Aliasing                      .          .                                                  .           .           .
+Run-time Checks                 204          .    155 (CVC5 45%, Trivial 4%, Z3 39%, altergo 12%)           .          49
+Assertions                       16          .                 10 (CVC5 50%, Z3 30%, altergo 20%)           .           6
+Functional Contracts             16          .                  9 (CVC5 33%, Z3 33%, altergo 33%)           .           7
+LSP Verification                  .          .                                                  .           .           .
+Termination                       5          5                                                  .           .           .
+Concurrency                       .          .                                                  .           .           .
+-------------------------------------------------------------------------------------------------------------------------
+Total                           260    24 (9%)                                          174 (67%)           .    62 (24%)
+
+
+max steps used for successful proof: 46499
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky.adb:20:13: precondition proved in max 2 seconds
+mj-cholesky.adb:21:32: fp_overflow check proved in max 2 seconds
+mj-cholesky.adb:21:85: overflow check proved in max 1 seconds
+mj-cholesky.adb:31:25: precondition proved in max 1 seconds
+mj-cholesky.adb:21:61: overflow check proved in max 1 seconds
+mj-cholesky.adb:21:61: index check proved in max 1 seconds
+mj-cholesky.adb:91:25: index check proved in max 1 seconds
+mj-cholesky.adb:91:49: index check proved in max 1 seconds
+mj-cholesky.adb:38:37: fp_overflow check proved in max 1 seconds
+mj-cholesky.adb:21:85: index check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky, 9 subprograms and packages out of 9 analyzed
+  MJ.Cholesky at mj-cholesky.ads:8 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Dot at mj-cholesky.adb:6 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and not proved, 72 checks out of 90 proved
+  MJ.Cholesky.Factor at mj-cholesky.ads:26 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 31 checks out of 41 proved
+  MJ.Cholesky.Positive_Diagonal at mj-cholesky.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Cholesky.Same_Upper at mj-cholesky.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Cholesky.Shape at mj-cholesky.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 0 checks out of 1 proved
+  MJ.Cholesky.Solve at mj-cholesky.ads:32 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 21 checks out of 29 proved
+  MJ.Cholesky.Update at mj-cholesky.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 40 checks out of 64 proved
+  MJ.Cholesky.Vector_Shape at mj-cholesky.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 0 checks out of 1 proved

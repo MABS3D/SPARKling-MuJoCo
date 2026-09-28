@@ -1,0 +1,221 @@
+{
+  "closed_local": [
+    {
+      "name": "Subtract_Product",
+      "proved": 10,
+      "exit": 0,
+      "log": "final_local/Subtract_Product.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Multiply",
+      "proved": 7,
+      "exit": 0,
+      "log": "final_local/Multiply.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Divide",
+      "proved": 9,
+      "exit": 0,
+      "log": "final_local/Divide.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Clamped",
+      "proved": 3,
+      "exit": 0,
+      "log": "final_local/Clamped.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Fast_Subtract",
+      "proved": 8,
+      "exit": 0,
+      "log": "final_local/Fast_Subtract.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Magnitude",
+      "proved": 9,
+      "exit": 0,
+      "log": "final_local/Magnitude.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Swap_Entries",
+      "proved": 10,
+      "exit": 0,
+      "log": "final_local/Swap_Entries.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Find_Pivot",
+      "proved": 27,
+      "exit": 0,
+      "log": "final_local/Find_Pivot.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Analyze",
+      "proved": 21,
+      "exit": 0,
+      "log": "final_local/Analyze.log",
+      "scope": "stated local contract; not global LU correctness"
+    },
+    {
+      "name": "Solve_Sparse",
+      "proved": 40,
+      "exit": 0,
+      "log": "final_local/Solve_Sparse.log",
+      "scope": "safety and bounded output only"
+    }
+  ],
+  "closed_checks": 144,
+  "full_gold": false,
+  "note": "Specification identical and all listed proved bodies byte-for-byte unchanged from final_local snapshot. Global functional LU/solve model remains unimplemented. final_algorithms records remaining obligations against delivered sources.",
+  "open_algorithms": [
+    {
+      "name": "Solve_Dense",
+      "line": 150,
+      "exit": 1,
+      "seconds": 61.668129601021064,
+      "open": [
+        " medium: postcondition might fail"
+      ],
+      "proved": 39,
+      "command": [
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-lu-20260928/evidence/final_algorithms/proof.gpr",
+        "-u",
+        "mj-lu.adb",
+        "--limit-subp=mj-lu.adb:150",
+        "--timeout=5",
+        "--steps=0",
+        "--prover=cvc5,z3,altergo",
+        "--proof=per_path",
+        "-j2",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--counterexamples=off"
+      ]
+    },
+    {
+      "name": "Swap_Rows",
+      "line": 49,
+      "exit": 1,
+      "seconds": 28.83110092600691,
+      "open": [
+        " medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove A (K) = (if K in BI .. BI+C then A'Loop_Entry (BJ+(K-BI)) elsif K in BJ .. BJ+C then A'Loop_Entry (BI+(K-BJ)) else A'Loop_Entry (K))"
+      ],
+      "proved": 43,
+      "command": [
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-lu-20260928/evidence/final_algorithms/proof.gpr",
+        "-u",
+        "mj-lu.adb",
+        "--limit-subp=mj-lu.adb:49",
+        "--timeout=5",
+        "--steps=0",
+        "--prover=cvc5,z3,altergo",
+        "--proof=per_path",
+        "-j2",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--counterexamples=off"
+      ]
+    },
+    {
+      "name": "Eliminate_Row",
+      "line": 91,
+      "exit": 1,
+      "seconds": 137.7853444610082,
+      "open": [
+        " medium: range check might fail",
+        " medium: range check might fail",
+        " medium: loop invariant might not be preserved by an arbitrary iteration",
+        " medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove A (V) = (if V in I*N+K+1 .. I*N+J then A'Loop_Entry (V) - A (I*N+K)*A'Loop_Entry (K*N+(V-I*N)) else A'Loop_Entry (V))",
+        " medium: float overflow check might fail",
+        " medium: float overflow check might fail",
+        " medium: postcondition might fail",
+        " medium: array index check might fail"
+      ],
+      "proved": 95,
+      "command": [
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-lu-20260928/evidence/final_algorithms/proof.gpr",
+        "-u",
+        "mj-lu.adb",
+        "--limit-subp=mj-lu.adb:91",
+        "--timeout=5",
+        "--steps=0",
+        "--prover=cvc5,z3,altergo",
+        "--proof=per_path",
+        "-j2",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--counterexamples=off"
+      ]
+    },
+    {
+      "name": "Factor_Dense",
+      "line": 119,
+      "exit": 1,
+      "seconds": 84.39806375800981,
+      "open": [
+        " medium: precondition might fail",
+        " medium: loop invariant might fail in first iteration, cannot prove abs A (J*N+J) >= Min_Val",
+        " medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove abs A (J*N+J) >= Min_Val",
+        " medium: range check might fail",
+        " medium: postcondition might fail"
+      ],
+      "proved": 40,
+      "command": [
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-lu-20260928/evidence/final_algorithms/proof.gpr",
+        "-u",
+        "mj-lu.adb",
+        "--limit-subp=mj-lu.adb:119",
+        "--timeout=5",
+        "--steps=0",
+        "--prover=cvc5,z3,altergo",
+        "--proof=per_path",
+        "-j2",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--counterexamples=off"
+      ]
+    },
+    {
+      "name": "Factor_Sparse",
+      "line": 180,
+      "exit": 1,
+      "seconds": 57.59136807901086,
+      "open": [
+        " medium: precondition might fail",
+        " medium: postcondition might fail"
+      ],
+      "proved": 105,
+      "command": [
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-lu-20260928/evidence/final_algorithms/proof.gpr",
+        "-u",
+        "mj-lu.adb",
+        "--limit-subp=mj-lu.adb:180",
+        "--timeout=5",
+        "--steps=0",
+        "--prover=cvc5,z3,altergo",
+        "--proof=per_path",
+        "-j2",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--counterexamples=off"
+      ]
+    }
+  ]
+}

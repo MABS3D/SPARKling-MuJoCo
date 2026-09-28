@@ -1,0 +1,53 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                               Provers   Justified    Unproved
+-------------------------------------------------------------------------------------------------------------
+Data Dependencies                 7           7                                     .           .           .
+Flow Dependencies                 .           .                                     .           .           .
+Initialization                   13          13                                     .           .           .
+Non-Aliasing                      .           .                                     .           .           .
+Run-time Checks                 204           .    132 (CVC5 48%, Trivial 2%, Z3 49%)           .          72
+Assertions                       16           .                  9 (CVC5 69%, Z3 31%)           .           7
+Functional Contracts             16           .                  6 (CVC5 29%, Z3 71%)           .          10
+LSP Verification                  .           .                                     .           .           .
+Termination                       5           5                                     .           .           .
+Concurrency                       .           .                                     .           .           .
+-------------------------------------------------------------------------------------------------------------
+Total                           261    25 (10%)                             147 (56%)           .    89 (34%)
+
+
+max steps used for successful proof: 33586
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky.adb:33:13: loop invariant after first iteration proved in max 2 seconds
+mj-cholesky.adb:91:49: index check proved in max 2 seconds
+mj-cholesky.adb:42:28: index check proved in max 2 seconds
+mj-cholesky.adb:21:61: overflow check proved in max 2 seconds
+mj-cholesky.adb:21:61: index check proved in max 1 seconds
+mj-cholesky.adb:41:37: fp_overflow check proved in max 1 seconds
+mj-cholesky.adb:38:37: fp_overflow check proved in max 1 seconds
+mj-cholesky.adb:30:23: loop invariant in first iteration proved in max 1 seconds
+mj-cholesky.adb:39:29: index check proved in max 1 seconds
+mj-cholesky.adb:39:41: index check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky, 9 subprograms and packages out of 9 analyzed
+  MJ.Cholesky at mj-cholesky.ads:8 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Dot at mj-cholesky.adb:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 61 checks out of 90 proved
+  MJ.Cholesky.Factor at mj-cholesky.ads:26 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 27 checks out of 41 proved
+  MJ.Cholesky.Positive_Diagonal at mj-cholesky.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Cholesky.Same_Upper at mj-cholesky.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Cholesky.Shape at mj-cholesky.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Cholesky.Solve at mj-cholesky.ads:32 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 13 checks out of 29 proved
+  MJ.Cholesky.Update at mj-cholesky.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 34 checks out of 64 proved
+  MJ.Cholesky.Vector_Shape at mj-cholesky.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)

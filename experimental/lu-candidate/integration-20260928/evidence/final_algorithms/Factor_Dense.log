@@ -1,0 +1,161 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Max_Row" proved
+--> mj-lu.adb:121:07
+
+ info: initialization of "Reciprocal" proved
+--> mj-lu.adb:122:07
+
+ info: precondition proved
+--> mj-lu.adb:123:30
+
+ info: length check proved
+--> mj-lu.adb:125:09
+
+ info: range check proved
+--> mj-lu.adb:125:12
+
+ info: range check proved
+--> mj-lu.adb:125:23
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:127:33
+
+ info: loop invariant preservation proved
+--> mj-lu.adb:127:33
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:128:33
+
+ info: loop invariant preservation proved
+--> mj-lu.adb:128:33
+
+ info: overflow check proved
+--> mj-lu.adb:128:66
+
+ info: overflow check proved
+--> mj-lu.adb:128:68
+
+ info: index check proved
+--> mj-lu.adb:128:68
+
+ info: precondition proved
+--> mj-lu.adb:130:28
+
+ info: precondition proved
+--> mj-lu.adb:133:21
+
+ info: overflow check proved
+--> mj-lu.adb:134:27
+
+ info: overflow check proved
+--> mj-lu.adb:134:29
+
+ info: index check proved
+--> mj-lu.adb:134:29
+
+ info: index check proved
+--> mj-lu.adb:135:13
+
+ info: precondition proved
+--> mj-lu.adb:136:31
+
+ info: division check proved
+--> mj-lu.adb:137:27
+
+ info: float overflow check proved
+--> mj-lu.adb:137:27
+
+ info: range check proved
+--> mj-lu.adb:137:27
+
+ info: overflow check proved
+--> mj-lu.adb:137:32
+
+ info: overflow check proved
+--> mj-lu.adb:137:34
+
+ info: index check proved
+--> mj-lu.adb:137:34
+
+ info: overflow check proved
+--> mj-lu.adb:138:20
+
+ medium: precondition might fail
+--> mj-lu.adb:139:13
+  139 |                Eliminate_Row (A, N, K, I, Reciprocal, Result, Stage_Limit);
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-lu.adb:139:37
+
+ info: loop invariant initialization proved
+--> mj-lu.adb:141:36
+
+ info: loop invariant preservation proved
+--> mj-lu.adb:141:36
+
+ medium: loop invariant might fail in first iteration, cannot prove abs A (J*N+J) >= Min_Val
+--> mj-lu.adb:142:59
+  142 |                pragma Loop_Invariant (for all J in 0 .. K => abs A (J*N+J) >= Min_Val);
+      |                                                              ^~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove abs A (J*N+J) >= Min_Val
+--> mj-lu.adb:142:59
+  142 |                pragma Loop_Invariant (for all J in 0 .. K => abs A (J*N+J) >= Min_Val);
+      |                                                              ^~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.adb:142:67
+
+ info: overflow check proved
+--> mj-lu.adb:142:69
+
+ info: index check proved
+--> mj-lu.adb:142:69
+
+ info: float overflow check proved
+--> mj-lu.adb:146:58
+
+ medium: range check might fail
+--> mj-lu.adb:146:58
+  146 |             if Stage_Limit <= 1.0e98 then Stage_Limit := 4.0*Stage_Limit; end if;
+      |                                                          ~~~^~~~~~~~~~~~
+      + reason for check: result of multiplication must fit in the target type of the assignment
+      + possible fix: loop invariant at line 127 should mention Stage_Limit
+  127 |             pragma Loop_Invariant (Bounded (A) and then Pivots_Valid (P, N) and then Result = Success);
+      |             ^
+      + provers reached time limit before completing the proof
+
+ info: initialization of "P" proved
+--> mj-lu.ads:99:28
+
+ info: initialization of "Result" proved
+--> mj-lu.ads:99:47
+
+ info: data dependencies proved
+--> mj-lu.ads:100:11
+
+ medium: postcondition might fail
+--> mj-lu.ads:102:14
+  102 |         Post => Bounded (A) and then Pivots_Valid (P, N)
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+  104 |           and then (if Result = Success then (for all I in 0 .. N-1 => abs A (I*N+I) >= Min_Val));
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-lu.ads:104:77
+
+ info: overflow check proved
+--> mj-lu.ads:104:79
+
+ info: index check proved
+--> mj-lu.ads:104:79
+Summary logged in /var/tmp/sparkling-lu-20260928/evidence/final_algorithms/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors

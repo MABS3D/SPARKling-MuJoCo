@@ -1,0 +1,10 @@
+project Bench is
+ for Source_Dirs use ("src", "tests");
+ for Object_Dir use "bench-obj";
+ for Exec_Dir use "bin";
+ for Main use ("lu_bench.adb");
+ for Create_Missing_Dirs use "True";
+ package Compiler is
+  for Default_Switches ("Ada") use ("-gnat2022", "-O3", "-march=native", "-gnatn", "-gnatp", "-ffp-contract=off");
+ end Compiler;
+end Bench;

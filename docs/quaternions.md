@@ -32,19 +32,21 @@ To_Matrix (Rotation, Q);
 | `Normalize` | Original length; tiny-norm identity fallback; near-unit no-op; otherwise component scaling | `mju_normalize4` |
 | `Rotate` | Exact ordered reference expression, including zero-vector and positive-identity shortcuts | `mju_rotVecQuat` |
 | `To_Matrix` | Nine ordered reference expressions and positive-identity shortcut | `mju_quat2Mat` |
+| `From_Matrix` | Four-branch selection, ordered pivot/quotient expressions, explicit numeric rejection and final normalization | `mju_mat2Quat` |
 
 Conjugation equals the inverse only for unit quaternions. `q` and `-q` encode the
 same ideal rotation, but their floating-point branches need not coincide.
-Multiplication and conversion require components in the existing Tier0 domain
+Multiplication and conversion require input components in the existing Tier0 domain
 `[-1e10,1e10]`; rotation also requires a Tier0 vector. `Norm` and `Normalize`
 accept Tier1 inputs (`[-1e30,1e30]`) so products can be normalized by the pose
-kernel. Multiplication/conversion outputs are Tier1; rotation outputs are Tier2.
+kernel. Multiplication and `To_Matrix` outputs are Tier1; rotation and
+`From_Matrix` outputs have a conservative Tier2 bound.
 Normalization retains a Tier1 output guarantee for Tier0 inputs and has a
 conservative Tier2 guarantee over the extended domain.
 Identity and conjugation have no Tier0 precondition. Inputs are finite values
 under the project's floating-point model; NaNs and infinities are unsupported.
 
-No unit-length precondition is imposed just to simplify proofs. Conversion uses
+No unit-length precondition is imposed just to simplify proofs. `To_Matrix` uses
 MuJoCo's square-and-product formula, including its behavior for nonunit inputs.
 It does not substitute the algebraically equivalent `1 - 2*(...)` formula.
 
@@ -81,9 +83,13 @@ specification.
 
 ## Scope
 
-This increment contains only quaternion algebra and its vector/matrix outputs.
-Axis-angle, matrix-to-quaternion conversion, interpolation, angular differences,
-Euler angles and time integration are outside this increment. There is no new
+The [matrix-to-quaternion increment](../tests/matrix_to_quaternion/README.md)
+adds `From_Matrix (Q, A, Result)` with bounded matrix inputs and an explicit
+`Conversion_Status`. Its separate evidence records the new proof and test scope;
+the historical counts below do not include that increment.
+
+Axis-angle, interpolation, angular differences, Euler angles and time integration
+remain outside this kernel. There is no new
 6D spatial algebra or simulator integration. Existing experimental smooth code
 has not been migrated to this API.
 
