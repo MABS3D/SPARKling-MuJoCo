@@ -1,0 +1,23 @@
+project Benchmark is
+   Build_Root := external ("CONTACT_BUILD_ROOT", "/var/tmp/sparkling-contact-20260929/build");
+   Reference_Root := external ("MUJOCO_NATIVE_ROOT", "/var/tmp/sparkling-movement-c");
+   Cxx_Runtime := external ("CONTACT_CXX_RUNTIME", "/var/tmp/sparkling-matrix-recovery/toolchains/gnat/gnat-x86_64-linux-16.1.0-1/lib64");
+   for Languages use ("Ada", "C");
+   for Source_Dirs use ("src", "../../src", "../collision/src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-collision.ads", "mj-collision.adb",
+     "mj-contact_rows.ads", "mj-contact_rows.adb", "mj-contact_slider.ads", "mj-contact_slider.adb",
+     "bench_adapter.ads", "bench_adapter.adb", "bench.c", "contact_bench.adb");
+   for Main use ("contact_bench.adb");
+   for Object_Dir use Build_Root & "/benchmark/obj";
+   for Exec_Dir use Build_Root & "/benchmark/bin";
+   for Create_Missing_Dirs use "True";
+   Common := ("-O3", "-march=native", "-flto", "-ffat-lto-objects", "-ffp-contract=off");
+   package Compiler is
+      for Default_Switches ("Ada") use Common & ("-gnat2022", "-gnatp", "-gnatn");
+      for Default_Switches ("C") use Common & ("-std=c11", "-I" & Reference_Root & "/source/include");
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use Common & ("-L" & Reference_Root & "/build/lib",
+        "-Wl,-rpath," & Reference_Root & "/build/lib", "-lmujoco", "-L" & Cxx_Runtime, "-Wl,-rpath," & Cxx_Runtime, "-lstdc++", "-lm");
+   end Linker;
+end Benchmark;

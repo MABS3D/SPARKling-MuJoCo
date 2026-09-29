@@ -1,5 +1,10 @@
 # Matrix to quaternion
 
+The [2026-09-29 SIMD optimization](optimization_20260929/README.md) retains the
+Gold functional contracts and reduces median conversion time by 5.6–10.8%
+versus C across all ten patterns in two balanced sessions on the measured CPU.
+The original 2026-09-28 results below are preserved as historical evidence.
+
 `MJ.Quaternions.From_Matrix (Q, A, Result)` implements the four branches of
 MuJoCo 3.14.0 `mju_mat2Quat`, commit
 `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. The official latest-release endpoint
@@ -47,9 +52,10 @@ equivalence to C are separate claims. The ordinary C implementation rejected
 none of the test inputs, and neither did the Ada implementation.
 
 The `abs` before each square root is proved numerically redundant; it exposes
-nonnegativity to the compiler. A private normalization helper follows C's scalar
-norm path, avoiding the public normalizer's additional zero/one dispatch and
-SIMD packing. Its result is specified against the same ordered ghost model.
+nonnegativity to the compiler. A private normalization helper retains C's ordered
+scalar sum and threshold path. The optimized implementation packs independent
+divisions and norm squares into SIMD lanes, without reciprocal approximation.
+Its result is specified against the same ordered ghost model.
 Ghost functions are static and are not evaluated in checked or release builds.
 The existing quaternion/pose APIs, arithmetic and deallocators are unchanged.
 
@@ -85,7 +91,7 @@ languages; initialization, IO and model construction are outside timing.
 These are kernel measurements. The smooth dynamics pipeline does not yet call
 this API, so they cannot establish any integrated movement speedup.
 
-## Accepted results
+## Initial results (2026-09-28, before SIMD optimization)
 
 The final source snapshot was checked on 2026-09-28. All **17 new minimal
 subprograms** passed first, followed by fresh complete-unit runs and the
@@ -163,7 +169,7 @@ cases remain open.
 | Zero matrix | 6.22 / 6.22 | 6.85 / 6.98 | 1.101 [1.095, 1.108] | 1.105 [1.095, 1.118] |
 | Mixed unit rotations | 5.25 / 5.24 | 5.62 / 5.62 | 1.066 [1.059, 1.084] | 1.064 [1.058, 1.081] |
 
-The delivered implementation uses a private scalar normalization path. Earlier
+The initial implementation used a private scalar normalization path. Earlier
 diagnostics found extra dispatch and SIMD packing costly for this conversion;
 the existing public `Normalize` implementation was left intact. A fully
 duplicated per-branch implementation was also tried and rejected after slower

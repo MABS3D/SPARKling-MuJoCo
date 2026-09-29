@@ -1,0 +1,2057 @@
+{
+  "unit_integration": {
+    "command": [
+      "gprbuild",
+      "-P",
+      "sparkling_mujoco.gpr",
+      "-XSPARKLING_BUILD_MODE=release",
+      "-XSPARKLING_BUILD_ROOT=/var/tmp/sparkling-matquat-opt-20260929/accepted-evidence/unit-integration",
+      "-c",
+      "-u",
+      "mj-quaternions.adb",
+      "-p",
+      "-j2"
+    ],
+    "code": 0,
+    "started": 1790642198.1081302,
+    "seconds": 1.113095998764038
+  },
+  "date": "2026-09-29",
+  "scope": "matrix-to-quaternion kernel on the recorded CPU; no integrated dynamics performance claim",
+  "source_sha256": {
+    "src/mj-blas.adb": "ff575b79b3186591e00ed854a36719b924c3df2da691a6da10096e4aa2f927fe",
+    "src/mj-blas.ads": "56813f1fb4c6b1b6cb479411c78b34d31542a8d908f7e0cb77e91e62cbcbb309",
+    "src/mj-matrices.adb": "ea74c51a245f3bebfefd6b8d5e2a94dd596e45bd3464ec13b9db4461deaf010c",
+    "src/mj-matrices.ads": "e417e5ad85dc5b7653946e551064e1ac8a252c4faff0e45da81943d30aed3858",
+    "src/mj-matrix_models.adb": "b0e7e043b1e91557ee645cdabd93fa72917c76ec7825c78c341cbc7da8c689fc",
+    "src/mj-matrix_models.ads": "bcbffb73a428ca2c48872f8ff71d71cd7238f18f8f6d527d4a2c035676f37124",
+    "src/mj-matrix_types.adb": "c2292fb63cf54550494fd43551ce9f2792cc9b16bc30ad5ce9ac92a46dad0c4f",
+    "src/mj-matrix_types.ads": "b893182cca6ce88ff49e0de04391097d1b7ff35fb57459f68bbf8721340ae80f",
+    "src/mj-poses.adb": "9f1a97cd42b7905fb0f09da73b2c8ce72de96f588520c8ab47de522b4bb2ea48",
+    "src/mj-poses.ads": "6b4ca730b53f1045b8d3257532a30c9fe1ae898b6a9e9cf1044c21b3e914f202",
+    "src/mj-quaternion_math.ads": "d4ea9952d858b00ac80a0ae1ab6dca14600e29636552082f4f2af5419d322e98",
+    "src/mj-quaternions.adb": "c76f7361ae84641ad84d0b291efb3fa4e5e2b86f2ff2dc46e6792de077b64cdd",
+    "src/mj-quaternions.ads": "e6906327524895b4a0c5d5deb34066b14041ad0b8aa0c7fc56eae06b1a51e134",
+    "src/mj-rotations.adb": "416ff9178f7a11b5a3ec90db73519c98c9b4d3530760e42e4181f729c422605f",
+    "src/mj-rotations.ads": "7d16944a907b4d5d51e3ddd10e8f60f2d5394f7e8730c8e42640b199820cabbc",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "src/mj-vector_models.adb": "d7dc856a85e0478893ff82774aa38d9c542f2ba07ae847930e48e52a40a2f9aa",
+    "src/mj-vector_models.ads": "01b1c99384b8c9457573840ad91ec96dd9ba91ed01f85cba0867d4c69c20ec73",
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62"
+  },
+  "proofs": {
+    "mj-quaternions": {
+      "proof": 629,
+      "flow": 89,
+      "unproved": 0,
+      "warnings": [
+        {
+          "check_tree": {},
+          "col": 10,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 62,
+          "message": {
+            "arguments": [
+              "Loop_Optimize"
+            ],
+            "text": "pragma {0} ignored (not yet supported) [ignored-pragma]"
+          },
+          "rule": "ignored-pragma",
+          "severity": "warning",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 13,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 266,
+          "message": {
+            "arguments": [
+              "Loop_Optimize"
+            ],
+            "text": "pragma {0} ignored (not yet supported) [ignored-pragma]"
+          },
+          "rule": "ignored-pragma",
+          "severity": "warning",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 10,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 290,
+          "message": {
+            "arguments": [
+              "Loop_Optimize"
+            ],
+            "text": "pragma {0} ignored (not yet supported) [ignored-pragma]"
+          },
+          "rule": "ignored-pragma",
+          "severity": "warning",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 68,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 347,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 34,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 91,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 34,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 91,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 28,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 124,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 28,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 124,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 34,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 91,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 28,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 124,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 32,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 71,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 38,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 96,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 68,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 347,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 32,
+          "file": "mj-quaternions.adb",
+          "how_proved": "trivial",
+          "line": 294,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        }
+      ]
+    },
+    "mj-poses": {
+      "proof": 181,
+      "flow": 23,
+      "unproved": 0,
+      "warnings": [
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        },
+        {
+          "check_tree": {},
+          "col": 57,
+          "file": "mj-quaternions.ads",
+          "how_proved": "trivial",
+          "line": 165,
+          "message": {
+            "arguments": [
+              "Sqrt"
+            ],
+            "text": "call to {0} is not handled precisely [imprecise-call]"
+          },
+          "rule": "imprecise-call",
+          "severity": "warning",
+          "suppressed": "",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        }
+      ]
+    },
+    "mj-rotations": {
+      "proof": 55,
+      "flow": 13,
+      "unproved": 0,
+      "warnings": []
+    }
+  },
+  "numerics": {
+    "numeric-matrix_to_quaternion-development": {
+      "mode": "development",
+      "cases": 6207,
+      "comparisons": 24828,
+      "comparison": "exact finite value equality with pinned C; zero sign bits excluded",
+      "anchors": 10,
+      "branches": {
+        "0": 2901,
+        "1": 1059,
+        "2": 1071,
+        "3": 1176
+      },
+      "rotation_roundtrips": 3066,
+      "max_roundtrip_error": 5.551115123125783e-16,
+      "max_squared_norm_error": 6.661338147750939e-16,
+      "precondition_rejections": 18,
+      "timing_fixture_comparisons": 5120
+    },
+    "numeric-matrix_to_quaternion-release": {
+      "mode": "release",
+      "cases": 6207,
+      "comparisons": 24828,
+      "comparison": "exact finite value equality with pinned C; zero sign bits excluded",
+      "anchors": 10,
+      "branches": {
+        "0": 2901,
+        "1": 1059,
+        "2": 1071,
+        "3": 1176
+      },
+      "rotation_roundtrips": 3066,
+      "max_roundtrip_error": 5.551115123125783e-16,
+      "max_squared_norm_error": 6.661338147750939e-16,
+      "precondition_rejections": 0,
+      "timing_fixture_comparisons": 5120
+    },
+    "numeric-matrix_to_quaternion-validation": {
+      "mode": "validation",
+      "cases": 6207,
+      "comparisons": 24828,
+      "comparison": "exact finite value equality with pinned C; zero sign bits excluded",
+      "anchors": 10,
+      "branches": {
+        "0": 2901,
+        "1": 1059,
+        "2": 1071,
+        "3": 1176
+      },
+      "rotation_roundtrips": 3066,
+      "max_roundtrip_error": 5.551115123125783e-16,
+      "max_squared_norm_error": 6.661338147750939e-16,
+      "precondition_rejections": 18,
+      "timing_fixture_comparisons": 5120
+    },
+    "numeric-poses-development": {
+      "mode": "development",
+      "cases": 9404,
+      "scalars": 357352,
+      "comparison": "exact finite numerical equality; zero sign not asserted",
+      "anchors": "passed",
+      "frame": "input storage unchanged",
+      "in_place": "matches separate result"
+    },
+    "numeric-poses-release": {
+      "mode": "release",
+      "cases": 9404,
+      "scalars": 357352,
+      "comparison": "exact finite numerical equality; zero sign not asserted",
+      "anchors": "passed",
+      "frame": "input storage unchanged",
+      "in_place": "matches separate result"
+    },
+    "numeric-poses-validation": {
+      "mode": "validation",
+      "cases": 9404,
+      "scalars": 357352,
+      "comparison": "exact finite numerical equality; zero sign not asserted",
+      "anchors": "passed",
+      "frame": "input storage unchanged",
+      "in_place": "matches separate result"
+    },
+    "numeric-quaternions-development": {
+      "mode": "development",
+      "cases": 4023,
+      "scalars": 152874,
+      "comparison": "exact finite numerical equality",
+      "anchors": "passed"
+    },
+    "numeric-quaternions-release": {
+      "mode": "release",
+      "cases": 4023,
+      "scalars": 152874,
+      "comparison": "exact finite numerical equality",
+      "anchors": "passed"
+    },
+    "numeric-quaternions-validation": {
+      "mode": "validation",
+      "cases": 4023,
+      "scalars": 152874,
+      "comparison": "exact finite numerical equality",
+      "anchors": "passed"
+    }
+  },
+  "codegen": {
+    "binary_sha256": "ec376df6323e156d8aabf8c920b0892bd4b0893cb723c282eec7d67fa6cae64c",
+    "packed_division_and_squares": true,
+    "no_fma": true,
+    "no_executable_quaternion_ghost_symbols": true
+  },
+  "comparison_sessions": [
+    {
+      "session": 1,
+      "cpu": 12,
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 68\nmodel name\t: AMD Ryzen 7 9800X3D 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 4699.895\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 0\ncpu cores\t: 8\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm avx512_vp2intersect\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass\nbogomips\t: 9399.79\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:",
+      "loadavg_start": "1.97 2.58 2.52 1/348 1073705",
+      "active_compiler_prover_processes": [],
+      "blocks": 48,
+      "target_ms": 20,
+      "started_unix": 1790641981.1226926,
+      "binary_sha256": {
+        "old_ada": "52d0703a06eed4e09495d6948df7a014c6ff1a1b400aeb7e4f97d274182ba594",
+        "old_c": "52d0703a06eed4e09495d6948df7a014c6ff1a1b400aeb7e4f97d274182ba594",
+        "new_ada": "ec376df6323e156d8aabf8c920b0892bd4b0893cb723c282eec7d67fa6cae64c",
+        "new_c": "ec376df6323e156d8aabf8c920b0892bd4b0893cb723c282eec7d67fa6cae64c"
+      },
+      "compiler": "\nString dump of section '.comment':\n  [     0]  GCC: (GNAT-FSF-builds) 16.1.0\n\n",
+      "loadavg_end": "1.62 2.39 2.45 2/350 1075853",
+      "ended_unix": 1790642027.2283678,
+      "results": [
+        {
+          "pattern": 0,
+          "repetitions": 62941,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.466908245420314,
+              "mad_ns": 0.0566366219952017,
+              "p95_sample_average_ns": 5.862146444686293
+            },
+            "old_c": {
+              "median_ns": 5.295284969256923,
+              "mad_ns": 0.0456657822405111,
+              "p95_sample_average_ns": 5.437687924008198
+            },
+            "new_ada": {
+              "median_ns": 4.719913664185507,
+              "mad_ns": 0.09570805893614587,
+              "p95_sample_average_ns": 6.082962864031394
+            },
+            "new_c": {
+              "median_ns": 5.2812816516658465,
+              "mad_ns": 0.047559172478989,
+              "p95_sample_average_ns": 5.525022441651705
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.8976025858027596,
+              "mad": 0.0216987399619909,
+              "bootstrap_95": [
+                0.8868746965883425,
+                0.9099107063131056
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.8925224189227743,
+              "mad": 0.01654208293375181,
+              "bootstrap_95": [
+                0.8836230756477303,
+                0.9080935731706883
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0320997730889665,
+              "mad": 0.015373583474054597,
+              "bootstrap_95": [
+                1.028304182011274,
+                1.0446061632885948
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8594246551791023,
+              "mad": 0.01910678189685633,
+              "bootstrap_95": [
+                0.855680355326047,
+                0.8784669148595433
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9950803673406503,
+              "mad": 0.008529437685145136,
+              "bootstrap_95": [
+                0.9909254343831726,
+                0.9996705837745858
+              ],
+              "classification": "faster"
+            }
+          }
+        },
+        {
+          "pattern": 1,
+          "repetitions": 67370,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.512966291561526,
+              "mad_ns": 0.11451093309336446,
+              "p95_sample_average_ns": 6.067851742244322
+            },
+            "old_c": {
+              "median_ns": 5.263850749591807,
+              "mad_ns": 0.04621980295383743,
+              "p95_sample_average_ns": 5.389265437138192
+            },
+            "new_ada": {
+              "median_ns": 4.730584134258573,
+              "mad_ns": 0.10242167786106648,
+              "p95_sample_average_ns": 5.7995266346296575
+            },
+            "new_c": {
+              "median_ns": 5.278290712668843,
+              "mad_ns": 0.049397914502003815,
+              "p95_sample_average_ns": 5.4630986065756275
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.8923986976440089,
+              "mad": 0.02262405079352192,
+              "bootstrap_95": [
+                0.8821244512780602,
+                0.9102085265888923
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.8937028752525817,
+              "mad": 0.02043115111235455,
+              "bootstrap_95": [
+                0.8843103765220572,
+                0.9132503782967396
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0405722714252204,
+              "mad": 0.024746175348929866,
+              "bootstrap_95": [
+                1.0336171309034692,
+                1.06474008663125
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8650873494362821,
+              "mad": 0.027851009000212035,
+              "bootstrap_95": [
+                0.8489568421103744,
+                0.8751709426451824
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.003079991922383,
+              "mad": 0.005810720516814305,
+              "bootstrap_95": [
+                1.0007606388529444,
+                1.0062037683714542
+              ],
+              "classification": "slower"
+            }
+          }
+        },
+        {
+          "pattern": 2,
+          "repetitions": 59540,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.964393553703393,
+              "mad_ns": 0.06153242568021522,
+              "p95_sample_average_ns": 6.3716125713805845
+            },
+            "old_c": {
+              "median_ns": 5.357052506718173,
+              "mad_ns": 0.05662461685421594,
+              "p95_sample_average_ns": 5.653754828686597
+            },
+            "new_ada": {
+              "median_ns": 4.859593865468593,
+              "mad_ns": 0.06805377687269099,
+              "p95_sample_average_ns": 5.620989828266712
+            },
+            "new_c": {
+              "median_ns": 5.337085493995633,
+              "mad_ns": 0.05896915414007342,
+              "p95_sample_average_ns": 5.60291846867652
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9071984967582423,
+              "mad": 0.016769944255831837,
+              "bootstrap_95": [
+                0.8998279640182796,
+                0.9192910755136109
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9077907605425627,
+              "mad": 0.017912098519059172,
+              "bootstrap_95": [
+                0.8988547276708418,
+                0.9171760035204157
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1150036895830648,
+              "mad": 0.019458627678807572,
+              "bootstrap_95": [
+                1.1105103988867202,
+                1.1254850938926535
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8182054602580657,
+              "mad": 0.017940240751142145,
+              "bootstrap_95": [
+                0.8042791909881831,
+                0.8233924469002666
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9878465496048388,
+              "mad": 0.01535351570881427,
+              "bootstrap_95": [
+                0.9817234430806364,
+                1.0020203018615552
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 3,
+          "repetitions": 61220,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.991008095802026,
+              "mad_ns": 0.09159907403626288,
+              "p95_sample_average_ns": 6.38608425555374
+            },
+            "old_c": {
+              "median_ns": 5.312399823382881,
+              "mad_ns": 0.054552740117608245,
+              "p95_sample_average_ns": 5.572639915468801
+            },
+            "new_ada": {
+              "median_ns": 4.9146297421185885,
+              "mad_ns": 0.07372794838288144,
+              "p95_sample_average_ns": 5.872697852009147
+            },
+            "new_c": {
+              "median_ns": 5.31742141559131,
+              "mad_ns": 0.05631827323587091,
+              "p95_sample_average_ns": 5.609479898317543
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.926292780405018,
+              "mad": 0.02281450774506444,
+              "bootstrap_95": [
+                0.9081533649472329,
+                0.9420030041071031
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9289721686128427,
+              "mad": 0.019213101730828908,
+              "bootstrap_95": [
+                0.9185074571679012,
+                0.9382515911169154
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1253854872914133,
+              "mad": 0.02410959169789162,
+              "bootstrap_95": [
+                1.1175310401445737,
+                1.1453027641807678
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8237187923064776,
+              "mad": 0.02145748582060214,
+              "bootstrap_95": [
+                0.8144352463515022,
+                0.832466453636918
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0003238367038252,
+              "mad": 0.017215167000380782,
+              "bootstrap_95": [
+                0.9948102352108065,
+                1.011421524863884
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 4,
+          "repetitions": 63651,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.998248382782674,
+              "mad_ns": 0.07729331628725378,
+              "p95_sample_average_ns": 6.391996738071672
+            },
+            "old_c": {
+              "median_ns": 5.332240827913152,
+              "mad_ns": 0.05745699694427486,
+              "p95_sample_average_ns": 5.6378663041429045
+            },
+            "new_ada": {
+              "median_ns": 4.966160071130068,
+              "mad_ns": 0.1711708427597367,
+              "p95_sample_average_ns": 6.028203111498641
+            },
+            "new_c": {
+              "median_ns": 5.408413899624515,
+              "mad_ns": 0.1165763793970247,
+              "p95_sample_average_ns": 5.795748004744623
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9171929001551132,
+              "mad": 0.02933706425445204,
+              "bootstrap_95": [
+                0.9070803421019135,
+                0.9389248701235823
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9355725362763609,
+              "mad": 0.033136999593991856,
+              "bootstrap_95": [
+                0.9113617063561683,
+                0.9565993590329399
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1210061836936436,
+              "mad": 0.01842048985352951,
+              "bootstrap_95": [
+                1.1089904949453595,
+                1.1343984180066118
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8252390913346723,
+              "mad": 0.029238812675083714,
+              "bootstrap_95": [
+                0.8135965755614987,
+                0.8507712545470425
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0107357526208354,
+              "mad": 0.02220017402203922,
+              "bootstrap_95": [
+                0.9989673152496972,
+                1.0202807647276892
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 5,
+          "repetitions": 64275,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.955785686503306,
+              "mad_ns": 0.08380080707895754,
+              "p95_sample_average_ns": 6.472310141968106
+            },
+            "old_c": {
+              "median_ns": 5.390568966355504,
+              "mad_ns": 0.07178371742512635,
+              "p95_sample_average_ns": 5.697355844029561
+            },
+            "new_ada": {
+              "median_ns": 4.899559631466356,
+              "mad_ns": 0.09032975982108127,
+              "p95_sample_average_ns": 5.579996110462855
+            },
+            "new_c": {
+              "median_ns": 5.377670531894204,
+              "mad_ns": 0.08408474329054849,
+              "p95_sample_average_ns": 5.964964507973551
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9152794590102009,
+              "mad": 0.024207077174879688,
+              "bootstrap_95": [
+                0.9075294592613482,
+                0.9262811635033095
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9149562438011432,
+              "mad": 0.02403625214929561,
+              "bootstrap_95": [
+                0.903228351781765,
+                0.9257723735099851
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1163059651497278,
+              "mad": 0.021917865909921286,
+              "bootstrap_95": [
+                1.1018059406826413,
+                1.1255405351603591
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8229616130460895,
+              "mad": 0.022891191228946617,
+              "bootstrap_95": [
+                0.8187795820987417,
+                0.8315011745350853
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0049899913183067,
+              "mad": 0.022465259138415516,
+              "bootstrap_95": [
+                0.9956738407321238,
+                1.019505227238373
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 6,
+          "repetitions": 54865,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.546945343114919,
+              "mad_ns": 0.11320314635924555,
+              "p95_sample_average_ns": 7.115855964640481
+            },
+            "old_c": {
+              "median_ns": 6.194110828852638,
+              "mad_ns": 0.070294131048938,
+              "p95_sample_average_ns": 6.483567335733163
+            },
+            "new_ada": {
+              "median_ns": 5.611855377973207,
+              "mad_ns": 0.08850160621525571,
+              "p95_sample_average_ns": 6.673971053950606
+            },
+            "new_c": {
+              "median_ns": 6.182154635241046,
+              "mad_ns": 0.06768958466235286,
+              "p95_sample_average_ns": 6.358172616877791
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9070444784344118,
+              "mad": 0.012197239241240942,
+              "bootstrap_95": [
+                0.9023369913164273,
+                0.9135956361710658
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9077281802456407,
+              "mad": 0.017147981446824223,
+              "bootstrap_95": [
+                0.90338545338878,
+                0.9159811471723657
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0577821045913756,
+              "mad": 0.020332247289742478,
+              "bootstrap_95": [
+                1.045574927647547,
+                1.066542120000912
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8528405609112004,
+              "mad": 0.024018836834300006,
+              "bootstrap_95": [
+                0.8463915069001636,
+                0.8721614827491991
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9965249486370547,
+              "mad": 0.013747838082068142,
+              "bootstrap_95": [
+                0.9891839802882446,
+                1.0074028420485905
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 7,
+          "repetitions": 49254,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.5217937565984485,
+              "mad_ns": 0.09026662174645672,
+              "p95_sample_average_ns": 7.101964434360661
+            },
+            "old_c": {
+              "median_ns": 6.196329390760141,
+              "mad_ns": 0.04224085861046767,
+              "p95_sample_average_ns": 6.5057241543834
+            },
+            "new_ada": {
+              "median_ns": 5.69062395313071,
+              "mad_ns": 0.1395776548605192,
+              "p95_sample_average_ns": 6.547932972448939
+            },
+            "new_c": {
+              "median_ns": 6.219594315943883,
+              "mad_ns": 0.10082065035327137,
+              "p95_sample_average_ns": 6.585841695598327
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9147002487113345,
+              "mad": 0.02629424611990827,
+              "bootstrap_95": [
+                0.9045059979558767,
+                0.9313852538582418
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9150891172378635,
+              "mad": 0.024547943167407493,
+              "bootstrap_95": [
+                0.9083094762388246,
+                0.9402363910309367
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0569939421304397,
+              "mad": 0.022563450845113353,
+              "bootstrap_95": [
+                1.047255835559234,
+                1.0666855345452473
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8694322046451874,
+              "mad": 0.027958481982039596,
+              "bootstrap_95": [
+                0.8628802807887184,
+                0.8822300297246334
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0027258565491928,
+              "mad": 0.018541657745192786,
+              "bootstrap_95": [
+                0.9948372841548552,
+                1.0123766617607695
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 8,
+          "repetitions": 55011,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.852117644652887,
+              "mad_ns": 0.07604743255894242,
+              "p95_sample_average_ns": 7.201423067659196
+            },
+            "old_c": {
+              "median_ns": 6.242364169211612,
+              "mad_ns": 0.05969402710366989,
+              "p95_sample_average_ns": 6.597842079311411
+            },
+            "new_ada": {
+              "median_ns": 5.789737649061097,
+              "mad_ns": 0.07067918802603135,
+              "p95_sample_average_ns": 6.489026058424678
+            },
+            "new_c": {
+              "median_ns": 6.239116665303303,
+              "mad_ns": 0.062066279925833356,
+              "p95_sample_average_ns": 6.4723856365090615
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9293682236995695,
+              "mad": 0.015424002844912355,
+              "bootstrap_95": [
+                0.9228052575310265,
+                0.9356618325760342
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9255565556292682,
+              "mad": 0.013534661214870292,
+              "bootstrap_95": [
+                0.9168947403280511,
+                0.9322623249425008
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0970656734837303,
+              "mad": 0.015327322975350222,
+              "bootstrap_95": [
+                1.0932222979643302,
+                1.104339456008452
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8450202121865071,
+              "mad": 0.01676266472960375,
+              "bootstrap_95": [
+                0.834851826312785,
+                0.8507774561657887
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9992072109578154,
+              "mad": 0.014658807757779613,
+              "bootstrap_95": [
+                0.992583651563703,
+                1.006396352437517
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 9,
+          "repetitions": 66063,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.697122680244615,
+              "mad_ns": 0.10105966558436652,
+              "p95_sample_average_ns": 6.241918225784478
+            },
+            "old_c": {
+              "median_ns": 5.356440774336618,
+              "mad_ns": 0.0864332389158835,
+              "p95_sample_average_ns": 5.677312991008582
+            },
+            "new_ada": {
+              "median_ns": 4.862654776501219,
+              "mad_ns": 0.10013535848356891,
+              "p95_sample_average_ns": 5.632088877283805
+            },
+            "new_c": {
+              "median_ns": 5.305764242087099,
+              "mad_ns": 0.055509868421052655,
+              "p95_sample_average_ns": 5.5560066716618985
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9075769668173848,
+              "mad": 0.019094486651361153,
+              "bootstrap_95": [
+                0.8988274410756912,
+                0.9165461541486787
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9040005571154295,
+              "mad": 0.02182203680807232,
+              "bootstrap_95": [
+                0.8948047509056037,
+                0.9150552527307709
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0694265832388212,
+              "mad": 0.02810799321612578,
+              "bootstrap_95": [
+                1.0586241790633772,
+                1.088548588394073
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8472115773673783,
+              "mad": 0.02228167869341824,
+              "bootstrap_95": [
+                0.8345182665301879,
+                0.8571344515022474
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9951219706520139,
+              "mad": 0.01919733593760936,
+              "bootstrap_95": [
+                0.9870339407584723,
+                1.0036678322341304
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "session": 2,
+      "cpu": 12,
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 26\nmodel\t\t: 68\nmodel name\t: AMD Ryzen 7 9800X3D 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0xffffffff\ncpu MHz\t\t: 4699.895\ncache size\t: 1024 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 0\ncpu cores\t: 8\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 13\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm avx512_vp2intersect\nbugs\t\t: sysret_ss_attrs null_seg spectre_v1 spectre_v2 spec_store_bypass\nbogomips\t: 9399.79\nTLB size\t: 192 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 48 bits physical, 48 bits virtual\npower management:",
+      "loadavg_start": "1.37 2.31 2.43 2/352 1075928",
+      "active_compiler_prover_processes": [],
+      "blocks": 48,
+      "target_ms": 20,
+      "started_unix": 1790642038.8461733,
+      "binary_sha256": {
+        "old_ada": "52d0703a06eed4e09495d6948df7a014c6ff1a1b400aeb7e4f97d274182ba594",
+        "old_c": "52d0703a06eed4e09495d6948df7a014c6ff1a1b400aeb7e4f97d274182ba594",
+        "new_ada": "ec376df6323e156d8aabf8c920b0892bd4b0893cb723c282eec7d67fa6cae64c",
+        "new_c": "ec376df6323e156d8aabf8c920b0892bd4b0893cb723c282eec7d67fa6cae64c"
+      },
+      "compiler": "\nString dump of section '.comment':\n  [     0]  GCC: (GNAT-FSF-builds) 16.1.0\n\n",
+      "loadavg_end": "2.39 2.43 2.46 2/353 1078367",
+      "ended_unix": 1790642087.3199544,
+      "results": [
+        {
+          "pattern": 0,
+          "repetitions": 64837,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.445854002151549,
+              "mad_ns": 0.055713028440550705,
+              "p95_sample_average_ns": 5.959761353471012
+            },
+            "old_c": {
+              "median_ns": 5.249905893818345,
+              "mad_ns": 0.017148050110276536,
+              "p95_sample_average_ns": 5.5345122673010785
+            },
+            "new_ada": {
+              "median_ns": 4.747027280912134,
+              "mad_ns": 0.0884014914323612,
+              "p95_sample_average_ns": 5.386146220522233
+            },
+            "new_c": {
+              "median_ns": 5.254995218779401,
+              "mad_ns": 0.022176404869133304,
+              "p95_sample_average_ns": 5.448964807902895
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9007589308345807,
+              "mad": 0.018667687297164393,
+              "bootstrap_95": [
+                0.8911801361757675,
+                0.9125341735564598
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.8971710456557798,
+              "mad": 0.017828513637613286,
+              "bootstrap_95": [
+                0.8889739608244196,
+                0.9135547871156227
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0361628621897354,
+              "mad": 0.0156957949286467,
+              "bootstrap_95": [
+                1.0291583001430584,
+                1.049940861456935
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8666686148307914,
+              "mad": 0.020274453899598588,
+              "bootstrap_95": [
+                0.8568681623052603,
+                0.8809795680040644
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9994892515671789,
+              "mad": 0.00937482798499778,
+              "bootstrap_95": [
+                0.9974632679321066,
+                1.0024250444763672
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 1,
+          "repetitions": 68808,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.519690660969655,
+              "mad_ns": 0.09911853908702462,
+              "p95_sample_average_ns": 5.926754292742123
+            },
+            "old_c": {
+              "median_ns": 5.252399339466342,
+              "mad_ns": 0.026721774720963154,
+              "p95_sample_average_ns": 5.344736667611325
+            },
+            "new_ada": {
+              "median_ns": 4.771885968019707,
+              "mad_ns": 0.1346984089786072,
+              "p95_sample_average_ns": 5.795410780723172
+            },
+            "new_c": {
+              "median_ns": 5.283754478040344,
+              "mad_ns": 0.04142618772526463,
+              "p95_sample_average_ns": 5.387882313829787
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9032025037406641,
+              "mad": 0.029361112576669013,
+              "bootstrap_95": [
+                0.8831104967953626,
+                0.9194952627812008
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9068399168460535,
+              "mad": 0.02784945725732041,
+              "bootstrap_95": [
+                0.8905301877001649,
+                0.9217515687074932
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0490501464660378,
+              "mad": 0.01901355318777065,
+              "bootstrap_95": [
+                1.0345450998447527,
+                1.0607237279942805
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8611108232064453,
+              "mad": 0.029554288691218067,
+              "bootstrap_95": [
+                0.8465927260151046,
+                0.8824049201583488
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0013252992498902,
+              "mad": 0.010758385049905395,
+              "bootstrap_95": [
+                0.997330077684813,
+                1.0098800024343835
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 2,
+          "repetitions": 67005,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.960832563801208,
+              "mad_ns": 0.08479241287963513,
+              "p95_sample_average_ns": 6.390237202447579
+            },
+            "old_c": {
+              "median_ns": 5.341417851279755,
+              "mad_ns": 0.05655932859488111,
+              "p95_sample_average_ns": 5.6632555406312965
+            },
+            "new_ada": {
+              "median_ns": 4.921763534437728,
+              "mad_ns": 0.15912816674128827,
+              "p95_sample_average_ns": 6.522504150809641
+            },
+            "new_c": {
+              "median_ns": 5.387157325013058,
+              "mad_ns": 0.10049833034848143,
+              "p95_sample_average_ns": 5.661087791955824
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9115467585777401,
+              "mad": 0.029332885779519757,
+              "bootstrap_95": [
+                0.9014389706004278,
+                0.9385379573050195
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9133264816540119,
+              "mad": 0.025717251119954654,
+              "bootstrap_95": [
+                0.9055087224510896,
+                0.929015816001091
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.114623201190524,
+              "mad": 0.015000443347106929,
+              "bootstrap_95": [
+                1.109059197904557,
+                1.125946208874468
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8147677487046094,
+              "mad": 0.02392916623139979,
+              "bootstrap_95": [
+                0.8072365642593069,
+                0.8378503341694282
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.008379749050559,
+              "mad": 0.017754802046905882,
+              "bootstrap_95": [
+                0.9973499831034984,
+                1.015020890285402
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 3,
+          "repetitions": 66354,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.153872953213069,
+              "mad_ns": 0.1957542593513577,
+              "p95_sample_average_ns": 6.63428353980167
+            },
+            "old_c": {
+              "median_ns": 5.387612394316846,
+              "mad_ns": 0.09672057261054334,
+              "p95_sample_average_ns": 5.7157662405431475
+            },
+            "new_ada": {
+              "median_ns": 5.160495575813063,
+              "mad_ns": 0.23697386838020318,
+              "p95_sample_average_ns": 6.419937004551346
+            },
+            "new_c": {
+              "median_ns": 5.42393273672273,
+              "mad_ns": 0.10464610272176511,
+              "p95_sample_average_ns": 5.777580053576273
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9408802030352875,
+              "mad": 0.039674652595496795,
+              "bootstrap_95": [
+                0.9177143617756508,
+                0.9668868881464787
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9429875066171951,
+              "mad": 0.03986364028921063,
+              "bootstrap_95": [
+                0.9239379691428876,
+                0.9788836077008554
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1348526887991706,
+              "mad": 0.034817158920975255,
+              "bootstrap_95": [
+                1.1254597080674704,
+                1.1570699080612035
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8320209774083929,
+              "mad": 0.041134555306951426,
+              "bootstrap_95": [
+                0.811043359040377,
+                0.8534810034400215
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0037219399670734,
+              "mad": 0.020432942733543347,
+              "bootstrap_95": [
+                0.9973890818265045,
+                1.0197227608711517
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 4,
+          "repetitions": 64909,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.0756559182856,
+              "mad_ns": 0.1132492942041936,
+              "p95_sample_average_ns": 6.5121116678734845
+            },
+            "old_c": {
+              "median_ns": 5.375303309248332,
+              "mad_ns": 0.08206681662019122,
+              "p95_sample_average_ns": 5.713051396955738
+            },
+            "new_ada": {
+              "median_ns": 5.050965341863224,
+              "mad_ns": 0.19211956835723853,
+              "p95_sample_average_ns": 6.28974289967493
+            },
+            "new_c": {
+              "median_ns": 5.494306933553128,
+              "mad_ns": 0.12499338015529426,
+              "p95_sample_average_ns": 5.814472232279037
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9325844416311034,
+              "mad": 0.04223097141458926,
+              "bootstrap_95": [
+                0.9078358588507078,
+                0.9680750070305254
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.932489547201033,
+              "mad": 0.040403420582896976,
+              "bootstrap_95": [
+                0.9231713714588612,
+                0.9713398308234167
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1235317478409792,
+              "mad": 0.034810829474696936,
+              "bootstrap_95": [
+                1.1099783776078074,
+                1.1442406229569857
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8467851587292199,
+              "mad": 0.03474081281543967,
+              "bootstrap_95": [
+                0.8205388594138229,
+                0.8683642594467844
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0075818460055175,
+              "mad": 0.018766199115695048,
+              "bootstrap_95": [
+                1.0017547678905787,
+                1.0206651011956152
+              ],
+              "classification": "slower"
+            }
+          }
+        },
+        {
+          "pattern": 5,
+          "repetitions": 64230,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.157318790868754,
+              "mad_ns": 0.21355991164564747,
+              "p95_sample_average_ns": 6.734804851704811
+            },
+            "old_c": {
+              "median_ns": 5.478559473766152,
+              "mad_ns": 0.1680018342285532,
+              "p95_sample_average_ns": 5.91330131947688
+            },
+            "new_ada": {
+              "median_ns": 5.262364622255955,
+              "mad_ns": 0.30352772750272417,
+              "p95_sample_average_ns": 6.664414263194769
+            },
+            "new_c": {
+              "median_ns": 5.534794512883388,
+              "mad_ns": 0.1312658123151178,
+              "p95_sample_average_ns": 5.8217616378639265
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9443062410229544,
+              "mad": 0.04579335779756999,
+              "bootstrap_95": [
+                0.9303302613297999,
+                0.9878373997902133
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9547033375790004,
+              "mad": 0.044189410738928736,
+              "bootstrap_95": [
+                0.9275715409582328,
+                0.9809822076707246
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1253726121432575,
+              "mad": 0.04307566095750148,
+              "bootstrap_95": [
+                1.108578591534005,
+                1.1377227892625021
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8517369199769589,
+              "mad": 0.05158586831667,
+              "bootstrap_95": [
+                0.8218926574855804,
+                0.8854986554619351
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9982255249639822,
+              "mad": 0.03390967618377727,
+              "bootstrap_95": [
+                0.9836823470738116,
+                1.0149897256918425
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 6,
+          "repetitions": 57637,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.714916199663411,
+              "mad_ns": 0.17880007633985118,
+              "p95_sample_average_ns": 7.1760414317192085
+            },
+            "old_c": {
+              "median_ns": 6.3324257584103965,
+              "mad_ns": 0.17815555220604784,
+              "p95_sample_average_ns": 6.820884913336919
+            },
+            "new_ada": {
+              "median_ns": 5.9856294838818815,
+              "mad_ns": 0.31226089577875316,
+              "p95_sample_average_ns": 7.2110997492929885
+            },
+            "new_c": {
+              "median_ns": 6.287942613902528,
+              "mad_ns": 0.1388689936585874,
+              "p95_sample_average_ns": 6.63264997961379
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9444285251939729,
+              "mad": 0.038480128841544115,
+              "bootstrap_95": [
+                0.9206244482705713,
+                0.961102023057099
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9260611493055645,
+              "mad": 0.044067188245956235,
+              "bootstrap_95": [
+                0.9068760591320465,
+                0.9607755704720442
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0447765741463781,
+              "mad": 0.03313579138196865,
+              "bootstrap_95": [
+                1.0347783752063724,
+                1.0720716597420337
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8920663166535937,
+              "mad": 0.05239010830938262,
+              "bootstrap_95": [
+                0.855299158099658,
+                0.917647517536638
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9942929590145515,
+              "mad": 0.016319349694886853,
+              "bootstrap_95": [
+                0.9812858965138704,
+                1.00095432600902
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 7,
+          "repetitions": 52994,
+          "times": {
+            "old_ada": {
+              "median_ns": 6.538214379222175,
+              "mad_ns": 0.08231518544552197,
+              "p95_sample_average_ns": 6.954341824074423
+            },
+            "old_c": {
+              "median_ns": 6.214473277635204,
+              "mad_ns": 0.08830731427142702,
+              "p95_sample_average_ns": 6.493403144695626
+            },
+            "new_ada": {
+              "median_ns": 5.7941111257878255,
+              "mad_ns": 0.2509519061120131,
+              "p95_sample_average_ns": 6.6581237380646865
+            },
+            "new_c": {
+              "median_ns": 6.179172701154847,
+              "mad_ns": 0.06658183001849283,
+              "p95_sample_average_ns": 6.519496016058421
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9386630339281601,
+              "mad": 0.04064862978702111,
+              "bootstrap_95": [
+                0.9162197952137758,
+                0.9648752207214811
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9258884540264232,
+              "mad": 0.046664598843970784,
+              "bootstrap_95": [
+                0.9099933056603319,
+                0.9794174127002934
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.0517663397559642,
+              "mad": 0.016374331070461157,
+              "bootstrap_95": [
+                1.0447693038867156,
+                1.0616036143414083
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8836428778769323,
+              "mad": 0.027933778332249637,
+              "bootstrap_95": [
+                0.8725829830978165,
+                0.9109762921012372
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9935667900865444,
+              "mad": 0.013120102871756023,
+              "bootstrap_95": [
+                0.9899254066133871,
+                1.0028589708423892
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        },
+        {
+          "pattern": 8,
+          "repetitions": 47529,
+          "times": {
+            "old_ada": {
+              "median_ns": 7.01886036025374,
+              "mad_ns": 0.17499546329609306,
+              "p95_sample_average_ns": 7.639825816869701
+            },
+            "old_c": {
+              "median_ns": 6.372091907046224,
+              "mad_ns": 0.126300686160028,
+              "p95_sample_average_ns": 6.754395671589976
+            },
+            "new_ada": {
+              "median_ns": 5.929447679311577,
+              "mad_ns": 0.20956925640135404,
+              "p95_sample_average_ns": 7.255038700056807
+            },
+            "new_c": {
+              "median_ns": 6.323566763186687,
+              "mad_ns": 0.11760188516484726,
+              "p95_sample_average_ns": 6.807419549117381
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9372373051500624,
+              "mad": 0.028732802888720765,
+              "bootstrap_95": [
+                0.9224117031448831,
+                0.9598614229712672
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9283565304237933,
+              "mad": 0.0436270669909955,
+              "bootstrap_95": [
+                0.9201359636736308,
+                0.945690217302564
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.1028853229761952,
+              "mad": 0.04657346328227996,
+              "bootstrap_95": [
+                1.0816200518622079,
+                1.1211839353075017
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8432961285065312,
+              "mad": 0.03347655215020401,
+              "bootstrap_95": [
+                0.8364334388358786,
+                0.8739527932320659
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 0.9905683881440006,
+              "mad": 0.022363130193271963,
+              "bootstrap_95": [
+                0.9823972516764387,
+                0.9982150954460104
+              ],
+              "classification": "faster"
+            }
+          }
+        },
+        {
+          "pattern": 9,
+          "repetitions": 64956,
+          "times": {
+            "old_ada": {
+              "median_ns": 5.714483891018536,
+              "mad_ns": 0.12271155185818117,
+              "p95_sample_average_ns": 6.326532335350083
+            },
+            "old_c": {
+              "median_ns": 5.3676699179059675,
+              "mad_ns": 0.09101581743795828,
+              "p95_sample_average_ns": 5.680806286178336
+            },
+            "new_ada": {
+              "median_ns": 4.878841061641727,
+              "mad_ns": 0.15044691310271574,
+              "p95_sample_average_ns": 5.977890562457664
+            },
+            "new_c": {
+              "median_ns": 5.375748102561734,
+              "mad_ns": 0.10602285104532294,
+              "p95_sample_average_ns": 5.716532633628918
+            }
+          },
+          "ratios": {
+            "new_over_c": {
+              "median": 0.9075945656429792,
+              "mad": 0.033000438337906834,
+              "bootstrap_95": [
+                0.8937631505620867,
+                0.9237659996441324
+              ],
+              "classification": "faster"
+            },
+            "new_over_old_c": {
+              "median": 0.9157873665341943,
+              "mad": 0.0316978894853856,
+              "bootstrap_95": [
+                0.9045219371694572,
+                0.9330567811669725
+              ],
+              "classification": "faster"
+            },
+            "old_over_c": {
+              "median": 1.063574803150498,
+              "mad": 0.025992426355615716,
+              "bootstrap_95": [
+                1.0535430316495333,
+                1.0843266323914205
+              ],
+              "classification": "slower"
+            },
+            "new_over_old": {
+              "median": 0.8539838614945746,
+              "mad": 0.0429219712729037,
+              "bootstrap_95": [
+                0.8408475055690202,
+                0.8766019380034868
+              ],
+              "classification": "faster"
+            },
+            "c_control": {
+              "median": 1.0016457966284578,
+              "mad": 0.022255666152993347,
+              "bootstrap_95": [
+                0.9929071487636072,
+                1.0218366757737722
+              ],
+              "classification": "inconclusive"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

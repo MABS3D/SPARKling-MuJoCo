@@ -213,19 +213,14 @@ package body MJ.Quaternions with SPARK_Mode is
       end case;
    end Conversion_Radicand;
 
-   function Conversion_Quotient (Left, Right : Tier0_Real;
-                                 Pivot : Real; Subtract : Boolean) return Tier1_Real with
-     Inline_Always, Global => null, Pre => Pivot in Min_Val .. 1.0e15,
-     Post => (Static => Conversion_Quotient'Result =
-       Model.Matrix_Quotient (Left, Right, Pivot, Subtract))
+   function Conversion_Quotient (Numerator, Denominator : Real) return Tier1_Real with
+     Inline_Always, Global => null,
+     Pre => Numerator in -1.0e15 .. 1.0e15 and then Denominator in Min_Val .. 1.0e15,
+     Post => Conversion_Quotient'Result = Numerator / Denominator
+       and then (if Denominator = 1.0 then Conversion_Quotient'Result = Numerator)
    is
-      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Quotient);
    begin
-      if Subtract then
-         return (0.25 * (Left - Right)) / Pivot;
-      else
-         return (0.25 * (Left + Right)) / Pivot;
-      end if;
+      return Numerator / Denominator;
    end Conversion_Quotient;
 
    procedure Convert_Raw (R : out Quaternion; A : Matrix_3;
@@ -236,22 +231,51 @@ package body MJ.Quaternions with SPARK_Mode is
      Post => (Static => In_Tier1 (R) and then R = Model.Matrix_Raw (A, Pivot))
    is
       pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Raw);
+      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Matrix_Quotient);
    begin
-      case Branch is
-         when W => R := [Pivot,
-           Conversion_Quotient (A (2, 1), A (1, 2), Pivot, True),
-           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, True),
-           Conversion_Quotient (A (1, 0), A (0, 1), Pivot, True)];
-         when X => R := [Conversion_Quotient (A (2, 1), A (1, 2), Pivot, True), Pivot,
-           Conversion_Quotient (A (0, 1), A (1, 0), Pivot, False),
-           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, False)];
-         when Y => R := [Conversion_Quotient (A (0, 2), A (2, 0), Pivot, True),
-           Conversion_Quotient (A (0, 1), A (1, 0), Pivot, False), Pivot,
-           Conversion_Quotient (A (1, 2), A (2, 1), Pivot, False)];
-         when Z => R := [Conversion_Quotient (A (1, 0), A (0, 1), Pivot, True),
-           Conversion_Quotient (A (0, 2), A (2, 0), Pivot, False),
-           Conversion_Quotient (A (1, 2), A (2, 1), Pivot, False), Pivot];
-      end case;
+      declare
+         subtype Numerator_Value is Real range -1.0e15 .. 1.0e15;
+         subtype Denominator_Value is Real range Min_Val .. 1.0e15;
+         type Numerator_Array is array (Component) of Numerator_Value;
+         type Denominator_Array is array (Component) of Denominator_Value;
+         Numerator : Numerator_Array;
+         Denominator : Denominator_Array;
+      begin
+         case Branch is
+            when W =>
+               Numerator := [Pivot, 0.25 * (A (2, 1) - A (1, 2)),
+                 0.25 * (A (0, 2) - A (2, 0)), 0.25 * (A (1, 0) - A (0, 1))];
+               Denominator := [1.0, Pivot, Pivot, Pivot];
+            when X =>
+               Numerator := [0.25 * (A (2, 1) - A (1, 2)), Pivot,
+                 0.25 * (A (0, 1) + A (1, 0)), 0.25 * (A (0, 2) + A (2, 0))];
+               Denominator := [Pivot, 1.0, Pivot, Pivot];
+            when Y =>
+               Numerator := [0.25 * (A (0, 2) - A (2, 0)),
+                 0.25 * (A (0, 1) + A (1, 0)), Pivot, 0.25 * (A (1, 2) + A (2, 1))];
+               Denominator := [Pivot, Pivot, 1.0, Pivot];
+            when Z =>
+               Numerator := [0.25 * (A (1, 0) - A (0, 1)),
+                 0.25 * (A (0, 2) + A (2, 0)), 0.25 * (A (1, 2) + A (2, 1)), Pivot];
+               Denominator := [Pivot, Pivot, Pivot, 1.0];
+         end case;
+         --  The dominant lane divides Pivot by one; the other three retain
+         --  C's multiplication-before-division expressions. Packing all four
+         --  divisions allows SIMD without reciprocal approximations.
+         for I in Component loop
+            pragma Loop_Optimize (Vector);
+            R (I) := Conversion_Quotient (Numerator (I), Denominator (I));
+         end loop;
+         pragma Assert (Static => In_Tier1 (R));
+         declare
+            Expected : constant Quaternion := Model.Matrix_Raw (A, Pivot) with Ghost => Static;
+         begin
+            pragma Assert (Static => R (W) = Expected (W));
+            pragma Assert (Static => R (X) = Expected (X));
+            pragma Assert (Static => R (Y) = Expected (Y));
+            pragma Assert (Static => R (Z) = Expected (Z));
+         end;
+      end;
    end Convert_Raw;
 
    function Conversion_Length (Q : Quaternion) return Nonnegative_Real with
@@ -259,14 +283,20 @@ package body MJ.Quaternions with SPARK_Mode is
      Post => (Static => Conversion_Length'Result = Model.Normalization_Length (Q))
    is
       pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Normalization_Length);
+      Squares : Quaternion;
+      Sum : Real;
    begin
-      return MJ.Quaternion_Math.Sqrt
-        (abs (((Q (W)*Q (W) + Q (X)*Q (X)) + Q (Y)*Q (Y)) + Q (Z)*Q (Z)));
+      for I in Component loop
+         pragma Loop_Optimize (Vector);
+         Squares (I) := Q (I) * Q (I);
+      end loop;
+      Sum := ((Squares (W) + Squares (X)) + Squares (Y)) + Squares (Z);
+      return MJ.Quaternion_Math.Sqrt (abs Sum);
    end Conversion_Length;
 
-   --  Keep C's scalar norm/threshold path here. The public Normalize's exact
-   --  zero/one shortcuts and SIMD square packing add cost to this conversion.
-   --  Both paths implement the same ordered normalization model.
+   --  Pack independent squares into SIMD lanes, but retain C's ordered sum
+   --  and norm/threshold path. The public Normalize's additional zero/one
+   --  dispatch costs more here. Both implement the same normalization model.
    procedure Normalize_Conversion (Q : in out Quaternion) with
      Inline_Always, Global => null, Pre => In_Tier1 (Q),
      Post => (Static => In_Tier2 (Q) and then Q = Model.Normalized (Q'Old))

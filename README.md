@@ -9,6 +9,8 @@ This is an independent, early-stage project. It is not a complete simulator, an 
 
 Ambitious? Yes. A little unreasonable? Probably. Let's see how much physics we can make explicit enough to prove.
 
-[Development checkpoint — 27–28 September 2026](docs/publication-2026-09-28.md): implementations, isolated candidates, proof status and C comparisons.
+[Latest checkpoint — 29 September 2026](docs/publication-2026-09-29.md): faster matrix-to-quaternion conversion and a verified scalar contact candidate.
+
+[Previous checkpoint — 27–28 September 2026](docs/publication-2026-09-28.md): implementations, isolated candidates, proof status and C comparisons.
 
 Maintained by [MABS3D](https://github.com/MABS3D). See [contributor and upstream attribution](CONTRIBUTORS.md).
