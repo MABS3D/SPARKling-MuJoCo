@@ -1,0 +1,82 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                           Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                13          13                                                 .           .          .
+Flow Dependencies                 .           .                                                 .           .          .
+Initialization                   39          39                                                 .           .          .
+Non-Aliasing                      .           .                                                 .           .          .
+Run-time Checks                 237           .    237 (CVC5 16%, Trivial 8%, Z3 75%, altergo 1%)           .          .
+Assertions                       88           .                 88 (CVC5 25%, Z3 74%, altergo 1%)           .          .
+Functional Contracts            176           .                176 (CVC5 25%, Z3 70%, altergo 4%)           .          .
+LSP Verification                  .           .                                                 .           .          .
+Termination                      12          12                                                 .           .          .
+Concurrency                       .           .                                                 .           .          .
+------------------------------------------------------------------------------------------------------------------------
+Total                           565    64 (11%)                                         501 (89%)           .          .
+
+
+max steps used for successful proof: 429288
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky.adb:484:7: precondition proved in max 5 seconds
+mj-cholesky.adb:482:7: precondition proved in max 4 seconds
+mj-cholesky.adb:280:25: postcondition proved in max 4 seconds
+mj-cholesky.adb:481:7: precondition proved in max 3 seconds
+mj-cholesky.adb:190:7: precondition proved in max 3 seconds
+mj-cholesky.adb:479:7: precondition proved in max 3 seconds
+mj-cholesky.ads:67:25: postcondition proved in max 3 seconds
+mj-cholesky.adb:408:25: postcondition proved in max 2 seconds
+mj-cholesky.adb:460:25: postcondition proved in max 2 seconds
+mj-cholesky.adb:88:42: precondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky, 38 subprograms and packages out of 38 analyzed
+  MJ.Cholesky at mj-cholesky.ads:8 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Advance_Lane at mj-cholesky.adb:11 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (20 checks)
+  MJ.Cholesky.Backward_Step at mj-cholesky.adb:276 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and proved (23 checks)
+  MJ.Cholesky.Bounded at mj-cholesky.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Cell at mj-cholesky.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Cholesky.Divide_RHS at mj-cholesky.adb:246 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky.Dot at mj-cholesky.adb:29 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (59 checks)
+  MJ.Cholesky.Factor at mj-cholesky.ads:47 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (21 checks)
+  MJ.Cholesky.Factor_Column at mj-cholesky.adb:165 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (20 checks)
+  MJ.Cholesky.Forward_Step at mj-cholesky.adb:257 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.Cholesky.Is_Zero at mj-cholesky.ads:21 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Positive_Diagonal at mj-cholesky.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Cholesky.Positive_Prefix at mj-cholesky.ads:30 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Cholesky.Reduce_RHS at mj-cholesky.adb:224 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Cholesky.Row_Dot at mj-cholesky.adb:85 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky.Same_Upper at mj-cholesky.ads:35 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Cholesky.Scale_Column at mj-cholesky.adb:143 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)
+  MJ.Cholesky.Scale_Entry at mj-cholesky.adb:123 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)
+  MJ.Cholesky.Shape at mj-cholesky.ads:26 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Solve at mj-cholesky.ads:54 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.Cholesky.Store at mj-cholesky.adb:61 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky.Store_Diagonal at mj-cholesky.adb:75 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Cholesky.Store_Vector at mj-cholesky.adb:214 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Cholesky.Store_Vector_Wide at mj-cholesky.adb:329 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.Cholesky.Store_Wide at mj-cholesky.adb:317 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky.Subtract_RHS at mj-cholesky.adb:235 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky.Update at mj-cholesky.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (31 checks)
+  MJ.Cholesky.Update_Column at mj-cholesky.adb:455 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)
+  MJ.Cholesky.Update_Factors at mj-cholesky.adb:339 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (17 checks)
+  MJ.Cholesky.Update_Matrix_Column at mj-cholesky.adb:403 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (34 checks)
+  MJ.Cholesky.Update_Matrix_Entry at mj-cholesky.adb:362 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (27 checks)
+  MJ.Cholesky.Update_Vector_Column at mj-cholesky.adb:438 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Cholesky.Update_Vector_Entry at mj-cholesky.adb:384 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Cholesky.Upper_Transitive at mj-cholesky.ads:39 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Cholesky.Vector_Dot at mj-cholesky.adb:95 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Cholesky.Vector_Shape at mj-cholesky.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Wide_Bounded at mj-cholesky.ads:23 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky.Zero_Column at mj-cholesky.adb:107 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (28 checks)

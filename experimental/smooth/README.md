@@ -1,5 +1,16 @@
 # Minimal smooth dynamics — review draft
 
+**Manifold performance update:** the active path saves roughly 15–25% of
+previous Ada time in the sampled multi-DOF workloads. See
+[paired C/baseline results and proof scope](../../docs/manifold-performance.md).
+Without external loads, the 12-DOF scalar chain still needs work for parity.
+
+**Free and ball joints (2026-09-30):** the active pipeline now separates
+`nq` from `nv`, computes manifold kinematics and spatial dynamics, projects
+6D/3D joint transmissions, and advances quaternions with Euler.
+See [implementation, supported scope and verification status](../../docs/manifold-joints.md).
+The new path is numerically checked; its Gold proof remains open.
+
 **External body loads:** `Forward.Evaluate` and `Euler.Step` accept optional
 world-frame forces/torques at body centres of mass, projected directly onto
 ancestor DOFs. See [API, proof scope and C comparisons](../../docs/external-body-forces.md).
@@ -32,7 +43,7 @@ against 3.14.0. `MJ.Spatial_Kernels` closes 413 proof obligations; composition o
 the new recursions remains open. Whole-step timings improve substantially for
 larger models but do not reach C parity.
 
-This directory contains the owned-state and scalar hinge/slide baseline of
+This directory contains the owned-state dynamics with hinge, slide, free and ball joints of
 SPARKling MuJoCo. It remains separate from the main library for review.
 The checked Ada executable has been built and compared with the official
 MuJoCo **3.12.0 C library**, through its Python binding. Reproducible fixtures,
@@ -65,26 +76,29 @@ source dependency closure, without including unrelated units under development.
 | Package | Intended responsibility |
 | --- | --- |
 | `MJ.Smooth_Math` | Small vector, quaternion and rotation operations |
+| `MJ.Manifold_Math` | Joint quaternion normalization, integration and rotation differences |
 | `MJ.Spatial_Kernels` | Contracted spatial inertia, motion and wrench operations |
 | `MJ.Data` | Owned model snapshot, state, scratch buffers, reset, accessors and status handling |
 | `MJ.Data.Kinematics` | Body and joint poses, body motion, center-of-mass Jacobians |
 | `MJ.Data.Inertia` | Dense mass matrix, joint armature and LDL factorization/solve |
 | `MJ.Data.Forces` | Gravity, velocity-dependent inertial bias, linear springs and damping |
-| `MJ.Data.Actuation` | Scalar joint transmissions, fixed gain, optional affine bias and clamping |
+| `MJ.Data.Actuation` | Scalar and 3D/6D joint transmissions, fixed gain, optional affine bias and clamping |
 | `MJ.External_Forces` | World-frame body loads at COM and exact projection formulas |
 | `MJ.Data.Forward` | Current-state acceleration pipeline |
 | `MJ.Data.Euler` | Semi-implicit Euler, with optional implicit linear damping |
 
 ## Supported model subset
 
-The intended subset is an ordered tree of fixed bodies and scalar hinge/slide
-joints. A body may have more than one scalar joint. Body and inertial frame
+The intended subset is an ordered tree of fixed bodies and hinge, slide, ball
+or free joints. A body may have more than one non-free joint; a free joint is
+exclusive to a root body, following the C model validator. Body and inertial frame
 rotations, joint anchors, principal inertia and joint armature are retained.
 Axes accepted by the model validator are normalized once in the owned snapshot.
 Pose updates, velocities and Jacobians all use this same normalized axis.
 
-Actuators have one control and one output, no activation state, a scalar joint
-transmission, a fixed gain and either no bias or an affine bias. This covers the
+Actuators have one control and one output, no activation state, a joint or
+`jointinparent` transmission, a fixed gain and either no bias or an affine bias.
+Ball/free transmissions retain their three/six gear components. This covers the
 basic motor and position/velocity servo force laws. Control and actuator force
 limits are supported. Actuator damping and actuator armature are excluded.
 
@@ -92,7 +106,8 @@ limits are supported. Actuator damping and actuator armature are excluded.
 for this subset. The draft requires:
 
 - Euler integration and the model's `Dsbl_Constraint` flag set;
-- `nq = nv = njnt`, with hinge/slide joints only;
+- joint-dependent position/velocity spans: hinge/slide 1/1, ball 4/3, free 7/6;
+- at most 512 position coordinates, separately from the velocity count;
 - at most 256 degrees of freedom, 4,096 bodies and 1,024 actuators;
 - one control and output per actuator, in actuator order.
 
@@ -100,7 +115,7 @@ Requiring disabled constraints makes the intended scope explicit: this draft
 does not implement contacts, joint limits, equality constraints or a constraint
 solver. A model with geometry is not thereby given collision dynamics.
 
-Other excluded features include free/ball joints, activation dynamics, tendons,
+Other excluded features include activation dynamics, unsupported tendon variants,
 flex bodies, plugins, mocap, history, fluid forces, gravity compensation,
 nonlinear stiffness/damping and joint-level aggregate actuator force limits.
 Unsupported enable flags and actuator-group disabling are rejected. Geometry
@@ -239,7 +254,8 @@ it is an empirical test tolerance, not a proved forward-error bound.
 In addition, seven numerical-policy cases check exact failure atomicity:
 time, position, velocity and acceleration limits, singular inertia, diagonal
 ill-conditioning and coupled ill-conditioning. Five unsupported-model cases
-check rejection of free/ball joints, RK4, enabled constraints and fluids. The
+historically checked rejection of free/ball joints, RK4, enabled constraints and fluids.
+Free/ball joints are now supported and tested by `tools/test_manifolds.py`. The
 probe also exercises reset, double creation/free, a freed source model,
 nonzero input-array bounds, arrays ending at `Natural'Last`, invalid setter
 sizes/indices and stale results.
@@ -260,5 +276,5 @@ Outstanding engineering includes complete lifecycle/dynamics compositional
 proofs, an independently specified mass/force recursion, allocation
 failure cleanup, and broader numerical conditioning analysis. There is no
 approved Silver-only mathematical exception. Dense storage/algorithms, optimized
-sparse dynamics, free/ball joints, collisions/constraints and integration into
+sparse dynamics beyond the current ancestor representation, collisions/constraints and integration into
 the main build are separate future work. No performance-parity claim is made.

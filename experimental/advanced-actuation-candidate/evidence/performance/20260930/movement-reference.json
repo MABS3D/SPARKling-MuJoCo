@@ -1,0 +1,72 @@
+{
+  "scope": "C-only complete mj_step on evolving trajectories; contextual measurements, not aggregate Ada/C comparison",
+  "recovered_completed_results_from_raw_outputs": true,
+  "supplementary_run_completed": false,
+  "results": [
+    {
+      "name": "hinge_motor",
+      "steps": 2000,
+      "blocks": 9,
+      "samples_per_block": 3,
+      "c_whole_step_us": 0.6450360015151091,
+      "native_vs_official_trajectory_passed": true,
+      "timings_us": {
+        "p10": 0.6234342989046125,
+        "p50": 0.6450360015151091,
+        "p90": 0.8101216968498198
+      }
+    },
+    {
+      "name": "dc_full",
+      "steps": 2000,
+      "blocks": 9,
+      "samples_per_block": 3,
+      "c_whole_step_us": 0.7463740039383993,
+      "native_vs_official_trajectory_passed": true,
+      "timings_us": {
+        "p10": 0.7183688023360445,
+        "p50": 0.7463740039383993,
+        "p90": 0.84228910272941
+      }
+    },
+    {
+      "name": "so3_quat",
+      "steps": 2000,
+      "blocks": 9,
+      "samples_per_block": 3,
+      "c_whole_step_us": 0.8076000012806617,
+      "native_vs_official_trajectory_passed": true,
+      "timings_us": {
+        "p10": 0.7745905968477018,
+        "p50": 0.8076000012806617,
+        "p90": 0.9191551012918354
+      }
+    },
+    {
+      "name": "dc_chain_8",
+      "status": "rejected_unstable_official_reference",
+      "warnings": [
+        {
+          "index": 5,
+          "number": 1,
+          "lastinfo": 2
+        }
+      ]
+    },
+    {
+      "name": "dc_chain_32",
+      "status": "not_run_after_dc_chain_8_failure"
+    },
+    {
+      "name": "dc_chain_64",
+      "status": "not_run_after_dc_chain_8_failure"
+    }
+  ],
+  "cpu": 15,
+  "native_library_sha256": "5ef8812ebfa01f6a9cd2917307463624375dfc6dd4d85e31c11930658e3ad755",
+  "binary_sha256": "6eb83adbfdc1d81089b8008e2bbec6f4a8ade4b976dd3bc46ce0647c621d38cd",
+  "sources": {
+    "tests/performance/movement_reference.c": "23901a12c3eaf901d499b327c3995be89976242993ab55bbfae5d1628f20f2fc",
+    "tests/performance/movement_reference.py": "2da6b8dadc8e7b5d70524050371ac568bdca2d1bc7abb23c3abbea1e463bc6b5"
+  }
+}

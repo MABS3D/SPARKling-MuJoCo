@@ -1,0 +1,55 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                           Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                10          10                                                 .           .          .
+Flow Dependencies                 .           .                                                 .           .          .
+Initialization                    .           .                                                 .           .          .
+Non-Aliasing                      .           .                                                 .           .          .
+Run-time Checks                  66           .    66 (CVC5 56%, Trivial 15%, Z3 26%, altergo 3%)           .          .
+Assertions                        .           .                                                 .           .          .
+Functional Contracts             26           .                 26 (CVC5 70%, Z3 23%, altergo 7%)           .          .
+LSP Verification                  .           .                                                 .           .          .
+Termination                      10          10                                                 .           .          .
+Concurrency                       .           .                                                 .           .          .
+------------------------------------------------------------------------------------------------------------------------
+Total                           112    20 (18%)                                          92 (82%)           .          .
+
+
+max steps used for successful proof: 35670
+
+============================
+Most difficult proved checks
+============================
+
+mj-elastic_contact_math.ads:15:14: postcondition proved in max 10 seconds
+mj-elastic_contact_math.adb:6:29: fp_overflow check proved in max 7 seconds
+mj-elastic_contact_math.adb:6:54: fp_overflow check proved in max 7 seconds
+mj-elastic_contact_math.ads:49:14: postcondition proved in max 6 seconds
+mj-elastic_contact_math.ads:11:14: postcondition proved in max 6 seconds
+mj-elastic_contact_math.adb:6:48: fp_overflow check proved in max 5 seconds
+mj-elastic_contact_math.adb:4:42: fp_overflow check proved in max 5 seconds
+mj-elastic_contact_math.ads:30:54: fp_overflow check proved in max 3 seconds
+mj-elastic_contact_math.adb:21:48: fp_overflow check proved in max 3 seconds
+mj-elastic_contact_math.ads:29:14: postcondition proved in max 3 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-elastic_contact_math, 11 subprograms and packages out of 11 analyzed
+  MJ.Elastic_Contact_Math at mj-elastic_contact_math.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Elastic_Contact_Math.Add at mj-elastic_contact_math.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Contact_Math.Clip at mj-elastic_contact_math.ads:36 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Elastic_Contact_Math.Cross at mj-elastic_contact_math.ads:13 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)
+  MJ.Elastic_Contact_Math.Dot at mj-elastic_contact_math.ads:9 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.Elastic_Contact_Math.Norm at mj-elastic_contact_math.ads:31 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Elastic_Contact_Math.Project at mj-elastic_contact_math.ads:40 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Elastic_Contact_Math.Scale at mj-elastic_contact_math.ads:27 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Elastic_Contact_Math.Scatter at mj-elastic_contact_math.ads:44 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Elastic_Contact_Math.Sub at mj-elastic_contact_math.ads:23 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Elastic_Contact_Math.Weighted_Inverse at mj-elastic_contact_math.ads:47 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)

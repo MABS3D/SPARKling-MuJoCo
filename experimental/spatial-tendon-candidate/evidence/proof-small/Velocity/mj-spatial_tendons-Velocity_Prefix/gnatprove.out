@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 .         .                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    .         .                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  11         .    11 (CVC5 72%, Trivial 22%, Z3 6%)           .          .
+Assertions                        .         .                                    .           .          .
+Functional Contracts              3         .                 3 (CVC5 59%, Z3 41%)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       2         1                             1 (CVC5)           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            16    1 (6%)                             15 (94%)           .          .
+
+
+max steps used for successful proof: 11867
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_tendons.ads:96:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_tendons, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Tendons.Velocity_Prefix at mj-spatial_tendons.ads:90 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (15 checks)

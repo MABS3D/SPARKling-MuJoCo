@@ -1,0 +1,186 @@
+{
+  "exit_code": 0,
+  "seconds": 5.304331302642822,
+  "command": [
+    "python3",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+    "--cap-mb",
+    "3000",
+    "--min-free-mb",
+    "2000",
+    "--timeout",
+    "600",
+    "--",
+    "gnatprove",
+    "-P",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/actuation.gpr",
+    "-u",
+    "mj-transmissions.ads",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--steps=0",
+    "--proof=per_check",
+    "-j2",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--report=all",
+    "--counterexamples=off",
+    "--limit-subp=mj-transmissions.adb:95"
+  ],
+  "subprogram": "Unfold_Tail",
+  "checks": 14,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 52,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 52,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 92,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 92,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 99,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 99,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_proof": [],
+  "skip_flow_proof": [],
+  "pragma_assume": [],
+  "spark": {
+    " 1": "all"
+  },
+  "progress": "PROGRESS_PROOF",
+  "stop_reason": "STOP_REASON_NONE",
+  "fresh": true,
+  "covered": [
+    "MJ.Transmissions.Unfold_Tail"
+  ],
+  "sources_unchanged": true,
+  "coverage_ok": true,
+  "all_in_spark": true,
+  "warning_review": [
+    {
+      "file": "mj-transmissions.ads",
+      "line": 52,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 52,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 92,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 92,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 99,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 99,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    }
+  ],
+  "reviewed_warnings": true,
+  "passed": true
+}

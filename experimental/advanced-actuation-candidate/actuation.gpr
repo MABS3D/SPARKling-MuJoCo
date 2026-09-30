@@ -1,0 +1,22 @@
+project Actuation is
+   Build_Root := external ("ACTUATION_BUILD_ROOT", "/var/tmp/sparkling-actuators-20260930/build");
+   type Mode_Type is ("development", "validation", "release");
+   Mode : Mode_Type := external ("ACTUATION_MODE", "validation");
+   for Source_Dirs use ("base", "src", "tests");
+   for Main use ("actuation_probe.adb", "csr_workspace_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "development" => Flags := Flags & ("-O0", "-g", "-gnata", "-gnato", "-gnatVa");
+      when "validation" => Flags := Flags & ("-O2", "-g", "-gnata", "-gnato", "-gnatVa");
+      when "release" => Flags := Flags & ("-O3", "-gnatp", "-gnatn", "-march=native", "-flto");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-flto", "-ffp-contract=off");
+   end Linker;
+end Actuation;

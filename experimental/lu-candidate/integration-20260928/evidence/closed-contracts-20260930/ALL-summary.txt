@@ -1,0 +1,99 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                                           Provers   Justified   Unproved
+-----------------------------------------------------------------------------------------------------------------------
+Data Dependencies                35         35                                                 .           .          .
+Flow Dependencies                 .          .                                                 .           .          .
+Initialization                   33         33                                                 .           .          .
+Non-Aliasing                      .          .                                                 .           .          .
+Run-time Checks                 680          .    680 (CVC5 13%, Trivial 3%, Z3 83%, altergo 0%)           .          .
+Assertions                      144          .                144 (CVC5 38%, Z3 60%, altergo 2%)           .          .
+Functional Contracts            239          .                239 (CVC5 28%, Z3 69%, altergo 3%)           .          .
+LSP Verification                  .          .                                                 .           .          .
+Termination                      19         19                                                 .           .          .
+Concurrency                       .          .                                                 .           .          .
+-----------------------------------------------------------------------------------------------------------------------
+Total                          1150    87 (8%)                                        1063 (92%)           .          .
+
+
+max steps used for successful proof: 155232
+
+============================
+Most difficult proved checks
+============================
+
+mj-lu.ads:186:25: postcondition proved in max 13 seconds
+mj-lu.adb:441:25: postcondition proved in max 11 seconds
+mj-lu.adb:642:25: postcondition proved in max 9 seconds
+mj-lu.ads:84:25: postcondition proved in max 7 seconds
+mj-lu.ads:147:25: postcondition proved in max 7 seconds
+mj-lu.ads:231:14: postcondition proved in max 6 seconds
+mj-lu.ads:135:25: postcondition proved in max 5 seconds
+mj-lu.ads:210:14: postcondition proved in max 5 seconds
+mj-lu.adb:345:25: postcondition proved in max 4 seconds
+mj-lu.ads:173:25: postcondition proved in max 4 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-lu, 55 subprograms and packages out of 55 analyzed
+  MJ.LU at mj-lu.ads:2 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Advance_Row_Model at mj-lu.adb:163 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (82 checks)
+  MJ.LU.Analyze at mj-lu.ads:47 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
+  MJ.LU.Before_Transitive at mj-lu.adb:254 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Bounded at mj-lu.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.CSR_Valid at mj-lu.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (26 checks)
+  MJ.LU.Cell at mj-lu.ads:7 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.LU.Checked_Entry at mj-lu.ads:142 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (30 checks)
+  MJ.LU.Clamped at mj-lu.ads:69 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.LU.Dense_Shape at mj-lu.ads:18 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Dense_Substitute_Row at mj-lu.adb:435 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (21 checks)
+  MJ.LU.Divide at mj-lu.ads:61 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.LU.Eliminate_Column at mj-lu.adb:340 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (28 checks)
+  MJ.LU.Eliminate_Row at mj-lu.ads:180 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (47 checks)
+  MJ.LU.Factor_Dense at mj-lu.ads:206 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
+  MJ.LU.Factor_Sparse at mj-lu.ads:224 flow analyzed (0 errors, 0 checks, 1 warnings and 0 pragma Assume statements) and proved (56 checks)
+  MJ.LU.Fast_Entry at mj-lu.ads:129 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (38 checks)
+  MJ.LU.Fast_Subtract at mj-lu.ads:109 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.LU.Find_Pivot at mj-lu.ads:125 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (22 checks)
+  MJ.LU.Index_Shape at mj-lu.ads:22 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Is_Zero at mj-lu.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Magnitude at mj-lu.ads:121 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.LU.Merge_Sparse_Rows at mj-lu.adb:536 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (56 checks)
+  MJ.LU.Model_Subtract at mj-lu.ads:116 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.LU.Multiply at mj-lu.ads:57 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.LU.Next_Stage at mj-lu.adb:305 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Outside_Transitive at mj-lu.adb:153 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Pivots_Valid at mj-lu.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.LU.Prefix_Good at mj-lu.ads:27 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.LU.Prepare_Pivot at mj-lu.adb:501 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (40 checks)
+  MJ.LU.Process_Sparse_Link at mj-lu.adb:577 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (42 checks)
+  MJ.LU.Reciprocal_Of at mj-lu.adb:369 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.LU.Row_Separation at mj-lu.ads:95 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.LU.Row_Stage at mj-lu.adb:323 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.LU.Same_Before at mj-lu.adb:250 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Same_Outside at mj-lu.adb:149 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Select_Pivot at mj-lu.adb:377 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.LU.Separate_From_Later at mj-lu.ads:199 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.LU.Separate_Rows at mj-lu.ads:194 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.LU.Solve_Dense at mj-lu.ads:213 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (17 checks)
+  MJ.LU.Solve_Sparse at mj-lu.ads:236 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.LU.Sparse_Substitute_Row at mj-lu.adb:634 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (30 checks)
+  MJ.LU.Stage_Bounded at mj-lu.ads:30 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Store at mj-lu.ads:88 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.LU.Store_RHS at mj-lu.adb:424 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.LU.Store_Sparse at mj-lu.adb:485 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.LU.Subtract_Product at mj-lu.ads:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.LU.Swap_Cells at mj-lu.ads:80 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.LU.Swap_Entries at mj-lu.ads:74 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.LU.Swap_Rows at mj-lu.ads:100 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (30 checks)
+  MJ.LU.Transfer_Row_Model at mj-lu.adb:264 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (64 checks)
+  MJ.LU.Update_Row_Checked at mj-lu.ads:169 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (86 checks)
+  MJ.LU.Update_Row_Fast at mj-lu.ads:158 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (102 checks)
+  MJ.LU.Vector_Shape at mj-lu.ads:20 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.LU.Widen_Stage at mj-lu.adb:314 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)

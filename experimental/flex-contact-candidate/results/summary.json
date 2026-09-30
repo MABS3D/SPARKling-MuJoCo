@@ -1,0 +1,96 @@
+{
+  "date": "2026-09-30",
+  "scope": "Cartesian elastic edges, one fixed arbitrary plane, frictionless normal contacts, exact C 3.14.0 filter; standalone candidate",
+  "max_particles": 4096,
+  "max_edges": 4096,
+  "max_detected_contacts": 4096,
+  "max_retained_contacts": 50,
+  "proofs": {
+    "passed": true,
+    "complete_unit_checks": 2003,
+    "candidate_unit_checks": 946,
+    "open": 0,
+    "assumptions": 0,
+    "skipped": 0,
+    "units": [
+      {
+        "unit": "mj-flex_contact_filter",
+        "checks": 426,
+        "warnings": 11,
+        "reused": false
+      },
+      {
+        "unit": "mj-flex_contact_kernels",
+        "checks": 159,
+        "warnings": 0,
+        "reused": false
+      },
+      {
+        "unit": "mj-flex_contact_network",
+        "checks": 361,
+        "warnings": 14,
+        "reused": false
+      },
+      {
+        "unit": "mj-contact_rows",
+        "checks": 226,
+        "warnings": 0,
+        "reused": true
+      },
+      {
+        "unit": "mj-elastic_kernels",
+        "checks": 179,
+        "warnings": 7,
+        "reused": true
+      },
+      {
+        "unit": "mj-elastic_network",
+        "checks": 652,
+        "warnings": 4,
+        "reused": true
+      }
+    ]
+  },
+  "numerical": {
+    "validation_cases": 144,
+    "release_cases": 144,
+    "boundary_tests_per_build": 5,
+    "exact_filter_cases_per_build": 54,
+    "reference": "MuJoCo 3.14.0",
+    "max_abs_error": {
+      "acceleration": 1.1368683772161603e-13,
+      "contact": 2.2737367544323206e-13,
+      "rank": 0.0,
+      "position": 8.838069165406637e-14,
+      "velocity": 1.3010575256044987e-11
+    }
+  },
+  "performance": {
+    "workloads": 12,
+    "steps": 1000,
+    "alternating_blocks": 8,
+    "measured_samples": 768,
+    "scope": "Equivalent supported full steps; previous Ada baseline only up to 50; generic native C retains AVX/LTO; not full MuJoCo parity"
+  },
+  "archive": {
+    "file": "flex-filter-evidence.zip",
+    "sha256": "19a89aec3b40f6bcf872d2b282b970323f33dfb3750b67c113a0802606c5db0d",
+    "bytes": 6969030
+  },
+  "baseline_archive": {
+    "file": "flex-contact-evidence.zip",
+    "sha256": "43936395d1fb1bcaa73ab93dc5656119b111144a71d5754f060bcfcfa5aaa683",
+    "bytes": 1653881
+  },
+  "raw_work_directory": "/var/tmp/sparkling-flex-filter-20260930",
+  "not_implemented": [
+    "friction",
+    "other rigid shapes",
+    "flex-flex and self-collision",
+    "multiple planes",
+    "articulated coupling",
+    "continuum/bending/interpolated flex",
+    "implicit integration",
+    "main-loader integration"
+  ]
+}

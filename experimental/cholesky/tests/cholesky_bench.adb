@@ -22,6 +22,7 @@ procedure Cholesky_Bench is
    Seed_A, A : Matrices;
    Seed_X, X : Vectors;
    Rank : Natural;
+   Result : MJ.Cholesky.Status;
    C_Rank : Interfaces.C.int;
    Start : Time;
    Elapsed : Duration := 0.0;
@@ -29,17 +30,17 @@ procedure Cholesky_Bench is
    procedure Factor (M : in out Real_Array) is
    begin
       if Use_C then C_Rank := C_Factor (M'Address, Interfaces.C.int (N), Min_Val);
-      else MJ.Cholesky.Factor (M, N, Min_Val, Rank); end if;
+      else MJ.Cholesky.Factor (M, N, Min_Val, Rank, Result); end if;
    end Factor;
    procedure Solve (M : Real_Array; V : in out Real_Array) is
    begin
       if Use_C then C_Solve (V'Address, M'Address, V'Address, Interfaces.C.int (N));
-      else MJ.Cholesky.Solve (M, V, N); end if;
+      else MJ.Cholesky.Solve (M, V, N, Result); end if;
    end Solve;
    procedure Update (M, V : in out Real_Array; Plus : Boolean) is
    begin
       if Use_C then C_Rank := C_Update (M'Address, V'Address, Interfaces.C.int (N), Boolean'Pos (Plus));
-      else MJ.Cholesky.Update (M, V, N, Plus, Rank); end if;
+      else MJ.Cholesky.Update (M, V, N, Plus, Rank, Result); end if;
    end Update;
 begin
    for B in 1 .. Batch loop

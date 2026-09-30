@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 .         .                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    .         .                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  39         .    39 (CVC5 59%, Z3 36%, altergo 5%)           .          .
+Assertions                        .         .                                    .           .          .
+Functional Contracts              1         .                             1 (CVC5)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       1         1                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            41    1 (2%)                             40 (98%)           .          .
+
+
+max steps used for successful proof: 45316
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_tendons.adb:49:69: range check proved in max 8 seconds
+mj-spatial_tendons.adb:49:69: fp_overflow check proved in max 7 seconds
+mj-spatial_tendons.adb:51:26: fp_overflow check proved in max 7 seconds
+mj-spatial_tendons.adb:48:69: range check proved in max 4 seconds
+mj-spatial_tendons.adb:47:69: range check proved in max 3 seconds
+mj-spatial_tendons.adb:47:69: fp_overflow check proved in max 3 seconds
+mj-spatial_tendons.ads:106:14: postcondition proved in max 2 seconds
+mj-spatial_tendons.adb:51:42: fp_overflow check proved in max 2 seconds
+mj-spatial_tendons.adb:51:58: fp_overflow check proved in max 2 seconds
+mj-spatial_tendons.adb:49:64: fp_overflow check proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_tendons, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Tendons.Point_Column at mj-spatial_tendons.ads:103 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (40 checks)

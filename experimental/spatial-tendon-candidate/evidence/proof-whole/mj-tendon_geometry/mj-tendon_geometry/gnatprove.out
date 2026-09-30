@@ -1,0 +1,48 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                       Provers   Justified     Unproved
+------------------------------------------------------------------------------------------------------
+Data Dependencies                 .           .                             .           .            .
+Flow Dependencies                 .           .                             .           .            .
+Initialization                   41          41                             .           .            .
+Non-Aliasing                      .           .                             .           .            .
+Run-time Checks                 190           .    24 (CVC5 78%, Trivial 22%)           .          166
+Assertions                        .           .                             .           .            .
+Functional Contracts             98           .                      5 (CVC5)           .           93
+LSP Verification                  .           .                             .           .            .
+Termination                      13          12                      1 (CVC5)           .            .
+Concurrency                       .           .                             .           .            .
+------------------------------------------------------------------------------------------------------
+Total                           342    53 (15%)                       30 (9%)           .    259 (76%)
+
+
+max steps used for successful proof: 2180
+
+============================
+Most difficult proved checks
+============================
+
+No check found with max time greater than 1 second
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-tendon_geometry, 13 subprograms and packages out of 13 analyzed
+  MJ.Tendon_Geometry at mj-tendon_geometry.ads:7 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Tendon_Geometry.Circle at mj-tendon_geometry.adb:81 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 4 checks out of 66 proved
+  MJ.Tendon_Geometry.Determinant at mj-tendon_geometry.adb:54 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 4 checks out of 10 proved
+  MJ.Tendon_Geometry.Dot2 at mj-tendon_geometry.adb:23 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 3 checks out of 9 proved
+  MJ.Tendon_Geometry.Inside at mj-tendon_geometry.adb:146 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 3 checks out of 82 proved
+  MJ.Tendon_Geometry.Inside.Residual at mj-tendon_geometry.adb:155 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 0 checks out of 9 proved
+  MJ.Tendon_Geometry.Intersect at mj-tendon_geometry.adb:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 6 checks out of 19 proved
+  MJ.Tendon_Geometry.Norm at mj-tendon_geometry.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 0 checks out of 5 proved
+  MJ.Tendon_Geometry.Norm2 at mj-tendon_geometry.adb:34 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 1 checks out of 3 proved
+  MJ.Tendon_Geometry.Pair_Bounded at mj-tendon_geometry.adb:21 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Tendon_Geometry.Unit at mj-tendon_geometry.ads:20 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 0 checks out of 10 proved
+  MJ.Tendon_Geometry.Unit2 at mj-tendon_geometry.adb:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 8 checks out of 15 proved
+  MJ.Tendon_Geometry.Wrap at mj-tendon_geometry.ads:27 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 1 checks out of 61 proved

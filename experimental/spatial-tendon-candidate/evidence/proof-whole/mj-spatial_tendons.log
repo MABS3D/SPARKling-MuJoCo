@@ -1,0 +1,1564 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: index check proved
+--> mj-spatial_tendons.adb:7:29
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:17:45
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:20:35
+
+ info: index check proved
+--> mj-spatial_tendons.adb:20:35
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:21:35
+
+ info: index check proved
+--> mj-spatial_tendons.adb:21:35
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:30:58
+
+ info: index check proved
+--> mj-spatial_tendons.adb:30:58
+
+ info: loop invariant initialization proved
+--> mj-spatial_tendons.adb:37:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:37:33
+   37 |             pragma Loop_Invariant (Branch_Sites <= K + 1);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for K + 1
+--> mj-spatial_tendons.adb:37:51
+   37 |             pragma Loop_Invariant (Branch_Sites <= K + 1);
+      |                                                    ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: use pragma Overflow_Mode or switch -gnato13 or unit SPARK.Big_Integers
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove K in Route'Range
+--> mj-spatial_tendons.adb:38:56
+   38 |             pragma Loop_Invariant (for all I in 0 .. K => Path_Node_Valid (Route, Sites, Geometries, I));
+      |                                                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Path_Node_Valid (Route, Sites, Geometries, I)
+--> mj-spatial_tendons.adb:38:56
+   38 |             pragma Loop_Invariant (for all I in 0 .. K => Path_Node_Valid (Route, Sites, Geometries, I));
+      |                                                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at mj-spatial_tendons.ads:55 should mention Geometries and Route and Sites in a precondition
+      --> mj-spatial_tendons.ads:55:04
+   55 |       function Valid_Path (Route : Route_Array; Sites : Site_Array;
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Path_Node_Valid (Route, Sites, Geometries, I)
+--> mj-spatial_tendons.adb:38:56
+   38 |             pragma Loop_Invariant (for all I in 0 .. K => Path_Node_Valid (Route, Sites, Geometries, I));
+      |                                                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at mj-spatial_tendons.ads:55 should mention Geometries and Route and Sites in a precondition
+      --> mj-spatial_tendons.ads:55:04
+   55 |       function Valid_Path (Route : Route_Array; Sites : Site_Array;
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:44:63
+   44 |          D1 : constant Real range -2.0e30 .. 2.0e30 := Point (1) - Origin (1);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:44:63
+   44 |          D1 : constant Real range -2.0e30 .. 2.0e30 := Point (1) - Origin (1);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:45:63
+   45 |          D2 : constant Real range -2.0e30 .. 2.0e30 := Point (2) - Origin (2);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:45:63
+   45 |          D2 : constant Real range -2.0e30 .. 2.0e30 := Point (2) - Origin (2);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:46:63
+   46 |          D3 : constant Real range -2.0e30 .. 2.0e30 := Point (3) - Origin (3);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:46:63
+   46 |          D3 : constant Real range -2.0e30 .. 2.0e30 := Point (3) - Origin (3);
+      |                                                        ~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:47:64
+   47 |          X : constant Real range -5.0e40 .. 5.0e40 := Angular (2) * D3 - Angular (3) * D2;
+      |                                                       ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:47:69
+   47 |          X : constant Real range -5.0e40 .. 5.0e40 := Angular (2) * D3 - Angular (3) * D2;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:47:69
+   47 |          X : constant Real range -5.0e40 .. 5.0e40 := Angular (2) * D3 - Angular (3) * D2;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:47:83
+   47 |          X : constant Real range -5.0e40 .. 5.0e40 := Angular (2) * D3 - Angular (3) * D2;
+      |                                                                          ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:48:64
+   48 |          Y : constant Real range -5.0e40 .. 5.0e40 := Angular (3) * D1 - Angular (1) * D3;
+      |                                                       ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:48:69
+   48 |          Y : constant Real range -5.0e40 .. 5.0e40 := Angular (3) * D1 - Angular (1) * D3;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:48:69
+   48 |          Y : constant Real range -5.0e40 .. 5.0e40 := Angular (3) * D1 - Angular (1) * D3;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:48:83
+   48 |          Y : constant Real range -5.0e40 .. 5.0e40 := Angular (3) * D1 - Angular (1) * D3;
+      |                                                                          ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:49:64
+   49 |          Z : constant Real range -5.0e40 .. 5.0e40 := Angular (1) * D2 - Angular (2) * D1;
+      |                                                       ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:49:69
+   49 |          Z : constant Real range -5.0e40 .. 5.0e40 := Angular (1) * D2 - Angular (2) * D1;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendons.adb:49:69
+   49 |          Z : constant Real range -5.0e40 .. 5.0e40 := Angular (1) * D2 - Angular (2) * D1;
+      |                                                       ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:49:83
+   49 |          Z : constant Real range -5.0e40 .. 5.0e40 := Angular (1) * D2 - Angular (2) * D1;
+      |                                                                          ~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:51:26
+   51 |          return (Linear (1) + X, Linear (2) + Y, Linear (3) + Z);
+      |                  ~~~~~~~~~~~^~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:51:42
+   51 |          return (Linear (1) + X, Linear (2) + Y, Linear (3) + Z);
+      |                                  ~~~~~~~~~~~^~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:51:58
+   51 |          return (Linear (1) + X, Linear (2) + Y, Linear (3) + Z);
+      |                                                  ~~~~~~~~~~~^~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.adb:59:07
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:59:37
+   59 |          Row : Real_Array (J'Range) := (others => 0.0);
+      |                                        ^~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.adb:60:07
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:60:44
+   60 |          Path : Point_Array (Points'Range) := (others => (others => <>));
+      |                                               ^~~~~~~~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ info: initialization of "A" proved
+--> mj-spatial_tendons.adb:64:07
+
+ info: initialization of "B" proved
+--> mj-spatial_tendons.adb:64:10
+
+ info: initialization of "G" proved
+--> mj-spatial_tendons.adb:65:07
+
+ info: initialization of "W" proved
+--> mj-spatial_tendons.adb:66:07
+
+ info: initialization of "Side" proved
+--> mj-spatial_tendons.adb:67:07
+
+ info: initialization of "Last_Node" proved
+--> mj-spatial_tendons.adb:68:07
+
+ info: initialization of "Geom_Id" proved
+--> mj-spatial_tendons.adb:69:07
+
+ info: initialization of "Legs" proved
+--> mj-spatial_tendons.adb:72:07
+
+ info: initialization of "Direction" proved
+--> mj-spatial_tendons.adb:73:07
+
+ info: initialization of "C0" proved
+--> mj-spatial_tendons.adb:73:18
+
+ info: initialization of "C1" proved
+--> mj-spatial_tendons.adb:73:22
+
+ info: initialization of "Increment" proved
+--> mj-spatial_tendons.adb:74:07
+
+ info: initialization of "First_Length" proved
+--> mj-spatial_tendons.adb:74:18
+
+ info: initialization of "Last_Length" proved
+--> mj-spatial_tendons.adb:74:32
+
+ medium: range check might fail, cannot prove upper bound for Path'Length
+--> mj-spatial_tendons.adb:76:24
+   76 |            Pre => N < Path'Length,
+      |                       ~~~~^~~~~~~
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:77:27
+
+ medium: postcondition might fail, cannot prove Path (N'Old) = (Position, Object_Id)
+--> mj-spatial_tendons.adb:77:40
+   77 |            Post => N = N'Old + 1 and then Path (N'Old) = (Position, Object_Id)
+      |                                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:77:47
+
+ info: index check proved
+--> mj-spatial_tendons.adb:79:39
+
+ info: index check proved
+--> mj-spatial_tendons.adb:79:54
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:82:16
+   82 |             Path (N) := (Position, Object_Id);
+      |                   ^
+      + reason for check: value must be a valid index into the array
+      + provers gave up before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for N + 1
+--> mj-spatial_tendons.adb:83:17
+   83 |             N := N + 1;
+      |                  ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers gave up before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:89:09
+   89 |          J := (others => 0.0);
+      |          ~~^~~~~~~~~~~~~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + possible fix: precondition of subprogram at mj-spatial_tendons.ads:83 should mention J'Length or J'First or J'Last
+      --> mj-spatial_tendons.ads:83:04
+   83 |       procedure Evaluate
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:90:14
+   90 |          Points := (others => (others => <>));
+      |          ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + possible fix: precondition of subprogram at mj-spatial_tendons.ads:83 should mention Points'Length or Points'First or Points'Last
+      --> mj-spatial_tendons.ads:83:04
+   83 |       procedure Evaluate
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: loop variant might fail
+--> mj-spatial_tendons.adb:92:31
+   92 |             pragma Loop_Variant (Increases => I);
+      |                                  ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-spatial_tendons.adb:93:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:93:33
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |                                    ^~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration
+--> mj-spatial_tendons.adb:94:33
+   94 |             pragma Loop_Invariant (Route (I).Kind /= Geometry_Node);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:94:33
+   94 |             pragma Loop_Invariant (Route (I).Kind /= Geometry_Node);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:94:40
+   94 |             pragma Loop_Invariant (Route (I).Kind /= Geometry_Node);
+      |                                           ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-spatial_tendons.adb:95:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:95:33
+   95 |             pragma Loop_Invariant (Divisor in 1.0e-10 .. 1.0e10);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove N <= 3 * I + 1
+--> mj-spatial_tendons.adb:96:33
+   96 |             pragma Loop_Invariant (N <= 3 * I + 1 and then N <= Path'Length);
+      |                                    ^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendons.adb:96:40
+   96 |             pragma Loop_Invariant (N <= 3 * I + 1 and then N <= Path'Length);
+      |                                         ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + possible fix: use pragma Overflow_Mode or switch -gnato13 or unit SPARK.Big_Integers
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I + 1
+--> mj-spatial_tendons.adb:96:44
+   96 |             pragma Loop_Invariant (N <= 3 * I + 1 and then N <= Path'Length);
+      |                                         ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: use pragma Overflow_Mode or switch -gnato13 or unit SPARK.Big_Integers
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove N <= Path'Length
+--> mj-spatial_tendons.adb:96:57
+   96 |             pragma Loop_Invariant (N <= 3 * I + 1 and then N <= Path'Length);
+      |                                                            ^~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for Path'Length
+--> mj-spatial_tendons.adb:96:66
+   96 |             pragma Loop_Invariant (N <= 3 * I + 1 and then N <= Path'Length);
+      |                                                                 ~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-spatial_tendons.adb:97:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:97:33
+   97 |             pragma Loop_Invariant (L in 0.0 .. 1.0e100);
+      |                                    ^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Row (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:98:59
+   98 |             pragma Loop_Invariant (for all K in Row'Range => Row (K) in -1.0e100 .. 1.0e100);
+      |                                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Row (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:98:59
+   98 |             pragma Loop_Invariant (for all K in Row'Range => Row (K) in -1.0e100 .. 1.0e100);
+      |                                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:98:64
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:99:20
+   99 |             if Route (I).Kind = Pulley_Node or else Route (I + 1).Kind = Pulley_Node then
+      |                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendons.adb:99:59
+   99 |             if Route (I).Kind = Pulley_Node or else Route (I + 1).Kind = Pulley_Node then
+      |                                                            ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:99:59
+   99 |             if Route (I).Kind = Pulley_Node or else Route (I + 1).Kind = Pulley_Node then
+      |                                                            ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:100:23
+
+ info: index check proved
+--> mj-spatial_tendons.adb:101:34
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:102:16
+  102 |                   Emit (Zero, -2);
+      |                   ^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendons.adb:104:20
+  104 |                I := I + 1;
+      |                     ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:106:32
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:106:34
+  106 |                A := Sites (Route (I).Object_Id);
+      |                            ~~~~~~~~~^~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:107:28
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:110:25
+
+ info: index check proved
+--> mj-spatial_tendons.adb:110:25
+
+ medium: overflow check might fail, cannot prove lower bound for I + 2
+--> mj-spatial_tendons.adb:111:31
+  111 |                   Last_Node := I + 2;
+      |                                ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:112:36
+
+ info: index check proved
+--> mj-spatial_tendons.adb:112:36
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:113:33
+  113 |                   G := Geometries (Geom_Id);
+      |                                    ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:115:28
+
+ info: index check proved
+--> mj-spatial_tendons.adb:115:28
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:116:43
+
+ info: index check proved
+--> mj-spatial_tendons.adb:116:43
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:116:47
+  116 |                      Side := Sites (Route (I + 1).Side_Id).Position;
+      |                                     ~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:118:21
+  118 |                   W := Wrap (A.Position, Sites (Route (Last_Node).Object_Id).Position,
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+  120 |                              Route (I + 1).Side_Id >= 0, Side);
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop invariant at line 93 should mention A and G
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:118:53
+  118 |                   W := Wrap (A.Position, Sites (Route (Last_Node).Object_Id).Position,
+      |                                                        ^~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Last_Node
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:118:63
+  118 |                   W := Wrap (A.Position, Sites (Route (Last_Node).Object_Id).Position,
+      |                                                 ~~~~~~~~~~~~~~~~~^~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Last_Node
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:120:36
+
+ info: index check proved
+--> mj-spatial_tendons.adb:120:36
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:125:32
+  125 |                B := Sites (Route (Last_Node).Object_Id);
+      |                                   ^~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Last_Node
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:125:42
+  125 |                B := Sites (Route (Last_Node).Object_Id);
+      |                            ~~~~~~~~~~~~~~~~~^~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Last_Node
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:140:32
+  140 |                   First_Length := Norm (Sub (P (1), P (2)));
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:140:38
+  140 |                   First_Length := Norm (Sub (P (1), P (2)));
+      |                                         ^~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:141:31
+  141 |                   Last_Length := Norm (Sub (P (3), P (4)));
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:141:37
+  141 |                   Last_Length := Norm (Sub (P (3), P (4)));
+      |                                        ^~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:145:44
+  145 |                   Increment := ((First_Length + W.Arc_Length) + Last_Length) / Divisor;
+      |                                 ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop invariant at line 93 should mention First_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:145:60
+  145 |                   Increment := ((First_Length + W.Arc_Length) + Last_Length) / Divisor;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop invariant at line 93 should mention First_Length and Last_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-spatial_tendons.adb:145:75
+  145 |                   Increment := ((First_Length + W.Arc_Length) + Last_Length) / Divisor;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+      + possible fix: loop invariant at line 93 should mention First_Length and Last_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:145:75
+  145 |                   Increment := ((First_Length + W.Arc_Length) + Last_Length) / Divisor;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop invariant at line 93 should mention First_Length and Last_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:150:32
+  150 |                   First_Length := Norm (Sub (P (1), P (2)));
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:150:38
+  150 |                   First_Length := Norm (Sub (P (1), P (2)));
+      |                                         ^~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-spatial_tendons.adb:152:42
+  152 |                   Increment := First_Length / Divisor;
+      |                                ~~~~~~~~~~~~~^~~~~~~~~
+      + possible fix: loop invariant at line 93 should mention First_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:152:42
+  152 |                   Increment := First_Length / Divisor;
+      |                                ~~~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop invariant at line 93 should mention First_Length
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:154:20
+  154 |                L := L + Increment;
+      |                     ~~^~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop invariant at line 93 should mention Increment
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Row (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:159:65
+  159 |                   pragma Loop_Invariant (for all K in Row'Range => Row (K) in -1.0e100 .. 1.0e100);
+      |                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Row (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:159:65
+  159 |                   pragma Loop_Invariant (for all K in Row'Range => Row (K) in -1.0e100 .. 1.0e100);
+      |                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:159:70
+
+ medium: overflow check might fail, cannot prove lower bound for Leg + 1
+--> mj-spatial_tendons.adb:160:47
+  160 |                   if Bodies (Leg) /= Bodies (Leg + 1) then
+      |                                              ~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:160:47
+  160 |                   if Bodies (Leg) /= Bodies (Leg + 1) then
+      |                                              ~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:161:32
+  161 |                      Direction := Unit (Sub (P (Leg + 1), P (Leg)));
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:161:38
+  161 |                      Direction := Unit (Sub (P (Leg + 1), P (Leg)));
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:161:50
+
+ info: index check proved
+--> mj-spatial_tendons.adb:161:50
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Row (Q) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:163:71
+  163 |                         pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
+      |                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Row (Q) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:163:71
+  163 |                         pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
+      |                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:163:76
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:164:28
+  164 |                         C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  165 |                                             P (Leg), Origins (Bodies (Leg)));
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:164:50
+  164 |                         C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+      |                                                     ^~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:164:64
+  164 |                         C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+      |                                                                   ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:164:77
+  164 |                         C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+      |                                                                                ^~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:164:91
+  164 |                         C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+      |                                                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:165:60
+  165 |                                             P (Leg), Origins (Bodies (Leg)));
+      |                                                               ^~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:166:28
+  166 |                         C1 := Point_Column (Linear (Bodies (Leg + 1), K), Angular (Bodies (Leg + 1), K),
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  167 |                                             P (Leg + 1), Origins (Bodies (Leg + 1)));
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 93 should mention P
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:166:50
+  166 |                         C1 := Point_Column (Linear (Bodies (Leg + 1), K), Angular (Bodies (Leg + 1), K),
+      |                                                     ^~~~~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:166:62
+
+ info: index check proved
+--> mj-spatial_tendons.adb:166:62
+
+ info: index check proved
+--> mj-spatial_tendons.adb:166:68
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:166:81
+  166 |                         C1 := Point_Column (Linear (Bodies (Leg + 1), K), Angular (Bodies (Leg + 1), K),
+      |                                                                                    ^~~~~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:166:93
+
+ info: index check proved
+--> mj-spatial_tendons.adb:166:93
+
+ info: index check proved
+--> mj-spatial_tendons.adb:166:99
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:167:49
+
+ info: index check proved
+--> mj-spatial_tendons.adb:167:49
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:167:64
+  167 |                                             P (Leg + 1), Origins (Bodies (Leg + 1)));
+      |                                                                   ^~~~~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 93 should mention Bodies
+   93 |             pragma Loop_Invariant (I <= Route'Last);
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:167:76
+
+ info: index check proved
+--> mj-spatial_tendons.adb:167:76
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:168:41
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                    ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop invariant at line 163 should mention C0 and C1
+  163 |                         pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
+      |                         ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-spatial_tendons.adb:168:48
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                               ~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:168:48
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                               ~~~~^~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:168:59
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                               ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop invariant at line 163 should mention C0 and C1
+  163 |                         pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
+      |                         ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:168:61
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 159 should mention Direction
+  159 |                   pragma Loop_Invariant (for all K in Row'Range => Row (K) in -1.0e100 .. 1.0e100);
+      |                   ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-spatial_tendons.adb:168:66
+  168 |                         Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
+      |                                                                     ^~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop invariant at line 163 should mention C0 and C1
+  163 |                         pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
+      |                         ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:175:13
+  175 |                Emit (A.Position, -1);
+      |                ^~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:177:16
+  177 |                   Emit (W.First, Geom_Id);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:178:16
+  178 |                   Emit (W.Last, Geom_Id);
+      |                   ^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendons.adb:181:48
+  181 |                if I = Route'Last or else Route (I + 1).Kind = Pulley_Node then
+      |                                                 ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:181:48
+  181 |                if I = Route'Last or else Route (I + 1).Kind = Pulley_Node then
+      |                                                 ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-spatial_tendons.adb:182:16
+  182 |                   Emit (B.Position, -1);
+      |                   ^~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:188:09
+  188 |          J := Row;
+      |          ~~^~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + possible fix: precondition of subprogram at mj-spatial_tendons.ads:83 should mention J'Length or J'First or J'Last
+      --> mj-spatial_tendons.ads:83:04
+   83 |       procedure Evaluate
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendons.adb:189:14
+  189 |          Points := Path;
+      |          ~~~~~~~^~~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + possible fix: precondition of subprogram at mj-spatial_tendons.ads:83 should mention Points'Length or Points'First or Points'Last
+      --> mj-spatial_tendons.ads:83:04
+   83 |       procedure Evaluate
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:194:16
+  194 |         (Previous + Moment * Force);
+      |          ~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:194:25
+  194 |         (Previous + Moment * Force);
+      |                     ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Count < 4096
+--> mj-spatial_tendons.adb:198:08
+  198 |           Velocity_Add (Velocity_Prefix (J, Qvel, Count - 1),
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  199 |                         J (Count - 1), Qvel (Count - 1), Count - 1));
+      |                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove J (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:198:22
+  198 |           Velocity_Add (Velocity_Prefix (J, Qvel, Count - 1),
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: subprogram variant proved
+--> mj-spatial_tendons.adb:198:22
+
+ info: range check proved
+--> mj-spatial_tendons.adb:198:54
+
+ info: index check proved
+--> mj-spatial_tendons.adb:199:31
+
+ info: index check proved
+--> mj-spatial_tendons.adb:199:49
+
+ info: range check proved
+--> mj-spatial_tendons.adb:199:61
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:205:17
+  205 |             V := V + J (K) * Qvel (K);
+      |                  ~~^~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.adb:205:25
+  205 |             V := V + J (K) * Qvel (K);
+      |                      ~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:205:33
+  205 |             V := V + J (K) * Qvel (K);
+      |                                    ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration
+--> mj-spatial_tendons.adb:206:43
+  206 |             pragma Loop_Invariant (Static => V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:206:43
+  206 |             pragma Loop_Invariant (Static => V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Count <= J'Length
+--> mj-spatial_tendons.adb:206:47
+  206 |             pragma Loop_Invariant (Static => V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for K + 1
+--> mj-spatial_tendons.adb:206:75
+  206 |             pragma Loop_Invariant (Static => V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                                                            ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: use pragma Overflow_Mode or switch -gnato13 or unit SPARK.Big_Integers
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for K + 1
+--> mj-spatial_tendons.adb:206:75
+  206 |             pragma Loop_Invariant (Static => V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                                                            ~~^~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration
+--> mj-spatial_tendons.adb:207:33
+  207 |             pragma Loop_Invariant (V in -Real (K + 1) * Velocity_Step_Bound .. Real (K + 1) * Velocity_Step_Bound);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-spatial_tendons.adb:207:33
+  207 |             pragma Loop_Invariant (V in -Real (K + 1) * Velocity_Step_Bound .. Real (K + 1) * Velocity_Step_Bound);
+      |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.adb:207:47
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:207:47
+
+ info: float overflow check proved
+--> mj-spatial_tendons.adb:207:52
+
+ info: range check proved
+--> mj-spatial_tendons.adb:207:85
+
+ info: overflow check proved
+--> mj-spatial_tendons.adb:207:85
+
+ info: float overflow check proved
+--> mj-spatial_tendons.adb:207:90
+
+ info: index check proved
+--> mj-spatial_tendons.adb:215:18
+
+ medium: precondition might fail, cannot prove Previous in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:215:24
+  215 |             Qforce (K) := Project_Component (Qforce (K), J (K), Force);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:215:51
+  215 |             Qforce (K) := Project_Component (Qforce (K), J (K), Force);
+      |                                                      ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Qforce (I) = (if I <= K then Project_Component (Qforce'Loop_Entry (I), J (I), Force) else Qforce'Loop_Entry (I))
+--> mj-spatial_tendons.adb:217:37
+  217 |               (for all I in J'Range => Qforce (I) =
+      |                                        ^~~~~~~~~~~~
+      :
+  219 |                  else Qforce'Loop_Entry (I)));
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Qforce (I) = (if I <= K then Project_Component (Qforce'Loop_Entry (I), J (I), Force) else Qforce'Loop_Entry (I))
+--> mj-spatial_tendons.adb:217:37
+  217 |               (for all I in J'Range => Qforce (I) =
+      |                                        ^~~~~~~~~~~~
+      :
+  219 |                  else Qforce'Loop_Entry (I)));
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:217:45
+  217 |               (for all I in J'Range => Qforce (I) =
+      |                                                ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Previous in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.adb:218:30
+  218 |                 (if I <= K then Project_Component (Qforce'Loop_Entry (I), J (I), Force)
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:218:68
+  218 |                 (if I <= K then Project_Component (Qforce'Loop_Entry (I), J (I), Force)
+      |                                                                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.adb:218:75
+
+ medium: array index check might fail
+--> mj-spatial_tendons.adb:219:39
+  219 |                  else Qforce'Loop_Entry (I)));
+      |                                          ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Path_Node_Valid" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:38:13
+
+ info: index check proved
+--> mj-spatial_tendons.ads:40:19
+
+ info: index check proved
+--> mj-spatial_tendons.ads:41:34
+
+ info: index check proved
+--> mj-spatial_tendons.ads:43:29
+
+ info: overflow check proved
+--> mj-spatial_tendons.ads:43:69
+
+ info: index check proved
+--> mj-spatial_tendons.ads:43:69
+
+ info: index check proved
+--> mj-spatial_tendons.ads:44:27
+
+ info: index check proved
+--> mj-spatial_tendons.ads:45:28
+
+ info: index check proved
+--> mj-spatial_tendons.ads:45:59
+
+ info: overflow check proved
+--> mj-spatial_tendons.ads:46:62
+
+ info: index check proved
+--> mj-spatial_tendons.ads:46:62
+
+ info: index check proved
+--> mj-spatial_tendons.ads:47:27
+
+ info: implicit aspect Always_Terminates on "Path_Layout" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:49:13
+
+ info: index check proved
+--> mj-spatial_tendons.ads:52:28
+
+ info: precondition proved
+--> mj-spatial_tendons.ads:53:45
+
+ info: range check proved
+--> mj-spatial_tendons.ads:53:88
+
+ info: implicit aspect Always_Terminates on "Valid_Path" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:55:13
+
+ medium: postcondition might fail, cannot prove Path_Node_Valid (Route, Sites, Geometries, K)
+--> mj-spatial_tendons.ads:57:41
+   57 |         Post => (if Valid_Path'Result then Path_Layout (Route, Sites, Geometries));
+      |                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-spatial_tendons.ads:53
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Valid_Kinematics" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:62:13
+
+ info: range check proved
+--> mj-spatial_tendons.ads:72:54
+
+ info: range check proved
+--> mj-spatial_tendons.ads:73:56
+
+ info: index check proved
+--> mj-spatial_tendons.ads:79:67
+
+ medium: array index check might fail
+--> mj-spatial_tendons.ads:81:30
+   81 |                Bounded (Linear (B, K), 1.0e10) and then Bounded (Angular (B, K), 1.0e10))));
+      |                                 ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.ads:81:33
+
+ medium: array index check might fail
+--> mj-spatial_tendons.ads:81:72
+   81 |                Bounded (Linear (B, K), 1.0e10) and then Bounded (Angular (B, K), 1.0e10))));
+      |                                                                           ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.ads:81:75
+   81 |                Bounded (Linear (B, K), 1.0e10) and then Bounded (Angular (B, K), 1.0e10))));
+      |                                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Status" proved
+--> mj-spatial_tendons.ads:86:07
+
+ info: initialization of "Length" proved
+--> mj-spatial_tendons.ads:86:39
+
+ info: initialization of "J" proved
+--> mj-spatial_tendons.ads:86:58
+
+ info: initialization of "Points" proved
+--> mj-spatial_tendons.ads:87:07
+
+ info: initialization of "Count" proved
+--> mj-spatial_tendons.ads:87:33
+
+ medium: range check might fail, cannot prove lower bound for J'Length
+--> mj-spatial_tendons.ads:90:81
+   90 |           and then Valid_Kinematics (Sites, Geometries, Origins, Linear, Angular, J'Length)
+      |                                                                                   ~^~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ medium: postcondition might fail, cannot prove Count <= Points'Length
+--> mj-spatial_tendons.ads:93:14
+   93 |         Post => Count <= Points'Length
+      |                 ^~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for Points'Length
+--> mj-spatial_tendons.ads:93:29
+   93 |         Post => Count <= Points'Length
+      |                          ~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.ads:95:57
+
+ info: index check proved
+--> mj-spatial_tendons.ads:97:57
+
+ info: index check proved
+--> mj-spatial_tendons.ads:99:30
+
+ info: implicit aspect Always_Terminates on "Point_Column" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:103:13
+
+ medium: postcondition might fail
+--> mj-spatial_tendons.ads:106:14
+  106 |         Post => Point_Column'Result =
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+      :
+  109 |            Linear (3) + (Angular (1) * (Point (2) - Origin (2)) - Angular (2) * (Point (1) - Origin (1))));
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:20
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:35
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:48
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:62
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:76
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:107:89
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:20
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:35
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:48
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:62
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:76
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:108:89
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:20
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:35
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:48
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:62
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:76
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:109:89
+
+ info: implicit aspect Always_Terminates on "Project_Component" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:111:13
+
+ info: postcondition proved
+--> mj-spatial_tendons.ads:114:14
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:114:50
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:114:59
+
+ info: implicit aspect Always_Terminates on "Velocity_Add" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:117:13
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.ads:118:11
+  118 |         (Acc + Moment * Rate) with Ghost => Static,
+      |          ~~~~^~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-spatial_tendons.ads:118:20
+  118 |         (Acc + Moment * Rate) with Ghost => Static,
+      |                ~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.ads:120:34
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:120:41
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:123:40
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:123:49
+
+ medium: postcondition might fail, cannot prove abs Velocity_Add'Result <= Real (Count + 1) * Velocity_Step_Bound
+--> mj-spatial_tendons.ads:124:17
+  124 |           and then abs Velocity_Add'Result <= Real (Count + 1) * Velocity_Step_Bound;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.ads:124:56
+
+ info: overflow check proved
+--> mj-spatial_tendons.ads:124:56
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:124:61
+
+ info: implicit aspect Always_Terminates on "Velocity_Prefix" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:126:13
+
+ info: range check proved
+--> mj-spatial_tendons.ads:129:53
+
+ info: index check proved
+--> mj-spatial_tendons.ads:130:45
+
+ info: index check proved
+--> mj-spatial_tendons.ads:131:25
+
+ medium: postcondition might fail
+--> mj-spatial_tendons.ads:132:14
+  132 |         Post => Velocity_Prefix'Result in -Real (Count) * Velocity_Step_Bound .. Real (Count) * Velocity_Step_Bound,
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendons.ads:132:47
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:132:54
+
+ info: range check proved
+--> mj-spatial_tendons.ads:132:85
+
+ info: float overflow check proved
+--> mj-spatial_tendons.ads:132:92
+
+ info: implicit aspect Always_Terminates on "Velocity" has been proved, subprogram will terminate
+--> mj-spatial_tendons.ads:134:13
+
+ info: index check proved
+--> mj-spatial_tendons.ads:137:45
+
+ info: index check proved
+--> mj-spatial_tendons.ads:138:25
+
+ medium: postcondition might fail
+--> mj-spatial_tendons.ads:139:25
+  139 |         Post => (Static => Velocity'Result = Velocity_Prefix (J, Qvel, J'Length));
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove J (K) in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.ads:139:43
+  139 |         Post => (Static => Velocity'Result = Velocity_Prefix (J, Qvel, J'Length));
+      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for J'Length
+--> mj-spatial_tendons.ads:139:70
+  139 |         Post => (Static => Velocity'Result = Velocity_Prefix (J, Qvel, J'Length));
+      |                                                                        ~^~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.ads:143:45
+
+ info: index check proved
+--> mj-spatial_tendons.ads:144:27
+
+ medium: postcondition might fail, cannot prove Qforce (K) = Project_Component (Qforce'Old (K), J (K), Force)
+--> mj-spatial_tendons.ads:146:08
+  146 |           Qforce (K) = Project_Component (Qforce'Old (K), J (K), Force));
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.ads:146:16
+
+ medium: precondition might fail, cannot prove Previous in -1.0e100 .. 1.0e100
+--> mj-spatial_tendons.ads:146:21
+  146 |           Qforce (K) = Project_Component (Qforce'Old (K), J (K), Force));
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendons.ads:146:52
+  146 |           Qforce (K) = Project_Component (Qforce'Old (K), J (K), Force));
+      |                                                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-spatial_tendons.ads:146:59
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/kernel-proof-source-zuq3m6au/build/mj-spatial_tendons/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 68.1 s, peak group RSS 540 MB

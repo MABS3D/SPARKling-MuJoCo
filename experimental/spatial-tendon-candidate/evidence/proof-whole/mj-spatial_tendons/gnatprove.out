@@ -1,0 +1,51 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-----------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                       Provers   Justified     Unproved
+-----------------------------------------------------------------------------------------------------
+Data Dependencies                 .          .                             .           .            .
+Flow Dependencies                 .          .                             .           .            .
+Initialization                   19         19                             .           .            .
+Non-Aliasing                      .          .                             .           .            .
+Run-time Checks                 205          .    115 (CVC5 95%, Trivial 5%)           .           90
+Assertions                       26          .                      4 (CVC5)           .           22
+Functional Contracts             36          .                      2 (CVC5)           .           34
+LSP Verification                  .          .                             .           .            .
+Termination                      11          9                      1 (CVC5)           .            1
+Concurrency                       .          .                             .           .            .
+-----------------------------------------------------------------------------------------------------
+Total                           297    28 (9%)                     122 (41%)           .    147 (49%)
+
+
+max steps used for successful proof: 7695
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_tendons.ads:97:57: index check proved in max 1 seconds
+mj-spatial_tendons.ads:95:57: index check proved in max 1 seconds
+mj-spatial_tendons.ads:99:30: index check proved in max 1 seconds
+mj-spatial_tendons.ads:109:35: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_tendons, 13 subprograms and packages out of 13 analyzed
+  MJ.Spatial_Tendons at mj-spatial_tendons.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Spatial_Tendons.Evaluate at mj-spatial_tendons.ads:83 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 37 checks out of 117 proved
+  MJ.Spatial_Tendons.Evaluate.Emit at mj-spatial_tendons.adb:75 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 4 checks out of 8 proved
+  MJ.Spatial_Tendons.Path_Layout at mj-spatial_tendons.ads:49 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Spatial_Tendons.Path_Node_Valid at mj-spatial_tendons.ads:38 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Spatial_Tendons.Point_Column at mj-spatial_tendons.ads:103 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 18 checks out of 40 proved
+  MJ.Spatial_Tendons.Project_Component at mj-spatial_tendons.ads:111 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 3 checks out of 5 proved
+  MJ.Spatial_Tendons.Project_Force at mj-spatial_tendons.ads:140 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 6 checks out of 17 proved
+  MJ.Spatial_Tendons.Valid_Kinematics at mj-spatial_tendons.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 4 checks out of 7 proved
+  MJ.Spatial_Tendons.Valid_Path at mj-spatial_tendons.ads:55 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 9 checks out of 15 proved
+  MJ.Spatial_Tendons.Velocity at mj-spatial_tendons.ads:134 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 8 checks out of 21 proved
+  MJ.Spatial_Tendons.Velocity_Add at mj-spatial_tendons.ads:117 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 7 checks out of 10 proved
+  MJ.Spatial_Tendons.Velocity_Prefix at mj-spatial_tendons.ads:126 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 12 checks out of 15 proved

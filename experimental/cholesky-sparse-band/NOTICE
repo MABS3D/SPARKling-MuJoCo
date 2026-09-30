@@ -1,0 +1,16 @@
+SPARKling MuJoCo — sparse and band-dense Cholesky
+
+The algorithms in src/mj-cholesky_sparse.adb and src/mj-cholesky_band.adb
+are adapted from MuJoCo 3.14.0, src/engine/engine_util_solve.c, commit
+9ecbb9d7b5ee623f54745638d36799ff90e6f7cd. Reduction order and sparse merging
+follow engine_util_blas.c and engine_util_sparse.h. The test bridge extracts
+the unmodified sparse-solve function and uses its original AVX header.
+
+MuJoCo upstream source:
+Copyright 2021 DeepMind Technologies Limited
+Licensed under the Apache License, Version 2.0.
+See ../../LICENSE and ../../CONTRIBUTORS.md.
+
+SPARK translation, contracts and test harness:
+Copyright 2026 MABS3D
+Licensed under the Apache License, Version 2.0.

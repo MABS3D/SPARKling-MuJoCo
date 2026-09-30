@@ -1,3 +1,4 @@
+with MJ.Manifold_Math;
 with MJ.Pose_Arithmetic;
 with MJ.Smooth_Dynamics; use MJ.Smooth_Dynamics;
 with MJ.Data.Inertia_Phase;
@@ -33,9 +34,15 @@ package body MJ.Data.Pipeline with SPARK_Mode is
    procedure Normalize_Orientation (Q : in out Quaternion; Ok : out Boolean)
      with Global => null,
      Post => (if Ok then Unit_Quaternion (Q) else Q = Q'Old)
+       and then (if Unit_Quaternion (Q'Old) then Ok and then Q = Q'Old)
    is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
    begin
-      Normalize (Q, Ok);
+      if MJ.Manifold_Math.Already_Normalized (Q) then
+         Ok := True;
+      else
+         Normalize (Q, Ok);
+      end if;
    end Normalize_Orientation;
 
    procedure Fixed_Position (P : Body_State; C : Body_Parameters; S : out Body_State; Ok : out Boolean)
@@ -459,6 +466,106 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Result := Success;
    end Build_Bodies;
 
+   procedure Build_Manifold_Bodies
+     (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
+      Qpos, Qvel : Real_Array; With_Motion : Boolean;
+      Bodies : in out Body_State_Array; Joints : in out Joint_State_Array; Result : out Status)
+     with Global => null,
+     Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
+       and then Bodies'First = 0 and then Bodies'Last = Body_Config'Last
+       and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
+       and then Joints'First = 0 and then Joints'Last = Joint_Config'Last
+       and then Qpos'First = 0 and then Position_Layout (Joint_Config, Qpos'Length)
+       and then Qvel'First = 0 and then Qvel'Last = Joint_Config'Last
+       and then MJ.Smooth_Kernels.All_Tier0 (Qpos) and then MJ.Smooth_Kernels.All_Tier0 (Qvel),
+     Post => (if Result = Success then (for all B of Bodies => Body_Bounded (B))
+       and then (for all J of Joints => Joint_Bounded (J)))
+   is
+      S : Body_State;
+      Accepted : Boolean;
+      K : Natural;
+      Q : Quaternion;
+      Anchor, Old_Offset, New_Offset, Anchor_Velocity, Anchor_Bias, Relative_Velocity : Vector;
+   begin
+      Result := Numeric_Limit;
+      Initialize_World (Bodies (0));
+      for B in 1 .. Body_Config'Last loop
+         declare
+            C : constant Body_Parameters := Body_Config (B);
+         begin
+            if C.Joint_Count > 0 and then Joint_Config (C.First_Joint).Group_Type = 0 then
+               --  C's free-body pose comes directly from qpos. A fixed frame
+               --  would be overwritten in full by the following free group.
+               S := (others => <>);
+               Accepted := True;
+            elsif With_Motion then
+               Fixed_Frame (Bodies (C.Parent), C, S, Accepted);
+            else
+               Fixed_Position (Bodies (C.Parent), C, S, Accepted);
+            end if;
+            if not Accepted then return; end if;
+            K := 0;
+            while K < C.Joint_Count loop
+               declare
+                  J : constant Natural := C.First_Joint + K;
+                  P : constant Joint_Parameters := Joint_Config (J);
+               begin
+                  if P.Group_Type = 0 then
+                     S.Position := Read_Vector (Qpos, P.Group_Qadr);
+                     S.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Qpos, P.Group_Qadr + 3));
+                     S.Rotation := Rotation (S.Orientation);
+                     if With_Motion then
+                        S.Linear_Velocity := Read_Vector (Qvel, P.Group_Vadr);
+                        S.Angular_Velocity := Apply (S.Rotation, Read_Vector (Qvel, P.Group_Vadr + 3));
+                        S.Linear_Bias := Zero; S.Angular_Bias := Zero;
+                     end if;
+                     for A in Axis loop
+                        Joints (J + A) := (Anchor => S.Position, Direction => [for I in Axis => (if I = A then 1.0 else 0.0)]);
+                        Joints (J + 3 + A) := (Anchor => S.Position, Direction => [for I in Axis => S.Rotation (I, A)]);
+                     end loop;
+                     K := K + 6;
+                  elsif P.Group_Type = 1 then
+                     Old_Offset := Apply (S.Rotation, P.Anchor);
+                     Anchor := S.Position + Old_Offset;
+                     if With_Motion then
+                        Anchor_Velocity := S.Linear_Velocity + Cross (S.Angular_Velocity, Old_Offset);
+                        Anchor_Bias := S.Linear_Bias + Cross (S.Angular_Bias, Old_Offset)
+                          + Cross (S.Angular_Velocity, Cross (S.Angular_Velocity, Old_Offset));
+                     end if;
+                     Q := MJ.Manifold_Math.Normalized (Read_Quaternion (Qpos, P.Qadr));
+                     S.Orientation := MJ.Manifold_Math.Normalized (Multiply (S.Orientation, Q));
+                     S.Rotation := Rotation (S.Orientation);
+                     New_Offset := Apply (S.Rotation, P.Anchor);
+                     S.Position := Anchor - New_Offset;
+                     if With_Motion then
+                        Relative_Velocity := Apply (S.Rotation, Read_Vector (Qvel, P.Group_Vadr));
+                        S.Angular_Bias := S.Angular_Bias + Cross (S.Angular_Velocity, Relative_Velocity);
+                        S.Angular_Velocity := S.Angular_Velocity + Relative_Velocity;
+                        S.Linear_Velocity := Anchor_Velocity - Cross (S.Angular_Velocity, New_Offset);
+                        S.Linear_Bias := Anchor_Bias - Cross (S.Angular_Bias, New_Offset)
+                          - Cross (S.Angular_Velocity, Cross (S.Angular_Velocity, New_Offset));
+                     end if;
+                     for A in Axis loop
+                        Joints (J + A) := (Anchor => Anchor, Direction => [for I in Axis => S.Rotation (I, A)]);
+                     end loop;
+                     K := K + 3;
+                  else
+                     Apply_One_Joint (S, P, Joint_Displacement (Qpos (P.Qadr), P.Reference),
+                       Qvel (P.Vadr), With_Motion, Joints (J), Accepted);
+                     if not Accepted then return; end if;
+                     K := K + 1;
+                  end if;
+                  if not Body_Bounded (S) then return; end if;
+               end;
+            end loop;
+            Finalize_Body_Frame (S, C, Accepted);
+            if not Accepted then return; end if;
+            Bodies (B) := S;
+         end;
+      end loop;
+      Result := Success;
+   end Build_Manifold_Bodies;
+
    procedure Expose_State_Layout (D : Simulation)
      with Ghost => Static, Global => null, Pre => Storage_Ready (D),
      Post => D.State.Qpos /= null and then D.State.Qpos'First = 0
@@ -515,6 +622,10 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Expose_Stable_Ready (D);
       Expose_State_Layout (D);
       Invalidate (D.Cache);
+      if D.Nq /= D.Nv then
+         Build_Manifold_Bodies (D.Body_Config.all, D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
+           With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result);
+      else
       pragma Assert (Static => D.Body_Config.all'First = 0);
       pragma Assert (Static => D.Body_Config.all'Length in 1 .. Max_Bodies);
       pragma Assert (Static => D.Kinematic.Bodies.all'First = 0);
@@ -553,6 +664,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
 
       Build_Bodies (D.Body_Config.all, D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
                     With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result);
+      end if;
       if Result = Success then
          D.Cache := (D.Cache with delta Pose_Valid => True,
            Cartesian_Motion_Valid => With_Motion);
@@ -654,9 +766,14 @@ package body MJ.Data.Pipeline with SPARK_Mode is
             Bodies : Body_State_Array (0 .. Nb - 1);
             Joints : Joint_State_Array (0 .. Nj - 1);
          begin
+            if D.Nq /= D.Nv then
+               Build_Manifold_Bodies (D.Body_Config.all, D.Joint_Config.all,
+                 D.State.Qpos.all, D.State.Qvel.all, True, Bodies, Joints, Result);
+            else
             Build_Bodies (D.Body_Config.all, D.Joint_Config.all,
                           D.State.Qpos.all, D.State.Qvel.all,
                           True, Bodies, Joints, Result);
+            end if;
             if Result = Success then
                Copy_Motions (D.Kinematic.Bodies.all, Bodies);
                D.Cache := (D.Cache with delta Cartesian_Motion_Valid => True);

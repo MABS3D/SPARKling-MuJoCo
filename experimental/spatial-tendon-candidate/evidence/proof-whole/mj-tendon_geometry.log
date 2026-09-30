@@ -1,0 +1,2351 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:15:51
+   15 |       function Norm (V : Vector) return Real is (Math.Sqrt (Dot (V, V)));
+      |                                                  ~~~~^~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:15:58
+   15 |       function Norm (V : Vector) return Real is (Math.Sqrt (Dot (V, V)));
+      |                                                             ^~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:17:28
+   17 |          N : constant Real := Norm (V);
+      |                               ^~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:19:53
+   19 |          return (if N < Tiny then (1.0, 0.0, 0.0) else Scale (V, 1.0 / N));
+      |                                                        ^~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:19:67
+   19 |          return (if N < Tiny then (1.0, 0.0, 0.0) else Scale (V, 1.0 / N));
+      |                                                                  ~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:19:67
+   19 |          return (if N < Tiny then (1.0, 0.0, 0.0) else Scale (V, 1.0 / N));
+      |                                                                  ~~~~^~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Pair_Bounded" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:21:13
+
+ info: implicit aspect Always_Terminates on "Dot2" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:23:13
+
+ medium: postcondition might fail, cannot prove Dot2'Result = A (1) * B (1) + A (2) * B (2)
+--> mj-tendon_geometry.adb:25:14
+   25 |         Post => Dot2'Result = A (1) * B (1) + A (2) * B (2)
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:25:34
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:25:42
+   25 |         Post => Dot2'Result = A (1) * B (1) + A (2) * B (2)
+      |                               ~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:25:50
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:29:62
+   29 |          X : constant Real range -1.01e200 .. 1.01e200 := A (1) * B (1);
+      |                                                           ~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-tendon_geometry.adb:29:62
+   29 |          X : constant Real range -1.01e200 .. 1.01e200 := A (1) * B (1);
+      |                                                           ~~~~~~^~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:30:62
+   30 |          Y : constant Real range -1.01e200 .. 1.01e200 := A (2) * B (2);
+      |                                                           ~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-tendon_geometry.adb:30:62
+   30 |          Y : constant Real range -1.01e200 .. 1.01e200 := A (2) * B (2);
+      |                                                           ~~~~~~^~~~~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:32:16
+
+ info: implicit aspect Always_Terminates on "Norm2" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:34:13
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:34:50
+   34 |       function Norm2 (A : Pair) return Real is (Math.Sqrt (Dot2 (A, A))) with
+      |                                                 ~~~~^~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: precondition proved
+--> mj-tendon_geometry.adb:34:57
+
+ medium: postcondition might fail
+--> mj-tendon_geometry.adb:36:14
+   36 |         Post => Norm2'Result >= 0.0;
+      |                 ^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Unit2" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:37:13
+
+ medium: postcondition might fail
+--> mj-tendon_geometry.adb:39:14
+   39 |         Post => Unit2'Result = (if Norm2 (A) < Tiny then (1.0, 0.0)
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   40 |           else (A (1) * (1.0 / Norm2 (A)), A (2) * (1.0 / Norm2 (A))))
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: precondition proved
+--> mj-tendon_geometry.adb:39:33
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:40:20
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:40:27
+   40 |           else (A (1) * (1.0 / Norm2 (A)), A (2) * (1.0 / Norm2 (A))))
+      |                          ~~~~^~~~~~~~~~~
+      + possible fix: add precondition (Norm2 (A) /= 0) to subprogram at line 37
+   37 |       function Unit2 (A : Pair) return Pair with
+      |                ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:40:27
+
+ info: precondition proved
+--> mj-tendon_geometry.adb:40:29
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:40:47
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:40:54
+   40 |           else (A (1) * (1.0 / Norm2 (A)), A (2) * (1.0 / Norm2 (A))))
+      |                                                     ~~~~^~~~~~~~~~~
+      + possible fix: add precondition (Norm2 (A) /= 0) to subprogram at line 37
+   37 |       function Unit2 (A : Pair) return Pair with
+      |                ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:40:54
+
+ info: precondition proved
+--> mj-tendon_geometry.adb:40:56
+
+ info: precondition proved
+--> mj-tendon_geometry.adb:43:28
+
+ info: initialization of "S" proved
+--> mj-tendon_geometry.adb:44:07
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:49:16
+   49 |          S := 1.0 / N;
+      |               ~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:49:16
+   49 |          S := 1.0 / N;
+      |               ~~~~^~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:50:21
+   50 |          return (A (1) * S, A (2) * S);
+      |                  ~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:50:32
+   50 |          return (A (1) * S, A (2) * S);
+      |                             ~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Determinant" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:54:13
+
+ medium: postcondition might fail
+--> mj-tendon_geometry.adb:57:14
+   57 |         Post => Determinant'Result = A * B - C * D
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:57:37
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:57:41
+   57 |         Post => Determinant'Result = A * B - C * D
+      |                                      ~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:57:45
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:59:56
+   59 |          X : constant Real range -5.0e100 .. 5.0e100 := A * B;
+      |                                                         ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-tendon_geometry.adb:59:56
+   59 |          X : constant Real range -5.0e100 .. 5.0e100 := A * B;
+      |                                                         ~~^~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:60:56
+   60 |          Y : constant Real range -5.0e100 .. 5.0e100 := C * D;
+      |                                                         ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-tendon_geometry.adb:60:56
+   60 |          Y : constant Real range -5.0e100 .. 5.0e100 := C * D;
+      |                                                         ~~^~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:62:16
+
+ info: range check proved
+--> mj-tendon_geometry.adb:62:16
+
+ info: implicit aspect Always_Terminates on "Intersect" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:65:13
+
+ medium: precondition might fail, cannot prove A in -2.1e50 .. 2.1e50
+--> mj-tendon_geometry.adb:69:42
+   69 |          Det : constant Determinant_Real := Determinant
+      |                                             ^~~~~~~~~~~
+   70 |            (P4 (2) - P3 (2), P2 (1) - P1 (1), P4 (1) - P3 (1), P2 (2) - P1 (2));
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:70:17
+   70 |            (P4 (2) - P3 (2), P2 (1) - P1 (1), P4 (1) - P3 (1), P2 (2) - P1 (2));
+      |             ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:70:34
+   70 |            (P4 (2) - P3 (2), P2 (1) - P1 (1), P4 (1) - P3 (1), P2 (2) - P1 (2));
+      |                              ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:70:51
+   70 |            (P4 (2) - P3 (2), P2 (1) - P1 (1), P4 (1) - P3 (1), P2 (2) - P1 (2));
+      |                                               ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:70:68
+   70 |            (P4 (2) - P3 (2), P2 (1) - P1 (1), P4 (1) - P3 (1), P2 (2) - P1 (2));
+      |                                                                ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ info: initialization of "A" proved
+--> mj-tendon_geometry.adb:71:07
+
+ info: initialization of "B" proved
+--> mj-tendon_geometry.adb:71:10
+
+ medium: precondition might fail, cannot prove A in -2.1e50 .. 2.1e50
+--> mj-tendon_geometry.adb:74:12
+   74 |          A := Determinant (P4 (1) - P3 (1), P1 (2) - P3 (2),
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   75 |                            P4 (2) - P3 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:74:32
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:74:49
+   74 |          A := Determinant (P4 (1) - P3 (1), P1 (2) - P3 (2),
+      |                                             ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:75:32
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:75:49
+   75 |                            P4 (2) - P3 (2), P1 (1) - P3 (1)) / Det;
+      |                                             ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:75:59
+   74 |          A := Determinant (P4 (1) - P3 (1), P1 (2) - P3 (2),
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   75 |                            P4 (2) - P3 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:75:59
+   74 |          A := Determinant (P4 (1) - P3 (1), P1 (2) - P3 (2),
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   75 |                            P4 (2) - P3 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove A in -2.1e50 .. 2.1e50
+--> mj-tendon_geometry.adb:76:12
+   76 |          B := Determinant (P2 (1) - P1 (1), P1 (2) - P3 (2),
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   77 |                            P2 (2) - P1 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:76:32
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:76:49
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:77:32
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:77:49
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:77:59
+   76 |          B := Determinant (P2 (1) - P1 (1), P1 (2) - P3 (2),
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   77 |                            P2 (2) - P1 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:77:59
+   76 |          B := Determinant (P2 (1) - P1 (1), P1 (2) - P3 (2),
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   77 |                            P2 (2) - P1 (2), P1 (1) - P3 (1)) / Det;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Circle" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:81:13
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:83:30
+   83 |          Sq0 : constant Real := Dot2 (E0, E0);
+      |                                 ^~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:84:30
+   84 |          Sq1 : constant Real := Dot2 (E1, E1);
+      |                                 ^~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-tendon_geometry.adb:85:31
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:85:31
+   85 |          RR : constant Real := R * R;
+      |                                ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:86:36
+   86 |          D : constant Pair := (E1 (1) - E0 (1), E1 (2) - E0 (2));
+      |                                ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:86:53
+   86 |          D : constant Pair := (E1 (1) - E0 (1), E1 (2) - E0 (2));
+      |                                                 ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:87:29
+   87 |          DD : constant Real := Dot2 (D, D);
+      |                                ^~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E0 and E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: initialization of "A" proved
+--> mj-tendon_geometry.adb:88:07
+
+ info: initialization of "Root0" proved
+--> mj-tendon_geometry.adb:88:10
+
+ info: initialization of "Root1" proved
+--> mj-tendon_geometry.adb:88:17
+
+ info: initialization of "S" proved
+--> mj-tendon_geometry.adb:88:24
+
+ info: initialization of "Cosine" proved
+--> mj-tendon_geometry.adb:88:27
+
+ info: initialization of "Angle" proved
+--> mj-tendon_geometry.adb:88:35
+
+ info: initialization of "Cross_Value" proved
+--> mj-tendon_geometry.adb:88:42
+
+ info: initialization of "Tmp" proved
+--> mj-tendon_geometry.adb:89:07
+
+ info: initialization of "Sol" proved
+--> mj-tendon_geometry.adb:90:07
+
+ info: initialization of "Choice" proved
+--> mj-tendon_geometry.adb:92:07
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:97:43
+   97 |          A := Real'Max (0.0, Real'Min (1.0, -Dot2 (D, E0) / DD));
+      |                                              ^~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:97:56
+   97 |          A := Real'Max (0.0, Real'Min (1.0, -Dot2 (D, E0) / DD));
+      |                                              ~~~~~~~~~~~~~^~~~
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:97:56
+   97 |          A := Real'Max (0.0, Real'Min (1.0, -Dot2 (D, E0) / DD));
+      |                                              ~~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:98:17
+   98 |          Tmp := (A * D (1) + E0 (1), A * D (2) + E0 (2));
+      |                  ~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:98:25
+   98 |          Tmp := (A * D (1) + E0 (1), A * D (2) + E0 (2));
+      |                  ~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:98:37
+   98 |          Tmp := (A * D (1) + E0 (1), A * D (2) + E0 (2));
+      |                                      ~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:98:45
+   98 |          Tmp := (A * D (1) + E0 (1), A * D (2) + E0 (2));
+      |                                      ~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:99:10
+   99 |          if Dot2 (Tmp, Tmp) > RR and then
+      |             ^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:100:31
+  100 |            (not Has_Side or else Dot2 (Side, Tmp) >= 0.0)
+      |                                  ^~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention Side in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:104:20
+  104 |          Root0 := Math.Sqrt (Sq0 - RR);
+      |                   ~~~~^~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:104:31
+  104 |          Root0 := Math.Sqrt (Sq0 - RR);
+      |                              ~~~~^~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:105:20
+  105 |          Root1 := Math.Sqrt (Sq1 - RR);
+      |                   ~~~~^~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:105:31
+  105 |          Root1 := Math.Sqrt (Sq1 - RR);
+      |                              ~~~~^~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-tendon_geometry.adb:106:23
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:109:21
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                 ~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:109:26
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:109:32
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:109:37
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                               ~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:109:47
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                               ~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:109:56
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:109:56
+  109 |               ((E0 (1) * RR + ((S * R) * E0 (2)) * Root0) / Sq0,
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:21
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                 ~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:26
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:32
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                                ~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:37
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                               ~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:47
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                               ~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:110:56
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:110:56
+  110 |                (E0 (2) * RR - ((S * R) * E0 (1)) * Root0) / Sq0);
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 81 should mention E0 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:112:21
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                 ~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:112:26
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:112:32
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:112:37
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                               ~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:112:47
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                               ~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:112:56
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:112:56
+  112 |               ((E1 (1) * RR - ((S * R) * E1 (2)) * Root1) / Sq1,
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:113:21
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                 ~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:113:26
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:113:32
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:113:37
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                               ~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:113:47
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                               ~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:113:56
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:113:56
+  113 |                (E1 (2) * RR + ((S * R) * E1 (1)) * Root1) / Sq1);
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 81 should mention E1 and R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:115:20
+  115 |                Tmp := Unit2 ((Sol (I).A (1) + Sol (I).B (1),
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  116 |                               Sol (I).A (2) + Sol (I).B (2)));
+      |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:115:42
+  115 |                Tmp := Unit2 ((Sol (I).A (1) + Sol (I).B (1),
+      |                               ~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:116:42
+  116 |                               Sol (I).A (2) + Sol (I).B (2)));
+      |                               ~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:117:25
+  117 |                Good (I) := Dot2 (Tmp, Side);
+      |                            ^~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention Side in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:119:35
+  119 |                Tmp := (Sol (I).A (1) - Sol (I).B (1),
+      |                        ~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:120:35
+  120 |                        Sol (I).A (2) - Sol (I).B (2));
+      |                        ~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:121:26
+  121 |                Good (I) := -Dot2 (Tmp, Tmp);
+      |                             ^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (P1, 1.0e50)
+--> mj-tendon_geometry.adb:123:13
+  123 |             if Intersect (E0, Sol (I).A, E1, Sol (I).B) then
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E0 and E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (P1, 1.0e50)
+--> mj-tendon_geometry.adb:128:10
+  128 |          if Intersect (E0, Sol (Choice).A, E1, Sol (Choice).B) then
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 81 should mention E0 and E1 in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:131:17
+  131 |          Cosine := Dot2 (Unit2 (Sol (Choice).A), Unit2 (Sol (Choice).B));
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:131:23
+  131 |          Cosine := Dot2 (Unit2 (Sol (Choice).A), Unit2 (Sol (Choice).B));
+      |                          ^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:131:47
+  131 |          Cosine := Dot2 (Unit2 (Sol (Choice).A), Unit2 (Sol (Choice).B));
+      |                                                  ^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:135:20
+  135 |          Angle := Math.Arccos (Cosine);
+      |                   ~~~~^~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:136:41
+  136 |          Cross_Value := Sol (Choice).A (2) * Sol (Choice).B (1)
+      |                         ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:137:09
+  136 |          Cross_Value := Sol (Choice).A (2) * Sol (Choice).B (1)
+      |                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  137 |            - Sol (Choice).A (1) * Sol (Choice).B (2);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:137:30
+  137 |            - Sol (Choice).A (1) * Sol (Choice).B (2);
+      |              ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:141:28
+  141 |             Angle := 2.0 * Pi - Angle;
+      |                      ~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:143:58
+  143 |          return (Wrapped, Sol (Choice).A, Sol (Choice).B, R * Angle);
+      |                                                           ~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 81 should mention R in a precondition
+   81 |       function Circle (E0, E1 : Pair; Side : Pair; Has_Side : Boolean; R : Real)
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Inside" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:146:13
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:147:29
+  147 |          L0 : constant Real := Norm2 (E0);
+      |                                ^~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:148:29
+  148 |          L1 : constant Real := Norm2 (E1);
+      |                                ^~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:149:36
+  149 |          D : constant Pair := (E1 (1) - E0 (1), E1 (2) - E0 (2));
+      |                                ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:149:53
+  149 |          D : constant Pair := (E1 (1) - E0 (1), E1 (2) - E0 (2));
+      |                                                 ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:150:29
+  150 |          DD : constant Real := Dot2 (D, D);
+      |                                ^~~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: initialization of "A" proved
+--> mj-tendon_geometry.adb:151:07
+
+ info: initialization of "B" proved
+--> mj-tendon_geometry.adb:151:10
+
+ info: initialization of "CosG" proved
+--> mj-tendon_geometry.adb:151:13
+
+ info: initialization of "G" proved
+--> mj-tendon_geometry.adb:151:19
+
+ info: initialization of "T" proved
+--> mj-tendon_geometry.adb:151:22
+
+ info: initialization of "Z" proved
+--> mj-tendon_geometry.adb:151:25
+
+ info: initialization of "F" proved
+--> mj-tendon_geometry.adb:151:28
+
+ info: initialization of "DF" proved
+--> mj-tendon_geometry.adb:151:31
+
+ info: initialization of "Z1" proved
+--> mj-tendon_geometry.adb:151:35
+
+ info: initialization of "Ang" proved
+--> mj-tendon_geometry.adb:151:39
+
+ info: initialization of "Q0" proved
+--> mj-tendon_geometry.adb:151:44
+
+ info: initialization of "Q1" proved
+--> mj-tendon_geometry.adb:151:48
+
+ info: initialization of "Q2" proved
+--> mj-tendon_geometry.adb:151:52
+
+ info: initialization of "Vec" proved
+--> mj-tendon_geometry.adb:152:07
+
+ info: initialization of "P" proved
+--> mj-tendon_geometry.adb:152:12
+
+ info: initialization of "Default" proved
+--> mj-tendon_geometry.adb:153:07
+
+ info: implicit aspect Always_Terminates on "Residual" has been proved, subprogram will terminate
+--> mj-tendon_geometry.adb:155:16
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:156:16
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |               ~~~~^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:27
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |                            ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 155 should mention A and X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:32
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |               ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 155 should mention A and B and X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:156:38
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |                                     ~~~~^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:49
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |                                                  ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 155 should mention B and X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:55
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 155 should mention A and B and X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:61
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |                                                            ~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 155 should mention X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:156:67
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |                                                                  ~~~~^~~~~~~~~~
+      + possible fix: subprogram at line 155 should mention X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:156:80
+  156 |            (((Math.Arcsin (A * X) + Math.Arcsin (B * X)) - 2.0 * Math.Arcsin (X)) + G);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 155 should mention A and B and G and X in a precondition
+  155 |          function Residual (X : Real) return Real is
+      |          ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Pair_Bounded (A, 1.0e100)
+--> mj-tendon_geometry.adb:164:16
+  164 |             T := -Dot2 (D, E0) / DD;
+      |                   ^~~~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:164:29
+  164 |             T := -Dot2 (D, E0) / DD;
+      |                   ~~~~~~~~~~~~~^~~~
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:164:29
+  164 |             T := -Dot2 (D, E0) / DD;
+      |                   ~~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:166:21
+  166 |               and then Norm2 ((E0 (1) + T * D (1), E0 (2) + T * D (2))) <= R
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:166:36
+  166 |               and then Norm2 ((E0 (1) + T * D (1), E0 (2) + T * D (2))) <= R
+      |                                ~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:166:40
+  166 |               and then Norm2 ((E0 (1) + T * D (1), E0 (2) + T * D (2))) <= R
+      |                                         ~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:166:56
+  166 |               and then Norm2 ((E0 (1) + T * D (1), E0 (2) + T * D (2))) <= R
+      |                                                    ~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:166:60
+  166 |               and then Norm2 ((E0 (1) + T * D (1), E0 (2) + T * D (2))) <= R
+      |                                                             ~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:171:12
+  171 |          P := Unit2 ((0.5 * (E0 (1) + E1 (1)), 0.5 * (E0 (2) + E1 (2))));
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:171:24
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:171:34
+  171 |          P := Unit2 ((0.5 * (E0 (1) + E1 (1)), 0.5 * (E0 (2) + E1 (2))));
+      |                             ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:171:49
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:171:59
+  171 |          P := Unit2 ((0.5 * (E0 (1) + E1 (1)), 0.5 * (E0 (2) + E1 (2))));
+      |                                                      ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:172:19
+  172 |          P := (P (1) * R, P (2) * R);
+      |                ~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:172:30
+  172 |          P := (P (1) * R, P (2) * R);
+      |                           ~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:174:14
+  174 |          A := R / L0;
+      |               ~~^~~~
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:174:14
+  174 |          A := R / L0;
+      |               ~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:175:14
+  175 |          B := R / L1;
+      |               ~~^~~~
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:175:14
+  175 |          B := R / L1;
+      |               ~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:20
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                    ~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:25
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                   ~~~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:30
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                              ~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:36
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                  ~~~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:176:42
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:42
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:50
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                                                 ~~~~^~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:176:56
+  176 |          CosG := ((L0 * L0 + L1 * L1) - DD) / ((2.0 * L0) * L1);
+      |                                                 ~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:182:16
+  182 |          G := Math.Arccos (CosG);
+      |               ~~~~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: loop variant proved
+--> mj-tendon_geometry.adb:189:31
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:190:20
+  190 |             Q0 := 1.0 - ((Z * Z) * A) * A;
+      |                   ~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:190:26
+  190 |             Q0 := 1.0 - ((Z * Z) * A) * A;
+      |                          ~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:190:31
+  190 |             Q0 := 1.0 - ((Z * Z) * A) * A;
+      |                         ~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:190:36
+  190 |             Q0 := 1.0 - ((Z * Z) * A) * A;
+      |                         ~~~~~~~~~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:191:20
+  191 |             Q1 := 1.0 - ((Z * Z) * B) * B;
+      |                   ~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:191:26
+  191 |             Q1 := 1.0 - ((Z * Z) * B) * B;
+      |                          ~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:191:31
+  191 |             Q1 := 1.0 - ((Z * Z) * B) * B;
+      |                         ~~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:191:36
+  191 |             Q1 := 1.0 - ((Z * Z) * B) * B;
+      |                         ~~~~~~~~~~~~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:192:20
+  192 |             Q2 := 1.0 - Z * Z;
+      |                   ~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:192:24
+  192 |             Q2 := 1.0 - Z * Z;
+      |                         ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:196:19
+  196 |             DF := (A / Real'Max (Tiny, Math.Sqrt (Q0))
+      |                    ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 188 should mention Q0 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:196:19
+  196 |             DF := (A / Real'Max (Tiny, Math.Sqrt (Q0))
+      |                    ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop at line 188 should mention Q0 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:196:41
+  196 |             DF := (A / Real'Max (Tiny, Math.Sqrt (Q0))
+      |                                        ~~~~^~~~~~~~~
+      + possible fix: loop at line 188 should mention Q0 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:197:12
+  196 |             DF := (A / Real'Max (Tiny, Math.Sqrt (Q0))
+      |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  197 |               + B / Real'Max (Tiny, Math.Sqrt (Q1)))
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop at line 188 should mention Q0 and Q1 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:197:16
+  197 |               + B / Real'Max (Tiny, Math.Sqrt (Q1)))
+      |                 ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 188 should mention Q1 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:197:16
+  197 |               + B / Real'Max (Tiny, Math.Sqrt (Q1)))
+      |                 ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop at line 188 should mention Q1 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:197:38
+  197 |               + B / Real'Max (Tiny, Math.Sqrt (Q1)))
+      |                                     ~~~~^~~~~~~~~
+      + possible fix: loop at line 188 should mention Q1 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:198:12
+  196 |             DF := (A / Real'Max (Tiny, Math.Sqrt (Q0))
+      |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+  198 |               - 2.0 / Real'Max (Tiny, Math.Sqrt (Q2));
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Q0 and Q1 and Q2 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:198:18
+  198 |               - 2.0 / Real'Max (Tiny, Math.Sqrt (Q2));
+      |                 ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 188 should mention Q2 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:198:18
+  198 |               - 2.0 / Real'Max (Tiny, Math.Sqrt (Q2));
+      |                 ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop at line 188 should mention Q2 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:198:40
+  198 |               - 2.0 / Real'Max (Tiny, Math.Sqrt (Q2));
+      |                                       ~~~~^~~~~~~~~
+      + possible fix: loop at line 188 should mention Q2 in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:202:18
+  202 |             Z1 := Z - F / DF;
+      |                   ~~^~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention DF and Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:202:22
+  202 |             Z1 := Z - F / DF;
+      |                       ~~^~~~
+      + possible fix: loop at line 188 should mention DF in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:202:22
+  202 |             Z1 := Z - F / DF;
+      |                       ~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop at line 188 should mention DF in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:207:44
+  207 |             if Z not in -1.0 .. 1.0 or else A * Z not in -1.0 .. 1.0
+      |                                             ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:208:22
+  208 |               or else B * Z not in -1.0 .. 1.0
+      |                       ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for Iter + 1
+--> mj-tendon_geometry.adb:216:23
+  216 |             Iter := Iter + 1;
+      |                     ~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:221:17
+  221 |          if E0 (1) * E1 (2) - E0 (2) * E1 (1) > 0.0 then
+      |             ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:221:26
+  221 |          if E0 (1) * E1 (2) - E0 (2) * E1 (1) > 0.0 then
+      |             ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:221:35
+  221 |          if E0 (1) * E1 (2) - E0 (2) * E1 (1) > 0.0 then
+      |                               ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention E0 and E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:222:17
+  222 |             Vec := Unit2 (E0);
+      |                    ^~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E0 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:223:21
+  223 |             Ang := Math.Arcsin (Z) - Math.Arcsin (A * Z);
+      |                    ~~~~^~~~~~~~~~
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:223:33
+  223 |             Ang := Math.Arcsin (Z) - Math.Arcsin (A * Z);
+      |                    ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:223:39
+  223 |             Ang := Math.Arcsin (Z) - Math.Arcsin (A * Z);
+      |                                      ~~~~^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:223:50
+  223 |             Ang := Math.Arcsin (Z) - Math.Arcsin (A * Z);
+      |                                                   ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:225:17
+  225 |             Vec := Unit2 (E1);
+      |                    ^~~~~~~~~
+      + possible fix: subprogram at line 146 should mention E1 in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:226:21
+  226 |             Ang := Math.Arcsin (Z) - Math.Arcsin (B * Z);
+      |                    ~~~~^~~~~~~~~~
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:226:33
+  226 |             Ang := Math.Arcsin (Z) - Math.Arcsin (B * Z);
+      |                    ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:226:39
+  226 |             Ang := Math.Arcsin (Z) - Math.Arcsin (B * Z);
+      |                                      ~~~~^~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:226:50
+  226 |             Ang := Math.Arcsin (Z) - Math.Arcsin (B * Z);
+      |                                                   ~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 188 should mention Z in a loop invariant
+  188 |          while Iter < 20 and then abs F > 1.0e-6 loop
+      |                                                  ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:228:15
+  228 |          P := (R * (Math.Cos (Ang) * Vec (1) - Math.Sin (Ang) * Vec (2)),
+      |                ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:228:33
+  228 |          P := (R * (Math.Cos (Ang) * Vec (1) - Math.Sin (Ang) * Vec (2)),
+      |                     ~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:228:43
+  228 |          P := (R * (Math.Cos (Ang) * Vec (1) - Math.Sin (Ang) * Vec (2)),
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:228:60
+  228 |          P := (R * (Math.Cos (Ang) * Vec (1) - Math.Sin (Ang) * Vec (2)),
+      |                                                ~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:229:15
+  229 |                R * (Math.Sin (Ang) * Vec (1) + Math.Cos (Ang) * Vec (2)));
+      |                ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at line 146 should mention R in a precondition
+  146 |       function Inside (E0, E1 : Pair; R : Real) return Pair_Result is
+      |       ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:229:33
+  229 |                R * (Math.Sin (Ang) * Vec (1) + Math.Cos (Ang) * Vec (2)));
+      |                     ~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:229:43
+  229 |                R * (Math.Sin (Ang) * Vec (1) + Math.Cos (Ang) * Vec (2)));
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:229:60
+  229 |                R * (Math.Sin (Ang) * Vec (1) + Math.Cos (Ang) * Vec (2)));
+      |                                                ~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-tendon_geometry.adb:237:31
+  237 |          P0 : constant Vector := Multiply (Orientation, Sub (Start, Center), True);
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:237:54
+  237 |          P0 : constant Vector := Multiply (Orientation, Sub (Start, Center), True);
+      |                                                         ^~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-tendon_geometry.adb:238:31
+  238 |          P1 : constant Vector := Multiply (Orientation, Sub (Finish, Center), True);
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:238:54
+  238 |          P1 : constant Vector := Multiply (Orientation, Sub (Finish, Center), True);
+      |                                                         ^~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Normal" proved
+--> mj-tendon_geometry.adb:241:07
+
+ info: initialization of "R0" proved
+--> mj-tendon_geometry.adb:241:15
+
+ info: initialization of "R1" proved
+--> mj-tendon_geometry.adb:241:19
+
+ info: initialization of "D0" proved
+--> mj-tendon_geometry.adb:243:07
+
+ info: initialization of "D1" proved
+--> mj-tendon_geometry.adb:243:11
+
+ info: initialization of "W" proved
+--> mj-tendon_geometry.adb:245:07
+
+ info: initialization of "N" proved
+--> mj-tendon_geometry.adb:246:07
+
+ info: initialization of "L0" proved
+--> mj-tendon_geometry.adb:246:10
+
+ info: initialization of "L1" proved
+--> mj-tendon_geometry.adb:246:14
+
+ info: initialization of "Total" proved
+--> mj-tendon_geometry.adb:246:18
+
+ info: initialization of "Height" proved
+--> mj-tendon_geometry.adb:246:25
+
+ info: initialization of "Result" proved
+--> mj-tendon_geometry.adb:248:07
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:250:10
+  250 |          if Norm (P0) < Tiny or else Norm (P1) < Tiny then
+      |             ^~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:250:35
+  250 |          if Norm (P0) < Tiny or else Norm (P1) < Tiny then
+      |                                      ^~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:254:19
+  254 |             Axis0 := Unit (P0);
+      |                      ^~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:255:20
+  255 |             Normal := Cross (P0, P1);
+      |                       ^~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:256:15
+  256 |             N := Norm (Normal);
+      |                  ^~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:257:20
+  257 |             Normal := Unit (Normal);
+      |                       ^~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:267:23
+  267 |                Normal := Unit (Cross (Axis0, Axis1));
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:267:29
+  267 |                Normal := Unit (Cross (Axis0, Axis1));
+      |                                ^~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:269:19
+  269 |             Axis1 := Unit (Cross (Normal, Axis0));
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:269:25
+  269 |             Axis1 := Unit (Cross (Normal, Axis0));
+      |                            ^~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:271:14
+  271 |          D0 := (Dot (P0, Axis0), Dot (P0, Axis1));
+      |                 ^~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:271:31
+  271 |          D0 := (Dot (P0, Axis0), Dot (P0, Axis1));
+      |                                  ^~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:272:14
+  272 |          D1 := (Dot (P1, Axis0), Dot (P1, Axis1));
+      |                 ^~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:272:31
+  272 |          D1 := (Dot (P1, Axis0), Dot (P1, Axis1));
+      |                                  ^~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-tendon_geometry.adb:274:15
+  274 |             S := Multiply (Orientation, Sub (Side, Center), True);
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:274:38
+  274 |             S := Multiply (Orientation, Sub (Side, Center), True);
+      |                                         ^~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:275:16
+  275 |             SD := Unit2 ((Dot (S, Axis0), Dot (S, Axis1)));
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:275:24
+  275 |             SD := Unit2 ((Dot (S, Axis0), Dot (S, Axis1)));
+      |                           ^~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:275:40
+  275 |             SD := Unit2 ((Dot (S, Axis0), Dot (S, Axis1)));
+      |                                           ^~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:276:24
+  276 |             SD := (SD (1) * Radius, SD (2) * Radius);
+      |                    ~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:276:41
+  276 |             SD := (SD (1) * Radius, SD (2) * Radius);
+      |                                     ~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:278:34
+  278 |          W := (if Has_Side and then Norm (S) < Radius then Inside (D0, D1, Radius)
+      |                                     ^~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ info: no contextual analysis of "Inside" (in potentially unevaluated context)
+--> mj-tendon_geometry.adb:278:57
+
+ info: no contextual analysis of "Circle" (in potentially unevaluated context)
+--> mj-tendon_geometry.adb:279:18
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:283:13
+  283 |          R0 := Add (Scale (Axis0, W.A (1)), Scale (Axis1, W.A (2)));
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:283:18
+  283 |          R0 := Add (Scale (Axis0, W.A (1)), Scale (Axis1, W.A (2)));
+      |                     ^~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:283:42
+  283 |          R0 := Add (Scale (Axis0, W.A (1)), Scale (Axis1, W.A (2)));
+      |                                             ^~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:284:13
+  284 |          R1 := Add (Scale (Axis0, W.B (1)), Scale (Axis1, W.B (2)));
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:284:18
+  284 |          R1 := Add (Scale (Axis0, W.B (1)), Scale (Axis1, W.B (2)));
+      |                     ^~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:284:42
+  284 |          R1 := Add (Scale (Axis0, W.B (1)), Scale (Axis1, W.B (2)));
+      |                                             ^~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:286:16
+  286 |             L0 := Norm2 ((P0 (1) - R0 (1), P0 (2) - R0 (2)));
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:286:31
+  286 |             L0 := Norm2 ((P0 (1) - R0 (1), P0 (2) - R0 (2)));
+      |                           ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:286:48
+  286 |             L0 := Norm2 ((P0 (1) - R0 (1), P0 (2) - R0 (2)));
+      |                                            ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:287:16
+  287 |             L1 := Norm2 ((P1 (1) - R1 (1), P1 (2) - R1 (2)));
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:287:31
+  287 |             L1 := Norm2 ((P1 (1) - R1 (1), P1 (2) - R1 (2)));
+      |                           ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:287:48
+  287 |             L1 := Norm2 ((P1 (1) - R1 (1), P1 (2) - R1 (2)));
+      |                                            ~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:288:23
+  288 |             Total := (L0 + W.Length) + L1;
+      |                      ~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:288:35
+  288 |             Total := (L0 + W.Length) + L1;
+      |                      ~~~~~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:292:27
+  292 |             R0 (3) := P0 (3) + ((P1 (3) - P0 (3)) * L0) / Total;
+      |                       ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:292:38
+  292 |             R0 (3) := P0 (3) + ((P1 (3) - P0 (3)) * L0) / Total;
+      |                                 ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:292:48
+  292 |             R0 (3) := P0 (3) + ((P1 (3) - P0 (3)) * L0) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~^~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:292:54
+  292 |             R0 (3) := P0 (3) + ((P1 (3) - P0 (3)) * L0) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:292:54
+  292 |             R0 (3) := P0 (3) + ((P1 (3) - P0 (3)) * L0) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:293:27
+  293 |             R1 (3) := P0 (3) + ((P1 (3) - P0 (3)) * (L0 + W.Length)) / Total;
+      |                       ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ info: float overflow check proved
+--> mj-tendon_geometry.adb:293:38
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:293:48
+  293 |             R1 (3) := P0 (3) + ((P1 (3) - P0 (3)) * (L0 + W.Length)) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:293:54
+  293 |             R1 (3) := P0 (3) + ((P1 (3) - P0 (3)) * (L0 + W.Length)) / Total;
+      |                                                     ~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.adb:293:67
+  293 |             R1 (3) := P0 (3) + ((P1 (3) - P0 (3)) * (L0 + W.Length)) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:293:67
+  293 |             R1 (3) := P0 (3) + ((P1 (3) - P0 (3)) * (L0 + W.Length)) / Total;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:294:32
+  294 |             Height := abs (R1 (3) - R0 (3));
+      |                           ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.adb:295:26
+  295 |             W.Length := Math.Sqrt (W.Length * W.Length + Height * Height);
+      |                         ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:295:42
+  295 |             W.Length := Math.Sqrt (W.Length * W.Length + Height * Height);
+      |                                    ~~~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:295:53
+  295 |             W.Length := Math.Sqrt (W.Length * W.Length + Height * Height);
+      |                                    ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.adb:295:62
+  295 |             W.Length := Math.Sqrt (W.Length * W.Length + Height * Height);
+      |                                                          ~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:297:27
+  297 |          Result := (Wrapped, Add (Multiply (Orientation, R0), Center),
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-tendon_geometry.adb:297:32
+  297 |          Result := (Wrapped, Add (Multiply (Orientation, R0), Center),
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.adb:298:18
+  298 |                     Add (Multiply (Orientation, R1), Center), W.Length);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-tendon_geometry.adb:298:23
+  298 |                     Add (Multiply (Orientation, R1), Center), W.Length);
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Norm" has been proved, subprogram will terminate
+--> mj-tendon_geometry.ads:16:13
+
+ medium: postcondition might fail, cannot prove Norm'Result >= 0.0
+--> mj-tendon_geometry.ads:17:43
+   17 |         Pre => Bounded (V, 1.0e100), Post => Norm'Result >= 0.0
+      |                                              ^~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-tendon_geometry.ads:18:69
+   18 |           and then Norm'Result = Ada.Numerics.Long_Elementary_Functions.Sqrt (Dot (V, V));
+      |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.ads:18:76
+   18 |           and then Norm'Result = Ada.Numerics.Long_Elementary_Functions.Sqrt (Dot (V, V));
+      |                                                                               ^~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Unit" has been proved, subprogram will terminate
+--> mj-tendon_geometry.ads:20:13
+
+ medium: postcondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.ads:22:14
+   22 |         Post => Bounded (Unit'Result, 2.0e115)
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.ads:24:35
+   24 |           and then Unit'Result = (if Norm (V) < 1.0e-15 then (1.0, 0.0, 0.0)
+      |                                      ^~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.ads:25:13
+   25 |           else Scale (V, 1.0 / Norm (V)));
+      |                ^~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ medium: divide by zero might fail
+--> mj-tendon_geometry.ads:25:27
+   25 |           else Scale (V, 1.0 / Norm (V)));
+      |                          ~~~~^~~~~~~~~
+      + possible fix: add precondition (Norm (V) /= 0) to subprogram at line 20
+   20 |       function Unit (V : Vector) return Vector with
+      |                ^
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-tendon_geometry.ads:25:27
+   25 |           else Scale (V, 1.0 / Norm (V)));
+      |                          ~~~~^~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-tendon_geometry.ads:25:29
+   25 |           else Scale (V, 1.0 / Norm (V)));
+      |                                ^~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + provers reached step limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Wrap" has been proved, subprogram will terminate
+--> mj-tendon_geometry.ads:27:13
+
+ medium: postcondition might fail, cannot prove Wrap'Result.Arc_Length in 0.0 .. 1.0e100
+--> mj-tendon_geometry.ads:35:17
+   35 |                    Wrap'Result.Arc_Length in 0.0 .. 1.0e100
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/kernel-proof-source-zuq3m6au/build/mj-tendon_geometry/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 71.0 s, peak group RSS 524 MB

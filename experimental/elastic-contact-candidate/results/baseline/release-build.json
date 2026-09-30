@@ -1,0 +1,33 @@
+{
+  "command": [
+    "gprbuild",
+    "-P",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/elastic-contact-candidate/contact.gpr",
+    "-p",
+    "-j2",
+    "-XELASTIC_CONTACT_MODE=release"
+  ],
+  "exit": 0,
+  "sources": {
+    "experimental/elastic-contact-candidate/contact.gpr": "09c83da828d691dea4e8477646b6a1cd078d6919d9839313f6a7ed22177a5f5c",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contact_math.adb": "ceaca87734d6030ee11c39cdeedad9f4b880cdcbc87568a7f797bc8f5add017d",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contact_math.ads": "284f2b30d3a6bd86ebeba3fdbf1b3ef5ce26d5622054c355dc344bdfe523530e",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contacts.adb": "a393abf432200c35a3e633768545b0132e9f4077e818fe5e125dfed8f1472e79",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contacts.ads": "6e92fd0d4b6006c05809c28b5b3528b0e7498e0ad0a1f6df6b5c25b5134f13b2",
+    "experimental/elastic-contact-candidate/tests/elastic_contact_probe.adb": "c262a33468a98e9928d5c1e6f73f1d279231de7501d66dba970c4759f27aa383",
+    "experimental/frictionless-contact-candidate/src/mj-contact_rows.adb": "c2744dabd1decee120a4726aa1dc79c6527eb6fc2a3ae2182188d1b06e528f32",
+    "experimental/frictionless-contact-candidate/src/mj-contact_rows.ads": "0a0da822015b57b29f2e6f986256925af6747549565df91b0594bd276632a49a",
+    "experimental/smooth/src/mj-elastic_kernels.adb": "494903eb72510552ece5b942439c9ba2669d5bf257188fd442fa7e813d0e2607",
+    "experimental/smooth/src/mj-elastic_kernels.ads": "7a28b0335cdca111ff003a1fb92f5dad9c04d136dbe859eabbf5318b9d08f14b",
+    "experimental/smooth/src/mj-elastic_network.adb": "c27e35800d87f398c5fab5b5fa69b56e6037a385dd19b70890f1ce2173d93784",
+    "experimental/smooth/src/mj-elastic_network.ads": "79851aeb4c85ed8f3e3dc7ac799acad5eb7f90112ddede0d9afae6c804e08b27",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62"
+  },
+  "toolchains": {
+    "gnatls": "GNATLS 16.1.0",
+    "gprbuild": "GPRBUILD 26.0.0 (2026-04-15) (x86_64-pc-linux-gnu)",
+    "gnatprove": "FSF 16.1.0"
+  },
+  "project": "project Contact is\n   Build_Root := external (\"ELASTIC_CONTACT_BUILD\", \"/var/tmp/sparkling-elastic-contact-20260930\");\n   type Mode_Type is (\"validation\", \"release\");\n   Mode : Mode_Type := external (\"ELASTIC_CONTACT_MODE\", \"validation\");\n   for Source_Dirs use (\"src\", \"tests\", \"../../src\", \"../smooth/src\", \"../frictionless-contact-candidate/src\");\n   for Source_Files use (\"mj.ads\", \"mj-types.ads\", \"mj-elastic_kernels.ads\", \"mj-elastic_kernels.adb\",\n     \"mj-elastic_network.ads\", \"mj-elastic_network.adb\", \"mj-contact_rows.ads\", \"mj-contact_rows.adb\",\n     \"mj-elastic_contact_math.ads\", \"mj-elastic_contact_math.adb\",\n     \"mj-elastic_contacts.ads\", \"mj-elastic_contacts.adb\", \"elastic_contact_probe.adb\");\n   for Main use (\"elastic_contact_probe.adb\");\n   for Object_Dir use Build_Root & \"/\" & Mode & \"/obj\";\n   for Exec_Dir use Build_Root & \"/\" & Mode & \"/bin\";\n   for Create_Missing_Dirs use \"True\";\n   Flags := (\"-gnat2022\", \"-ffp-contract=off\");\n   case Mode is\n      when \"validation\" => Flags := Flags & (\"-O2\", \"-g\", \"-gnata\", \"-gnato\", \"-gnatVa\");\n      when \"release\" => Flags := Flags & (\"-O3\", \"-gnatp\", \"-gnatn\", \"-march=native\", \"-flto\");\n   end case;\n   package Compiler is\n      for Default_Switches (\"Ada\") use Flags;\n   end Compiler;\n   package Linker is\n      for Default_Switches (\"Ada\") use (\"-flto\", \"-ffp-contract=off\");\n   end Linker;\nend Contact;\n"
+}

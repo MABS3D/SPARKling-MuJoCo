@@ -1,0 +1,40 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                           Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 .         .                                                 .           .          .
+Flow Dependencies                 .         .                                                 .           .          .
+Initialization                    .         .                                                 .           .          .
+Non-Aliasing                      .         .                                                 .           .          .
+Run-time Checks                  14         .    14 (CVC5 29%, Trivial 12%, Z3 56%, altergo 3%)           .          .
+Assertions                        4         .                              4 (CVC5 83%, Z3 17%)           .          .
+Functional Contracts              3         .                               3 (CVC5 4%, Z3 96%)           .          .
+LSP Verification                  .         .                                                 .           .          .
+Termination                       1         1                                                 .           .          .
+Concurrency                       .         .                                                 .           .          .
+----------------------------------------------------------------------------------------------------------------------
+Total                            22    1 (5%)                                          21 (95%)           .          .
+
+
+max steps used for successful proof: 24917
+
+============================
+Most difficult proved checks
+============================
+
+mj-spatial_tendons.adb:205:17: fp_overflow check proved in max 3 seconds
+mj-spatial_tendons.adb:206:43: loop invariant in first iteration proved in max 1 seconds
+mj-spatial_tendons.adb:205:25: fp_overflow check proved in max 1 seconds
+mj-spatial_tendons.ads:139:25: postcondition proved in max 1 seconds
+mj-spatial_tendons.adb:207:33: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-spatial_tendons, 1 subprograms and packages out of 1 analyzed
+  MJ.Spatial_Tendons.Velocity at mj-spatial_tendons.ads:134 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (21 checks)

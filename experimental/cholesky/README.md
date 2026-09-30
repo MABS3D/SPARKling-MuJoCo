@@ -1,65 +1,61 @@
-# Dense Cholesky — experimental implementation
+# Dense Cholesky — experimental candidate
 
-`MJ.Cholesky` implements the dense `mju_cholFactor`, `mju_cholSolve` and
-`mju_cholUpdate` algorithms from MuJoCo 3.14.0, revision
-`9ecbb9d7b5ee623f54745638d36799ff90e6f7cd` (`engine_util_solve.c`).
-The reference release was checked on 2026-09-28. See [NOTICE](NOTICE) for upstream attribution.
+`MJ.Cholesky` translates MuJoCo 3.14.0, revision
+`9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`, dense
+`mju_cholFactor`, `mju_cholSolve` and `mju_cholUpdate`.
+The stable release was rechecked on 2026-09-30. See [NOTICE](NOTICE).
 
-- `Factor (A, N, Minimum, Rank)`: in-place lower-triangular LLᵀ factorization.
-  Pivots below `Minimum` are clamped, decrement the returned rank, and zero
-  the entries below that diagonal in the column, exactly as in C.
-- `Solve (A, X, N)`: forward and backward substitution, replacing the RHS.
-- `Update (A, X, N, Plus, Rank)`: rank-one update/downdate, with destructive
-  vector workspace and the C pivot clamp at `mjMINVAL`.
+- `Factor (A, N, Minimum, Rank, Result)`: lower-triangle factorization, clamped
+  deficient pivots, rank count and zeroed deficient columns.
+- `Solve (A, X, N, Result)`: in-place forward/backward substitution.
+- `Update (A, X, N, Plus, Rank, Result)`: rank-one update/downdate, destructive X.
 
-Arrays use zero-based row-major storage. Upper-triangular entries are preserved
-and ignored. Empty arrays are supported; aliased `A` and `X` are not supported
-by the Ada interface. The in-place solve avoids a separate RHS copy.
-No heap allocation or whole-matrix validation scan is added to release kernels.
-The four-lane dot product preserves C's accumulation and remainder order;
-FMA contraction is disabled in both languages.
+Storage is zero-based row-major; N is 0..11585. Upper entries are preserved.
+The four-lane dot recurrence and tail use C's operation order, with FMA disabled.
+No allocation or ghost array copy occurs in executable kernels. The candidate
+is separate from the dynamics LDLT inertia solver.
 
-The default library project retains runtime checks. The separately built
-release executable is for measurement and does not imply proof closure.
-These routines have **not** replaced the existing dynamics inertia solver,
-which has a different storage scheme and LDLᵀ contract. Sparse symbolic/numeric
-Cholesky, sparse updates and banded Cholesky are outside this dense delivery.
+## Numeric domain and API change
 
-## Domain and assurance
+Factor/Solve require input magnitudes <=1e100. Update requires magnitudes
+<=1e150, including its destructive workspace. Solve/Update input diagonals
+must be >=mjMINVAL; Minimum is mjMINVAL..1e60.
+These are caller obligations, not properties implied by matrix shape.
 
-Dimensions range from 0 to 11585. `Minimum` ranges from `mjMINVAL` to 1e60;
-solve/update require positive input diagonals. The scalar proof helpers have
-explicit broad magnitude domains (1e100 or 1e150); the dot-product model bounds
-its inputs by 1e100. Checked builds reject violations of these domains.
-Input shape and positive diagonals alone **do not prove** that every intermediate
-value remains inside those domains. Ill-conditioned matrices and repeated
-indefinite downdates can exceed them, or overflow even C's binary64 arithmetic.
-Composition of these bounds remains open and is not a Silver or Gold result.
+The new `Result` is `Success` or `Numeric_Limit`. Growth beyond the documented
+operand/storage domains stops explicitly and leaves a bounded partial result.
+Only Success permits using the completed operation. C may continue with finite
+values outside these domains; this intentional difference is tested. Update
+checks narrow operand domains only when an entry uses them, preserving the
+large final values in the clamped differential cases.
 
-See [verification.md](verification.md) for exact proof scopes, numerical evidence
-and performance limitations. C comparison is not a universal equivalence proof.
+The default checked build retains checks. Release builds omit assertion/range
+checks but retain explicit numeric-limit branches. Those branches add measurable
+cost. The current candidate has not met integrated performance parity.
 
-## Reproduce
+## Evidence and reproduction
 
-From the repository root, with GNAT/GPRbuild/GNATprove on PATH:
+All current contracts close in fresh complete-unit proofs: 676 proof obligations
+plus 93 flow/termination checks, with no skipped proof or pragma Assume.
+This proves the listed functional/integrity properties under the explicit
+preconditions; it does not prove general real-arithmetic LLT identities or a
+complete end-to-end solver model. See [verification.md](verification.md).
+
+With GNAT/GPRbuild/GNATprove available:
 
 ```sh
-# Optional helper for the toolchain layout used on this machine:
-. experimental/cholesky/tools/env.sh
+. tools/env.sh
+python3 tools/prove.py new-models ALL --unit mj-cholesky_models.ads
+python3 tools/prove.py new-steps ALL --unit mj-cholesky_steps.ads
+python3 tools/prove.py new-algorithms ALL
+# Diagnose the smallest subprogram first:
+python3 tools/prove.py new-factor Factor_Column Factor
 
-gprbuild -p -P experimental/cholesky/checks.gpr -j2
-python experimental/cholesky/tools/compare.py --output /tmp/cholesky-numerics.json
-
-# -f is intentional: compiler-switch experiments require a complete rebuild.
-gprbuild -f -p -P experimental/cholesky/benchmark.gpr -j2
-python experimental/cholesky/tools/benchmark.py --output /tmp/cholesky-performance.json
+gprbuild -f -p -P checks.gpr -j2
+python tools/compare.py --output /tmp/cholesky-numerics.json
 ```
 
-`compare.py` requires NumPy and the MuJoCo 3.14.0 Python package. Override
-`CHOLESKY_BUILD_ROOT` to keep objects in a different directory; pass the resulting
-executable path using `--probe` / `--binary`. Use `cholesky.gpr` from client projects.
-
-The [proof command log](results/proofs/commands.json) records each complete-unit
-invocation and its separate build directory. Run them from the repository root;
-nonzero results for the iterative algorithms are expected until the listed open
-obligations are closed. `SHA256SUMS` covers the delivered sources and evidence.
+Comparison requires NumPy and MuJoCo 3.14.0. Override CHOLESKY_BUILD_ROOT and
+pass --probe/--binary when using a different build directory. Frozen sources,
+commands and reports are linked from the verification document. Historical
+reports are retained and refer only to their own source snapshots.

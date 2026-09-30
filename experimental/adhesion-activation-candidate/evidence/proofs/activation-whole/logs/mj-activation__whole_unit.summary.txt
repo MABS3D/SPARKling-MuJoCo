@@ -1,0 +1,43 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                               Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------
+Data Dependencies                 5           5                                     .           .          .
+Flow Dependencies                 .           .                                     .           .          .
+Initialization                    6           6                                     .           .          .
+Non-Aliasing                      .           .                                     .           .          .
+Run-time Checks                  20           .    19 (CVC5 21%, Trivial 63%, Z3 16%)           .          1
+Assertions                        .           .                                     .           .          .
+Functional Contracts              5           .     5 (CVC5 33%, Trivial 25%, Z3 42%)           .          .
+LSP Verification                  .           .                                     .           .          .
+Termination                       4           4                                     .           .          .
+Concurrency                       .           .                                     .           .          .
+------------------------------------------------------------------------------------------------------------
+Total                            40    15 (38%)                              24 (60%)           .     1 (3%)
+
+
+max steps used for successful proof: 21114
+
+============================
+Most difficult proved checks
+============================
+
+mj-activation.adb:17:44: fp_overflow check proved in max 1 seconds
+mj-activation.adb:17:44: range check proved in max 1 seconds
+mj-activation.adb:13:48: range check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-activation, 6 subprograms and packages out of 6 analyzed
+  MJ.Activation at mj-activation.ads:2 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Activation.Derivative at mj-activation.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.Activation.Exact_Factor at mj-activation.ads:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 6 checks out of 7 proved
+  MJ.Activation.Next_Value at mj-activation.ads:22 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Activation.Prepare at mj-activation.ads:30 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Activation.Raw_Next at mj-activation.ads:17 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)

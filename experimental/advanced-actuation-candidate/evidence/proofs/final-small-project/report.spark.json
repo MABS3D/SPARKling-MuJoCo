@@ -1,0 +1,4356 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_EFFECTS"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Transmissions.Project",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-transmissions.ads",
+          "line": 146
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Transmissions.Add_Force",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-transmissions.adb",
+          "line": 13
+        }
+      ]
+    },
+    " 3": {
+      "name": "MJ.Transmissions.Valid",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-transmissions.ads",
+          "line": 23
+        }
+      ]
+    }
+  },
+  "flow": [
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 65,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": {
+      },
+      "col": 65,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 153,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 0,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 52,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 150,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1576,
+              "time": 4.27580000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.70050000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.00000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1575,
+              "time": 5.84880000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.30050000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.34890000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.56200000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.79200000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.50000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.04320000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.17000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1932,
+              "time": 8.86540000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 52,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 150,
+      "message": {
+        "text": "overflow check proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1576,
+          "max_time": 4.27579991519451E-02
+        },
+        "Z3": {
+          "count": 3,
+          "max_steps": 1,
+          "max_time": 5.30049987137318E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 63,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 150,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.76820000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.58150000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.80000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.41980000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 298,
+              "time": 2.41350000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.89900000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.86300000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.12900000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 63,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 150,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 1.12899998202920E-02
+        },
+        "Z3": {
+          "count": 3,
+          "max_steps": 1,
+          "max_time": 4.58149984478951E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 71,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 150,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1585,
+              "time": 5.71630000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.95550000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.12000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1585,
+              "time": 4.26860000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.87690000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.50860000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.22430000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.89700000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 265,
+              "time": 2.30090000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.17400000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 265,
+              "time": 2.60200000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 71,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 150,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 3,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 1585,
+          "max_time": 5.71630001068115E-02
+        },
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 2.89699994027615E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 150,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 7613,
+              "time": 1.69997000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.43715000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.33000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.11060000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.84300000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 266,
+              "time": 1.49360000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 25,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 150,
+      "message": {
+        "text": "assertion proved"
+      },
+      "msg_id": 4,
+      "rule": "VC_ASSERT",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 1.43714994192123E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.58200000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.10000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.75210000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.56000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 289,
+              "time": 2.67630000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.15900000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.70200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 251,
+              "time": 1.80220000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.04250000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.30100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 251,
+              "time": 2.41570000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 5,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 5.70200011134148E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 38,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.06700000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.11100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.38000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.85900000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.99900000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 289,
+              "time": 2.78450000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.32330000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.43100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 251,
+              "time": 2.02990000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.61200000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.63600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 251,
+              "time": 2.38840000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 38,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 6,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 7.43100000545382E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 76,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1581,
+              "time": 5.27730000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.18790000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1581,
+              "time": 5.58510000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.82850000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 292,
+              "time": 2.30090000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.17500000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.94200000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.40000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.11810000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 255,
+              "time": 2.30810000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 76,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 7,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1581,
+          "max_time": 5.27729988098145E-02
+        },
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 2.94200005009770E-03
+        },
+        "altergo": {
+          "count": 1,
+          "max_steps": 292,
+          "max_time": 2.30090003460646E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 71,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.06742000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.56700000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.50000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.61240000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.43150000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.03000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 414,
+              "time": 2.54360000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.87100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.72430000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 412,
+              "time": 2.14640000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.48000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1379,
+              "time": 6.33900000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 71,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 8,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 9.56699997186661E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 10871,
+              "time": 2.95441000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.74450000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.30000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 818,
+              "time": 3.13040000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 25,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "assertion proved"
+      },
+      "msg_id": 9,
+      "rule": "VC_ASSERT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 10871,
+          "max_time": 2.95441001653671E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 59,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.12896000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.02830000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.35000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 9.34780000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.45890000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.37170000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.21500000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1044,
+              "time": 4.09270000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.26900000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.60820000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 59,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 10,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 1.02830000221729E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 46,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.30244000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.15775000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.58000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1088,
+              "time": 3.55540000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.24300000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.34460000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 46,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 11,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 1.15774996578693E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 73,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 2021,
+              "time": 6.79670000000000E-02
+            },
+            "Z3": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 2021,
+              "time": 5.54640000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.03590000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.66000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.88800000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.13600000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.52000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.10350000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.31100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1430,
+              "time": 7.67660000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 73,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 12,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 2021,
+          "max_time": 6.79669976234436E-02
+        },
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 5.31100016087294E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 68,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.88150000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.05390000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.40000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1064,
+              "time": 3.71680000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.32500000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.73290000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 68,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 13,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 5.05390018224716E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 23,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.39300000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.25200000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.33000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.42830000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.48500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 309,
+              "time": 2.62990000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.98800000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.27000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.03010000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.75500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 280,
+              "time": 2.90070000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 23,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 14,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 6.48499978706241E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 80,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 158,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.06590000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.78400000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.75000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.53130000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.44900000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 311,
+              "time": 2.72800000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.27510000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 284,
+              "time": 2.73010000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.28750000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.47700000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.63860000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 80,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 158,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 15,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 3.47699993290007E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 158,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 8611,
+              "time": 2.25478000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.19816000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.32000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 8615,
+              "time": 2.89213000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.10928000000000E+00
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 3040,
+              "time": 1.92500000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 158,
+      "message": {
+        "text": "loop invariant initialization proved"
+      },
+      "msg_id": 16,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 8611,
+          "max_time": 2.25477993488312E-01
+        },
+        "altergo": {
+          "count": 1,
+          "max_steps": 3040,
+          "max_time": 1.92499995231628E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 158,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 19514,
+              "time": 3.86951000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.80483000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.54000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 19516,
+              "time": 4.61823000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.14125000000000E+00
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.39664000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 158,
+      "message": {
+        "text": "loop invariant preservation proved"
+      },
+      "msg_id": 17,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 19516,
+          "max_time": 4.61822986602783E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 30,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.78200000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.22100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.40000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.63680000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.03100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 316,
+              "time": 3.49390000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.08420000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.82700000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 2.66490000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.32260000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.39700000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 2.61910000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 30,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 18,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 6.82700006291270E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.80920000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.73700000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 316,
+              "time": 3.73830000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.76700000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.22400000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.60000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.61500000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.70200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 1.81250000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.24310000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.83900000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 2.92360000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 25,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 19,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 6.70199980959296E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 74,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3567,
+              "time": 8.83250000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.93100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 315,
+              "time": 2.84170000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.66850000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.69600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 313,
+              "time": 2.68620000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.12670000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.42500000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 9.72700000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.30590000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.29000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 284,
+              "time": 2.61050000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 74,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 20,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 8.93099978566170E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 69,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.61365000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.19239000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.46000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.29801000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.03351000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.14500000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1762,
+              "time": 4.56340000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.84980000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.44370000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1764,
+              "time": 4.39880000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.89630000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 290,
+              "time": 2.46310000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 69,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 21,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1762,
+          "max_time": 4.56340014934540E-02
+        },
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 2.19238996505737E-01
+        },
+        "altergo": {
+          "count": 1,
+          "max_steps": 290,
+          "max_time": 2.46309991925955E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 56,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.16750000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.54450000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.80000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 7965,
+              "time": 1.54294000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.37890000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1409,
+              "time": 6.58630000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 56,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 22,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 9.54449996352196E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 83,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3348,
+              "time": 9.78200000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.51520000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3347,
+              "time": 1.07940000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.09180000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 313,
+              "time": 3.17010000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1328,
+              "time": 2.71740000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.87800000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.00000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1328,
+              "time": 3.97030000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.18400000000000E-03
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 83,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 23,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 3,
+          "max_steps": 3348,
+          "max_time": 9.78199988603592E-02
+        },
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 1.09179997816682E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 78,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 157,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.42727000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.15447000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.26000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 7566,
+              "time": 2.19592000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.51690000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1974,
+              "time": 1.09041000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 78,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 157,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 24,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 1.15446999669075E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 156,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 8696,
+              "time": 1.28013000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.31524000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.28300000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 156,
+      "message": {
+        "text": "loop invariant initialization proved"
+      },
+      "msg_id": 25,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 8696,
+          "max_time": 1.28012999892235E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 156,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 86794,
+              "time": 1.69596000000000E+00
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 156,
+      "message": {
+        "text": "loop invariant preservation proved"
+      },
+      "msg_id": 26,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "info",
+      "stats": {
+        "altergo": {
+          "count": 1,
+          "max_steps": 86794,
+          "max_time": 1.69596505165100E+00
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 91,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 155,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.20600000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.83900000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.17000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.23900000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.99600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 311,
+              "time": 2.59570000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.93800000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.71000000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.20000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.42960000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.11400000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 284,
+              "time": 2.94500000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 91,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 155,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 27,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 8.11399985104799E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 155,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.38380000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.29890000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.45000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.98630000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.85720000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.01900000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 155,
+      "message": {
+        "text": "loop invariant initialization proved"
+      },
+      "msg_id": 28,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 5.85720017552376E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 155,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.10184000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.67680000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 9.10000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.22971000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.07618000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 9.70000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 155,
+      "message": {
+        "text": "loop invariant preservation proved"
+      },
+      "msg_id": 29,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 1.07617996633053E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 78,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 154,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.48000000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.40600000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.45000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.58720000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.59500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 312,
+              "time": 2.68900000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.89500000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.04700000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.40000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.32960000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.57600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 284,
+              "time": 2.43670000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 78,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 154,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 30,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 8.59500002115965E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 105,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 154,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.41000000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.54300000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.50000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.72590000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.73500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 312,
+              "time": 2.98560000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.12700000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.66900000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 284,
+              "time": 2.98270000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.12900000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.82100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.64000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 105,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 154,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 31,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 4,
+          "max_steps": 1,
+          "max_time": 6.73499982804060E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 53,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 154,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3362,
+              "time": 7.90640000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.78780000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.14000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.08450000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.03000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 315,
+              "time": 2.51550000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1341,
+              "time": 4.41830000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.39660000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00740000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.08860000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.22100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.63100000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 53,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 154,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 32,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 3362,
+          "max_time": 7.90639966726303E-02
+        },
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 9.03000030666590E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 8171,
+              "time": 2.87929000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.06000000000000E-04
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "loop invariant initialization proved"
+      },
+      "msg_id": 33,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 8171,
+          "max_time": 2.87928998470306E-01
+        },
+        "Trivial": {
+          "count": 1,
+          "max_steps": 2,
+          "max_time": 0.00000000000000E+00
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 19117,
+              "time": 3.81840000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.22000000000000E-04
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "loop invariant preservation proved"
+      },
+      "msg_id": 34,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 19117,
+          "max_time": 3.81839990615845E-01
+        },
+        "Trivial": {
+          "count": 1,
+          "max_steps": 2,
+          "max_time": 0.00000000000000E+00
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 69,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.77950000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.26700000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 271,
+              "time": 3.20650000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.91490000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 271,
+              "time": 1.96070000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 69,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 35,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 5.26699982583523E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 89,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.28650000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 271,
+              "time": 2.69180000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.81160000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.63100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 271,
+              "time": 2.20740000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 89,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 36,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 3.63099994137883E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 44,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 151,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.79740000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 274,
+              "time": 2.35420000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.30700000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.74200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 274,
+              "time": 2.59440000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 44,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 151,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 37,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 3.74200008809566E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 28,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.56370000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.73100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.32600000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.82610000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 275,
+              "time": 2.53420000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 28,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 38,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 3.73100000433624E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 23,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.52300000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.20000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.78630000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.32500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 275,
+              "time": 2.93590000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 23,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 39,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 7.32500012964010E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 54,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.75200000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.36800000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.26000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.07370000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.34500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 273,
+              "time": 2.38960000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 54,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 40,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 3.36800003424287E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 49,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.21330000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.30270000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.49000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 7229,
+              "time": 1.35802000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.80000000000000E-05
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 49,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 41,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 7229,
+          "max_time": 1.35802000761032E-01
+        },
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 5.30270002782345E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 63,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 124,
+              "time": 2.45590000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.08550000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.24950000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 124,
+              "time": 2.47840000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 63,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 42,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 124,
+          "max_time": 2.45590005069971E-02
+        },
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 9.99999997475243E-07
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 57,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.22100000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.04369000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.93000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 57,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 43,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 2.04368993639946E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 148,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.49450000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.77200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 240,
+              "time": 2.16140000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.15540000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.85000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1201,
+              "time": 4.72100000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 148,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 44,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 8.77199973911047E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 148,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.00200000000000E-03
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.31400000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.70000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.64940000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.63900000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.85630000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 148,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 45,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 5.63899986445904E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 150,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 15646,
+              "time": 4.46212000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.16099000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.40000000000000E-05
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 7617,
+              "time": 1.31615000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.70000000000000E-05
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 150,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 46,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 15646,
+          "max_time": 4.46211993694305E-01
+        },
+        "Trivial": {
+          "count": 1,
+          "max_steps": 2,
+          "max_time": 0.00000000000000E+00
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 2.06640008836985E-02,
+      "gnatwhy3.init": 3.08515012264252E-01,
+      "gnatwhy3.register_vcs": 4.18038994073868E-01,
+      "gnatwhy3.run_vcs": 2.01000002562068E-04,
+      "gnatwhy3.save_session": 7.07719996571541E-02,
+      "gnatwhy3.schedule_vcs": 2.66702008247375E+00,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 1.57684996724129E-01,
+      "gnatwhy3.transformations.detect_polymorphism": 6.88749998807907E-02,
+      "gnatwhy3.transformations.discriminate_if_poly": 3.49998997990042E-04,
+      "gnatwhy3.transformations.eliminate_algebraic": 3.24577003717422E-01,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 1.82236999273300E-01,
+      "gnatwhy3.transformations.eliminate_builtin": 9.64919999241829E-02,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 2.45949998497963E-02,
+      "gnatwhy3.transformations.eliminate_epsilon": 1.57266005873680E-01,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 1.22587002813816E-01,
+      "gnatwhy3.transformations.eliminate_inductive": 8.78830030560493E-02,
+      "gnatwhy3.transformations.eliminate_literal": 1.58613994717598E-01,
+      "gnatwhy3.transformations.eliminate_projections_sums": 3.07860001921654E-02,
+      "gnatwhy3.transformations.eliminate_recursion": 3.10130007565022E-02,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 1.69998995261267E-04,
+      "gnatwhy3.transformations.inline_trivial": 2.90108108520508E+00,
+      "gnatwhy3.transformations.introduce_premises": 2.33682006597519E-01,
+      "gnatwhy3.transformations.monomorphise_goal": 2.46169995516539E-02,
+      "gnatwhy3.transformations.remove_unused": 1.01571702957153E+00,
+      "gnatwhy3.transformations.simplify_formula": 4.95519012212753E-01,
+      "gnatwhy3.transformations.split_goal_wp_conj": 2.47434005141258E-01,
+      "gnatwhy3.transformations.split_premise_right": 3.55259001255035E-01
+    },
+    "global": {
+      "flow analysis": 8.95000004675239E-04,
+      "globals (advanced)": 3.12800006940961E-03,
+      "globals (basic)": 5.03899995237589E-03,
+      "init_why_sections": 7.44000019039959E-04,
+      "marking": 1.13099999725819E-03,
+      "properties (advanced)": 1.06999999843538E-04,
+      "translation of standard": 8.84999986737967E-04
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 60,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 60,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 108,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 108,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 115,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 115,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

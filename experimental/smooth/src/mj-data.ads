@@ -1,4 +1,6 @@
---  Owned scalar-joint simulation state with executable lifecycle contracts.
+--  Owned smooth simulation state, with scalar and quaternion joint coordinates.
+with MJ.Manifold_Math;
+with MJ.Spatial_Tendon_Models;
 with MJ.Types;       use MJ.Types;
 with MJ.Bounds_Kernels;
 with MJ.Ancestor_Rows;
@@ -14,6 +16,7 @@ package MJ.Data with SPARK_Mode is
    --  These total value queries are safe to snapshot unconditionally on entry.
    pragma Unevaluated_Use_Of_Old (Allow);
    Max_Dofs   : constant := 256;
+   Max_Positions : constant := 2 * Max_Dofs;
    Max_Bodies : constant := 4_096;
    Max_Actuators : constant := 1_024;
 
@@ -56,6 +59,8 @@ package MJ.Data with SPARK_Mode is
    function Position_Count (D : Simulation) return Natural with Global => null;
    function Velocity_Count (D : Simulation) return Natural with Global => null;
    function Control_Count (D : Simulation) return Natural with Global => null;
+   function Tendon_Count (D : Simulation) return Natural with Global => null;
+
    function Position (D : Simulation; Index : Natural) return Real with Global => null,
      Pre => Is_Ready (D) and then Index < Position_Count (D);
    function Velocity (D : Simulation; Index : Natural) return Real with Global => null,
@@ -83,6 +88,10 @@ package MJ.Data with SPARK_Mode is
    function Velocity_Values (D : Simulation) return Real_Array with Ghost => Static, Global => null;
    function Step_Rates (D : Simulation) return Real_Array with Ghost => Static, Global => null;
    function Reset_Values (D : Simulation) return Real_Array with Global => null;
+   function Euler_State_Update
+     (D : Simulation; Q, V, Rate, Next_Q, Next_V : Real_Array; H : Nonneg_Tier0) return Boolean
+     with Ghost => Static, Global => null, Pre => Is_Ready (D);
+
    --  Exact reset semantics, expressed componentwise to avoid concatenation
    --  in a lifecycle postcondition: qpos0, zero qvel/time/control/applied force.
    function At_Reset_State (D : Simulation) return Boolean with Global => null;
@@ -235,6 +244,21 @@ package MJ.Data with SPARK_Mode is
        and then (for all I in Actuation'Range => Actuation (I) = Force_Value (D, Actuator_Force, I - Actuation'First))
        else (for all X of Gravity => X = 0.0) and then (for all X of Bias => X = 0.0)
          and then (for all X of Passive => X = 0.0) and then (for all X of Actuation => X = 0.0));
+   function Tendon_Value (D : Simulation; Index, Component : Natural) return Real with
+     Global => null, Pre => Is_Ready (D) and then Passive_Current (D)
+       and then Index < Tendon_Count (D) and then Component <= 2;
+   --  Component 0/1/2 is length, velocity, and total passive tendon force.
+   procedure Get_Tendon_Outputs
+     (D : Simulation; Length, Velocity, Force : out Real_Array; Result : out Status) with
+     Global => null, Pre => Valid_State (D),
+     Post => (if Result = Success then Is_Ready (D) and then Passive_Current (D)
+       and then Length'Length = Tendon_Count (D) and then Velocity'Length = Length'Length
+       and then Force'Length = Length'Length
+       and then (for all I in Length'Range => Length (I) = Tendon_Value (D, I - Length'First, 0))
+       and then (for all I in Velocity'Range => Velocity (I) = Tendon_Value (D, I - Velocity'First, 1))
+       and then (for all I in Force'Range => Force (I) = Tendon_Value (D, I - Force'First, 2))
+       else (for all X of Length => X = 0.0) and then (for all X of Velocity => X = 0.0)
+         and then (for all X of Force => X = 0.0));
    procedure Get_Actuator_Outputs
      (D : Simulation; Length, Velocity, Force : out Real_Array;
       Result : out Status) with Global => null, Pre => Valid_State (D),
@@ -262,6 +286,8 @@ private
    type Scalar_Joint_Kind is (Slide_Joint, Hinge_Joint);
    type Body_Parameters is record
       Parent : Natural := 0;
+      --  Internal spans count expanded DOF entries; historical names are kept
+      --  so the existing scalar CRB/Jacobian proof interfaces stay unchanged.
       First_Joint : Integer := -1;
       Joint_Count : Natural := 0;
       Position, Inertial_Position : Vector := Zero;
@@ -272,6 +298,12 @@ private
    type Joint_Parameters is record
       Kind : Scalar_Joint_Kind := Hinge_Joint;
       Body_Id, Qadr, Vadr : Natural := 0;
+      --  One motion-cache entry per DOF. Group_Type retains the original
+      --  MuJoCo joint type; angular triples are evaluated simultaneously.
+      Group_Type : Natural range 0 .. 3 := 3;
+      Component : Natural range 0 .. 5 := 0;
+      Group_Qadr, Group_Vadr : Natural := 0;
+      Reference_Quaternion, Spring_Quaternion : Quaternion := Identity_Quaternion;
       Anchor, Direction : Vector := Zero;  --  Direction is normalized by Create.
       Reference, Spring_Reference : Tier0_Real := 0.0;
       Stiffness, Damping, Armature : Nonneg_Tier0 := 0.0;
@@ -280,15 +312,18 @@ private
    type Body_Parameter_Array is array (Natural range <>) of Body_Parameters;
    type Joint_Parameter_Array is array (Natural range <>) of Joint_Parameters;
    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
+   use type MJ.Spatial_Tendon_Models.Description_Access;
+   use type MJ.Spatial_Tendon_Models.Description;
    use type Actuator_Parameters;
    use type Actuator_Parameter_Array;
-   type Configuration_Snapshot (Nb, Nj, Na : Natural) is record
+   type Configuration_Snapshot (Nb, Nj, Na, Nt, Ns, Ng, Nw : Natural) is record
       Nq, Nv, Nu, No : Natural;
       Timestep : Nonneg_Tier0;
       Gravity : Vector;
       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean;
       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean;
       Solver_Policy : Inertia_Policy;
+      Tendons : MJ.Spatial_Tendon_Models.Description (Nt, Ns, Ng, Nw);
       Bodies : Body_Parameter_Array (1 .. Nb);
       Joints : Joint_Parameter_Array (1 .. Nj);
       Actuators : Actuator_Parameter_Array (1 .. Na);
@@ -346,7 +381,9 @@ private
       Allocated : Boolean := False;
       Solver_Policy : Inertia_Policy := Compatible;
       First_Clamped : Dof_Diagnostic := -1;
-      Nq, Nv, Nj : Natural range 0 .. Max_Dofs := 0;
+      Nq : Natural range 0 .. Max_Positions := 0;
+      Nv, Nj : Natural range 0 .. Max_Dofs := 0;
+      --  Nj counts expanded motion entries (Nv), not source-model joints.
       Nu, Na, No : Natural range 0 .. Max_Actuators := 0;
       Nb : Natural range 0 .. Max_Bodies := 0;
       Clock : Nonneg_Tier0 := 0.0;
@@ -355,6 +392,8 @@ private
       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean := True;
       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean := True;
       Cache : Cache_Flags;
+      Tendons : MJ.Spatial_Tendon_Models.Description_Access := null;
+      Tendon_Outputs : Real_Array_Access := null;
       Body_Config : Body_Parameter_Access := null;
       Joint_Config : Joint_Parameter_Access := null;
       Actuator_Config : Actuator_Parameter_Access := null;
@@ -374,14 +413,24 @@ private
      (if D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
         and then Int64 (D.Body_Config'Length) = Int64 (D.Nb) and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
         and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na) then
-        (Nb => D.Nb, Nj => D.Nj, Na => D.Na, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+        (Nb => D.Nb, Nj => D.Nj, Na => D.Na,
+         Nt => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nt,
+         Ns => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ns,
+         Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
+         Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
          Implicit_Damping => D.Implicit_Damping, Solver_Policy => D.Solver_Policy,
          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
       else
-        (Nb => 0, Nj => 0, Na => 0, Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+        (Nb => 0, Nj => 0, Na => 0,
+         Nt => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nt,
+         Ns => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ns,
+         Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
+         Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
@@ -394,7 +443,7 @@ private
      with Global => null;
 
    function Is_Empty (D : Simulation) return Boolean is
-     (not D.Allocated and then D.Body_Config = null and then D.Joint_Config = null
+     (not D.Allocated and then D.Tendons = null and then D.Tendon_Outputs = null and then D.Body_Config = null and then D.Joint_Config = null
       and then D.Actuator_Config = null and then D.State.Qpos = null
       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
@@ -416,6 +465,9 @@ private
    function Velocity_Count (D : Simulation) return Natural is (D.Nv);
 
    function Control_Count (D : Simulation) return Natural is (D.Nu);
+   function Tendon_Count (D : Simulation) return Natural is (MJ.Spatial_Tendon_Models.Count (D.Tendons));
+   function Tendon_Value (D : Simulation; Index, Component : Natural) return Real is
+     (D.Tendon_Outputs (Component * Tendon_Count (D) + Index));
    function Position (D : Simulation; Index : Natural) return Real is (D.State.Qpos (Index));
    function Velocity (D : Simulation; Index : Natural) return Real is (D.State.Qvel (Index));
 
@@ -440,7 +492,7 @@ private
    function State_Image (Qpos, Qvel : Real_Array; Clock : Nonneg_Tier0) return Real_Array is
      (Qpos & Qvel & Clock) with Global => null,
      Pre => Qpos'First = 0 and then Qvel'First = 0
-       and then Int64 (Qpos'Length) <= Max_Dofs and then Int64 (Qvel'Length) <= Max_Dofs,
+       and then Int64 (Qpos'Length) <= Max_Positions and then Int64 (Qvel'Length) <= Max_Dofs,
      Post => (if MJ.Smooth_Kernels.All_Tier0 (Qpos) and then MJ.Smooth_Kernels.All_Tier0 (Qvel)
        then MJ.Smooth_Kernels.All_Tier0 (State_Image'Result));
    function Input_Image (Ctrl, Applied : Real_Array) return Real_Array is
@@ -457,6 +509,8 @@ private
      Post => Input_Image (C1, F1) = Input_Image (C2, F2);
    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) with Ghost => Static, Global => null,
      Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
+       and then A.Nt = B.Nt and then A.Ns = B.Ns and then A.Ng = B.Ng and then A.Nw = B.Nw
+       and then A.Tendons = B.Tendons
        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
@@ -484,10 +538,30 @@ private
    function Step_Rates (D : Simulation) return Real_Array is
      (if D.Scratch.Solution = null then Real_Array'[1 .. 0 => 0.0] else D.Scratch.Solution.all);
 
+   function Position_Layout (Joints : Joint_Parameter_Array; Nq : Natural) return Boolean is
+     (Joints'First = 0 and then Joints'Length <= Max_Dofs and then Nq <= Max_Positions
+      and then (for all J in Joints'Range =>
+        Joints (J).Qadr < Nq and then Joints (J).Group_Qadr < Nq
+        and then Joints (J).Group_Vadr <= J
+        and then Joints (J).Qadr = Joints (J).Group_Qadr
+          + (if Joints (J).Group_Type = 0 then (if Joints (J).Component < 3 then Joints (J).Component else 3) else 0)
+        and then (if Nq = Joints'Length then Joints (J).Qadr = J
+          and then Joints (J).Group_Type in 2 .. 3)
+        and then (if Joints (J).Group_Type in 0 .. 1 then
+          Joints (J).Group_Qadr <= Nq - (if Joints (J).Group_Type = 0 then 7 else 4)
+          and then Joints (J).Component < (if Joints (J).Group_Type = 0 then 6 else 3)
+          and then Joints (J).Group_Vadr <= Joints'Length - (if Joints (J).Group_Type = 0 then 6 else 3)
+          and then J = Joints (J).Group_Vadr + Joints (J).Component
+          and then Unit_Quaternion (Joints (J).Reference_Quaternion)
+          and then Unit_Quaternion (Joints (J).Spring_Quaternion)))) with Global => null;
+   function Reset_Positions (Joints : Joint_Parameter_Array; Nq : Natural) return Real_Array
+     with Global => null,
+     Pre => Position_Layout (Joints, Nq),
+     Post => Reset_Positions'Result'First = 0 and then Reset_Positions'Result'Length = Nq
+       and then MJ.Smooth_Kernels.All_Tier0 (Reset_Positions'Result);
+
    function Reset_Values (D : Simulation) return Real_Array is
-     (if D.Allocated and then D.Joint_Config /= null
-        and then D.Joint_Config'First = 0 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj) then
-        Real_Array'[for J in 0 .. D.Nj - 1 => Real (D.Joint_Config (J).Reference)]
+     (if Is_Ready (D) then Reset_Positions (D.Joint_Config.all, D.Nq)
         & Real_Array'[0 .. Integer (D.Nv) - 1 => 0.0] & 0.0
       else [1 .. 0 => 0.0]);
 
@@ -531,7 +605,8 @@ private
       and then (if D.Cache.Jacobian_Valid then D.Cache.Pose_Valid and then Jacobians_Bounded (D.Kinematic))
       and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
-        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive))
+        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
+        and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
       and then (if D.Cache.Actuation_Valid then Array_Bounded (D.Dynamics.Actuator, 1.0e50)
         and then Array_Bounded (D.Actuators.Length, 1.0e20) and then Array_Bounded (D.Actuators.Velocity, 1.0e20)
         and then Array_Bounded (D.Actuators.Force, 4.0e30))
@@ -543,7 +618,8 @@ private
      ((if D.Cache.Pose_Valid then Kinematic_Bounded (D.Kinematic))
       and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
-        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive))
+        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
+        and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
       and then (if D.Cache.Actuation_Valid then Array_Bounded (D.Dynamics.Actuator, 1.0e50)
         and then Array_Bounded (D.Actuators.Length, 1.0e20) and then Array_Bounded (D.Actuators.Velocity, 1.0e20)
         and then Array_Bounded (D.Actuators.Force, 4.0e30))
@@ -566,7 +642,7 @@ private
         and then Bodies (Joints (J).Body_Id).Joint_Count > 0
         and then J in Bodies (Joints (J).Body_Id).First_Joint ..
           Bodies (Joints (J).Body_Id).First_Joint + Bodies (Joints (J).Body_Id).Joint_Count - 1
-        and then Joints (J).Qadr = J and then Joints (J).Vadr = J
+        and then Joints (J).Qadr < Max_Positions and then Joints (J).Vadr = J
         and then Unit_Vector (Joints (J).Direction))
       and then (for all A in 0 .. Na - 1 => Actuators (A).Joint_Id < Nj
         and then Actuators (A).Control_Id = A and then Actuators (A).Output_Id = A
@@ -596,10 +672,21 @@ private
    function Topology_Storage_Ready (D : Simulation) return Boolean is
      (Topology_Layout_Ready (D.Topology, D.Nb, D.Nv));
 
+   function Actuator_Layout (C : Actuator_Parameter_Array; Nq, Nv : Natural) return Boolean is
+     (Nv <= Max_Dofs and then Nq <= Max_Positions and then C'First = 0
+      and then (for all P of C => P.Position_Id < Nq and then P.Joint_Id < Nv
+        and then P.Position_Id <= Nq - (if P.Joint_Type = 0 then 7 elsif P.Joint_Type = 1 then 4 else 1)
+        and then P.Joint_Id <= Nv - (if P.Joint_Type = 0 then 6 elsif P.Joint_Type = 1 then 3 else 1)
+        and then (for all X of P.Wrench_Gear => X in Tier0_Real)
+        and then (if Nq = Nv then P.Position_Id = P.Joint_Id and then P.Joint_Type in 2 .. 3)))
+     with Global => null;
    function Storage_Ready (D : Simulation) return Boolean is
-     (D.Allocated and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+     (D.Allocated and then MJ.Spatial_Tendon_Models.Ready (D.Tendons, D.Nb)
+      and then (if D.Tendons = null then D.Tendon_Outputs = null
+        else D.Nq = D.Nv and then Has_Real_Layout (D.Tendon_Outputs, 3 * Tendon_Count (D)))
+      and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
       and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
-      and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+      and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
       and then D.Nu = D.Na and then D.No = D.Na
       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
@@ -625,6 +712,8 @@ private
       and then Has_Real_Layout (D.Scratch.Rhs, D.Nv) and then Has_Real_Layout (D.Scratch.Solution, D.Nv)
       and then Has_Real_Layout (D.Scratch.Condition_Sums, D.Nv)
       and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
+      and then Position_Layout (D.Joint_Config.all, D.Nq)
+      and then Actuator_Layout (D.Actuator_Config.all, D.Nq, D.Nv)
 );
    function Inputs_Bounded (D : Simulation) return Boolean is
      (Array_Bounded (D.State.Qpos, Max_Val) and then Array_Bounded (D.State.Qvel, Max_Val)
@@ -645,7 +734,7 @@ private
 
    function Original_Ready (D : Simulation) return Boolean is
      (D.Allocated and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
-      and then D.Nq = D.Nv and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+      and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
       and then D.Nu = D.Na and then D.No = D.Na
       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
@@ -668,6 +757,8 @@ private
       and then Has_Real_Layout (D.Scratch.Rhs, D.Nv) and then Has_Real_Layout (D.Scratch.Solution, D.Nv)
       and then Has_Real_Layout (D.Scratch.Condition_Sums, D.Nv)
       and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
+      and then Position_Layout (D.Joint_Config.all, D.Nq)
+      and then Actuator_Layout (D.Actuator_Config.all, D.Nq, D.Nv)
       and then Configuration_Bounded (D) and then Prior_Caches_Bounded (D)
       and then (for all X of D.State.Qpos.all => X in Tier0_Real)
       and then (for all X of D.State.Qvel.all => X in Tier0_Real)
@@ -679,6 +770,8 @@ private
    --  materialized, every reader gets the same bounds as the historical path.
    procedure Prove_Readiness_Compatibility (D : Simulation) with Ghost => Static, Global => null,
      Pre => Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
+       --  This lemma compares the historical engine, which had no tendons.
+       and then D.Tendons = null and then D.Tendon_Outputs = null
        --  The stronger layout invariant fixes the bounds of an empty joint
        --  array too; length zero alone does not establish Last = -1.
        and then (if Original_Ready (D) then D.Kinematic.Joints'Last = D.Nj - 1)
@@ -730,9 +823,26 @@ private
        and then Body_Id < D.Nb and then Velocity_Id < D.Nv,
      Post => Jacobian_Offset'Result = 3 * (Body_Id * D.Nv + Velocity_Id)
        and then Jacobian_Offset'Result + 2 < 3 * D.Nb * D.Nv;
+   function Euler_State_Update
+     (D : Simulation; Q, V, Rate, Next_Q, Next_V : Real_Array; H : Nonneg_Tier0) return Boolean is
+     (Q'First = 0 and then Q'Length = D.Nq and then Next_Q'First = 0 and then Next_Q'Length = D.Nq
+      and then V'First = 0 and then V'Length = D.Nv
+      and then Rate'First = 0 and then Rate'Length = D.Nv
+      and then Next_V'First = 0 and then Next_V'Length = D.Nv
+      and then MJ.Smooth_Kernels.All_Tier0 (Q) and then MJ.Smooth_Kernels.All_Tier0 (V)
+      and then MJ.Smooth_Kernels.All_Tier0 (Next_V) and then MJ.Smooth_Kernels.All_Tier0 (Rate)
+      and then (for all I in V'Range => Next_V (I) = MJ.Smooth_Kernels.Euler_Value (V (I), Rate (I), H))
+      and then (for all P of D.Joint_Config.all =>
+        (if P.Group_Type in 2 .. 3 or else (P.Group_Type = 0 and then P.Component < 3) then
+          Next_Q (P.Qadr) = MJ.Smooth_Kernels.Euler_Value (Q (P.Qadr), Next_V (P.Vadr), H)
+         elsif (P.Group_Type = 1 and then P.Component = 0)
+           or else (P.Group_Type = 0 and then P.Component = 3) then
+          Read_Quaternion (Next_Q, P.Qadr) = MJ.Manifold_Math.Integrated
+            (Read_Quaternion (Q, P.Qadr), Read_Vector (Next_V, P.Vadr), H))));
+
    function At_Reset_State (D : Simulation) return Boolean is
      (Is_Ready (D) and then D.Clock = 0.0
-      and then (for all J in 0 .. D.Nj - 1 => D.State.Qpos (J) = D.Joint_Config (J).Reference)
+      and then D.State.Qpos.all = Reset_Positions (D.Joint_Config.all, D.Nq)
       and then (for all X of D.State.Qvel.all => X = 0.0)
       and then (for all X of D.State.Ctrl.all => X = 0.0)
       and then (for all X of D.State.Applied.all => X = 0.0));

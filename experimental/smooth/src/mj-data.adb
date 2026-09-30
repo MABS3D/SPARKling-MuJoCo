@@ -2,6 +2,7 @@ with Ada.Unchecked_Deallocation;
 with Interfaces;
 with MJ.Models.Validity;
 with MJ.Simple_Kernels;
+with MJ.Manifold_Math;
 
 package body MJ.Data with SPARK_Mode is
    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
@@ -106,13 +107,13 @@ package body MJ.Data with SPARK_Mode is
      Global => null,
      Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Joint_Layout_OK (S, Fields)
        and then J < S.Njnt,
-     Post => (Joint_Element'Result = Success) = (Fields.Jnt_Type (J) in 2 .. 3
+     Post => (Joint_Element'Result = Success) = (Fields.Jnt_Type (J) in 0 .. 3
           and then Fields.Jnt_Actfrclimited (J) = 0 and then Fields.Jnt_Actgravcomp (J) = 0
           and then Fields.Jnt_Stiffnesspoly (2 * J) = 0.0 and then Fields.Jnt_Stiffnesspoly (2 * J + 1) = 0.0
           and then Fields.Jnt_Stiffness (J) in Nonneg_Tier0)
    is
    begin
-         if Fields.Jnt_Type (J) not in 2 .. 3 then
+         if Fields.Jnt_Type (J) not in 0 .. 3 then
             return Unsupported_Joint;
          end if;
          if Fields.Jnt_Actfrclimited (J) /= 0 or else Fields.Jnt_Actgravcomp (J) /= 0
@@ -243,7 +244,7 @@ package body MJ.Data with SPARK_Mode is
       and then MJ.Models.Actuator_Layout_OK (M.S, M.Actuators)
       and then MJ.Models.Qpos_Layout_OK (M.S, M.Qpos)
       and then M.S.Nbody in 1 .. Max_Bodies and then M.S.Nv <= Max_Dofs
-      and then M.S.Nq = M.S.Nv and then M.S.Njnt = M.S.Nv
+      and then M.S.Nq in M.S.Nv .. Max_Positions and then M.S.Njnt <= M.S.Nv
       and then M.S.Nactuator <= Max_Actuators
       and then M.S.Nu = M.S.Nactuator and then M.S.Nout = M.S.Nactuator
       and then M.Opt.Disableflags >= 0 and then M.Opt.Timestep in Nonneg_Tier0);
@@ -259,7 +260,7 @@ package body MJ.Data with SPARK_Mode is
        and then MJ.Models.Actuator_Layout_OK (M.S, M.Actuators)
        and then MJ.Models.Qpos_Layout_OK (M.S, M.Qpos)
        and then M.S.Nbody in 1 .. Max_Bodies and then M.S.Nv <= Max_Dofs
-       and then M.S.Nq = M.S.Nv and then M.S.Njnt = M.S.Nv
+       and then M.S.Nq in M.S.Nv .. Max_Positions and then M.S.Njnt <= M.S.Nv
        and then M.S.Nactuator <= Max_Actuators
        and then M.S.Nu = M.S.Nactuator and then M.S.Nout = M.S.Nactuator
        and then M.Opt.Disableflags >= 0 and then M.Opt.Timestep in Nonneg_Tier0)
@@ -311,7 +312,7 @@ package body MJ.Data with SPARK_Mode is
       if not Has_Flag (Flags, Dsbl_Constraint)
         or else M.Opt.Integrator /= 0 or else M.Opt.Enableflags /= 0
         or else M.Opt.Disableactuator /= 0
-        or else M.S.Ntendon /= 0 or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
+        or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
         or else M.S.Nmocap /= 0 or else M.S.Na /= 0 or else M.S.Nhistory /= 0
         or else M.Opt.Density /= 0.0 or else M.Opt.Viscosity /= 0.0
         or else M.Flg_Adhesion
@@ -326,7 +327,7 @@ package body MJ.Data with SPARK_Mode is
       if Detail /= Success then
          return Detail;
       end if;
-      if M.S.Nq /= M.S.Nv or else M.S.Njnt /= M.S.Nv then
+      if M.S.Nq < M.S.Nv or else M.S.Nq > Max_Positions or else M.S.Njnt > M.S.Nv then
          return Invalid_Model;
       end if;
       Detail := Dof_Status (M.S, M.Dofs);
@@ -342,17 +343,17 @@ package body MJ.Data with SPARK_Mode is
 
    procedure Set_Dimensions (D : in out Simulation; S : MJ.Models.Sizes) with
      Global => null,
-     Pre => Is_Empty (D) and then S.Nq <= Max_Dofs and then S.Nv <= Max_Dofs
+     Pre => Is_Empty (D) and then S.Nq <= Max_Positions and then S.Nv <= Max_Dofs
        and then S.Njnt <= Max_Dofs and then S.Nbody <= Max_Bodies
        and then S.Nu <= Max_Actuators and then S.Nactuator <= Max_Actuators
        and then S.Nout <= Max_Actuators,
      Post => Is_Empty (D) and then D.Nq = S.Nq and then D.Nv = S.Nv
-       and then D.Nj = S.Njnt and then D.Nb = S.Nbody and then D.Nu = S.Nu
+       and then D.Nj = S.Nv and then D.Nb = S.Nbody and then D.Nu = S.Nu
        and then D.Na = S.Nactuator and then D.No = S.Nout
    is
    begin
       D.Nq := S.Nq; D.Nv := S.Nv; D.Nu := S.Nu;
-      D.Nb := S.Nbody; D.Nj := S.Njnt; D.Na := S.Nactuator; D.No := S.Nout;
+      D.Nb := S.Nbody; D.Nj := S.Nv; D.Na := S.Nactuator; D.No := S.Nout;
    end Set_Dimensions;
 
    procedure Set_Options (D : in out Simulation; M : MJ.Models.Model) with
@@ -383,7 +384,7 @@ package body MJ.Data with SPARK_Mode is
    end Set_Options;
 
    procedure Allocate_State (B : in out State_Buffers; Nq, Nv, Nu : Natural) with
-     Global => null, Pre => Nq <= Max_Dofs and then Nv <= Max_Dofs and then Nu <= Max_Actuators
+     Global => null, Pre => Nq <= Max_Positions and then Nv <= Max_Dofs and then Nu <= Max_Actuators
        and then B.Qpos = null and then B.Qvel = null and then B.Ctrl = null and then B.Applied = null,
      Post => Has_Real_Layout (B.Qpos, Nq) and then (for all X of B.Qpos.all => X = 0.0) and then Has_Real_Layout (B.Qvel, Nv) and then (for all X of B.Qvel.all => X = 0.0) and then Has_Real_Layout (B.Ctrl, Nu) and then (for all X of B.Ctrl.all => X = 0.0) and then Has_Real_Layout (B.Applied, Nv) and then (for all X of B.Applied.all => X = 0.0)
    is
@@ -448,7 +449,7 @@ package body MJ.Data with SPARK_Mode is
    end Allocate_Actuators;
 
    procedure Allocate_Scratch (B : in out Scratch_Buffers; Nq, Nv, Nc : Natural) with
-     Global => null, Pre => Nq <= Max_Dofs and then Nv <= Max_Dofs
+     Global => null, Pre => Nq <= Max_Positions and then Nv <= Max_Dofs
        and then Nc <= MJ.Ancestor_Rows.Max_Entries and then B.Ancestor_Factor = null
        and then B.Factor = null and then B.Rhs = null and then B.Solution = null and then B.Next_Qpos = null and then B.Next_Qvel = null and then B.Condition_Sums = null,
      Post => Has_Real_Layout (B.Ancestor_Factor, Nc)
@@ -560,7 +561,8 @@ package body MJ.Data with SPARK_Mode is
         Body_Id => Source.Jnt_Bodyid (Index), Qadr => Q, Vadr => V, Anchor => Anchor,
         Direction => Read_Vector (Source.Jnt_Axis.all, 3 * Index), Reference => Positions.Qpos0 (Q),
         Spring_Reference => Positions.Qpos_Spring (Q), Stiffness => Source.Jnt_Stiffness (Index),
-        Damping => Dofs.Dof_Damping (V), Armature => Dofs.Dof_Armature (V));
+        Damping => Dofs.Dof_Damping (V), Armature => Dofs.Dof_Armature (V),
+        Group_Type => Source.Jnt_Type (Index), Group_Qadr => Q, Group_Vadr => V, others => <>);
       Normalize (Item.Direction, Normal);
       if not Normal then return; end if;
       Ok := True;
@@ -617,7 +619,7 @@ package body MJ.Data with SPARK_Mode is
         Control_Limited => Source.Actuator_Ctrllimited (U) /= 0,
         Force_Limited => Source.Actuator_Forcelimited (Index) /= 0,
         Control_Lower => Source.Actuator_Ctrlrange (2 * U), Control_Upper => Source.Actuator_Ctrlrange (2 * U + 1),
-        Force_Lower => Source.Actuator_Forcerange (2 * Index), Force_Upper => Source.Actuator_Forcerange (2 * Index + 1));
+        Force_Lower => Source.Actuator_Forcerange (2 * Index), Force_Upper => Source.Actuator_Forcerange (2 * Index + 1), others => <>);
       Ok := True;
    end Read_Actuator_Config;
 
@@ -819,6 +821,145 @@ package body MJ.Data with SPARK_Mode is
       Ok := True;
    end Build_Topology;
 
+   function Reset_Positions (Joints : Joint_Parameter_Array; Nq : Natural) return Real_Array is
+      R : Real_Array (0 .. Nq - 1) := [others => 0.0];
+   begin
+      for J of Joints loop
+         if J.Group_Type in 2 .. 3 or else (J.Group_Type = 0 and then J.Component < 3) then
+            R (J.Qadr) := J.Reference;
+         elsif (J.Group_Type = 1 and then J.Component = 0)
+           or else (J.Group_Type = 0 and then J.Component = 3)
+         then
+            for K in 0 .. 3 loop R (J.Qadr + K) := J.Reference_Quaternion (K); end loop;
+         end if;
+      end loop;
+      return R;
+   end Reset_Positions;
+
+   procedure Copy_Manifold_Joints (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean)
+     with Global => null,
+     Pre => Creation_Inputs (M) and then D.Nq = M.S.Nq and then D.Nv = M.S.Nv
+       and then D.Body_Config /= null and then D.Joint_Config = null,
+     Post => (if Ok then D.Joint_Config /= null
+       and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nv - 1
+       and then Position_Layout (D.Joint_Config.all, D.Nq))
+   is
+      Q, V, Count, Kind, Body_Id : Integer;
+      Base : Joint_Parameters;
+      Accepted : Boolean;
+   begin
+      Ok := False;
+      D.Joint_Config := new Joint_Parameter_Array (0 .. D.Nv - 1);
+      for Qpos_Id in 0 .. D.Nq - 1 loop
+         if M.Qpos.Qpos0 (Qpos_Id) not in Tier0_Real
+           or else M.Qpos.Qpos_Spring (Qpos_Id) not in Tier0_Real then return; end if;
+      end loop;
+      for J in 0 .. M.S.Njnt - 1 loop
+         Kind := M.Joints.Jnt_Type (J);
+         Count := (if Kind = 0 then 6 elsif Kind = 1 then 3 else 1);
+         Q := M.Joints.Jnt_Qposadr (J); V := M.Joints.Jnt_Dofadr (J);
+         Body_Id := M.Joints.Jnt_Bodyid (J);
+         if Kind not in 0 .. 3 or else V < 0 or else V > D.Nv - Count
+           or else Q < 0 or else Q > D.Nq - (if Kind = 0 then 7 elsif Kind = 1 then 4 else 1)
+           or else Body_Id not in 1 .. D.Nb - 1 then return; end if;
+         Read_Joint_Config (M.S, M.Joints, M.Dofs, M.Qpos, J, Base, Accepted);
+         if not Accepted then return; end if;
+         if Kind in 0 .. 1 then
+            Base.Reference_Quaternion := Read_Quaternion
+              (M.Qpos.Qpos0.all, Q + (if Kind = 0 then 3 else 0));
+            Base.Spring_Quaternion := Read_Quaternion
+              (M.Qpos.Qpos_Spring.all, Q + (if Kind = 0 then 3 else 0));
+            if not Unit_Quaternion (Base.Reference_Quaternion)
+              or else not Unit_Quaternion (Base.Spring_Quaternion) then return; end if;
+         end if;
+         for C in 0 .. Count - 1 loop
+            declare
+               P : Joint_Parameters := Base;
+            begin
+               P.Group_Type := Kind; P.Component := C;
+               P.Group_Qadr := Q; P.Group_Vadr := V; P.Vadr := V + C;
+               P.Kind := (if Kind = 2 or else (Kind = 0 and then C < 3) then Slide_Joint else Hinge_Joint);
+               P.Qadr := Q + (if Kind = 0 then (if C < 3 then C else 3) else 0);
+               if Kind = 0 and then C < 3 then
+                  P.Reference := M.Qpos.Qpos0 (P.Qadr);
+                  P.Spring_Reference := M.Qpos.Qpos_Spring (P.Qadr);
+               end if;
+               P.Damping := M.Dofs.Dof_Damping (V + C);
+               P.Armature := M.Dofs.Dof_Armature (V + C);
+               D.Joint_Config (V + C) := P;
+            end;
+         end loop;
+      end loop;
+      for B in 0 .. D.Nb - 1 loop
+         if M.Bodies.Body_Dofnum (B) not in 0 .. D.Nv
+           or else (M.Bodies.Body_Dofnum (B) > 0 and then
+             M.Bodies.Body_Dofadr (B) not in 0 .. D.Nv - M.Bodies.Body_Dofnum (B)) then return; end if;
+         D.Body_Config (B).First_Joint := M.Bodies.Body_Dofadr (B);
+         D.Body_Config (B).Joint_Count := M.Bodies.Body_Dofnum (B);
+      end loop;
+      Ok := Position_Layout (D.Joint_Config.all, D.Nq);
+   end Copy_Manifold_Joints;
+
+   procedure Build_Manifold_Topology (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean)
+     with Global => null, Pre => Creation_Inputs (M)
+       and then D.Body_Config /= null and then D.Joint_Config /= null
+       and then D.Nb = M.S.Nbody and then D.Nv = M.S.Nv
+       and then MJ.Smooth_Topology.Empty (D.Topology) and then MJ.Ancestor_Rows.Empty (D.Ancestors)
+   is
+      package T renames MJ.Smooth_Topology;
+      Roots, Last : Int_Array (0 .. D.Nb - 1);
+      Ids : constant Int_Array := [for V in 0 .. D.Nv - 1 => Integer (V)];
+      Simple : constant Int_Array (0 .. D.Nv - 1) := [others => 0];
+      Masses : Real_Array (0 .. D.Nb - 1) := [others => 0.0];
+      Arms : Real_Array (0 .. D.Nv - 1);
+      Fixed : constant Real_Array (0 .. D.Nv - 1) := [others => 0.0];
+      Added : Boolean;
+   begin
+      Ok := False;
+      if not T.Valid_Body_Links (M.Bodies.Body_Parentid.all,
+        M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all, D.Nv) then return; end if;
+      T.Build_Body_Links (M.Bodies.Body_Parentid.all, M.Bodies.Body_Dofadr.all,
+        M.Bodies.Body_Dofnum.all, D.Nv, Roots, Last);
+      for B in 1 .. D.Nb - 1 loop Masses (B) := D.Body_Config (B).Mass; end loop;
+      for B in reverse 1 .. D.Nb - 1 loop
+         if M.Bodies.Body_Parentid (B) > 0 then
+            T.Add_Subtree (Masses, M.Bodies.Body_Parentid (B), B, Added);
+            if not Added then return; end if;
+         end if;
+      end loop;
+      for V in 0 .. D.Nv - 1 loop Arms (V) := D.Joint_Config (V).Armature; end loop;
+      if not T.Valid_Inputs (Roots, Last, M.Dofs.Dof_Parentid.all,
+        M.Dofs.Dof_Bodyid.all, Ids, Simple, Masses, Arms, Fixed)
+        or else not MJ.Ancestor_Rows.Valid_Parents (M.Dofs.Dof_Parentid.all)
+      then return; end if;
+      T.Build (D.Topology, Roots, Last, M.Dofs.Dof_Parentid.all,
+        M.Dofs.Dof_Bodyid.all, Ids, Simple, Masses, Arms, Fixed);
+      MJ.Ancestor_Rows.Build (D.Ancestors, M.Dofs.Dof_Parentid.all);
+      Ok := True;
+   end Build_Manifold_Topology;
+
+   procedure Remap_Actuators (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean) is
+      Id, V, Q, Kind : Integer;
+   begin
+      Ok := False;
+      for A in 0 .. D.Na - 1 loop
+         Id := M.Actuators.Actuator_Trnid (2 * A);
+         if Id not in 0 .. M.S.Njnt - 1 then return; end if;
+         V := M.Joints.Jnt_Dofadr (Id); Q := M.Joints.Jnt_Qposadr (Id);
+         Kind := M.Joints.Jnt_Type (Id);
+         if V not in 0 .. D.Nv - 1 or else Q not in 0 .. D.Nq - 1 then return; end if;
+         D.Actuator_Config (A).Joint_Id := V;
+         D.Actuator_Config (A).Position_Id := Q;
+         D.Actuator_Config (A).Joint_Type := Kind;
+         D.Actuator_Config (A).Parent_Frame := M.Actuators.Actuator_Trntype (A) = 1;
+         for K in 0 .. 5 loop
+            if M.Actuators.Actuator_Gear (6 * A + K) not in Tier0_Real then return; end if;
+            D.Actuator_Config (A).Wrench_Gear (K) := M.Actuators.Actuator_Gear (6 * A + K);
+         end loop;
+      end loop;
+      Ok := True;
+   end Remap_Actuators;
+
    procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) with
      Global => null, Pre => Is_Empty (D) and then Creation_Inputs (M),
      Post => (if Result = Success then Is_Ready (D) and then At_Reset_State (D)
@@ -844,20 +985,32 @@ package body MJ.Data with SPARK_Mode is
    begin
       Set_Dimensions (D, M.S);
       Set_Options (D, M);
+      MJ.Spatial_Tendon_Models.Load (M, D.Tendons, Normal);
+      if not Normal then Free (D); Result := Unsupported_Feature; return; end if;
 
       Copy_Bodies (M.S, M.Bodies, D.Body_Config, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
-      Copy_Joints (M.S, M.Joints, M.Dofs, M.Qpos, D.Joint_Config, Normal);
+      if M.S.Nq = M.S.Nv then
+         Copy_Joints (M.S, M.Joints, M.Dofs, M.Qpos, D.Joint_Config, Normal);
+      else
+         Copy_Manifold_Joints (M, D, Normal);
+      end if;
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
       Copy_Actuators (M.S, M.Actuators, D.Actuator_Config, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
-      Build_Topology (M, D, Normal);
+      Remap_Actuators (M, D, Normal);
+      if not Normal then Free (D); Result := Invalid_Model; return; end if;
+      if M.S.Nq = M.S.Nv then Build_Topology (M, D, Normal);
+      else Build_Manifold_Topology (M, D, Normal); end if;
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
       Allocate_Dynamics (D.Dynamics, D.Nv);
       Allocate_Actuators (D.Actuators, D.No);
       Allocate_Scratch (D.Scratch, D.Nq, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
+      if D.Tendons /= null then
+         D.Tendon_Outputs := new Real_Array'(0 .. 3 * Tendon_Count (D) - 1 => 0.0);
+      end if;
       D.Allocated := True;
       if not Is_Ready (D) then
          Free (D);
@@ -948,6 +1101,8 @@ package body MJ.Data with SPARK_Mode is
       Free_Kinematic (D.Kinematic);
       Free_Forces (D.Dynamics);
       Free_Actuators (D.Actuators);
+      MJ.Spatial_Tendon_Models.Free (D.Tendons);
+      Free_Real (D.Tendon_Outputs);
       Free_Scratch (D.Scratch);
       MJ.Ancestor_Rows.Free (D.Ancestors);
       MJ.Smooth_Topology.Free (D.Topology);
@@ -1099,7 +1254,7 @@ package body MJ.Data with SPARK_Mode is
       D.Clock := 0.0;
       Clear_State (D.State);
       D.State.Qpos.all :=
-        [for J in 0 .. D.Nj - 1 => Real (D.Joint_Config (J).Reference)];
+        Reset_Positions (D.Joint_Config.all, D.Nq);
       Clear_Kinematic (D.Kinematic);
       Clear_Forces (D.Dynamics);
       Clear_Actuators (D.Actuators);
@@ -1107,7 +1262,7 @@ package body MJ.Data with SPARK_Mode is
       D.First_Clamped := -1;
       pragma Assert (Is_Ready (D));
       pragma Assert (D.State.Qpos.all =
-        Real_Array'[for J in 0 .. D.Nj - 1 => Real (D.Joint_Config (J).Reference)]);
+        Reset_Positions (D.Joint_Config.all, D.Nq));
       pragma Assert (D.State.Qvel.all = Real_Array'[0 .. Integer (D.Nv) - 1 => 0.0]);
       pragma Assert (D.State.Ctrl.all = Real_Array'[0 .. Integer (D.Nu) - 1 => 0.0]);
       pragma Assert (D.State.Applied.all = Real_Array'[0 .. Integer (D.Nv) - 1 => 0.0]);
@@ -1242,6 +1397,25 @@ package body MJ.Data with SPARK_Mode is
          Result := Success;
       end if;
    end Get_Forces;
+
+   procedure Get_Tendon_Outputs
+     (D : Simulation; Length, Velocity, Force : out Real_Array; Result : out Status) is
+      N : constant Natural := Tendon_Count (D);
+   begin
+      Length := [others => 0.0]; Velocity := [others => 0.0]; Force := [others => 0.0];
+      if not Is_Ready (D) then Result := Not_Allocated;
+      elsif not D.Cache.Passive_Valid then Result := Stale_Results;
+      elsif Int64 (Length'Length) /= Int64 (N) or else Int64 (Velocity'Length) /= Int64 (N)
+        or else Int64 (Force'Length) /= Int64 (N) then Result := Invalid_Size;
+      else
+         if N > 0 then
+            Length := D.Tendon_Outputs (0 .. N - 1);
+            Velocity := D.Tendon_Outputs (N .. 2 * N - 1);
+            Force := D.Tendon_Outputs (2 * N .. 3 * N - 1);
+         end if;
+         Result := Success;
+      end if;
+   end Get_Tendon_Outputs;
 
    procedure Get_Actuator_Outputs
      (D : Simulation; Length, Velocity, Force : out Real_Array; Result : out Status) is

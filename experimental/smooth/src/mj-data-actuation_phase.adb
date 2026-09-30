@@ -1,3 +1,4 @@
+with MJ.Data.Manifold_Actuation;
 package body MJ.Data.Actuation_Phase with SPARK_Mode is
    procedure State_Query_Images (D : Simulation)
      with Ghost => Static, Global => null, Pre => Is_Ready (D),
@@ -38,6 +39,10 @@ package body MJ.Data.Actuation_Phase with SPARK_Mode is
       pragma Assert (Static => Initial_Velocity = Initial_Qvel);
       pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
       D.Cache.Force_Valid := False;
+      if D.Nq /= D.Nv then
+         MJ.Data.Manifold_Actuation.Compute (D, Result);
+         return;
+      end if;
       MJ.Smooth_Actuation.Compute
         (D.Actuator_Config.all, D.State.Qpos.all, D.State.Qvel.all, D.State.Ctrl.all,
          D.Actuation_Enabled, D.Clamp_Control, D.Actuators.Length.all, D.Actuators.Velocity.all,

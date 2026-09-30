@@ -37,6 +37,8 @@ def main():
             l = np.linalg.cholesky(spd)
             l[np.triu_indices(n, 1)] = inp[np.triu_indices(n, 1)]
             add(1, l, rng.normal(size=n), label='solve')
+            if sample == 0:
+                add(1, l, np.zeros(n), label='solve_zero_rhs')
             add(2, l, rng.normal(size=n) * 0.1, label='update')
             add(2, l, rng.normal(size=n) * 0.01, False, label='downdate_spd')
             add(2, l, np.zeros(n), False, label='zero_noop')
@@ -84,6 +86,9 @@ def main():
     by_op = {}
     for ci, ((op, mat, x, plus, minimum, label), (cr, cm, cx)) in enumerate(zip(cases, expected)):
         n = len(x)
+        status = next(out)
+        if status != 'SUCCESS':
+            failures.append({'case': ci, 'label': label, 'status': status})
         rank = int(next(out))
         am = np.array([float(next(out)) for _ in range(n * n)]).reshape(n, n)
         ax = np.array([float(next(out)) for _ in range(n)])
@@ -101,6 +106,8 @@ def main():
             failures.append({'case': ci, 'label': label, 'rank': [rank, int(cr)]})
         if not np.array_equal(am[np.triu_indices(n, 1)], mat[np.triu_indices(n, 1)]):
             failures.append({'case': ci, 'field': 'upper triangle'})
+        if label == 'solve_zero_rhs' and not np.all(ax == 0):
+            failures.append({'case': ci, 'field': 'zero RHS'})
         if label == 'zero_noop' and (rank != n or not np.array_equal(mat, am) or (not np.array_equal(x, ax))):
             failures.append({'case': ci, 'field': 'no-op'})
         if n and label in ['solve', 'update', 'downdate_spd', 'spd']:

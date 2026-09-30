@@ -1,0 +1,319 @@
+{
+  "exit_code": 1,
+  "seconds": 52.84818387031555,
+  "command": [
+    "python3",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+    "--cap-mb",
+    "3000",
+    "--min-free-mb",
+    "2000",
+    "--timeout",
+    "600",
+    "--",
+    "gnatprove",
+    "-P",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/actuation.gpr",
+    "-u",
+    "mj-transmissions.ads",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=5",
+    "--steps=0",
+    "--proof=per_check",
+    "-j2",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--report=all",
+    "--counterexamples=off",
+    "--limit-subp=mj-transmissions.adb:97"
+  ],
+  "subprogram": "Velocity",
+  "checks": 79,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-transmissions.adb",
+      "check_line": 104,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 68592,
+              "time": 2.46415
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.48718
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1e-06
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 71807,
+              "time": 2.59939
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.5778
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 0.000104
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 21,
+      "entity": 1,
+      "file": "mj-transmissions.adb",
+      "how_proved": "prover",
+      "line": 105,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove S2=Lane_Model (R,Qvel,2,I)"
+      },
+      "msg_id": 62,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 36,
+      "check_file": "mj-transmissions.ads",
+      "check_line": 128,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.31651
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.21602
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 36,
+      "entity": 1,
+      "file": "mj-transmissions.ads",
+      "how_proved": "prover",
+      "line": 128,
+      "message": {
+        "text": "postcondition might fail"
+      },
+      "msg_id": 80,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 52,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 52,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 92,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 92,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 99,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 99,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_proof": [],
+  "skip_flow_proof": [],
+  "pragma_assume": [],
+  "spark": {
+    " 1": "all"
+  },
+  "progress": "PROGRESS_PROOF",
+  "stop_reason": "STOP_REASON_NONE",
+  "fresh": true,
+  "covered": [
+    "MJ.Transmissions.Velocity"
+  ],
+  "sources_unchanged": true,
+  "coverage_ok": true,
+  "all_in_spark": true,
+  "warning_review": [
+    {
+      "file": "mj-transmissions.ads",
+      "line": 52,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 52,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 92,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 92,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 99,
+      "rule": "contracts-recursive",
+      "review": "explicit recursive model contract/termination obligation retained"
+    },
+    {
+      "file": "mj-transmissions.ads",
+      "line": 99,
+      "rule": "numeric-variant",
+      "review": "explicit recursive model contract/termination obligation retained"
+    }
+  ],
+  "reviewed_warnings": true,
+  "passed": false
+}

@@ -683,6 +683,37 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    end Reset_Mass;
    pragma Inline_Always (Reset_Mass);
 
+   --  CRB builds its own complete candidate. Preserve the published matrix
+   --  while marking it stale; the dense fallback still clears its workspace.
+   procedure Invalidate_Mass (D : in out Simulation)
+     with Global => null, Pre => Is_Ready (D),
+       Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+         and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+         and then State_Values (D) = State_Values (D)'Old
+         and then Input_Values (D) = Input_Values (D)'Old
+         and then Positions_Current (D) = Positions_Current (D)'Old
+         and then Configuration (D) = Configuration (D)'Old
+         and then Position_Values (D) = Position_Values (D)'Old
+         and then Velocity_Values (D) = Velocity_Values (D)'Old
+         and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+         and then not Mass_Current (D) and then not Forces_Current (D)
+         and then D.Dynamics.Mass.all = D.Dynamics.Mass.all'Old)
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+   begin
+      Expose_Assembly_Layout (D);
+      D.Cache.Mass_Valid := False;
+      D.Cache.Force_Valid := False;
+      Prove_Configuration_Equality (Configuration (D), Initial_Config);
+   end Invalidate_Mass;
+   pragma Inline_Always (Invalidate_Mass);
+
    procedure Ready_Properties (D : Simulation)
      with Ghost => Static, Global => null, Pre => Is_Ready (D),
        Post => Stable_Ready (D) and then D.Allocated and then not Is_Empty (D) and then D.Nv <= Max_Dofs
@@ -1091,7 +1122,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-         Reset_Mass (D);
+         Invalidate_Mass (D);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);

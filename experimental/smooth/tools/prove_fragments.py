@@ -88,7 +88,7 @@ def targets(source: Path) -> list[dict]:
 
 def source_files(repo: Path) -> list[Path]:
     paths = [repo / 'sparkling_mujoco.gpr', repo / 'experimental/smooth/smooth.gpr']
-    for directory in (repo / 'src', repo / 'experimental/smooth/src'):
+    for directory in (repo / 'src', repo / 'experimental/smooth/src', repo / 'experimental/spatial-tendon-candidate/src'):
         paths.extend(p for p in directory.rglob('*') if p.is_file() and p.suffix in ('.ads', '.adb'))
     return sorted(paths)
 

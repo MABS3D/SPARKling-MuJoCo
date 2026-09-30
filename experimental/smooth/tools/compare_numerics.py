@@ -69,7 +69,7 @@ def build(repo, out, toolchain):
     work = Path(tempfile.mkdtemp(prefix='sparkling-smooth-numerical-'))
     snapshot = work / 'source'
     files = [repo / 'sparkling_mujoco.gpr']
-    for directory in ('src', 'experimental/smooth'):
+    for directory in ('src', 'experimental/smooth', 'experimental/spatial-tendon-candidate/src'):
         files += [p for p in (repo / directory).rglob('*') if p.suffix in ('.ads', '.adb', '.gpr')]
     hashes = {}
     for path in sorted(files):
@@ -227,8 +227,6 @@ def rejection_tests(probe, out):
     results.append(dict(name='external_acceleration', forward='NUMERIC_LIMIT',
                         step='NUMERIC_LIMIT', state_unchanged=True))
     unsupported = {
-        'ball': (model_xml('<body><joint type="ball"/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
-        'free': (model_xml('<body><freejoint/>' + inertial + '</body>'), 'UNSUPPORTED_JOINT'),
         'rk4': (ordinary.replace('integrator="Euler"', 'integrator="RK4"'), 'UNSUPPORTED_FEATURE'),
         'discrete': (ordinary.replace('integrator="Euler"', 'integrator="discrete"'), 'UNSUPPORTED_FEATURE'),
         'ipc': (ordinary.replace('integrator="Euler"', 'integrator="discrete" solver="CG"')

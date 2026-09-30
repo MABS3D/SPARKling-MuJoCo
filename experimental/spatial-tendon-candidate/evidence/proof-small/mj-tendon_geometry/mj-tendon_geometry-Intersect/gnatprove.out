@@ -1,0 +1,42 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                  Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------
+Data Dependencies                 .          .                        .           .          .
+Flow Dependencies                 .          .                        .           .          .
+Initialization                    2          2                        .           .          .
+Non-Aliasing                      .          .                        .           .          .
+Run-time Checks                  16          .    16 (CVC5 75%, Z3 25%)           .          .
+Assertions                        .          .                        .           .          .
+Functional Contracts              3          .                 3 (CVC5)           .          .
+LSP Verification                  .          .                        .           .          .
+Termination                       1          1                        .           .          .
+Concurrency                       .          .                        .           .          .
+----------------------------------------------------------------------------------------------
+Total                            22    3 (14%)                 19 (86%)           .          .
+
+
+max steps used for successful proof: 79533
+
+============================
+Most difficult proved checks
+============================
+
+mj-tendon_geometry.adb:76:12: precondition proved in max 6 seconds
+mj-tendon_geometry.adb:77:59: fp_overflow check proved in max 2 seconds
+mj-tendon_geometry.adb:74:12: precondition proved in max 2 seconds
+mj-tendon_geometry.adb:75:59: fp_overflow check proved in max 1 seconds
+mj-tendon_geometry.adb:77:59: divide by zero proved in max 1 seconds
+mj-tendon_geometry.adb:69:42: precondition proved in max 1 seconds
+mj-tendon_geometry.adb:75:59: divide by zero proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-tendon_geometry, 1 subprograms and packages out of 1 analyzed
+  MJ.Tendon_Geometry.Intersect at mj-tendon_geometry.adb:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (19 checks)

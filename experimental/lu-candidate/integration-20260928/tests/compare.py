@@ -1,7 +1,9 @@
-import ctypes as c,json,subprocess,hashlib
+import argparse,ctypes as c,json,subprocess,hashlib
 from pathlib import Path
 import numpy as np
-root=Path(__file__).resolve().parents[1];rng=np.random.default_rng(20260928)
+root=Path(__file__).resolve().parents[1]
+parser=argparse.ArgumentParser();parser.add_argument('--output-dir',type=Path,default=root/'evidence');args=parser.parse_args();args.output_dir.mkdir(parents=True,exist_ok=True)
+rng=np.random.default_rng(20260928)
 libpath=root/'bin/reference.so';lib=c.CDLL(str(libpath));dp=c.POINTER(c.c_double);ip=c.POINTER(c.c_int)
 lib.mju_factorLU.argtypes=[dp,c.c_int,ip];lib.mju_solveLU.argtypes=[dp,dp,dp,ip,c.c_int]
 lib.mju_factorLUSparse.argtypes=[dp,c.c_int,ip,ip,ip,ip,ip]
@@ -47,6 +49,10 @@ cases.append(dict(mode='D',a=np.array([[1e100,1e100],[-1e100,1e100]]),b=np.ones(
 a=np.array([[1e100,1e100],[1e100,1e-15]])
 cases.append(dict(mode='S',a=a,mask=np.ones((2,2),dtype=bool),b=np.ones(2),expect='NUMERIC_LIMIT',name='sparse_numeric_limit'))
 cases.append(dict(mode='D',a=np.array([[1e-15]]),b=np.array([1e100]),expect='SUCCESS',solve_expect='NUMERIC_LIMIT',name='solve_numeric_limit'))
+# Zero RHS is a proved solver property. Exercise it on dense/sparse and clamp paths.
+for v in list(cases)[::17]:
+ if v['expect']=='SUCCESS' and v.get('solve_expect','SUCCESS')=='SUCCESS':
+  cases.append(dict(v,b=np.zeros(len(v['a'])),name=v['name']+'_zero_rhs'))
 lines=[]
 for v in cases:
  a=v['a'];n=len(a)
@@ -60,7 +66,7 @@ invalid=['S 2 2 0 1 2 0 0 1 1 1 1', 'S 2 3 0 2 3 0 0 1 1 1 1 1 1',
          'S 2 3 0 2 3 1 0 1 1 1 1 1 1','S 1 1 0 2 0 1 1']
 lines+=invalid
 p=subprocess.run([str(root/'bin/lu_probe')],input='\n'.join(lines)+'\n',text=True,capture_output=True)
-(root/'evidence/numerical-input.txt').write_text('\n'.join(lines)+'\n');(root/'evidence/numerical-output.txt').write_text(p.stdout);(root/'evidence/numerical-stderr.txt').write_text(p.stderr)
+(args.output_dir/'numerical-input.txt').write_text('\n'.join(lines)+'\n');(args.output_dir/'numerical-output.txt').write_text(p.stdout);(args.output_dir/'numerical-stderr.txt').write_text(p.stderr)
 assert p.returncode==0,p.stderr
 out=p.stdout.splitlines();assert len(out)==5*len(lines),(len(out),len(lines))
 worst=0.;counts={'dense':0,'sparse':0,'rejections':0};fail=[];clamps=[]
@@ -87,11 +93,13 @@ for index,v in enumerate(cases):
   assert sol_status=='SUCCESS'
   np.testing.assert_allclose(factors,cf.ravel(),rtol=2e-12,atol=2e-12)
   np.testing.assert_allclose(x,cx,rtol=2e-10,atol=2e-10)
-  if n and v['name']!='clamp':
+  if np.all(b==0):assert np.all(x==0), 'zero RHS did not yield zero solution'
+  if n and v['name']!='clamp' and np.any(b!=0):
    residual=np.linalg.norm(v['a']@x-b,np.inf)/(np.linalg.norm(v['a'],np.inf)*np.linalg.norm(x,np.inf)+np.linalg.norm(b,np.inf))
    worst=max(worst,float(residual));assert residual<2e-12,residual
  except Exception as e:fail.append(dict(name=v['name'],error=str(e)))
 for j in range(len(invalid)):
  assert out[5*(len(cases)+j)]=='INVALID_STRUCTURE';counts['rejections']+=1
 result=dict(status='passed' if not fail else 'failed',cases=len(lines),counts=counts,clamped=len(clamps),worst_scaled_residual=worst,failures=fail,oracle='MuJoCo 3.14.0 extracted C',library=str(libpath),library_sha256=hashlib.sha256(libpath.read_bytes()).hexdigest(),binary_sha256=hashlib.sha256((root/'bin/lu_probe').read_bytes()).hexdigest())
-(root/'evidence/numerical.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2));assert not fail
+result['source_sha256']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [*(root/'src').glob('*.ad?'),Path(__file__)]}
+(args.output_dir/'numerical.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2));assert not fail

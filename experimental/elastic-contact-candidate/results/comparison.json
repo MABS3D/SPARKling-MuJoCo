@@ -1,0 +1,1001 @@
+{
+  "reference": "3.14.0",
+  "sources": {
+    "experimental/elastic-contact-candidate/contact.gpr": "0b6452dc7511f8a8c8908ed1946681bad7ce2cdc6ea5a07a33daf014ca7af72c",
+    "experimental/elastic-contact-candidate/coordinate_checks.gpr": "d43a239e2a1ef91879c3f2b1244d5786a8316a14e1ff63af48c4658af3f1c4c9",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contact_math.adb": "ae215de8064483066274d223af8903c619fde822acb1bf55106d9fd64891a61b",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contact_math.ads": "e2f87215402a2173134401b2368f778710fae4badd3440b83b3c2a9a66021202",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contacts.adb": "47fa72072a12f761ef6259c7e326dd46693e99d2807fd30a875766ef5af8d64d",
+    "experimental/elastic-contact-candidate/src/mj-elastic_contacts.ads": "8456772341742e9bc65ac239455e44dbdb10d001007cbf678086f9ab2abca500",
+    "experimental/elastic-contact-candidate/src/mj-elastic_coordinates.adb": "ee78a5886891c26a464c06a1b74bb937cf3546f167c3b36773e3e542627c0c94",
+    "experimental/elastic-contact-candidate/src/mj-elastic_coordinates.ads": "b5f1ed2f56ec666db2c2f13bf89503a5e24936d03bc41d2a3bc5e1ce153ca6c9",
+    "experimental/elastic-contact-candidate/tests/coordinate_checks.adb": "f70ff0b5916cff4efb6d68872d2b0bd52a6076bd3f6748ed15bdedc1f687fecd",
+    "experimental/elastic-contact-candidate/tests/elastic_contact_probe.adb": "1dec258a79777b44baf7c7e75c37c5c50c3336639cc04ac2cc8d339cab6bc9b8",
+    "experimental/frictionless-contact-candidate/src/mj-contact_rows.adb": "c2744dabd1decee120a4726aa1dc79c6527eb6fc2a3ae2182188d1b06e528f32",
+    "experimental/frictionless-contact-candidate/src/mj-contact_rows.ads": "0a0da822015b57b29f2e6f986256925af6747549565df91b0594bd276632a49a",
+    "experimental/smooth/src/mj-elastic_kernels.adb": "494903eb72510552ece5b942439c9ba2669d5bf257188fd442fa7e813d0e2607",
+    "experimental/smooth/src/mj-elastic_kernels.ads": "7a28b0335cdca111ff003a1fb92f5dad9c04d136dbe859eabbf5318b9d08f14b",
+    "experimental/smooth/src/mj-elastic_network.adb": "c27e35800d87f398c5fab5b5fa69b56e6037a385dd19b70890f1ce2173d93784",
+    "experimental/smooth/src/mj-elastic_network.ads": "79851aeb4c85ed8f3e3dc7ac799acad5eb7f90112ddede0d9afae6c804e08b27",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62"
+  },
+  "results": [
+    {
+      "name": "crossing",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 3.965082230804128e-15,
+        "count": 0.0,
+        "position": 9.91270557701032e-22,
+        "velocity": 1.982541115402064e-18,
+        "coordinate": 9.91270557701032e-22
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "two_light_sides",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 3.965082230804129e-30,
+        "count": 0.0,
+        "position": 1.6940658945086007e-21,
+        "velocity": 3.469446951953614e-18,
+        "coordinate": 1.6940658945086007e-21
+      },
+      "iterations": 1.0,
+      "residual": 6.310887241768095e-30
+    },
+    {
+      "name": "parallel",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 4.349383075918922e-09,
+        "count": 0.0,
+        "position": 1.0894063429134349e-15,
+        "velocity": 2.174691850209687e-12,
+        "coordinate": 1.0873459352692388e-15
+      },
+      "iterations": 7.0,
+      "residual": 5.202593911232712e-13
+    },
+    {
+      "name": "coincident",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 1.057355261547768e-14,
+        "count": 0.0,
+        "position": 2.6433881538694204e-21,
+        "velocity": 5.28677630773884e-18,
+        "coordinate": 2.6433881538694204e-21
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "shared_vertex",
+      "steps": 1,
+      "contacts": 0.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0
+      },
+      "iterations": 0.0,
+      "residual": 0.0
+    },
+    {
+      "name": "disabled_self",
+      "steps": 1,
+      "contacts": 0.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0
+      },
+      "iterations": 0.0,
+      "residual": 0.0
+    },
+    {
+      "name": "separating",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "plane",
+      "steps": 1,
+      "contacts": 3.0,
+      "max_abs_error": {
+        "particle_contact": 3.552713678800501e-15,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 1.734723475976807e-18,
+        "coordinate": 8.470329472543003e-22
+      },
+      "iterations": 1.0,
+      "residual": 2.4234476568839867e-16
+    },
+    {
+      "name": "sphere",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 2.842170943040401e-14,
+        "body_force": 4.263256414560601e-14,
+        "body_torque": 3.552713678800501e-15,
+        "count": 0.0,
+        "position": 6.776263578034403e-21,
+        "velocity": 1.3877787807814457e-17,
+        "coordinate": 6.776263578034403e-21,
+        "body_position": 4.424898922563869e-21,
+        "body_velocity": 1.0408340855860843e-17,
+        "body_omega": 5.551115123125783e-17,
+        "body_quaternion": 1.1102230246251565e-16
+      },
+      "iterations": 1.0,
+      "residual": 1.5917653855451796e-16
+    },
+    {
+      "name": "capsule",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 1.2185374660520009e-14,
+        "body_force": 2.4370749321040017e-14,
+        "body_torque": 8.529762262364005e-16,
+        "count": 0.0,
+        "position": 3.0463436651300016e-21,
+        "velocity": 6.092687330260005e-18,
+        "coordinate": 3.0463436651300024e-21,
+        "body_position": 3.0463436651300024e-21,
+        "body_velocity": 6.092687330260005e-18,
+        "body_omega": 1.4216270437273343e-17,
+        "body_quaternion": 3.554067609318336e-21
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "parallel_rigid_capsule",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 8.501217507728143e-09,
+        "body_force": 1.1275943734290195e-08,
+        "body_torque": 1.7181651656983377e-09,
+        "count": 0.0,
+        "position": 2.125303920482921e-15,
+        "velocity": 4.25061028042073e-12,
+        "coordinate": 2.125303920482921e-15,
+        "body_position": 1.4085954624931674e-15,
+        "body_velocity": 2.8189880985074467e-12,
+        "body_omega": 2.147707167665658e-11,
+        "body_quaternion": 5.369267919164145e-15
+      },
+      "iterations": 6.0,
+      "residual": 6.7310802857459944e-12
+    },
+    {
+      "name": "shared_body",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.1306262592825078e-09,
+        "body_force": 1.6277112990792375e-09,
+        "body_torque": 1.4649348401007956e-10,
+        "count": 0.0,
+        "position": 2.8275992658421956e-16,
+        "velocity": 5.653134210747979e-13,
+        "coordinate": 2.826574355976018e-16,
+        "body_position": 2.0122792321330962e-16,
+        "body_velocity": 4.0692796354768745e-13,
+        "body_omega": 1.8311741012411176e-12,
+        "body_quaternion": 4.578009792002152e-16
+      },
+      "iterations": 7.0,
+      "residual": 2.150426869783186e-12
+    },
+    {
+      "name": "variable_impedance",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 3.1658378141230514e-09,
+        "body_force": 4.478253323725312e-09,
+        "body_torque": 4.0304276582858733e-10,
+        "count": 0.0,
+        "position": 7.914594543981246e-14,
+        "velocity": 1.5829188654281623e-11,
+        "coordinate": 7.914594543981246e-14,
+        "body_position": 5.5978166234858275e-14,
+        "body_velocity": 1.1195633179209019e-11,
+        "body_omega": 5.024358706862131e-11,
+        "body_quaternion": 1.2560896875575545e-13
+      },
+      "iterations": 6.0,
+      "residual": 6.632895399713918e-13
+    },
+    {
+      "name": "rotating_body",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 2.3092638912203256e-14,
+        "body_force": 3.552713678800501e-14,
+        "body_torque": 3.1086244689504383e-15,
+        "count": 0.0,
+        "position": 5.505714157152952e-21,
+        "velocity": 1.1275702593849246e-17,
+        "coordinate": 5.505714157152952e-21,
+        "body_position": 8.470329472543003e-22,
+        "body_velocity": 1.3877787807814457e-17,
+        "body_omega": 5.551115123125783e-17,
+        "body_quaternion": 0.0
+      },
+      "iterations": 1.0,
+      "residual": 1.8416396003882117e-16
+    },
+    {
+      "name": "attachment_spring",
+      "steps": 1,
+      "contacts": 0.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 0.0,
+        "body_torque": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0,
+        "body_position": 0.0,
+        "body_velocity": 0.0,
+        "body_omega": 0.0,
+        "body_quaternion": 0.0
+      },
+      "iterations": 0.0,
+      "residual": 0.0
+    },
+    {
+      "name": "attached_vertex_contact",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 3.552713678800501e-15,
+        "body_force": 7.105427357601002e-15,
+        "body_torque": 4.440892098500626e-16,
+        "count": 0.0,
+        "position": 1.3877787807814457e-17,
+        "velocity": 1.3877787807814457e-17,
+        "coordinate": 8.470329472543003e-22,
+        "body_position": 0.0,
+        "body_velocity": 1.734723475976807e-18,
+        "body_omega": 0.0,
+        "body_quaternion": 1.1102230246251565e-16
+      },
+      "iterations": 1.0,
+      "residual": 2.643798246666459e-16
+    },
+    {
+      "name": "attached_vertex_contact_trajectory",
+      "steps": 50,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 2.842170943040401e-14,
+        "body_torque": 1.1102230246251565e-15,
+        "count": 0.0,
+        "position": 4.163336342344337e-17,
+        "velocity": 1.249000902703301e-16,
+        "coordinate": 5.421010862427522e-20,
+        "body_position": 1.734723475976807e-18,
+        "body_velocity": 1.3877787807814457e-17,
+        "body_omega": 2.220446049250313e-16,
+        "body_quaternion": 2.220446049250313e-16
+      },
+      "iterations": 1.0,
+      "residual": 1.5376065077486746e-16
+    },
+    {
+      "name": "attached_world_force_trajectory",
+      "steps": 200,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 6.572520305780927e-14,
+        "body_torque": 2.220446049250313e-15,
+        "count": 0.0,
+        "position": 1.249000902703301e-16,
+        "velocity": 1.249000902703301e-16,
+        "coordinate": 4.336808689942018e-18,
+        "body_position": 1.6479873021779667e-17,
+        "body_velocity": 4.996003610813204e-16,
+        "body_omega": 1.7763568394002505e-15,
+        "body_quaternion": 5.551115123125783e-16
+      },
+      "iterations": 1.0,
+      "residual": 1.3931538915785685e-16
+    },
+    {
+      "name": "shared_attachment_filtered",
+      "steps": 1,
+      "contacts": 0.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 0.0,
+        "body_torque": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0,
+        "body_position": 0.0,
+        "body_velocity": 0.0,
+        "body_omega": 0.0,
+        "body_quaternion": 0.0
+      },
+      "iterations": 0.0,
+      "residual": 0.0
+    },
+    {
+      "name": "merged_body_jacobian",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 4.061791553506669e-15,
+        "body_force": 8.123583107013337e-15,
+        "body_torque": 2.0308957767533347e-16,
+        "count": 0.0,
+        "position": 1.0154478883766672e-21,
+        "velocity": 2.0308957767533342e-18,
+        "coordinate": 1.0154478883766672e-21,
+        "body_position": 1.0154478883766672e-21,
+        "body_velocity": 2.0308957767533342e-18,
+        "body_omega": 2.5386197209416685e-18,
+        "body_quaternion": 6.346549302354171e-22
+      },
+      "iterations": 1.0,
+      "residual": 1.9421501444109408e-16
+    },
+    {
+      "name": "pinned_side",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 7.930164461608256e-15,
+        "count": 0.0,
+        "position": 1.982541115402064e-21,
+        "velocity": 3.965082230804128e-18,
+        "coordinate": 1.982541115402064e-21
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "fixed_body",
+      "steps": 1,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 2.379049338482478e-14,
+        "body_force": 0.0,
+        "body_torque": 0.0,
+        "count": 0.0,
+        "position": 3.3881317890172014e-21,
+        "velocity": 1.189524669241239e-17,
+        "coordinate": 5.947623346206195e-21,
+        "body_position": 0.0,
+        "body_velocity": 0.0,
+        "body_omega": 0.0,
+        "body_quaternion": 0.0
+      },
+      "iterations": 1.0,
+      "residual": 1.3263464400855207e-16
+    },
+    {
+      "name": "plane_filter_51",
+      "steps": 1,
+      "contacts": 50.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0
+      },
+      "iterations": 1.0,
+      "residual": 1.5029035402514917e-16
+    },
+    {
+      "name": "plane_filter_128",
+      "steps": 1,
+      "contacts": 50.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 0.0,
+        "velocity": 0.0,
+        "coordinate": 0.0
+      },
+      "iterations": 1.0,
+      "residual": 1.5029035402514917e-16
+    },
+    {
+      "name": "plane_filter_symmetric_trajectory",
+      "steps": 1000,
+      "contacts": 50.0,
+      "max_abs_error": {
+        "particle_contact": 2.842170943040401e-14,
+        "count": 0.0,
+        "position": 6.938893903907228e-18,
+        "velocity": 3.3306690738754696e-16,
+        "coordinate": 6.938893903907228e-18
+      },
+      "iterations": 1.0,
+      "residual": 1.358433298963937e-16
+    },
+    {
+      "name": "plane_filter_trajectory",
+      "steps": 100,
+      "contacts": 50.0,
+      "max_abs_error": {
+        "particle_contact": 8.881784197001252e-15,
+        "count": 0.0,
+        "position": 3.469446951953614e-18,
+        "velocity": 2.7755575615628914e-17,
+        "coordinate": 8.673617379884035e-19
+      },
+      "iterations": 1.0,
+      "residual": 2.684726288335503e-16
+    },
+    {
+      "name": "crossing_trajectory",
+      "steps": 100,
+      "contacts": 1.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "count": 0.0,
+        "position": 1.357868690584925e-18,
+        "velocity": 3.050846276667014e-17,
+        "coordinate": 1.357868690584925e-18
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "coupled_trajectory",
+      "steps": 100,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 0.0,
+        "body_torque": 0.0,
+        "count": 0.0,
+        "position": 2.200271215224703e-12,
+        "velocity": 6.255582163383622e-11,
+        "coordinate": 2.2002729499481788e-12,
+        "body_position": 1.4009418625171577e-12,
+        "body_velocity": 3.960981542761033e-11,
+        "body_omega": 1.7822188169702713e-10,
+        "body_quaternion": 3.150299465737305e-12
+      },
+      "iterations": 1.0,
+      "residual": 0.0
+    },
+    {
+      "name": "attached_trajectory",
+      "steps": 100,
+      "contacts": 0.0,
+      "max_abs_error": {
+        "particle_contact": 0.0,
+        "body_force": 0.0,
+        "body_torque": 0.0,
+        "count": 0.0,
+        "position": 1.9477193300768367e-59,
+        "velocity": 5.22024357439882e-54,
+        "coordinate": 3.526538710188887e-63,
+        "body_position": 1.9477193300768367e-59,
+        "body_velocity": 1.2869642946559042e-57,
+        "body_omega": 3.851859888774472e-34,
+        "body_quaternion": 0.0
+      },
+      "iterations": 0.0,
+      "residual": 0.0
+    },
+    {
+      "name": "random_0",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 5.561850979773908e-09,
+        "body_force": 6.824115938997011e-09,
+        "body_torque": 6.141582312158e-10,
+        "count": 0.0,
+        "position": 1.675786245880495e-13,
+        "velocity": 3.6537800562896905e-11,
+        "coordinate": 1.67578841428484e-13,
+        "body_position": 2.3550605909861133e-13,
+        "body_velocity": 5.084702450752765e-11,
+        "body_omega": 8.405953710877156e-11,
+        "body_quaternion": 1.9696310554762064e-13
+      },
+      "iterations": 10.0,
+      "residual": 2.7841244429543e-12
+    },
+    {
+      "name": "random_1",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 7.924292333427729e-10,
+        "body_force": 1.116589487537567e-09,
+        "body_torque": 1.0049383547539037e-10,
+        "count": 0.0,
+        "position": 1.9081958235744878e-16,
+        "velocity": 3.803415915548669e-13,
+        "coordinate": 1.9017075511985199e-16,
+        "body_position": 9.71445146547012e-17,
+        "body_velocity": 1.9506271597968805e-13,
+        "body_omega": 1.2561757189999412e-12,
+        "body_quaternion": 3.140459355240044e-16
+      },
+      "iterations": 7.0,
+      "residual": 7.737679482207648e-13
+    },
+    {
+      "name": "random_2",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 2.0734347572215484e-08,
+        "body_force": 2.828622314154927e-08,
+        "body_torque": 2.5457609353907173e-09,
+        "count": 0.0,
+        "position": 9.902668962613603e-15,
+        "velocity": 1.980532751688635e-11,
+        "coordinate": 9.90266388041592e-15,
+        "body_position": 3.899658373995862e-15,
+        "body_velocity": 7.796832623974126e-12,
+        "body_omega": 3.182201724349909e-11,
+        "body_quaternion": 7.955509623465418e-15
+      },
+      "iterations": 7.0,
+      "residual": 4.390579119549697e-13
+    },
+    {
+      "name": "random_3",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.3828360678758145e-09,
+        "body_force": 1.7780124039745715e-09,
+        "body_torque": 1.6000534230897756e-10,
+        "count": 0.0,
+        "position": 1.0142407746993598e-13,
+        "velocity": 1.6406626057730023e-11,
+        "coordinate": 1.0142516167210847e-13,
+        "body_position": 1.0053763377371183e-13,
+        "body_velocity": 1.571826002688681e-11,
+        "body_omega": 4.2366221641998436e-11,
+        "body_quaternion": 1.3564496748053045e-13
+      },
+      "iterations": 8.0,
+      "residual": 2.293846506134133e-12
+    },
+    {
+      "name": "random_4",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.803520888188359e-09,
+        "body_force": 2.633825602060824e-09,
+        "body_torque": 2.370459384337664e-10,
+        "count": 0.0,
+        "position": 2.2985086056692694e-16,
+        "velocity": 4.594224306542216e-13,
+        "coordinate": 2.2971194716357723e-16,
+        "body_position": 4.2327252813834093e-16,
+        "body_velocity": 8.511386040410684e-13,
+        "body_omega": 2.9630742304220803e-12,
+        "body_quaternion": 7.407743580871429e-16
+      },
+      "iterations": 7.0,
+      "residual": 3.9963000422385545e-12
+    },
+    {
+      "name": "random_5",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.1130232735467871e-08,
+        "body_force": 1.5840385003684787e-08,
+        "body_torque": 1.425632945029065e-09,
+        "count": 0.0,
+        "position": 1.8214596497756474e-15,
+        "velocity": 3.6425810284734794e-12,
+        "coordinate": 1.8212902431861966e-15,
+        "body_position": 1.3808398868775384e-15,
+        "body_velocity": 2.765267181903397e-12,
+        "body_omega": 1.7820411812863313e-11,
+        "body_quaternion": 4.45511547575092e-15
+      },
+      "iterations": 7.0,
+      "residual": 1.3132364756394166e-13
+    },
+    {
+      "name": "random_6",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 5.338806730037504e-09,
+        "body_force": 7.19230364154555e-09,
+        "body_torque": 6.472558079784196e-10,
+        "count": 0.0,
+        "position": 1.933913099105844e-13,
+        "velocity": 3.1447788817473565e-11,
+        "coordinate": 1.933910930701499e-13,
+        "body_position": 1.5616131502607829e-13,
+        "body_velocity": 2.5306056078769346e-11,
+        "body_omega": 1.4826229133291235e-10,
+        "body_quaternion": 4.609212317374656e-13
+      },
+      "iterations": 8.0,
+      "residual": 6.175115806577799e-12
+    },
+    {
+      "name": "random_7",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 5.405524916568538e-10,
+        "body_force": 7.823359737813007e-10,
+        "body_torque": 7.040945604330773e-11,
+        "count": 0.0,
+        "position": 1.3400738851920835e-16,
+        "velocity": 2.681101868295954e-13,
+        "coordinate": 1.340550341224914e-16,
+        "body_position": 1.3877787807814457e-16,
+        "body_velocity": 2.7391283685673784e-13,
+        "body_omega": 8.801293027715928e-13,
+        "body_quaternion": 2.200354427741441e-16
+      },
+      "iterations": 8.0,
+      "residual": 2.277481537228195e-12
+    },
+    {
+      "name": "random_8",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 5.456008977944293e-10,
+        "body_force": 7.800196044627228e-10,
+        "body_torque": 7.02016222930979e-11,
+        "count": 0.0,
+        "position": 1.3791051634015616e-16,
+        "velocity": 2.7599450502791e-13,
+        "coordinate": 1.379969137007761e-16,
+        "body_position": 1.1102230246251565e-16,
+        "body_velocity": 2.2089968743088662e-13,
+        "body_omega": 8.775064008759159e-13,
+        "body_quaternion": 2.193815333388638e-16
+      },
+      "iterations": 7.0,
+      "residual": 7.871766093309049e-13
+    },
+    {
+      "name": "random_9",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 5.668161051630705e-09,
+        "body_force": 7.44592565382618e-09,
+        "body_torque": 6.70108482592191e-10,
+        "count": 0.0,
+        "position": 1.7975117921897876e-13,
+        "velocity": 3.441191775976904e-11,
+        "coordinate": 1.7975052869767527e-13,
+        "body_position": 1.6820572712461512e-13,
+        "body_velocity": 3.1907379516304957e-11,
+        "body_omega": 1.1044365422208102e-10,
+        "body_quaternion": 2.9700027159851317e-13
+      },
+      "iterations": 8.0,
+      "residual": 7.809170570260002e-12
+    },
+    {
+      "name": "random_10",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.4812009396791836e-09,
+        "body_force": 2.185345238103764e-09,
+        "body_torque": 1.9668000561523513e-10,
+        "count": 0.0,
+        "position": 4.380176776841438e-16,
+        "velocity": 8.768819004245643e-13,
+        "coordinate": 4.384403471248237e-16,
+        "body_position": 3.191891195797325e-16,
+        "body_velocity": 6.333822355486518e-13,
+        "body_omega": 2.4585056213055623e-12,
+        "body_quaternion": 6.146240471866654e-16
+      },
+      "iterations": 7.0,
+      "residual": 4.3530393338908254e-12
+    },
+    {
+      "name": "random_11",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.0542748896114063e-09,
+        "body_force": 1.503082103226916e-09,
+        "body_torque": 1.3527667874768667e-10,
+        "count": 0.0,
+        "position": 1.491862189340054e-16,
+        "velocity": 2.980740654301428e-13,
+        "coordinate": 1.4903714113528865e-16,
+        "body_position": 1.8735013540549517e-16,
+        "body_velocity": 3.818993732362941e-13,
+        "body_omega": 1.6909529332309603e-12,
+        "body_quaternion": 4.22739744414518e-16
+      },
+      "iterations": 7.0,
+      "residual": 1.4259570561048078e-12
+    },
+    {
+      "name": "random_12",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.601092147751615e-09,
+        "body_force": 2.025146716988502e-09,
+        "body_torque": 1.822624065561662e-10,
+        "count": 0.0,
+        "position": 4.605690828718423e-14,
+        "velocity": 1.0373840675370616e-11,
+        "coordinate": 4.605669144674973e-14,
+        "body_position": 8.699291287328492e-14,
+        "body_velocity": 1.866184984322672e-11,
+        "body_omega": 2.4031332479523826e-11,
+        "body_quaternion": 5.6007282145387194e-14
+      },
+      "iterations": 10.0,
+      "residual": 5.712985584020819e-13
+    },
+    {
+      "name": "random_13",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.6272139191642054e-09,
+        "body_force": 2.4329978032255895e-09,
+        "body_torque": 2.1896973123602947e-10,
+        "count": 0.0,
+        "position": 2.38524477946811e-16,
+        "velocity": 4.760983274287867e-13,
+        "coordinate": 2.3805013949634857e-16,
+        "body_position": 4.2327252813834093e-16,
+        "body_velocity": 8.346517921253849e-13,
+        "body_omega": 2.7371160893352453e-12,
+        "body_quaternion": 6.84273872373492e-16
+      },
+      "iterations": 8.0,
+      "residual": 8.234137403038032e-12
+    },
+    {
+      "name": "random_14",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 4.035420886339125e-10,
+        "body_force": 5.85870907343633e-10,
+        "body_torque": 5.2727600063917635e-11,
+        "count": 0.0,
+        "position": 1.465841337200402e-16,
+        "velocity": 2.9287336444916434e-13,
+        "coordinate": 1.4643674998721795e-16,
+        "body_position": 1.1796119636642288e-16,
+        "body_velocity": 2.4263230313792405e-13,
+        "body_omega": 6.590838985687242e-13,
+        "body_quaternion": 1.6477162516348454e-16
+      },
+      "iterations": 7.0,
+      "residual": 8.220945171908741e-13
+    },
+    {
+      "name": "random_15",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.2068017696265088e-09,
+        "body_force": 1.6832757410156773e-09,
+        "body_torque": 1.5147860743525143e-10,
+        "count": 0.0,
+        "position": 1.0129831001792766e-13,
+        "velocity": 9.50547973666005e-12,
+        "coordinate": 1.0129820159771041e-13,
+        "body_position": 1.647058954067776e-13,
+        "body_velocity": 1.6159393267933808e-11,
+        "body_omega": 4.745759341062694e-11,
+        "body_quaternion": 2.5695418015558857e-13
+      },
+      "iterations": 9.0,
+      "residual": 8.435441048469111e-13
+    },
+    {
+      "name": "random_16",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 3.1994247251532215e-09,
+        "body_force": 4.28390478646179e-09,
+        "body_torque": 3.8555114656446676e-10,
+        "count": 0.0,
+        "position": 6.891189008317866e-16,
+        "velocity": 1.3779671848013209e-12,
+        "coordinate": 6.889833755602259e-16,
+        "body_position": 1.4155343563970746e-15,
+        "body_velocity": 2.820597921893153e-12,
+        "body_omega": 4.81938100538315e-12,
+        "body_quaternion": 1.204850157360618e-15
+      },
+      "iterations": 8.0,
+      "residual": 3.4427576923387476e-13
+    },
+    {
+      "name": "random_17",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 8.482601288051228e-10,
+        "body_force": 1.4229826206246798e-09,
+        "body_torque": 1.280686667826103e-10,
+        "count": 0.0,
+        "position": 3.7470027081099033e-16,
+        "velocity": 7.442796379208971e-13,
+        "coordinate": 3.721396902114406e-16,
+        "body_position": 1.261196588956987e-16,
+        "body_velocity": 2.5223931016810086e-13,
+        "body_omega": 1.2806769533746376e-12,
+        "body_quaternion": 3.201682896667585e-16
+      },
+      "iterations": 6.0,
+      "residual": 2.17328241360665e-12
+    },
+    {
+      "name": "random_18",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 8.975677978639851e-10,
+        "body_force": 1.3130256881765945e-09,
+        "body_torque": 1.18167420293247e-10,
+        "count": 0.0,
+        "position": 9.269928574751063e-14,
+        "velocity": 9.164974335007514e-12,
+        "coordinate": 9.269896048685888e-14,
+        "body_position": 2.4343336591306497e-13,
+        "body_velocity": 2.503915130791512e-11,
+        "body_omega": 3.7179703760159555e-11,
+        "body_quaternion": 1.9276420737401878e-13
+      },
+      "iterations": 9.0,
+      "residual": 8.281640955789334e-12
+    },
+    {
+      "name": "random_19",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 1.6747989661780593e-09,
+        "body_force": 2.4495960815329454e-09,
+        "body_torque": 2.2046364733796509e-10,
+        "count": 0.0,
+        "position": 5.247538514829841e-16,
+        "velocity": 1.0497644420404129e-12,
+        "coordinate": 5.248826004909668e-16,
+        "body_position": 3.2612801348363973e-16,
+        "body_velocity": 6.463163337855349e-13,
+        "body_omega": 2.755767836148948e-12,
+        "body_quaternion": 6.889461061105467e-16
+      },
+      "iterations": 7.0,
+      "residual": 4.613931679171188e-12
+    },
+    {
+      "name": "random_20",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 8.413358898451406e-10,
+        "body_force": 1.2453398312572972e-09,
+        "body_torque": 1.120801229603785e-10,
+        "count": 0.0,
+        "position": 1.8388068845354155e-16,
+        "velocity": 3.6848996076699336e-13,
+        "coordinate": 1.842432185549664e-16,
+        "body_position": 3.3306690738754696e-16,
+        "body_velocity": 6.731837309814637e-13,
+        "body_omega": 1.400997373668389e-12,
+        "body_quaternion": 3.502498177555477e-16
+      },
+      "iterations": 8.0,
+      "residual": 5.689438822126314e-12
+    },
+    {
+      "name": "random_21",
+      "steps": 25,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 4.174067314011154e-09,
+        "body_force": 5.468939079378288e-09,
+        "body_torque": 4.921933537821443e-10,
+        "count": 0.0,
+        "position": 1.4492920752395833e-13,
+        "velocity": 2.8017421715986757e-11,
+        "coordinate": 1.4492899068352383e-13,
+        "body_position": 1.7328499746227521e-13,
+        "body_velocity": 3.271472936300368e-11,
+        "body_omega": 8.22245604936711e-11,
+        "body_quaternion": 2.1924259283045977e-13
+      },
+      "iterations": 8.0,
+      "residual": 7.68961339676421e-12
+    },
+    {
+      "name": "random_22",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 8.407674556565325e-10,
+        "body_force": 1.2046541542076739e-09,
+        "body_torque": 1.0841816333595489e-10,
+        "count": 0.0,
+        "position": 2.0860049798621105e-16,
+        "velocity": 4.173120182748846e-13,
+        "coordinate": 2.0865555512778258e-16,
+        "body_position": 1.457167719820518e-16,
+        "body_velocity": 2.87960627565198e-13,
+        "body_omega": 1.3552492461599286e-12,
+        "body_quaternion": 3.388064026381421e-16
+      },
+      "iterations": 7.0,
+      "residual": 1.2653386213104067e-12
+    },
+    {
+      "name": "random_23",
+      "steps": 1,
+      "contacts": 2.0,
+      "max_abs_error": {
+        "particle_contact": 9.594174343874329e-10,
+        "body_force": 1.3598651094071101e-09,
+        "body_torque": 1.2238743352099846e-10,
+        "count": 0.0,
+        "position": 2.905661822261152e-16,
+        "velocity": 5.818297232895731e-13,
+        "coordinate": 2.9091515980038396e-16,
+        "body_position": 1.734723475976807e-16,
+        "body_velocity": 3.5895592054302483e-13,
+        "body_omega": 1.5298318167822345e-12,
+        "body_quaternion": 3.824523163442617e-16
+      },
+      "iterations": 7.0,
+      "residual": 1.42076974194637e-12
+    }
+  ]
+}

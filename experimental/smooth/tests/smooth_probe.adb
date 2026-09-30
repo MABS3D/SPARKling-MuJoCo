@@ -9,6 +9,7 @@ with MJ.Models;
 with MJ.MJB;
 with MJ.Data; use MJ.Data;
 with MJ.Data.Forward;
+with MJ.Data.Forces;
 with MJ.Data.Euler;
 with MJ.Smooth_Math;
 with MJ.External_Forces;
@@ -110,6 +111,7 @@ begin
    end if;
    Put_Line ("create " & Result'Image);
    if Result /= Success then
+      if not Is_Empty (D) then raise Program_Error with "rejected creation retained storage"; end if;
       MJ.Models.Free (M);
       return;
    end if;
@@ -120,12 +122,16 @@ begin
    declare
       N : constant Natural := Velocity_Count (D);
       U : constant Natural := Control_Count (D);
-      Q, V : State_Vector (3 .. N + 2);  --  Nonzero lower bound is intentional.
+      Nq : constant Natural := Position_Count (D);
+      Q : State_Vector (3 .. Nq + 2);
+      V : State_Vector (3 .. N + 2);  --  Nonzero lower bound is intentional.
       Controls : State_Vector (0 .. Integer (U) - 1);
       Applied : State_Vector (0 .. Integer (N) - 1);
-      Qout, Vout, Acc, G, B, P, A : Real_Array (0 .. Integer (N) - 1);
+      Qout : Real_Array (0 .. Integer (Nq) - 1);
+      Vout, Acc, G, B, P, A : Real_Array (0 .. Integer (N) - 1);
       Mass : Real_Array (0 .. Integer (N * N) - 1);
       Len, Vel, Force : Real_Array (0 .. Integer (U) - 1);
+      TLen, TVel, TForce : Real_Array (0 .. Integer (Tendon_Count (D)) - 1);
       Empty : State_Vector (1 .. 0);
       Bad : State_Vector (0 .. Integer (N)) := [others => 0.0];
       Loads : MJ.External_Forces.Wrench_Array
@@ -138,15 +144,17 @@ begin
    begin
       --  Explicit lifecycle/error checks; no assertions depend on optimization.
       Get_Acceleration (D, Acc, Result); Check (Stale_Results);
+      Get_Tendon_Outputs (D, TLen, TVel, TForce, Result); Check (Stale_Results);
       Get_Mass_Matrix (D, Mass, Result); Check (Stale_Results);
       Set_State (D, Bad, Empty, 0.0, Result); Check (Invalid_Size);
       Set_Control (D, U, 0.0, Result); Check (Invalid_Index);
       Set_Applied_Force (D, N, 0.0, Result); Check (Invalid_Index);
       if N > 0 then
          declare
-            Edge_Q : State_Vector (Natural'Last - N + 1 .. Natural'Last) := [others => 0.25];
+            Edge_Q : State_Vector (Natural'Last - Nq + 1 .. Natural'Last) := [others => 0.25];
             Edge_V : State_Vector (Natural'Last - N + 1 .. Natural'Last) := [others => -0.5];
-            Edge_Qout, Edge_Vout : Real_Array (Edge_Q'Range);
+            Edge_Qout : Real_Array (Edge_Q'Range);
+            Edge_Vout : Real_Array (Edge_V'Range);
          begin
             Set_State (D, Edge_Q, Edge_V, 0.125, Result); Check;
             Get_State (D, Edge_Qout, Edge_Vout, T, Result); Check;
@@ -236,6 +244,28 @@ begin
             end;
             Get_Forces (D, G, B, P, A, Result); Check;
             Emit ("gravity", G); Emit ("bias", B); Emit ("passive", P); Emit ("actuation", A);
+            Get_Tendon_Outputs (D, TLen, TVel, TForce, Result); Check;
+            declare
+               WL, WV, WF : Real_Array (0 .. Tendon_Count (D));
+            begin
+               Get_Tendon_Outputs (D, WL, WV, WF, Result); Check (Invalid_Size);
+               if (for some X of WL => X /= 0.0) or else (for some X of WV => X /= 0.0)
+                 or else (for some X of WF => X /= 0.0) then
+                  raise Program_Error with "invalid tendon output retained data";
+               end if;
+            end;
+            Emit ("tendon_length", TLen); Emit ("tendon_velocity", TVel); Emit ("tendon_force", TForce);
+            if Tendon_Count (D) > 0 then
+               declare
+                  Before : constant Real_Array := P;
+               begin
+                  MJ.Data.Forces.Compute (D, Result); Check;
+                  MJ.Data.Forces.Compute (D, Result); Check;
+                  MJ.Data.Forward.Evaluate (D, Result, Loads); Check;
+                  Get_Forces (D, G, B, P, A, Result); Check;
+                  if Before /= P then raise Program_Error with "tendon force accumulated twice"; end if;
+               end;
+            end if;
             Get_Actuator_Outputs (D, Len, Vel, Force, Result); Check;
             Emit ("length", Len); Emit ("velocity", Vel); Emit ("force", Force);
             for Body_Id in 0 .. Body_Count (D) - 1 loop

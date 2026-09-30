@@ -1,127 +1,101 @@
-# Verification and performance — dense Cholesky
+# Dense Cholesky verification — 2026-09-30
 
-Implementation checkpoint, 2026-09-28. Scope: the dense factorization, solve,
-and rank-one update/downdate APIs. This is **not** complete Gold closure,
-global C parity, or integration into the dynamics solver.
+The current contracts close for all three candidate units. Scope is runtime
+safety and the explicit functional/integrity properties below. This is not a
+full MuJoCo simulation proof, a universal C-equivalence theorem or performance
+acceptance for integrated movement.
 
-## Numerical differential and independent checks
+## Formal results
 
-Both validation (`-gnata -gnato -gnatVa`) and release builds pass **1,210 cases
-and 1,648,938 scalar/rank comparisons each**, or **3,297,876 comparisons** total.
-All compared numerical values equal the MuJoCo 3.14.0 reference in this sample.
-This is a numerical sample, not a universal or bit-pattern equivalence theorem.
-Sizes include 0–17, 24, 32, 64, 96 and 128; the deterministic seed is 20260928.
-Coverage includes SPD matrices, triangular solves, positive updates, admissible
-downdates, clamped deficient pivots, exact threshold neighbours, zero and sparse
-update vectors, diagonal scales, unchanged upper triangles and destructive X.
-Independent LLᵀ reconstruction / solve residuals reach at most
-**1.865e-15 relative residual** in the tested SPD cases.
-Indefinite downdates are compared against C clamping semantics rather than
-asserting that the clamped result exactly factors the requested indefinite matrix.
+| Complete unit | Proof obligations | Flow/termination checks | Open |
+| --- | ---: | ---: | ---: |
+| MJ.Cholesky_Steps | 43 | 14 | 0 |
+| MJ.Cholesky_Models | 132 | 15 | 0 |
+| MJ.Cholesky | 501 | 64 | 0 |
+| Total | 676 | 93 | 0 |
 
-[Validation results](results/numerics-validation.json),
-[release results](results/numerics-release.json),
-[source manifest](results/manifest.json).
+[Machine-readable coverage and warnings](results/formal-status-20260930.json).
+Reports and matching frozen-source manifests:
+[scalar steps](results/proofs/current-20260930-steps/ALL-summary.txt),
+[dot models](results/proofs/current-20260930-zero-models/ALL-summary.txt),
+[algorithms](results/proofs/current-20260930-full/ALL-summary.txt).
+Each directory includes ALL.spark.json, manifest.json, source/, the command
+log and solver output. GNATprove 16.1.0, CVC5/Z3/Alt-Ergo, per_path, 10 seconds
+per attempt, 512 MiB per prover, two workers. No pragma Assume, skipped proof,
+suppression or new trusted project body was introduced. Reviewed warnings
+remain visible in the reports.
 
-## Formal verification
+Proved functional scope:
 
-`MJ.Cholesky_Steps` is closed: **57 checks**, consisting of 43 proof obligations
-and 14 flow/termination checks. The proved scalar functional contracts specify
-product, pivot square, pivot clamp/root, factor-entry update, signed rank-one
-entry update, and destructive vector update under the documented magnitude
-domains. Root equality is relative to the existing Ada elementary-function
-contract, not a new correctly-rounded-sqrt theorem.
-[Complete-unit report](results/proofs/steps/summary.txt).
+- Exact ordered binary64 product, bounded scalar arithmetic, pivot clamp/root,
+  lower entry update, signed update and destructive vector update.
+- The recursive four-lane sum, C lane combination/tail, and production Dot
+  equality to that rounded model, including zero operands.
+- Factor preserves upper entries, bounds every stored/partial result, keeps
+  rank within 0..N, and produces diagonals >=mjMINVAL on Success.
+- Solve bounds successful/partial results and maps a zero RHS to a zero
+  solution with Success. Its scalar subtraction/division contracts are exact.
+- Update preserves upper entries and X(0), bounds arrays and rank, preserves
+  positive diagonals on Success, and is an exact no-op for a zero vector.
+- Local cell contracts give exact entry formulas and unchanged-cell frames.
 
-`MJ.Cholesky_Models`: **97/105 proof obligations closed**, plus 11 flow checks.
-Eight remain open: the recursive lane result bound, six operand bounds in
-the tail, and the combined dot result bound. The recurrence unfold lemma,
-bounded addition and input-shape predicate are proved under their contracts.
-The four-lane production reduction has an exact ordered floating-point model;
-its composition is not promoted to Gold while supporting obligations remain open.
-[Complete-unit report](results/proofs/models/summary.txt).
+The root relation uses the existing elementary-function contract; no new
+correct-rounding theorem is asserted. A global functional model mapping every
+nonzero RHS to the final solver vector, and general matrix reconstruction/error
+bounds, remain outside this proved scope. These missing models are engineering
+work, not a mathematical Silver exception. The scoped results above should not
+be promoted to a claim of complete functional correctness for the solver.
 
-`MJ.Cholesky`, final complete-unit attempt: **147/236 proof obligations closed**,
-89 still open. This is neither complete Silver nor complete Gold.
-[Full report](results/proofs/algorithms/summary.txt) and
-[remaining obligations by location](results/proofs/algorithms/status.json).
+## Numeric-limit handling and differential tests
 
-| Subprogram | Proof obligations closed |
-| --- | ---: |
-| `MJ.Cholesky.Dot` | 61/90 |
-| `MJ.Cholesky.Factor` | 27/41 |
-| `MJ.Cholesky.Positive_Diagonal` | 3/3 |
-| `MJ.Cholesky.Same_Upper` | 7/7 |
-| `MJ.Cholesky.Shape` | 1/1 |
-| `MJ.Cholesky.Solve` | 13/29 |
-| `MJ.Cholesky.Update` | 34/64 |
-| `MJ.Cholesky.Vector_Shape` | 1/1 |
+Shapes/positive pivots alone do not bound ill-conditioned intermediates. The
+new explicit Result parameter replaces potential out-of-domain stores with
+Numeric_Limit, leaving bounded partial arrays. Factor/Solve use storage <=1e100;
+Update uses storage <=1e150, narrower operands where the scalar formulas require
+it, and positive input diagonals >=mjMINVAL. Only Success denotes completion.
+C can continue outside those supported domains; the API documents that difference.
 
-The initial attempt found 62 open obligations, including shape predicates that
-could raise during length conversion for excessively large arrays. The final
-predicates guard length before conversion; the two predicate proofs now close.
-The older attempt and its exact algorithm sources are retained only as a
-[diagnostic/measured snapshot](results/proofs/algorithms-initial/summary.txt).
-Changing prover strategy/time limits changes which other checks close; counts
-from these attempts must not be interpreted as a monotonic progress percentage.
+Both checked and release probes pass 1,233 C differential cases and 1,682,539
+scalar/rank comparisons each, with zero numerical differences in the sample.
+The maximum independently checked relative reconstruction residual is
+1.8643e-15. Additional six cases per build cover Numeric_Limit, partial bounds,
+unchanged upper entries and zero-input behavior at extreme admissible inputs.
 
-No `Assume`, suppression or trusted replacement body was introduced.
-Unclosed bounds/invariants are unfinished proof engineering. No mathematical
-limitation or Silver-only exception is claimed to excuse these obligations.
-In particular, shape and a positive diagonal alone do not bound arbitrarily
-ill-conditioned computations. A checked call may raise a numeric range or
-overflow exception; callers need stronger numerical admissibility contracts
-before the iterative kernels can have a complete safety/functional claim.
+[Checked comparison](results/numerics-20260930-validation.json),
+[release comparison](results/numerics-20260930-release.json),
+[checked edge cases](results/edges-20260930-validation.json),
+[release edge cases](results/edges-20260930-release.json).
+Tests cover N=0..17,24,32,64,96,128; SPD/clamped inputs, solve, update/downdate,
+threshold neighbours, scales, sparse/zero update vectors, and zero RHS.
+These samples do not establish universal equivalence or general stability.
 
-## Release timing against the unmodified C algorithms
+## Performance after the proof changes
 
-AMD Ryzen 7 9800X3D, GNAT/GCC 16.1.0. C is built from the pinned MuJoCo sources
-with the normal platform SIMD path enabled. Both languages use O3, native ISA,
-LTO and disabled FMA contraction; exact switches are in [benchmark.gpr](benchmark.gpr).
-Nine paired samples alternate Ada/C order on the same pinned logical CPU.
-Input reset and checksum consumption are outside the timed interval; each
-batch has independent prepared inputs. Checksums of both modified arrays are
-compared. Compiler-switch experiments use a forced fresh build.
-The machine was shared with other work; some intervals are wide.
-The JSON preserves all samples and paired-median bootstrap 95% intervals.
-These intervals describe this run and do not eliminate host scheduling bias.
+Normal MuJoCo platform SIMD C; O3/native ISA/LTO, FMA contraction disabled in
+both languages. Nine alternating paired samples on one logical CPU; preparation
+and checksums are outside timed regions. The shared host adds uncertainty.
+[Raw measurements, source/binary hashes and intervals](results/performance-20260930.json).
 
-Ratios below are median paired **Ada time / C time**; smaller is faster.
-The cycle consists of factorization, solve, positive update and another solve.
-It is an algebra workload, **not an integrated MuJoCo simulation step**.
+Ratios are Ada time / C time. The cycle is factor, solve, update, solve;
+it is an algebra workload, not integrated movement.
 
-| N | Factor | Solve | Update | Downdate | Algebra cycle | Cycle 95% interval |
+| N | Factor | Solve | Update | Downdate | Cycle | Cycle 95% interval |
 | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| 1 | 1.326 | 1.471 | 0.601 | 0.582 | 1.249 | 0.954–1.594 |
-| 3 | 1.387 | 0.924 | 0.753 | 0.804 | 1.100 | 0.668–1.377 |
-| 6 | 1.473 | 0.989 | 0.896 | 0.767 | 1.075 | 0.834–1.117 |
-| 12 | 1.450 | 0.914 | 0.897 | 0.914 | 1.002 | 0.976–1.062 |
-| 24 | 1.564 | 0.820 | 0.950 | 1.001 | 1.220 | 1.080–1.344 |
-| 48 | 1.613 | 0.918 | 1.062 | 1.048 | 1.228 | 1.144–1.475 |
-| 96 | 1.244 | 0.923 | 1.449 | 1.288 | 1.271 | 1.087–1.414 |
+| 1 | 2.699 | 1.816 | 0.690 | 0.765 | 1.742 | 1.489–1.928 |
+| 3 | 1.332 | 1.146 | 0.990 | 0.968 | 1.057 | 0.973–1.187 |
+| 6 | 1.294 | 1.054 | 1.022 | 1.175 | 0.905 | 0.783–1.032 |
+| 12 | 1.288 | 1.064 | 1.642 | 1.271 | 1.063 | 1.000–1.321 |
+| 24 | 1.681 | 1.062 | 1.895 | 1.920 | 1.314 | 1.230–1.507 |
+| 48 | 2.643 | 1.212 | 3.108 | 2.927 | 1.917 | 1.732–2.108 |
+| 96 | 2.184 | 1.515 | 4.057 | 4.083 | 2.459 | 2.273–2.906 |
 
-Factorization remains slower in the reproducible larger cases. Several small
-updates/downdates are faster, but those improvements do not establish aggregate
-parity: the algebra cycle is approximately 22–27% slower at N=24–96.
-At N=12 its measured interval includes parity. There is no prior implemented
-Ada Cholesky baseline in this delivery and no integrated dynamics speedup claim.
-[Raw measurements and build/source hashes](results/performance.json).
-The final shape-predicate guard change and removal of an unused initializer leave
-the entire release executable byte-identical: [binary and section hashes](results/performance-applicability.json).
-The measured source snapshot is retained with the initial algorithm proof report.
+The new explicit numeric guards are executable and the larger cases regress.
+At N=96 the measured cycle takes about 2.46x C time; this candidate is not ready
+for performance acceptance. Small cases have wider intervals; no general parity
+claim follows. Historical timings describe older source versions and do not
+apply to this one. Next performance work is to prove a sufficient stage bound
+and hoist redundant entry checks, followed by an equivalent integrated workload.
 
-## Build and integration status
-
-The standalone checked/release probes and C/Ada benchmark compile successfully.
-The default checked library project also builds against published base commit
-`89648379ce915846dc63febbeccaa434ea6fc720` in an isolated snapshot.
-An attempted build against the concurrently edited shared tree encountered
-ghost-policy errors in existing quaternion/rotation units. Those files were
-not modified by this task; the isolated baseline check avoids altering that work.
-[Library build log](results/library-build.txt).
-
-Next proof work: close model operand bounds; express admissible intermediate
-growth in caller contracts; prove the row-major frame invariants and every
-iteration against the ordered model. Next performance work: factorization
-code generation and large updates, followed by equivalent integrated workloads.
-Sparse and banded variants require separate algorithms and contracts.
+Checked/release/benchmark build logs are in results/*-build-20260930.log.
+The candidates remain separate from active dynamics. Source/evidence hashes
+are recorded in results/manifest-20260930.json.

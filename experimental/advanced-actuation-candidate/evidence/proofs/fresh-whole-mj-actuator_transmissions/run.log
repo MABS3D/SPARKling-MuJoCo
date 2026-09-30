@@ -1,0 +1,771 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-actuators-csr-20260930/verification-final/fresh-whole-mj-actuator_transmissions/build/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 105.5 s, peak group RSS 403 MB
+ info: range check proved
+--> mj-actuator_transmissions.adb:9:07
+
+ info: length check proved
+--> mj-actuator_transmissions.adb:9:35
+
+ info: loop variant proved
+--> mj-actuator_transmissions.adb:14:31
+
+ medium: array index check might fail
+--> mj-actuator_transmissions.adb:15:36
+   15 |             if A<B then B := Parents (B); else A := Parents (A); end if;
+      |                                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-actuator_transmissions.adb:15:59
+   15 |             if A<B then B := Parents (B); else A := Parents (A); end if;
+      |                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: loop variant proved
+--> mj-actuator_transmissions.adb:19:34
+
+ medium: array index check might fail
+--> mj-actuator_transmissions.adb:20:16
+   20 |                R (A) := True; A := Parents (A);
+      |                   ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:20:42
+
+ info: initialization of "Q" proved
+--> mj-actuator_transmissions.adb:28:07
+
+ info: initialization of "Axis" proved
+--> mj-actuator_transmissions.adb:29:07
+
+ info: initialization of "G" proved
+--> mj-actuator_transmissions.adb:29:13
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:34:34
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:35:35
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:35:55
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:38:51
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:40:21
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:44:32
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:45:64
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:45:75
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:45:86
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:49:39
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:51:32
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:53:32
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:53:44
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:53:55
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:53:66
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:53:72
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:57:36
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:60:29
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:61:23
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:61:34
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:61:45
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:62:24
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:62:38
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:62:50
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:62:57
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:71:42
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:74:17
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:74:35
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:74:46
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:74:64
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:74:66
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:74:66
+
+ info: loop invariant initialization proved
+--> mj-actuator_transmissions.adb:75:33
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:75:63
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:75:78
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove R.Val (J)=Moment.Val (J)*Gear
+--> mj-actuator_transmissions.adb:75:90
+   75 |             pragma Loop_Invariant (for all J in 0 .. K => R.Col (J)=Moment.Col (J) and then R.Val (J)=Moment.Val (J)*Gear);
+      |                                                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:75:97
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:75:112
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:75:114
+
+ warning: initialization of "Dense" has no effect
+--> mj-actuator_transmissions.adb:82:07
+   82 |          Dense : Dense_Row (0 .. JP'Length (2)-1) := (others => 0.0);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:82:07
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:82:33
+
+ info: length check proved
+--> mj-actuator_transmissions.adb:82:51
+
+ warning: initialization of "F" has no effect
+--> mj-actuator_transmissions.adb:83:07
+   83 |          F, T, P, Rotation, A : Vector := Zero;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "T" has no effect
+--> mj-actuator_transmissions.adb:83:07
+   83 |          F, T, P, Rotation, A : Vector := Zero;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "P" has no effect
+--> mj-actuator_transmissions.adb:83:07
+   83 |          F, T, P, Rotation, A : Vector := Zero;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "Rotation" has no effect
+--> mj-actuator_transmissions.adb:83:07
+   83 |          F, T, P, Rotation, A : Vector := Zero;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "A" has no effect
+--> mj-actuator_transmissions.adb:83:07
+   83 |          F, T, P, Rotation, A : Vector := Zero;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:91:31
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:91:67
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:91:103
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:93:29
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:94:53
+
+ medium: float overflow check might fail
+--> mj-actuator_transmissions.adb:94:59
+   94 |                   A (I) := (Reference_Orientation (0,I)*P (0)+Reference_Orientation (1,I)*P (1))+Reference_Orientation (2,I)*P (2);
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:94:87
+
+ medium: float overflow check might fail
+--> mj-actuator_transmissions.adb:94:94
+   94 |                   A (I) := (Reference_Orientation (0,I)*P (0)+Reference_Orientation (1,I)*P (1))+Reference_Orientation (2,I)*P (2);
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:94:122
+
+ medium: precondition might fail, cannot prove Bounded (A, 1.0e60)
+--> mj-actuator_transmissions.adb:96:29
+   96 |                R.Length (0) := Dot (A,(Gear (0),Gear (1),Gear (2)));
+      |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:99:25
+
+ medium: float overflow check might fail
+--> mj-actuator_transmissions.adb:102:46
+  102 |                else R.Length (0) := R.Length (0)+Dot (Rotation,(Gear (3),Gear (4),Gear (5))); end if;
+      |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-actuator_transmissions.ads:62 should mention Gear
+      --> mj-actuator_transmissions.ads:62:04
+   62 |       procedure Site (R : in out Result; Position, Reference_Position : Vector; Orientation, Reference_Orientation : Matrix;
+      |       ^
+      + provers gave up before completing the proof
+
+ medium: precondition might fail, cannot prove Bounded (B, 1.0e11)
+--> mj-actuator_transmissions.adb:102:47
+  102 |                else R.Length (0) := R.Length (0)+Dot (Rotation,(Gear (3),Gear (4),Gear (5))); end if;
+      |                                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:104:15
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:105:15
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:107:15
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:108:15
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:110:30
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:111:31
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:23
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:41
+
+ medium: precondition might fail, cannot prove Bounded (A, 1.0e60)
+--> mj-actuator_transmissions.adb:114:58
+  114 |                   Dense (J) := (if Common (J) then 0.0 else Dot ((JR (0,J)-RR (0,J),JR (1,J)-RR (1,J),JR (2,J)-RR (2,J)),A));
+      |                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 111 should mention A in a loop invariant
+  111 |             for J in Dense'Range loop
+      |                                  ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:68
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:70
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:114:72
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:77
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:79
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:86
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:88
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:114:90
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:95
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:97
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:104
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:106
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.adb:114:108
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:113
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:114:115
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:23
+
+ medium: precondition might fail, cannot prove Bounded (Force, 1.0e11)
+--> mj-actuator_transmissions.adb:116:29
+  116 |                   Dense (J) := Reference_Column ((JP (0,J),JP (1,J),JP (2,J)),(JR (0,J),JR (1,J),JR (2,J)),
+      |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  117 |                     (RP (0,J),RP (1,J),RP (2,J)),(RR (0,J),RR (1,J),RR (2,J)),F,T,Common (J),Translate,Rotate_Gear);
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:52
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:54
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:61
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:63
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:70
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:72
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:81
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:83
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:90
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:92
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:99
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:116:101
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:23
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:25
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:32
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:34
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:41
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:43
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:52
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:54
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:61
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:63
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:70
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:72
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:117:88
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:23
+
+ medium: precondition might fail, cannot prove Bounded (Force, 1.0e11)
+--> mj-actuator_transmissions.adb:119:29
+  119 |                   Dense (J) := Site_Column ((JP (0,J),JP (1,J),JP (2,J)),(JR (0,J),JR (1,J),JR (2,J)),F,T);
+      |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:47
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:49
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:56
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:58
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:65
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:67
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:76
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:78
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:85
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:87
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:94
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:119:96
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:122:51
+
+ medium: range check might fail, cannot prove upper bound for R.Row_Adr (K-1)+R.Row_N (K-1)
+--> mj-actuator_transmissions.adb:122:54
+  122 |             if K>0 then R.Row_Adr (K) := R.Row_Adr (K-1)+R.Row_N (K-1); end if;
+      |                                          ~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+      + reason for check: result of addition must fit in the target type of the assignment
+      + possible fix: loop at line 110 should mention R in a loop invariant
+  110 |          for K in 0 .. R.Nout-1 loop
+      |                                 ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:122:65
+
+ medium: precondition might fail, cannot prove Col'Length>=A'Length
+--> mj-actuator_transmissions.adb:123:10
+  123 |             Compress_Into (Dense,1.0,R.Col (R.Row_Adr (K) .. R.Col'Last),
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  124 |                            R.Val (R.Row_Adr (K) .. R.Val'Last),R.Row_N (K));
+      |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 111 should mention Dense in a loop invariant
+  111 |             for J in Dense'Range loop
+      |                                  ^
+      + provers reached time limit before completing the proof
+
+ info: non-aliasing of formal parameters "Col" and "Val" proved
+--> mj-actuator_transmissions.adb:123:36
+
+ info: non-aliasing of formal parameters "Col" and "N" proved
+--> mj-actuator_transmissions.adb:123:36
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:123:36
+
+ info: non-aliasing of formal parameters "Val" and "N" proved
+--> mj-actuator_transmissions.adb:124:26
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:124:26
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:130:37
+
+ info: initialization of "Dense" proved
+--> mj-actuator_transmissions.adb:131:07
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:131:07
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:131:44
+
+ medium: float overflow check might fail
+--> mj-actuator_transmissions.adb:136:44
+  136 |          R.Nout := 1; R.Length (0) := S.Length*Gear;
+      |                                       ~~~~~~~~^~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-actuator_transmissions.ads:76 should mention Gear
+      --> mj-actuator_transmissions.ads:76:04
+   76 |       procedure Slidercrank (R : in out Result; Axis, Displacement : Vector; Axis_Jacobian, Displacement_Jacobian : Jacobian;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:137:28
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:17
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:138:23
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:64
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:66
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:84
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:86
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:104
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:138:106
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:60
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:62
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:88
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:90
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:116
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:139:118
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:142:07
+
+ info: non-aliasing of formal parameters "Col" and "Val" proved
+--> mj-actuator_transmissions.adb:142:34
+
+ info: non-aliasing of formal parameters "Col" and "N" proved
+--> mj-actuator_transmissions.adb:142:34
+
+ info: non-aliasing of formal parameters "Val" and "N" proved
+--> mj-actuator_transmissions.adb:142:40
+
+ info: initialization of "Dense" proved
+--> mj-actuator_transmissions.adb:145:07
+
+ info: range check proved
+--> mj-actuator_transmissions.adb:145:07
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-actuator_transmissions.adb:149:28
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:149:46
+
+ info: index check proved
+--> mj-actuator_transmissions.adb:149:79
+
+ info: precondition proved
+--> mj-actuator_transmissions.adb:151:07
+
+ info: non-aliasing of formal parameters "Col" and "Val" proved
+--> mj-actuator_transmissions.adb:151:33
+
+ info: non-aliasing of formal parameters "Col" and "N" proved
+--> mj-actuator_transmissions.adb:151:33
+
+ info: non-aliasing of formal parameters "Val" and "N" proved
+--> mj-actuator_transmissions.adb:151:39
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:17:07
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:18:07
+
+ info: implicit aspect Always_Terminates on "Valid_Row" has been proved, subprogram will terminate
+--> mj-actuator_transmissions.ads:20:13
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:21:31
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:21:43
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:21:52
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:22:16
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:22:33
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:22:50
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:22:71
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:23:16
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:23:33
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:23:50
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:23:71
+
+ info: postcondition proved
+--> mj-actuator_transmissions.ads:26:14
+
+ info: implicit aspect Always_Terminates on "Is_Ancestor" has been proved, subprogram will terminate
+--> mj-actuator_transmissions.ads:30:13
+
+ info: precondition proved
+--> mj-actuator_transmissions.ads:31:63
+
+ info: subprogram variant proved
+--> mj-actuator_transmissions.ads:31:63
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:31:102
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:34:49
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:35:59
+
+ info: overflow check proved
+--> mj-actuator_transmissions.ads:35:82
+
+ info: implicit aspect Always_Terminates on "Common_Ancestors" has been proved, subprogram will terminate
+--> mj-actuator_transmissions.ads:38:13
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:40:48
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:40:100
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:41:57
+
+ info: overflow check proved
+--> mj-actuator_transmissions.ads:41:80
+
+ medium: postcondition might fail, cannot prove Common_Ancestors'Result (K)= (Is_Ancestor (Parents,K,First) and then Is_Ancestor (Parents,K,Second))
+--> mj-actuator_transmissions.ads:43:67
+   43 |       pragma Postcondition (Static => (for all K in Parents'Range => Common_Ancestors'Result (K)=
+      |                                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   44 |         (Is_Ancestor (Parents,K,First) and then Is_Ancestor (Parents,K,Second))));
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:43:92
+
+ info: precondition proved
+--> mj-actuator_transmissions.ads:44:07
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:44:28
+
+ info: precondition proved
+--> mj-actuator_transmissions.ads:44:46
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:44:67
+
+ medium: postcondition might fail, cannot prove Valid_Row (R,K,NV)
+--> mj-actuator_transmissions.ads:52:58
+   52 |           and then (for all K in 0 .. Integer (R.Nout)-1 => Valid_Row (R,K,NV))
+      |                                                             ^~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.ads:54:69
+
+ info: range check proved
+--> mj-actuator_transmissions.ads:56:18
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:56:132
+
+ info: postcondition proved
+--> mj-actuator_transmissions.ads:57:14
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.ads:58:33
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:60:67
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:60:82
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:61:67
+
+ info: index check proved
+--> mj-actuator_transmissions.ads:61:82
+
+ info: float overflow check proved
+--> mj-actuator_transmissions.ads:61:84
+
+ info: overflow check proved
+--> mj-actuator_transmissions.ads:66:40
+gnatprove: unproved check messages considered as errors

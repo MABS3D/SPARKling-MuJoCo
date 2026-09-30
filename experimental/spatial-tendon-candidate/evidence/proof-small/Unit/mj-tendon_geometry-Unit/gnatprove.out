@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+--------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                         Provers   Justified   Unproved
+--------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 .         .                                               .           .          .
+Flow Dependencies                 .         .                                               .           .          .
+Initialization                    .         .                                               .           .          .
+Non-Aliasing                      .         .                                               .           .          .
+Run-time Checks                   4         .                            4 (CVC5 75%, Z3 25%)           .          .
+Assertions                        .         .                                               .           .          .
+Functional Contracts              6         .    6 (CVC5 44%, Trivial 2%, Z3 48%, altergo 6%)           .          .
+LSP Verification                  .         .                                               .           .          .
+Termination                       1         1                                               .           .          .
+Concurrency                       .         .                                               .           .          .
+--------------------------------------------------------------------------------------------------------------------
+Total                            11    1 (9%)                                        10 (91%)           .          .
+
+
+max steps used for successful proof: 37234
+
+============================
+Most difficult proved checks
+============================
+
+mj-tendon_geometry.ads:22:14: postcondition proved in max 5 seconds
+mj-tendon_geometry.ads:25:13: precondition proved in max 1 seconds
+mj-tendon_geometry.ads:25:29: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-tendon_geometry, 1 subprograms and packages out of 1 analyzed
+  MJ.Tendon_Geometry.Unit at mj-tendon_geometry.ads:20 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)

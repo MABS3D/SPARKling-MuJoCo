@@ -1,0 +1,20 @@
+project Benchmark is
+   Build_Root := external ("MUSCLE_BUILD_ROOT", "/var/tmp/sparkling-muscle-20260930/build");
+   Reference_Root := external ("MUSCLE_REFERENCE_ROOT", "/var/tmp/sparkling-muscle-20260930/reference");
+   Include_Root := Benchmark'Project_Dir & "../../mujoco/include";
+   for Languages use ("Ada", "C");
+   for Source_Dirs use ("src", "../../src", "tests", Reference_Root);
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-muscle_kernels.ads", "mj-muscle_kernels.adb",
+     "mj-muscle_actuation.ads", "mj-muscle_actuation.adb", "muscle_bench.adb", "muscle_reference.c");
+   for Main use ("muscle_bench.adb");
+   for Object_Dir use Build_Root & "/benchmark/obj";
+   for Exec_Dir use Build_Root & "/benchmark/bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-O3", "-gnatp", "-gnatn", "-march=native", "-flto", "-ffp-contract=off");
+      for Default_Switches ("C") use ("-std=c11", "-D_POSIX_C_SOURCE=200809L", "-O3", "-march=native", "-flto", "-ffat-lto-objects", "-ffp-contract=off", "-I" & Include_Root);
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-flto", "-ffp-contract=off");
+   end Linker;
+end Benchmark;

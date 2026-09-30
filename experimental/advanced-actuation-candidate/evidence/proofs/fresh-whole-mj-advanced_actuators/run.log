@@ -1,0 +1,1853 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-actuators-csr-20260930/verification-final/fresh-whole-mj-advanced_actuators/build/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 307.6 s, peak group RSS 403 MB
+ info: initialization of "R" proved
+--> mj-advanced_actuators.adb:5:07
+
+ info: range check proved
+--> mj-advanced_actuators.adb:7:38
+
+ info: range check proved
+--> mj-advanced_actuators.adb:7:52
+
+ info: range check proved
+--> mj-advanced_actuators.adb:8:43
+
+ info: range check proved
+--> mj-advanced_actuators.adb:8:57
+
+ info: range check proved
+--> mj-advanced_actuators.adb:9:45
+
+ info: range check proved
+--> mj-advanced_actuators.adb:9:59
+
+ info: range check proved
+--> mj-advanced_actuators.adb:10:41
+
+ info: range check proved
+--> mj-advanced_actuators.adb:10:55
+
+ info: range check proved
+--> mj-advanced_actuators.adb:11:41
+
+ info: range check proved
+--> mj-advanced_actuators.adb:11:55
+
+ info: range check proved
+--> mj-advanced_actuators.adb:15:37
+
+ info: division check proved
+--> mj-advanced_actuators.adb:15:37
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:15:37
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:16:24
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:16:38
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:16:47
+   16 |       begin return Coulomb+(Static_Force-Coulomb)*Math.Exp ((-Ratio)*Ratio); end Stribeck;
+      |                            ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: subprogram at mj-advanced_actuators.ads:24 should mention Coulomb and Static_Force in a precondition
+      --> mj-advanced_actuators.ads:24:04
+   24 |       function Stribeck (Speed, Coulomb, Static_Force, Transition_Speed : Input) return Real;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ low: overflow check might fail
+--> mj-advanced_actuators.adb:16:52
+   16 |       begin return Coulomb+(Static_Force-Coulomb)*Math.Exp ((-Ratio)*Ratio); end Stribeck;
+      |                                                   ~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: value must fit in a 64-bits machine integer
+      + possible explanation: the check might be unprovable due to proof limitations; use --info for more information
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:16:66
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:18:27
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:18:39
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:18:44
+   18 |       begin return Activation+(Derivative*Tau)*(1.0-Math.Exp (-H/Tau)); end Filter_Next;
+      |                               ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:25 should mention H and Tau
+      --> mj-advanced_actuators.ads:25:04
+   25 |       function Filter_Next (Activation : Input; Derivative : Scalar; H, Tau : Positive_Real) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:18:49
+   18 |       begin return Activation+(Derivative*Tau)*(1.0-Math.Exp (-H/Tau)); end Filter_Next;
+      |                                                 ~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:25 should mention H and Tau
+      --> mj-advanced_actuators.ads:25:04
+   25 |       function Filter_Next (Activation : Input; Derivative : Scalar; H, Tau : Positive_Real) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ low: overflow check might fail
+--> mj-advanced_actuators.adb:18:54
+   18 |       begin return Activation+(Derivative*Tau)*(1.0-Math.Exp (-H/Tau)); end Filter_Next;
+      |                                                     ~~~~^~~~~~~~~~~~
+      + reason for check: value must fit in a 64-bits machine integer
+      + possible explanation: the check might be unprovable due to proof limitations; use --info for more information
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:18:62
+
+ info: division check proved
+--> mj-advanced_actuators.adb:18:62
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:21:37
+
+ info: range check proved
+--> mj-advanced_actuators.adb:21:48
+
+ info: division check proved
+--> mj-advanced_actuators.adb:21:48
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:21:48
+
+ info: range check proved
+--> mj-advanced_actuators.adb:22:32
+
+ low: overflow check might fail
+--> mj-advanced_actuators.adb:22:32
+   22 |          E : constant Real := Math.Exp (A*H);
+      |                               ~~~~^~~~~~~~~
+      + reason for check: value must fit in a 64-bits machine integer
+      + possible explanation: the check might be unprovable due to proof limitations; use --info for more information
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:22:39
+   22 |          E : constant Real := Math.Exp (A*H);
+      |                                         ~^~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:27 should mention Bias and H and Speed
+      --> mj-advanced_actuators.ads:27:04
+   27 |       function Bristle_Next (Activation, Speed : Input; H : Positive_Real; Dyn, Bias : Parameters) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:23:53
+
+ info: division check proved
+--> mj-advanced_actuators.adb:23:58
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:23:58
+   23 |          I : constant Real := (if abs A>Min_Val then (E-1.0)/A else H);
+      |                                                      ~~~~~~~^~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:27 should mention Bias and H and Speed
+      --> mj-advanced_actuators.ads:27:04
+   27 |       function Bristle_Next (Activation, Speed : Input; H : Positive_Real; Dyn, Bias : Parameters) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:24:18
+   24 |       begin return E*Activation+I*Speed; end Bristle_Next;
+      |                    ~^~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:27 should mention Activation
+      --> mj-advanced_actuators.ads:27:04
+   27 |       function Bristle_Next (Activation, Speed : Input; H : Positive_Real; Dyn, Bias : Parameters) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:24:29
+   24 |       begin return E*Activation+I*Speed; end Bristle_Next;
+      |                    ~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:27 should mention Activation and Speed
+      --> mj-advanced_actuators.ads:27:04
+   27 |       function Bristle_Next (Activation, Speed : Input; H : Positive_Real; Dyn, Bias : Parameters) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:24:31
+   24 |       begin return E*Activation+I*Speed; end Bristle_Next;
+      |                                 ~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:27 should mention Speed
+      --> mj-advanced_actuators.ads:27:04
+   27 |       function Bristle_Next (Activation, Speed : Input; H : Positive_Real; Dyn, Bias : Parameters) return Real with
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: initialization of "R" proved
+--> mj-advanced_actuators.adb:28:07
+
+ info: initialization of "Ref" proved
+--> mj-advanced_actuators.adb:30:07
+
+ info: range check proved
+--> mj-advanced_actuators.adb:34:56
+
+ info: range check proved
+--> mj-advanced_actuators.adb:34:76
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:35:42
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:35:50
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:35:73
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:35:81
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:36:33
+
+ info: division check proved
+--> mj-advanced_actuators.adb:36:45
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:36:45
+   36 |             R.Slew_Dot := (Position-Slew_State)/H;
+      |                           ~~~~~~~~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention H and Slew_State
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:41:33
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:42:58
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:42:65
+   42 |          if Period>0.0 then R.Integral_Dot := R.Integral_Dot-Period*Real'Rounding (R.Integral_Dot/Period); end if;
+      |                                                              ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:42:95
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:42:95
+   42 |          if Period>0.0 then R.Integral_Dot := R.Integral_Dot-Period*Real'Rounding (R.Integral_Dot/Period); end if;
+      |                                                                                    ~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:48:37
+   48 |             R.Next_Integral := Integral+R.Integral_Dot*H;
+      |                                ~~~~~~~~^~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention H
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:48:52
+   48 |             R.Next_Integral := Integral+R.Integral_Dot*H;
+      |                                         ~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention H
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:53:41
+   53 |          if Period>0.0 then Ref := Position-Period*Real'Rounding ((Position-Length)/Period); end if;
+      |                                    ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Length
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:53:48
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:53:73
+
+ info: division check proved
+--> mj-advanced_actuators.adb:53:81
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:53:81
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:54:28
+   54 |          R.Force := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                       ~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Bias
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:54:32
+   54 |          R.Force := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                     ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Bias
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:54:41
+   54 |          R.Force := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                                    ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Bias
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:55:10
+   54 |          R.Force := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   55 |             +(if U.Has_Feedforward then U.Feedforward else 0.0);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Bias
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:56:46
+   56 |          if Gain (0)>0.0 then R.Force := R.Force+Gain (0)*Integral; end if;
+      |                                          ~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Gain
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:56:55
+   56 |          if Gain (0)>0.0 then R.Force := R.Force+Gain (0)*Integral; end if;
+      |                                                  ~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Gain
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:57:25
+   57 |          R.Force := R.Force+Affine (Bias,Length,Speed);
+      |                     ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:65 should mention Bias and Length and Speed
+      --> mj-advanced_actuators.ads:65:04
+   65 |       function PID (U : Servo_Input; Length, Speed, Slew_State, Integral_State : Input;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: initialization of "R" proved
+--> mj-advanced_actuators.adb:64:07
+
+ warning: initialization of "Current" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "Resistance" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "G" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "A" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "Z" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "Torque" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: initialization of "Raw" has no effect
+--> mj-advanced_actuators.adb:66:07
+   66 |          Integral, Temperature, Current, Resistance, G, A, Z, Torque, Raw : Real := 0.0;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-advanced_actuators.adb:68:23
+
+ info: index check proved
+--> mj-advanced_actuators.adb:70:45
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:70:51
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:70:59
+
+ info: index check proved
+--> mj-advanced_actuators.adb:70:85
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:70:91
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:70:99
+
+ info: index check proved
+--> mj-advanced_actuators.adb:71:18
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:71:37
+   71 |             R.Dot (S.Slew) := (Position-Activation (S.Slew))/H;
+      |                               ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:71:51
+
+ info: division check proved
+--> mj-advanced_actuators.adb:71:58
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:71:58
+   71 |             R.Dot (S.Slew) := (Position-Activation (S.Slew))/H;
+      |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention H
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail
+--> mj-advanced_actuators.adb:71:58
+   71 |             R.Dot (S.Slew) := (Position-Activation (S.Slew))/H;
+      |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      + reason for check: result of division must fit in the target type of the assignment
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention H
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:75:35
+
+ info: index check proved
+--> mj-advanced_actuators.adb:76:18
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:76:40
+
+ medium: range check might fail
+--> mj-advanced_actuators.adb:76:40
+   76 |             R.Dot (S.Integral) := Position-Length;
+      |                                   ~~~~~~~~^~~~~~~
+      + reason for check: result of subtraction must fit in the target type of the assignment
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Length
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:78:47
+
+ info: range check proved
+--> mj-advanced_actuators.adb:78:65
+
+ info: index check proved
+--> mj-advanced_actuators.adb:78:79
+
+ info: index check proved
+--> mj-advanced_actuators.adb:79:51
+
+ info: range check proved
+--> mj-advanced_actuators.adb:79:69
+
+ info: index check proved
+--> mj-advanced_actuators.adb:79:83
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:30
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                         ~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Length
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:85:40
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:48
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Length and Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:57
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                                                    ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:103
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:111
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Length and Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:85:120
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                                                                                                                   ~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:86:12
+   85 |             Torque := ((Gain (4)*(Position-Length)+Gain (6)*((if U.Has_Velocity then U.Velocity else 0.0)-Speed))+Gain (5)*Integral)
+      |                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   86 |               +(if U.Has_Feedforward then U.Feedforward else 0.0);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Length and Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:87:26
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:87:26
+   87 |             Raw := (Gain (0)/Gain (1))*Torque+Gain (1)*Speed;
+      |                    ~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:87:36
+   87 |             Raw := (Gain (0)/Gain (1))*Torque+Gain (1)*Speed;
+      |                    ~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:87:43
+   87 |             Raw := (Gain (0)/Gain (1))*Torque+Gain (1)*Speed;
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:87:52
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:89:26
+   89 |             R.Voltage := Raw+(if U.Has_Voltage then U.Voltage else 0.0);
+      |                          ~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:93:38
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:94:34
+   94 |             Resistance := Resistance*(1.0+Gain (2)*((Temperature+Dyn (4))-Gain (3)));
+      |                           ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:94:39
+   94 |             Resistance := Resistance*(1.0+Gain (2)*((Temperature+Dyn (4))-Gain (3)));
+      |                                       ~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:94:48
+   94 |             Resistance := Resistance*(1.0+Gain (2)*((Temperature+Dyn (4))-Gain (3)));
+      |                                           ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:94:62
+   94 |             Resistance := Resistance*(1.0+Gain (2)*((Temperature+Dyn (4))-Gain (3)));
+      |                                                     ~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:94:71
+   94 |             Resistance := Resistance*(1.0+Gain (2)*((Temperature+Dyn (4))-Gain (3)));
+      |                                                    ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: unexpected exception might be raised
+--> mj-advanced_actuators.adb:97:31
+   97 |          if Resistance<=0.0 then raise Constraint_Error with "non-positive thermal resistance"; end if;
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: "DC" allows propagating no exceptions
+      + possible explanation: "Constraint_Error" might be unexpectedly raised
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:98:53
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:98:78
+   98 |          Current := (if S.Current>=0 then Activation (S.Current) else (R.Voltage-Gain (1)*Speed)/Resistance);
+      |                                                                       ~~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:98:87
+
+ info: division check proved
+--> mj-advanced_actuators.adb:98:94
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:98:94
+   98 |          Current := (if S.Current>=0 then Activation (S.Current) else (R.Voltage-Gain (1)*Speed)/Resistance);
+      |                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:100:18
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:100:47
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                       ~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:100:56
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                       ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:100:64
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:100:76
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:100:76
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                                                    ~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:100:85
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:100:85
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers gave up before completing the proof
+
+ medium: range check might fail
+--> mj-advanced_actuators.adb:100:85
+  100 |             R.Dot (S.Temperature) := ((Resistance*Current)*Current-Temperature/Dyn (2))/Dyn (3);
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of division must fit in the target type of the assignment
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:104:24
+  104 |             A := (-Dyn (5)*abs Speed)/Real'Max (Min_Val,G);
+      |                    ~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:104:35
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:104:35
+  104 |             A := (-Dyn (5)*abs Speed)/Real'Max (Min_Val,G);
+      |                  ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:105:28
+
+ info: index check proved
+--> mj-advanced_actuators.adb:106:18
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:106:32
+  106 |             R.Dot (S.Bristle) := A*Z+Speed;
+      |                                  ~^~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:106:34
+  106 |             R.Dot (S.Bristle) := A*Z+Speed;
+      |                                  ~~~^~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail
+--> mj-advanced_actuators.adb:106:34
+  106 |             R.Dot (S.Bristle) := A*Z+Speed;
+      |                                  ~~~^~~~~~
+      + reason for check: result of addition must fit in the target type of the assignment
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:109:18
+
+ info: division check proved
+--> mj-advanced_actuators.adb:109:42
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:109:42
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                    ~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:109:53
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:109:63
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:109:63
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                                         ~~~~~~~~~^~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:109:75
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                                         ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:109:82
+
+ info: division check proved
+--> mj-advanced_actuators.adb:109:91
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:109:91
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail
+--> mj-advanced_actuators.adb:109:91
+  109 |             R.Dot (S.Current) := ((R.Voltage/Resistance-(Gain (1)/Resistance)*Speed)-Current)/Dyn (0);
+      |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of division must fit in the target type of the assignment
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Speed
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:110:38
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:110:51
+
+ info: index check proved
+--> mj-advanced_actuators.adb:110:66
+
+ info: range check proved
+--> mj-advanced_actuators.adb:110:76
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-advanced_actuators.adb:112:37
+
+ medium: precondition might fail
+--> mj-advanced_actuators.adb:113:44
+  113 |             if K=S.Current then R.Next (K) := Filter_Next (Activation (K),R.Dot (K),H,Real'Max (Min_Val,Dyn (0)));
+      |                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-advanced_actuators.adb:113:88
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:114:47
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:116:41
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:116:51
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:122:29
+  122 |             R.Force := Gain (1)*(if Actearly then R.Next (S.Current) else Current);
+      |                        ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.adb:122:57
+
+ medium: divide by zero might fail
+--> mj-advanced_actuators.adb:125:30
+  125 |             R.Force := (Gain (1)/R.Resistance)*R.Voltage;
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:125:30
+  125 |             R.Force := (Gain (1)/R.Resistance)*R.Voltage;
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:125:44
+  125 |             R.Force := (Gain (1)/R.Resistance)*R.Voltage;
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:126:28
+  126 |             R.Force := R.Force-((Gain (1)/R.Resistance)*Gain (1))*Speed;
+      |                        ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.adb:126:39
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:126:39
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:126:53
+  126 |             R.Force := R.Force-((Gain (1)/R.Resistance)*Gain (1))*Speed;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:126:63
+  126 |             R.Force := R.Force-((Gain (1)/R.Resistance)*Gain (1))*Speed;
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:129:47
+  129 |          if Bias (0)/=0.0 then R.Force := R.Force+Bias (0)*Math.Sin (Bias (1)*Length+Bias (2)); end if;
+      |                                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:129:56
+  129 |          if Bias (0)/=0.0 then R.Force := R.Force+Bias (0)*Math.Sin (Bias (1)*Length+Bias (2)); end if;
+      |                                                   ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at mj-advanced_actuators.ads:132 should mention Bias and Length
+      --> mj-advanced_actuators.ads:132:04
+  132 |       function DC (U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:129:75
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:129:82
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.adb:130:46
+  130 |          if S.Bristle>=0 then R.Force := R.Force-(Dyn (5)*Activation (S.Bristle)+Dyn (6)*R.Dot (S.Bristle)); end if;
+      |                                          ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: loop at line 112 should mention R in a loop invariant
+  112 |          for K in 0 .. Integer (S.N)-1 loop
+      |                                        ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:130:55
+
+ info: index check proved
+--> mj-advanced_actuators.adb:130:69
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:130:78
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:130:86
+
+ info: index check proved
+--> mj-advanced_actuators.adb:130:95
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:135:85
+
+ info: float overflow check proved
+--> mj-advanced_actuators.adb:136:08
+
+ info: implicit aspect Always_Terminates on "SO3_Core" has been proved, subprogram will terminate
+--> mj-advanced_actuators.adb:137:13
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:141:54
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:142:37
+
+ info: initialization of "Force" proved
+--> mj-advanced_actuators.adb:143:07
+
+ medium: precondition might fail, cannot prove Bounded (Error,1.0e10)
+--> mj-advanced_actuators.adb:145:36
+  145 |          Force := MJ.Actuator_Geometry.SO3_Force (Error,Speed,Gain (0),Bias (0),Bias (2));
+      |                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail
+--> mj-advanced_actuators.adb:146:56
+  146 |          if Force_Limited then return MJ.Actuator_Geometry.Limit_Norm (Force,Limit); end if;
+      |                                       ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:152:14
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:152:44
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:157:14
+
+ info: precondition proved
+--> mj-advanced_actuators.adb:157:44
+
+ info: implicit aspect Always_Terminates on "Slots" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:16:13
+
+ info: postcondition proved
+--> mj-advanced_actuators.ads:17:14
+
+ info: implicit aspect Always_Terminates on "Stribeck" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:24:13
+
+ info: implicit aspect Always_Terminates on "Filter_Next" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:25:13
+
+ info: implicit aspect Always_Terminates on "Bristle_Next" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:27:13
+
+ info: implicit aspect Always_Terminates on "Effective_Position" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:33:16
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:38:25
+   38 |                         Raw-Period*Real'Rounding ((Raw-Previous)/Period) else Raw);
+      |                         ~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 33 should mention Previous and U
+   33 |          function Effective_Position (U : Servo_Input; Previous : Input; H : Positive_Real;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:38:32
+   38 |                         Raw-Period*Real'Rounding ((Raw-Previous)/Period) else Raw);
+      |                             ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 33 should mention Previous and U
+   33 |          function Effective_Position (U : Servo_Input; Previous : Input; H : Positive_Real;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:38:52
+
+ info: division check proved
+--> mj-advanced_actuators.ads:38:62
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:38:62
+   38 |                         Raw-Period*Real'Rounding ((Raw-Previous)/Period) else Raw);
+      |                                                   ~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 33 should mention Previous and U
+   33 |          function Effective_Position (U : Servo_Input; Previous : Input; H : Positive_Real;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:39:36
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:39:41
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:39:62
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:39:67
+
+ info: implicit aspect Always_Terminates on "Integral_Dot" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:41:16
+
+ info: range check proved
+--> mj-advanced_actuators.ads:43:49
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:43:49
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:44:68
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:44:75
+   44 |                     Wrapped : constant Real := (if Period>0.0 then Err-Period*Real'Rounding (Err/Period) else Err);
+      |                                                                        ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 41 should mention Length
+   41 |          function Integral_Dot (Position : Real; Length, Integral, Limit : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:44:94
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:44:94
+
+ info: implicit aspect Always_Terminates on "PID_Law" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:48:16
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:51:31
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:53:72
+
+ info: division check proved
+--> mj-advanced_actuators.ads:53:82
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:53:82
+   53 |             and then R.Slew_Dot=(if Dyn (1)>0.0 then (R.Effective_Position-Previous)/H else 0.0)
+      |                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention H and Previous and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:54:56
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:55:65
+   55 |             and then R.Next_Integral=(if Gain (0)>0.0 then Integral+R.Integral_Dot*H else Integral)
+      |                                                            ~~~~~~~~^~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention H and Integral and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:55:80
+   55 |             and then R.Next_Integral=(if Gain (0)>0.0 then Integral+R.Integral_Dot*H else Integral)
+      |                                                                     ~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention H and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:57:43
+   57 |                          R.Effective_Position-Period*Real'Rounding ((R.Effective_Position-Length)/Period) else R.Effective_Position);
+      |                          ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Length and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:57:50
+   57 |                          R.Effective_Position-Period*Real'Rounding ((R.Effective_Position-Length)/Period) else R.Effective_Position);
+      |                                               ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Length and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:57:87
+   57 |                          R.Effective_Position-Period*Real'Rounding ((R.Effective_Position-Length)/Period) else R.Effective_Position);
+      |                                                                     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Length and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:57:95
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:57:95
+   57 |                          R.Effective_Position-Period*Real'Rounding ((R.Effective_Position-Length)/Period) else R.Effective_Position);
+      |                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Length and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:59:63
+   59 |                                Feed : constant Real := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                                                          ~~~~~~~~^~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Bias and Length and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:59:67
+   59 |                                Feed : constant Real := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                                                        ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Bias and Length and R and U
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:59:76
+   59 |                                Feed : constant Real := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                                                                       ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Bias and U
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-advanced_actuators.ads:60:31
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:60:31
+   59 |                                Feed : constant Real := (-Bias (1)*Ref-Bias (2)*(if U.Has_Velocity then U.Velocity else 0.0))
+      |                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   60 |                                  +(if U.Has_Feedforward then U.Feedforward else 0.0);
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Bias and Length and R and U
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:61:39
+   61 |                       begin R.Force=(Feed+(if Gain (0)>0.0 then Gain (0)*Drive else 0.0))
+      |                                     ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Actearly and Bias and Gain and Integral and Length and R and U
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:61:70
+   61 |                       begin R.Force=(Feed+(if Gain (0)>0.0 then Gain (0)*Drive else 0.0))
+      |                                                                 ~~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Actearly and Gain and Integral and R
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:62:22
+   61 |                       begin R.Force=(Feed+(if Gain (0)>0.0 then Gain (0)*Drive else 0.0))
+      |                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   62 |                         +((Bias (0)+Bias (1)*Length)+Bias (2)*Speed)))
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 48 should mention Actearly and Bias and Gain and Integral and Length and R and Speed and U
+   48 |          function PID_Law (R : PID_Result; U : Servo_Input; Length, Speed, Previous, Integral : Input;
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:62:33
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:62:42
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:62:50
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:62:59
+
+ info: implicit aspect Always_Terminates on "PID" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:65:13
+
+ medium: postcondition might fail, cannot prove R.Effective_Position=Effective_Position (U,Previous,H,Period,Dyn (1))
+--> mj-advanced_actuators.ads:70:36
+   70 |       pragma Postcondition (Static => Model.PID_Law (PID'Result,U,Length,Speed,Slew_State,Integral_State,H,Period,Dyn,Gain,Bias,Actearly));
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-advanced_actuators.ads:51
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:70:41
+
+ info: implicit aspect Always_Terminates on "Raw_Resistance" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:77:13
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:78:35
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:78:40
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:78:49
+
+ info: index check proved
+--> mj-advanced_actuators.ads:78:80
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:78:93
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:78:102
+
+ info: implicit aspect Always_Terminates on "DC_Force_Law" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:79:13
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:82:73
+
+ info: index check proved
+--> mj-advanced_actuators.ads:82:101
+
+ info: index check proved
+--> mj-advanced_actuators.ads:82:129
+
+ info: division check proved
+--> mj-advanced_actuators.ads:83:31
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:83:31
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:83:45
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:83:55
+   83 |                    else (Gain (1)/R.Resistance)*R.Voltage-((Gain (1)/R.Resistance)*Gain (1))*Speed);
+      |                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 79 should mention Gain and Speed
+   79 |       function DC_Force_Law (R : DC_Result; Activation : State; Length, Speed : Input; Dyn, Gain, Bias : Parameters;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:83:66
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:83:66
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:83:80
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:83:90
+   83 |                    else (Gain (1)/R.Resistance)*R.Voltage-((Gain (1)/R.Resistance)*Gain (1))*Speed);
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 79 should mention Gain and Speed
+   79 |       function DC_Force_Law (R : DC_Result; Activation : State; Length, Speed : Input; Dyn, Gain, Bias : Parameters;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-advanced_actuators.ads:85:48
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:85:48
+   85 |                  Cogged : constant Real := Clamped+(if Bias (0)/=0.0 then Bias (0)*Math.Sin (Bias (1)*Length+Bias (2)) else 0.0);
+      |                                            ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 79 should mention Actearly and Activation and Bias and Dyn and Gain and Length and Limit_Force and Lower and Speed and Upper
+   79 |       function DC_Force_Law (R : DC_Result; Activation : State; Length, Speed : Input; Dyn, Gain, Bias : Parameters;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:85:80
+   85 |                  Cogged : constant Real := Clamped+(if Bias (0)/=0.0 then Bias (0)*Math.Sin (Bias (1)*Length+Bias (2)) else 0.0);
+      |                                                                           ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 79 should mention Bias and Length
+   79 |       function DC_Force_Law (R : DC_Result; Activation : State; Length, Speed : Input; Dyn, Gain, Bias : Parameters;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:85:99
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:85:106
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:86:19
+   86 |          begin Cogged-(if S.Bristle>=0 then Dyn (5)*Activation (S.Bristle)+Dyn (6)*R.Dot (S.Bristle) else 0.0))
+      |                ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 79 should mention Actearly and Activation and Bias and Dyn and Gain and Length and Limit_Force and Lower and Speed and Upper
+   79 |       function DC_Force_Law (R : DC_Result; Activation : State; Length, Speed : Input; Dyn, Gain, Bias : Parameters;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:86:49
+
+ info: index check proved
+--> mj-advanced_actuators.ads:86:63
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:86:72
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:86:80
+
+ info: index check proved
+--> mj-advanced_actuators.ads:86:89
+
+ info: implicit aspect Always_Terminates on "DC_Law" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:91:13
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:100:44
+
+ info: index check proved
+--> mj-advanced_actuators.ads:100:99
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:102:52
+
+ info: range check proved
+--> mj-advanced_actuators.ads:103:13
+
+ info: index check proved
+--> mj-advanced_actuators.ads:104:91
+
+ medium: precondition might fail, cannot prove X in -1.0e190 .. 1.0e190
+--> mj-advanced_actuators.ads:107:26
+  107 |            and then R.Force=DC_Force_Law (R,Activation,Length,Speed,Dyn,Gain,Bias,Actearly,Limit_Force,Lower,Upper)
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:109:50
+  109 |              (if K=S.Slew then (R.Effective_Position-Activation (K))/H
+      |                                ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:109:66
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:109:66
+  109 |              (if K=S.Slew then (R.Effective_Position-Activation (K))/H
+      |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention H
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail, cannot prove Position in -1.0e28 .. 1.0e28
+--> mj-advanced_actuators.ads:110:41
+  110 |               elsif K=S.Integral then Model.Integral_Dot (R.Effective_Position,Length,Activation (K),Dyn (8),0.0)
+      |                                       ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.ads:112:79
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:112:104
+  112 |                 (declare I : constant Real := (if S.Current>=0 then Activation (S.Current) else (R.Voltage-Gain (1)*Speed)/RR);
+      |                                                                                                 ~~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers gave up before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:112:113
+
+ info: division check proved
+--> mj-advanced_actuators.ads:112:120
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:112:120
+  112 |                 (declare I : constant Real := (if S.Current>=0 then Activation (S.Current) else (R.Voltage-Gain (1)*Speed)/RR);
+      |                                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:113:25
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                         ~~~^~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:113:28
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                         ~~~~~~^~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers gave up before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:113:30
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:113:45
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:113:45
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                                  ~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers gave up before completing the proof
+
+ medium: divide by zero might fail
+--> mj-advanced_actuators.ads:113:54
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:113:54
+  113 |                  begin ((RR*I)*I-Activation (K)/Dyn (2))/Dyn (3))
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:114:45
+  114 |               elsif K=S.Bristle then ((-Dyn (5)*abs Speed)/Real'Max (Min_Val,Stribeck (Speed,Bias (3),Bias (4),Bias (5))))*Activation (K)+Speed
+      |                                         ~~~~~~~^~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:114:56
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:114:56
+  114 |               elsif K=S.Bristle then ((-Dyn (5)*abs Speed)/Real'Max (Min_Val,Stribeck (Speed,Bias (3),Bias (4),Bias (5))))*Activation (K)+Speed
+      |                                      ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Bias and Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:114:120
+  114 |               elsif K=S.Bristle then ((-Dyn (5)*abs Speed)/Real'Max (Min_Val,Stribeck (Speed,Bias (3),Bias (4),Bias (5))))*Activation (K)+Speed
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Bias and Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:114:135
+  114 |               elsif K=S.Bristle then ((-Dyn (5)*abs Speed)/Real'Max (Min_Val,Stribeck (Speed,Bias (3),Bias (4),Bias (5))))*Activation (K)+Speed
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Bias and Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:116:59
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:59
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                     ~~~~~~~~~^~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:62
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                    ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: division check proved
+--> mj-advanced_actuators.ads:116:72
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:72
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                                  ~~~~~~~~~^~~~
+      + reason for check: result of floating-point division must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:76
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                                  ~~~~~~~~~~~~~^~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:83
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-advanced_actuators.ads:116:99
+
+ info: division check proved
+--> mj-advanced_actuators.ads:116:99
+
+ medium: float overflow check might fail
+--> mj-advanced_actuators.ads:116:99
+  116 |                 (declare Dot_I : constant Real := ((R.Voltage/RR-(Gain (1)/RR)*Speed)-Activation (K))/Dyn (0);
+      |                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+      + reason for check: result of floating-point division must be bounded
+      + possible fix: precondition of subprogram at line 91 should mention Speed
+   91 |       function DC_Law (R : DC_Result; U : Servo_Input; Length, Speed : Input; Activation : State;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-advanced_actuators.ads:120:32
+
+ medium: range check might fail
+--> mj-advanced_actuators.ads:120:76
+  120 |              (if K=S.Current then Filter_Next (Activation (K),R.Dot (K),H,Real'Max (Min_Val,Dyn (0)))
+      |                                                                           ~~~~^~~~~~~~~~~~~~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail
+--> mj-advanced_actuators.ads:121:35
+  121 |               elsif K=S.Bristle then Bristle_Next (Activation (K),Speed,H,Dyn,Bias)
+      |                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:123:62
+
+ info: range check proved
+--> mj-advanced_actuators.ads:123:62
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:123:72
+
+ info: index check proved
+--> mj-advanced_actuators.ads:131:63
+
+ info: implicit aspect Always_Terminates on "DC" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:132:13
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:141:46
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:141:51
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:141:60
+
+ info: index check proved
+--> mj-advanced_actuators.ads:141:91
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:141:104
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:141:113
+
+ medium: postcondition might fail, cannot prove DC'Result.Dot (Slots (Dyn,Gain).Current) in -1.0e100 .. 1.0e100
+--> mj-advanced_actuators.ads:142:57
+  142 |       pragma Postcondition (Static => (if Dyn (0)>0.0 then DC'Result.Dot (Slots (Dyn,Gain).Current) in -1.0e100 .. 1.0e100)
+      |                                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-advanced_actuators.ads:142:88
+
+ medium: precondition might fail, cannot prove Raw_Resistance (Activation,Dyn,Gain)>=Min_Val
+--> mj-advanced_actuators.ads:143:15
+  143 |         and then DC_Law (DC'Result,U,Length,Speed,Activation,H,Dyn,Gain,Bias,Actearly,Force_Limited,Lower,Upper));
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Muscle_Force" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:144:13
+
+ medium: postcondition might fail
+--> mj-advanced_actuators.ads:146:36
+  146 |       pragma Postcondition (Static => Muscle_Force'Result=
+      |                                       ^~~~~~~~~~~~~~~~~~~~
+      :
+  148 |           +MJ.Actuator_Curves.Model.Muscle_Bias (Length,Range_Lower,Range_Upper,Acceleration,Bias));
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:147:99
+
+ info: float overflow check proved
+--> mj-advanced_actuators.ads:148:08
+
+ info: implicit aspect Always_Terminates on "SO3" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:149:13
+
+ info: implicit aspect Always_Terminates on "SO3_Expmap" has been proved, subprogram will terminate
+--> mj-advanced_actuators.ads:152:13
+gnatprove: unproved check messages considered as errors

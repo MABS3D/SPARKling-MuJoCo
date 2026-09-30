@@ -1,0 +1,1886 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Spatial_Tendon_Models.Spring_Damper",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-spatial_tendon_models.ads",
+          "line": 79
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Spatial_Tendon_Models.Displacement",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-spatial_tendon_models.ads",
+          "line": 61
+        }
+      ]
+    },
+    " 3": {
+      "name": "MJ.Spatial_Tendon_Models.Polynomial",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-spatial_tendon_models.ads",
+          "line": 70
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 29,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "flow",
+      "line": 81,
+      "message": {
+        "text": "initialization of \"Spring\" proved"
+      },
+      "msg_id": 0,
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 7,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "flow",
+      "line": 148,
+      "message": {
+        "text": "initialization of \"X\" proved"
+      },
+      "msg_id": 1,
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 37,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "flow",
+      "line": 81,
+      "message": {
+        "text": "initialization of \"Damper\" proved"
+      },
+      "msg_id": 2,
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 6,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "flow",
+      "line": 82,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 3,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 23,
+      "check_file": "mj-spatial_tendon_models.adb",
+      "check_line": 153,
+      "check_tree": {
+      },
+      "col": 23,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "trivial",
+      "line": 153,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 4,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 51,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 93,
+      "check_tree": {
+      },
+      "col": 51,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "trivial",
+      "line": 93,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 5,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 15,
+      "check_file": "mj-spatial_tendon_models.adb",
+      "check_line": 152,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.76670000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.63600000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.11600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 252,
+              "time": 3.79850000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.96210000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.79000000000000E-04
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.66430000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.89200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 252,
+              "time": 4.16650000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.06670000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.51900000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.85180000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.34240000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.89000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 249,
+              "time": 3.45340000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 5632,
+              "time": 3.15878000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 15,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "prover",
+      "line": 152,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 6,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 5632,
+          "max_time": 3.15878003835678E-01
+        },
+        "Z3": {
+          "count": 5,
+          "max_steps": 1,
+          "max_time": 7.11600016802549E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-spatial_tendon_models.adb",
+      "check_line": 153,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.55200000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.69000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.90550000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.70200000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.06600000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.66230000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.09000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 254,
+              "time": 7.67390000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.84570000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.31100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.25250000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.32620000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.92000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 254,
+              "time": 3.60450000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.30760000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.44800000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 254,
+              "time": 4.18070000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.57850000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.50400000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 254,
+              "time": 4.45040000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.21500000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.53400000000000E-03
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 25,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "prover",
+      "line": 153,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 7,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 8,
+          "max_steps": 1,
+          "max_time": 8.31099972128868E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 32,
+      "check_file": "mj-spatial_tendon_models.adb",
+      "check_line": 156,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.63333000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.52237000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.12500000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.77465000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.78386000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.99000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.39970000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.79100000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 3.89440000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.28280000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.99300000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 3.96870000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.28450000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.23600000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.81440000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.04210000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.97400000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.69800000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.29080000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.19600000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 4.20680000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.68050000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.74000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 288,
+              "time": 5.71010000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 32,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "prover",
+      "line": 156,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 8,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 8,
+          "max_steps": 1,
+          "max_time": 1.78386002779007E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 30,
+      "check_file": "mj-spatial_tendon_models.adb",
+      "check_line": 156,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 13670,
+              "time": 8.15552000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.91124000000000E-01
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 8673,
+              "time": 1.18843000000000E+00
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 30,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.adb",
+      "how_proved": "prover",
+      "line": 156,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 9,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 13670,
+          "max_time": 8.15551996231079E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 11,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 93,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.11370000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.77300000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 9.35300000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.07200000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.34650000000000E-02
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 8.29400000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.41810000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.43480000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.22860000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.41840000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.27600000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.43330000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.94770000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.69570000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.51560000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.12800000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 294,
+              "time": 3.52960000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 18626,
+              "time": 6.41355000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.37000000000000E-04
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 11,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 93,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 10,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 18626,
+          "max_time": 6.41354978084564E-01
+        },
+        "Z3": {
+          "count": 6,
+          "max_steps": 1,
+          "max_time": 1.69569998979568E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 49,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 94,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.20440000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.92000000000000E-04
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.83660000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.58800000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 294,
+              "time": 4.24670000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.65410000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.52000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.31250000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.06400000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 294,
+              "time": 2.79140000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.82170000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.37500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 294,
+              "time": 3.15220000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.78780000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 293,
+              "time": 4.73250000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.20089000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.35710000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 49,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 94,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 11,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 2.20439992845058E-02
+        },
+        "Z3": {
+          "count": 6,
+          "max_steps": 1,
+          "max_time": 2.35709995031357E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 53,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 93,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.59920000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 9.69100000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.15280000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.93330000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.44510000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.20200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 4.80160000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.22650000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.05600000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.45460000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.97140000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.78500000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 4.07650000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.69490000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.36900000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.12780000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.91880000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.93300000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 5.27210000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 4.57110000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.71800000000000E-03
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 53,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 93,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 12,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 4.57109995186329E-02
+        },
+        "Z3": {
+          "count": 7,
+          "max_steps": 1,
+          "max_time": 9.69099998474121E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 22,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 97,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.05807000000000E+00
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 3417,
+              "time": 1.06446000000000E+00
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1134,
+              "time": 1.05648000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.14696000000000E+00
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 2209,
+              "time": 8.68350000000000E-01
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1207,
+              "time": 1.53575000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.25870000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.45200000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 5.51880000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.04130000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.22800000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.86820000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.41120000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 5.19000000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 3.30200000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.81200000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.73700000000000E-03
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.03420000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.53710000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.62800000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 5.20330000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.00680000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.57400000000000E-03
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 295,
+              "time": 4.08130000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 22,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 97,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 13,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 6,
+          "max_steps": 1,
+          "max_time": 8.73699970543385E-03
+        },
+        "altergo": {
+          "count": 2,
+          "max_steps": 1207,
+          "max_time": 1.53575003147125E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 20,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 97,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 8.75900000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.60150000000000E-02
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.66360000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 20,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 97,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 14,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 1.60150006413460E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-spatial_tendon_models.ads",
+      "check_line": 91,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 3.82172000000000E-01
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.81684000000000E-01
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1783,
+              "time": 1.33344000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 18923,
+              "time": 1.26222000000000E+00
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 7.83918000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 14583,
+              "time": 1.01594000000000E+00
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.12953000000000E+00
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 15917,
+              "time": 2.18210000000000E+00
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 2.32412000000000E+00
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 6.81000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 18565,
+              "time": 6.22319000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.89676000000000E-01
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 4.15000000000000E-04
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 18565,
+              "time": 8.84832000000000E-01
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.13945000000000E+00
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-spatial_tendon_models.ads",
+      "how_proved": "prover",
+      "line": 91,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 15,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 5,
+          "max_steps": 18923,
+          "max_time": 2.18210005760193E+00
+        },
+        "altergo": {
+          "count": 1,
+          "max_steps": 1783,
+          "max_time": 1.33343994617462E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 7.04550027847290E-01,
+      "gnatwhy3.init": 8.93432974815369E-01,
+      "gnatwhy3.register_vcs": 1.05966001749039E-01,
+      "gnatwhy3.run_vcs": 1.48998995427974E-04,
+      "gnatwhy3.save_session": 1.75090003758669E-02,
+      "gnatwhy3.schedule_vcs": 1.09576702117920E+00,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 9.55310016870499E-02,
+      "gnatwhy3.transformations.detect_polymorphism": 5.12249991297722E-02,
+      "gnatwhy3.transformations.discriminate_if_poly": 4.41999000031501E-04,
+      "gnatwhy3.transformations.eliminate_algebraic": 2.78699010610580E-01,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 1.17131002247334E-01,
+      "gnatwhy3.transformations.eliminate_builtin": 7.98679962754250E-02,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 2.79050003737211E-02,
+      "gnatwhy3.transformations.eliminate_epsilon": 7.25509971380234E-02,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 5.97710013389587E-02,
+      "gnatwhy3.transformations.eliminate_inductive": 6.62539973855019E-02,
+      "gnatwhy3.transformations.eliminate_literal": 9.33220013976097E-02,
+      "gnatwhy3.transformations.eliminate_projections_sums": 1.49769987910986E-02,
+      "gnatwhy3.transformations.eliminate_recursion": 9.67300031334162E-03,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 2.26998992729932E-04,
+      "gnatwhy3.transformations.inline_trivial": 2.33090591430664E+00,
+      "gnatwhy3.transformations.introduce_premises": 1.39757007360458E-01,
+      "gnatwhy3.transformations.monomorphise_goal": 8.34500044584274E-03,
+      "gnatwhy3.transformations.remove_unused": 7.29534983634949E-01,
+      "gnatwhy3.transformations.simplify_formula": 3.51251989603043E-01,
+      "gnatwhy3.transformations.split_goal_wp_conj": 2.79239993542433E-02,
+      "gnatwhy3.transformations.split_premise_right": 3.46827000379562E-01
+    },
+    "global": {
+      "flow analysis": 1.12051002681255E-01,
+      "globals (advanced)": 1.04860002174973E-02,
+      "globals (basic)": 1.36129995808005E-02,
+      "init_why_sections": 1.23250000178814E-02,
+      "marking": 4.95130009949207E-02,
+      "properties (advanced)": 4.50999999884516E-04,
+      "translation of standard": 1.56799994874746E-03
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 73,
+      "file": "mj-smooth_math.ads",
+      "how_proved": "trivial",
+      "line": 151,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 73,
+      "file": "mj-smooth_math.ads",
+      "how_proved": "trivial",
+      "line": 151,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

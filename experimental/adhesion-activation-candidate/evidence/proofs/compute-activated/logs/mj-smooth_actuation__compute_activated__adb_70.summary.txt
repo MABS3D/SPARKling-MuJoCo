@@ -1,0 +1,42 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                          Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                                .           .          .
+Flow Dependencies                 .         .                                                .           .          .
+Initialization                    3         3                                                .           .          .
+Non-Aliasing                      .         .                                                .           .          .
+Run-time Checks                  67         .                 67 (CVC5 1%, Z3 97%, altergo 2%)           .          .
+Assertions                        6         .                             6 (CVC5 43%, Z3 57%)           .          .
+Functional Contracts              8         .    8 (CVC5 21%, Trivial 36%, Z3 36%, altergo 7%)           .          .
+LSP Verification                  .         .                                                .           .          .
+Termination                       .         .                                                .           .          .
+Concurrency                       .         .                                                .           .          .
+---------------------------------------------------------------------------------------------------------------------
+Total                            85    4 (5%)                                         81 (95%)           .          .
+
+
+max steps used for successful proof: 26212
+
+============================
+Most difficult proved checks
+============================
+
+mj-smooth_actuation.adb:88:34: precondition proved in max 2 seconds
+mj-smooth_actuation.adb:86:33: loop invariant after first iteration proved in max 1 seconds
+mj-smooth_actuation.ads:126:14: postcondition proved in max 1 seconds
+mj-smooth_actuation.adb:84:33: loop invariant after first iteration proved in max 1 seconds
+mj-smooth_actuation.adb:111:27: precondition proved in max 1 seconds
+mj-smooth_actuation.adb:114:7: precondition proved in max 1 seconds
+mj-smooth_actuation.ads:129:32: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-smooth_actuation, 1 subprograms and packages out of 1 analyzed
+  MJ.Smooth_Actuation.Compute_Activated at mj-smooth_actuation.ads:108 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (81 checks)

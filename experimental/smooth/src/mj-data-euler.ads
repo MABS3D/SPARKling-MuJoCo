@@ -21,7 +21,7 @@ package MJ.Data.Euler with SPARK_Mode is
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then
-     MJ.Smooth_Kernels.Euler_Update (Position_Values (D)'Old, Velocity_Values (D)'Old,
+     Euler_State_Update (D, Position_Values (D)'Old, Velocity_Values (D)'Old,
        Step_Rates (D), Position_Values (D), Velocity_Values (D), Step_Size (D)'Old)));
 private
    procedure Integrate (D : in out Simulation; Result : out Status) with Global => null, Pre => Is_Ready (D),
@@ -36,6 +36,6 @@ private
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then
-     MJ.Smooth_Kernels.Euler_Update (Position_Values (D)'Old, Velocity_Values (D)'Old,
+     Euler_State_Update (D, Position_Values (D)'Old, Velocity_Values (D)'Old,
        Step_Rates (D), Position_Values (D), Velocity_Values (D), Step_Size (D)'Old)));
 end MJ.Data.Euler;

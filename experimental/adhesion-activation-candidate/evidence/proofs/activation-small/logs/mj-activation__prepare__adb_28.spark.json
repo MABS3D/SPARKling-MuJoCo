@@ -1,0 +1,619 @@
+{
+  "mj-activation.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 2,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 3,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Activation.Prepare",
+        "sloc": [
+          {
+            "column": 14,
+            "file": "mj-activation.ads",
+            "line": 30
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Activation.Next_Value",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-activation.ads",
+            "line": 22
+          }
+        ]
+      },
+      " 3": {
+        "name": "MJ.Activation.Derivative",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-activation.ads",
+            "line": 14
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 53,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "flow",
+        "line": 33,
+        "message": {
+          "text": "initialization of \"Ok\" proved"
+        },
+        "msg_id": 0,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 7,
+        "entity": 1,
+        "file": "mj-activation.adb",
+        "how_proved": "flow",
+        "line": 32,
+        "message": {
+          "text": "initialization of \"Candidate\" proved"
+        },
+        "msg_id": 1,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 7,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "flow",
+        "line": 33,
+        "message": {
+          "text": "initialization of \"Dot\" proved"
+        },
+        "msg_id": 2,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 23,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "flow",
+        "line": 33,
+        "message": {
+          "text": "initialization of \"Next\" proved"
+        },
+        "msg_id": 3,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 29,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "flow",
+        "line": 33,
+        "message": {
+          "text": "initialization of \"Drive\" proved"
+        },
+        "msg_id": 4,
+        "rule": "UNINITIALIZED",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 11,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "flow",
+        "line": 34,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 5,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 23,
+        "check_file": "mj-activation.adb",
+        "check_line": 37,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015099
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006904
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.019647
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 23,
+        "entity": 1,
+        "file": "mj-activation.adb",
+        "how_proved": "prover",
+        "line": 37,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "Trivial": {
+            "count": 1,
+            "max_steps": 2,
+            "max_time": 0.0
+          },
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00690399995073676
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 18,
+        "check_file": "mj-activation.adb",
+        "check_line": 40,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.019654
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006863
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 248,
+                "time": 0.034027
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 18,
+        "entity": 1,
+        "file": "mj-activation.adb",
+        "how_proved": "prover",
+        "line": 40,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00686299987137318
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 10,
+        "check_file": "mj-activation.ads",
+        "check_line": 37,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.025543
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005128
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 269,
+                "time": 0.035492
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 10,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "prover",
+        "line": 37,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "Trivial": {
+            "count": 1,
+            "max_steps": 2,
+            "max_time": 0.0
+          },
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00512799993157387
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 10,
+        "check_file": "mj-activation.ads",
+        "check_line": 39,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.02888
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008066
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 262,
+                "time": 0.051834
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 10,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "prover",
+        "line": 39,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "Trivial": {
+            "count": 1,
+            "max_steps": 2,
+            "max_time": 0.0
+          },
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00806600041687489
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 14,
+        "check_file": "mj-activation.ads",
+        "check_line": 35,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 6927,
+                "time": 0.273103
+              },
+              "Z3": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.225774
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.000775
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 6928,
+                "time": 0.270879
+              },
+              "Z3": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.187812
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.003627
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.01497
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005095
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1e-06
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.058593
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.008472
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.000368
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 6926,
+                "time": 0.233177
+              },
+              "Z3": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.140395
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 7.2e-05
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 14,
+        "entity": 1,
+        "file": "mj-activation.ads",
+        "how_proved": "prover",
+        "line": 35,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 10,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 3,
+            "max_steps": 6928,
+            "max_time": 0.273102998733521
+          },
+          "Z3": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00847200024873018
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.00295399990864098,
+        "gnatwhy3.init": 0.43266499042511,
+        "gnatwhy3.register_vcs": 0.0251230001449585,
+        "gnatwhy3.run_vcs": 2.90000007225899e-05,
+        "gnatwhy3.save_session": 0.00571699906140566,
+        "gnatwhy3.schedule_vcs": 0.322373986244202,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00997800007462502,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00413999892771244,
+        "gnatwhy3.transformations.discriminate_if_poly": 0.00072900002123788,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0233280006796122,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.0141899986192584,
+        "gnatwhy3.transformations.eliminate_builtin": 0.0125759989023209,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.00174700003117323,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.0122309988364577,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.00572399888187647,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00646300008520484,
+        "gnatwhy3.transformations.eliminate_literal": 0.0106440000236034,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00259899906814098,
+        "gnatwhy3.transformations.eliminate_recursion": 0.00291000003926456,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 2.09989993891213e-05,
+        "gnatwhy3.transformations.inline_trivial": 0.196147993206978,
+        "gnatwhy3.transformations.introduce_premises": 0.00666899885982275,
+        "gnatwhy3.transformations.monomorphise_goal": 0.00193400005809963,
+        "gnatwhy3.transformations.remove_unused": 0.0958620011806488,
+        "gnatwhy3.transformations.simplify_formula": 0.042408000677824,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.0139250000938773,
+        "gnatwhy3.transformations.split_premise_right": 0.0268239993602037
+      },
+      "global": {
+        "flow analysis": 0.0020630001090467,
+        "globals (advanced)": 0.00450599985197186,
+        "globals (basic)": 0.00537599995732307,
+        "init_why_sections": 0.00114900001790375,
+        "marking": 0.000532999983988702,
+        "properties (advanced)": 4.50000006821938e-05,
+        "translation of standard": 0.00148400000762194
+      }
+    },
+    "warn_error": []
+  }
+}

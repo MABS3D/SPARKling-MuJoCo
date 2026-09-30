@@ -1,0 +1,537 @@
+{
+  "completed": 1790769679.3023806,
+  "sources_sha256": {
+    "src/mj-cholesky_arithmetic.adb": "e7d8f1434c7004c4f9d5718a02a22f394c4a23c63739b1285bc8c3fc9323eb00",
+    "src/mj-cholesky_arithmetic.ads": "bfb766477831347d7bffc525299da5f788947d0ef92b4f373b75d3399db51326",
+    "src/mj-cholesky_band.adb": "c80f4ac6bfb7f3e702ea348da53a107e4181cf43e1263ccc42a7443317cdff36",
+    "src/mj-cholesky_band.ads": "b91c180f122a99c4544273e6ae1ff11b501f14cd55abd33a6de760d3ab3471ea",
+    "src/mj-cholesky_sparse.adb": "cd5a0c982a9c2784e96878849f3208bf7557193920906a85fc3da7422b79f82c",
+    "src/mj-cholesky_sparse.ads": "6149437766bc38d480aeb4ce689d2e29e1d6bfd54c929da9ce598fc794627c8d"
+  },
+  "units": {
+    "arithmetic": {
+      "proved": 93,
+      "open": 0,
+      "open_by_rule": {},
+      "flow_open": [],
+      "subprograms": {
+        "MJ.Cholesky_Arithmetic": {
+          "proved": 1,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Add_Product": {
+          "proved": 6,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Multiply": {
+          "proved": 4,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Root": {
+          "proved": 5,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Divide": {
+          "proved": 6,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Factor_Pivot": {
+          "proved": 3,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Copy": {
+          "proved": 27,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Dot": {
+          "proved": 19,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Arithmetic.Dot_Sparse": {
+          "proved": 22,
+          "open": 0,
+          "locations": []
+        }
+      },
+      "project_body_modes": {
+        "MJ.Cholesky_Arithmetic.Divide": "all",
+        "MJ.Cholesky_Arithmetic": "all",
+        "MJ.Cholesky_Arithmetic.Copy": "all",
+        "MJ.Cholesky_Arithmetic.Elementary": "spec",
+        "MJ.Cholesky_Arithmetic.Dot_Sparse": "all",
+        "MJ.Cholesky_Arithmetic.Multiply": "all",
+        "MJ.Cholesky_Arithmetic.Store": "all",
+        "MJ.Cholesky_Arithmetic.Factor_Pivot": "all",
+        "MJ.Cholesky_Arithmetic.Dot": "all",
+        "MJ.Cholesky_Arithmetic.Root": "all",
+        "MJ.Cholesky_Arithmetic.Add_Product": "all",
+        "MJ.Cholesky_Arithmetic.Reduce": "all"
+      }
+    },
+    "band": {
+      "proved": 258,
+      "open": 9,
+      "open_by_rule": {
+        "VC_PRECONDITION": 1,
+        "VC_LOOP_INVARIANT_PRESERV": 4,
+        "VC_POSTCONDITION": 3,
+        "VC_LOOP_INVARIANT_INIT": 1
+      },
+      "flow_open": [],
+      "subprograms": {
+        "MJ.Cholesky_Band.Solve": {
+          "proved": 51,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Storage_Length": {
+          "proved": 1,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Diagonal": {
+          "proved": 4,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Stored": {
+          "proved": 7,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Storage_Row": {
+          "proved": 6,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Storage_Column": {
+          "proved": 7,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Shape": {
+          "proved": 2,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Factor_Valid": {
+          "proved": 3,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Element": {
+          "proved": 4,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Band.Factor": {
+          "proved": 68,
+          "open": 3,
+          "locations": [
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 46,
+              "rule": "VC_PRECONDITION",
+              "message": "precondition might fail, cannot prove B0 <= B'Length"
+            },
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 14,
+              "rule": "VC_LOOP_INVARIANT_PRESERV",
+              "message": "loop invariant might not be preserved by an arbitrary iteration, cannot prove A (Diagonal (R, N, Band, Dense)) >= Min_Diag"
+            },
+            {
+              "file": "mj-cholesky_band.ads",
+              "line": 58,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove A (K) = A'Old (K)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Band.To_Dense": {
+          "proved": 42,
+          "open": 4,
+          "locations": [
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 141,
+              "rule": "VC_LOOP_INVARIANT_INIT",
+              "message": "loop invariant might fail in first iteration, cannot prove Matrix (R * N + C) = Element (A, N, Band, Dense, R, C, Symmetric)"
+            },
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 141,
+              "rule": "VC_LOOP_INVARIANT_PRESERV",
+              "message": "loop invariant might not be preserved by an arbitrary iteration, cannot prove Matrix (R * N + C) = Element (A, N, Band, Dense, R, C, Symmetric)"
+            },
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 127,
+              "rule": "VC_LOOP_INVARIANT_PRESERV",
+              "message": "loop invariant might not be preserved by an arbitrary iteration, cannot prove Matrix (R * N + C) = Element (A, N, Band, Dense, R, C, Symmetric)"
+            },
+            {
+              "file": "mj-cholesky_band.ads",
+              "line": 70,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove Matrix (R * N + C) = Element (A, N, Band, Dense, R, C, Symmetric)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Band.From_Dense": {
+          "proved": 33,
+          "open": 2,
+          "locations": [
+            {
+              "file": "mj-cholesky_band.adb",
+              "line": 153,
+              "rule": "VC_LOOP_INVARIANT_PRESERV",
+              "message": "loop invariant might not be preserved by an arbitrary iteration, cannot prove A (K) = Matrix (Storage_Row (K, N, Band, Dense) * N + Storage_Column (K, N, Band, Dense))"
+            },
+            {
+              "file": "mj-cholesky_band.ads",
+              "line": 76,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove A (K) = Matrix (Storage_Row (K, N, Band, Dense) * N + Storage_Column (K, N, Band, Dense))"
+            }
+          ]
+        },
+        "MJ.Cholesky_Band.Multiply": {
+          "proved": 30,
+          "open": 0,
+          "locations": []
+        }
+      },
+      "project_body_modes": {
+        "MJ.Cholesky_Band.Factor": "all",
+        "MJ.Cholesky_Band.Stored": "all",
+        "MJ.Cholesky_Band.Multiply": "all",
+        "MJ.Cholesky_Band.Storage_Length": "all",
+        "MJ.Cholesky_Band.Shape": "all",
+        "MJ.Cholesky_Band.From_Dense": "all",
+        "MJ.Cholesky_Band": "all",
+        "MJ.Cholesky_Band.Element": "all",
+        "MJ.Cholesky_Band.Diagonal": "all",
+        "MJ.Cholesky_Band.Solve": "all",
+        "MJ.Cholesky_Band.Storage_Row": "all",
+        "MJ.Cholesky_Band.Layout_Valid": "all",
+        "MJ.Cholesky_Band.To_Dense": "all",
+        "MJ.Cholesky_Band.Factor_Valid": "all",
+        "MJ.Cholesky_Band.Storage_Column": "all"
+      }
+    },
+    "sparse": {
+      "proved": 400,
+      "open": 36,
+      "open_by_rule": {
+        "VC_INDEX_CHECK": 23,
+        "VC_RANGE_CHECK": 9,
+        "VC_POSTCONDITION": 3,
+        "VC_PRECONDITION": 1
+      },
+      "flow_open": [],
+      "subprograms": {
+        "MJ.Cholesky_Sparse.Factor": {
+          "proved": 79,
+          "open": 7,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 113,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove lower bound for Adr (R) + Count (R) - 1"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 113,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 139,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 144,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 137,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 128,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.ads",
+              "line": 71,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove CSR_Valid (N, Count, Adr, Col, A'Length, True)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.Numeric": {
+          "proved": 56,
+          "open": 9,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 178,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 182,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 182,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 182,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 182,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 183,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 185,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 181,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.ads",
+              "line": 90,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove CSR_Valid (N, Count, Adr, Col, A'Length, True)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.Solve": {
+          "proved": 32,
+          "open": 2,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 226,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 234,
+              "rule": "VC_PRECONDITION",
+              "message": "precondition might fail, cannot prove Col (K) < B'Length"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.Update": {
+          "proved": 41,
+          "open": 2,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 301,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.ads",
+              "line": 114,
+              "rule": "VC_POSTCONDITION",
+              "message": "postcondition might fail, cannot prove CSR_Valid (N, Count, Adr, Col, A'Length, True)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.CSR_Valid": {
+          "proved": 28,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Sparse.Transpose_Valid": {
+          "proved": 38,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Sparse.Lower_Source_Valid": {
+          "proved": 4,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Sparse.Factor_Valid": {
+          "proved": 5,
+          "open": 0,
+          "locations": []
+        },
+        "MJ.Cholesky_Sparse.Symbolic_Count": {
+          "proved": 31,
+          "open": 7,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 47,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 48,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove upper bound for Count (I) + 1"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 48,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove upper bound for TCount (R) + 1"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 49,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove lower bound for Parent (I)"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 46,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 55,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove upper bound for NNZ + Count (R)"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 56,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove upper bound for TAdr (R - 1) + TCount (R - 1)"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.Symbolic_Fill": {
+          "proved": 67,
+          "open": 9,
+          "locations": [
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 80,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove lower bound for Adr (R) + Count (R) - 1"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 80,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 81,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 86,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 89,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove upper bound for Cursor (I)"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 89,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 90,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 91,
+              "rule": "VC_RANGE_CHECK",
+              "message": "range check might fail, cannot prove lower bound for Parent (I)"
+            },
+            {
+              "file": "mj-cholesky_sparse.adb",
+              "line": 85,
+              "rule": "VC_INDEX_CHECK",
+              "message": "array index check might fail"
+            }
+          ]
+        },
+        "MJ.Cholesky_Sparse.Update_Closed": {
+          "proved": 19,
+          "open": 0,
+          "locations": []
+        }
+      },
+      "project_body_modes": {
+        "MJ.Cholesky_Sparse.Factor": "all",
+        "MJ.Cholesky_Sparse.Factor_Valid": "all",
+        "MJ.Cholesky_Sparse.CSR_Valid": "all",
+        "MJ.Cholesky_Sparse": "all",
+        "MJ.Cholesky_Sparse.Symbolic_Count": "all",
+        "MJ.Cholesky_Sparse.Solve": "all",
+        "MJ.Cholesky_Sparse.Numeric": "all",
+        "MJ.Cholesky_Sparse.Transpose_Valid": "all",
+        "MJ.Cholesky_Sparse.Update_Closed": "all",
+        "MJ.Cholesky_Sparse.Update": "all",
+        "MJ.Cholesky_Sparse.Symbolic_Fill": "all",
+        "MJ.Cholesky_Sparse.Lower_Source_Valid": "all"
+      }
+    }
+  },
+  "note": "Open obligations remain unfinished proof engineering; not Silver exceptions. Per-subprogram success is conditional on called contracts. Dots have no ordered functional postcondition yet; global algorithms are candidates."
+}

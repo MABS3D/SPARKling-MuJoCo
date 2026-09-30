@@ -1,0 +1,103 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Result" proved
+--> mj-data-forces_phase.adb:750:55
+
+ info: data dependencies proved
+--> mj-data-forces_phase.adb:751:11
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:751:172
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:752:66
+
+ medium: postcondition might fail, cannot prove Shape (D) = Shape (D)'Old
+--> mj-data-forces_phase.adb:756:36
+  756 |       pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-data-forces_phase.adb:775:07
+
+ info: precondition proved
+--> mj-data-forces_phase.adb:777:30
+
+ info: precondition proved
+--> mj-data-forces_phase.adb:781:10
+
+ info: non-aliasing of formal parameters "Joints" and "Passive" proved
+--> mj-data-forces_phase.adb:781:50
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:781:50
+
+ info: non-aliasing of formal parameters "Qpos" and "Passive" proved
+--> mj-data-forces_phase.adb:781:68
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:781:68
+
+ info: non-aliasing of formal parameters "Qvel" and "Passive" proved
+--> mj-data-forces_phase.adb:781:86
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:781:86
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:782:82
+
+ medium: assertion might fail
+--> mj-data-forces_phase.adb:784:32
+  784 |          pragma Assert (Static => Storage_Ready (D));
+      |                                   ^~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: assertion might fail, cannot prove Bounded (D.Gravity, Max_Val)
+--> mj-data-forces_phase.adb:785:32
+  785 |          pragma Assert (Static => Configuration_Bounded (D));
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:584
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-data-forces_phase.adb:786:32
+
+ medium: assertion might fail
+--> mj-data-forces_phase.adb:786:32
+  786 |          pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:786:67
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:786:87
+
+ info: pointer dereference check proved
+--> mj-data-forces_phase.adb:786:110
+
+ medium: assertion might fail, cannot prove Array_Bounded (D.State.Qpos, Max_Val)
+--> mj-data-forces_phase.adb:789:32
+  789 |          pragma Assert (Static => Inputs_Bounded (D));
+      |                                   ^~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:719
+      + provers reached time limit before completing the proof
+
+ medium: assertion might fail
+--> mj-data-forces_phase.adb:790:32
+  790 |          pragma Assert (Static => Caches_Bounded (D));
+      |                                   ^~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail
+--> mj-data-forces_phase.adb:791:07
+  791 |          Establish_Readiness (D);
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/spatial-integration-proof-r83izqre/mj-data-forces_phase-Complete_Passive/mj-data-forces_phase-obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 239.8 s, peak group RSS 868 MB

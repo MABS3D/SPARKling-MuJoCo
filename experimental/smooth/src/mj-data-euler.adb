@@ -1,3 +1,4 @@
+with MJ.Manifold_Math;
 with MJ.Data.Pipeline;
 with MJ.Data.Boundary;
 with MJ.Data.Inertia_Phase;
@@ -66,6 +67,48 @@ package body MJ.Data.Euler with SPARK_Mode is
    end Integrate_Buffers;
    pragma Inline_Always (Integrate_Buffers);
 
+   procedure Integrate_Manifolds (D : in out Simulation; Result : out Status)
+     with Global => null, Pre => Is_Ready (D),
+     Post => (if Result = Success then Is_Ready (D)
+       else State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => (if Result = Success then
+     Euler_State_Update (D, Position_Values (D)'Old, Velocity_Values (D)'Old,
+       Step_Rates (D), Position_Values (D), Velocity_Values (D), Step_Size (D))));
+   procedure Integrate_Manifolds (D : in out Simulation; Result : out Status) is
+      H : constant Nonneg_Tier0 := D.Timestep;
+      Next_Time : constant Real := D.Clock + H;
+      Value : Real;
+      Q : Quaternion;
+   begin
+      Result := Numeric_Limit;
+      if Next_Time not in Nonneg_Tier0 then return; end if;
+      for V in 0 .. D.Nv - 1 loop
+         if D.Scratch.Solution (V) not in Tier0_Real then return; end if;
+         Value := D.State.Qvel (V) + H * D.Scratch.Solution (V);
+         if Value not in Tier0_Real then return; end if;
+         D.Scratch.Next_Qvel (V) := Value;
+      end loop;
+      D.Scratch.Next_Qpos.all := D.State.Qpos.all;
+      for P of D.Joint_Config.all loop
+         if P.Group_Type in 2 .. 3 or else (P.Group_Type = 0 and then P.Component < 3) then
+            Value := D.State.Qpos (P.Qadr) + H * D.Scratch.Next_Qvel (P.Vadr);
+            if Value not in Tier0_Real then return; end if;
+            D.Scratch.Next_Qpos (P.Qadr) := Value;
+         elsif (P.Group_Type = 1 and then P.Component = 0)
+           or else (P.Group_Type = 0 and then P.Component = 3)
+         then
+            Q := MJ.Manifold_Math.Integrated (Read_Quaternion (D.State.Qpos.all, P.Qadr),
+              Read_Vector (D.Scratch.Next_Qvel.all, P.Vadr), H);
+            for K in 0 .. 3 loop D.Scratch.Next_Qpos (P.Qadr + K) := Q (K); end loop;
+         end if;
+      end loop;
+      D.State.Qpos.all := D.Scratch.Next_Qpos.all;
+      D.State.Qvel.all := D.Scratch.Next_Qvel.all;
+      D.Clock := Next_Time;
+      Invalidate (D.Cache);
+      Result := Success;
+   end Integrate_Manifolds;
+
    procedure Integrate (D : in out Simulation; Result : out Status) is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.Euler_Update);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
@@ -93,9 +136,13 @@ package body MJ.Data.Euler with SPARK_Mode is
       pragma Assert (Static => Initial_State = State_Image (Initial_Qpos, Initial_Qvel, Initial_Time));
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
       pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
-      Integrate_Buffers
-        (D.State.Qpos.all, D.State.Qvel.all, D.Scratch.Solution.all, D.Timestep,
-         D.Clock, D.Scratch.Next_Qpos.all, D.Scratch.Next_Qvel.all, Result);
+      if D.Nq = D.Nv then
+         Integrate_Buffers
+           (D.State.Qpos.all, D.State.Qvel.all, D.Scratch.Solution.all, D.Timestep,
+            D.Clock, D.Scratch.Next_Qpos.all, D.Scratch.Next_Qvel.all, Result);
+      else
+         Integrate_Manifolds (D, Result);
+      end if;
       pragma Assert (Static => (if Result = Success then D.Clock = Initial_Time + Initial_Step));
       if Result = Success then Invalidate (D.Cache); end if;
       pragma Assert (Static => Array_Bounded (D.State.Qpos, Max_Val));
@@ -107,8 +154,8 @@ package body MJ.Data.Euler with SPARK_Mode is
       pragma Assert (Static => Stable_Ready (D));
       pragma Assert (Static => Is_Ready (D));
       pragma Assert (Static => (if Result = Success then
-        MJ.Smooth_Kernels.Euler_Update
-          (Initial_Qpos, Initial_Qvel, Step_Rates (D), Position_Values (D),
+        Euler_State_Update
+          (D, Initial_Qpos, Initial_Qvel, Step_Rates (D), Position_Values (D),
            Velocity_Values (D), Initial_Step)));
       if Result /= Success then
          State_Query_Image (D);
@@ -137,8 +184,8 @@ package body MJ.Data.Euler with SPARK_Mode is
         and then (if Result /= Success then State_Values (D) = Initial_State)
         and then (if Result = Success then Time (D) = Initial_Time + Initial_Step
           and then not Positions_Current (D) and then not Forces_Current (D)
-          and then MJ.Smooth_Kernels.Euler_Update
-            (Initial_Qpos, Initial_Qvel, Step_Rates (D), Position_Values (D),
+          and then Euler_State_Update
+            (D, Initial_Qpos, Initial_Qvel, Step_Rates (D), Position_Values (D),
              Velocity_Values (D), Initial_Step)));
    end Integrate;
    procedure Equal_Euler_Values (A, B, Rate : Tier0_Real; H1, H2 : Nonneg_Tier0)
@@ -196,7 +243,7 @@ package body MJ.Data.Euler with SPARK_Mode is
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then
-     MJ.Smooth_Kernels.Euler_Update (Position_Values (D)'Old, Velocity_Values (D)'Old,
+     Euler_State_Update (D, Position_Values (D)'Old, Velocity_Values (D)'Old,
        Step_Rates (D), Position_Values (D), Velocity_Values (D), Step_Size (D)'Old)));
 
    procedure Step_Ready
@@ -316,9 +363,9 @@ package body MJ.Data.Euler with SPARK_Mode is
               and then Configuration (D) = Initial_Config);
             return;
          end if;
-         Equal_Euler_Inputs
+         if D.Nq = D.Nv then Equal_Euler_Inputs
            (Before_Qpos, Initial_Qpos, Before_Qvel, Initial_Qvel,
-            Step_Rates (D), Position_Values (D), Velocity_Values (D), Before_Step, Initial_Step);
+            Step_Rates (D), Position_Values (D), Velocity_Values (D), Before_Step, Initial_Step); end if;
       end;
    end Step_Ready;
    procedure Step

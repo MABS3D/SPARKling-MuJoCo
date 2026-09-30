@@ -1,3 +1,4 @@
+with MJ.Data.Manifold_Actuation;
 --  Review draft. Stateless scalar joint transmissions with fixed gain and
 --  optional affine bias; supports simple motors and position/velocity servos.
 private package MJ.Data.Actuation_Phase with SPARK_Mode is
@@ -56,15 +57,13 @@ private
      and then (for all J in 0 .. Velocity_Count (D) - 1 =>
        Force_Value (D, Actuator_Force, J) = Expected_Generalized (D, J))));
    function Expected_Length (D : Simulation; Index : Natural) return Real is
-     (MJ.Smooth_Kernels.Transmission (D.Actuator_Config (Index).Gear,
-       D.State.Qpos (D.Actuator_Config (Index).Joint_Id)));
+     (MJ.Data.Manifold_Actuation.Length (D.Actuator_Config (Index), D.State.Qpos.all));
    function Expected_Velocity (D : Simulation; Index : Natural) return Real is
-     (if D.Actuation_Enabled then MJ.Smooth_Kernels.Transmission (D.Actuator_Config (Index).Gear,
-       D.State.Qvel (D.Actuator_Config (Index).Joint_Id)) else 0.0);
+     (if D.Actuation_Enabled then MJ.Data.Manifold_Actuation.Velocity
+       (D.Actuator_Config (Index), D.State.Qpos.all, D.State.Qvel.all) else 0.0);
    function Expected_Force (D : Simulation; Index : Natural) return Real is
-     (MJ.Smooth_Actuation.Force_For (D.Actuator_Config (Index),
-       D.State.Qpos (D.Actuator_Config (Index).Joint_Id), D.State.Qvel (D.Actuator_Config (Index).Joint_Id),
-       D.State.Ctrl (Index), D.Actuation_Enabled, D.Clamp_Control));
+     (MJ.Data.Manifold_Actuation.Force (D.Actuator_Config (Index), Expected_Length (D, Index),
+       Expected_Velocity (D, Index), D.State.Ctrl (Index), D.Actuation_Enabled, D.Clamp_Control));
    function Expected_Generalized (D : Simulation; Index : Natural) return Real is
-     (MJ.Smooth_Actuation.Reduced_Force (D.Actuator_Config.all, D.Actuators.Force.all, Index, D.Na));
+     (MJ.Data.Manifold_Actuation.Reduced (D.Actuator_Config.all, D.State.Qpos.all, D.Actuators.Force.all, Index, D.Na));
 end MJ.Data.Actuation_Phase;

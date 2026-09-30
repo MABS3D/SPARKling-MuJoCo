@@ -1,0 +1,15 @@
+project Candidate is
+   Build_Root := external ("ADHESION_ACTIVATION_BUILD_ROOT", "/var/tmp/sparkling-adhesion-activation/build");
+   for Source_Dirs use ("src", "../../src", "../smooth/src", "../frictionless-contact-candidate/src", "../collision/src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-activation.ads", "mj-activation.adb",
+     "mj-adhesion.ads", "mj-adhesion.adb", "mj-adhesive_slider.ads", "mj-adhesive_slider.adb",
+     "mj-contact_rows.ads", "mj-contact_rows.adb", "mj-contact_slider.ads", "mj-contact_slider.adb",
+     "mj-collision.ads", "mj-collision.adb", "adhesion_probe.adb", "adhesive_probe.adb");
+   for Main use ("adhesion_probe.adb", "adhesive_probe.adb");
+   for Object_Dir use Build_Root & "/validation/obj";
+   for Exec_Dir use Build_Root & "/validation/bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-O2", "-g", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");
+   end Compiler;
+end Candidate;

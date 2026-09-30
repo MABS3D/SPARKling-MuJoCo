@@ -1,0 +1,55 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                           Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1           1                                                 .           .          .
+Flow Dependencies                 .           .                                                 .           .          .
+Initialization                    .           .                                                 .           .          .
+Non-Aliasing                      .           .                                                 .           .          .
+Run-time Checks                  54           .    54 (CVC5 50%, Trivial 5%, Z3 35%, altergo 11%)           .          .
+Assertions                        2           .                                            2 (Z3)           .          .
+Functional Contracts             14           .                 14 (CVC5 21%, Z3 76%, altergo 3%)           .          .
+LSP Verification                  .           .                                                 .           .          .
+Termination                      10          10                                                 .           .          .
+Concurrency                       .           .                                                 .           .          .
+------------------------------------------------------------------------------------------------------------------------
+Total                            81    11 (14%)                                          70 (86%)           .          .
+
+
+max steps used for successful proof: 32250
+
+============================
+Most difficult proved checks
+============================
+
+mj-tendon_vectors.ads:33:63: fp_overflow check proved in max 6 seconds
+mj-tendon_vectors.adb:18:22: fp_overflow check proved in max 6 seconds
+mj-tendon_vectors.ads:35:39: fp_overflow check proved in max 4 seconds
+mj-tendon_vectors.adb:19:22: fp_overflow check proved in max 2 seconds
+mj-tendon_vectors.ads:43:14: postcondition proved in max 2 seconds
+mj-tendon_vectors.adb:18:14: fp_overflow check proved in max 1 seconds
+mj-tendon_vectors.ads:35:22: fp_overflow check proved in max 1 seconds
+mj-tendon_vectors.adb:19:14: fp_overflow check proved in max 1 seconds
+mj-tendon_vectors.ads:33:14: postcondition proved in max 1 seconds
+mj-tendon_vectors.adb:18:30: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-tendon_vectors, 11 subprograms and packages out of 11 analyzed
+  MJ.Tendon_Vectors at mj-tendon_vectors.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (3 checks)
+  MJ.Tendon_Vectors.Add at mj-tendon_vectors.ads:25 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Tendon_Vectors.Bounded at mj-tendon_vectors.ads:11 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Tendon_Vectors.Cross at mj-tendon_vectors.ads:41 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (19 checks)
+  MJ.Tendon_Vectors.Dot at mj-tendon_vectors.ads:38 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Tendon_Vectors.Dot_Model at mj-tendon_vectors.ads:34 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Tendon_Vectors.Matrix_Row at mj-tendon_vectors.ads:47 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Tendon_Vectors.Multiply at mj-tendon_vectors.ads:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.Tendon_Vectors.Rotation_Bounded at mj-tendon_vectors.ads:14 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Tendon_Vectors.Scale at mj-tendon_vectors.ads:31 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Tendon_Vectors.Sub at mj-tendon_vectors.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)

@@ -1,0 +1,15 @@
+project Performance is
+   Build_Root := external ("ACTUATION_PERFORMANCE_ROOT", "/var/tmp/sparkling-actuators-performance-20260930");
+   for Source_Dirs use ("base", "src", "tests/performance");
+   for Main use ("actuation_bench.adb");
+   for Object_Dir use Build_Root & "/ada-obj";
+   for Exec_Dir use Build_Root & "/bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-O3", "-gnatp", "-gnatn", "-march=native", "-flto", "-ffp-contract=off");
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-flto", "-ffp-contract=off");
+   end Linker;
+end Performance;

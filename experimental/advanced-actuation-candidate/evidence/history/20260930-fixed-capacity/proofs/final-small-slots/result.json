@@ -1,0 +1,179 @@
+{
+  "exit_code": 0,
+  "seconds": 3.886892795562744,
+  "command": [
+    "python3",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+    "--cap-mb",
+    "3000",
+    "--min-free-mb",
+    "2000",
+    "--timeout",
+    "600",
+    "--",
+    "gnatprove",
+    "-P",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/actuation.gpr",
+    "-u",
+    "mj-advanced_actuators.ads",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--steps=0",
+    "--proof=per_check",
+    "-j2",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--report=all",
+    "--counterexamples=off",
+    "--limit-subp=mj-advanced_actuators.adb:4"
+  ],
+  "subprogram": "Slots",
+  "checks": 13,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 32,
+      "file": "mj-advanced_actuators.adb",
+      "how_proved": "trivial",
+      "line": 22,
+      "message": {
+        "arguments": [
+          "Exp"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 85,
+      "file": "mj-advanced_actuators.ads",
+      "how_proved": "trivial",
+      "line": 85,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 85,
+      "file": "mj-advanced_actuators.ads",
+      "how_proved": "trivial",
+      "line": 85,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 14,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 6,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 14,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 6,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_proof": [],
+  "skip_flow_proof": [],
+  "pragma_assume": [],
+  "spark": {
+    " 1": "all"
+  },
+  "progress": "PROGRESS_PROOF",
+  "stop_reason": "STOP_REASON_NONE",
+  "fresh": true,
+  "covered": [
+    "MJ.Advanced_Actuators.Slots"
+  ],
+  "sources_unchanged": true,
+  "coverage_ok": true,
+  "all_in_spark": true,
+  "warning_review": [
+    {
+      "file": "mj-advanced_actuators.adb",
+      "line": 22,
+      "rule": "imprecise-call",
+      "review": "outside selected pure subprogram; remains pending for complete unit"
+    },
+    {
+      "file": "mj-advanced_actuators.ads",
+      "line": 85,
+      "rule": "imprecise-call",
+      "review": "outside selected pure subprogram; remains pending for complete unit"
+    },
+    {
+      "file": "mj-advanced_actuators.ads",
+      "line": 85,
+      "rule": "imprecise-call",
+      "review": "outside selected pure subprogram; remains pending for complete unit"
+    },
+    {
+      "file": "mj-actuator_geometry.ads",
+      "line": 6,
+      "rule": "imprecise-call",
+      "review": "outside selected pure subprogram; remains pending for complete unit"
+    },
+    {
+      "file": "mj-actuator_geometry.ads",
+      "line": 6,
+      "rule": "imprecise-call",
+      "review": "outside selected pure subprogram; remains pending for complete unit"
+    }
+  ],
+  "reviewed_warnings": true,
+  "passed": true
+}

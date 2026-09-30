@@ -4,6 +4,10 @@ with MJ.Smooth_Kernels; use MJ.Smooth_Kernels;
 package MJ.Smooth_Actuation with SPARK_Mode is
    type Parameters is record
       Joint_Id, Control_Id, Output_Id : Natural := 0;
+      Position_Id : Natural := 0;
+      Joint_Type : Natural range 0 .. 3 := 3;
+      Parent_Frame : Boolean := False;
+      Wrench_Gear : Real_Array (0 .. 5) := [others => 0.0];
       Gear, Gain : Tier0_Real := 0.0;
       Bias : Vector := Zero;
       Control_Limited, Force_Limited : Boolean := False;

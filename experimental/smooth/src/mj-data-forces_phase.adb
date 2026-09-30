@@ -1,3 +1,5 @@
+with MJ.Manifold_Math;
+with MJ.Data.Spatial_Tendon_Phase;
 with MJ.Gravity_Bounds;
 with MJ.Composite_Weights;
 with MJ.Smooth_Dynamics;
@@ -136,6 +138,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       Current_Velocity : SK.Motion := Parent_Velocity;
       Delta_Acc : SK.Motion := [others => 0.0];
       Current_Acceleration : SK.Motion;
+      Group_Velocity : SK.Motion := Parent_Velocity;
       Accepted : Boolean;
    begin
       Ok := False;
@@ -147,7 +150,19 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
             V : constant Natural := Joint_Config (J).Vadr;
             Axis : constant SK.Motion := MJ.Spatial_Storage.Load_Motion (Spatial_Motions, 6 * J);
          begin
+            if Joint_Config (J).Group_Type in 0 .. 1 then
+               if Joint_Config (J).Component = (if Joint_Config (J).Group_Type = 0 then 3 else 0) then
+                  Group_Velocity := Current_Velocity;
+               end if;
+               MJ.Manifold_Math.Widen_Motion (Current_Velocity);
+               MJ.Manifold_Math.Widen_Motion (Delta_Acc);
+               MJ.Manifold_Math.Widen_Motion (Axis);
+               MJ.Manifold_Math.Advance_Axis (Current_Velocity, Delta_Acc,
+                 Group_Velocity, Axis, Qvel (V),
+                 Joint_Config (J).Group_Type = 0 and then Joint_Config (J).Component < 3, Accepted);
+            else
             Advance_Joint (Current_Velocity, Delta_Acc, Axis, Qvel (V), Accepted);
+            end if;
             if not Accepted then return; end if;
          end;
       end loop;
@@ -425,6 +440,35 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
          D.Kinematic.Spatial_Inertias.all, D.Kinematic.Spatial_Motions.all,
          D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok);
    end Try_Recursive;
+
+   procedure Manifold_Passive (D : in out Simulation; Result : out Status) is
+      Delta_Rotation : Vector := Zero;
+      Displacement, Value : Real;
+   begin
+      Result := Numeric_Limit;
+      for J in 0 .. D.Nv - 1 loop
+         declare
+            P : constant Joint_Parameters := D.Joint_Config (J);
+         begin
+            if not D.Spring_Enabled or else P.Stiffness = 0.0 then
+               Displacement := 0.0;
+            elsif P.Group_Type in 0 .. 1 and then P.Kind = Hinge_Joint then
+               if P.Component = (if P.Group_Type = 0 then 3 else 0) then
+                  Delta_Rotation := MJ.Manifold_Math.Difference
+                    (Read_Quaternion (D.State.Qpos.all, P.Qadr), P.Spring_Quaternion);
+               end if;
+               Displacement := Delta_Rotation (P.Component - (if P.Group_Type = 0 then 3 else 0));
+            else
+               Displacement := D.State.Qpos (P.Qadr) - P.Spring_Reference;
+            end if;
+            Value := (if D.Spring_Enabled then -P.Stiffness * Displacement else 0.0)
+              - (if D.Damper_Enabled then P.Damping * D.State.Qvel (J) else 0.0);
+            if not Within_Work (Value) then return; end if;
+            D.Dynamics.Passive (J) := Value;
+         end;
+      end loop;
+      Result := Success;
+   end Manifold_Passive;
 
    procedure Passive_Buffers
      (Joints : Joint_Parameter_Array; Qpos, Qvel : Real_Array;
@@ -704,7 +748,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    end Establish_Readiness;
 
    procedure Complete_Passive (D : in out Simulation; Result : out Status)
-     with Global => null, Pre => Is_Ready (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+     with Global => null, Pre => Is_Ready (D) and then Positions_Current (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all);
    pragma Postcondition (Static => Is_Ready (D));
    pragma Postcondition (Static => Stable_Ready (D));
@@ -729,8 +773,14 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Joint_Bounded);
    begin
       Expose_Passive_Inputs (D);
-      Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
-                       D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
+      if D.Tendons /= null then
+         Spatial_Tendon_Phase.Compute_Passive (D, Result);
+      elsif D.Nq /= D.Nv then
+         Manifold_Passive (D, Result);
+      else
+         Passive_Bounded_Buffers (D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
+                          D.Spring_Enabled, D.Damper_Enabled, D.Dynamics.Passive.all, Result);
+      end if;
       pragma Assert (Static => Storage_Ready (D));
       pragma Assert (Static => Configuration_Bounded (D));
       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));

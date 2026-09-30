@@ -1,0 +1,52 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                               Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------
+Data Dependencies                 9           9                                     .           .          .
+Flow Dependencies                 .           .                                     .           .          .
+Initialization                    .           .                                     .           .          .
+Non-Aliasing                      .           .                                     .           .          .
+Run-time Checks                 108           .    108 (CVC5 6%, Trivial 22%, Z3 71%)           .          .
+Assertions                        .           .                                     .           .          .
+Functional Contracts             23           .     23 (CVC5 22%, Z3 70%, altergo 9%)           .          .
+LSP Verification                  .           .                                     .           .          .
+Termination                       7           6                                1 (Z3)           .          .
+Concurrency                       .           .                                     .           .          .
+------------------------------------------------------------------------------------------------------------
+Total                           147    15 (10%)                             132 (90%)           .          .
+
+
+max steps used for successful proof: 63555
+
+============================
+Most difficult proved checks
+============================
+
+mj-cholesky_models.ads:82:25: postcondition proved in max 4 seconds
+mj-cholesky_models.ads:66:25: postcondition proved in max 2 seconds
+mj-cholesky_models.ads:29:14: postcondition proved in max 2 seconds
+mj-cholesky_models.ads:92:14: postcondition proved in max 1 seconds
+mj-cholesky_models.ads:50:14: postcondition proved in max 1 seconds
+mj-cholesky_models.ads:90:25: precondition proved in max 1 seconds
+mj-cholesky_models.ads:41:25: postcondition proved in max 1 seconds
+mj-cholesky_models.ads:71:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-cholesky_models, 10 subprograms and packages out of 10 analyzed
+  MJ.Cholesky_Models at mj-cholesky_models.ads:3 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Cholesky_Models.Combine at mj-cholesky_models.ads:69 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Cholesky_Models.Dot_Value at mj-cholesky_models.ads:73 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)
+  MJ.Cholesky_Models.Lane_Sum at mj-cholesky_models.ads:33 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (19 checks)
+  MJ.Cholesky_Models.Model_Add at mj-cholesky_models.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (7 checks)
+  MJ.Cholesky_Models.Prefix_Dot at mj-cholesky_models.ads:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Cholesky_Models.Reduction_Model at mj-cholesky_models.ads:84 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Cholesky_Models.Tail at mj-cholesky_models.ads:54 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (45 checks)
+  MJ.Cholesky_Models.Unfold_Lane at mj-cholesky_models.ads:45 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Cholesky_Models.Valid_Dot at mj-cholesky_models.ads:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)

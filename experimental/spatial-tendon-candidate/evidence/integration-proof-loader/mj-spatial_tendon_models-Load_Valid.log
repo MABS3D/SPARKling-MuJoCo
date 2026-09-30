@@ -1,0 +1,1313 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Accepted" proved
+--> mj-spatial_tendon_models.adb:16:26
+
+ info: data dependencies proved
+--> mj-spatial_tendon_models.adb:17:06
+
+ medium: postcondition might fail, cannot prove Ready (T, M.S.Nbody)
+--> mj-spatial_tendon_models.adb:27:32
+   27 |         Post => (if Accepted then Ready (T, M.S.Nbody) and then Count (T) = M.S.Ntendon
+      |                                   ^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Q" proved
+--> mj-spatial_tendon_models.adb:33:07
+
+ info: initialization of "R" proved
+--> mj-spatial_tendon_models.adb:34:07
+
+ info: initialization of "OK" proved
+--> mj-spatial_tendon_models.adb:35:07
+
+ info: initialization of "Obj" proved
+--> mj-spatial_tendon_models.adb:36:07
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-spatial_tendon_models.adb:41:37
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:42:22
+   42 |             if M.Tendons.Tendon_Armature (I) /= 0.0 then return; end if;
+      |                ~~~~~~~~~^~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:42:40
+   42 |             if M.Tendons.Tendon_Armature (I) /= 0.0 then return; end if;
+      |                                           ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: discriminant check proved
+--> mj-spatial_tendon_models.adb:44:09
+
+ medium: resource or memory leak might occur
+--> mj-spatial_tendon_models.adb:44:09
+   44 |          T := new Description (M.S.Ntendon, M.S.Nsite, M.S.Ngeom, M.S.Nwrap);
+      |          ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.S.Ntendon
+--> mj-spatial_tendon_models.adb:44:32
+   44 |          T := new Description (M.S.Ntendon, M.S.Nsite, M.S.Ngeom, M.S.Nwrap);
+      |                                ~~~^~~~~~~~
+      + possible fix: add precondition (M.S.Ntendon >= Natural'First) to subprogram at line 15
+   15 |       procedure Load_Valid (M : MJ.Models.Model; T : in out Description_Access;
+      |                 ^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.S.Nsite
+--> mj-spatial_tendon_models.adb:44:45
+   44 |          T := new Description (M.S.Ntendon, M.S.Nsite, M.S.Ngeom, M.S.Nwrap);
+      |                                             ~~~^~~~~~
+      + possible fix: add precondition (M.S.Nsite >= Natural'First) to subprogram at line 15
+   15 |       procedure Load_Valid (M : MJ.Models.Model; T : in out Description_Access;
+      |                 ^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.S.Ngeom
+--> mj-spatial_tendon_models.adb:44:56
+   44 |          T := new Description (M.S.Ntendon, M.S.Nsite, M.S.Ngeom, M.S.Nwrap);
+      |                                                        ~~~^~~~~~
+      + possible fix: add precondition (M.S.Ngeom >= Natural'First) to subprogram at line 15
+   15 |       procedure Load_Valid (M : MJ.Models.Model; T : in out Description_Access;
+      |                 ^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.S.Nwrap
+--> mj-spatial_tendon_models.adb:44:67
+   44 |          T := new Description (M.S.Ntendon, M.S.Nsite, M.S.Ngeom, M.S.Nwrap);
+      |                                                                   ~~~^~~~~~
+      + possible fix: add precondition (M.S.Nwrap >= Natural'First) to subprogram at line 15
+   15 |       procedure Load_Valid (M : MJ.Models.Model; T : in out Description_Access;
+      |                 ^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:45:08
+   45 |          T.Nb := M.S.Nbody;
+      |          ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:46:22
+   46 |          for I in 0 .. T.Ns - 1 loop
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:47:33
+   47 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:47:33
+   47 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:47:53
+   47 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                                       ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:48:22
+   48 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:48:50
+   48 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                                                    ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:49:22
+   49 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:49:48
+   49 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                                                  ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:50:20
+   50 |             if M.Sites.Site_Bodyid (I) not in 0 .. M.S.Nbody - 1 then Free (T); return; end if;
+      |                ~~~~~~~^~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:50:34
+   50 |             if M.Sites.Site_Bodyid (I) not in 0 .. M.S.Nbody - 1 then Free (T); return; end if;
+      |                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:51:11
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |             ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:51:21
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |                      ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:51:21
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |                      ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:51:50
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |                                              ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendon_models.adb:51:63
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |                                                                ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:51:63
+   51 |             T.Sites (I + 1) := (Position => (M.Sites.Site_Pos (3 * I),
+      |                                                                ~~^~~
+      + reason for check: result of multiplication must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:52:19
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |               ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendon_models.adb:52:32
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                 ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I + 1
+--> mj-spatial_tendon_models.adb:52:36
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                 ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:52:36
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                 ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:52:49
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                             ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendon_models.adb:52:62
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                                               ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I + 2
+--> mj-spatial_tendon_models.adb:52:66
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                                               ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:52:66
+   52 |               M.Sites.Site_Pos (3 * I + 1), M.Sites.Site_Pos (3 * I + 2)),
+      |                                                               ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:53:30
+   53 |               Body_Id => M.Sites.Site_Bodyid (I));
+      |                          ~~~~~~~^~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Sites.Site_Bodyid (I)
+--> mj-spatial_tendon_models.adb:53:30
+   53 |               Body_Id => M.Sites.Site_Bodyid (I));
+      |                          ~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: value must fit in component type
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:53:44
+   53 |               Body_Id => M.Sites.Site_Bodyid (I));
+      |                                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:55:22
+   55 |          for I in 0 .. T.Ng - 1 loop
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:56:33
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:56:33
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:56:53
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                                       ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:57:22
+   57 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:57:50
+   57 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                                                    ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:58:22
+   58 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:58:48
+   58 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                                                  ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:59:20
+   59 |             if M.Geoms.Geom_Bodyid (I) not in 0 .. M.S.Nbody - 1 then Free (T); return; end if;
+      |                ~~~~~~~^~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:59:34
+   59 |             if M.Geoms.Geom_Bodyid (I) not in 0 .. M.S.Nbody - 1 then Free (T); return; end if;
+      |                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:61:11
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |             ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:61:26
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |                           ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:61:26
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |                           ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:61:49
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |                                             ~~~~~~~^~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Geoms.Geom_Bodyid (I)
+--> mj-spatial_tendon_models.adb:61:49
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |                                             ~~~~~~~^~~~~~~~~~~~~~~
+      + reason for check: value must fit in the target type of the assignment
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:61:63
+   61 |             T.Geometries (I + 1).Body_Id := M.Geoms.Geom_Bodyid (I);
+      |                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:62:20
+   62 |             if M.Geoms.Geom_Type (I) in 2 | 5 then
+      |                ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:62:32
+   62 |             if M.Geoms.Geom_Type (I) in 2 | 5 then
+      |                                   ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-spatial_tendon_models.adb:63:30
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:63:51
+   63 |                for K in Q'Range loop Q (K) := M.Geoms.Geom_Quat (4 * I + K); end loop;
+      |                                               ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 4 * I
+--> mj-spatial_tendon_models.adb:63:65
+   63 |                for K in Q'Range loop Q (K) := M.Geoms.Geom_Quat (4 * I + K); end loop;
+      |                                                                  ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 4 * I + K
+--> mj-spatial_tendon_models.adb:63:69
+   63 |                for K in Q'Range loop Q (K) := M.Geoms.Geom_Quat (4 * I + K); end loop;
+      |                                                                  ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: loop invariant at line 56 should mention K
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:63:69
+   63 |                for K in Q'Range loop Q (K) := M.Geoms.Geom_Quat (4 * I + K); end loop;
+      |                                                                  ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + possible fix: loop invariant at line 56 should mention K
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Bounded (Q, 1.000001)
+--> mj-spatial_tendon_models.adb:66:32
+   66 |                R := MJ.Smooth_Math.Rotation (Q);
+      |                     ~~~~~~~~~~~~~~^~~~~~~~~~~~
+      + in inlined expression function body at mj-smooth_math.ads:106
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-spatial_tendon_models.adb:67:29
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:68:17
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                   ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:68:32
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                 ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:68:32
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                 ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:68:60
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                                        ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendon_models.adb:68:73
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                                                          ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I + A
+--> mj-spatial_tendon_models.adb:68:77
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                                                          ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: loop invariant at line 56 should mention A
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:68:81
+   68 |                   T.Geometries (I + 1).Position (A) := M.Geoms.Geom_Pos (3 * I + A - 1);
+      |                                                                          ~~~~~~~~~~^~~
+      + reason for check: result of subtraction must be a valid index into the array
+      + possible fix: loop invariant at line 56 should mention A
+   56 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-spatial_tendon_models.adb:69:32
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:69:38
+   69 |                   for B in 1 .. 3 loop T.Geometries (I + 1).Orientation (A, B) := R (A - 1, B - 1); end loop;
+      |                                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:69:53
+   69 |                   for B in 1 .. 3 loop T.Geometries (I + 1).Orientation (A, B) := R (A - 1, B - 1); end loop;
+      |                                                      ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:69:53
+   69 |                   for B in 1 .. 3 loop T.Geometries (I + 1).Orientation (A, B) := R (A - 1, B - 1); end loop;
+      |                                                      ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:71:14
+   71 |                T.Geometries (I + 1).Kind := (if M.Geoms.Geom_Type (I) = 2
+      |                ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:71:29
+   71 |                T.Geometries (I + 1).Kind := (if M.Geoms.Geom_Type (I) = 2
+      |                              ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:71:29
+   71 |                T.Geometries (I + 1).Kind := (if M.Geoms.Geom_Type (I) = 2
+      |                              ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:71:53
+   71 |                T.Geometries (I + 1).Kind := (if M.Geoms.Geom_Type (I) = 2
+      |                                                 ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:71:65
+   71 |                T.Geometries (I + 1).Kind := (if M.Geoms.Geom_Type (I) = 2
+      |                                                                    ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:73:14
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:73:29
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                              ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:73:29
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                              ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:73:51
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                                               ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * I
+--> mj-spatial_tendon_models.adb:73:65
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                                                                  ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:73:65
+   73 |                T.Geometries (I + 1).Radius := M.Geoms.Geom_Size (3 * I);
+      |                                                                  ~~^~~
+      + reason for check: result of multiplication must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:76:22
+   76 |          for I in 0 .. T.Nw - 1 loop
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:77:33
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:77:33
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:77:53
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                                       ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:78:22
+   78 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:78:50
+   78 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                                                    ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:79:22
+   79 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:79:48
+   79 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                                                  ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:80:24
+   80 |             Obj := M.Wraps.Wrap_Objid (I);
+      |                    ~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:80:37
+   80 |             Obj := M.Wraps.Wrap_Objid (I);
+      |                                        ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:81:22
+   81 |             case M.Wraps.Wrap_Type (I) is
+      |                  ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:81:34
+   81 |             case M.Wraps.Wrap_Type (I) is
+      |                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:82:24
+   82 |                when 2 => T.Nodes (I + 1) := (Kind => Pulley_Node, Divisor => M.Wraps.Wrap_Prm (I), others => <>);
+      |                          ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:82:34
+   82 |                when 2 => T.Nodes (I + 1) := (Kind => Pulley_Node, Divisor => M.Wraps.Wrap_Prm (I), others => <>);
+      |                                   ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:82:34
+   82 |                when 2 => T.Nodes (I + 1) := (Kind => Pulley_Node, Divisor => M.Wraps.Wrap_Prm (I), others => <>);
+      |                                   ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:82:82
+   82 |                when 2 => T.Nodes (I + 1) := (Kind => Pulley_Node, Divisor => M.Wraps.Wrap_Prm (I), others => <>);
+      |                                                                              ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:82:93
+   82 |                when 2 => T.Nodes (I + 1) := (Kind => Pulley_Node, Divisor => M.Wraps.Wrap_Prm (I), others => <>);
+      |                                                                                                ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:84:36
+   84 |                   if Obj not in 0 .. T.Ns - 1 then Free (T); return; end if;
+      |                                      ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:85:17
+   85 |                   T.Nodes (I + 1) := (Kind => Site_Node, Object_Id => Obj, others => <>);
+      |                   ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:85:27
+   85 |                   T.Nodes (I + 1) := (Kind => Site_Node, Object_Id => Obj, others => <>);
+      |                            ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:85:27
+   85 |                   T.Nodes (I + 1) := (Kind => Site_Node, Object_Id => Obj, others => <>);
+      |                            ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for Obj
+--> mj-spatial_tendon_models.adb:85:68
+   85 |                   T.Nodes (I + 1) := (Kind => Site_Node, Object_Id => Obj, others => <>);
+      |                                                                       ^~~
+      + reason for check: value must fit in component type
+      + possible fix: loop invariant at line 77 should mention Obj
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:87:36
+   87 |                   if Obj not in 0 .. T.Ng - 1
+      |                                      ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:88:33
+   88 |                     or else M.Geoms.Geom_Type (Obj) /= (if M.Wraps.Wrap_Type (I) = 4 then 2 else 5)
+      |                             ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:88:45
+   88 |                     or else M.Geoms.Geom_Type (Obj) /= (if M.Wraps.Wrap_Type (I) = 4 then 2 else 5)
+      |                                                ^~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop invariant at line 77 should mention Obj
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:88:64
+   88 |                     or else M.Geoms.Geom_Type (Obj) /= (if M.Wraps.Wrap_Type (I) = 4 then 2 else 5)
+      |                                                            ~~~~~~~^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:88:76
+   88 |                     or else M.Geoms.Geom_Type (Obj) /= (if M.Wraps.Wrap_Type (I) = 4 then 2 else 5)
+      |                                                                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:89:33
+   89 |                     or else M.Wraps.Wrap_Prm (I) < -1.0
+      |                             ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:89:44
+   89 |                     or else M.Wraps.Wrap_Prm (I) < -1.0
+      |                                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:90:33
+   90 |                     or else M.Wraps.Wrap_Prm (I) > Real (Max_Objects)
+      |                             ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:90:44
+   90 |                     or else M.Wraps.Wrap_Prm (I) > Real (Max_Objects)
+      |                                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-spatial_tendon_models.adb:92:25
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:92:41
+   92 |                   if Real (Integer (M.Wraps.Wrap_Prm (I))) /= M.Wraps.Wrap_Prm (I) then Free (T); return; end if;
+      |                                     ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Wraps.Wrap_Prm (I)
+--> mj-spatial_tendon_models.adb:92:41
+   92 |                   if Real (Integer (M.Wraps.Wrap_Prm (I))) /= M.Wraps.Wrap_Prm (I) then Free (T); return; end if;
+      |                                     ~~~~~~~^~~~~~~~~~~~
+      + reason for check: value must be convertible to the target type of the conversion
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:92:52
+   92 |                   if Real (Integer (M.Wraps.Wrap_Prm (I))) /= M.Wraps.Wrap_Prm (I) then Free (T); return; end if;
+      |                                                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:92:67
+   92 |                   if Real (Integer (M.Wraps.Wrap_Prm (I))) /= M.Wraps.Wrap_Prm (I) then Free (T); return; end if;
+      |                                                               ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:92:78
+   92 |                   if Real (Integer (M.Wraps.Wrap_Prm (I))) /= M.Wraps.Wrap_Prm (I) then Free (T); return; end if;
+      |                                                                                 ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:93:17
+   93 |                   T.Nodes (I + 1) := (Kind => Geometry_Node, Object_Id => Obj,
+      |                   ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:93:27
+   93 |                   T.Nodes (I + 1) := (Kind => Geometry_Node, Object_Id => Obj,
+      |                            ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:93:27
+   93 |                   T.Nodes (I + 1) := (Kind => Geometry_Node, Object_Id => Obj,
+      |                            ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for Obj
+--> mj-spatial_tendon_models.adb:93:72
+   93 |                   T.Nodes (I + 1) := (Kind => Geometry_Node, Object_Id => Obj,
+      |                                                                           ^~~
+      + reason for check: value must fit in component type
+      + possible fix: loop invariant at line 77 should mention Obj
+   77 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |             ^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:94:45
+   94 |                     Side_Id => Integer (M.Wraps.Wrap_Prm (I)), others => <>);
+      |                                         ~~~~~~~^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Wraps.Wrap_Prm (I)
+--> mj-spatial_tendon_models.adb:94:45
+   94 |                     Side_Id => Integer (M.Wraps.Wrap_Prm (I)), others => <>);
+      |                                         ~~~~~~~^~~~~~~~~~~~
+      + reason for check: value must be convertible to the target type of the conversion
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:94:56
+   94 |                     Side_Id => Integer (M.Wraps.Wrap_Prm (I)), others => <>);
+      |                                                           ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:98:22
+   98 |          for I in 0 .. T.Nt - 1 loop
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:99:33
+   99 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove T /= null
+--> mj-spatial_tendon_models.adb:99:33
+   99 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                    ^~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:99:53
+   99 |             pragma Loop_Invariant (T /= null and then T.Nb = M.S.Nbody
+      |                                                       ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:100:22
+  100 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:100:50
+  100 |               and then T.Nt = M.S.Ntendon and then T.Ns = M.S.Nsite
+      |                                                    ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:101:22
+  101 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                        ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:101:48
+  101 |               and then T.Ng = M.S.Ngeom and then T.Nw = M.S.Nwrap);
+      |                                                  ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:102:22
+  102 |             if M.Tendons.Tendon_Num (I) not in 2 .. T.Nw
+      |                ~~~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:102:35
+  102 |             if M.Tendons.Tendon_Num (I) not in 2 .. T.Nw
+      |                                      ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:102:51
+  102 |             if M.Tendons.Tendon_Num (I) not in 2 .. T.Nw
+      |                                                     ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:103:29
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                       ~~~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:103:42
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                                             ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:103:58
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                                                            ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for T.Nw - M.Tendons.Tendon_Num (I)
+--> mj-spatial_tendon_models.adb:103:62
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                                                            ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of subtraction must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:103:73
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                                                                   ~~~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:103:86
+  103 |               or else M.Tendons.Tendon_Adr (I) not in 0 .. T.Nw - M.Tendons.Tendon_Num (I)
+      |                                                                                         ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:105:11
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |             ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:105:23
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                        ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:105:23
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                        ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:105:50
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                            ~~~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Tendons.Tendon_Adr (I)
+--> mj-spatial_tendon_models.adb:105:50
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                            ~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: value must fit in component type
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:105:63
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:105:85
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                                                               ~~~~~~~~~^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for M.Tendons.Tendon_Num (I)
+--> mj-spatial_tendon_models.adb:105:85
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                                                               ~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: value must fit in component type
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:105:98
+  105 |             T.Tendons (I + 1) := (First => M.Tendons.Tendon_Adr (I), Count => M.Tendons.Tendon_Num (I),
+      |                                                                                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:106:30
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:106:54
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                       ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:106:54
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                       ~~^~~
+      + reason for check: result of multiplication must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:106:78
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                                        ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:106:102
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                                                                       ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I + 1
+--> mj-spatial_tendon_models.adb:106:106
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                                                                       ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:106:106
+  106 |               Lower => M.Tendons.Tendon_Lengthspring (2 * I), Upper => M.Tendons.Tendon_Lengthspring (2 * I + 1),
+      |                                                                                                       ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:107:34
+  107 |               Stiffness => M.Tendons.Tendon_Stiffness (I), Damping => M.Tendons.Tendon_Damping (I),
+      |                            ~~~~~~~~~^~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:107:53
+  107 |               Stiffness => M.Tendons.Tendon_Stiffness (I), Damping => M.Tendons.Tendon_Damping (I),
+      |                                                        ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:107:77
+  107 |               Stiffness => M.Tendons.Tendon_Stiffness (I), Damping => M.Tendons.Tendon_Damping (I),
+      |                                                                       ~~~~~~~~~^~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:107:94
+  107 |               Stiffness => M.Tendons.Tendon_Stiffness (I), Damping => M.Tendons.Tendon_Damping (I),
+      |                                                                                                 ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:108:38
+  108 |               Spring_Linear => M.Tendons.Tendon_Stiffnesspoly (2 * I),
+      |                                ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:108:63
+  108 |               Spring_Linear => M.Tendons.Tendon_Stiffnesspoly (2 * I),
+      |                                                                ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:108:63
+  108 |               Spring_Linear => M.Tendons.Tendon_Stiffnesspoly (2 * I),
+      |                                                                ~~^~~
+      + reason for check: result of multiplication must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:109:41
+  109 |               Spring_Quadratic => M.Tendons.Tendon_Stiffnesspoly (2 * I + 1),
+      |                                   ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:109:66
+  109 |               Spring_Quadratic => M.Tendons.Tendon_Stiffnesspoly (2 * I + 1),
+      |                                                                   ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I + 1
+--> mj-spatial_tendon_models.adb:109:70
+  109 |               Spring_Quadratic => M.Tendons.Tendon_Stiffnesspoly (2 * I + 1),
+      |                                                                   ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:109:70
+  109 |               Spring_Quadratic => M.Tendons.Tendon_Stiffnesspoly (2 * I + 1),
+      |                                                                   ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:110:38
+  110 |               Damper_Linear => M.Tendons.Tendon_Dampingpoly (2 * I),
+      |                                ~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:110:61
+  110 |               Damper_Linear => M.Tendons.Tendon_Dampingpoly (2 * I),
+      |                                                              ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:110:61
+  110 |               Damper_Linear => M.Tendons.Tendon_Dampingpoly (2 * I),
+      |                                                              ~~^~~
+      + reason for check: result of multiplication must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:111:41
+  111 |               Damper_Quadratic => M.Tendons.Tendon_Dampingpoly (2 * I + 1));
+      |                                   ~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I
+--> mj-spatial_tendon_models.adb:111:64
+  111 |               Damper_Quadratic => M.Tendons.Tendon_Dampingpoly (2 * I + 1));
+      |                                                                 ~~^~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * I + 1
+--> mj-spatial_tendon_models.adb:111:68
+  111 |               Damper_Quadratic => M.Tendons.Tendon_Dampingpoly (2 * I + 1));
+      |                                                                 ~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:111:68
+  111 |               Damper_Quadratic => M.Tendons.Tendon_Dampingpoly (2 * I + 1));
+      |                                                                 ~~~~~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:113:41
+  113 |                P : constant Parameters := T.Tendons (I + 1);
+      |                                           ~^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for I + 1
+--> mj-spatial_tendon_models.adb:113:53
+  113 |                P : constant Parameters := T.Tendons (I + 1);
+      |                                                      ~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-spatial_tendon_models.adb:113:53
+  113 |                P : constant Parameters := T.Tendons (I + 1);
+      |                                                      ~~^~~
+      + reason for check: result of addition must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:114:39
+  114 |                Ns : constant Natural := T.Ns;
+      |                                         ~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:115:39
+  115 |                Ng : constant Natural := T.Ng;
+      |                                         ~^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendon_models.adb:116:13
+  116 |                Sites : constant Site_Array (0 .. Ns - 1) := T.Sites;
+      |                ^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:116:59
+  116 |                Sites : constant Site_Array (0 .. Ns - 1) := T.Sites;
+      |                                                             ~^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendon_models.adb:116:59
+  116 |                Sites : constant Site_Array (0 .. Ns - 1) := T.Sites;
+      |                                                             ~^~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendon_models.adb:117:13
+  117 |                Geometries : constant Geometry_Array (0 .. Ng - 1) := T.Geometries;
+      |                ^~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:117:68
+  117 |                Geometries : constant Geometry_Array (0 .. Ng - 1) := T.Geometries;
+      |                                                                      ~^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendon_models.adb:117:68
+  117 |                Geometries : constant Geometry_Array (0 .. Ng - 1) := T.Geometries;
+      |                                                                      ~^~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendon_models.adb:118:13
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                ^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-spatial_tendon_models.adb:118:65
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                                   ~^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-spatial_tendon_models.adb:118:65
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                                   ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: slice bounds must fit in the underlying array
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-spatial_tendon_models.adb:118:65
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                                   ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for P.First + 1
+--> mj-spatial_tendon_models.adb:118:81
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                                            ~~~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for P.First + P.Count
+--> mj-spatial_tendon_models.adb:118:96
+  118 |                Route : constant Route_Array (0 .. P.Count - 1) := T.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                                                           ~~~~~~~~^~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/spatial-integration-proof-gpku2n78/mj-spatial_tendon_models-Load_Valid/mj-spatial_tendon_models-obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 247.1 s, peak group RSS 1336 MB

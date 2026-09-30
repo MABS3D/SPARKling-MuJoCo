@@ -1,0 +1,25 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: incompatible ghost policies in effect
+--> mj-spatial_tendons.adb:213:37
+  213 |             pragma Loop_Invariant (V = Velocity_Prefix (J, Qvel, K + 1));
+      |                                        ^~~~~~~~~~~~~~~
+      + "Velocity_Prefix" declared at mj-spatial_tendons.ads:90 with ghost policy "Ignore"
+      --> mj-spatial_tendons.ads:90:13
+   90 |       function Velocity_Prefix (J, Qvel : Real_Array; Count : Natural) return Real with
+      |                ^
+      + "Velocity_Prefix" used at line 213 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-spatial_tendons.ads:103:32
+  103 |         Post => Velocity'Result = Velocity_Prefix (J, Qvel, J'Length);
+      |                                   ^~~~~~~~~~~~~~~
+      + "Velocity_Prefix" declared at line 90 with ghost policy "Ignore"
+   90 |       function Velocity_Prefix (J, Qvel : Real_Array; Count : Natural) return Real with
+      |                ^
+      + "Velocity_Prefix" used at line 103 with ghost policy "Check"
+gnatprove: error during generation of Global contracts
+guarded: elapsed 6.7 s, peak group RSS 58 MB

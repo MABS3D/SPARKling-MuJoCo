@@ -1,0 +1,40 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 .         .                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    .         .                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  18         .    18 (CVC5 61%, Z3 33%, altergo 6%)           .          .
+Assertions                        .         .                                    .           .          .
+Functional Contracts              1         .                             1 (CVC5)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       1         1                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            20    1 (5%)                             19 (95%)           .          .
+
+
+max steps used for successful proof: 32250
+
+============================
+Most difficult proved checks
+============================
+
+mj-tendon_vectors.adb:18:22: fp_overflow check proved in max 2 seconds
+mj-tendon_vectors.ads:43:14: postcondition proved in max 1 seconds
+mj-tendon_vectors.adb:19:22: fp_overflow check proved in max 1 seconds
+mj-tendon_vectors.adb:18:30: fp_overflow check proved in max 1 seconds
+mj-tendon_vectors.adb:18:14: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-tendon_vectors, 1 subprograms and packages out of 1 analyzed
+  MJ.Tendon_Vectors.Cross at mj-tendon_vectors.ads:41 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (19 checks)

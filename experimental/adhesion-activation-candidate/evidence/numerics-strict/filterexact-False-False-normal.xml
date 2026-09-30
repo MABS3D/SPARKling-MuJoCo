@@ -1,0 +1,4 @@
+<mujoco><compiler angle="radian"/>
+    <option timestep="0.002" gravity="0 0 -9.81" integrator="Euler">
+      <flag constraint="disable" /></option>
+    <worldbody><body><joint name="j" axis="0 1 0" armature=".1" damping=".2"/><inertial pos=".2 0 0" mass="1" diaginertia=".1 .2 .3"/></body></worldbody><actuator><general joint="j" dyntype="filterexact" dynprm=".02" actearly="false" gainprm="1.7" biastype="affine" biasprm=".1 -.3 -.2" gear="-.7" ctrllimited="true" ctrlrange="-.5 .8" forcelimited="true" forcerange="-1 1.2"/><motor joint="j" gear=".2"/></actuator></mujoco>

@@ -1,0 +1,153 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-actuation-20260930/proofs/adhesion-small-2/mj-adhesion-obj/gnatprove/gnatprove.out
+guarded: elapsed 85.2 s, peak group RSS 308 MB
+ info: initialization of "W" proved
+--> mj-adhesion.adb:56:07
+
+ info: range check proved
+--> mj-adhesion.adb:56:07
+
+ info: initialization of "N" proved
+--> mj-adhesion.adb:57:07
+
+ info: precondition proved
+--> mj-adhesion.adb:59:07
+
+ info: assertion proved
+--> mj-adhesion.adb:60:32
+
+ info: range check proved
+--> mj-adhesion.adb:60:50
+
+ info: range check proved
+--> mj-adhesion.adb:60:61
+
+ info: precondition proved
+--> mj-adhesion.adb:60:75
+
+ info: range check proved
+--> mj-adhesion.adb:60:112
+
+ info: precondition proved
+--> mj-adhesion.adb:62:35
+
+ info: range check proved
+--> mj-adhesion.adb:62:54
+
+ info: precondition proved
+--> mj-adhesion.adb:62:57
+
+ info: range check proved
+--> mj-adhesion.adb:62:86
+
+ info: loop invariant initialization proved
+--> mj-adhesion.adb:63:43
+
+ info: loop invariant preservation proved
+--> mj-adhesion.adb:63:43
+
+ info: index check proved
+--> mj-adhesion.adb:63:86
+
+ medium: initialization check might fail
+--> mj-adhesion.adb:64:78
+   64 |             pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Moment (L) =
+      |                                                                                 ^~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Moment (L) = Normalize (Active_Sum (J, W, L, W'Length), Gap_Sum (Cs, Gap_J, Body_Id, L, Cs'Length), N)
+--> mj-adhesion.adb:64:78
+   64 |             pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Moment (L) =
+      |                                                                                 ^~~~~~~~~~~~
+   65 |               Normalize (Active_Sum (J, W, L, W'Length), Gap_Sum (Cs, Gap_J, Body_Id, L, Cs'Length), N)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Moment (L) = Normalize (Active_Sum (J, W, L, W'Length), Gap_Sum (Cs, Gap_J, Body_Id, L, Cs'Length), N)
+--> mj-adhesion.adb:64:78
+   64 |             pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Moment (L) =
+      |                                                                                 ^~~~~~~~~~~~
+   65 |               Normalize (Active_Sum (J, W, L, W'Length), Gap_Sum (Cs, Gap_J, Body_Id, L, Cs'Length), N)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-adhesion.adb:64:86
+
+ info: precondition proved
+--> mj-adhesion.adb:65:23
+
+ info: range check proved
+--> mj-adhesion.adb:65:41
+
+ info: range check proved
+--> mj-adhesion.adb:65:45
+
+ info: precondition proved
+--> mj-adhesion.adb:65:55
+
+ info: range check proved
+--> mj-adhesion.adb:65:84
+
+ info: range check proved
+--> mj-adhesion.adb:65:89
+
+ info: data dependencies proved
+--> mj-adhesion.ads:115:60
+
+ info: range check proved
+--> mj-adhesion.ads:117:45
+
+ info: initialization check proved
+--> mj-adhesion.ads:122:09
+
+ medium: postcondition might fail, cannot prove Moment (K) = Normalize (Active_Sum (J, [for R in J'Range (1) => Selected_Weight (Cs, Body_Id, Kind, R, Cs'Length)], K, J'Length (1)), Gap_Sum (Cs, Gap_J, Body_Id, K, Cs'Length), Relevant_Count (Cs, Body_Id, Cs'Length))
+--> mj-adhesion.ads:122:09
+  122 |            Moment (K) = Normalize
+      |            ^~~~~~~~~~~~~~~~~~~~~~
+      :
+  124 |               Gap_Sum (Cs, Gap_J, Body_Id, K, Cs'Length), Relevant_Count (Cs, Body_Id, Cs'Length))));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-adhesion.ads:122:17
+
+ info: precondition proved
+--> mj-adhesion.ads:123:12
+
+ info: range check proved
+--> mj-adhesion.ads:123:27
+
+ info: range check proved
+--> mj-adhesion.ads:123:38
+
+ info: precondition proved
+--> mj-adhesion.ads:123:52
+
+ info: range check proved
+--> mj-adhesion.ads:123:93
+
+ info: range check proved
+--> mj-adhesion.ads:123:104
+
+ info: range check proved
+--> mj-adhesion.ads:123:108
+
+ info: precondition proved
+--> mj-adhesion.ads:124:12
+
+ info: range check proved
+--> mj-adhesion.ads:124:41
+
+ info: range check proved
+--> mj-adhesion.ads:124:46
+
+ info: precondition proved
+--> mj-adhesion.ads:124:56
+
+ info: range check proved
+--> mj-adhesion.ads:124:87
+gnatprove: unproved check messages considered as errors

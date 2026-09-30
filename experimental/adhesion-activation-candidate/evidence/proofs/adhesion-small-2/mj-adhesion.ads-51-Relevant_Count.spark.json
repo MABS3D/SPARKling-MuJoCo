@@ -1,0 +1,829 @@
+{
+  "mj-adhesion.spark": {
+    "assumptions": [
+      {
+        "assumptions": [
+          {
+            "arg": 1,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 1,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 1,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_POST"
+        }
+      },
+      {
+        "assumptions": [
+          {
+            "arg": 1,
+            "predicate": "CLAIM_POST"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 1,
+            "predicate": "CLAIM_EFFECTS"
+          },
+          {
+            "arg": 2,
+            "predicate": "CLAIM_AORTE"
+          },
+          {
+            "arg": 1,
+            "predicate": "CLAIM_AORTE"
+          }
+        ],
+        "claim": {
+          "arg": 1,
+          "predicate": "CLAIM_AORTE"
+        }
+      }
+    ],
+    "entities": {
+      " 1": {
+        "name": "MJ.Adhesion.Relevant_Count",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-adhesion.ads",
+            "line": 51
+          }
+        ]
+      },
+      " 2": {
+        "name": "MJ.Adhesion.Relevant",
+        "sloc": [
+          {
+            "column": 13,
+            "file": "mj-adhesion.ads",
+            "line": 25
+          }
+        ]
+      }
+    },
+    "flow": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "flow",
+        "line": 51,
+        "message": {
+          "text": "implicit aspect Always_Terminates on \"Relevant_Count\" has been proved, subprogram will terminate"
+        },
+        "msg_id": 0,
+        "rule": "SUBPROGRAM_TERMINATION",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 29,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "flow",
+        "line": 54,
+        "message": {
+          "text": "data dependencies proved"
+        },
+        "msg_id": 1,
+        "rule": "GLOBAL_WRONG",
+        "severity": "info",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "pragma_assume": [],
+    "progress": "PROGRESS_PROOF",
+    "proof": [
+      {
+        "check_col": 66,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 52,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.022879
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006985
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.015883
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.012529
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005134
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 19,
+                "time": 0.020869
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 66,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 52,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 2,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00698499986901879
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 52,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003615
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003523
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 5.7e-05
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015841
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005057
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007583
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.011019
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 1e-06
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 17,
+                "time": 0.011239
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 52,
+        "message": {
+          "text": "precondition proved"
+        },
+        "msg_id": 3,
+        "rule": "VC_PRECONDITION",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 3,
+            "max_steps": 1,
+            "max_time": 0.00505700008943677
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 52,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014486
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.009513
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 21,
+                "time": 0.022027
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 52,
+        "message": {
+          "text": "subprogram variant proved"
+        },
+        "msg_id": 4,
+        "rule": "VC_SUBPROGRAM_VARIANT",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00951300002634525
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 33,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 53,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016397
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.005906
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.00145
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.014872
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.004787
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 17,
+                "time": 0.021134
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 33,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 53,
+        "message": {
+          "text": "index check proved"
+        },
+        "msg_id": 5,
+        "rule": "VC_INDEX_CHECK",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00590599980205297
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 8,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 53,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.016892
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.006241
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.000503
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.039184
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003479
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 107,
+                "time": 0.04612
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 8,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 53,
+        "message": {
+          "text": "overflow check proved"
+        },
+        "msg_id": 6,
+        "rule": "VC_OVERFLOW_CHECK",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00624099979177117
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 8,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 53,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.020421
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.000406
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.002327
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.017745
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.003796
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1e-06
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 8,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 53,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 7,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 2,
+            "max_steps": 1,
+            "max_time": 0.00379600003361702
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 74,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 55,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.020751
+              },
+              "Z3": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 1e-06
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.003492
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.015528
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.004332
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 29,
+                "time": 0.018661
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 74,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 55,
+        "message": {
+          "text": "range check proved"
+        },
+        "msg_id": 8,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "info",
+        "stats": {
+          "CVC5": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.0207509994506836
+          },
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00433199992403388
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_col": 15,
+        "check_file": "mj-adhesion.ads",
+        "check_line": 56,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.017338
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.00736
+              },
+              "altergo": {
+                "result": "High failure (signaled)",
+                "steps": 1,
+                "time": 0.007888
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 15,
+        "entity": 1,
+        "file": "mj-adhesion.ads",
+        "how_proved": "prover",
+        "line": 56,
+        "message": {
+          "text": "postcondition proved"
+        },
+        "msg_id": 9,
+        "rule": "VC_POSTCONDITION",
+        "severity": "info",
+        "stats": {
+          "Z3": {
+            "count": 1,
+            "max_steps": 1,
+            "max_time": 0.00736000016331673
+          }
+        },
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "skip_flow_proof": [],
+    "skip_proof": [],
+    "spark": {
+      " 1": "all"
+    },
+    "stop_reason": "STOP_REASON_NONE",
+    "timings": {
+      " 1": {
+        "gnat2why.vc_generation": 0.0215119998902082,
+        "gnatwhy3.init": 0.525029003620148,
+        "gnatwhy3.register_vcs": 0.0105839986354113,
+        "gnatwhy3.run_vcs": 2.80000003840541e-05,
+        "gnatwhy3.save_session": 0.00330500002019107,
+        "gnatwhy3.schedule_vcs": 0.19081799685955,
+        "gnatwhy3.transformations.counterexamples_dependent_intros": 0.0055740000680089,
+        "gnatwhy3.transformations.detect_polymorphism": 0.00175000005401671,
+        "gnatwhy3.transformations.discriminate_if_poly": 3.70000016118865e-05,
+        "gnatwhy3.transformations.eliminate_algebraic": 0.0114110000431538,
+        "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.00726399896666408,
+        "gnatwhy3.transformations.eliminate_builtin": 0.00576800014823675,
+        "gnatwhy3.transformations.eliminate_definition_conditionally": 0.000943000020924956,
+        "gnatwhy3.transformations.eliminate_epsilon": 0.00508499890565872,
+        "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 0.0090589988976717,
+        "gnatwhy3.transformations.eliminate_inductive": 0.00339500000700355,
+        "gnatwhy3.transformations.eliminate_literal": 0.00600099889561534,
+        "gnatwhy3.transformations.eliminate_projections_sums": 0.00318400003015995,
+        "gnatwhy3.transformations.eliminate_recursion": 0.000501998991239816,
+        "gnatwhy3.transformations.encoding_smt_if_poly": 2.59989992628107e-05,
+        "gnatwhy3.transformations.inline_trivial": 0.151724994182587,
+        "gnatwhy3.transformations.introduce_premises": 0.00338299898430705,
+        "gnatwhy3.transformations.monomorphise_goal": 0.000774000014644116,
+        "gnatwhy3.transformations.remove_unused": 0.0501549988985062,
+        "gnatwhy3.transformations.simplify_formula": 0.0119610000401735,
+        "gnatwhy3.transformations.split_goal_wp_conj": 0.00555199896916747,
+        "gnatwhy3.transformations.split_premise_right": 0.00910000037401915
+      },
+      "global": {
+        "flow analysis": 0.00226199999451637,
+        "globals (advanced)": 0.000927000015508384,
+        "globals (basic)": 0.00459000002592802,
+        "init_why_sections": 0.000881000014487654,
+        "marking": 0.00114599999506027,
+        "properties (advanced)": 0.00011600000289036,
+        "translation of standard": 0.00242400006391108
+      }
+    },
+    "warn_error": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 42,
+        "message": {
+          "text": "implicit function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 42,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 68,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 68,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 77,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-adhesion.ads",
+        "how_proved": "trivial",
+        "line": 77,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ]
+  }
+}

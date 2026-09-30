@@ -1,0 +1,4 @@
+<mujoco><compiler angle="radian"/><option timestep=".001" gravity="0 0 -1" integrator="Euler"><flag constraint="disable" eulerdamp="disable"/></option>
+                <worldbody><geom name="wrap" type="sphere" size=".4 .8" contype="0" conaffinity="0"/><site name="side" pos="0 0.6 0"/><site name="start" pos="-1 .1 .1"/>
+                <body pos="1 .1 .2"><joint name="j" type="slide" axis="0 1 0" damping=".03" armature=".1"/>
+                <joint type="hinge" axis="0 0 1" stiffness=".2" armature=".1"/><inertial pos=".1 0 .05" mass="1.4" diaginertia=".2 .3 .4"/><site name="end" pos=".1 .05 0"/></body></worldbody><tendon><spatial stiffness="2 .02 .01" damping=".03 .003 .001" springlength="1.4 1.6"><site site="start"/><geom geom="wrap" sidesite="side"/><site site="end"/></spatial></tendon><actuator><motor joint="j" gear=".7"/></actuator></mujoco>

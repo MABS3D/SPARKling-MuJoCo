@@ -1,0 +1,204 @@
+{
+  "status": "passed",
+  "policy": "Compatible",
+  "external": false,
+  "trajectory_steps": 100,
+  "seed": 20260923,
+  "samples_per_model": 24,
+  "oracle": "3.14.0",
+  "probe": "/var/tmp/sparkling-actuation-20260930/bin/smooth_probe",
+  "probe_sha256": "0f7bf3abda13e2b188893ae09aa8f9dcdb7acdfabcc4b778874925b48a0f87cd",
+  "normalization_edge_cases": 7,
+  "comparisons": 33840,
+  "scenarios": 360,
+  "fixtures": [
+    {
+      "name": "world",
+      "scenarios": 24,
+      "comparisons": 216,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "fixed",
+      "scenarios": 24,
+      "comparisons": 384,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "slide",
+      "scenarios": 24,
+      "comparisons": 672,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "hinge_motor",
+      "scenarios": 24,
+      "comparisons": 744,
+      "max_absolute": 5.995204332975845e-15,
+      "max_tolerance_ratio": 1.3203322883215052e-05
+    },
+    {
+      "name": "hinge_affine",
+      "scenarios": 24,
+      "comparisons": 744,
+      "max_absolute": 1.4210854715202004e-14,
+      "max_tolerance_ratio": 9.227128707335664e-06
+    },
+    {
+      "name": "branched_multijoint",
+      "scenarios": 24,
+      "comparisons": 3024,
+      "max_absolute": 3.907985046680551e-14,
+      "max_tolerance_ratio": 2.932179433627251e-05
+    },
+    {
+      "name": "shared_actuators",
+      "scenarios": 24,
+      "comparisons": 816,
+      "max_absolute": 1.5987211554602254e-14,
+      "max_tolerance_ratio": 1.012931855265794e-05
+    },
+    {
+      "name": "disable_gravity",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 1.4210854715202004e-14,
+      "max_tolerance_ratio": 6.207551553973103e-05
+    },
+    {
+      "name": "disable_spring",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 4.440892098500626e-14,
+      "max_tolerance_ratio": 5.875251155616819e-05
+    },
+    {
+      "name": "disable_damper",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 3.019806626980426e-14,
+      "max_tolerance_ratio": 6.235149693681005e-05
+    },
+    {
+      "name": "disable_actuation",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 3.552713678800501e-14,
+      "max_tolerance_ratio": 7.45839625552424e-05
+    },
+    {
+      "name": "disable_clampctrl",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 3.019806626980426e-14,
+      "max_tolerance_ratio": 4.236066019600672e-05
+    },
+    {
+      "name": "disable_eulerdamp",
+      "scenarios": 24,
+      "comparisons": 2952,
+      "max_absolute": 2.5757174171303632e-14,
+      "max_tolerance_ratio": 3.7505594337569374e-05
+    },
+    {
+      "name": "small_inertia",
+      "scenarios": 24,
+      "comparisons": 672,
+      "max_absolute": 0.0,
+      "max_tolerance_ratio": 0.0
+    },
+    {
+      "name": "chain_12",
+      "scenarios": 24,
+      "comparisons": 8856,
+      "max_absolute": 6.536993168992922e-13,
+      "max_tolerance_ratio": 0.00038795447818752395
+    }
+  ],
+  "failures": [],
+  "policy_tests_mode": "Strict",
+  "policy_tests": [
+    {
+      "name": "time_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "position_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "velocity_limit",
+      "forward": "SUCCESS",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "acceleration_limit",
+      "forward": "NUMERIC_LIMIT",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "singular",
+      "forward": "SINGULAR_INERTIA",
+      "step": "SINGULAR_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "ill_conditioned",
+      "forward": "ILL_CONDITIONED_INERTIA",
+      "step": "ILL_CONDITIONED_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "coupled_condition",
+      "forward": "ILL_CONDITIONED_INERTIA",
+      "step": "ILL_CONDITIONED_INERTIA",
+      "state_unchanged": true
+    },
+    {
+      "name": "external_acceleration",
+      "forward": "NUMERIC_LIMIT",
+      "step": "NUMERIC_LIMIT",
+      "state_unchanged": true
+    },
+    {
+      "name": "ball",
+      "create": "UNSUPPORTED_JOINT"
+    },
+    {
+      "name": "free",
+      "create": "UNSUPPORTED_JOINT"
+    },
+    {
+      "name": "rk4",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "discrete",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "ipc",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "constraints",
+      "create": "UNSUPPORTED_FEATURE"
+    },
+    {
+      "name": "fluid",
+      "create": "UNSUPPORTED_FEATURE"
+    }
+  ],
+  "seconds": 8.341494321997743,
+  "atol": 2e-10,
+  "rtol": 2e-10
+}

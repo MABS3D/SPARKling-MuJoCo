@@ -1,0 +1,27 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ medium: precondition might fail
+--> mj-spatial_tendon_models.adb:141:07
+  141 |          Load_Valid (M, T, Accepted);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: precondition of subprogram at mj-spatial_tendon_models.ads:49 should mention M
+      --> mj-spatial_tendon_models.ads:49:04
+   49 |       procedure Load (M : MJ.Models.Model; T : in out Description_Access;
+      |       ^
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Accepted" proved
+--> mj-spatial_tendon_models.ads:50:20
+
+ info: data dependencies proved
+--> mj-spatial_tendon_models.ads:51:06
+
+ medium: postcondition might fail, cannot prove Ready (T, M.S.Nbody)
+--> mj-spatial_tendon_models.ads:52:32
+   52 |         Post => (if Accepted then Ready (T, M.S.Nbody) and then Count (T) = M.S.Ntendon
+      |                                   ^~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/spatial-integration-proof-gpku2n78/mj-spatial_tendon_models-Load/mj-spatial_tendon_models-obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 14.2 s, peak group RSS 560 MB

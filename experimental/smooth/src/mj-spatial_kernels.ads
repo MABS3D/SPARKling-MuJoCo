@@ -145,4 +145,5 @@ package MJ.Spatial_Kernels with SPARK_Mode is
      Pre => Bounded (A, 1.0e54) and then Bounded (B, 1.0e54),
      Post => Bounded (Add_Wrenches'Result, 3.0e54)
        and then (for all K in Motion'Range => Add_Wrenches'Result (K) = A (K) + B (K));
+   pragma Inline_Always (Angular_Component, Linear_Component, Multiply, Dot);
 end MJ.Spatial_Kernels;

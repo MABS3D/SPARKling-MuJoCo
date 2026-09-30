@@ -1,0 +1,1009 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:15:07
+   15 |          Outputs : Real_Array (0 .. 3 * Nt - 1) := (others => 0.0);
+      |          ^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for 3 * Nt
+--> mj-data-spatial_tendon_phase.adb:15:36
+   15 |          Outputs : Real_Array (0 .. 3 * Nt - 1) := (others => 0.0);
+      |                                     ~~^~~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:15:49
+   15 |          Outputs : Real_Array (0 .. 3 * Nt - 1) := (others => 0.0);
+      |                                                    ^~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for D.Nv
+--> mj-data-spatial_tendon_phase.adb:16:33
+   16 |          Nv : constant Natural := D.Nv;
+      |                                   ~^~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail, cannot prove lower bound for D.Nb
+--> mj-data-spatial_tendon_phase.adb:17:33
+   17 |          Nb : constant Natural := D.Nb;
+      |                                   ~^~~
+      + reason for check: default component value must fit in the type
+      + provers reached step limit before completing the proof
+
+ info: range check proved
+--> mj-data-spatial_tendon_phase.adb:18:07
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:18:61
+   18 |          Springs, Dampers, Total : Real_Array (0 .. Nv - 1) := (others => 0.0);
+      |                                                                ^~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:22:30
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:23:19
+   23 |             Springs (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                      ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:23:65
+   23 |             Springs (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                                                             ~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:23:65
+   23 |             Springs (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                                                             ~~~~~~~^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:23:72
+   23 |             Springs (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                                                                           ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:24:13
+   24 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |               ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:24:28
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:24:56
+   24 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |                                                    ~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:24:56
+   24 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |                                                    ~~~~~~~^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:24:63
+   24 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:25:13
+   25 |               D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping,
+      |               ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:25:28
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:25:43
+   25 |               D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping,
+      |                                             ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:25:58
+   25 |               D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping,
+      |                                                             ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:27:19
+   27 |             Dampers (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                      ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:27:65
+   27 |             Dampers (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                                                             ~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:27:65
+   27 |             Dampers (J) := MJ.Smooth_Kernels.Passive_Force (D.State.Qpos (J),
+      |                                                             ~~~~~~~^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:27:72
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:28:13
+   28 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |               ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:28:28
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:28:56
+   28 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |                                                    ~~~~~~~^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:28:56
+   28 |               D.Joint_Config (J).Spring_Reference, D.State.Qvel (J),
+      |                                                    ~~~~~~~^~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:28:63
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:29:13
+   29 |               D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping,
+      |               ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:29:28
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:29:43
+   29 |               D.Joint_Config (J).Stiffness, D.Joint_Config (J).Damping,
+      |                                             ~^~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: index check proved
+--> mj-data-spatial_tendon_phase.adb:29:58
+
+ medium: precondition might fail, cannot prove Stable_Ready (D)
+--> mj-data-spatial_tendon_phase.adb:33:18
+   33 |             Pipeline.Ensure_Jacobians (D, Result);
+      |             ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:679
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:37:47
+   37 |                Ns : constant Natural := D.Tendons.Ns;
+      |                                         ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:38:47
+   38 |                Ng : constant Natural := D.Tendons.Ng;
+      |                                         ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:39:13
+   39 |                Sites : ST.Site_Array (0 .. Ns - 1) := D.Tendons.Sites;
+      |                ^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:39:61
+   39 |                Sites : ST.Site_Array (0 .. Ns - 1) := D.Tendons.Sites;
+      |                                                       ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:39:61
+   39 |                Sites : ST.Site_Array (0 .. Ns - 1) := D.Tendons.Sites;
+      |                                                       ~~~~~~~~~^~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:40:13
+   40 |                Geoms : ST.Geometry_Array (0 .. Ng - 1) := D.Tendons.Geometries;
+      |                ^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:40:65
+   40 |                Geoms : ST.Geometry_Array (0 .. Ng - 1) := D.Tendons.Geometries;
+      |                                                           ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:40:65
+   40 |                Geoms : ST.Geometry_Array (0 .. Ng - 1) := D.Tendons.Geometries;
+      |                                                           ~~~~~~~~~^~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Origins" proved
+--> mj-data-spatial_tendon_phase.adb:41:13
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:41:13
+   41 |                Origins : ST.Vector_Array (0 .. Nb - 1);
+      |                ^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Bodies in 1 .. 4096
+--> mj-data-spatial_tendon_phase.adb:42:69
+   42 |                Linear : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Linear_Jacobian.all, Nb, Nv);
+      |                                                      ~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:42:108
+   42 |                Linear : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Linear_Jacobian.all, Nb, Nv);
+      |                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Bodies in 1 .. 4096
+--> mj-data-spatial_tendon_phase.adb:43:70
+   43 |                Angular : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Angular_Jacobian.all, Nb, Nv);
+      |                                                       ~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:43:110
+   43 |                Angular : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Angular_Jacobian.all, Nb, Nv);
+      |                                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ info: initialization of "R" proved
+--> mj-data-spatial_tendon_phase.adb:44:13
+
+ info: initialization of "V" proved
+--> mj-data-spatial_tendon_phase.adb:45:13
+
+ info: initialization of "Position" proved
+--> mj-data-spatial_tendon_phase.adb:45:16
+
+ info: initialization of "B" proved
+--> mj-data-spatial_tendon_phase.adb:46:13
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:48:42
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:50:25
+   50 |                   Origins (Body_Id) := (D.Kinematic.Bodies (Body_Id).Center (0),
+      |                            ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:50:49
+   50 |                   Origins (Body_Id) := (D.Kinematic.Bodies (Body_Id).Center (0),
+      |                                         ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:50:58
+   50 |                   Origins (Body_Id) := (D.Kinematic.Bodies (Body_Id).Center (0),
+      |                                                             ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:51:29
+   51 |                     D.Kinematic.Bodies (Body_Id).Center (1), D.Kinematic.Bodies (Body_Id).Center (2));
+      |                     ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:51:38
+   51 |                     D.Kinematic.Bodies (Body_Id).Center (1), D.Kinematic.Bodies (Body_Id).Center (2));
+      |                                         ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:51:70
+   51 |                     D.Kinematic.Bodies (Body_Id).Center (1), D.Kinematic.Bodies (Body_Id).Center (2));
+      |                                                              ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:51:79
+   51 |                     D.Kinematic.Bodies (Body_Id).Center (1), D.Kinematic.Bodies (Body_Id).Center (2));
+      |                                                                                  ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:53:34
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:54:28
+   54 |                   B := Sites (I).Body_Id;
+      |                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:55:32
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:56:46
+   56 |                      Position (A) := D.Kinematic.Bodies (B).Position (A - 1);
+      |                                      ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:56:55
+   56 |                      Position (A) := D.Kinematic.Bodies (B).Position (A - 1);
+      |                                                          ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 53 should mention B in a loop invariant
+   53 |                for I in Sites'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:57:35
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:57:63
+   57 |                      for C in 1 .. 3 loop R (A, C) := D.Kinematic.Bodies (B).Rotation (A - 1, C - 1); end loop;
+      |                                                       ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:57:72
+   57 |                      for C in 1 .. 3 loop R (A, C) := D.Kinematic.Bodies (B).Rotation (A - 1, C - 1); end loop;
+      |                                                                           ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 53 should mention B in a loop invariant
+   53 |                for I in Sites'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:60:23
+   60 |                   Sites (I).Position := TV.Add (Position, TV.Multiply (R, Sites (I).Position));
+      |                          ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-data-spatial_tendon_phase.adb:60:40
+   60 |                   Sites (I).Position := TV.Add (Position, TV.Multiply (R, Sites (I).Position));
+      |                                         ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop at line 53 should mention Position in a loop invariant
+   53 |                for I in Sites'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-data-spatial_tendon_phase.adb:60:58
+   60 |                   Sites (I).Position := TV.Add (Position, TV.Multiply (R, Sites (I).Position));
+      |                                                           ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + possible fix: loop at line 53 should mention R and Sites in a loop invariant
+   53 |                for I in Sites'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:60:79
+   60 |                   Sites (I).Position := TV.Add (Position, TV.Multiply (R, Sites (I).Position));
+      |                                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:62:34
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:63:28
+   63 |                   B := Geoms (I).Body_Id;
+      |                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:64:32
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:65:46
+   65 |                      Position (A) := D.Kinematic.Bodies (B).Position (A - 1);
+      |                                      ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:65:55
+   65 |                      Position (A) := D.Kinematic.Bodies (B).Position (A - 1);
+      |                                                          ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 62 should mention B in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:66:35
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:66:63
+   66 |                      for C in 1 .. 3 loop R (A, C) := D.Kinematic.Bodies (B).Rotation (A - 1, C - 1); end loop;
+      |                                                       ~~~~~~~~~~~^~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:66:72
+   66 |                      for C in 1 .. 3 loop R (A, C) := D.Kinematic.Bodies (B).Rotation (A - 1, C - 1); end loop;
+      |                                                                           ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 62 should mention B in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:69:23
+   69 |                   Geoms (I).Position := TV.Add (Position, TV.Multiply (R, Geoms (I).Position));
+      |                          ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove V (1) in -Limit .. Limit
+--> mj-data-spatial_tendon_phase.adb:69:40
+   69 |                   Geoms (I).Position := TV.Add (Position, TV.Multiply (R, Geoms (I).Position));
+      |                                         ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:12
+      + possible fix: loop at line 62 should mention Position in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-data-spatial_tendon_phase.adb:69:58
+   69 |                   Geoms (I).Position := TV.Add (Position, TV.Multiply (R, Geoms (I).Position));
+      |                                                           ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + possible fix: loop at line 62 should mention Geoms and R in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:69:79
+   69 |                   Geoms (I).Position := TV.Add (Position, TV.Multiply (R, Geoms (I).Position));
+      |                                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:70:32
+
+ medium: precondition might fail, cannot prove M (1, 1) in -1.000001 .. 1.000001
+--> mj-data-spatial_tendon_phase.adb:71:26
+   71 |                      V := TV.Multiply (R, (Geoms (I).Orientation (1, C),
+      |                           ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   72 |                        Geoms (I).Orientation (2, C), Geoms (I).Orientation (3, C)));
+      |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-tendon_vectors.ads:15
+      + possible fix: loop at line 62 should mention R in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:71:48
+   71 |                      V := TV.Multiply (R, (Geoms (I).Orientation (1, C),
+      |                                                   ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:72:28
+   72 |                        Geoms (I).Orientation (2, C), Geoms (I).Orientation (3, C)));
+      |                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:72:58
+   72 |                        Geoms (I).Orientation (2, C), Geoms (I).Orientation (3, C)));
+      |                                                             ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:73:35
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:73:47
+   73 |                      for A in 1 .. 3 loop Geoms (I).Orientation (A, C) := V (A); end loop;
+      |                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:77:31
+   77 |                for T in D.Tendons.Tendons'Range loop
+      |                         ~~~~~~~~~^~~~~~~~
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:77:46
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:79:58
+   79 |                      P : constant TM.Parameters := D.Tendons.Tendons (T);
+      |                                                    ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:79:68
+   79 |                      P : constant TM.Parameters := D.Tendons.Tendons (T);
+      |                                                                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:80:19
+   80 |                      Route : constant ST.Route_Array (0 .. P.Count - 1) :=
+      |                      ^~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:81:30
+   81 |                        D.Tendons.Nodes (P.First + 1 .. P.First + P.Count);
+      |                        ~~~~~~~~~^
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:81:30
+   81 |                        D.Tendons.Nodes (P.First + 1 .. P.First + P.Count);
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: slice bounds must fit in the underlying array
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:81:30
+   81 |                        D.Tendons.Nodes (P.First + 1 .. P.First + P.Count);
+      |                        ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for P.First + 1
+--> mj-data-spatial_tendon_phase.adb:81:46
+   81 |                        D.Tendons.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                         ~~~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for P.First + P.Count
+--> mj-data-spatial_tendon_phase.adb:81:61
+   81 |                        D.Tendons.Nodes (P.First + 1 .. P.First + P.Count);
+      |                                                        ~~~~~~~~^~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:82:19
+   82 |                      Points : ST.Point_Array (0 .. 3 * P.Count - 1);
+      |                      ^~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 3 * P.Count
+--> mj-data-spatial_tendon_phase.adb:82:51
+   82 |                      Points : ST.Point_Array (0 .. 3 * P.Count - 1);
+      |                                                    ~~^~~~~~~~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Row" proved
+--> mj-data-spatial_tendon_phase.adb:83:19
+
+ medium: range check might fail
+--> mj-data-spatial_tendon_phase.adb:83:19
+   83 |                      Row : Real_Array (0 .. Nv - 1);
+      |                      ^~~
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Length" proved
+--> mj-data-spatial_tendon_phase.adb:84:19
+
+ info: initialization of "Velocity" proved
+--> mj-data-spatial_tendon_phase.adb:84:27
+
+ info: initialization of "Spring" proved
+--> mj-data-spatial_tendon_phase.adb:84:37
+
+ info: initialization of "Damper" proved
+--> mj-data-spatial_tendon_phase.adb:84:45
+
+ info: initialization of "Eval" proved
+--> mj-data-spatial_tendon_phase.adb:86:19
+
+ medium: precondition might fail
+--> mj-data-spatial_tendon_phase.adb:89:21
+   89 |                      ST.Evaluate (Route, Sites, Geoms, Origins, Linear, Angular,
+      |                      ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   90 |                                   Eval, Length, Row, Points, Count);
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 62 should mention Geoms in a loop invariant
+   62 |                for I in Geoms'Range loop
+      |                                     ^
+      + provers reached step limit before completing the proof
+
+ warning: "Points" is set by "Evaluate" but not used after the call
+--> mj-data-spatial_tendon_phase.adb:90:51
+   90 |                                   Eval, Length, Row, Points, Count);
+      |                                                      ^~~~~~
+
+ warning: "Count" is set by "Evaluate" but not used after the call
+--> mj-data-spatial_tendon_phase.adb:90:59
+   90 |                                   Eval, Length, Row, Points, Count);
+      |                                                              ^~~~~
+
+ medium: precondition might fail, cannot prove J'First = 0
+--> mj-data-spatial_tendon_phase.adb:92:33
+   92 |                      Velocity := ST.Velocity (Row, D.State.Qvel.all);
+      |                                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:92:62
+   92 |                      Velocity := ST.Velocity (Row, D.State.Qvel.all);
+      |                                                    ~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail, cannot prove Length in 0.0 .. 1.0e30
+--> mj-data-spatial_tendon_phase.adb:94:21
+   94 |                      TM.Spring_Damper (P, Length, Velocity, D.Spring_Enabled, D.Damper_Enabled, Spring, Damper);
+      |                      ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 77 should mention Velocity in a loop invariant
+   77 |                for T in D.Tendons.Tendons'Range loop
+      |                                                 ^
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for T - 1
+--> mj-data-spatial_tendon_phase.adb:95:30
+   95 |                      Outputs (T - 1) := Length;
+      |                               ~~^~~
+      + reason for check: result of subtraction must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:95:30
+   95 |                      Outputs (T - 1) := Length;
+      |                               ~~^~~
+      + reason for check: result of subtraction must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for Nt + T
+--> mj-data-spatial_tendon_phase.adb:96:31
+   96 |                      Outputs (Nt + T - 1) := Velocity;
+      |                               ~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for Nt + T - 1
+--> mj-data-spatial_tendon_phase.adb:96:35
+   96 |                      Outputs (Nt + T - 1) := Velocity;
+      |                               ~~~~~~~^~~
+      + reason for check: result of subtraction must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:96:35
+   96 |                      Outputs (Nt + T - 1) := Velocity;
+      |                               ~~~~~~~^~~
+      + reason for check: result of subtraction must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * Nt
+--> mj-data-spatial_tendon_phase.adb:97:30
+   97 |                      Outputs (2 * Nt + T - 1) := Spring + Damper;
+      |                               ~~^~~~
+      + reason for check: result of multiplication must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * Nt + T
+--> mj-data-spatial_tendon_phase.adb:97:35
+   97 |                      Outputs (2 * Nt + T - 1) := Spring + Damper;
+      |                               ~~~~~~~^~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: overflow check might fail, cannot prove lower bound for 2 * Nt + T - 1
+--> mj-data-spatial_tendon_phase.adb:97:39
+   97 |                      Outputs (2 * Nt + T - 1) := Spring + Damper;
+      |                               ~~~~~~~~~~~^~~
+      + reason for check: result of subtraction must fit in a 32-bits machine integer
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:97:39
+   97 |                      Outputs (2 * Nt + T - 1) := Spring + Damper;
+      |                               ~~~~~~~~~~~^~~
+      + reason for check: result of subtraction must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:97:54
+   97 |                      Outputs (2 * Nt + T - 1) := Spring + Damper;
+      |                                                  ~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:99:41
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:100:34
+  100 |                            Springs (K) := Springs (K) + Row (K) * Spring;
+      |                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:100:49
+  100 |                            Springs (K) := Springs (K) + Row (K) * Spring;
+      |                                                    ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:100:52
+  100 |                            Springs (K) := Springs (K) + Row (K) * Spring;
+      |                                           ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop at line 99 should mention Springs in a loop invariant
+   99 |                         for K in Row'Range loop
+      |                                            ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:100:59
+  100 |                            Springs (K) := Springs (K) + Row (K) * Spring;
+      |                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:100:62
+  100 |                            Springs (K) := Springs (K) + Row (K) * Spring;
+      |                                                         ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:101:34
+  101 |                            Dampers (K) := Dampers (K) + Row (K) * Damper;
+      |                                     ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:101:49
+  101 |                            Dampers (K) := Dampers (K) + Row (K) * Damper;
+      |                                                    ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:101:52
+  101 |                            Dampers (K) := Dampers (K) + Row (K) * Damper;
+      |                                           ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop at line 99 should mention Dampers in a loop invariant
+   99 |                         for K in Row'Range loop
+      |                                            ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:101:59
+  101 |                            Dampers (K) := Dampers (K) + Row (K) * Damper;
+      |                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:101:62
+  101 |                            Dampers (K) := Dampers (K) + Row (K) * Damper;
+      |                                                         ~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:102:37
+  102 |                            if Springs (K) not in -1.0e60 .. 1.0e60
+      |                                        ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:103:44
+  103 |                              or else Dampers (K) not in -1.0e60 .. 1.0e60 then return; end if;
+      |                                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-spatial_tendon_phase.adb:110:28
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:111:17
+  111 |             Total (K) := Springs (K) + Dampers (K);
+      |                    ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:111:32
+  111 |             Total (K) := Springs (K) + Dampers (K);
+      |                                   ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-data-spatial_tendon_phase.adb:111:35
+  111 |             Total (K) := Springs (K) + Dampers (K);
+      |                          ~~~~~~~~~~~~^~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: loop at line 22 should mention Dampers and Springs in a loop invariant
+   22 |          for J in 0 .. D.Nj - 1 loop
+      |                                 ^
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:111:46
+  111 |             Total (K) := Springs (K) + Dampers (K);
+      |                                                 ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-spatial_tendon_phase.adb:112:20
+  112 |             if Total (K) not in -Work_Limit .. Work_Limit then return; end if;
+      |                       ^
+      + reason for check: value must be a valid index into the array
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:115:26
+  115 |          D.Dynamics.Passive.all := Total;
+      |          ~~~~~~~~~~~~~~~~~~~^~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:115:26
+  115 |          D.Dynamics.Passive.all := Total;
+      |          ~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:115:30
+  115 |          D.Dynamics.Passive.all := Total;
+      |          ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:115:33
+  115 |          D.Dynamics.Passive.all := Total;
+      |                                    ^~~~~
+      + reason for check: array must be of the appropriate length
+      + possible fix: loop at line 110 should mention Total in a loop invariant
+  110 |          for K in Total'Range loop
+      |                               ^
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:116:39
+  116 |          if Nt > 0 then D.Tendon_Outputs.all := Outputs; end if;
+      |                         ~~~~~~~~~~~~~~~~~^~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.adb:116:39
+  116 |          if Nt > 0 then D.Tendon_Outputs.all := Outputs; end if;
+      |                         ~~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:116:43
+  116 |          if Nt > 0 then D.Tendon_Outputs.all := Outputs; end if;
+      |                         ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+      + reason for check: source and destination arrays for the assignment must have the same length
+      + provers reached step limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-spatial_tendon_phase.adb:116:46
+  116 |          if Nt > 0 then D.Tendon_Outputs.all := Outputs; end if;
+      |                                                 ^~~~~~~
+      + reason for check: array must be of the appropriate length
+      + provers reached step limit before completing the proof
+
+ info: initialization of "Result" proved
+--> mj-data-spatial_tendon_phase.ads:4:54
+
+ info: data dependencies proved
+--> mj-data-spatial_tendon_phase.ads:5:06
+
+ medium: postcondition might fail, cannot prove Is_Ready (D)
+--> mj-data-spatial_tendon_phase.ads:8:25
+    8 |         Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+      |                            ^~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.ads:17:36
+   17 |           and then D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
+      |                    ~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.ads:17:61
+   17 |           and then D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
+      |                                             ~~~~~~~~~~~~~~~~~~~^~~
+      + possible explanation: enclosing 'Old attribute reference is unconditionally evaluated on subprogram entry
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.ads:18:33
+   18 |           and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old
+      |                    ~~~~~~~~~~~~~~~~^~~
+      + provers reached step limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-spatial_tendon_phase.ads:18:55
+   18 |           and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old
+      |                                          ~~~~~~~~~~~~~~~~^~~
+      + possible explanation: enclosing 'Old attribute reference is unconditionally evaluated on subprogram entry
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-data-spatial_tendon_phase.ads:20:43
+   20 |           and then (if Result = Success then Array_Bounded (D.Dynamics.Passive)
+      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+
+ medium: precondition might fail
+--> mj-data-spatial_tendon_phase.ads:21:46
+   21 |             and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103))));
+      |                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached step limit before completing the proof
+Summary logged in /var/tmp/sparkling-spatial-tendons-20260930/spatial-integration-proof-juwta0rf/mj-data-spatial_tendon_phase-Compute_Passive/mj-data-spatial_tendon_phase-obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 216.2 s, peak group RSS 1558 MB
