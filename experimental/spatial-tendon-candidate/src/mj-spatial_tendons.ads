@@ -86,7 +86,7 @@ package MJ.Spatial_Tendons with SPARK_Mode is
       Status : out Evaluation_Status; Length : out Real; J : out Real_Array;
       Points : out Point_Array; Count : out Natural) with
      Pre => Valid_Path (Route, Sites, Geometries)
-       and then J'First = 0
+       and then J'First = 0 and then J'Length <= 4096
        and then Valid_Kinematics (Sites, Geometries, Origins, Linear, Angular, J'Length)
        and then Points'First = 0 and then Points'Length >= 3 * Route'Length
        and then Points'Length <= 12288,
@@ -99,6 +99,60 @@ package MJ.Spatial_Tendons with SPARK_Mode is
                      Points (K) = (Position => Zero, Object_Id => -1)));
    --  Caller owns all storage. No model/state mutation. Failure is atomic:
    --  all outputs reset, never a partially accumulated path or force row.
+
+   function Flat_Column (Flat : Real_Array; Body_Index, Dof, Dofs : Natural)
+     return Vector with
+     Global => null,
+     Pre => Body_Index < 4096 and then Dofs <= 4096 and then Dof < Dofs
+       and then Flat'First = 0
+       and then Flat'Last >= 3 * (Body_Index * Dofs + Dof) + 2
+       and then (for all A in 0 .. 2 =>
+         Flat (3 * (Body_Index * Dofs + Dof) + A) in -1.0e10 .. 1.0e10),
+     Post => Bounded (Flat_Column'Result, 1.0e10)
+       and then Flat_Column'Result =
+         (Flat (3 * (Body_Index * Dofs + Dof)),
+          Flat (3 * (Body_Index * Dofs + Dof) + 1),
+          Flat (3 * (Body_Index * Dofs + Dof) + 2));
+   pragma Inline_Always (Flat_Column);
+
+   function Valid_Flat_Kinematics
+     (Sites : Site_Array; Geometries : Geometry_Array; Origins : Vector_Array;
+      Linear, Angular : Real_Array; Dofs : Natural) return Boolean is
+     (Sites'First = 0 and then Sites'Length <= 4096
+        and then Geometries'First = 0 and then Geometries'Length <= 4096
+        and then Origins'First = 0 and then Origins'Length <= 4096
+        and then Dofs <= 4096
+        and then Linear'First = 0 and then Angular'First = 0
+        and then Int64 (Linear'Length) = 3 * Int64 (Origins'Length) * Int64 (Dofs)
+        and then Angular'Length = Linear'Length
+        and then (for all S of Sites =>
+          Bounded (S.Position, 1.0e10) and then S.Body_Id in Origins'Range)
+        and then (for all G of Geometries => G.Body_Id in Origins'Range
+          and then Bounded (G.Position, 1.0e10) and then Rotation_Bounded (G.Orientation)
+          and then G.Radius in 0.0 .. 1.0e10)
+        and then (for all B in Origins'Range => Bounded (Origins (B), 1.0e10))
+        and then (for all X of Linear => abs X <= 1.0e10)
+        and then (for all X of Angular => abs X <= 1.0e10));
+
+   procedure Evaluate_Flat
+     (Route : Route_Array; Sites : Site_Array; Geometries : Geometry_Array;
+      Origins : Vector_Array; Linear, Angular : Real_Array;
+      Status : out Evaluation_Status; Length : out Real; J : out Real_Array;
+      Points : out Point_Array; Count : out Natural) with
+     Pre => Valid_Path (Route, Sites, Geometries)
+       and then J'First = 0 and then J'Length <= 4096
+       and then Valid_Flat_Kinematics (Sites, Geometries, Origins, Linear, Angular, J'Length)
+       and then Points'First = 0 and then Points'Length >= 3 * Route'Length
+       and then Points'Length <= 12288,
+     Post => Count <= Points'Length
+       and then (if Status = Success then Length in 0.0 .. 1.0e100
+                   and then (for all K in J'Range => J (K) in -1.0e100 .. 1.0e100)
+                 else Length = 0.0 and then Count = 0
+                   and then (for all K in J'Range => J (K) = 0.0)
+                   and then (for all K in Points'Range =>
+                     Points (K) = (Position => Zero, Object_Id => -1)));
+   --  Same path algorithm and output contract, reading the caller's existing
+   --  body-major/component-interleaved buffers without full Jacobian copies.
 
    function Point_Column (Linear, Angular, Point, Origin : Vector) return Vector with
      Pre => Bounded (Linear, 1.0e10) and then Bounded (Angular, 1.0e10)

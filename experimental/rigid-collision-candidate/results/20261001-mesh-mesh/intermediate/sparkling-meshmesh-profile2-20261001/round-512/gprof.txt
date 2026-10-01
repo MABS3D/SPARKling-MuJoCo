@@ -1,0 +1,243 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 43.09      9.26     9.26 205000000     0.00     0.00  mj__convex_contacts__support_cached
+ 16.61     12.83     3.57  2000000     0.00     0.00  mj__convex_contacts__generate
+ 14.29     15.90     3.07                             mj__convex_contacts__generate__attach.19
+ 11.77     18.43     2.53                             mj__convex_contacts__generate__horizon.15
+  4.33     19.36     0.93                             mj__convex_contacts__generate__support.6
+  2.65     19.93     0.57                             mj__convex_contacts__generate__epa_support.13
+  1.49     20.25     0.32  2000000     0.00     0.00  mj__contact_features__expand
+  1.12     20.49     0.24                             ada__numerics__long_elementary_functions__sqrt
+  1.07     20.72     0.23                             mj__contact_features__expand__normals__try_face.2
+  0.88     20.91     0.19                             mj__convex_contacts__generate__gjk.1
+  0.56     21.03     0.12 14500000     0.00     0.00  mj__convex_contacts__generate__intersection__distance.3
+  0.51     21.14     0.11                             _init
+  0.37     21.22     0.08                             mj__contact_features__expand__normals.1
+  0.28     21.28     0.06  2000000     0.00     0.00  mj__rigid_simplex__segment
+  0.23     21.33     0.05  8000000     0.00     0.00  mj__rigid_simplex__same_side
+  0.23     21.38     0.05                             mj__contact_features__expand__recover.7
+  0.19     21.42     0.04  2000000     0.00     0.00  mj__advanced_contacts__generate
+  0.19     21.46     0.04  2000000     0.00     0.00  mj__rigid_simplex__triangle
+  0.09     21.48     0.02        1     0.02     4.00  _ada_contact_probe
+  0.05     21.49     0.01  4000000     0.00     0.00  mj__rigid_simplex__affine
+  0.00     21.49     0.00        1     0.00     0.00  ada_main__finalize_library
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.05% of 21.49 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     47.4    0.93    9.26                 mj__convex_contacts__generate__support.6 [1]
+                9.26    0.00 205000000/205000000     mj__convex_contacts__support_cached [2]
+-----------------------------------------------
+                9.26    0.00 205000000/205000000     mj__convex_contacts__generate__support.6 [1]
+[2]     43.1    9.26    0.00 205000000         mj__convex_contacts__support_cached [2]
+-----------------------------------------------
+                                                 <spontaneous>
+[3]     18.6    0.00    4.00                 main [3]
+                0.02    3.98       1/1           _ada_contact_probe [4]
+                0.00    0.00       1/1           ada_main__finalize_library [22]
+-----------------------------------------------
+                0.02    3.98       1/1           main [3]
+[4]     18.6    0.02    3.98       1         _ada_contact_probe [4]
+                0.04    3.94 2000000/2000000     mj__advanced_contacts__generate [5]
+-----------------------------------------------
+                0.04    3.94 2000000/2000000     _ada_contact_probe [4]
+[5]     18.5    0.04    3.94 2000000         mj__advanced_contacts__generate [5]
+                3.57    0.38 2000000/2000000     mj__convex_contacts__generate [6]
+-----------------------------------------------
+                3.57    0.38 2000000/2000000     mj__advanced_contacts__generate [5]
+[6]     18.4    3.57    0.38 2000000         mj__convex_contacts__generate [6]
+                0.32    0.00 2000000/2000000     mj__contact_features__expand [11]
+                0.05    0.00 8000000/8000000     mj__rigid_simplex__same_side [18]
+                0.01    0.00 2000000/4000000     mj__rigid_simplex__affine [21]
+-----------------------------------------------
+                                                 <spontaneous>
+[7]     14.3    3.07    0.00                 mj__convex_contacts__generate__attach.19 [7]
+-----------------------------------------------
+                                                 <spontaneous>
+[8]     11.8    2.53    0.00                 mj__convex_contacts__generate__horizon.15 [8]
+-----------------------------------------------
+                                                 <spontaneous>
+[9]      2.7    0.57    0.00                 mj__convex_contacts__generate__epa_support.13 [9]
+-----------------------------------------------
+                                                 <spontaneous>
+[10]     1.9    0.19    0.23                 mj__convex_contacts__generate__gjk.1 [10]
+                0.12    0.00 14500000/14500000     mj__convex_contacts__generate__intersection__distance.3 [14]
+                0.06    0.00 2000000/2000000     mj__rigid_simplex__segment [17]
+                0.04    0.01 2000000/2000000     mj__rigid_simplex__triangle [20]
+-----------------------------------------------
+                0.32    0.00 2000000/2000000     mj__convex_contacts__generate [6]
+[11]     1.5    0.32    0.00 2000000         mj__contact_features__expand [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[12]     1.1    0.24    0.00                 ada__numerics__long_elementary_functions__sqrt [12]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]     1.1    0.23    0.00                 mj__contact_features__expand__normals__try_face.2 [13]
+-----------------------------------------------
+                0.12    0.00 14500000/14500000     mj__convex_contacts__generate__gjk.1 [10]
+[14]     0.6    0.12    0.00 14500000         mj__convex_contacts__generate__intersection__distance.3 [14]
+-----------------------------------------------
+                                                 <spontaneous>
+[15]     0.5    0.11    0.00                 _init [15]
+-----------------------------------------------
+                                                 <spontaneous>
+[16]     0.4    0.08    0.00                 mj__contact_features__expand__normals.1 [16]
+-----------------------------------------------
+                0.06    0.00 2000000/2000000     mj__convex_contacts__generate__gjk.1 [10]
+[17]     0.3    0.06    0.00 2000000         mj__rigid_simplex__segment [17]
+-----------------------------------------------
+                0.05    0.00 8000000/8000000     mj__convex_contacts__generate [6]
+[18]     0.2    0.05    0.00 8000000         mj__rigid_simplex__same_side [18]
+-----------------------------------------------
+                                                 <spontaneous>
+[19]     0.2    0.05    0.00                 mj__contact_features__expand__recover.7 [19]
+-----------------------------------------------
+                0.04    0.01 2000000/2000000     mj__convex_contacts__generate__gjk.1 [10]
+[20]     0.2    0.04    0.01 2000000         mj__rigid_simplex__triangle [20]
+                0.01    0.00 2000000/4000000     mj__rigid_simplex__affine [21]
+-----------------------------------------------
+                0.01    0.00 2000000/4000000     mj__rigid_simplex__triangle [20]
+                0.01    0.00 2000000/4000000     mj__convex_contacts__generate [6]
+[21]     0.0    0.01    0.00 4000000         mj__rigid_simplex__affine [21]
+-----------------------------------------------
+                0.00    0.00       1/1           main [3]
+[22]     0.0    0.00    0.00       1         ada_main__finalize_library [22]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+   [4] _ada_contact_probe (contact_probe.adb) [13] mj__contact_features__expand__normals__try_face.2 (<artificial>) [14] mj__convex_contacts__generate__intersection__distance.3 (mj-convex_contacts.adb)
+  [15] _init                  [19] mj__contact_features__expand__recover.7 (mj-contact_features.adb) [1] mj__convex_contacts__generate__support.6 (mj-convex_contacts.adb)
+  [12] ada__numerics__long_elementary_functions__sqrt [6] mj__convex_contacts__generate (mj-convex_contacts.adb) [2] mj__convex_contacts__support_cached (mj-convex_contacts.adb)
+  [22] ada_main__finalize_library (b__contact_probe.adb) [7] mj__convex_contacts__generate__attach.19 (mj-convex_contacts.adb) [21] mj__rigid_simplex__affine (mj-rigid_simplex.adb)
+   [5] mj__advanced_contacts__generate (mj-advanced_contacts.adb) [9] mj__convex_contacts__generate__epa_support.13 (mj-convex_contacts.adb) [18] mj__rigid_simplex__same_side (mj-rigid_simplex.adb)
+  [11] mj__contact_features__expand (mj-contact_features.adb) [10] mj__convex_contacts__generate__gjk.1 (mj-convex_contacts.adb) [17] mj__rigid_simplex__segment (mj-rigid_simplex.adb)
+  [16] mj__contact_features__expand__normals.1 (mj-contact_features.adb) [8] mj__convex_contacts__generate__horizon.15 (mj-convex_contacts.adb) [20] mj__rigid_simplex__triangle (mj-rigid_simplex.adb)

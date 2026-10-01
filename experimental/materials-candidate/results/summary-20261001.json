@@ -1,0 +1,806 @@
+{
+  "date": "2026-10-01",
+  "passed": true,
+  "scope": "Optimized isolated material kernels; integration not included",
+  "reference_version": "3.14.0",
+  "reference_commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "source_hashes": {
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "experimental/materials-candidate/src/mj-contact_materials.adb": "ba1e883f396da8dc0a5d1220b7deecb376d2745df8ed9b0fe887cb7d28fe9276",
+    "experimental/materials-candidate/src/mj-contact_materials.ads": "fc0336b8abfa66ed5aaa1db6760c779c4cc35783b9b8ed0401615aae0a5277c5",
+    "experimental/materials-candidate/src/mj-elastic_materials.adb": "5b1c13b250b9499697adf9ddc14f030875d36bb35768e11025d67a9468fc9b00",
+    "experimental/materials-candidate/src/mj-elastic_materials.ads": "786620b713404e92d37f1bd051d10dc10a2b1b38d40f45aa5275ba09fe196304",
+    "experimental/materials-candidate/tests/materials_probe.adb": "17871cc103e9b7dca0b3440b1287dfe9816675d96f42e2ea65a2f7c18d5af952"
+  },
+  "proof": [
+    {
+      "unit": "mj-elastic_materials",
+      "checks": 126,
+      "passed": true,
+      "complete_coverage": true,
+      "entities": [
+        "MJ.Elastic_Materials",
+        "MJ.Elastic_Materials.Bending_Modulus",
+        "MJ.Elastic_Materials.Column",
+        "MJ.Elastic_Materials.Compile_Metric",
+        "MJ.Elastic_Materials.Count",
+        "MJ.Elastic_Materials.Damper_Elongation",
+        "MJ.Elastic_Materials.Damping_Scale",
+        "MJ.Elastic_Materials.Lame_Interpolated",
+        "MJ.Elastic_Materials.Lame_Plane_Stress",
+        "MJ.Elastic_Materials.Lame_Simplex",
+        "MJ.Elastic_Materials.Metric_Entry",
+        "MJ.Elastic_Materials.Product",
+        "MJ.Elastic_Materials.Row",
+        "MJ.Elastic_Materials.Shear",
+        "MJ.Elastic_Materials.Spring_Elongation",
+        "MJ.Elastic_Materials.Trace",
+        "MJ.Elastic_Materials.Trace_Product",
+        "MJ.Elastic_Materials.Weighted_Lame",
+        "MJ.Elastic_Materials.Weighted_Shear"
+      ],
+      "open": 0,
+      "warnings": 0
+    },
+    {
+      "unit": "mj-contact_materials",
+      "checks": 73,
+      "passed": true,
+      "complete_coverage": true,
+      "entities": [
+        "MJ.Contact_Materials",
+        "MJ.Contact_Materials.Blend",
+        "MJ.Contact_Materials.DIMENSIONPREDICATE",
+        "MJ.Contact_Materials.Effective_Adhesion",
+        "MJ.Contact_Materials.Expected",
+        "MJ.Contact_Materials.Friction_Component",
+        "MJ.Contact_Materials.Impedance_Component",
+        "MJ.Contact_Materials.Maximum",
+        "MJ.Contact_Materials.Minimum",
+        "MJ.Contact_Materials.Mix",
+        "MJ.Contact_Materials.Mixed_Adhesion",
+        "MJ.Contact_Materials.Mixed_Dimension",
+        "MJ.Contact_Materials.Prepare",
+        "MJ.Contact_Materials.Raw_Model",
+        "MJ.Contact_Materials.Reference_Component",
+        "MJ.Contact_Materials.Weight"
+      ],
+      "open": 0,
+      "warnings": 0
+    }
+  ],
+  "numerics": {
+    "validation": {
+      "passed": true,
+      "seed": 3140930,
+      "oracle": "3.14.0",
+      "algebra_cases": 3072,
+      "algebra_values": 101376,
+      "equal_values": 101376,
+      "bit_identical_values": 101376,
+      "max_scaled_error": 0.0,
+      "real_engine_contacts": 96,
+      "real_compiled_flexes": 32,
+      "checked_rejections": 9,
+      "signed_zero_cases": 64,
+      "source_hashes": {
+        "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+        "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+        "experimental/materials-candidate/src/mj-contact_materials.adb": "ba1e883f396da8dc0a5d1220b7deecb376d2745df8ed9b0fe887cb7d28fe9276",
+        "experimental/materials-candidate/src/mj-contact_materials.ads": "fc0336b8abfa66ed5aaa1db6760c779c4cc35783b9b8ed0401615aae0a5277c5",
+        "experimental/materials-candidate/src/mj-elastic_materials.adb": "5b1c13b250b9499697adf9ddc14f030875d36bb35768e11025d67a9468fc9b00",
+        "experimental/materials-candidate/src/mj-elastic_materials.ads": "786620b713404e92d37f1bd051d10dc10a2b1b38d40f45aa5275ba09fe196304",
+        "experimental/materials-candidate/tests/materials_probe.adb": "17871cc103e9b7dca0b3440b1287dfe9816675d96f42e2ea65a2f7c18d5af952"
+      },
+      "harness_hashes": {
+        "check.py": "b3ba363d4b6324dd613686c23bd1f30019cda805f49e2372d7070ec5ab39cd77",
+        "numerics.py": "0fdc60e2906350d9d1abd982e8a7f163b4ac6333cd365be0f5fd6644a0a53f7e",
+        "reference.py": "ccd0c7a4b785c9f96cdb798ffc376f098822271563312aa618e49852e48db439"
+      },
+      "evidence_hashes": {
+        "flex-18.xml": "298316ffa48e9451a7b05fcba4c4c7665e7063b99bc89f27d178d4fcc56fb333",
+        "signed-zero-c.txt": "46b2fe9291beb0104c0fe118ae2966ddacbe5f141c4b842070563a4b1714c3d1",
+        "flex-10.xml": "a9a1771439c89d05a621b40ab0382542f202c7afed55764595f61fce506debed",
+        "input.txt": "110a7105e78a5aabc41a257cd894e328f2ce219a1e505780dc548aebb7cbe8ea",
+        "flex-24.xml": "dc6af29c8090c4865dfff2e61f6140967fceaba67293f72066744839743459cc",
+        "flex-25.xml": "d6075b1e889070e77d49e0baa7d8848021ffe111d866a5b0652efcb4618f9320",
+        "flex-08.xml": "f61814c454eae5f33714634b9b41b83986d2c3f6e91e78187ef57389e5f56d03",
+        "flex-27.xml": "b67609c1264ef3b4b1a64370d4a68aa0d9b6c5d5f45406b785a6d82f9997bdba",
+        "engine-contact-cases.json": "c9556919db0c76993ec6d818d5bcf7de4335057af2945109f1d7f7e9c42dfa1d",
+        "flex-30.xml": "a4582943dc5977da67f19656f3ccf8cc6340434e3aeecdd92938ef5af021c084",
+        "compiled-flex-output.txt": "4943acd17a851aeb12020ab164103a000a66a637ead5b660cb40ba679923b472",
+        "flex-20.xml": "38de52405bcf06a7d96935f52bc6c84d5c7aedb699f82c1ca40c298b69273425",
+        "compiled-flex-cases.json": "386c7d196be5259ac7be66e3ea6c870b3d96f55df653add2f54f66dc3edfbf98",
+        "flex-09.xml": "ca40ddc1708798744ba403efc50e58fd4adca42083bf7df3e3123694703692e5",
+        "flex-28.xml": "5620e92d49ab9f57499279e546643297c5b4a9f5bbe6b12ad71adb2d06f072d9",
+        "compiled-flex-input.txt": "bdae06665a07ad071dfd8aac917de92230e0be11283a76e0fb0ef57ffff327dd",
+        "c-output.txt": "f02b3544007d2d84bc3a199a1da3f690479bcdbe35d7bcc5169deec7552ac019",
+        "flex-05.xml": "01cd7f2c50db9caea928f73e5b9645b0f92365396ac2fed4e9878881b1885f98",
+        "flex-06.xml": "7d6614947bcc9c64849ffba00a63234ced178db3ace254960942e9b67e9afc45",
+        "flex-14.xml": "05b408e670f4286fa7c4cc91b36e306b7be99a88accd90a9fbdce108f575a13f",
+        "engine-contact-output.txt": "6b35dfd95ca22ae8cfb50197af9d41d2e485a29b2ce6f10b3a31282c9c42ce99",
+        "flex-13.xml": "79457335a2d0ed16c1db4e50b7491ec7cea8b28c2968682696f7896bc9a82671",
+        "flex-19.xml": "ae8017e8d15f57dbd29328ce7d605edc3bb9227ad637ffac2779fad8d54aa1cb",
+        "flex-07.xml": "559f74de5d29189faaa28cab56462bbbdd894bf32446f1fecec0de72306830e7",
+        "engine-contact-input.txt": "db75f202297a9de5d6fd8158453535d8fd37dd4b354b768255335f56fadea3bb",
+        "flex-26.xml": "92341535c3ff822e02c8acaecc4632943c5b28e8c7eddf47b37a4aff57263dd2",
+        "flex-31.xml": "b0592b0c1039eda328e433aa07c6ceecbc20c5ea97bb79c1616043acbd153d81",
+        "flex-12.xml": "036647c2dbcd8b385bdb283cda7f58cb17027dc4f9f14a166fc5ca8798c791ff",
+        "flex-32.xml": "2b12378feba2ab9932b67f6c6b5750aebf0d19b22d925b97a67f448f63700740",
+        "flex-23.xml": "7a492bf982ac3268952d90f45ad6e693a8c42faf07109a3a826b3bc53f6d14f2",
+        "flex-17.xml": "5067cfc088f40478d43967bd7d407b27e97ad898634756f636d04ffceceb30ac",
+        "flex-02.xml": "357732d62a369a99d94f0449e679e7719d7b90bb78da58b7abb88092b88344c1",
+        "flex-04.xml": "c0189337602cb2a70519be038029acecacae67631bac20e65ed8e86598a8f5cc",
+        "flex-16.xml": "56b6989b9ac2e332ed7630bfa86a8412c5bb75d76d74307cfd3bc40e2adae830",
+        "flex-15.xml": "a427410f4efb7314ec1aaf4b190516c1bbd057b1b987f5ebe417da1c8eea5d32",
+        "flex-21.xml": "cd36d9b2d325e309d11e87c3db99f6a2161a247d819b21b21bd1c05855b83b4c",
+        "flex-22.xml": "b48f3568b172eca75a15b059d6c3e1b44cd650d099c4c9d2d00f8d429b9dbbcd",
+        "flex-03.xml": "ee0b97b95a8dc8f2aefba741bd110a1e4134fbfd76b22d817edc8f13a3d4b6e3",
+        "flex-29.xml": "2b7f7fb271555404875b9a2cd2274e2ad31a1c59cd0afa159b9715943633008b",
+        "ada-output.txt": "a991162cce1782d2c7c44a32d58452d8e103740f74d2b8a19cc9e85aaf09c207",
+        "compiled-flex-expected.json": "954a24cd7cc9705849359428afa6357cf538d69717f6a54babe4a39dfe0ef564",
+        "engine-contact-expected.json": "83b667b8ef2b4bfac3a4d8535cf8c39696e5342791131cc924f4253fdd5dcff3",
+        "signed-zero-ada.txt": "7ec2eec424a15cc70781e6d81cfa1588d06a6135941cc40e7ac085af8143b9af",
+        "flex-01.xml": "7d95768bf736736f2d90f5d30b9540815cae133152606653fb1a18ae9e293222",
+        "flex-11.xml": "1255a81df0d9fb3917bee90ac93b1914f73811c142249643e2221639f6caa598",
+        "signed-zero-input.txt": "189eb6154de46357b661f6114766bf9eb97cd95fece5a37d77e8e74aeae850c5",
+        "reference/reference.cpp": "29d940c6c97010f18c7654074c96b98c3faaa72fdd07ed206aec30ae3564973d",
+        "reference/reference": "c47501bc4166ec8d4cd57ebef4a9f4a9e8f9e8ac10587fa9e74fd543c8854e15",
+        "reference/reference.json": "00aa1304e7fa97224b0d865eeb1420bce152eefa4b34081ac18af44c80a0b4f2",
+        "reference/reference.d": "50857e81e19a5e1233fc32eef9f6b9226d883ba2efa8c262585798361292b163",
+        "reference/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "binary_sha256": "bd7a527dd08918c11afc2278b6a9fcfbb6768f878d011e7c37ece42f71b2c39a"
+    },
+    "release": {
+      "passed": true,
+      "seed": 3140930,
+      "oracle": "3.14.0",
+      "algebra_cases": 3072,
+      "algebra_values": 101376,
+      "equal_values": 101376,
+      "bit_identical_values": 101376,
+      "max_scaled_error": 0.0,
+      "real_engine_contacts": 96,
+      "real_compiled_flexes": 32,
+      "checked_rejections": 0,
+      "signed_zero_cases": 64,
+      "source_hashes": {
+        "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+        "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+        "experimental/materials-candidate/src/mj-contact_materials.adb": "ba1e883f396da8dc0a5d1220b7deecb376d2745df8ed9b0fe887cb7d28fe9276",
+        "experimental/materials-candidate/src/mj-contact_materials.ads": "fc0336b8abfa66ed5aaa1db6760c779c4cc35783b9b8ed0401615aae0a5277c5",
+        "experimental/materials-candidate/src/mj-elastic_materials.adb": "5b1c13b250b9499697adf9ddc14f030875d36bb35768e11025d67a9468fc9b00",
+        "experimental/materials-candidate/src/mj-elastic_materials.ads": "786620b713404e92d37f1bd051d10dc10a2b1b38d40f45aa5275ba09fe196304",
+        "experimental/materials-candidate/tests/materials_probe.adb": "17871cc103e9b7dca0b3440b1287dfe9816675d96f42e2ea65a2f7c18d5af952"
+      },
+      "harness_hashes": {
+        "check.py": "b3ba363d4b6324dd613686c23bd1f30019cda805f49e2372d7070ec5ab39cd77",
+        "numerics.py": "0fdc60e2906350d9d1abd982e8a7f163b4ac6333cd365be0f5fd6644a0a53f7e",
+        "reference.py": "ccd0c7a4b785c9f96cdb798ffc376f098822271563312aa618e49852e48db439"
+      },
+      "evidence_hashes": {
+        "flex-18.xml": "298316ffa48e9451a7b05fcba4c4c7665e7063b99bc89f27d178d4fcc56fb333",
+        "signed-zero-c.txt": "46b2fe9291beb0104c0fe118ae2966ddacbe5f141c4b842070563a4b1714c3d1",
+        "flex-10.xml": "a9a1771439c89d05a621b40ab0382542f202c7afed55764595f61fce506debed",
+        "input.txt": "110a7105e78a5aabc41a257cd894e328f2ce219a1e505780dc548aebb7cbe8ea",
+        "flex-24.xml": "dc6af29c8090c4865dfff2e61f6140967fceaba67293f72066744839743459cc",
+        "flex-25.xml": "d6075b1e889070e77d49e0baa7d8848021ffe111d866a5b0652efcb4618f9320",
+        "flex-08.xml": "f61814c454eae5f33714634b9b41b83986d2c3f6e91e78187ef57389e5f56d03",
+        "flex-27.xml": "b67609c1264ef3b4b1a64370d4a68aa0d9b6c5d5f45406b785a6d82f9997bdba",
+        "engine-contact-cases.json": "c9556919db0c76993ec6d818d5bcf7de4335057af2945109f1d7f7e9c42dfa1d",
+        "flex-30.xml": "a4582943dc5977da67f19656f3ccf8cc6340434e3aeecdd92938ef5af021c084",
+        "compiled-flex-output.txt": "4943acd17a851aeb12020ab164103a000a66a637ead5b660cb40ba679923b472",
+        "flex-20.xml": "38de52405bcf06a7d96935f52bc6c84d5c7aedb699f82c1ca40c298b69273425",
+        "compiled-flex-cases.json": "386c7d196be5259ac7be66e3ea6c870b3d96f55df653add2f54f66dc3edfbf98",
+        "flex-09.xml": "ca40ddc1708798744ba403efc50e58fd4adca42083bf7df3e3123694703692e5",
+        "flex-28.xml": "5620e92d49ab9f57499279e546643297c5b4a9f5bbe6b12ad71adb2d06f072d9",
+        "compiled-flex-input.txt": "bdae06665a07ad071dfd8aac917de92230e0be11283a76e0fb0ef57ffff327dd",
+        "c-output.txt": "f02b3544007d2d84bc3a199a1da3f690479bcdbe35d7bcc5169deec7552ac019",
+        "flex-05.xml": "01cd7f2c50db9caea928f73e5b9645b0f92365396ac2fed4e9878881b1885f98",
+        "flex-06.xml": "7d6614947bcc9c64849ffba00a63234ced178db3ace254960942e9b67e9afc45",
+        "flex-14.xml": "05b408e670f4286fa7c4cc91b36e306b7be99a88accd90a9fbdce108f575a13f",
+        "engine-contact-output.txt": "6b35dfd95ca22ae8cfb50197af9d41d2e485a29b2ce6f10b3a31282c9c42ce99",
+        "flex-13.xml": "79457335a2d0ed16c1db4e50b7491ec7cea8b28c2968682696f7896bc9a82671",
+        "flex-19.xml": "ae8017e8d15f57dbd29328ce7d605edc3bb9227ad637ffac2779fad8d54aa1cb",
+        "flex-07.xml": "559f74de5d29189faaa28cab56462bbbdd894bf32446f1fecec0de72306830e7",
+        "engine-contact-input.txt": "db75f202297a9de5d6fd8158453535d8fd37dd4b354b768255335f56fadea3bb",
+        "flex-26.xml": "92341535c3ff822e02c8acaecc4632943c5b28e8c7eddf47b37a4aff57263dd2",
+        "flex-31.xml": "b0592b0c1039eda328e433aa07c6ceecbc20c5ea97bb79c1616043acbd153d81",
+        "flex-12.xml": "036647c2dbcd8b385bdb283cda7f58cb17027dc4f9f14a166fc5ca8798c791ff",
+        "flex-32.xml": "2b12378feba2ab9932b67f6c6b5750aebf0d19b22d925b97a67f448f63700740",
+        "flex-23.xml": "7a492bf982ac3268952d90f45ad6e693a8c42faf07109a3a826b3bc53f6d14f2",
+        "flex-17.xml": "5067cfc088f40478d43967bd7d407b27e97ad898634756f636d04ffceceb30ac",
+        "flex-02.xml": "357732d62a369a99d94f0449e679e7719d7b90bb78da58b7abb88092b88344c1",
+        "flex-04.xml": "c0189337602cb2a70519be038029acecacae67631bac20e65ed8e86598a8f5cc",
+        "flex-16.xml": "56b6989b9ac2e332ed7630bfa86a8412c5bb75d76d74307cfd3bc40e2adae830",
+        "flex-15.xml": "a427410f4efb7314ec1aaf4b190516c1bbd057b1b987f5ebe417da1c8eea5d32",
+        "flex-21.xml": "cd36d9b2d325e309d11e87c3db99f6a2161a247d819b21b21bd1c05855b83b4c",
+        "flex-22.xml": "b48f3568b172eca75a15b059d6c3e1b44cd650d099c4c9d2d00f8d429b9dbbcd",
+        "flex-03.xml": "ee0b97b95a8dc8f2aefba741bd110a1e4134fbfd76b22d817edc8f13a3d4b6e3",
+        "flex-29.xml": "2b7f7fb271555404875b9a2cd2274e2ad31a1c59cd0afa159b9715943633008b",
+        "ada-output.txt": "a991162cce1782d2c7c44a32d58452d8e103740f74d2b8a19cc9e85aaf09c207",
+        "compiled-flex-expected.json": "954a24cd7cc9705849359428afa6357cf538d69717f6a54babe4a39dfe0ef564",
+        "engine-contact-expected.json": "83b667b8ef2b4bfac3a4d8535cf8c39696e5342791131cc924f4253fdd5dcff3",
+        "signed-zero-ada.txt": "7ec2eec424a15cc70781e6d81cfa1588d06a6135941cc40e7ac085af8143b9af",
+        "flex-01.xml": "7d95768bf736736f2d90f5d30b9540815cae133152606653fb1a18ae9e293222",
+        "flex-11.xml": "1255a81df0d9fb3917bee90ac93b1914f73811c142249643e2221639f6caa598",
+        "signed-zero-input.txt": "189eb6154de46357b661f6114766bf9eb97cd95fece5a37d77e8e74aeae850c5",
+        "reference/reference.cpp": "29d940c6c97010f18c7654074c96b98c3faaa72fdd07ed206aec30ae3564973d",
+        "reference/reference": "21d5acf1d5e8bdc11d1780b2e631740fbdb1c3e85a035f3f1fa1090550ee4c4e",
+        "reference/reference.json": "87617eea31558c61ee34f40965ff30dc474bec7160bb4b34ab549649ca34fc97",
+        "reference/reference.d": "3e5ce87f3b963905b189235efc57b9a88771e52afe3fc580d6535a92314e52fc",
+        "reference/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "binary_sha256": "4f6b7dd35ead13f8379d741e5afc8e0857c6763cc54f9811b1651c28e8502676"
+    }
+  },
+  "performance": {
+    "passed": true,
+    "quick": false,
+    "cpu": 5,
+    "build": "bench-atomic",
+    "results": [
+      {
+        "case": "triangle",
+        "loops": 148287,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 20.84100732447888,
+            "p05_ns": 19.985042624269155,
+            "p95_ns": 23.195917692548907,
+            "mad_ns": 0.7989659621207501
+          },
+          "after": {
+            "median_ns": 10.65455343775921,
+            "p05_ns": 10.258862775395011,
+            "p95_ns": 11.187595254472745,
+            "mad_ns": 0.1616162829513037
+          },
+          "c": {
+            "median_ns": 12.433832913539286,
+            "p05_ns": 11.724086568613567,
+            "p95_ns": 13.274768270313649,
+            "mad_ns": 0.45850930121993194
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.5079711843698316,
+            "ci95": [
+              0.4883296585073361,
+              0.5153320317851325
+            ]
+          },
+          "after_c": {
+            "median": 0.8543680787514412,
+            "ci95": [
+              0.825233105655351,
+              0.8755686812401154
+            ]
+          }
+        }
+      },
+      {
+        "case": "tetrahedron",
+        "loops": 29436,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 57.58451120651583,
+            "p05_ns": 53.69509221276668,
+            "p95_ns": 62.34416934196222,
+            "mad_ns": 2.288273712460935
+          },
+          "after": {
+            "median_ns": 56.76290086968338,
+            "p05_ns": 53.66104960762332,
+            "p95_ns": 63.22311858778367,
+            "mad_ns": 2.379904708520179
+          },
+          "c": {
+            "median_ns": 61.822079575180055,
+            "p05_ns": 57.82863829579426,
+            "p95_ns": 69.22407405048241,
+            "mad_ns": 3.8383962240114045
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.9928432137364231,
+            "ci95": [
+              0.9804232456509018,
+              1.0283871910173417
+            ]
+          },
+          "after_c": {
+            "median": 0.9068308102845869,
+            "ci95": [
+              0.8735396707595813,
+              0.9468057966131103
+            ]
+          }
+        }
+      },
+      {
+        "case": "laws",
+        "loops": 257559,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 6.128532564383306,
+            "p05_ns": 6.046592965107024,
+            "p95_ns": 9.395651396864407,
+            "mad_ns": 0.08193959927628214
+          },
+          "after": {
+            "median_ns": 6.2696772268684064,
+            "p05_ns": 6.037997665098094,
+            "p95_ns": 11.383701404338423,
+            "mad_ns": 0.18135013482347695
+          },
+          "c": {
+            "median_ns": 6.095340654956728,
+            "p05_ns": 5.978820083456606,
+            "p95_ns": 8.843625999285601,
+            "mad_ns": 0.06999136605593304
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 1.0140757471342714,
+            "ci95": [
+              0.9952946885848591,
+              1.034855607712303
+            ]
+          },
+          "after_c": {
+            "median": 1.0127080053246813,
+            "ci95": [
+              1.0009694123789041,
+              1.0368255087265632
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-equal",
+        "loops": 319589,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 11.813504366154655,
+            "p05_ns": 11.475672905278342,
+            "p95_ns": 12.62648594170951,
+            "mad_ns": 0.2512811376486681
+          },
+          "after": {
+            "median_ns": 5.468209853123856,
+            "p05_ns": 4.950236964507539,
+            "p95_ns": 6.2024577367337415,
+            "mad_ns": 0.3081957412489169
+          },
+          "c": {
+            "median_ns": 7.870349300194938,
+            "p05_ns": 7.365436789517161,
+            "p95_ns": 8.542176876003241,
+            "mad_ns": 0.3807043480063461
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.44852777818576106,
+            "ci95": [
+              0.4384401943302328,
+              0.48496837015734234
+            ]
+          },
+          "after_c": {
+            "median": 0.6766037805177768,
+            "ci95": [
+              0.6546531607057278,
+              0.7180046276228141
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-priority",
+        "loops": 591624,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 9.297634746688775,
+            "p05_ns": 8.930994020273012,
+            "p95_ns": 10.002671565893202,
+            "mad_ns": 0.24104865907231598
+          },
+          "after": {
+            "median_ns": 3.0678811362875744,
+            "p05_ns": 2.8233205074084218,
+            "p95_ns": 3.5008527111391694,
+            "mad_ns": 0.1244994445374088
+          },
+          "c": {
+            "median_ns": 6.596427349760996,
+            "p05_ns": 6.093562301605411,
+            "p95_ns": 7.12887521783261,
+            "mad_ns": 0.20888771309987408
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.3256606907502923,
+            "ci95": [
+              0.31816957492225406,
+              0.33900184701269437
+            ]
+          },
+          "after_c": {
+            "median": 0.4589271122085964,
+            "ci95": [
+              0.45040615436225945,
+              0.47911885913969227
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-direct",
+        "loops": 343794,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 11.967468664011008,
+            "p05_ns": 11.21815539429135,
+            "p95_ns": 12.475643663065673,
+            "mad_ns": 0.38154107183371266
+          },
+          "after": {
+            "median_ns": 5.0118964318021835,
+            "p05_ns": 4.8266555971744705,
+            "p95_ns": 5.665494543971099,
+            "mad_ns": 0.08372337431717813
+          },
+          "c": {
+            "median_ns": 7.601126601249586,
+            "p05_ns": 7.089784416685573,
+            "p95_ns": 8.16355474681059,
+            "mad_ns": 0.2011084853865981
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.42190077634797446,
+            "ci95": [
+              0.40536726902604303,
+              0.44196637459979016
+            ]
+          },
+          "after_c": {
+            "median": 0.6607895194992783,
+            "ci95": [
+              0.6442047628083644,
+              0.678390510473415
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-pair",
+        "loops": 594257,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 7.261086480680918,
+            "p05_ns": 6.921289631422096,
+            "p95_ns": 7.45728844485635,
+            "mad_ns": 0.08844631825960825
+          },
+          "after": {
+            "median_ns": 2.809077685454273,
+            "p05_ns": 2.7255199560122976,
+            "p95_ns": 3.163493867131561,
+            "mad_ns": 0.06889085866889255
+          },
+          "c": {
+            "median_ns": 4.186702076079878,
+            "p05_ns": 4.124014394235155,
+            "p95_ns": 4.607952241202039,
+            "mad_ns": 0.06268768184472329
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.39023526281551035,
+            "ci95": [
+              0.3838248222254732,
+              0.40049086266584366
+            ]
+          },
+          "after_c": {
+            "median": 0.6717267981618865,
+            "ci95": [
+              0.6316277841287284,
+              0.6874070549624313
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-override",
+        "loops": 518448,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 7.4284081407392835,
+            "p05_ns": 7.236942850343718,
+            "p95_ns": 7.698704836357745,
+            "mad_ns": 0.11087198595616155
+          },
+          "after": {
+            "median_ns": 3.2456264297480173,
+            "p05_ns": 3.1392831043325464,
+            "p95_ns": 3.5614176530240256,
+            "mad_ns": 0.07346813229099158
+          },
+          "c": {
+            "median_ns": 7.910108993573125,
+            "p05_ns": 7.5074804994907876,
+            "p95_ns": 8.454964986845354,
+            "mad_ns": 0.35110937475889603
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.43925708647668016,
+            "ci95": [
+              0.42900821231755004,
+              0.45021488142629645
+            ]
+          },
+          "after_c": {
+            "median": 0.41428113378373504,
+            "ci95": [
+              0.39616701074184246,
+              0.426589649449982
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-flex",
+        "loops": 347069,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 11.447147217123973,
+            "p05_ns": 11.080471525474762,
+            "p95_ns": 12.653643214677773,
+            "mad_ns": 0.2866704369304074
+          },
+          "after": {
+            "median_ns": 4.955258446447249,
+            "p05_ns": 4.602829696688555,
+            "p95_ns": 5.831772869731956,
+            "mad_ns": 0.11304569480420401
+          },
+          "c": {
+            "median_ns": 7.38698091193682,
+            "p05_ns": 6.773004521435219,
+            "p95_ns": 8.327194439362202,
+            "mad_ns": 0.266671216674494
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.43208765961598844,
+            "ci95": [
+              0.4187856338807286,
+              0.4438434290353686
+            ]
+          },
+          "after_c": {
+            "median": 0.6938009079555223,
+            "ci95": [
+              0.65571590150294,
+              0.7160424357067098
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-mixed",
+        "loops": 418275,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 10.171822178889487,
+            "p05_ns": 9.866390383121152,
+            "p95_ns": 10.699513515330823,
+            "mad_ns": 0.2188547083258623
+          },
+          "after": {
+            "median_ns": 4.290139262446955,
+            "p05_ns": 3.898757321738091,
+            "p95_ns": 5.008069937541092,
+            "mad_ns": 0.20041012940051406
+          },
+          "c": {
+            "median_ns": 6.924152172613711,
+            "p05_ns": 6.331472640607256,
+            "p95_ns": 7.772117924810233,
+            "mad_ns": 0.2649031363935208
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.4217670331821837,
+            "ci95": [
+              0.39755405400044586,
+              0.4321710164399996
+            ]
+          },
+          "after_c": {
+            "median": 0.6213968878600015,
+            "ci95": [
+              0.5989561924372805,
+              0.6480649946019068
+            ]
+          }
+        }
+      }
+    ],
+    "binaries": {
+      "before": {
+        "path": "/var/tmp/sparkling-materials-performance-20261001/bin/materials_benchmark",
+        "sha256": "ad70fa2c04237e023e7333d10e7fce3aeaec30e92f1065cff6c237c602c412d2"
+      },
+      "after": {
+        "path": "/var/tmp/sparkling-materials-opt-20261001/bench-atomic/bin/materials_benchmark",
+        "sha256": "e884d7c90d2fad14b64d2afbc13dede002d4719b5d98ba62a4af0c24a849baeb"
+      },
+      "c": {
+        "path": "/var/tmp/sparkling-materials-performance-20261001/c16-closed-benchmark",
+        "sha256": "fdbd3c282f48bab9737f1680d8d035a14155b51558dc2912be59e830a1eeff91"
+      }
+    },
+    "sources": {
+      "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+      "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+      "experimental/materials-candidate/src/mj-contact_materials.adb": "ba1e883f396da8dc0a5d1220b7deecb376d2745df8ed9b0fe887cb7d28fe9276",
+      "experimental/materials-candidate/src/mj-contact_materials.ads": "fc0336b8abfa66ed5aaa1db6760c779c4cc35783b9b8ed0401615aae0a5277c5",
+      "experimental/materials-candidate/src/mj-elastic_materials.adb": "5b1c13b250b9499697adf9ddc14f030875d36bb35768e11025d67a9468fc9b00",
+      "experimental/materials-candidate/src/mj-elastic_materials.ads": "786620b713404e92d37f1bd051d10dc10a2b1b38d40f45aa5275ba09fe196304"
+    },
+    "driver_sha256": "ff27570fd85b60b9ea0d08b51010821bfc9c889a1e842df9b11668e39633196e"
+  },
+  "performance_native_padding": {
+    "passed": true,
+    "quick": false,
+    "cpu": 5,
+    "build": "bench-atomic",
+    "results": [
+      {
+        "case": "triangle",
+        "loops": 149985,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 20.244016693336,
+            "p05_ns": 19.156055293029304,
+            "p95_ns": 21.42965129846318,
+            "mad_ns": 0.6405092592592574
+          },
+          "after": {
+            "median_ns": 10.545519447778112,
+            "p05_ns": 10.277509417608428,
+            "p95_ns": 10.895171600493383,
+            "mad_ns": 0.15798236073607264
+          },
+          "c": {
+            "median_ns": 12.743534249258259,
+            "p05_ns": 12.324701845184519,
+            "p95_ns": 13.220262234556788,
+            "mad_ns": 0.28713517185051884
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.5226215124892246,
+            "ci95": [
+              0.5040887178919288,
+              0.5359817630685174
+            ]
+          },
+          "after_c": {
+            "median": 0.8323501616194213,
+            "ci95": [
+              0.8280599875314227,
+              0.8403158413717435
+            ]
+          }
+        }
+      },
+      {
+        "case": "contact-mixed",
+        "loops": 398957,
+        "repetitions": 21,
+        "bit_identical": true,
+        "stats": {
+          "before": {
+            "median_ns": 9.907979157214937,
+            "p05_ns": 9.57529190959176,
+            "p95_ns": 10.290464182230167,
+            "mad_ns": 0.2073601838669319
+          },
+          "after": {
+            "median_ns": 3.983443234483917,
+            "p05_ns": 3.86295640883604,
+            "p95_ns": 4.5036026360610295,
+            "mad_ns": 0.1186565453795776
+          },
+          "c": {
+            "median_ns": 6.5674129276463376,
+            "p05_ns": 6.27960688745905,
+            "p95_ns": 6.932923848936101,
+            "mad_ns": 0.10071010158989502
+          }
+        },
+        "ratios": {
+          "after_before": {
+            "median": 0.4039205069231474,
+            "ci95": [
+              0.3985454703130721,
+              0.42897332068848687
+            ]
+          },
+          "after_c": {
+            "median": 0.6181046074743912,
+            "ci95": [
+              0.6005709799116113,
+              0.6406759852531917
+            ]
+          }
+        }
+      }
+    ],
+    "binaries": {
+      "before": {
+        "path": "/var/tmp/sparkling-materials-performance-20261001/bin/materials_benchmark",
+        "sha256": "ad70fa2c04237e023e7333d10e7fce3aeaec30e92f1065cff6c237c602c412d2"
+      },
+      "after": {
+        "path": "/var/tmp/sparkling-materials-opt-20261001/bench-atomic/bin/materials_benchmark",
+        "sha256": "e884d7c90d2fad14b64d2afbc13dede002d4719b5d98ba62a4af0c24a849baeb"
+      },
+      "c": {
+        "path": "/var/tmp/sparkling-materials-opt-20261001/c-native-padding-benchmark",
+        "sha256": "1b84dcf7d82fa102f7bbd53f6f2f78127cda320d8aa0a7a552a923b19aeca273"
+      }
+    },
+    "sources": {
+      "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+      "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+      "experimental/materials-candidate/src/mj-contact_materials.adb": "ba1e883f396da8dc0a5d1220b7deecb376d2745df8ed9b0fe887cb7d28fe9276",
+      "experimental/materials-candidate/src/mj-contact_materials.ads": "fc0336b8abfa66ed5aaa1db6760c779c4cc35783b9b8ed0401615aae0a5277c5",
+      "experimental/materials-candidate/src/mj-elastic_materials.adb": "5b1c13b250b9499697adf9ddc14f030875d36bb35768e11025d67a9468fc9b00",
+      "experimental/materials-candidate/src/mj-elastic_materials.ads": "786620b713404e92d37f1bd051d10dc10a2b1b38d40f45aa5275ba09fe196304"
+    },
+    "driver_sha256": "aebbc1afba1b457cc112b2224595aaf75ee06621a49bda92735ab108181707a9"
+  },
+  "archive_sha256": "38ed4381aee580df848db1f4f044956a2e7ada8a45becaa6f5d051bf48ba29b4"
+}

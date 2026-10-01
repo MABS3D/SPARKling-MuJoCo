@@ -1,0 +1,78 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-contact_incidence.adb:102:44
+
+ info: range check proved
+--> mj-contact_incidence.adb:103:51
+
+ info: loop invariant initialization proved
+--> mj-contact_incidence.adb:105:33
+
+ info: loop invariant preservation proved
+--> mj-contact_incidence.adb:105:33
+
+ info: loop invariant initialization proved
+--> mj-contact_incidence.adb:106:33
+
+ info: loop invariant preservation proved
+--> mj-contact_incidence.adb:106:33
+
+ info: loop invariant initialization proved
+--> mj-contact_incidence.adb:107:33
+
+ info: loop invariant preservation proved
+--> mj-contact_incidence.adb:107:33
+
+ info: range check proved
+--> mj-contact_incidence.adb:107:78
+
+ info: loop invariant initialization proved
+--> mj-contact_incidence.adb:108:33
+
+ info: precondition proved
+--> mj-contact_incidence.adb:108:63
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove L.Data (L.Start (Vertex)+K).Face in F'Range
+--> mj-contact_incidence.adb:108:63
+  108 |             pragma Loop_Invariant (for all V in 0 .. Vertex-1 => Vertex_Matches (L, F, V));
+      |                                                                  ^~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-contact_incidence.adb:19
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-contact_incidence.adb:109:33
+
+ info: loop invariant preservation proved
+--> mj-contact_incidence.adb:109:33
+
+ info: index check proved
+--> mj-contact_incidence.adb:109:72
+
+ info: index check proved
+--> mj-contact_incidence.adb:109:83
+
+ info: precondition proved
+--> mj-contact_incidence.adb:110:10
+
+ info: initialization of "L" proved
+--> mj-contact_incidence.ads:47:21
+
+ info: initialization of "Result" proved
+--> mj-contact_incidence.ads:47:37
+
+ info: data dependencies proved
+--> mj-contact_incidence.ads:48:11
+
+ info: overflow check proved
+--> mj-contact_incidence.ads:49:70
+
+ medium: postcondition might fail, cannot prove Matches (L, F)
+--> mj-contact_incidence.ads:50:16
+   50 |           Post => Matches (L, F) and then
+      |                   ^~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-meshmesh-proof5-20261001/Build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 14.5 s, peak group RSS 215 MB

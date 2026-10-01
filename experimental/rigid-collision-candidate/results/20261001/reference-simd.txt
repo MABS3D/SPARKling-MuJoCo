@@ -1,0 +1,82 @@
+
+/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .text:
+
+00000000002d1720 <mju_dot>:
+  2d1720:	83 fa 04             	cmp    $0x4,%edx
+  2d1723:	0f 8c a2 00 00 00    	jl     2d17cb <mju_dot+0xab>
+  2d1729:	c5 fd 10 07          	vmovupd (%rdi),%ymm0
+  2d172d:	c5 fd 59 06          	vmulpd (%rsi),%ymm0,%ymm0
+  2d1731:	b8 04 00 00 00       	mov    $0x4,%eax
+  2d1736:	83 fa 08             	cmp    $0x8,%edx
+  2d1739:	72 2c                	jb     2d1767 <mju_dot+0x47>
+  2d173b:	8d 42 fc             	lea    -0x4(%rdx),%eax
+  2d173e:	89 c1                	mov    %eax,%ecx
+  2d1740:	b8 04 00 00 00       	mov    $0x4,%eax
+  2d1745:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  2d174c:	00 00 00 00 
+  2d1750:	c5 fd 10 0c c7       	vmovupd (%rdi,%rax,8),%ymm1
+  2d1755:	c5 f5 59 0c c6       	vmulpd (%rsi,%rax,8),%ymm1,%ymm1
+  2d175a:	c5 fd 58 c1          	vaddpd %ymm1,%ymm0,%ymm0
+  2d175e:	48 83 c0 04          	add    $0x4,%rax
+  2d1762:	48 39 c8             	cmp    %rcx,%rax
+  2d1765:	76 e9                	jbe    2d1750 <mju_dot+0x30>
+  2d1767:	c4 e3 7d 19 c1 01    	vextractf128 $0x1,%ymm0,%xmm1
+  2d176d:	c5 f9 58 c1          	vaddpd %xmm1,%xmm0,%xmm0
+  2d1771:	c5 f9 c6 c8 01       	vshufpd $0x1,%xmm0,%xmm0,%xmm1
+  2d1776:	c5 fb 58 c1          	vaddsd %xmm1,%xmm0,%xmm0
+  2d177a:	29 c2                	sub    %eax,%edx
+  2d177c:	83 fa 01             	cmp    $0x1,%edx
+  2d177f:	74 57                	je     2d17d8 <mju_dot+0xb8>
+  2d1781:	83 fa 02             	cmp    $0x2,%edx
+  2d1784:	74 66                	je     2d17ec <mju_dot+0xcc>
+  2d1786:	83 fa 03             	cmp    $0x3,%edx
+  2d1789:	75 5d                	jne    2d17e8 <mju_dot+0xc8>
+  2d178b:	89 c0                	mov    %eax,%eax
+  2d178d:	c5 fb 10 0c c7       	vmovsd (%rdi,%rax,8),%xmm1
+  2d1792:	48 89 c1             	mov    %rax,%rcx
+  2d1795:	48 83 c9 01          	or     $0x1,%rcx
+  2d1799:	c5 fb 10 14 cf       	vmovsd (%rdi,%rcx,8),%xmm2
+  2d179e:	c5 eb 59 54 c6 08    	vmulsd 0x8(%rsi,%rax,8),%xmm2,%xmm2
+  2d17a4:	c5 f3 59 0c c6       	vmulsd (%rsi,%rax,8),%xmm1,%xmm1
+  2d17a9:	c5 f3 58 ca          	vaddsd %xmm2,%xmm1,%xmm1
+  2d17ad:	48 89 c1             	mov    %rax,%rcx
+  2d17b0:	48 83 c9 02          	or     $0x2,%rcx
+  2d17b4:	c5 fb 10 14 cf       	vmovsd (%rdi,%rcx,8),%xmm2
+  2d17b9:	c5 eb 59 54 c6 10    	vmulsd 0x10(%rsi,%rax,8),%xmm2,%xmm2
+  2d17bf:	c5 eb 58 c9          	vaddsd %xmm1,%xmm2,%xmm1
+  2d17c3:	c5 fb 58 c1          	vaddsd %xmm1,%xmm0,%xmm0
+  2d17c7:	c5 f8 77             	vzeroupper
+  2d17ca:	c3                   	ret
+  2d17cb:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+  2d17cf:	31 c0                	xor    %eax,%eax
+  2d17d1:	29 c2                	sub    %eax,%edx
+  2d17d3:	83 fa 01             	cmp    $0x1,%edx
+  2d17d6:	75 a9                	jne    2d1781 <mju_dot+0x61>
+  2d17d8:	89 c0                	mov    %eax,%eax
+  2d17da:	c5 fb 10 0c c7       	vmovsd (%rdi,%rax,8),%xmm1
+  2d17df:	c5 f3 59 0c c6       	vmulsd (%rsi,%rax,8),%xmm1,%xmm1
+  2d17e4:	c5 f3 58 c0          	vaddsd %xmm0,%xmm1,%xmm0
+  2d17e8:	c5 f8 77             	vzeroupper
+  2d17eb:	c3                   	ret
+  2d17ec:	89 c0                	mov    %eax,%eax
+  2d17ee:	c5 fb 10 0c c7       	vmovsd (%rdi,%rax,8),%xmm1
+  2d17f3:	48 89 c1             	mov    %rax,%rcx
+  2d17f6:	48 83 c9 01          	or     $0x1,%rcx
+  2d17fa:	c5 fb 10 14 cf       	vmovsd (%rdi,%rcx,8),%xmm2
+  2d17ff:	c5 eb 59 54 c6 08    	vmulsd 0x8(%rsi,%rax,8),%xmm2,%xmm2
+  2d1805:	c5 f3 59 0c c6       	vmulsd (%rsi,%rax,8),%xmm1,%xmm1
+  2d180a:	c5 f3 58 ca          	vaddsd %xmm2,%xmm1,%xmm1
+  2d180e:	c5 fb 58 c1          	vaddsd %xmm1,%xmm0,%xmm0
+  2d1812:	c5 f8 77             	vzeroupper
+  2d1815:	c3                   	ret
+
+Disassembly of section __lcxx_override:
+
+Disassembly of section .plt:

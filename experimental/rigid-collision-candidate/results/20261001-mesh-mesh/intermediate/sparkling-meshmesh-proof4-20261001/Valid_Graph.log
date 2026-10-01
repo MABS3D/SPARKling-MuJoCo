@@ -1,0 +1,204 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "N" proved
+--> mj-convex_assets.adb:4:07
+
+ info: initialization of "Edge_Start" proved
+--> mj-convex_assets.adb:4:10
+
+ info: initialization of "Start" proved
+--> mj-convex_assets.adb:4:22
+
+ info: initialization of "Last" proved
+--> mj-convex_assets.adb:4:29
+
+ info: initialization of "Neighbour" proved
+--> mj-convex_assets.adb:4:35
+
+ info: initialization of "Terminated" proved
+--> mj-convex_assets.adb:5:07
+
+ info: overflow check proved
+--> mj-convex_assets.adb:9:35
+
+ info: index check proved
+--> mj-convex_assets.adb:10:14
+
+ info: range check proved
+--> mj-convex_assets.adb:11:21
+
+ info: index check proved
+--> mj-convex_assets.adb:11:25
+
+ info: division check proved
+--> mj-convex_assets.adb:12:41
+
+ info: overflow check proved
+--> mj-convex_assets.adb:13:34
+
+ info: overflow check proved
+--> mj-convex_assets.adb:13:36
+
+ info: overflow check proved
+--> mj-convex_assets.adb:13:38
+
+ info: overflow check proved
+--> mj-convex_assets.adb:13:63
+
+ info: range check proved
+--> mj-convex_assets.adb:13:63
+
+ info: loop invariant initialization proved
+--> mj-convex_assets.adb:16:33
+
+ info: loop invariant preservation proved
+--> mj-convex_assets.adb:16:33
+
+ info: index check proved
+--> mj-convex_assets.adb:16:69
+
+ info: loop invariant initialization proved
+--> mj-convex_assets.adb:20:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove G (S.First_Graph+2+N+J) in 0 .. S.Length-1
+--> mj-convex_assets.adb:21:12
+   21 |               G (S.First_Graph+2+N+J) in 0 .. S.Length-1
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at mj-convex_assets.ads:19 should mention G and S in a precondition
+      --> mj-convex_assets.ads:19:04
+   19 |       function Valid_Graph (S : Object; G : Graph_Array) return Boolean
+      |       ^
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-convex_assets.adb:21:28
+
+ info: overflow check proved
+--> mj-convex_assets.adb:21:30
+
+ info: overflow check proved
+--> mj-convex_assets.adb:21:32
+
+ info: index check proved
+--> mj-convex_assets.adb:21:32
+
+ info: overflow check proved
+--> mj-convex_assets.adb:22:37
+
+ info: overflow check proved
+--> mj-convex_assets.adb:22:39
+
+ info: index check proved
+--> mj-convex_assets.adb:22:39
+
+ info: overflow check proved
+--> mj-convex_assets.adb:22:55
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:29
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:31
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:33
+
+ info: index check proved
+--> mj-convex_assets.adb:23:33
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:65
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:67
+
+ info: overflow check proved
+--> mj-convex_assets.adb:23:69
+
+ info: index check proved
+--> mj-convex_assets.adb:23:69
+
+ info: overflow check proved
+--> mj-convex_assets.adb:24:29
+
+ info: overflow check proved
+--> mj-convex_assets.adb:24:31
+
+ info: index check proved
+--> mj-convex_assets.adb:24:31
+
+ info: overflow check proved
+--> mj-convex_assets.adb:24:63
+
+ info: overflow check proved
+--> mj-convex_assets.adb:24:65
+
+ info: index check proved
+--> mj-convex_assets.adb:24:65
+
+ info: overflow check proved
+--> mj-convex_assets.adb:24:75
+
+ info: overflow check proved
+--> mj-convex_assets.adb:25:29
+
+ info: range check proved
+--> mj-convex_assets.adb:25:29
+
+ info: overflow check proved
+--> mj-convex_assets.adb:25:46
+
+ info: overflow check proved
+--> mj-convex_assets.adb:25:48
+
+ info: index check proved
+--> mj-convex_assets.adb:25:48
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-convex_assets.adb:26:33
+
+ info: index check proved
+--> mj-convex_assets.adb:27:19
+
+ info: range check proved
+--> mj-convex_assets.adb:29:39
+
+ info: index check proved
+--> mj-convex_assets.adb:29:42
+
+ info: range check proved
+--> mj-convex_assets.adb:30:53
+
+ info: index check proved
+--> mj-convex_assets.adb:30:56
+
+ info: overflow check proved
+--> mj-convex_assets.adb:30:79
+
+ info: overflow check proved
+--> mj-convex_assets.adb:30:81
+
+ info: overflow check proved
+--> mj-convex_assets.adb:30:83
+
+ info: index check proved
+--> mj-convex_assets.adb:30:83
+
+ info: index check proved
+--> mj-convex_assets.adb:31:22
+
+ info: implicit aspect Always_Terminates on "Valid_Graph" has been proved, subprogram will terminate
+--> mj-convex_assets.ads:19:13
+
+ info: data dependencies proved
+--> mj-convex_assets.ads:20:11
+
+ medium: postcondition might fail, cannot prove Graph_Header (S, G)
+--> mj-convex_assets.ads:20:63
+   20 |         with Global => null, Post => (if Valid_Graph'Result then Graph_Header (S, G));
+      |                                                                  ^~~~~~~~~~~~~~~~~~
+      + provers gave up before completing the proof
+Summary logged in /var/tmp/sparkling-meshmesh-proof4-20261001/Valid_Graph/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 7.1 s, peak group RSS 238 MB

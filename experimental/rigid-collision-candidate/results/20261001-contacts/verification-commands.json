@@ -1,0 +1,63 @@
+[
+  {
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "tests/check_contacts.py",
+      "--out",
+      "/var/tmp/sparkling-fullcontact-validated-20261001",
+      "--reuse",
+      "--convex",
+      "--samples",
+      "1000"
+    ],
+    "exitcode": 0
+  },
+  {
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "tests/check_full_contacts.py",
+      "--out",
+      "/var/tmp/sparkling-fullcontact-validated-20261001",
+      "--reuse",
+      "--samples",
+      "2000"
+    ],
+    "exitcode": 0
+  },
+  {
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "tests/check_advanced.py",
+      "--out",
+      "/var/tmp/sparkling-fullcontact-validated-20261001",
+      "--reuse",
+      "--samples",
+      "100",
+      "--indexed-terrain"
+    ],
+    "exitcode": 0
+  },
+  {
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "tests/check_advanced.py",
+      "--out",
+      "/var/tmp/sparkling-fullcontact-validated-20261001",
+      "--reuse",
+      "--samples",
+      "100"
+    ],
+    "exitcode": 1
+  },
+  {
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "tests/check_finalized_geometry.py",
+      "--out",
+      "/var/tmp/sparkling-fullcontact-validated-20261001",
+      "/var/tmp/sparkling-fullcontact-validated-20261001/primitive-contact-input.txt",
+      "/var/tmp/sparkling-fullcontact-validated-20261001/advanced-input.txt"
+    ],
+    "exitcode": 0
+  }
+]

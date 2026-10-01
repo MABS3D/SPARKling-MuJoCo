@@ -1,0 +1,16 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: aspect specifications must come after parenthesized expression
+--> mj-face_selection.adb:5:50
+    5 |       function Min_4 (A, B : Quad) return Quad with Inline, Global => null,
+      |                                                     ^
+
+ error: mixed logical operators in expression
+--> mj-face_selection.adb:20:90
+   20 |                 Witness (I) in D'First .. D'First+4*G-1 and then Best (I) = D (Witness (I)) and Best (I) <= Threshold));
+      |                                                                                             ^
+gnatprove: error during generation of Global contracts
+guarded: elapsed 1.8 s, peak group RSS 44 MB

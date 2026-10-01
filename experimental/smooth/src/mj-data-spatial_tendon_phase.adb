@@ -1,5 +1,4 @@
 with MJ.Manifold_Math;
-with MJ.Tendon_Adapters;
 with MJ.Data.Pipeline;
 with MJ.Spatial_Tendons;
 with MJ.Spatial_Tendon_Models;
@@ -64,8 +63,6 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
             Sites : ST.Site_Array (0 .. Ns - 1) := D.Tendons.Sites;
             Geoms : ST.Geometry_Array (0 .. Ng - 1) := D.Tendons.Geometries;
             Origins : ST.Vector_Array (0 .. Nb - 1);
-            Linear : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Linear_Jacobian.all, Nb, Nv);
-            Angular : constant ST.Body_Jacobian := MJ.Tendon_Adapters.Jacobian (D.Kinematic.Angular_Jacobian.all, Nb, Nv);
             R : TV.Matrix;
             V, Position : TV.Vector;
             B : Natural;
@@ -98,7 +95,8 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
                   for A in 1 .. 3 loop Geoms (I).Orientation (A, C) := V (A); end loop;
                end loop;
             end loop;
-            if not ST.Valid_Kinematics (Sites, Geoms, Origins, Linear, Angular, D.Nv) then return; end if;
+            if not ST.Valid_Flat_Kinematics (Sites, Geoms, Origins,
+              D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all, Nv) then return; end if;
             for T in D.Tendons.Tendons'Range loop
                declare
                   P : constant TM.Parameters := D.Tendons.Tendons (T);
@@ -111,7 +109,8 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
                   Eval : ST.Evaluation_Status;
                begin
                   if not ST.Valid_Path (Route, Sites, Geoms) then return; end if;
-                  ST.Evaluate (Route, Sites, Geoms, Origins, Linear, Angular,
+                  ST.Evaluate_Flat (Route, Sites, Geoms, Origins,
+                               D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all,
                                Eval, Length, Row, Points, Count);
                   if Eval /= ST.Success or else Length not in 0.0 .. 1.0e30 then return; end if;
                   Velocity := ST.Velocity (Row, D.State.Qvel.all);

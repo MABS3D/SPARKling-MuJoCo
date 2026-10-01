@@ -9,7 +9,9 @@ This is an independent, early-stage project. It is not a complete simulator, an 
 
 Ambitious? Yes. A little unreasonable? Probably. Let's see how much physics we can make explicit enough to prove.
 
-[Latest checkpoint — 30 September 2026](docs/publication-2026-09-30.md): ball/free dynamics, spatial tendons, performance work, solver contracts and new isolated candidates.
+[Latest checkpoint — 1 October 2026](docs/publication-2026-10-01.md): direct tendon Jacobian views, elastic/contact materials and isolated rigid collision routines.
+
+[Previous checkpoint — 30 September 2026](docs/publication-2026-09-30.md): ball/free dynamics, spatial tendons, performance work, solver contracts and new isolated candidates.
 
 [Previous checkpoint — 29 September 2026](docs/publication-2026-09-29.md): faster matrix-to-quaternion conversion and a verified scalar contact candidate.
 

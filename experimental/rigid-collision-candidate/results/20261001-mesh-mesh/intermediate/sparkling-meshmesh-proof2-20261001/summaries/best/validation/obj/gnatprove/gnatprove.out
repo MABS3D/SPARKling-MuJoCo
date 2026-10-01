@@ -1,0 +1,43 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                      Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                            .           .          .
+Flow Dependencies                 .         .                            .           .          .
+Initialization                    1         1                            .           .          .
+Non-Aliasing                      .         .                            .           .          .
+Run-time Checks                  21         .                    21 (CVC5)           .          .
+Assertions                       10         .    9 (CVC5 85%, Trivial 15%)           .          1
+Functional Contracts             11         .                     8 (CVC5)           .          3
+LSP Verification                  .         .                            .           .          .
+Termination                       1         1                            .           .          .
+Concurrency                       .         .                            .           .          .
+-------------------------------------------------------------------------------------------------
+Total                            45    3 (7%)                     38 (84%)           .     4 (9%)
+
+
+max steps used for successful proof: 67301
+
+============================
+Most difficult proved checks
+============================
+
+mj-convex_assets.ads:16:57: precondition proved in max 2 seconds
+mj-convex_assets.ads:18:25: precondition proved in max 2 seconds
+mj-convex_assets.adb:35:62: precondition proved in max 2 seconds
+mj-convex_assets.adb:37:49: precondition proved in max 1 seconds
+mj-convex_assets.adb:35:33: loop invariant after first iteration proved in max 1 seconds
+mj-convex_assets.adb:36:33: precondition proved in max 1 seconds
+mj-convex_assets.ads:18:57: precondition proved in max 1 seconds
+mj-convex_assets.adb:37:33: loop invariant after first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-convex_assets, 1 subprograms and packages out of 1 analyzed
+  MJ.Convex_Assets.Best_Vertex at mj-convex_assets.ads:9 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 38 checks out of 42 proved

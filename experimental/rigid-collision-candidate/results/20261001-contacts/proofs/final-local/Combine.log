@@ -1,0 +1,83 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "W" proved
+--> mj-contact_parameters.adb:14:07
+
+ info: initialization of "Fri" proved
+--> mj-contact_parameters.adb:15:07
+
+ info: precondition proved
+--> mj-contact_parameters.adb:24:15
+
+ info: predicate check proved
+--> mj-contact_parameters.adb:24:56
+
+ info: float overflow check proved
+--> mj-contact_parameters.adb:25:34
+
+ info: precondition proved
+--> mj-contact_parameters.adb:27:23
+
+ info: precondition proved
+--> mj-contact_parameters.adb:27:60
+
+ info: precondition proved
+--> mj-contact_parameters.adb:29:20
+
+ info: precondition proved
+--> mj-contact_parameters.adb:29:57
+
+ info: precondition proved
+--> mj-contact_parameters.adb:30:20
+
+ info: precondition proved
+--> mj-contact_parameters.adb:30:57
+
+ info: precondition proved
+--> mj-contact_parameters.adb:31:20
+
+ info: implicit aspect Always_Terminates on "Combine" has been proved, subprogram will terminate
+--> mj-contact_parameters.ads:56:13
+
+ info: data dependencies proved
+--> mj-contact_parameters.ads:56:62
+
+ info: float overflow check proved
+--> mj-contact_parameters.ads:62:113
+
+ medium: postcondition might fail, cannot prove Combine'Result.Ref (I) = (if A.Priority > B.Priority then A.Ref (I) elsif B.Priority > A.Priority then B.Ref (I) elsif A.Ref (0) > 0.0 and B.Ref (0) > 0.0 then Mix_Value (A.Ref (I), B.Ref (I), Weight (A.Mix, B.Mix)) else Real'Min (A.Ref (I), B.Ref (I)))
+--> mj-contact_parameters.ads:63:45
+   63 |           and (for all I in Reference'Range => Combine'Result.Ref (I) =
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~
+      :
+   67 |              else Real'Min (A.Ref (I), B.Ref (I))))
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-contact_parameters.ads:66:13
+
+ info: precondition proved
+--> mj-contact_parameters.ads:66:46
+
+ info: precondition proved
+--> mj-contact_parameters.ads:70:16
+
+ info: precondition proved
+--> mj-contact_parameters.ads:70:49
+
+ info: index check proved
+--> mj-contact_parameters.ads:72:51
+
+ info: index check proved
+--> mj-contact_parameters.ads:73:54
+
+ info: index check proved
+--> mj-contact_parameters.ads:74:34
+
+ info: index check proved
+--> mj-contact_parameters.ads:75:35
+Summary logged in /var/tmp/sparkling-contact-deliveryproof-20261001/Combine/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 169.4 s, peak group RSS 242 MB

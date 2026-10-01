@@ -1,0 +1,58 @@
+"""Paired full-precontact narrowphase timings over 16 changing poses."""
+import argparse,ctypes,itertools,json,os,platform,subprocess,time
+from pathlib import Path
+import numpy as np,mujoco
+from common import build
+from check_contacts import library,serialize_objects,match
+from check_advanced import model,mesh_asset,mesh_graph,CUBE
+
+OFFSETS=np.array([0,.0003,.001,.0006,-.0002,-.001,-.0007,.0002,.0008,.0001,-.0005,-.0009,.0004,.0009,-.0003,-.0006])
+def run(out,rounds):
+    os.sched_setaffinity(0,{15});lib=library(out);f=lib.rigid_contact_time
+    f.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_int,ctypes.c_int,ctypes.c_double,ctypes.c_int,ctypes.POINTER(ctypes.c_double)];f.restype=ctypes.c_double
+    cases=[]
+    for a,b in itertools.combinations_with_replacement(['sphere','capsule','ellipsoid','cylinder','box'],2):cases.append((a+'-'+b,a,b,0))
+    cases += [('plane-'+b,'plane',b,0) for b in ['sphere','capsule','cylinder','box','mesh']]
+    cases += [('box-mesh','box','mesh',0),('cylinder-mesh','cylinder','mesh',0),('mesh-mesh','mesh','mesh',0),('capsule-cylinder-margin','capsule','cylinder',.005)]
+    exe=out/'build/release/bin/contact_probe';rng=np.random.default_rng(3141201);results=[]
+    for name,a,b,margin in cases:
+        m,d=model(a,b,CUBE);positions=np.array([[0.,0.,0.],[.35,.17,.25]]);mats=np.stack([np.eye(3).reshape(9)]*2)
+        d.geom_xpos[:]=positions;d.geom_xmat[:]=mats
+        verts=[[],[]];facets=[[],[]];graphs=[[],[]];seeds=[[],[]]
+        for g,k in enumerate([a,b]):
+            if k=='mesh':verts[g],facets[g]=mesh_asset(m,g);graphs[g],seeds[g]=mesh_graph(m,g)
+        def text(mode=0,repeats=1,pos=positions):return serialize_objects([a,b],m.geom_size,pos,mats,vertices=verts,facets=facets,graphs=graphs,seeds=seeds,margin=margin,mode=mode,repeats=repeats)
+        inputs=[];expected=[]
+        for off in OFFSETS:
+            p=positions.copy();p[1,0]+=off;d.geom_xpos[:]=p;v=np.zeros(500);n=lib.rigid_contacts(m._address,d._address,0,1,margin,v)
+            expected.append(v[:10*n].reshape(-1,10));inputs.append(text(pos=p))
+        d.geom_xpos[:]=positions
+        check=subprocess.run([str(exe)],input=''.join(inputs),text=True,capture_output=True,check=True)
+        errors=[]
+        for frame,(line,want) in enumerate(zip(check.stdout.splitlines(),expected)):
+            words=line.split();actual=np.asarray(list(map(float,words[2:]))).reshape(-1,10);err=match(actual,want)
+            if words[0]!='SUCCESS' or err:errors.append(dict(frame=frame,error=err,status=words[0]))
+        if len(check.stdout.splitlines())!=16:errors.append(dict(reason='missing frames'))
+        if errors:results.append(dict(case=name,correctness_errors=errors));continue
+        checksum=ctypes.c_double();pilot=f(m._address,d._address,0,1,margin,128,ctypes.byref(checksum));reps=max(256,min(100000,int(.012*1e9/max(1,pilot))));reps=(reps//16)*16
+        def ada():
+            words=subprocess.run([str(exe)],input=text(1,reps),text=True,capture_output=True,check=True).stdout.split()
+            if words[0]!='SUCCESS':raise RuntimeError(words)
+            return float(words[2]),float(words[3])
+        def c():return f(m._address,d._address,0,1,margin,reps,ctypes.byref(checksum)),checksum.value
+        paired=[];sums=[]
+        for r in range(rounds):
+            order=[ada,c] if r%2==0 else [c,ada];timings=[fn() for fn in order]
+            aa,cc=timings if r%2==0 else timings[::-1]
+            if abs(aa[1]-cc[1])>2e-7*(1+abs(cc[1])):raise RuntimeError((name,'full checksum mismatch',aa,cc))
+            paired.append([aa[0],cc[0]]);sums.append([aa[1],cc[1]])
+        p=np.asarray(paired);ratios=p[:,0]/p[:,1];boots=np.median(rng.choice(ratios,size=(10000,len(ratios)),replace=True),axis=1)
+        record=dict(case=name,frames=16,repetitions=reps,contacts=[len(e) for e in expected],paired_ns=paired,checksums=sums,
+          ada_ns=float(np.median(p[:,0])),c_ns=float(np.median(p[:,1])),ratio=float(np.median(ratios)),ratio95=np.quantile(boots,[.025,.975]).tolist())
+        results.append(record);print(name,round(record['ada_ns'],1),round(record['c_ns'],1),'ratio',round(record['ratio'],3),flush=True)
+        (out/'contact-timing.json').write_text(json.dumps(dict(scope='full geometric precontacts only, 16 changing kinematic poses; excludes broadphase, materials, constraint construction, dynamics/integration',cpu=platform.processor(),platform=platform.platform(),cpu_affinity=[15],rounds=rounds,results=results),indent=2)+'\n')
+    return results
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--rounds',type=int,default=15);p.add_argument('--reuse',action='store_true');a=p.parse_args();out=a.out.resolve()
+    if not a.reuse:build(out)
+    run(out,a.rounds)

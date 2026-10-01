@@ -1,0 +1,41 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                  Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                        .           .          .
+Flow Dependencies                 .         .                                        .           .          .
+Initialization                    5         5                                        .           .          .
+Non-Aliasing                      .         .                                        .           .          .
+Run-time Checks                  81         .                81 (CVC5 95%, altergo 5%)           .          .
+Assertions                        6         .                                 6 (CVC5)           .          .
+Functional Contracts              5         .    5 (CVC5 57%, Trivial 6%, altergo 37%)           .          .
+LSP Verification                  .         .                                        .           .          .
+Termination                       .         .                                        .           .          .
+Concurrency                       .         .                                        .           .          .
+-------------------------------------------------------------------------------------------------------------
+Total                            98    6 (6%)                                 92 (94%)           .          .
+
+
+max steps used for successful proof: 10093
+
+============================
+Most difficult proved checks
+============================
+
+mj-convex_assets.ads:55:16: postcondition proved in max 1 seconds
+mj-convex_assets.adb:85:34: precondition proved in max 1 seconds
+mj-convex_assets.adb:85:57: range check proved in max 1 seconds
+mj-convex_assets.ads:61:36: precondition proved in max 1 seconds
+mj-convex_assets.ads:61:92: overflow check proved in max 1 seconds
+mj-convex_assets.adb:85:57: overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-convex_assets, 1 subprograms and packages out of 1 analyzed
+  MJ.Convex_Assets.Compile_Degrees at mj-convex_assets.ads:53 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (92 checks)

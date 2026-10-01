@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+-------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                      Provers   Justified   Unproved
+-------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                            .           .          .
+Flow Dependencies                 .         .                            .           .          .
+Initialization                    2         2                            .           .          .
+Non-Aliasing                      .         .                            .           .          .
+Run-time Checks                  39         .                    39 (CVC5)           .          .
+Assertions                       10         .    10 (CVC5 92%, Trivial 8%)           .          .
+Functional Contracts              5         .                     4 (CVC5)           .          1
+LSP Verification                  .         .                            .           .          .
+Termination                       .         .                            .           .          .
+Concurrency                       .         .                            .           .          .
+-------------------------------------------------------------------------------------------------
+Total                            57    3 (5%)                     53 (93%)           .     1 (2%)
+
+
+max steps used for successful proof: 527
+
+============================
+Most difficult proved checks
+============================
+
+No check found with max time greater than 1 second
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-contact_incidence, 1 subprograms and packages out of 1 analyzed
+  MJ.Contact_Incidence.Append_Vertex at mj-contact_incidence.adb:52 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 53 checks out of 54 proved

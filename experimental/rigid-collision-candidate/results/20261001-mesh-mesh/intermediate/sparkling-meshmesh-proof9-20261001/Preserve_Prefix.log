@@ -1,0 +1,71 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: data dependencies proved
+--> mj-contact_incidence.adb:71:18
+
+ info: overflow check proved
+--> mj-contact_incidence.adb:74:77
+
+ info: index check proved
+--> mj-contact_incidence.adb:78:62
+
+ info: index check proved
+--> mj-contact_incidence.adb:78:79
+
+ info: index check proved
+--> mj-contact_incidence.adb:80:49
+
+ info: index check proved
+--> mj-contact_incidence.adb:80:65
+
+ info: precondition proved
+--> mj-contact_incidence.adb:81:12
+
+ medium: postcondition might fail, cannot prove L.Data (L.Start (Vertex)+K).Face in F'Range
+--> mj-contact_incidence.adb:81:12
+   81 |               Vertex_Matches (After, F, V) = Vertex_Matches (Before, F, V)))
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-contact_incidence.adb:19
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-contact_incidence.adb:81:43
+
+ info: precondition proved
+--> mj-contact_incidence.adb:86:13
+
+ info: index check proved
+--> mj-contact_incidence.adb:89:51
+
+ info: index check proved
+--> mj-contact_incidence.adb:89:67
+
+ info: precondition proved
+--> mj-contact_incidence.adb:90:14
+
+ medium: loop invariant might fail in first iteration, cannot prove L.Data (L.Start (Vertex)+K).Face in F'Range
+--> mj-contact_incidence.adb:90:14
+   90 |                 Vertex_Matches (After, F, J) = Vertex_Matches (Before, F, J)));
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-contact_incidence.adb:19
+      + possible fix: precondition of subprogram at line 69 should mention F
+   69 |       procedure Preserve_Prefix (Before, After : Lookup; F : Facet_Array;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove L.Data (L.Start (Vertex)+K).Face in F'Range
+--> mj-contact_incidence.adb:90:14
+   90 |                 Vertex_Matches (After, F, J) = Vertex_Matches (Before, F, J)));
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-contact_incidence.adb:19
+      + possible fix: precondition of subprogram at line 69 should mention F
+   69 |       procedure Preserve_Prefix (Before, After : Lookup; F : Facet_Array;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-contact_incidence.adb:90:45
+Summary logged in /var/tmp/sparkling-meshmesh-proof9-20261001/Preserve_Prefix/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 41.0 s, peak group RSS 201 MB

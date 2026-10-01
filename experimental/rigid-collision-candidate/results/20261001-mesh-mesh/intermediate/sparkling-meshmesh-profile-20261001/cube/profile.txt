@@ -1,0 +1,118 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 27.42      0.34     0.34 18000000     0.00     0.00  mj__convex_contacts__support_cached
+ 13.71      0.51     0.17  1000000     0.00     0.00  mj__convex_contacts__generate
+  9.68      0.63     0.12                             mj__convex_contacts__generate__attach.19
+  8.06      0.73     0.10                             mj__contact_features__expand__normals.1
+  7.26      0.82     0.09  1000000     0.00     0.00  mj__contact_features__expand
+  7.26      0.91     0.09                             mj__convex_contacts__generate__horizon.15
+  4.03      0.96     0.05                             ada__numerics__long_elementary_functions__sqrt
+  4.03      1.01     0.05                             mj__convex_contacts__generate__support.6
+  3.23      1.05     0.04                             mj__convex_contacts__generate__epa_support.13
+  3.23      1.09     0.04                             mj__convex_contacts__generate__gjk.1
+  2.42      1.12     0.03  4000000     0.00     0.00  mj__convex_contacts__generate__intersection__distance.3
+  2.42      1.15     0.03  2000000     0.00     0.00  mj__rigid_simplex__affine
+  2.42      1.18     0.03        1    30.00   315.00  _ada_contact_probe
+  1.61      1.20     0.02  1000000     0.00     0.00  mj__rigid_simplex__segment
+  1.61      1.22     0.02                             mj__contact_features__expand__recover.6
+  0.81      1.23     0.01  4000000     0.00     0.00  mj__rigid_simplex__same_side
+  0.81      1.24     0.01                             _init
+  0.00      1.24     0.00  1000000     0.00     0.00  mj__advanced_contacts__generate
+  0.00      1.24     0.00  1000000     0.00     0.00  mj__rigid_simplex__triangle
+  0.00      1.24     0.00        1     0.00     0.00  ada_main__finalize_library
+
+			Call graph
+
+
+granularity: each sample hit covers 4 byte(s) for 0.81% of 1.24 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     31.5    0.05    0.34                 mj__convex_contacts__generate__support.6 [1]
+                0.34    0.00 18000000/18000000     mj__convex_contacts__support_cached [2]
+-----------------------------------------------
+                0.34    0.00 18000000/18000000     mj__convex_contacts__generate__support.6 [1]
+[2]     27.4    0.34    0.00 18000000         mj__convex_contacts__support_cached [2]
+-----------------------------------------------
+                                                 <spontaneous>
+[3]     25.4    0.00    0.32                 main [3]
+                0.03    0.28       1/1           _ada_contact_probe [4]
+                0.00    0.00       1/1           ada_main__finalize_library [21]
+-----------------------------------------------
+                0.03    0.28       1/1           main [3]
+[4]     25.4    0.03    0.28       1         _ada_contact_probe [4]
+                0.00    0.28 1000000/1000000     mj__advanced_contacts__generate [5]
+-----------------------------------------------
+                0.00    0.28 1000000/1000000     _ada_contact_probe [4]
+[5]     23.0    0.00    0.28 1000000         mj__advanced_contacts__generate [5]
+                0.17    0.12 1000000/1000000     mj__convex_contacts__generate [6]
+-----------------------------------------------
+                0.17    0.12 1000000/1000000     mj__advanced_contacts__generate [5]
+[6]     23.0    0.17    0.12 1000000         mj__convex_contacts__generate [6]
+                0.09    0.00 1000000/1000000     mj__contact_features__expand [10]
+                0.01    0.00 1000000/2000000     mj__rigid_simplex__affine [15]
+                0.01    0.00 4000000/4000000     mj__rigid_simplex__same_side [19]
+-----------------------------------------------
+                                                 <spontaneous>
+[7]      9.7    0.12    0.00                 mj__convex_contacts__generate__attach.19 [7]
+-----------------------------------------------
+                                                 <spontaneous>
+[8]      8.5    0.04    0.07                 mj__convex_contacts__generate__gjk.1 [8]
+                0.03    0.00 4000000/4000000     mj__convex_contacts__generate__intersection__distance.3 [14]
+                0.02    0.00 1000000/1000000     mj__rigid_simplex__segment [16]
+                0.00    0.01 1000000/1000000     mj__rigid_simplex__triangle [18]
+-----------------------------------------------
+                                                 <spontaneous>
+[9]      8.1    0.10    0.00                 mj__contact_features__expand__normals.1 [9]
+-----------------------------------------------
+                0.09    0.00 1000000/1000000     mj__convex_contacts__generate [6]
+[10]     7.3    0.09    0.00 1000000         mj__contact_features__expand [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[11]     7.3    0.09    0.00                 mj__convex_contacts__generate__horizon.15 [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[12]     4.0    0.05    0.00                 ada__numerics__long_elementary_functions__sqrt [12]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]     3.2    0.04    0.00                 mj__convex_contacts__generate__epa_support.13 [13]
+-----------------------------------------------
+                0.03    0.00 4000000/4000000     mj__convex_contacts__generate__gjk.1 [8]
+[14]     2.4    0.03    0.00 4000000         mj__convex_contacts__generate__intersection__distance.3 [14]
+-----------------------------------------------
+                0.01    0.00 1000000/2000000     mj__rigid_simplex__triangle [18]
+                0.01    0.00 1000000/2000000     mj__convex_contacts__generate [6]
+[15]     2.4    0.03    0.00 2000000         mj__rigid_simplex__affine [15]
+-----------------------------------------------
+                0.02    0.00 1000000/1000000     mj__convex_contacts__generate__gjk.1 [8]
+[16]     1.6    0.02    0.00 1000000         mj__rigid_simplex__segment [16]
+-----------------------------------------------
+                                                 <spontaneous>
+[17]     1.6    0.02    0.00                 mj__contact_features__expand__recover.6 [17]
+-----------------------------------------------
+                0.00    0.01 1000000/1000000     mj__convex_contacts__generate__gjk.1 [8]
+[18]     1.2    0.00    0.01 1000000         mj__rigid_simplex__triangle [18]
+                0.01    0.00 1000000/2000000     mj__rigid_simplex__affine [15]
+-----------------------------------------------
+                0.01    0.00 4000000/4000000     mj__convex_contacts__generate [6]
+[19]     0.8    0.01    0.00 4000000         mj__rigid_simplex__same_side [19]
+-----------------------------------------------
+                                                 <spontaneous>
+[20]     0.8    0.01    0.00                 _init [20]
+-----------------------------------------------
+                0.00    0.00       1/1           main [3]
+[21]     0.0    0.00    0.00       1         ada_main__finalize_library [21]
+-----------------------------------------------
+
+Index by function name
+
+   [4] _ada_contact_probe (contact_probe.adb) [17] mj__contact_features__expand__recover.6 (<artificial>) [1] mj__convex_contacts__generate__support.6 (mj-convex_contacts.adb)
+  [20] _init                   [6] mj__convex_contacts__generate (mj-convex_contacts.adb) [2] mj__convex_contacts__support_cached (mj-convex_contacts.adb)
+  [12] ada__numerics__long_elementary_functions__sqrt [7] mj__convex_contacts__generate__attach.19 (mj-convex_contacts.adb) [15] mj__rigid_simplex__affine (mj-rigid_simplex.adb)
+  [21] ada_main__finalize_library (b__contact_probe.adb) [13] mj__convex_contacts__generate__epa_support.13 (mj-convex_contacts.adb) [19] mj__rigid_simplex__same_side (mj-rigid_simplex.adb)
+   [5] mj__advanced_contacts__generate (mj-advanced_contacts.adb) [8] mj__convex_contacts__generate__gjk.1 (mj-convex_contacts.adb) [16] mj__rigid_simplex__segment (mj-rigid_simplex.adb)
+  [10] mj__contact_features__expand (mj-contact_features.adb) [11] mj__convex_contacts__generate__horizon.15 (mj-convex_contacts.adb) [18] mj__rigid_simplex__triangle (mj-rigid_simplex.adb)
+   [9] mj__contact_features__expand__normals.1 (mj-contact_features.adb) [14] mj__convex_contacts__generate__intersection__distance.3 (mj-convex_contacts.adb)

@@ -51,11 +51,34 @@ package body MJ.Spatial_Tendons with SPARK_Mode is
       return (Linear (1) + X, Linear (2) + Y, Linear (3) + Z);
    end Point_Column;
 
-   procedure Evaluate
+   function Flat_Column (Flat : Real_Array; Body_Index, Dof, Dofs : Natural)
+     return Vector is
+   begin
+      return (Flat (3 * (Body_Index * Dofs + Dof)),
+              Flat (3 * (Body_Index * Dofs + Dof) + 1),
+              Flat (3 * (Body_Index * Dofs + Dof) + 2));
+   end Flat_Column;
+
+   procedure Evaluate_Internal
      (Route : Route_Array; Sites : Site_Array; Geometries : Geometry_Array;
       Origins : Vector_Array; Linear, Angular : Body_Jacobian;
+      Flat_Linear, Flat_Angular : Real_Array; Flat : Boolean;
       Status : out Evaluation_Status; Length : out Real; J : out Real_Array;
-      Points : out Point_Array; Count : out Natural) is
+      Points : out Point_Array; Count : out Natural) with
+     Pre => Valid_Path (Route, Sites, Geometries) and then J'First = 0 and then J'Length <= 4096
+       and then (if Flat then Valid_Flat_Kinematics
+         (Sites, Geometries, Origins, Flat_Linear, Flat_Angular, J'Length)
+         else Valid_Kinematics (Sites, Geometries, Origins, Linear, Angular, J'Length))
+       and then Points'First = 0 and then Points'Length >= 3 * Route'Length
+       and then Points'Length <= 12288,
+     Post => Count <= Points'Length
+       and then (if Status = Success then Length in 0.0 .. 1.0e100
+                   and then (for all K in J'Range => J (K) in -1.0e100 .. 1.0e100)
+                 else Length = 0.0 and then Count = 0
+                   and then (for all K in J'Range => J (K) = 0.0)
+                   and then (for all K in Points'Range =>
+                     Points (K) = (Position => Zero, Object_Id => -1)))
+   is
       Row : Real_Array (J'Range) := (others => 0.0);
       Path : Point_Array (Points'Range) := (others => (others => <>));
       N, I : Natural := 0;
@@ -161,9 +184,17 @@ package body MJ.Spatial_Tendons with SPARK_Mode is
                   Direction := Unit (Sub (P (Leg + 1), P (Leg)));
                   for K in Row'Range loop
                      pragma Loop_Invariant (for all Q in Row'Range => Row (Q) in -1.0e100 .. 1.0e100);
-                     C0 := Point_Column (Linear (Bodies (Leg), K), Angular (Bodies (Leg), K),
+                     C0 := Point_Column
+                       ((if Flat then Flat_Column (Flat_Linear, Bodies (Leg), K, J'Length)
+                         else Linear (Bodies (Leg), K)),
+                        (if Flat then Flat_Column (Flat_Angular, Bodies (Leg), K, J'Length)
+                         else Angular (Bodies (Leg), K)),
                                          P (Leg), Origins (Bodies (Leg)));
-                     C1 := Point_Column (Linear (Bodies (Leg + 1), K), Angular (Bodies (Leg + 1), K),
+                     C1 := Point_Column
+                       ((if Flat then Flat_Column (Flat_Linear, Bodies (Leg + 1), K, J'Length)
+                         else Linear (Bodies (Leg + 1), K)),
+                        (if Flat then Flat_Column (Flat_Angular, Bodies (Leg + 1), K, J'Length)
+                         else Angular (Bodies (Leg + 1), K)),
                                          P (Leg + 1), Origins (Bodies (Leg + 1)));
                      Row (K) := Row (K) + (1.0 / Divisor) * Dot (Sub (C1, C0), Direction);
                      if Row (K) not in -1.0e100 .. 1.0e100 then
@@ -188,7 +219,29 @@ package body MJ.Spatial_Tendons with SPARK_Mode is
       J := Row;
       Points := Path;
       Count := N;
+   end Evaluate_Internal;
+
+   procedure Evaluate
+     (Route : Route_Array; Sites : Site_Array; Geometries : Geometry_Array;
+      Origins : Vector_Array; Linear, Angular : Body_Jacobian;
+      Status : out Evaluation_Status; Length : out Real; J : out Real_Array;
+      Points : out Point_Array; Count : out Natural) is
+      Empty : constant Real_Array (1 .. 0) := (others => 0.0);
+   begin
+      Evaluate_Internal (Route, Sites, Geometries, Origins, Linear, Angular,
+                         Empty, Empty, False, Status, Length, J, Points, Count);
    end Evaluate;
+
+   procedure Evaluate_Flat
+     (Route : Route_Array; Sites : Site_Array; Geometries : Geometry_Array;
+      Origins : Vector_Array; Linear, Angular : Real_Array;
+      Status : out Evaluation_Status; Length : out Real; J : out Real_Array;
+      Points : out Point_Array; Count : out Natural) is
+      Empty : constant Body_Jacobian (1 .. 0, 1 .. 0) := (others => (others => Zero));
+   begin
+      Evaluate_Internal (Route, Sites, Geometries, Origins, Empty, Empty,
+                         Linear, Angular, True, Status, Length, J, Points, Count);
+   end Evaluate_Flat;
 
    function Project_Component (Previous, Moment, Force : Real) return Real is
      (Previous + Moment * Force);

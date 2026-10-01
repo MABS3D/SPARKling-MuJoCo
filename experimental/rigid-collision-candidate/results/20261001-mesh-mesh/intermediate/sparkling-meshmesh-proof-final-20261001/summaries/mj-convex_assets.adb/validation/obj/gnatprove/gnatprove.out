@@ -1,0 +1,56 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                   Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------------
+Data Dependencies                11          11                                         .           .          .
+Flow Dependencies                 .           .                                         .           .          .
+Initialization                   15          15                                         .           .          .
+Non-Aliasing                      .           .                                         .           .          .
+Run-time Checks                 258           .                258 (CVC5 97%, altergo 3%)           .          .
+Assertions                       27           .     27 (CVC5 89%, Trivial 4%, altergo 7%)           .          .
+Functional Contracts             24           .    24 (CVC5 74%, Trivial 5%, altergo 20%)           .          .
+LSP Verification                  .           .                                         .           .          .
+Termination                       9           9                                         .           .          .
+Concurrency                       .           .                                         .           .          .
+----------------------------------------------------------------------------------------------------------------
+Total                           344    35 (10%)                                 309 (90%)           .          .
+
+
+max steps used for successful proof: 68358
+
+============================
+Most difficult proved checks
+============================
+
+mj-convex_assets.adb:109:33: loop invariant after first iteration proved in max 3 seconds
+mj-convex_assets.ads:87:57: precondition proved in max 2 seconds
+mj-convex_assets.adb:108:62: precondition proved in max 2 seconds
+mj-convex_assets.ads:83:16: postcondition proved in max 2 seconds
+mj-convex_assets.ads:85:25: precondition proved in max 2 seconds
+mj-convex_assets.adb:106:33: loop invariant after first iteration proved in max 1 seconds
+mj-convex_assets.adb:108:33: loop invariant after first iteration proved in max 1 seconds
+mj-convex_assets.ads:87:25: precondition proved in max 1 seconds
+mj-convex_assets.adb:107:46: precondition proved in max 1 seconds
+mj-convex_assets.ads:55:16: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-convex_assets, 12 subprograms and packages out of 12 analyzed
+  MJ.Convex_Assets at mj-convex_assets.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Convex_Assets.Best_Vertex at mj-convex_assets.ads:78 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (41 checks)
+  MJ.Convex_Assets.Compile_Degrees at mj-convex_assets.ads:53 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (92 checks)
+  MJ.Convex_Assets.Compile_Graph at mj-convex_assets.ads:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (74 checks)
+  MJ.Convex_Assets.Encode_Neighbour at mj-convex_assets.ads:34 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Convex_Assets.Encode_Parts at mj-convex_assets.ads:49 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Convex_Assets.Find_End at mj-convex_assets.ads:42 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (14 checks)
+  MJ.Convex_Assets.Global_Id at mj-convex_assets.ads:40 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Convex_Assets.Graph_Header at mj-convex_assets.ads:8 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (36 checks)
+  MJ.Convex_Assets.Local_Id at mj-convex_assets.ads:38 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Convex_Assets.Seed_Coordinate at mj-convex_assets.ads:30 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Convex_Assets.Valid_Graph at mj-convex_assets.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)

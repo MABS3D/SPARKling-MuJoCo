@@ -1,0 +1,2672 @@
+{
+  "scope": "mesh-mesh geometric precontacts; excludes broadphase, material/frame, constraints and movement",
+  "rounds": 12,
+  "target_seconds": 0.012,
+  "cpu_affinity": [
+    15
+  ],
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "order": "all six permutations of baseline,current,native C repeated",
+  "baseline_path": "/var/tmp/sparkling-fullcontact-followup-finalized-20261001",
+  "current_path": "/var/tmp/sparkling-meshmesh-direct-v2-20261001",
+  "baseline_manifest": {
+    "sources": {
+      "base/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+      "base/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+      "src/mj-advanced_contacts.adb": "1cc34230be86cb6b9e315fc47d3062a32b862080b1a49e805de2cd81aa79a7a4",
+      "src/mj-advanced_contacts.ads": "3b08bc454decd55e5f746d67e0bd08edac4243ac607ecaffe70818dc816918ec",
+      "src/mj-collision_contacts.adb": "6519b0ce0adb7c9e3cc0bd24bf8108d08fcae0d6949d9ed9b87e5e8e2bd4b7d4",
+      "src/mj-collision_contacts.ads": "9381e745d49a86141bf612bc9d25815e2f6f1d813be8c00e4ca8e7dc3549b4f4",
+      "src/mj-contact_features.adb": "e86b4cd3970138719a4faa61c507939f8ea3005bd5449c2ff70ef463f464677e",
+      "src/mj-contact_features.ads": "196aa1f0ae2b6d4884f4ccf5ad3761d458289a96364b39641767ed7328b461dd",
+      "src/mj-contact_geometry.adb": "f9a0fae27ce4e207a396369f90240d4f5ea403baa9b310ffbd54b8a8eace475f",
+      "src/mj-contact_geometry.ads": "7faa3d18640f25c1bedecc81a225eb72ecb536396a388c8fb23c504e73da375d",
+      "src/mj-contact_inflation.adb": "3173c6156f0b024d458fa56ce9f31a961d494df82ff88529d1ae72e203475c75",
+      "src/mj-contact_inflation.ads": "3cdee3a853c61114891f3d82352066f5215de781a5f15fdbe916dfa1e80b52a4",
+      "src/mj-contact_parameters.adb": "80c43b9427e78d5d956835331589ef40621e9c99d98a78587eada9691f7e83f5",
+      "src/mj-contact_parameters.ads": "13c2530f385b50411e03a619bd2f755b3a079102eaaee36b96b231fff00dcf23",
+      "src/mj-contact_perturbations.adb": "aefd3608aabf64b7e083bb541ed0ff91e95bfa7e2dfe220a0efaa63405679601",
+      "src/mj-contact_perturbations.ads": "036f30686e283d56b72775dadbde7897e885b8090350b91d9442313d4d1ad3c9",
+      "src/mj-convex_assets.adb": "86cae873f60c6275382401ff8fb80e328a3c42d3109e5d5a5d639c51342e4e85",
+      "src/mj-convex_assets.ads": "e9b29d3ae6b30a6498753f7eae5f2caaeb00d11cdc9b9c709c4b5f3d3b2ad6fe",
+      "src/mj-convex_contacts.adb": "ce6826b022bcc8f4f2699f0775a1707fdd1952fcd028f2dcaf5de264501ba59a",
+      "src/mj-convex_contacts.ads": "2014d7a3b1bfe992533302d7d6831a0e1861c89373f25761e676e40f3c197651",
+      "src/mj-full_contacts.adb": "949c522b19c0e3e8758c32428f1af72e7ab62e17555dfd5df4027b506d2e2e3a",
+      "src/mj-full_contacts.ads": "38801fff379bec09564cc95d80c8b2a5a16ba7c0599f13d9faa4c13804eb92d4",
+      "src/mj-heightfield_contacts.adb": "8c0b55bd299cfbfc9504ddf959ddfabd51d13edc6e3ace2e58ef247072cdf795",
+      "src/mj-heightfield_contacts.ads": "d137f2b9485fcd4b434c713ec70dd1f407d2fdec5678a5dd9856b30b9d3e7f86",
+      "src/mj-primitive_contacts.adb": "cf8bf53a9b02bce78092496d19eec153f78a1f787c5ba972d2293519d5138b4e",
+      "src/mj-primitive_contacts.ads": "b9a6c8ebe07691d76f596bfe7b81facb5ac85684f69361110fff804de57a8a7d",
+      "src/mj-rigid_ccd.adb": "09d5f19a6c3c1191d863a679accad764bde1b01922125bde6bee099d2b666b47",
+      "src/mj-rigid_ccd.ads": "0386caea3cda370abca76551507c067df4804b72363c41d2603982917d2ef25e",
+      "src/mj-rigid_detector.adb": "e0846828c615be982778d28f18c0d4b59556cb9b60759a01825ebbea874e4520",
+      "src/mj-rigid_detector.ads": "da5bfd2a77436d4862a068318ddafe3bb99fdc1f0505e2cab240b0f27dd08c68",
+      "src/mj-rigid_geometry.ads": "f1b8ddef7b483d94f207d14e026de41ad2c50f7cae863fe76fe98a1c65e1aa36",
+      "src/mj-rigid_math.adb": "0a6790943cafbf403e128d99c34cea445a58160ad94d6287835a94f583ccef9c",
+      "src/mj-rigid_math.ads": "ed39ab1ab31c9854636c63067a6d0a61a9e4b5800a12788e42dd3af93e74cf5a",
+      "src/mj-rigid_narrowphase.adb": "81340c4256de1da60061ca67b537bdc8183d5eb251cde563b1f078d1a688f45d",
+      "src/mj-rigid_narrowphase.ads": "593b8570b12f08b85c5d6ddb15c7bdf1286b376e2ec62c63617a3772836dfcde",
+      "src/mj-rigid_primitives.adb": "4124e9c7e8a62c8cfcd5663e6c5f0cff1233f0771fcf7393fadac5a0c6eed17f",
+      "src/mj-rigid_primitives.ads": "9d1624fa113f994238d5e555f62c46a1ef7c500b25f7bed0e3c4bf3f31e655f8",
+      "src/mj-rigid_simplex.adb": "f575ab7f82f44654e02c15d2ce6c4b5701a0b5806e4c50ea79b9e94c44fd1180",
+      "src/mj-rigid_simplex.ads": "7c9f90ec06a77069522fe04fe57943ae0dfd62fd0744712dca4ab8b9040c1588",
+      "src/mj-rigid_support.adb": "a9a3e486e7f6df6d0f309eea41fb15698decb63031d601f2c4138e0a63b83333",
+      "src/mj-rigid_support.ads": "44f15175809a8c9e289c01e3c3baedf652d3fdfc99b96bfb5439236140c0a404",
+      "tests/benchmark.py": "6c7bd38d4cb433f3013a89ef7528fc9f6793f2ed1011138e38d3b693db1b183c",
+      "tests/benchmark_contacts.py": "73e8aa26f23b48ee3a9dae68be8b71b26e22e9f60c5df35dc8313b8944fa60cc",
+      "tests/benchmark_motion.py": "f92143c931b70d2ecd376b498860573fce82ee6b970d759c924d8d9b2af56acf",
+      "tests/check.py": "4f8589a2b0c68c5e6c7bd6f91523d5f7797b0450311d96daa8e3f858567f42b4",
+      "tests/check_advanced.py": "0b87b395d1f804d4d86a0d92c7794162252402e9e6e84a5a31ba4874c7ac37fe",
+      "tests/check_contacts.py": "b6c54b4065e20f9747a1b047a45292b46a02693334ed7e44080b87e01cc810c4",
+      "tests/check_contact_regressions.py": "b17ede5782ff7ae493f91defb370b8a86e1d7ee2191b2f7ee724fa1bbaa6d815",
+      "tests/check_finalized_geometry.py": "be5834e7247824d984d0460da65ca19a2e85225ad08b3f82acdd308c0c7ce525",
+      "tests/check_full_contacts.py": "31663a8252329e3d646eb6653bb6e5454c45d570c27936dc47a9778d9c91d330",
+      "tests/common.py": "6773ad19f1585785ed140c13553bef0f48cd71da9f5c0bc1495dea9ea706fa84",
+      "tests/contact_probe.adb": "d15213ae6ffedc3badea5a4cf942fe0089ce1d647a1e9eabe23869435814e375",
+      "tests/contact_regressions.json": "dc4a3b5b9f45200e9b888c1a0b68bb43a178ec7777aa6c29883c3c5099d349a3",
+      "tests/driver_cases.py": "6503a3e6e792bfd18cbe47178aeb32417640112455a6b2cb5fc5193338bc5b22",
+      "tests/full_contact_probe.adb": "ac572647cf46cf28f579ec4f469876a58dfef9b4f8d4fe69e811fd8b595470f4",
+      "tests/prove.py": "7d5c2fbfbc5dd4ef1995775e196d3818efb01b85fdd5fb6f9211ecd49436b676",
+      "tests/prove_contacts.py": "4c4be85a3d470720d293367d949e08c9b1f95a7dd43391aa5b127cee3d09f64f",
+      "tests/reference.c": "8d6acf65aadc364b4dc631400c5a5db6101e0df52af423163aadf9911e64b6c2",
+      "tests/rigid_probe.adb": "da7acb41cc2fd1590fce77585e0956b5a36fbe06c5cac077d1e6dbe8c9784a63",
+      "tests/terrain_oracle.py": "ee9d07db397c748394ed009eedcaab4c906333d61ecad4b40d14267b1f64f5a2",
+      "rigid.gpr": "ad02fde6ee51ed176d4742c366415d1b277306ddd9f66f8844f5faecdd0e0d15"
+    },
+    "reference_library": "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+    "reference_library_sha256": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+    "oracle_command": [
+      "gcc",
+      "-O3",
+      "-march=native",
+      "-flto",
+      "-ffp-contract=off",
+      "-fPIC",
+      "-shared",
+      "-I/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/include",
+      "-I/var/tmp/sparkling-movement-c/build/_deps/ccd-src/src",
+      "-I/var/tmp/sparkling-movement-c/build/_deps/ccd-build/src",
+      "-I/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/src",
+      "/var/tmp/sparkling-fullcontact-followup-finalized-20261001/source/tests/reference.c",
+      "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+      "-Wl,-rpath,/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco",
+      "-o",
+      "/var/tmp/sparkling-fullcontact-followup-finalized-20261001/reference.so"
+    ],
+    "binaries": {
+      "validation": "0b7ff7a7831dab376a21eba6f0d5a5731d2fca20561731242085fa5bae706884",
+      "release": "b9457d84e3a6b0ba9c2dddafebdea9d88283f72dc925324b56280d1f79889cf8"
+    },
+    "contact_binaries": {
+      "validation": "dc83f81e854bb0f71d8ca951d54d21a3b117c187bbcc968db4e6236595bacad6",
+      "release": "6ca4ea587bc00a18643bb1bde755338c3c44d81938d3abcb215d177db5881a7b"
+    },
+    "full_contact_binaries": {
+      "validation": "80ef569cc60bd709a1a7cf38b3bec68d8a9e8065c9b48cc432896c838128ea74",
+      "release": "56eb96fb21a04b8dbd39c1187094725a7b9ed641349609a411ca5e6b495a189f"
+    }
+  },
+  "current_manifest": {
+    "sources": {
+      "base/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+      "base/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+      "src/mj-advanced_contacts.adb": "ce13e9a9ba61f9eea5e5c2ba704002c6a18f0ff7e04d079c2a96d63f5b814de2",
+      "src/mj-advanced_contacts.ads": "cfbfcbec4def1981ca3fe303c2718d2ae0f5ed1e833fec05fbbdddb8f8a3437d",
+      "src/mj-collision_contacts.adb": "564c301b16cff28aa48409906787ed0b3f40589caf6910dc14ea532caf3c27bd",
+      "src/mj-collision_contacts.ads": "c00043ed262aa18b67dda5e9cd90903bcb2cdaa9af9bc4752eb16c6edcd4a854",
+      "src/mj-contact_features.adb": "dc07746d61352da8454ee4a190562da7b2bfe449904af847fffa7dc56d78aa4f",
+      "src/mj-contact_features.ads": "b610c3aa9ce03f2fe3620ef853a5c40896ae80ed53f0080da4c62c9d76eafcda",
+      "src/mj-contact_geometry.adb": "f9a0fae27ce4e207a396369f90240d4f5ea403baa9b310ffbd54b8a8eace475f",
+      "src/mj-contact_geometry.ads": "7faa3d18640f25c1bedecc81a225eb72ecb536396a388c8fb23c504e73da375d",
+      "src/mj-contact_incidence.adb": "89696ca9da5914d040c02cd1db323fb8b3c126680e398f12266265d2a97f23d3",
+      "src/mj-contact_incidence.ads": "965dd31b5721c86da3d947b5b7df84fdf06027d20925bf92063d067521b0b234",
+      "src/mj-contact_inflation.adb": "3173c6156f0b024d458fa56ce9f31a961d494df82ff88529d1ae72e203475c75",
+      "src/mj-contact_inflation.ads": "3cdee3a853c61114891f3d82352066f5215de781a5f15fdbe916dfa1e80b52a4",
+      "src/mj-contact_parameters.adb": "80c43b9427e78d5d956835331589ef40621e9c99d98a78587eada9691f7e83f5",
+      "src/mj-contact_parameters.ads": "13c2530f385b50411e03a619bd2f755b3a079102eaaee36b96b231fff00dcf23",
+      "src/mj-contact_perturbations.adb": "aefd3608aabf64b7e083bb541ed0ff91e95bfa7e2dfe220a0efaa63405679601",
+      "src/mj-contact_perturbations.ads": "036f30686e283d56b72775dadbde7897e885b8090350b91d9442313d4d1ad3c9",
+      "src/mj-convex_assets.adb": "858607422733b1139d6b994777fd91fe0ac0eda04a6b649cd7752c0a42ccd209",
+      "src/mj-convex_assets.ads": "e9b29d3ae6b30a6498753f7eae5f2caaeb00d11cdc9b9c709c4b5f3d3b2ad6fe",
+      "src/mj-convex_contacts.adb": "75338be9d43eedcf64566683ffac7a95bfbd7b9c3309b6307639d7c26277bbc9",
+      "src/mj-convex_contacts.ads": "715934f53e838ee9190fe1156b1808317b5fa13b6f98bdc05af668c9782bcc90",
+      "src/mj-full_contacts.adb": "949c522b19c0e3e8758c32428f1af72e7ab62e17555dfd5df4027b506d2e2e3a",
+      "src/mj-full_contacts.ads": "38801fff379bec09564cc95d80c8b2a5a16ba7c0599f13d9faa4c13804eb92d4",
+      "src/mj-heightfield_contacts.adb": "8c0b55bd299cfbfc9504ddf959ddfabd51d13edc6e3ace2e58ef247072cdf795",
+      "src/mj-heightfield_contacts.ads": "d137f2b9485fcd4b434c713ec70dd1f407d2fdec5678a5dd9856b30b9d3e7f86",
+      "src/mj-primitive_contacts.adb": "cf8bf53a9b02bce78092496d19eec153f78a1f787c5ba972d2293519d5138b4e",
+      "src/mj-primitive_contacts.ads": "b9a6c8ebe07691d76f596bfe7b81facb5ac85684f69361110fff804de57a8a7d",
+      "src/mj-rigid_ccd.adb": "09d5f19a6c3c1191d863a679accad764bde1b01922125bde6bee099d2b666b47",
+      "src/mj-rigid_ccd.ads": "0386caea3cda370abca76551507c067df4804b72363c41d2603982917d2ef25e",
+      "src/mj-rigid_detector.adb": "e0846828c615be982778d28f18c0d4b59556cb9b60759a01825ebbea874e4520",
+      "src/mj-rigid_detector.ads": "da5bfd2a77436d4862a068318ddafe3bb99fdc1f0505e2cab240b0f27dd08c68",
+      "src/mj-rigid_geometry.ads": "f1b8ddef7b483d94f207d14e026de41ad2c50f7cae863fe76fe98a1c65e1aa36",
+      "src/mj-rigid_math.adb": "0a6790943cafbf403e128d99c34cea445a58160ad94d6287835a94f583ccef9c",
+      "src/mj-rigid_math.ads": "ed39ab1ab31c9854636c63067a6d0a61a9e4b5800a12788e42dd3af93e74cf5a",
+      "src/mj-rigid_narrowphase.adb": "81340c4256de1da60061ca67b537bdc8183d5eb251cde563b1f078d1a688f45d",
+      "src/mj-rigid_narrowphase.ads": "593b8570b12f08b85c5d6ddb15c7bdf1286b376e2ec62c63617a3772836dfcde",
+      "src/mj-rigid_primitives.adb": "4124e9c7e8a62c8cfcd5663e6c5f0cff1233f0771fcf7393fadac5a0c6eed17f",
+      "src/mj-rigid_primitives.ads": "9d1624fa113f994238d5e555f62c46a1ef7c500b25f7bed0e3c4bf3f31e655f8",
+      "src/mj-rigid_simplex.adb": "f575ab7f82f44654e02c15d2ce6c4b5701a0b5806e4c50ea79b9e94c44fd1180",
+      "src/mj-rigid_simplex.ads": "7c9f90ec06a77069522fe04fe57943ae0dfd62fd0744712dca4ab8b9040c1588",
+      "src/mj-rigid_support.adb": "a9a3e486e7f6df6d0f309eea41fb15698decb63031d601f2c4138e0a63b83333",
+      "src/mj-rigid_support.ads": "44f15175809a8c9e289c01e3c3baedf652d3fdfc99b96bfb5439236140c0a404",
+      "tests/benchmark.py": "6c7bd38d4cb433f3013a89ef7528fc9f6793f2ed1011138e38d3b693db1b183c",
+      "tests/benchmark_contacts.py": "73e8aa26f23b48ee3a9dae68be8b71b26e22e9f60c5df35dc8313b8944fa60cc",
+      "tests/benchmark_meshes.py": "677bfcc1c32d047d4cdeb93538abdf3da6c17c8c8ff9215e1552cd6556edf042",
+      "tests/benchmark_motion.py": "f92143c931b70d2ecd376b498860573fce82ee6b970d759c924d8d9b2af56acf",
+      "tests/check.py": "4f8589a2b0c68c5e6c7bd6f91523d5f7797b0450311d96daa8e3f858567f42b4",
+      "tests/check_advanced.py": "0b87b395d1f804d4d86a0d92c7794162252402e9e6e84a5a31ba4874c7ac37fe",
+      "tests/check_contacts.py": "b6c54b4065e20f9747a1b047a45292b46a02693334ed7e44080b87e01cc810c4",
+      "tests/check_contact_regressions.py": "b17ede5782ff7ae493f91defb370b8a86e1d7ee2191b2f7ee724fa1bbaa6d815",
+      "tests/check_finalized_geometry.py": "be5834e7247824d984d0460da65ca19a2e85225ad08b3f82acdd308c0c7ce525",
+      "tests/check_full_contacts.py": "31663a8252329e3d646eb6653bb6e5454c45d570c27936dc47a9778d9c91d330",
+      "tests/check_mesh_index.py": "fcbcbbefa5d1d144ef5a8ecca94480b2a1854db8a74b4a799a88d7f672eb4c44",
+      "tests/common.py": "6773ad19f1585785ed140c13553bef0f48cd71da9f5c0bc1495dea9ea706fa84",
+      "tests/contact_probe.adb": "154627b1b8caca8742967b7f9262ccfe1db40acdb6c77bef0f8866644de03f69",
+      "tests/contact_regressions.json": "dc4a3b5b9f45200e9b888c1a0b68bb43a178ec7777aa6c29883c3c5099d349a3",
+      "tests/driver_cases.py": "6503a3e6e792bfd18cbe47178aeb32417640112455a6b2cb5fc5193338bc5b22",
+      "tests/full_contact_probe.adb": "ac572647cf46cf28f579ec4f469876a58dfef9b4f8d4fe69e811fd8b595470f4",
+      "tests/prove.py": "7d5c2fbfbc5dd4ef1995775e196d3818efb01b85fdd5fb6f9211ecd49436b676",
+      "tests/prove_contacts.py": "4c4be85a3d470720d293367d949e08c9b1f95a7dd43391aa5b127cee3d09f64f",
+      "tests/reference.c": "8d6acf65aadc364b4dc631400c5a5db6101e0df52af423163aadf9911e64b6c2",
+      "tests/rigid_probe.adb": "da7acb41cc2fd1590fce77585e0956b5a36fbe06c5cac077d1e6dbe8c9784a63",
+      "tests/terrain_oracle.py": "ee9d07db397c748394ed009eedcaab4c906333d61ecad4b40d14267b1f64f5a2",
+      "rigid.gpr": "ad02fde6ee51ed176d4742c366415d1b277306ddd9f66f8844f5faecdd0e0d15"
+    },
+    "reference_library": "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+    "reference_library_sha256": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+    "oracle_command": [
+      "gcc",
+      "-O3",
+      "-march=native",
+      "-flto",
+      "-ffp-contract=off",
+      "-fPIC",
+      "-shared",
+      "-I/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/include",
+      "-I/var/tmp/sparkling-movement-c/build/_deps/ccd-src/src",
+      "-I/var/tmp/sparkling-movement-c/build/_deps/ccd-build/src",
+      "-I/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/src",
+      "/var/tmp/sparkling-meshmesh-direct-v2-20261001/source/tests/reference.c",
+      "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+      "-Wl,-rpath,/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco",
+      "-o",
+      "/var/tmp/sparkling-meshmesh-direct-v2-20261001/reference.so"
+    ],
+    "binaries": {
+      "validation": "0b7ff7a7831dab376a21eba6f0d5a5731d2fca20561731242085fa5bae706884",
+      "release": "b9457d84e3a6b0ba9c2dddafebdea9d88283f72dc925324b56280d1f79889cf8"
+    },
+    "contact_binaries": {
+      "validation": "4f022120f1de53b586dad732e23be651769e60212f0e8ce292655ec14692d541",
+      "release": "a48387eb6f3b89a43f0b1f4fa01888dc60be4559ace6d21203a2b568abc1bb25"
+    },
+    "full_contact_binaries": {
+      "validation": "80ef569cc60bd709a1a7cf38b3bec68d8a9e8065c9b48cc432896c838128ea74",
+      "release": "56eb96fb21a04b8dbd39c1187094725a7b9ed641349609a411ca5e6b495a189f"
+    }
+  },
+  "results": [
+    {
+      "case": "cube-aligned",
+      "vertices": [
+        8,
+        8
+      ],
+      "facets": [
+        6,
+        6
+      ],
+      "frames": 16,
+      "contacts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "repetitions": 13392,
+      "baseline_ns": 1183.4595280764636,
+      "ada_ns": 993.7834901433691,
+      "c_ns": 861.5734393667861,
+      "ratio": 1.1390875886616951,
+      "ratio95": [
+        1.0967141422932642,
+        1.1697117757248008
+      ],
+      "current_over_baseline": 0.8307885946164157,
+      "change95": [
+        0.825605428677429,
+        0.8432168231411048
+      ],
+      "triples_ns": [
+        [
+          1215.0793757467145,
+          1011.3239994026285,
+          846.9471326164875
+        ],
+        [
+          1185.6996714456393,
+          993.6636051373955,
+          873.7472371565113
+        ],
+        [
+          1199.1600955794504,
+          987.8119772998805,
+          914.1627837514934
+        ],
+        [
+          1181.2193847072879,
+          977.5980436081243,
+          847.7270758661888
+        ],
+        [
+          1171.5118727598565,
+          993.9033751493429,
+          855.9162186379929
+        ],
+        [
+          1179.9550477897253,
+          976.3628285543608,
+          861.1242532855437
+        ],
+        [
+          1167.6435185185185,
+          973.9027777777778,
+          853.603270609319
+        ],
+        [
+          1174.1248506571087,
+          1015.6418010752689,
+          862.0226254480286
+        ],
+        [
+          1174.8691009557945,
+          1183.8040621266427,
+          852.1682347670251
+        ],
+        [
+          1495.314964157706,
+          973.9706541218638,
+          1003.6117084826762
+        ],
+        [
+          1202.1900388291517,
+          996.9354838709677,
+          925.85513739546
+        ],
+        [
+          1236.3567801672639,
+          996.8584976105137,
+          895.7597819593788
+        ]
+      ],
+      "checksums": [
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ],
+        [
+          200076.98220006865,
+          200076.98220006865,
+          200076.98220006865
+        ]
+      ]
+    },
+    {
+      "case": "cube-rotated",
+      "vertices": [
+        8,
+        8
+      ],
+      "facets": [
+        6,
+        6
+      ],
+      "frames": 16,
+      "contacts": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.3997930137226738,
+          0.02273085318577922,
+          -0.916323553387115,
+          -0.9108736989700705,
+          -0.10177056721161443,
+          -0.3999398156898211,
+          -0.10234574101116173,
+          0.9945481687494444,
+          -0.019982225451720848
+        ],
+        [
+          0.7100914361924664,
+          -0.33421911794506093,
+          -0.6197319851727404,
+          0.2426024472501201,
+          -0.7101350380903031,
+          0.6609480163104634,
+          -0.6609948599152439,
+          -0.6196820223925407,
+          -0.4231784331568869
+        ]
+      ],
+      "repetitions": 5744,
+      "baseline_ns": 2565.5692026462393,
+      "ada_ns": 2128.3682103064066,
+      "c_ns": 1900.157729805014,
+      "ratio": 1.1087342797513466,
+      "ratio95": [
+        1.0257368166098584,
+        1.152397009502629
+      ],
+      "current_over_baseline": 0.8259624651008328,
+      "change95": [
+        0.7991171197345612,
+        0.8682911895841311
+      ],
+      "triples_ns": [
+        [
+          2524.2752437325908,
+          2191.276810584958,
+          1892.533077994429
+        ],
+        [
+          2615.75139275766,
+          2271.7822075208915,
+          1885.8091922005572
+        ],
+        [
+          2674.848015320334,
+          2111.079909470752,
+          1873.0757311977716
+        ],
+        [
+          2563.223189415042,
+          2081.922527855153,
+          1909.3154596100278
+        ],
+        [
+          2557.926532033426,
+          2142.8810933147633,
+          1868.3461002785516
+        ],
+        [
+          2650.010967966574,
+          2074.3549791086352,
+          1968.4907729805013
+        ],
+        [
+          2495.4162604456824,
+          2035.3896239554317,
+          2236.1652158774373
+        ],
+        [
+          2850.816678272981,
+          2164.3306058495823,
+          1907.782381615599
+        ],
+        [
+          2527.70786908078,
+          2113.8553272980503,
+          2118.740598885794
+        ],
+        [
+          2541.089484679666,
+          2055.7430362116993,
+          1888.3687325905291
+        ],
+        [
+          2732.413997214485,
+          2482.60254178273,
+          1862.0412604456824
+        ],
+        [
+          2567.9152158774373,
+          2483.9068593314764,
+          2497.9193941504177
+        ]
+      ],
+      "checksums": [
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ],
+        [
+          115.05131973967434,
+          115.05131973967434,
+          115.05131973967434
+        ]
+      ]
+    },
+    {
+      "case": "cube-margin",
+      "vertices": [
+        8,
+        8
+      ],
+      "facets": [
+        6,
+        6
+      ],
+      "frames": 16,
+      "contacts": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "margin": 0.005,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.3997930137226738,
+          0.02273085318577922,
+          -0.916323553387115,
+          -0.9108736989700705,
+          -0.10177056721161443,
+          -0.3999398156898211,
+          -0.10234574101116173,
+          0.9945481687494444,
+          -0.019982225451720848
+        ],
+        [
+          0.7100914361924664,
+          -0.33421911794506093,
+          -0.6197319851727404,
+          0.2426024472501201,
+          -0.7101350380903031,
+          0.6609480163104634,
+          -0.6609948599152439,
+          -0.6196820223925407,
+          -0.4231784331568869
+        ]
+      ],
+      "repetitions": 1104,
+      "baseline_ns": 13862.440670289856,
+      "ada_ns": 11041.630434782608,
+      "c_ns": 11024.754981884058,
+      "ratio": 0.9930047664620507,
+      "ratio95": [
+        0.8990588478167045,
+        1.0139453330349122
+      ],
+      "current_over_baseline": 0.7903545807081418,
+      "change95": [
+        0.7836064713064911,
+        0.8068914549062921
+      ],
+      "triples_ns": [
+        [
+          14072.48731884058,
+          11215.203804347826,
+          10871.254528985508
+        ],
+        [
+          13550.669384057972,
+          11067.64945652174,
+          10834.73097826087
+        ],
+        [
+          14888.886775362318,
+          11112.809782608696,
+          13479.334239130434
+        ],
+        [
+          13809.83152173913,
+          11006.747282608696,
+          10936.82518115942
+        ],
+        [
+          13860.64402173913,
+          12292.647644927536,
+          11239.788949275362
+        ],
+        [
+          13693.557971014492,
+          12625.802536231884,
+          13815.827898550724
+        ],
+        [
+          13864.23731884058,
+          10888.486413043478,
+          10946.579710144928
+        ],
+        [
+          14011.508152173914,
+          11015.611413043478,
+          11102.930253623188
+        ],
+        [
+          13679.210144927536,
+          10735.265398550724,
+          10801.434782608696
+        ],
+        [
+          15319.28079710145,
+          10640.688405797102,
+          12033.538949275362
+        ],
+        [
+          13613.630434782608,
+          10651.658514492754,
+          10892.701992753624
+        ],
+        [
+          14127.622282608696,
+          11224.763586956522,
+          13833.519927536232
+        ]
+      ],
+      "checksums": [
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ],
+        [
+          22190.553304632394,
+          22190.553304632394,
+          22190.553304632394
+        ]
+      ]
+    },
+    {
+      "case": "cube-separated",
+      "vertices": [
+        8,
+        8
+      ],
+      "facets": [
+        6,
+        6
+      ],
+      "frames": 16,
+      "contacts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          3.5641016151377545,
+          0.0,
+          0.0
+        ]
+      ],
+      "matrices": [
+        [
+          0.3997930137226738,
+          0.02273085318577922,
+          -0.916323553387115,
+          -0.9108736989700705,
+          -0.10177056721161443,
+          -0.3999398156898211,
+          -0.10234574101116173,
+          0.9945481687494444,
+          -0.019982225451720848
+        ],
+        [
+          0.7100914361924664,
+          -0.33421911794506093,
+          -0.6197319851727404,
+          0.2426024472501201,
+          -0.7101350380903031,
+          0.6609480163104634,
+          -0.6609948599152439,
+          -0.6196820223925407,
+          -0.4231784331568869
+        ]
+      ],
+      "repetitions": 169376,
+      "baseline_ns": 98.46856107122613,
+      "ada_ns": 84.71986881258266,
+      "c_ns": 65.36963619402985,
+      "ratio": 1.2903402805340645,
+      "ratio95": [
+        1.2480128215372526,
+        1.336548737072053
+      ],
+      "current_over_baseline": 0.8604167997532823,
+      "change95": [
+        0.8369270971579185,
+        0.9020406337202878
+      ],
+      "triples_ns": [
+        [
+          97.04214292461742,
+          86.01067447572265,
+          64.46888579255621
+        ],
+        [
+          101.51818439448328,
+          84.54716724919706,
+          67.33123937275647
+        ],
+        [
+          97.64299546570942,
+          84.14628991120348,
+          64.60947241639902
+        ],
+        [
+          97.73890633856037,
+          94.89437110334404,
+          81.8334356697525
+        ],
+        [
+          102.11500448705839,
+          86.28472747024372,
+          64.44183945777442
+        ],
+        [
+          99.1398309087474,
+          95.76947147175515,
+          67.77525741545438
+        ],
+        [
+          103.7280252219913,
+          83.69071769317968,
+          65.42368458341205
+        ],
+        [
+          97.46077366332892,
+          83.72451823162667,
+          65.31558780464765
+        ],
+        [
+          100.6055462403174,
+          83.7070246079728,
+          64.44779071415077
+        ],
+        [
+          99.67973620819951,
+          83.83328806914793,
+          67.589197997355
+        ],
+        [
+          97.21681938409219,
+          89.22154850746269,
+          64.31813243907047
+        ],
+        [
+          97.79729123370488,
+          84.89257037596826,
+          79.31299003400719
+        ]
+      ],
+      "checksums": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "case": "polytope-aligned",
+      "vertices": [
+        28,
+        28
+      ],
+      "facets": [
+        24,
+        24
+      ],
+      "frames": 16,
+      "contacts": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "repetitions": 7536,
+      "baseline_ns": 2110.0307855626324,
+      "ada_ns": 2198.484872611465,
+      "c_ns": 1586.0210323779193,
+      "ratio": 1.3813386636774627,
+      "ratio95": [
+        1.3433253779564192,
+        1.4323176380345422
+      ],
+      "current_over_baseline": 1.043219919814196,
+      "change95": [
+        1.0307939398522838,
+        1.074821917399999
+      ],
+      "triples_ns": [
+        [
+          2095.4669585987263,
+          2170.161756900212,
+          1567.6722399150742
+        ],
+        [
+          2155.416533970276,
+          2225.032510615711,
+          1560.697186836518
+        ],
+        [
+          2104.591029723991,
+          2269.744161358811,
+          1577.3399681528663
+        ],
+        [
+          2063.0208333333335,
+          2200.933121019108,
+          2102.94148089172
+        ],
+        [
+          2081.2478768577494,
+          2158.5261411889596,
+          1562.7976380042462
+        ],
+        [
+          2128.879644373673,
+          2191.2339437367305,
+          1679.537287685775
+        ],
+        [
+          2077.8759288747347,
+          2180.334129511677,
+          1582.4202494692145
+        ],
+        [
+          2133.30241507431,
+          2165.1835191082805,
+          1575.2957802547771
+        ],
+        [
+          2102.562765392781,
+          2252.2043524416135,
+          1716.3716825902336
+        ],
+        [
+          2230.1259288747347,
+          2541.6544585987263,
+          1600.249203821656
+        ],
+        [
+          2115.4705414012737,
+          2620.6601645435244,
+          1649.9317940552016
+        ],
+        [
+          2230.0497611464966,
+          2196.0366242038217,
+          1589.6218152866243
+        ]
+      ],
+      "checksums": [
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ],
+        [
+          31058.798427644684,
+          31058.798427644684,
+          31058.798427644684
+        ]
+      ]
+    },
+    {
+      "case": "polytope-rotated",
+      "vertices": [
+        28,
+        28
+      ],
+      "facets": [
+        24,
+        24
+      ],
+      "frames": 16,
+      "contacts": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.3157347601727354,
+          -0.2625246130665403,
+          -0.9118072102988266,
+          0.5598186960338329,
+          0.8274258273020101,
+          -0.04437936327352002,
+          0.7661035104929648,
+          -0.49643461588395243,
+          0.4082132817076245
+        ],
+        [
+          0.7778956304003412,
+          -0.612763463438352,
+          0.1392814635157578,
+          -0.434181707083741,
+          -0.6843412715895657,
+          -0.585801390603526,
+          0.45427374284444877,
+          0.3952188784385328,
+          -0.7983967714663455
+        ]
+      ],
+      "repetitions": 5568,
+      "baseline_ns": 2785.0298132183907,
+      "ada_ns": 2895.1749281609195,
+      "c_ns": 2210.970456178161,
+      "ratio": 1.3117671845985364,
+      "ratio95": [
+        1.1830176850422052,
+        1.3402763435765404
+      ],
+      "current_over_baseline": 1.0318219420624892,
+      "change95": [
+        1.0165667115799666,
+        1.0556302482256976
+      ],
+      "triples_ns": [
+        [
+          2822.731321839081,
+          2881.8820043103447,
+          2177.0089798850577
+        ],
+        [
+          3161.0919540229884,
+          3129.7507183908046,
+          2929.7731681034484
+        ],
+        [
+          2720.1743893678163,
+          2826.9642600574707,
+          2553.542025862069
+        ],
+        [
+          2847.097162356322,
+          3107.868893678161,
+          2203.6436781609195
+        ],
+        [
+          2751.1973778735633,
+          2919.4786278735633,
+          2202.7401221264367
+        ],
+        [
+          2787.8150143678163,
+          2927.4676724137935,
+          2208.5057471264367
+        ],
+        [
+          2853.4263649425293,
+          3355.239942528736,
+          2213.435165229885
+        ],
+        [
+          2782.2446120689656,
+          2908.4678520114944,
+          2146.454202586207
+        ],
+        [
+          2760.5890804597702,
+          2810.872306034483,
+          2162.618893678161
+        ],
+        [
+          3325.8679956896553,
+          2863.3036997126433,
+          2314.029992816092
+        ],
+        [
+          2745.577047413793,
+          2812.529094827586,
+          2417.9150502873563
+        ],
+        [
+          2767.8660201149423,
+          2809.1591235632186,
+          2335.4559985632186
+        ]
+      ],
+      "checksums": [
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ],
+        [
+          11770.562182525515,
+          11770.562182525515,
+          11770.562182525515
+        ]
+      ]
+    },
+    {
+      "case": "polytope-margin",
+      "vertices": [
+        28,
+        28
+      ],
+      "facets": [
+        24,
+        24
+      ],
+      "frames": 16,
+      "contacts": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "margin": 0.005,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.3157347601727354,
+          -0.2625246130665403,
+          -0.9118072102988266,
+          0.5598186960338329,
+          0.8274258273020101,
+          -0.04437936327352002,
+          0.7661035104929648,
+          -0.49643461588395243,
+          0.4082132817076245
+        ],
+        [
+          0.7778956304003412,
+          -0.612763463438352,
+          0.1392814635157578,
+          -0.434181707083741,
+          -0.6843412715895657,
+          -0.585801390603526,
+          0.45427374284444877,
+          0.3952188784385328,
+          -0.7983967714663455
+        ]
+      ],
+      "repetitions": 992,
+      "baseline_ns": 13987.838205645161,
+      "ada_ns": 14651.09072580645,
+      "c_ns": 12046.855846774193,
+      "ratio": 1.2200250385628755,
+      "ratio95": [
+        1.1906036558734634,
+        1.2270663520419962
+      ],
+      "current_over_baseline": 1.058242648693801,
+      "change95": [
+        1.0075181024858666,
+        1.0809236399213236
+      ],
+      "triples_ns": [
+        [
+          14955.244959677419,
+          14425.04435483871,
+          12035.15927419355
+        ],
+        [
+          13775.390120967742,
+          14588.977822580646,
+          11895.841733870968
+        ],
+        [
+          13853.256048387097,
+          14648.770161290322,
+          14116.974798387097
+        ],
+        [
+          14115.328629032258,
+          16524.261088709678,
+          12058.552419354839
+        ],
+        [
+          13746.427419354839,
+          14862.520161290322,
+          12066.462701612903
+        ],
+        [
+          14075.333669354839,
+          16316.387096774191,
+          15401.730846774193
+        ],
+        [
+          13622.158266129032,
+          14587.12197580645,
+          11944.560483870968
+        ],
+        [
+          14045.776209677419,
+          14847.040322580646,
+          12202.069556451614
+        ],
+        [
+          18160.512096774193,
+          14653.411290322581,
+          11944.712701612903
+        ],
+        [
+          13929.900201612903,
+          14633.202620967742,
+          12006.094758064517
+        ],
+        [
+          13794.954637096775,
+          14907.597782258064,
+          12605.44052419355
+        ],
+        [
+          15518.678427419354,
+          14501.300403225807,
+          11815.005040322581
+        ]
+      ],
+      "checksums": [
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ],
+        [
+          64.2708082392571,
+          64.2708082392571,
+          64.2708082392571
+        ]
+      ]
+    },
+    {
+      "case": "polytope-separated",
+      "vertices": [
+        28,
+        28
+      ],
+      "facets": [
+        24,
+        24
+      ],
+      "frames": 16,
+      "contacts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          5.549194740158138,
+          0.0,
+          0.0
+        ]
+      ],
+      "matrices": [
+        [
+          0.3157347601727354,
+          -0.2625246130665403,
+          -0.9118072102988266,
+          0.5598186960338329,
+          0.8274258273020101,
+          -0.04437936327352002,
+          0.7661035104929648,
+          -0.49643461588395243,
+          0.4082132817076245
+        ],
+        [
+          0.7778956304003412,
+          -0.612763463438352,
+          0.1392814635157578,
+          -0.434181707083741,
+          -0.6843412715895657,
+          -0.585801390603526,
+          0.45427374284444877,
+          0.3952188784385328,
+          -0.7983967714663455
+        ]
+      ],
+      "repetitions": 88336,
+      "baseline_ns": 123.1183549175874,
+      "ada_ns": 140.99366622894405,
+      "c_ns": 100.90720657489585,
+      "ratio": 1.424610138288442,
+      "ratio95": [
+        1.3412737374373642,
+        1.4871772383997954
+      ],
+      "current_over_baseline": 1.1377795964172281,
+      "change95": [
+        1.119360085366778,
+        1.1837863097527226
+      ],
+      "triples_ns": [
+        [
+          122.55863973917768,
+          138.9323265712733,
+          98.67461737004166
+        ],
+        [
+          123.0267727766709,
+          140.49170213729397,
+          95.27611619271872
+        ],
+        [
+          138.67110804202136,
+          166.13229034595182,
+          99.8802753124434
+        ],
+        [
+          123.2099370585039,
+          143.18073039304474,
+          95.1295508060134
+        ],
+        [
+          122.38272052164463,
+          137.36094004709292,
+          101.9341378373483
+        ],
+        [
+          122.40602925194712,
+          155.92434568013041,
+          115.35946839340698
+        ],
+        [
+          125.82106955261727,
+          160.26429768157942,
+          106.85851747871763
+        ],
+        [
+          122.99024180402101,
+          137.3812828291976,
+          95.32186198152509
+        ],
+        [
+          125.74136252490491,
+          137.15724053613476,
+          102.73939277304837
+        ],
+        [
+          126.30194937511321,
+          141.4956303205941,
+          96.3624683028437
+        ],
+        [
+          122.67191179134215,
+          137.1991713457707,
+          105.89211646440862
+        ],
+        [
+          123.30260595906539,
+          144.20752581054157,
+          112.07393361709835
+        ]
+      ],
+      "checksums": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "case": "round-512-aligned",
+      "vertices": [
+        512,
+        512
+      ],
+      "facets": [
+        934,
+        934
+      ],
+      "frames": 16,
+      "contacts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "repetitions": 1344,
+      "baseline_ns": 17139.997395833336,
+      "ada_ns": 11053.44494047619,
+      "c_ns": 8674.227306547618,
+      "ratio": 1.2784979673386492,
+      "ratio95": [
+        1.252378743955426,
+        1.308690761967406
+      ],
+      "current_over_baseline": 0.6528692760153113,
+      "change95": [
+        0.6388933747285818,
+        0.6605986178328808
+      ],
+      "triples_ns": [
+        [
+          16725.34375,
+          11008.78794642857,
+          8706.904017857143
+        ],
+        [
+          16956.837797619046,
+          11078.206101190477,
+          11798.71130952381
+        ],
+        [
+          17272.136904761905,
+          10921.933779761905,
+          8626.183035714286
+        ],
+        [
+          16853.940476190477,
+          11182.238839285714,
+          8469.403273809523
+        ],
+        [
+          17126.24181547619,
+          10950.267113095239,
+          8669.509672619048
+        ],
+        [
+          17293.494791666668,
+          11401.095238095239,
+          8605.870535714286
+        ],
+        [
+          16941.824404761905,
+          11053.19568452381,
+          8521.655505952382
+        ],
+        [
+          17525.28050595238,
+          10930.32142857143,
+          8802.85267857143
+        ],
+        [
+          16990.645089285714,
+          11246.558035714286,
+          8678.94494047619
+        ],
+        [
+          17153.752976190477,
+          10985.347470238095,
+          8510.110119047618
+        ],
+        [
+          17192.45238095238,
+          13117.360119047618,
+          9356.587797619048
+        ],
+        [
+          17314.644345238095,
+          11053.69419642857,
+          9910.615327380952
+        ]
+      ],
+      "checksums": [
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ],
+        [
+          24286.850498534826,
+          24286.850498534826,
+          24286.850498534826
+        ]
+      ]
+    },
+    {
+      "case": "round-512-rotated",
+      "vertices": [
+        512,
+        512
+      ],
+      "facets": [
+        934,
+        934
+      ],
+      "frames": 16,
+      "contacts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.44815515703607967,
+          0.5473681620363855,
+          -0.7067850100354958,
+          0.13137663865949084,
+          -0.8223687846339919,
+          -0.5535790466357486,
+          -0.8842494749992789,
+          0.15523426570354923,
+          -0.4404602010567805
+        ],
+        [
+          -0.07721574788830582,
+          -0.09229765875639434,
+          -0.9927330308124827,
+          -0.4881373288198974,
+          -0.8647036205535787,
+          0.11836214265595046,
+          -0.8693443946392159,
+          0.49372947125892774,
+          0.02171480416109367
+        ]
+      ],
+      "repetitions": 1376,
+      "baseline_ns": 16775.32558139535,
+      "ada_ns": 11036.969113372093,
+      "c_ns": 8478.92805232558,
+      "ratio": 1.2916337220980831,
+      "ratio95": [
+        1.1432894838977776,
+        1.3410698736914117
+      ],
+      "current_over_baseline": 0.6542362968401402,
+      "change95": [
+        0.6105640455335777,
+        0.6678287060518924
+      ],
+      "triples_ns": [
+        [
+          16794.064680232557,
+          10853.44476744186,
+          8508.756540697674
+        ],
+        [
+          16622.526889534885,
+          11071.454941860466,
+          11881.540697674418
+        ],
+        [
+          18683.91715116279,
+          10904.34011627907,
+          10131.028343023256
+        ],
+        [
+          22079.010174418603,
+          11002.483284883721,
+          8247.545784883721
+        ],
+        [
+          17116.737645348836,
+          10912.029069767443,
+          9016.358284883721
+        ],
+        [
+          20399.956395348836,
+          11131.70566860465,
+          8257.276889534884
+        ],
+        [
+          16241.387354651162,
+          10782.255087209302,
+          11070.242005813954
+        ],
+        [
+          16136.099563953489,
+          11245.726744186046,
+          8303.168604651162
+        ],
+        [
+          16569.02034883721,
+          10700.349563953489,
+          8449.099563953489
+        ],
+        [
+          16756.58648255814,
+          11096.310319767443,
+          8360.124273255815
+        ],
+        [
+          16919.5675872093,
+          11811.039244186046,
+          8379.800145348838
+        ],
+        [
+          16677.565406976744,
+          11167.400436046511,
+          8539.689680232557
+        ]
+      ],
+      "checksums": [
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ],
+        [
+          24618.32598095775,
+          24618.32598095775,
+          24618.32598095775
+        ]
+      ]
+    },
+    {
+      "case": "round-512-margin",
+      "vertices": [
+        512,
+        512
+      ],
+      "facets": [
+        934,
+        934
+      ],
+      "frames": 16,
+      "contacts": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "margin": 0.005,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.35,
+          0.17,
+          0.25
+        ]
+      ],
+      "matrices": [
+        [
+          0.44815515703607967,
+          0.5473681620363855,
+          -0.7067850100354958,
+          0.13137663865949084,
+          -0.8223687846339919,
+          -0.5535790466357486,
+          -0.8842494749992789,
+          0.15523426570354923,
+          -0.4404602010567805
+        ],
+        [
+          -0.07721574788830582,
+          -0.09229765875639434,
+          -0.9927330308124827,
+          -0.4881373288198974,
+          -0.8647036205535787,
+          0.11836214265595046,
+          -0.8693443946392159,
+          0.49372947125892774,
+          0.02171480416109367
+        ]
+      ],
+      "repetitions": 272,
+      "baseline_ns": 49246.47977941176,
+      "ada_ns": 51113.591911764706,
+      "c_ns": 42271.89154411765,
+      "ratio": 1.2052576594500644,
+      "ratio95": [
+        1.1445975132385415,
+        1.2313177049635082
+      ],
+      "current_over_baseline": 1.0316931108198788,
+      "change95": [
+        1.015997853668152,
+        1.0485049709365675
+      ],
+      "triples_ns": [
+        [
+          51585.05882352941,
+          51427.805147058825,
+          41285.033088235294
+        ],
+        [
+          49494.14705882353,
+          51023.62867647059,
+          43032.01470588235
+        ],
+        [
+          50462.48529411765,
+          51347.330882352944,
+          42675.4375
+        ],
+        [
+          50866.830882352944,
+          51602.41544117647,
+          42996.220588235294
+        ],
+        [
+          49592.591911764706,
+          51203.555147058825,
+          41467.330882352944
+        ],
+        [
+          48897.64705882353,
+          50548.055147058825,
+          41868.345588235294
+        ],
+        [
+          47708.82352941176,
+          50673.03676470588,
+          45921.044117647056
+        ],
+        [
+          65128.69852941176,
+          50348.11397058824,
+          41481.430147058825
+        ],
+        [
+          48457.117647058825,
+          61391.54779411765,
+          41530.46323529412
+        ],
+        [
+          48468.02573529412,
+          50228.02205882353,
+          55506.007352941175
+        ],
+        [
+          48998.8125,
+          50152.75,
+          40846.231617647056
+        ],
+        [
+          48528.87132352941,
+          51474.44852941176,
+          55391.518382352944
+        ]
+      ],
+      "checksums": [
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ],
+        [
+          396.02899056125636,
+          396.02899056125636,
+          396.02899056125636
+        ]
+      ]
+    },
+    {
+      "case": "round-512-separated",
+      "vertices": [
+        512,
+        512
+      ],
+      "facets": [
+        934,
+        934
+      ],
+      "frames": 16,
+      "contacts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "margin": 0.0,
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          2.100003451669822,
+          0.0,
+          0.0
+        ]
+      ],
+      "matrices": [
+        [
+          0.44815515703607967,
+          0.5473681620363855,
+          -0.7067850100354958,
+          0.13137663865949084,
+          -0.8223687846339919,
+          -0.5535790466357486,
+          -0.8842494749992789,
+          0.15523426570354923,
+          -0.4404602010567805
+        ],
+        [
+          -0.07721574788830582,
+          -0.09229765875639434,
+          -0.9927330308124827,
+          -0.4881373288198974,
+          -0.8647036205535787,
+          0.11836214265595046,
+          -0.8693443946392159,
+          0.49372947125892774,
+          0.02171480416109367
+        ]
+      ],
+      "repetitions": 87728,
+      "baseline_ns": 130.2021304486595,
+      "ada_ns": 140.591196653292,
+      "c_ns": 98.95823454313333,
+      "ratio": 1.415905003203203,
+      "ratio95": [
+        1.3949701818356832,
+        1.4405683876539666
+      ],
+      "current_over_baseline": 1.0964722775496027,
+      "change95": [
+        1.0175367292236506,
+        1.120981259713263
+      ],
+      "triples_ns": [
+        [
+          127.26366724420937,
+          145.52321949662593,
+          99.02663915739559
+        ],
+        [
+          131.85400328287434,
+          144.25508389567756,
+          101.13178232719314
+        ],
+        [
+          140.71969040671166,
+          141.29922031734452,
+          98.51286932336312
+        ],
+        [
+          127.92725241656028,
+          140.57835582710194,
+          99.14915420390297
+        ],
+        [
+          124.2495782418384,
+          137.21273709648003,
+          98.5445353820901
+        ],
+        [
+          134.85564472004378,
+          137.2838660404888,
+          97.78482354550428
+        ],
+        [
+          132.90509301477294,
+          146.11849124566842,
+          98.88982992887105
+        ],
+        [
+          128.55025761444466,
+          139.5590233448842,
+          134.0365675724968
+        ],
+        [
+          135.434946653292,
+          137.74646635053801,
+          97.41873746124385
+        ],
+        [
+          123.59372150282692,
+          140.60403747948203,
+          97.18181196425314
+        ],
+        [
+          125.34270700346525,
+          166.7651946926865,
+          131.55872697428416
+        ],
+        [
+          156.80656118913004,
+          140.39706821083348,
+          100.45962520517965
+        ]
+      ],
+      "checksums": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  ]
+}

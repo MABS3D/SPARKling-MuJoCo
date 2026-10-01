@@ -1,0 +1,236 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "N" proved
+--> mj-convex_assets.adb:36:07
+
+ info: initialization of "First_Edge" proved
+--> mj-convex_assets.adb:36:10
+
+ info: initialization of "Last" proved
+--> mj-convex_assets.adb:36:22
+
+ medium: range check might fail, cannot prove lower bound for G (S.First_Graph)
+--> mj-convex_assets.adb:39:12
+   39 |          N := G (S.First_Graph);
+      |               ^~~~~~~~~~~~~~~~
+      + reason for check: value must fit in the target type of the assignment
+      + provers gave up before completing the proof
+
+ medium: array index check might fail
+--> mj-convex_assets.adb:39:16
+   39 |          N := G (S.First_Graph);
+      |                  ~^~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + provers gave up before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for S.First_Graph+2
+--> mj-convex_assets.adb:41:34
+   41 |          First_Edge := S.First_Graph+2+2*N; Last := S.First_Graph+(S.Graph_Length-1);
+      |                        ~~~~~~~~~~~~~^~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers gave up before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for S.First_Graph+2+2*N
+--> mj-convex_assets.adb:41:36
+   41 |          First_Edge := S.First_Graph+2+2*N; Last := S.First_Graph+(S.Graph_Length-1);
+      |                        ~~~~~~~~~~~~~~~^~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-convex_assets.adb:41:38
+
+ medium: overflow check might fail, cannot prove upper bound for S.First_Graph+(S.Graph_Length-1)
+--> mj-convex_assets.adb:41:63
+   41 |          First_Edge := S.First_Graph+2+2*N; Last := S.First_Graph+(S.Graph_Length-1);
+      |                                                     ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + provers gave up before completing the proof
+
+ info: range check proved
+--> mj-convex_assets.adb:41:63
+
+ info: loop invariant initialization proved
+--> mj-convex_assets.adb:43:33
+
+ info: loop invariant preservation proved
+--> mj-convex_assets.adb:43:33
+
+ info: overflow check proved
+--> mj-convex_assets.adb:44:36
+
+ info: index check proved
+--> mj-convex_assets.adb:44:62
+
+ info: index check proved
+--> mj-convex_assets.adb:45:21
+
+ medium: precondition might fail, cannot prove Global_Id < Graph_Index_Base
+--> mj-convex_assets.adb:45:26
+   45 |                then G (K) = Encode_Neighbour (G'Loop_Entry (K), G'Loop_Entry (S.First_Graph+2+N+G'Loop_Entry (K)))
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers gave up before completing the proof
+
+ info: range check proved
+--> mj-convex_assets.adb:45:45
+
+ info: index check proved
+--> mj-convex_assets.adb:45:58
+
+ medium: range check might fail, cannot prove lower bound for G'Loop_Entry (S.First_Graph+2+N+G'Loop_Entry (K))
+--> mj-convex_assets.adb:45:63
+   45 |                then G (K) = Encode_Neighbour (G'Loop_Entry (K), G'Loop_Entry (S.First_Graph+2+N+G'Loop_Entry (K)))
+      |                                                                 ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-convex_assets.adb:45:89
+
+ info: overflow check proved
+--> mj-convex_assets.adb:45:91
+
+ info: overflow check proved
+--> mj-convex_assets.adb:45:93
+
+ info: index check proved
+--> mj-convex_assets.adb:45:93
+
+ info: index check proved
+--> mj-convex_assets.adb:45:108
+
+ info: index check proved
+--> mj-convex_assets.adb:46:21
+
+ info: index check proved
+--> mj-convex_assets.adb:46:40
+
+ medium: array index check might fail
+--> mj-convex_assets.adb:47:16
+   47 |             if G (J) in 0 .. N-1 then
+      |                   ^
+      + reason for check: value must be a valid index into the array
+      + provers gave up before completing the proof
+
+ info: index check proved
+--> mj-convex_assets.adb:48:16
+
+ medium: precondition might fail, cannot prove Global_Id < Graph_Index_Base
+--> mj-convex_assets.adb:48:22
+   48 |                G (J) := Encode_Neighbour (G (J), G (S.First_Graph+2+N+G (J)));
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers gave up before completing the proof
+
+ info: range check proved
+--> mj-convex_assets.adb:48:40
+
+ info: index check proved
+--> mj-convex_assets.adb:48:43
+
+ medium: range check might fail, cannot prove lower bound for G (S.First_Graph+2+N+G (J))
+--> mj-convex_assets.adb:48:47
+   48 |                G (J) := Encode_Neighbour (G (J), G (S.First_Graph+2+N+G (J)));
+      |                                                  ^~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-convex_assets.adb:48:63
+
+ info: overflow check proved
+--> mj-convex_assets.adb:48:65
+
+ info: overflow check proved
+--> mj-convex_assets.adb:48:67
+
+ info: index check proved
+--> mj-convex_assets.adb:48:67
+
+ info: index check proved
+--> mj-convex_assets.adb:48:71
+
+ info: data dependencies proved
+--> mj-convex_assets.ads:24:11
+
+ medium: postcondition might fail, cannot prove G (S.First_Graph) in 1 .. Graph_Index_Base
+--> mj-convex_assets.ads:30:21
+   30 |               and then G (S.First_Graph) in 1 .. Graph_Index_Base
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers gave up before completing the proof
+
+ info: index check proved
+--> mj-convex_assets.ads:30:25
+
+ info: overflow check proved
+--> mj-convex_assets.ads:32:36
+
+ info: overflow check proved
+--> mj-convex_assets.ads:32:38
+
+ info: overflow check proved
+--> mj-convex_assets.ads:32:40
+
+ info: index check proved
+--> mj-convex_assets.ads:32:49
+
+ info: overflow check proved
+--> mj-convex_assets.ads:32:79
+
+ info: index check proved
+--> mj-convex_assets.ads:33:33
+
+ info: index check proved
+--> mj-convex_assets.ads:33:52
+
+ info: overflow check proved
+--> mj-convex_assets.ads:33:65
+
+ info: index check proved
+--> mj-convex_assets.ads:34:23
+
+ medium: precondition might fail, cannot prove Global_Id < Graph_Index_Base
+--> mj-convex_assets.ads:34:28
+   34 |                  then G (J) = Encode_Neighbour (G'Old (J), G'Old (S.First_Graph+2+G'Old (S.First_Graph)+G'Old (J)))
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers gave up before completing the proof
+
+ info: range check proved
+--> mj-convex_assets.ads:34:47
+
+ info: index check proved
+--> mj-convex_assets.ads:34:53
+
+ medium: range check might fail, cannot prove lower bound for G'Old (S.First_Graph+2+G'Old (S.First_Graph)+G'Old (J))
+--> mj-convex_assets.ads:34:58
+   34 |                  then G (J) = Encode_Neighbour (G'Old (J), G'Old (S.First_Graph+2+G'Old (S.First_Graph)+G'Old (J)))
+      |                                                            ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: input value must fit in parameter type
+      + provers gave up before completing the proof
+
+ info: overflow check proved
+--> mj-convex_assets.ads:34:77
+
+ info: overflow check proved
+--> mj-convex_assets.ads:34:79
+
+ info: index check proved
+--> mj-convex_assets.ads:34:88
+
+ info: overflow check proved
+--> mj-convex_assets.ads:34:101
+
+ info: index check proved
+--> mj-convex_assets.ads:34:101
+
+ info: index check proved
+--> mj-convex_assets.ads:34:109
+
+ info: index check proved
+--> mj-convex_assets.ads:35:23
+
+ info: index check proved
+--> mj-convex_assets.ads:35:35
+Summary logged in /var/tmp/sparkling-meshmesh-proof3-20261001/Compile_Graph/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 10.0 s, peak group RSS 248 MB

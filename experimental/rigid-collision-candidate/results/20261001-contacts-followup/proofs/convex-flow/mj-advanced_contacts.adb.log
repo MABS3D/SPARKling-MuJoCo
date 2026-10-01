@@ -1,0 +1,39 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: analysis of data and information flow ...
+ info: implicit aspect Always_Terminates on "Area" has been proved, subprogram will terminate
+--> mj-advanced_contacts.adb:17:16
+
+ info: no contextual analysis of "Plane_Hull" (nested subprogram)
+--> mj-advanced_contacts.adb:19:07
+
+ info: analyzing call to "Emit" in context
+--> mj-advanced_contacts.adb:27:82
+
+ error: renamed index cannot depend on variable input "Best" [E0007]
+--> mj-advanced_contacts.adb:43:39
+   43 |          declare Poly : Facet renames F (Best); begin
+      |                                          ^~~~
+      + use instead a constant initialized to the expression with variable input
+      + launch "gnatprove --explain=E0007" for more information
+
+ info: analyzing call to "Emit" in context
+--> mj-advanced_contacts.adb:68:78
+
+ info: no contextual analysis of "Radius" (object renaming)
+--> mj-advanced_contacts.adb:76:07
+
+ info: implicit aspect Always_Terminates on "Radius" has been proved, subprogram will terminate
+--> mj-advanced_contacts.adb:76:16
+
+ info: implicit aspect Always_Terminates on "Curved" has been proved, subprogram will terminate
+--> mj-advanced_contacts.adb:87:16
+
+ info: initialization of "Result" proved
+--> mj-advanced_contacts.ads:8:45
+
+ info: data dependencies proved
+--> mj-advanced_contacts.ads:9:11
+Summary logged in /var/tmp/sparkling-contact-followup-canonical-proof-20261001/mj-advanced_contacts.adb/validation/obj/gnatprove/gnatprove.out
+gnatprove: error during analysis of data and information flow
+guarded: elapsed 3.2 s, peak group RSS 66 MB

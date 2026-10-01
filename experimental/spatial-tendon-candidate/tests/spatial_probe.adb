@@ -83,12 +83,18 @@ begin
                Geoms : Geometry_Array (0 .. NG - 1);
                Origins : Vector_Array (0 .. NB - 1);
                Linear, Angular : Body_Jacobian (0 .. NB - 1, 0 .. NV - 1);
+               Flat_Linear, Flat_Angular : Real_Array (0 .. 3 * NB * NV - 1);
                Route : Route_Array (0 .. NR - 1);
                Points : Point_Array (0 .. 3 * NR - 1);
                J, Vel, Force_Row : Real_Array (0 .. NV - 1) := (others => 0.0);
                State : Evaluation_Status;
                Length, Force : Real;
                Count : Natural;
+               Reference_State : Evaluation_Status;
+               Reference_Length : Real;
+               Reference_Count : Natural;
+               Reference_J : Real_Array (J'Range);
+               Reference_Points : Point_Array (Points'Range);
             begin
                for S of Sites loop
                   S.Body_Id := Read_Int;
@@ -106,6 +112,10 @@ begin
                   for K in J'Range loop
                      Linear (B, K) := Read_Vector;
                      Angular (B, K) := Read_Vector;
+                     for A in 1 .. 3 loop
+                        Flat_Linear (3 * (B * NV + K) + A - 1) := Linear (B, K) (A);
+                        Flat_Angular (3 * (B * NV + K) + A - 1) := Angular (B, K) (A);
+                     end loop;
                   end loop;
                end loop;
                for N of Route loop
@@ -128,6 +138,22 @@ begin
                else
                   Evaluate (Route, Sites, Geoms, Origins, Linear, Angular, State,
                             Length, J, Points, Count);
+                  Reference_State := State;
+                  Reference_Length := Length;
+                  Reference_Count := Count;
+                  Reference_J := J;
+                  Reference_Points := Points;
+                  if not Valid_Flat_Kinematics (Sites, Geoms, Origins,
+                    Flat_Linear, Flat_Angular, NV) then
+                     raise Program_Error with "flat kinematics validation differs";
+                  end if;
+                  Evaluate_Flat (Route, Sites, Geoms, Origins, Flat_Linear, Flat_Angular,
+                                 State, Length, J, Points, Count);
+                  if State /= Reference_State or else Length /= Reference_Length
+                    or else Count /= Reference_Count or else J /= Reference_J
+                    or else Points /= Reference_Points then
+                     raise Program_Error with "flat and matrix path outputs differ";
+                  end if;
                   Put (Integer'Image (Evaluation_Status'Pos (State)));
                   Put_Real (Length);
                   Put (Integer'Image (Count));

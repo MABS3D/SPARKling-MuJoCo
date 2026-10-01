@@ -1,0 +1,24 @@
+project Materials is
+   Build_Root := external ("MATERIALS_BUILD_ROOT", "/var/tmp/sparkling-materials-20260930/build");
+   Mode := external ("MATERIALS_MODE", "validation");
+   for Source_Dirs use ("src", "../../src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-elastic_materials.ads",
+     "mj-elastic_materials.adb", "mj-contact_materials.ads",
+     "mj-contact_materials.adb", "materials_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Main use ("materials_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags &
+        ("-O3", "-gnatn", "-gnatp", "-march=native", "-flto");
+      when others => Flags := Flags & ("-O2", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-ffp-contract=off", "-flto");
+   end Linker;
+end Materials;
