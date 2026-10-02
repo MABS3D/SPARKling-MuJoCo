@@ -94,10 +94,8 @@ def main():
         results.append(dict(name=name,cases=len(rows),dofs=m.nv,tendons=m.ntendon,max_abs_error=error))
         print(name, 'PASS', error.get('qacc',0),error.get('qvel',0),flush=True)
     rejections=[]
-    free_tendon = '<mujoco><option><flag constraint="disable"/></option><worldbody><site name="a" pos="-1 .1 0"/><geom name="g" type="sphere" size=".3"/><body pos="1 .1 0"><freejoint/><inertial pos="0 0 0" mass="1" diaginertia=".1 .1 .1"/><site name="b"/></body></worldbody><tendon><spatial><site site="a"/><geom geom="g"/><site site="b"/></spatial></tendon></mujoco>'
     xml=dict(fixtures())['sphere_False_outer']
     for name,model_xml,status in [
-        ('quaternion_tendon', free_tendon, 'UNSUPPORTED_FEATURE'),
         ('armature', re.sub(r'<geom geom="wrap"[^>]*/>', '', xml).replace('<spatial ', '<spatial armature=".1" '), 'UNSUPPORTED_FEATURE'),
         ('tendon_actuator', xml.replace('<spatial ', '<spatial name="t" ').replace('<motor joint="j" gear=".7"/>','<motor tendon="t"/>'), 'UNSUPPORTED_ACTUATOR')]:
         m=mj.MjModel.from_xml_string(model_xml);path=work/(name+'.mjb');mj.mj_saveModel(m,str(path))

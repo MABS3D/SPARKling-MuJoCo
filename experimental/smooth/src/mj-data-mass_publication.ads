@@ -15,6 +15,7 @@ private package MJ.Data.Mass_Publication with SPARK_Mode is
        and then Actuation_Current (D) = Actuation_Current (D)'Old
        and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then D.Dynamics.Mass.all = Mass;
@@ -34,6 +35,7 @@ private package MJ.Data.Mass_Publication with SPARK_Mode is
        and then Actuation_Current (D) = Actuation_Current (D)'Old
        and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then D.Dynamics.Mass.all = D.Dynamics.Mass.all'Old;

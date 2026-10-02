@@ -15,7 +15,8 @@ package MJ.Data.Actuation with SPARK_Mode is
      Post => Is_Empty (D) = Is_Empty (D)'Old;
    pragma Postcondition (Is_Ready (D) = Is_Ready (D)'Old);
    pragma Postcondition (Shape (D) = Shape (D)'Old);
-   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (if Result = Success then Is_Ready (D) and then Actuation_Current (D));
@@ -41,7 +42,7 @@ private
    function Expected_Force (D : Simulation; Index : Natural) return Real is
      (MJ.Smooth_Actuation.Force_For (D.Actuator_Config (Index),
        D.State.Qpos (D.Actuator_Config (Index).Joint_Id), D.State.Qvel (D.Actuator_Config (Index).Joint_Id),
-       D.State.Ctrl (Index), D.Actuation_Enabled, D.Clamp_Control));
+       (if D.Nactivation = 0 then D.State.Ctrl (Index) else D.Drive (Index)), D.Actuation_Enabled, D.Clamp_Control));
    function Expected_Generalized (D : Simulation; Index : Natural) return Real is
      (MJ.Smooth_Actuation.Reduced_Force (D.Actuator_Config.all, D.Actuators.Force.all, Index, D.Na));
 end MJ.Data.Actuation;

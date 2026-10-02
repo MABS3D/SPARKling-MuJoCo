@@ -53,7 +53,8 @@ package body MJ.Rigid_Detector with SPARK_Mode is
 
    procedure Initialize
      (S : in out Scene; Geoms : Shape_Array; Explicit_Pairs : Explicit_Array;
-      Exclusions : Exclusion_Array; O : Options; Result : out Status)
+      Exclusions : Exclusion_Array; O : Options; Result : out Status;
+      Margin_Override : Real := -1.0)
    is
       type Body_Map is array (Natural range 0 .. 65535) of Count;
       Group_Map : Body_Map := [others => Max_Geoms];
@@ -61,6 +62,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
    begin
       S.NG := 0;
       S.Ready := False; S.Have_Order := False; S.N := 0; S.E := 0; S.X := 0; Result := Invalid_Input;
+      if Margin_Override /= -1.0 and then Margin_Override not in 0.0 .. 1.0e10 then return; end if;
       if Geoms'Length > Max_Geoms or Explicit_Pairs'Length > Max_Pairs or Exclusions'Length > Max_Pairs then
          Result := Capacity_Limit; return;
       end if;
@@ -83,7 +85,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
          end if;
          S.Group_Of (I) := Group;
       end loop;
-      S.N := Geoms'Length; S.Config := O;
+      S.N := Geoms'Length; S.Config := O; S.Override_Margin := Margin_Override;
       for P of Explicit_Pairs loop
          S.Explicit_Pairs (S.E) := P;
          S.Explicit_Keys (S.E) := Key (P.Geoms.First, P.Geoms.Second); S.E := S.E+1;
@@ -137,8 +139,37 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       end loop;
    end Sort_Endpoints;
 
-   procedure Detect (S : in out Scene; Poses : Pose_Array;
-                     Hits : in out Pair_List; Result : out Status)
+   procedure Append_Pair (A, B : Geom_Id; Margin : Real;
+                          Explicit_Index : Natural; With_Metadata : Boolean;
+                          Hits : in out Pair_List; Details : in out Metadata_Array)
+     with Pre => A /= B and Hits.Length < Max_Pairs
+       and Margin in 0.0 .. 4.0e10 and Explicit_Index <= Max_Pairs
+       and Details'First = 0 and Details'Last = Max_Pairs-1,
+       Post => Hits.Length = Hits.Length'Old+1
+         and then Hits.Items (Hits.Length'Old) = Canonical (A, B)
+         and then (for all I in 0 .. Hits.Length'Old-1 => Hits.Items (I) = Hits.Items'Old (I))
+         and then (if With_Metadata then Details (Hits.Length'Old)'Initialized
+           and then Details (Hits.Length'Old).Detection_Margin = Margin
+           and then Details (Hits.Length'Old).Explicit_Index = Explicit_Index)
+   is
+   begin
+      Hits.Items (Hits.Length) := Canonical (A, B);
+      if With_Metadata then Details (Hits.Length) := (Margin, Explicit_Index); end if;
+      Hits.Length := Hits.Length+1;
+   end Append_Pair;
+
+   procedure Traverse (S : in out Scene; Poses : Pose_Array;
+                       Hits : in out Pair_List; Details : in out Metadata_Array;
+                       With_Narrowphase : Boolean; Result : out Status)
+     with Pre => Details'First = 0 and Details'Last = Max_Pairs-1,
+       Post => (if not With_Narrowphase then Narrowphase_Count (S) = 0)
+         and then (if Result /= Success then Hits.Length = 0)
+         and then (if not With_Narrowphase and Result = Success then
+           (for all P of Poses => Valid_Pose (P)))
+         and then (for all I in 0 .. Hits.Length-1 =>
+           Hits.Items (I).First < Hits.Items (I).Second
+           and then Hits.Items (I).Second < Geom_Count (S)
+           and then (if not With_Narrowphase then Details (I)'Initialized))
    is
       Min_C, Max_C : Vec := Zero;
       A_X, A_Y, A_Z : Axis := 0;
@@ -152,8 +183,9 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       Cursor, Previous, Following : Count;
       Filter_Options : Options;
       Awake : constant Pose := (others => <>);
+      Broad_Shape : Shape;
 
-      procedure Try_Pair (A, B : Geom_Id; Explicit : Boolean; M : Real) is
+      procedure Try_Pair (A, B : Geom_Id; Explicit_Index : Natural; M : Real) is
          PA : constant Pose := Poses (Poses'First+A);
          PB : constant Pose := Poses (Poses'First+B);
          Margin : Real := M;
@@ -163,25 +195,30 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       begin
          if Result /= Success then return; end if;
          S.Candidates := S.Candidates+1;
-         if not Explicit then
+         if Explicit_Index = 0 then
             if not Compatible (S.Shapes (A), S.Shapes (B))
               or else not Body_Allowed (S.Shapes (A), S.Shapes (B), PA, PB, S.Config)
               or else Contains (S.Excluded, S.X, Key (S.Shapes (A).Body_Id, S.Shapes (B).Body_Id))
               or else Contains (S.Explicit_Keys, S.E, Key (A, B)) then return;
             end if;
-            Margin := (S.Shapes (A).Margin+S.Shapes (B).Margin)+(S.Shapes (A).Gap+S.Shapes (B).Gap);
+            Margin := (if S.Override_Margin >= 0.0 then S.Override_Margin
+                       else S.Shapes (A).Margin+S.Shapes (B).Margin)
+              +(S.Shapes (A).Gap+S.Shapes (B).Gap);
          elsif S.Config.Sleep_Filter and then PA.Asleep and then PB.Asleep then return;
          end if;
          if S.Shapes (A).Kind /= Plane and S.Shapes (B).Kind /= Plane then
             D := Sub (PA.Position, PB.Position); R := (S.Rbound (A)+S.Rbound (B))+Margin;
             if Dot (D, D) > R*R then return; end if;
          end if;
-         S.Calls := S.Calls+1;
-         Test_Result := Test (S.Shapes (A), S.Shapes (B), PA, PB, Margin, S.Config);
-         if Test_Result = Unresolved then Result := Iteration_Limit; return; end if;
+         Test_Result := Contact;
+         if With_Narrowphase then
+            S.Calls := S.Calls+1;
+            Test_Result := Test (S.Shapes (A), S.Shapes (B), PA, PB, Margin, S.Config);
+            if Test_Result = Unresolved then Result := Iteration_Limit; return; end if;
+         end if;
          if Test_Result = Contact then
             if Hits.Length = Max_Pairs then Result := Capacity_Limit; return; end if;
-            Hits.Items (Hits.Length) := Canonical (A, B); Hits.Length := Hits.Length+1;
+            Append_Pair (A, B, Margin, Explicit_Index, not With_Narrowphase, Hits, Details);
          end if;
       end Try_Pair;
    begin
@@ -189,7 +226,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       if not S.Ready or Poses'Length /= S.N then return; end if;
       for I in 0 .. S.N-1 loop
          if (for some X of Poses (Poses'First+I).Position => X not in Coordinate) then return; end if;
-         if S.Shapes (I).Kind /= Sphere and then
+         if (S.Shapes (I).Kind /= Sphere or else not With_Narrowphase) and then
            (not S.Known_Rotation (I) or else S.Last_Rotation (I) /= Poses (Poses'First+I).Rotation) then
             if not Valid_Pose (Poses (Poses'First+I)) then return; end if;
             S.Last_Rotation (I) := Poses (Poses'First+I).Rotation; S.Known_Rotation (I) := True;
@@ -218,10 +255,16 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       Reuse_Order := S.Have_Order and S.Axis_Used = Projection_Id;
       for I in 0 .. S.N-1 loop
          if S.Shapes (I).Kind /= Plane then
-            Bounds (S.Shapes (I), Poses (Poses'First+I), S.Lo (I), S.Hi (I));
+            Broad_Shape := S.Shapes (I);
+            if S.Override_Margin >= 0.0 then
+               --  Conservative per-geom padding, including the smallest
+               --  subnormal margins (halving those can round down to zero).
+               Broad_Shape.Margin := S.Override_Margin;
+            end if;
+            Bounds (Broad_Shape, Poses (Poses'First+I), S.Lo (I), S.Hi (I));
             if (for some X of S.Lo (I) => X not in -1.0e12 .. 1.0e12)
               or else (for some X of S.Hi (I) => X not in -1.0e12 .. 1.0e12) then Result := Numeric_Limit; return; end if;
-            if Diagonal then Projection_Bounds (S.Shapes (I), Poses (Poses'First+I), S.Projection_Lo (I), S.Projection_Hi (I));
+            if Diagonal then Projection_Bounds (Broad_Shape, Poses (Poses'First+I), S.Projection_Lo (I), S.Projection_Hi (I));
             else S.Projection_Lo (I) := S.Lo (I) (A_X); S.Projection_Hi (I) := S.Hi (I) (A_X); end if;
             if not Reuse_Order then
                S.Sorted (NE) := (Float (S.Projection_Lo (I)), 2*I);
@@ -238,12 +281,12 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       end if;
       Sort_Endpoints (S, NE); S.Have_Order := True; S.Axis_Used := Projection_Id;
       for E in 0 .. S.E-1 loop
-         Try_Pair (S.Explicit_Pairs (E).Geoms.First, S.Explicit_Pairs (E).Geoms.Second, True, S.Explicit_Pairs (E).Margin);
+         Try_Pair (S.Explicit_Pairs (E).Geoms.First, S.Explicit_Pairs (E).Geoms.Second, E+1, S.Explicit_Pairs (E).Margin);
       end loop;
       for I in 0 .. S.N-1 loop
          if S.Shapes (I).Kind = Plane then
             for J in 0 .. S.N-1 loop
-               if S.Shapes (J).Kind /= Plane then Try_Pair (I, J, False, 0.0); end if;
+               if S.Shapes (J).Kind /= Plane then Try_Pair (I, J, 0, 0.0); end if;
             end loop;
          end if;
       end loop;
@@ -266,7 +309,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
                         Other := Cursor;
                         if S.Lo (Other) (A_Y) <= S.Hi (Id) (A_Y) and S.Lo (Id) (A_Y) <= S.Hi (Other) (A_Y)
                           and S.Lo (Other) (A_Z) <= S.Hi (Id) (A_Z) and S.Lo (Id) (A_Z) <= S.Hi (Other) (A_Z)
-                        then Try_Pair (Other, Id, False, 0.0); end if;
+                        then Try_Pair (Other, Id, 0, 0.0); end if;
                         Cursor := S.Next_Id (Other);
                      end loop;
                   end if;
@@ -281,7 +324,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
                   Other := S.Active (J);
                   if S.Lo (Other) (A_Y) <= S.Hi (Id) (A_Y) and S.Lo (Id) (A_Y) <= S.Hi (Other) (A_Y)
                     and S.Lo (Other) (A_Z) <= S.Hi (Id) (A_Z) and S.Lo (Id) (A_Z) <= S.Hi (Other) (A_Z)
-                  then Try_Pair (Other, Id, False, 0.0); end if;
+                  then Try_Pair (Other, Id, 0, 0.0); end if;
                end loop;
             end if;
             S.Active (NA) := Id; S.Active_Position (Id) := NA; NA := NA+1;
@@ -301,5 +344,18 @@ package body MJ.Rigid_Detector with SPARK_Mode is
          end if;
       end loop;
       if Result /= Success then Hits.Length := 0; end if;
+   end Traverse;
+
+   procedure Detect (S : in out Scene; Poses : Pose_Array;
+                     Hits : in out Pair_List; Result : out Status) is
+      Unused : Metadata_Array (0 .. Max_Pairs-1);
+   begin
+      Traverse (S, Poses, Hits, Unused, True, Result);
    end Detect;
+
+   procedure Find_Candidates (S : in out Scene; Poses : Pose_Array;
+                             Hits : in out Candidate_List; Result : out Status) is
+   begin
+      Traverse (S, Poses, Hits.Pairs, Hits.Metadata, False, Result);
+   end Find_Candidates;
 end MJ.Rigid_Detector;

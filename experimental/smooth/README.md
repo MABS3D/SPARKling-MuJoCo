@@ -1,5 +1,13 @@
 # Minimal smooth dynamics — review draft
 
+**Force integration, 2026-10-02:** the active engine now combines owned activation
+(`integrator`, `filter`, `filterexact`), standard joint muscles, inertia-box and
+ellipsoid fluids, fixed tendons including armature, and spatial tendons with
+ball/free joints. See [scope, C comparisons, proofs and timings](../../docs/force-integration.md).
+The historical proof/performance numbers below describe their recorded snapshots;
+they do not certify this expanded composition. Whole-pipeline Gold and C parity
+remain open. PID/DC/SO3, adhesion and flex are not enabled by this integration.
+
 **Manifold performance update:** the active path saves roughly 15–25% of
 previous Ada time in the sampled multi-DOF workloads. See
 [paired C/baseline results and proof scope](../../docs/manifold-performance.md).
@@ -96,8 +104,11 @@ rotations, joint anchors, principal inertia and joint armature are retained.
 Axes accepted by the model validator are normalized once in the owned snapshot.
 Pose updates, velocities and Jacobians all use this same normalized axis.
 
-Actuators have one control and one output, no activation state, a joint or
-`jointinparent` transmission, a fixed gain and either no bias or an affine bias.
+Actuators have one control and one output and a joint or `jointinparent`
+transmission. Basic actuators have fixed gain, absent/affine bias, and optional
+integrator/filter/filterexact activation. Standard muscles use muscle dynamics,
+gain and bias together, including actearly and activation limits. Arbitrary mixed
+muscle/general gain/dynamics combinations remain unsupported.
 Ball/free transmissions retain their three/six gear components. This covers the
 basic motor and position/velocity servo force laws. Control and actuator force
 limits are supported. Actuator damping and actuator armature are excluded.
@@ -115,11 +126,19 @@ Requiring disabled constraints makes the intended scope explicit: this draft
 does not implement contacts, joint limits, equality constraints or a constraint
 solver. A model with geometry is not thereby given collision dynamics.
 
-Other excluded features include activation dynamics, unsupported tendon variants,
-flex bodies, plugins, mocap, history, fluid forces, gravity compensation,
-nonlinear stiffness/damping and joint-level aggregate actuator force limits.
+Fixed tendon spring/damper laws, polynomial coefficients and armature are
+supported, including repeated joints and mixed fixed/spatial models. Spatial
+paths accept hinge/slide/ball/free bodies. Fluid forces support inertia-box and
+ellipsoid models, density, viscosity and wind; the recursive velocity pass is
+reused when available.
+
+Excluded features include advanced PID/DC/SO3 and non-joint actuator
+transmissions, spatial tendon armature/Jdot, tendon constraints/actuation,
+flex bodies, adhesion, plugins, mocap, history, gravity compensation,
+nonlinear joint stiffness/damping and joint-level aggregate actuator force limits.
 Unsupported enable flags and actuator-group disabling are rejected. Geometry
-and site world transforms, sensors and rendering are not computed by this API.
+and site world transforms are prepared internally when required by the supported
+forces; sensors and rendering remain outside this API.
 
 This is a small independent runtime representation. It is not a complete
 `mjData` port and does not provide its binary layout or full C API.
@@ -133,7 +152,10 @@ the caller's model after a successful creation is not intended to change the
 simulation. To adopt a different configuration, release and recreate it.
 
 `Reset` restores `qpos0`, sets time and velocities to zero, clears controls and
-applied forces, clears derived/scratch storage and invalidates cached results.
+applied forces and activation, clears derived/scratch storage and invalidates cached results.
+`Set_Activation` changes only the activation vector and invalidates actuation and
+acceleration. Euler publishes activation only after the complete next state is
+accepted; failed steps retain position, velocity, activation and time.
 `Free` releases the owned storage. There is no automatic finalization in this
 draft; callers must arrange cleanup. Allocation failure (`Storage_Error`) is
 outside the status-based failure contract and still needs a lifetime review.

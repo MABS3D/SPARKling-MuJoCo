@@ -1,0 +1,24 @@
+project Friction is
+   Build_Root := external ("FRICTION_BUILD_ROOT", "/var/tmp/sparkling-friction-response-20261001/build");
+   type Mode_Type is ("validation", "release");
+   Mode : Mode_Type := external ("FRICTION_MODE", "validation");
+   for Source_Dirs use ("src", "../../src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads",
+     "mj-friction_kernels.ads", "mj-friction_kernels.adb",
+     "mj-friction_random.ads", "mj-friction_random.adb",
+     "mj-pyramidal_pgs.ads", "mj-pyramidal_pgs.adb", "friction_probe.adb");
+   for Main use ("friction_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      case Mode is
+         when "validation" =>
+            for Default_Switches ("Ada") use
+              ("-gnat2022", "-O2", "-g", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");
+         when "release" =>
+            for Default_Switches ("Ada") use
+              ("-gnat2022", "-O3", "-gnatp", "-gnatn", "-march=native", "-ffp-contract=off");
+      end case;
+   end Compiler;
+end Friction;

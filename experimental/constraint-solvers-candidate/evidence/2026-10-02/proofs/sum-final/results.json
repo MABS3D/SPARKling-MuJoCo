@@ -1,0 +1,145 @@
+[
+  {
+    "label": "small-Substitution_Sum",
+    "command": [
+      "/usr/bin/python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3800",
+      "--timeout",
+      "180",
+      "--",
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/constraint-cholesky-20261002-sum-final/solvers.gpr",
+      "-u",
+      "mj-constraint_solvers-cholesky.ads",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=15",
+      "--memlimit=800",
+      "--steps=0",
+      "--proof=per_path",
+      "-j2",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-constraint_solvers-cholesky.ads:62"
+    ],
+    "code": 0,
+    "seconds": 5.506163120269775,
+    "unit": "mj-constraint_solvers-cholesky",
+    "limit": "mj-constraint_solvers-cholesky.ads:62",
+    "checks": 20,
+    "open": [],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-constraint_solvers-cholesky.ads",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-constraint_solvers-cholesky.ads",
+        "how_proved": "trivial",
+        "line": 62,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 36,
+        "file": "mj-constraint_solvers-cholesky.adb",
+        "how_proved": "trivial",
+        "line": 61,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "reviewed_warnings": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-constraint_solvers-cholesky.ads",
+        "how_proved": "trivial",
+        "line": 51,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-constraint_solvers-cholesky.ads",
+        "how_proved": "trivial",
+        "line": 62,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 36,
+        "file": "mj-constraint_solvers-cholesky.adb",
+        "how_proved": "trivial",
+        "line": 61,
+        "message": {
+          "arguments": [
+            "Sqrt"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "unreviewed_warnings": [],
+    "passed": true
+  }
+]

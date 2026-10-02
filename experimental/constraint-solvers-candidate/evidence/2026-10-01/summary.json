@@ -1,0 +1,99 @@
+{
+  "reference": {
+    "tag": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "official_latest_release_checked": "2026-10-01",
+    "url": "https://github.com/google-deepmind/mujoco/releases/tag/3.14.0"
+  },
+  "sources": {
+    "src/mj-constraint_order.adb": "78eee4cf603d362c2191795cd5235c9310cbe5d289b4c5bd11f04925e3d61e08",
+    "src/mj-constraint_order.ads": "e3489bad8cf76e5656f66977967d353034c020b9b5bcc2e0907b5a3ab3485487",
+    "src/mj-constraint_scalar.adb": "1aebed599b4f24024e1d65d060a64b4b5d0b9141344321db1baafb46cd56e0a5",
+    "src/mj-constraint_scalar.ads": "2f39f11ca5a417247653f2e2a1d3ee6880a05ec3aaca4afa082d7dc7755d4e9f",
+    "src/mj-constraint_solvers.adb": "357b8f5e0a2654ed0c51aea875238e00a10298760098704d0ea7dff4549139ce",
+    "src/mj-constraint_solvers.ads": "d57fc5299a47f5fdd9bd8c571638e76df8c14aeffd725c16775d1bed06efde46",
+    "tests/check.py": "290491a064c512cb20c156571c010e30ed309a0060b0fc3f41f33791824aa781",
+    "tests/differential.py": "3ef7284d2e3ffd1c1f4a6602503bfef21555674456216520455b38756bd67a9c",
+    "tests/robustness.py": "5fbb641092e70cbfad2fe8d3a5e4354579a5eae9fa9573a190e4406d554b505c",
+    "tests/solvers_probe.adb": "799f214ddc7c48cc77297790f62b93a6d3c2f05393085b5a1979fab44c6fb122",
+    "solvers.gpr": "b71f3d7fb9078c88ed128064a5d1fb296e6b20a2003f2cc7472551454d273055"
+  },
+  "proofs": {
+    "mj-constraint_scalar": {
+      "status": "whole_unit_passed",
+      "checks": 54,
+      "complete_coverage": true,
+      "entities": [
+        "MJ.Constraint_Scalar",
+        "MJ.Constraint_Scalar.Cone_Zone",
+        "MJ.Constraint_Scalar.Evaluate",
+        "MJ.Constraint_Scalar.Project",
+        "MJ.Constraint_Scalar.Step"
+      ]
+    },
+    "mj-constraint_order": {
+      "status": "whole_unit_passed",
+      "checks": 8,
+      "complete_coverage": true,
+      "entities": [
+        "MJ.Constraint_Order",
+        "MJ.Constraint_Order.Next"
+      ]
+    }
+  },
+  "checks": {
+    "validation-07": {
+      "total": 409,
+      "passed": 409,
+      "native_cases": 193,
+      "native_direct_matches": 192,
+      "robustness": {
+        "binary_sha256": "129d95eee35d986d70f89d512d07d90b6273b52fc63ff6fcae86954f060529fe",
+        "stress_cases": 240,
+        "replay_cases": 240,
+        "capacity_cases": 5,
+        "outcomes": {
+          "CONVERGED": 89,
+          "ITERATION_LIMIT": 65,
+          "STALLED": 62,
+          "LINE_SEARCH_LIMIT": 20,
+          "NUMERIC_LIMIT": 4
+        },
+        "failures": [],
+        "passed": true
+      },
+      "binary_sha256": "129d95eee35d986d70f89d512d07d90b6273b52fc63ff6fcae86954f060529fe"
+    },
+    "release-final": {
+      "total": 409,
+      "passed": 409,
+      "native_cases": 193,
+      "native_direct_matches": 192,
+      "robustness": {
+        "binary_sha256": "7a33b5a699d6ea43d3f7e9dee96d861c3a283d319bf059910c37cd1ff2a732bc",
+        "stress_cases": 240,
+        "replay_cases": 240,
+        "capacity_cases": 5,
+        "outcomes": {
+          "CONVERGED": 89,
+          "ITERATION_LIMIT": 65,
+          "STALLED": 62,
+          "LINE_SEARCH_LIMIT": 20,
+          "NUMERIC_LIMIT": 4
+        },
+        "failures": [],
+        "passed": true
+      },
+      "binary_sha256": "7a33b5a699d6ea43d3f7e9dee96d861c3a283d319bf059910c37cd1ff2a732bc"
+    }
+  },
+  "solver_proof_status": "OPEN: missing composition/invariants and an internal GNATprove error in full-unit attempt",
+  "performance_status": "not measured; no parity claim",
+  "minimal_factor_diagnostic": {
+    "no_inlining": true,
+    "seconds": 19.168723344802856,
+    "checks": 9,
+    "open_obligations": 15,
+    "status": "OPEN"
+  }
+}

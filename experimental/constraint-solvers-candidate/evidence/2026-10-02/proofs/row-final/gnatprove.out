@@ -1,0 +1,40 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    1         1                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  30         .    30 (CVC5 14%, Z3 85%, altergo 1%)           .          .
+Assertions                        6         .      6 (CVC5 6%, Z3 89%, altergo 6%)           .          .
+Functional Contracts              9         .     9 (CVC5 10%, Z3 86%, altergo 3%)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       .         .                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            47    2 (4%)                             45 (96%)           .          .
+
+
+max steps used for successful proof: 160877
+
+============================
+Most difficult proved checks
+============================
+
+mj-constraint_solvers-cholesky.adb:152:25: postcondition proved in max 7 seconds
+mj-constraint_solvers-cholesky.adb:185:12: assertion proved in max 2 seconds
+mj-constraint_solvers-cholesky.adb:157:10: precondition proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:160:13: precondition proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:162:13: range check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-constraint_solvers-cholesky, 1 subprograms and packages out of 1 analyzed
+  MJ.Constraint_Solvers.Cholesky.Substitute_Row at mj-constraint_solvers-cholesky.adb:145 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (45 checks)

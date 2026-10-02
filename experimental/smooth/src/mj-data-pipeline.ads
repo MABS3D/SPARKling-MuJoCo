@@ -8,6 +8,7 @@ private package MJ.Data.Pipeline with SPARK_Mode is
      (D : in out Simulation; Result : out Status; With_Cartesian_Motion : Boolean := False) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then not D.Cache.Jacobian_Valid
        and then (if Result = Success then Is_Ready (D) and then Positions_Current (D));
@@ -24,7 +25,8 @@ private package MJ.Data.Pipeline with SPARK_Mode is
    --  Independent frame clauses keep solver diagnostics local while retaining
    --  every guarantee of the original conjunction.
    pragma Postcondition (Shape (D) = Shape (D)'Old);
-   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Mass_Current (D) = Mass_Current (D)'Old);
    pragma Postcondition (Passive_Current (D) = Passive_Current (D)'Old);
@@ -41,7 +43,8 @@ private package MJ.Data.Pipeline with SPARK_Mode is
      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D),
      Post => Is_Ready (D) and then Positions_Current (D);
    pragma Postcondition (Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old);
-   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Mass_Current (D) = Mass_Current (D)'Old);
    pragma Postcondition (Passive_Current (D) = Passive_Current (D)'Old);
@@ -68,6 +71,7 @@ private package MJ.Data.Pipeline with SPARK_Mode is
       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then (if Result = Success then Is_Ready (D) and then Positions_Current (D) and then Forces_Current (D));
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old

@@ -146,7 +146,9 @@ def check(out,samples):
     (out/'numerics.json').write_text(json.dumps(reports,indent=2)+'\n')
     from driver_cases import check as check_driver
     driver_ok=check_driver(out)
-    return driver_ok and not any(r['returncode'] or r['failures'] or r['scene_failures'] for r in reports.values())
+    from check_scene import run as check_scene
+    scene_ok=check_scene(out)
+    return driver_ok and scene_ok and not any(r['returncode'] or r['failures'] or r['scene_failures'] for r in reports.values())
 
 if __name__=='__main__':
     a=argparse.ArgumentParser();a.add_argument('--out',type=Path,required=True);a.add_argument('--reuse',action='store_true');a.add_argument('--samples',type=int,default=300);args=a.parse_args()

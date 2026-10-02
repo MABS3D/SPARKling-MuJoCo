@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                             Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                                   .           .          .
+Flow Dependencies                 .          .                                   .           .          .
+Initialization                    1          1                                   .           .          .
+Non-Aliasing                      1          1                                   .           .          .
+Run-time Checks                   .          .                                   .           .          .
+Assertions                        .          .                                   .           .          .
+Functional Contracts              4          .    4 (CVC5 23%, Z3 71%, altergo 6%)           .          .
+LSP Verification                  .          .                                   .           .          .
+Termination                       1          1                                   .           .          .
+Concurrency                       .          .                                   .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                             8    4 (50%)                             4 (50%)           .          .
+
+
+max steps used for successful proof: 33897
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.ads:38:16: postcondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 1 subprograms and packages out of 1 analyzed
+  MJ.BVH.Union_Box at mj-bvh.ads:36 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)

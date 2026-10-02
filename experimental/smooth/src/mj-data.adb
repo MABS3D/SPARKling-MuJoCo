@@ -3,12 +3,14 @@ with Interfaces;
 with MJ.Models.Validity;
 with MJ.Simple_Kernels;
 with MJ.Manifold_Math;
+with MJ.Data.Fluid_Phase;
 
 package body MJ.Data with SPARK_Mode is
    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
    --  Clear-buffer preconditions make these entry-bound snapshots defined.
    pragma Unevaluated_Use_Of_Old (Allow);
+   use type MJ.Activation.Dynamics;
    use type Interfaces.Unsigned_32;
    use type Interfaces.Unsigned_8;
 
@@ -38,6 +40,17 @@ package body MJ.Data with SPARK_Mode is
    begin
       return new Real_Array'[0 .. Integer (Length) - 1 => 0.0];
    end Zero_Array;
+
+   procedure Equal_Activation_Images (A, B : State_Vector) is
+   begin
+      for Offset in 0 .. Integer (A'Length) - 1 loop
+         pragma Assert (A (A'First + Offset) = B (B'First + Offset));
+         pragma Loop_Invariant (for all K in 0 .. Offset =>
+           A (A'First + K) = B (B'First + K));
+      end loop;
+   end Equal_Activation_Images;
+
+   procedure Equal_State_Images (Q1, Q2, V1, V2 : Real_Array; T1, T2 : Nonneg_Tier0) is null;
 
    procedure Equal_Input_Images (C1, C2, F1, F2 : Real_Array) is null;
    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) is
@@ -189,24 +202,27 @@ package body MJ.Data with SPARK_Mode is
      Global => null,
      Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Actuator_Layout_OK (S, Fields)
        and then A < S.Nactuator,
-     Post => (Actuator_Element'Result = Success) = (Fields.Actuator_Trntype (A) in 0 .. 1 and then Fields.Actuator_Dyntype (A) = 0
-          and then Fields.Actuator_Gaintype (A) = 0 and then Fields.Actuator_Biastype (A) in 0 .. 1
+     Post => (Actuator_Element'Result = Success) = (Fields.Actuator_Trntype (A) in 0 .. 1 and then ((Fields.Actuator_Dyntype (A) in 0 .. 3
+          and then Fields.Actuator_Gaintype (A) = 0 and then Fields.Actuator_Biastype (A) in 0 .. 1)
+          or else (Fields.Actuator_Dyntype (A) = 4 and then Fields.Actuator_Gaintype (A) = 2
+            and then Fields.Actuator_Biastype (A) = 2))
           and then Fields.Actuator_Ctrlnum (A) = 1 and then Fields.Actuator_Outnum (A) = 1
           and then Fields.Actuator_Ctrladr (A) = A and then Fields.Actuator_Outadr (A) = A
-          and then Fields.Actuator_Actnum (A) = 0 and then Fields.Actuator_Delay (A) = 0.0
+          and then Fields.Actuator_Actnum (A) = (if Fields.Actuator_Dyntype (A) = 0 then 0 else 1) and then Fields.Actuator_Delay (A) = 0.0
           and then Fields.Actuator_Damping (A) = 0.0 and then Fields.Actuator_Dampingpoly (2 * A) = 0.0
           and then Fields.Actuator_Dampingpoly (2 * A + 1) = 0.0 and then Fields.Actuator_Armature (A) = 0.0)
    is
    begin
          if Fields.Actuator_Trntype (A) not in 0 .. 1
-           or else Fields.Actuator_Dyntype (A) /= 0
-           or else Fields.Actuator_Gaintype (A) /= 0
-           or else Fields.Actuator_Biastype (A) not in 0 .. 1
+           or else not ((Fields.Actuator_Dyntype (A) in 0 .. 3
+             and then Fields.Actuator_Gaintype (A) = 0 and then Fields.Actuator_Biastype (A) in 0 .. 1)
+             or else (Fields.Actuator_Dyntype (A) = 4 and then Fields.Actuator_Gaintype (A) = 2
+               and then Fields.Actuator_Biastype (A) = 2))
            or else Fields.Actuator_Ctrlnum (A) /= 1
            or else Fields.Actuator_Outnum (A) /= 1
            or else Fields.Actuator_Ctrladr (A) /= A
            or else Fields.Actuator_Outadr (A) /= A
-           or else Fields.Actuator_Actnum (A) /= 0
+           or else Fields.Actuator_Actnum (A) /= (if Fields.Actuator_Dyntype (A) = 0 then 0 else 1)
            or else Fields.Actuator_Delay (A) /= 0.0
            or else Fields.Actuator_Damping (A) /= 0.0
            or else Fields.Actuator_Dampingpoly (2 * A) /= 0.0
@@ -238,6 +254,7 @@ package body MJ.Data with SPARK_Mode is
 
    function Creation_Inputs (M : MJ.Models.Model) return Boolean is
      (MJ.Models.Sizes_In_Range (M.S)
+      and then MJ.Models.Geom_Layout_OK (M.S, M.Geoms)
       and then MJ.Models.Body_Layout_OK (M.S, M.Bodies)
       and then MJ.Models.Joint_Layout_OK (M.S, M.Joints)
       and then MJ.Models.Dof_Layout_OK (M.S, M.Dofs)
@@ -313,8 +330,7 @@ package body MJ.Data with SPARK_Mode is
         or else M.Opt.Integrator /= 0 or else M.Opt.Enableflags /= 0
         or else M.Opt.Disableactuator /= 0
         or else M.S.Nflex /= 0 or else M.S.Nplugin /= 0
-        or else M.S.Nmocap /= 0 or else M.S.Na /= 0 or else M.S.Nhistory /= 0
-        or else M.Opt.Density /= 0.0 or else M.Opt.Viscosity /= 0.0
+        or else M.S.Nmocap /= 0 or else M.S.Na > Max_Actuators or else M.S.Nhistory /= 0
         or else M.Flg_Adhesion
       then
          return Unsupported_Feature;
@@ -996,8 +1012,80 @@ package body MJ.Data with SPARK_Mode is
          Copy_Manifold_Joints (M, D, Normal);
       end if;
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+      MJ.Data.Fluid_Phase.Initialize
+        (M, D.Body_Config.all, D.Spring_Enabled, D.Damper_Enabled,
+         D.Fluid, D.Fluid_Elements, Result);
+      if Result /= Success then Free (D); return; end if;
       Copy_Actuators (M.S, M.Actuators, D.Actuator_Config, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+      D.Nactivation := M.S.Na;
+      declare
+         Expected_Address : Natural := 0;
+      begin
+      for I in 0 .. D.Na - 1 loop
+         declare
+            C : Actuator_Parameters renames D.Actuator_Config (I);
+            A : constant Integer := M.Actuators.Actuator_Actadr (I);
+            K : constant Integer := M.Actuators.Actuator_Dyntype (I);
+         begin
+            if K /= 0 then
+               if A /= Expected_Address or else A not in 0 .. Integer (D.Nactivation) - 1
+                 or else M.Actuators.Actuator_Dynprm (10 * I) not in Tier0_Real
+                 or else M.Actuators.Actuator_Actrange (2 * I) not in Tier0_Real
+                 or else M.Actuators.Actuator_Actrange (2 * I + 1) not in Tier0_Real
+               then Free (D); Result := Invalid_Model; return; end if;
+               Expected_Address := Expected_Address + 1;
+               C.Kind := (if K = 4 then MJ.Activation.Integrator else MJ.Activation.Dynamics'Val (K));
+               C.Muscle_Mode := K = 4;
+               D.Has_Muscles := D.Has_Muscles or else C.Muscle_Mode;
+               C.Activation_Id := A;
+               C.Tau := Real'Max (1.0e-15, M.Actuators.Actuator_Dynprm (10 * I));
+               if C.Kind = MJ.Activation.Filter_Exact then
+                  C.Factor := MJ.Activation.Exact_Factor (D.Timestep, C.Tau);
+               end if;
+               C.Early := M.Actuators.Actuator_Actearly (I) /= 0;
+               C.Activation_Limited := M.Actuators.Actuator_Actlimited (I) /= 0;
+               C.Activation_Lower := M.Actuators.Actuator_Actrange (2 * I);
+               C.Activation_Upper := M.Actuators.Actuator_Actrange (2 * I + 1);
+               if C.Activation_Limited and then C.Activation_Lower > C.Activation_Upper then
+                  Free (D); Result := Invalid_Model; return;
+               end if;
+               if C.Muscle_Mode then
+                  for P in 0 .. 8 loop
+                     if M.Actuators.Actuator_Gainprm (10 * I + P) not in Tier0_Real
+                       or else M.Actuators.Actuator_Biasprm (10 * I + P) not in Tier0_Real
+                     then Free (D); Result := Invalid_Model; return; end if;
+                     C.Muscle.Gain_Parameters (P) := M.Actuators.Actuator_Gainprm (10 * I + P);
+                     C.Muscle.Bias_Parameters (P) := M.Actuators.Actuator_Biasprm (10 * I + P);
+                  end loop;
+                  for P in 0 .. 2 loop
+                     if M.Actuators.Actuator_Dynprm (10 * I + P) not in Tier0_Real
+                     then Free (D); Result := Invalid_Model; return; end if;
+                     C.Muscle.Dynamics (P) := M.Actuators.Actuator_Dynprm (10 * I + P);
+                  end loop;
+                  for P in 0 .. 1 loop
+                     if M.Actuators.Actuator_Lengthrange (2 * I + P) not in Tier0_Real
+                     then Free (D); Result := Invalid_Model; return; end if;
+                     C.Muscle.Range_Of_Length (P) := M.Actuators.Actuator_Lengthrange (2 * I + P);
+                  end loop;
+                  if M.Actuators.Actuator_Acc0 (I) not in Tier0_Real
+                  then Free (D); Result := Invalid_Model; return; end if;
+                  C.Muscle.Acc0 := M.Actuators.Actuator_Acc0 (I);
+                  C.Muscle.Control_Limited := C.Control_Limited and then D.Clamp_Control;
+                  C.Muscle.Control_Range := (C.Control_Lower, C.Control_Upper);
+                  C.Muscle.Activation_Limited := C.Activation_Limited;
+                  C.Muscle.Activation_Range := (C.Activation_Lower, C.Activation_Upper);
+                  C.Muscle.Force_Limited := C.Force_Limited;
+                  C.Muscle.Force_Range := (C.Force_Lower, C.Force_Upper);
+                  C.Muscle.Actearly := C.Early;
+               end if;
+            end if;
+         end;
+      end loop;
+      if Expected_Address /= D.Nactivation then
+         Free (D); Result := Invalid_Model; return;
+      end if;
+      end;
       Remap_Actuators (M, D, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
       if M.S.Nq = M.S.Nv then Build_Topology (M, D, Normal);
@@ -1094,6 +1182,7 @@ package body MJ.Data with SPARK_Mode is
 
    procedure Free (D : in out Simulation) is
    begin
+      MJ.Data.Fluid_Phase.Release (D.Fluid_Elements, D.Fluid);
       Free_Body_Config (D.Body_Config);
       Free_Joint_Config (D.Joint_Config);
       Free_Actuator_Config (D.Actuator_Config);
@@ -1115,6 +1204,13 @@ package body MJ.Data with SPARK_Mode is
       D.Timestep := 0.0;
       D.Gravity := Zero;
       Invalidate (D.Cache);
+      D.Nactivation := 0;
+      D.Has_Muscles := False;
+      D.Activation_Can_Advance := True;
+      D.Activation := [others => 0.0];
+      D.Next_Activation := [others => 0.0];
+      D.Act_Dot := [others => 0.0];
+      D.Drive := [others => 0.0];
    end Free;
 
    procedure Clear_State (S : in out State_Buffers) with
@@ -1251,6 +1347,11 @@ package body MJ.Data with SPARK_Mode is
          return;
       end if;
       Invalidate (D.Cache);
+      D.Activation_Can_Advance := True;
+      D.Activation := [others => 0.0];
+      D.Next_Activation := [others => 0.0];
+      D.Act_Dot := [others => 0.0];
+      D.Drive := [others => 0.0];
       D.Clock := 0.0;
       Clear_State (D.State);
       D.State.Qpos.all :=
@@ -1295,6 +1396,48 @@ package body MJ.Data with SPARK_Mode is
         (for all I in Qvel'Range => Velocity (D, I - Qvel'First) = Qvel (I));
       Result := Success;
    end Set_State;
+
+   procedure Set_Activation (D : in out Simulation; Values : State_Vector; Result : out Status) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
+      Initial_Time : constant Nonneg_Tier0 := D.Clock with Ghost => Static;
+      Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+   begin
+      Prove_Configuration_Equality (Configuration (D), Initial_Config);
+      if not Is_Ready (D) then Result := Not_Allocated; return; end if;
+      if Int64 (Values'Length) /= Int64 (D.Nactivation) then Result := Invalid_Size; return; end if;
+      declare
+         Initial_Q : constant Real_Array := D.State.Qpos.all with Ghost => Static;
+         Initial_V : constant Real_Array := D.State.Qvel.all with Ghost => Static;
+         Initial_Control : constant Real_Array := D.State.Ctrl.all with Ghost => Static;
+         Initial_Applied : constant Real_Array := D.State.Applied.all with Ghost => Static;
+      begin
+      pragma Assert (Static => Initial_State = State_Image (Initial_Q, Initial_V, Initial_Time));
+      pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
+      pragma Assert (Static => Stable_Ready (D));
+      D.Activation (0 .. Integer (D.Nactivation) - 1) := Values;
+      pragma Assert (Static => Stable_Ready (D));
+      D.Cache.Actuation_Valid := False;
+      D.Cache.Force_Valid := False;
+      Prove_Configuration_Equality (Configuration (D), Initial_Config);
+      pragma Assert (Static => Is_Ready (D));
+      Equal_Input_Images (D.State.Ctrl.all, Initial_Control, D.State.Applied.all, Initial_Applied);
+      MJ.Smooth_Kernels.Equal_Transitive
+        (Input_Values (D), Input_Image (D.State.Ctrl.all, D.State.Applied.all),
+         Input_Image (Initial_Control, Initial_Applied));
+      MJ.Smooth_Kernels.Equal_Transitive
+        (Input_Values (D), Input_Image (Initial_Control, Initial_Applied), Initial_Inputs);
+      Equal_State_Images (D.State.Qpos.all, Initial_Q, D.State.Qvel.all, Initial_V, D.Clock, Initial_Time);
+      MJ.Smooth_Kernels.Equal_Transitive
+        (State_Values (D), State_Image (D.State.Qpos.all, D.State.Qvel.all, D.Clock),
+         State_Image (Initial_Q, Initial_V, Initial_Time));
+      MJ.Smooth_Kernels.Equal_Transitive
+        (State_Values (D), State_Image (Initial_Q, Initial_V, Initial_Time), Initial_State);
+      Equal_Activation_Images (D.Activation (0 .. Integer (D.Nactivation) - 1), Values);
+      Result := Success;
+      end;
+   end Set_Activation;
 
    procedure Set_Control
      (D : in out Simulation; Index : Natural; Value : Tier0_Real; Result : out Status) is

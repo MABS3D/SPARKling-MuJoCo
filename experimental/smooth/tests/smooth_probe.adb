@@ -10,6 +10,7 @@ with MJ.MJB;
 with MJ.Data; use MJ.Data;
 with MJ.Data.Forward;
 with MJ.Data.Forces;
+with MJ.Data.Actuation;
 with MJ.Data.Euler;
 with MJ.Smooth_Math;
 with MJ.External_Forces;
@@ -138,6 +139,7 @@ begin
         (0 .. (if With_External then Integer (Body_Count (D)) - 1 else -1));
       Bad_Loads : MJ.External_Forces.Wrench_Array (0 .. Body_Count (D));
       Shifted_Loads : MJ.External_Forces.Wrench_Array (1 .. Body_Count (D));
+      Act : State_Vector (0 .. Integer (Activation_Count (D)) - 1) := [others => 0.0];
       T : Real;
       Pos : MJ.Smooth_Math.Vector;
       Quat : MJ.Smooth_Math.Quaternion;
@@ -165,6 +167,16 @@ begin
             end if;
          end;
       end if;
+      if Activation_Count (D) > 0 then
+         declare
+            Edge : State_Vector (Natural'Last - Activation_Count (D) + 1 .. Natural'Last) := [others => 0.25];
+         begin
+            Set_Activation (D, Edge, Result); Check;
+            if (for some X of Activation_Values (D) => X /= 0.25) then
+               raise Program_Error with "activation high array bounds";
+            end if;
+         end;
+      end if;
       Ada.Integer_Text_IO.Get (Cases);
       for C in 1 .. Cases loop
          Reset (D, Result); Check;
@@ -174,6 +186,18 @@ begin
          Emit ("reset_qpos", Qout);
          Emit ("reset_qvel", Vout);
          Read_State (Q); Read_State (V); Read_State (Controls); Read_State (Applied);
+         Read_State (Act);
+         if (for some X of Activation_Values (D) => X /= 0.0) then
+            raise Program_Error with "activation reset";
+         end if;
+         declare
+            Bad : State_Vector (0 .. Activation_Count (D)) := [others => 0.0];
+            Before : constant Real_Array := Complete_State_Values (D);
+         begin
+            Set_Activation (D, Bad, Result); Check (Invalid_Size);
+            if Complete_State_Values (D) /= Before then raise Program_Error with "activation invalid size"; end if;
+         end;
+         Set_Activation (D, Act, Result); Check;
          for W of Loads loop
             for X of W.Force loop Numbers.Get (Input_Time); X := Input_Time; end loop;
             for X of W.Torque loop Numbers.Get (Input_Time); X := Input_Time; end loop;
@@ -182,10 +206,10 @@ begin
          Ada.Integer_Text_IO.Get (Steps);
          Set_State (D, Q, V, Input_Time, Result); Check;
          declare
-            Before : constant Real_Array := State_Values (D);
+            Before : constant Real_Array := Complete_State_Values (D);
          begin
             Set_State (D, Bad, Empty, 0.0, Result); Check (Invalid_Size);
-            if State_Values (D) /= Before then
+            if Complete_State_Values (D) /= Before then
                raise Program_Error with "invalid Set_State changed state";
             end if;
          end;
@@ -196,14 +220,14 @@ begin
             Set_Applied_Force (D, I, Applied (I), Result); Check;
          end loop;
          declare
-            Before : constant Real_Array := State_Values (D);
+            Before : constant Real_Array := Complete_State_Values (D);
             Inputs : constant Real_Array := Input_Values (D);
          begin
             MJ.Data.Forward.Evaluate (D, Result, Bad_Loads); Check (Invalid_Size);
             MJ.Data.Euler.Step (D, Result, Bad_Loads); Check (Invalid_Size);
             MJ.Data.Forward.Evaluate (D, Result, Shifted_Loads); Check (Invalid_Size);
             MJ.Data.Euler.Step (D, Result, Shifted_Loads); Check (Invalid_Size);
-            if State_Values (D) /= Before or else Input_Values (D) /= Inputs then
+            if Complete_State_Values (D) /= Before or else Input_Values (D) /= Inputs then
                raise Program_Error with "invalid external loads changed inputs/state";
             end if;
          end;
@@ -212,6 +236,12 @@ begin
          Emit ("forward_clamped", [Real (Clamped_Dof (D))]);
          if Result = Success then
             Get_Acceleration (D, Acc, Result); Check; Emit ("qacc", Acc);
+            Emit ("act_dot", Activation_Rates (D));
+            MJ.Data.Actuation.Compute (D, Result); Check;
+            MJ.Data.Forward.Evaluate (D, Result, Loads); Check;
+            if Activation_Values (D) /= As_Reals (Act) then
+               raise Program_Error with "Forward advanced activation";
+            end if;
             if With_External then
                declare
                   Expected : constant Real_Array := Acc;
@@ -286,15 +316,16 @@ begin
          end if;
          for S in 1 .. Steps loop
             declare
-               Before : constant Real_Array := State_Values (D);
+               Before : constant Real_Array := Complete_State_Values (D);
             begin
                MJ.Data.Euler.Step (D, Result, Loads);
-               if Result /= Success and then State_Values (D) /= Before then
+               if Result /= Success and then Complete_State_Values (D) /= Before then
                   raise Program_Error with "failed Step changed state";
                end if;
             end;
             exit when Result /= Success;
          end loop;
+         Emit ("act", Activation_Values (D));
          Put_Line ("step " & Result'Image);
          Emit ("step_clamped", [Real (Clamped_Dof (D))]);
          Get_State (D, Qout, Vout, T, Result); Check;

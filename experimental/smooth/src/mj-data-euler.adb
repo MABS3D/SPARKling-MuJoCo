@@ -136,6 +136,10 @@ package body MJ.Data.Euler with SPARK_Mode is
       pragma Assert (Static => Initial_State = State_Image (Initial_Qpos, Initial_Qvel, Initial_Time));
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
       pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
+      if not D.Activation_Can_Advance then
+         Result := Numeric_Limit;
+         return;
+      end if;
       if D.Nq = D.Nv then
          Integrate_Buffers
            (D.State.Qpos.all, D.State.Qvel.all, D.Scratch.Solution.all, D.Timestep,
@@ -144,7 +148,13 @@ package body MJ.Data.Euler with SPARK_Mode is
          Integrate_Manifolds (D, Result);
       end if;
       pragma Assert (Static => (if Result = Success then D.Clock = Initial_Time + Initial_Step));
-      if Result = Success then Invalidate (D.Cache); end if;
+      if Result = Success then
+         if D.Nactivation > 0 then
+            D.Activation (0 .. Integer (D.Nactivation) - 1) :=
+              D.Next_Activation (0 .. Integer (D.Nactivation) - 1);
+         end if;
+         Invalidate (D.Cache);
+      end if;
       pragma Assert (Static => Array_Bounded (D.State.Qpos, Max_Val));
       pragma Assert (Static => Array_Bounded (D.State.Qvel, Max_Val));
       pragma Assert (Static => Array_Bounded (D.State.Ctrl, Max_Val));
@@ -239,7 +249,8 @@ package body MJ.Data.Euler with SPARK_Mode is
    pragma Postcondition (if Result = Success then Is_Ready (D));
    pragma Postcondition (if Result = Success then Time (D) = Time (D)'Old + Step_Size (D)'Old);
    pragma Postcondition (if Result = Success then not Positions_Current (D) and then not Forces_Current (D));
-   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old
+     and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then

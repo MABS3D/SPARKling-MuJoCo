@@ -1,0 +1,44 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    1         1                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                  14         .                14 (CVC5 39%, Z3 61%)           .          .
+Assertions                        8         .    8 (CVC5 60%, Z3 20%, altergo 20%)           .          .
+Functional Contracts             10         .                10 (CVC5 13%, Z3 87%)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       1         1                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            35    3 (9%)                             32 (91%)           .          .
+
+
+max steps used for successful proof: 55914
+
+============================
+Most difficult proved checks
+============================
+
+mj-flex_support.adb:11:33: loop invariant after first iteration proved in max 3 seconds
+mj-flex_support.ads:11:14: postcondition proved in max 1 seconds
+mj-flex_support.ads:15:61: precondition proved in max 1 seconds
+mj-flex_support.ads:15:25: precondition proved in max 1 seconds
+mj-flex_support.adb:11:70: precondition proved in max 1 seconds
+mj-flex_support.adb:12:64: precondition proved in max 1 seconds
+mj-flex_support.adb:10:38: precondition proved in max 1 seconds
+mj-flex_support.ads:13:25: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-flex_support, 2 subprograms and packages out of 2 analyzed
+  MJ.Flex_Support at mj-flex_support.ads:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Flex_Support.Select_Vertex at mj-flex_support.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (32 checks)

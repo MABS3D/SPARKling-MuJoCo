@@ -1,0 +1,55 @@
+with Ada.Text_IO; use Ada.Text_IO;
+with MJ.Types; use MJ.Types;
+with MJ.Joint_Limits;
+with MJ.Joint_Limit_Response;
+with MJ.Contact_Rows;
+procedure Limit_Probe is
+   package F is new Float_IO (Real);
+   package I is new Integer_IO (Integer);
+   package L renames MJ.Joint_Limits;
+   package R renames MJ.Joint_Limit_Response;
+   Kind, Enabled, Ref_Safe, Metric, Power : Integer;
+   Joint, Dof : Index_Type;
+   Position, Low, High : Tier0_Real;
+   Margin : Tier0_Real;
+   H : Nonneg_Tier0;
+   Q : L.Quaternion;
+   V : L.Vector;
+   P : R.Parameters;
+   B : L.Batch;
+   E : R.Effective_Parameters;
+   Prepared : R.Prepared_Row;
+   Diag : MJ.Contact_Rows.Inverse_Mass;
+   Forces : L.Forces;
+   Generalized : L.Vector;
+   procedure Get (X : out Real) is begin F.Get (X); end Get;
+   procedure Put (X : Real) is begin F.Put (X, Fore => 1, Aft => 17, Exp => 3); Put (" "); end Put;
+   procedure Put (X : Integer) is begin I.Put (X, Width => 0); Put (" "); end Put;
+begin
+   while not End_Of_File loop
+      I.Get (Kind); I.Get (Enabled); I.Get (Joint); I.Get (Dof);
+      Get (Position); Get (Low); Get (High); Get (Margin);
+      for X of Q loop Get (X); end loop;
+      for X of V loop Get (X); end loop;
+      Get (P.Ref0); Get (P.Ref1); Get (P.D0); Get (P.D_Width); Get (P.Width); Get (P.Midpoint);
+      I.Get (Power); P.Power := R.Curve_Power'Val (Power - 1);
+      Get (H); I.Get (Ref_Safe); I.Get (Metric); Get (Diag);
+      for X of Forces loop Get (X); end loop;
+      B := L.Build (Joint_Kind'Val (Kind), Joint, Dof, Position, Q, Low, High, Margin, Enabled /= 0);
+      E := R.Sanitize (P, H, Ref_Safe /= 0, Metric /= 0);
+      Put (L.Status'Pos (B.Result)); Put (B.Count); Put (Boolean'Pos (E.Used_Default));
+      for N in 1 .. 2 loop
+         Prepared := (others => <>);
+         if N <= B.Count then R.Prepare (B.Rows (N), V, E, Diag, H, Metric /= 0, Prepared); end if;
+         Put (B.Rows (N).Joint); Put (B.Rows (N).Dof); Put (B.Rows (N).Width);
+         Put (L.Side'Pos (B.Rows (N).Boundary)); Put (B.Rows (N).Position); Put (B.Rows (N).Margin);
+         for X of B.Rows (N).Jacobian loop Put (X); end loop;
+         Put (L.Status'Pos (Prepared.Result)); Put (Prepared.Velocity);
+         Put (Prepared.Impedance); Put (Prepared.Derivative); Put (Prepared.K); Put (Prepared.B);
+         Put (Prepared.R); Put (Prepared.D); Put (Prepared.Aref);
+      end loop;
+      Generalized := L.Project_Forces (B, Forces);
+      for X of Generalized loop Put (X); end loop;
+      New_Line;
+   end loop;
+end Limit_Probe;

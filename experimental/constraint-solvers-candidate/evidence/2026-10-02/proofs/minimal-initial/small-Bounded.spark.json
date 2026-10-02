@@ -1,0 +1,251 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Constraint_Solvers.Cholesky.Bounded",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-constraint_solvers-cholesky.ads",
+          "line": 20
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cholesky.ads",
+      "how_proved": "flow",
+      "line": 20,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Bounded\" has been proved, subprogram will terminate"
+      },
+      "msg_id": 0,
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 41,
+      "check_file": "mj-constraint_solvers-cholesky.ads",
+      "check_line": 22,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.57990000000000E-02
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 1.99270000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 41,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cholesky.ads",
+      "how_proved": "prover",
+      "line": 22,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 9.99999997475243E-07
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 44,
+      "check_file": "mj-constraint_solvers-cholesky.ads",
+      "check_line": 22,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.41420000000000E-02
+            },
+            "Z3": {
+              "result": "High failure (signaled)",
+              "steps": 1,
+              "time": 5.50000000000000E-05
+            },
+            "altergo": {
+              "result": "Failure\n(interrupted)",
+              "steps": 1,
+              "time": 0
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 44,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cholesky.ads",
+      "how_proved": "prover",
+      "line": 22,
+      "message": {
+        "text": "index check proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 1.41420001164079E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 1.32170002907515E-02,
+      "gnatwhy3.init": 2.37919002771378E-01,
+      "gnatwhy3.register_vcs": 1.94600003305823E-03,
+      "gnatwhy3.run_vcs": 3.99900000047637E-06,
+      "gnatwhy3.save_session": 6.55998999718577E-04,
+      "gnatwhy3.schedule_vcs": 7.81320035457611E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 4.13700006902218E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 1.04999002360273E-04,
+      "gnatwhy3.transformations.discriminate_if_poly": 4.99899988426478E-06,
+      "gnatwhy3.transformations.eliminate_algebraic": 4.19399887323380E-03,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 1.27300003077835E-03,
+      "gnatwhy3.transformations.eliminate_builtin": 8.26300028711557E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 4.40000003436580E-04,
+      "gnatwhy3.transformations.eliminate_epsilon": 1.45600002724677E-03,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 7.63999007176608E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 9.89999040029943E-04,
+      "gnatwhy3.transformations.eliminate_literal": 1.40700000338256E-03,
+      "gnatwhy3.transformations.eliminate_projections_sums": 3.44000000040978E-04,
+      "gnatwhy3.transformations.eliminate_recursion": 8.14998988062143E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 1.99900000552589E-06,
+      "gnatwhy3.transformations.inline_trivial": 2.78629995882511E-02,
+      "gnatwhy3.transformations.introduce_premises": 6.37000019196421E-04,
+      "gnatwhy3.transformations.monomorphise_goal": 2.49990007432643E-05,
+      "gnatwhy3.transformations.path_split": 3.72000009519979E-04,
+      "gnatwhy3.transformations.remove_unused": 7.55999889224768E-03,
+      "gnatwhy3.transformations.simplify_formula": 3.78199899569154E-03,
+      "gnatwhy3.transformations.split_premise_right": 3.32499900832772E-03
+    },
+    "global": {
+      "flow analysis": 1.59500003792346E-03,
+      "globals (advanced)": 5.71000017225742E-03,
+      "globals (basic)": 5.53500000387430E-03,
+      "init_why_sections": 8.35000013466924E-04,
+      "marking": 1.32299994584173E-03,
+      "properties (advanced)": 1.14000002213288E-04,
+      "translation of standard": 1.49699999019504E-03
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-constraint_solvers-cholesky.ads",
+      "how_proved": "trivial",
+      "line": 51,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-constraint_solvers-cholesky.ads",
+      "how_proved": "trivial",
+      "line": 62,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 36,
+      "file": "mj-constraint_solvers-cholesky.adb",
+      "how_proved": "trivial",
+      "line": 61,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

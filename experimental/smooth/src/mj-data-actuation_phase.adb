@@ -1,5 +1,6 @@
 with MJ.Data.Manifold_Actuation;
 package body MJ.Data.Actuation_Phase with SPARK_Mode is
+   use type MJ.Activation.Dynamics;
    procedure State_Query_Images (D : Simulation)
      with Ghost => Static, Global => null, Pre => Is_Ready (D),
      Post => Position_Values (D) = D.State.Qpos.all
@@ -39,14 +40,30 @@ package body MJ.Data.Actuation_Phase with SPARK_Mode is
       pragma Assert (Static => Initial_Velocity = Initial_Qvel);
       pragma Assert (Static => Initial_Inputs = Input_Image (Initial_Control, Initial_Applied));
       D.Cache.Force_Valid := False;
-      if D.Nq /= D.Nv then
+      D.Cache.Actuation_Valid := False;
+      D.Activation_Can_Advance := True;
+      if D.Nq /= D.Nv or else D.Has_Muscles then
          MJ.Data.Manifold_Actuation.Compute (D, Result);
          return;
       end if;
+      if D.Nactivation = 0 then
       MJ.Smooth_Actuation.Compute
         (D.Actuator_Config.all, D.State.Qpos.all, D.State.Qvel.all, D.State.Ctrl.all,
          D.Actuation_Enabled, D.Clamp_Control, D.Actuators.Length.all, D.Actuators.Velocity.all,
          D.Actuators.Force.all, D.Dynamics.Actuator.all);
+      else
+         declare
+            Ok : Boolean;
+         begin
+            MJ.Smooth_Actuation.Compute_Activated
+              (D.Actuator_Config.all, D.State.Qpos.all, D.State.Qvel.all, D.State.Ctrl.all,
+               D.Activation, D.Timestep, D.Actuation_Enabled, D.Clamp_Control,
+               D.Next_Activation, D.Drive, D.Act_Dot, D.Actuators.Length.all,
+               D.Actuators.Velocity.all, D.Actuators.Force.all, D.Dynamics.Actuator.all, Ok,
+               D.Activation_Can_Advance);
+            if not Ok then Result := Numeric_Limit; return; end if;
+         end;
+      end if;
       D.Cache.Actuation_Valid := True;
       pragma Assert (Static => Storage_Ready (D));
       pragma Assert (Static => Stable_Ready (D));

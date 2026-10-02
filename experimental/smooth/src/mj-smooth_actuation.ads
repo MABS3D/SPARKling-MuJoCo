@@ -1,8 +1,19 @@
+with MJ.Activation;
+with MJ.Muscle_Actuation;
 with MJ.Types; use MJ.Types;
 with MJ.Smooth_Math; use MJ.Smooth_Math;
 with MJ.Smooth_Kernels; use MJ.Smooth_Kernels;
 package MJ.Smooth_Actuation with SPARK_Mode is
+   use type MJ.Activation.Dynamics;
    type Parameters is record
+      Muscle_Mode : Boolean := False;
+      Muscle : MJ.Muscle_Actuation.Configuration;
+      Kind : MJ.Activation.Dynamics := MJ.Activation.None;
+      Activation_Id : Integer range -1 .. 1023 := -1;
+      Tau : MJ.Activation.Time_Constant := 1.0;
+      Factor : MJ.Activation.Decay_Factor := 0.0;
+      Early, Activation_Limited : Boolean := False;
+      Activation_Lower, Activation_Upper : Tier0_Real := 0.0;
       Joint_Id, Control_Id, Output_Id : Natural := 0;
       Position_Id : Natural := 0;
       Joint_Type : Natural range 0 .. 3 := 3;
@@ -16,6 +27,10 @@ package MJ.Smooth_Actuation with SPARK_Mode is
    type Parameter_Array is array (Natural range <>) of Parameters;
    function Valid_Parameter (C : Parameters) return Boolean is
      (Bounded (C.Bias, Max_Val)
+      and then (if C.Muscle_Mode then C.Kind = MJ.Activation.Integrator
+        and then MJ.Muscle_Actuation.Valid (C.Muscle))
+      and then (if C.Kind /= MJ.Activation.None then C.Activation_Id >= 0)
+      and then (if C.Activation_Limited then C.Activation_Lower <= C.Activation_Upper)
       and then (if C.Control_Limited then C.Control_Lower <= C.Control_Upper)
       and then (if C.Force_Limited then C.Force_Lower <= C.Force_Upper)) with Global => null;
    function Valid_Inputs (C : Parameter_Array; Q, V, U : Real_Array) return Boolean is
@@ -30,10 +45,10 @@ package MJ.Smooth_Actuation with SPARK_Mode is
        (if not Enabled then 0.0 else
          (if C.Force_Limited then Clamp
            (Affine_Force (C.Gain, Control_Value (U, C.Control_Lower, C.Control_Upper,
-              Clamp_Control and then C.Control_Limited), C.Bias, Transmission (C.Gear, Q), Transmission (C.Gear, V)),
+              Clamp_Control and then C.Kind = MJ.Activation.None and then C.Control_Limited), C.Bias, Transmission (C.Gear, Q), Transmission (C.Gear, V)),
             C.Force_Lower, C.Force_Upper)
           else Affine_Force (C.Gain, Control_Value (U, C.Control_Lower, C.Control_Upper,
-            Clamp_Control and then C.Control_Limited), C.Bias, Transmission (C.Gear, Q), Transmission (C.Gear, V)))) with Global => null, Pre => Valid_Parameter (C);
+            Clamp_Control and then C.Kind = MJ.Activation.None and then C.Control_Limited), C.Bias, Transmission (C.Gear, Q), Transmission (C.Gear, V)))) with Global => null, Pre => Valid_Parameter (C);
    function Force_For
      (C : Parameters; Q, V, U : Tier0_Real; Enabled, Clamp_Control : Boolean) return Actuator_Force_Real with
      Global => null, Pre => Valid_Parameter (C),
@@ -99,4 +114,32 @@ package MJ.Smooth_Actuation with SPARK_Mode is
        and then (for all X of Generalized => X in Accumulated_Real);
    pragma Postcondition (Static => (for all J in Q'Range =>
      Generalized (J) = Reduced_Force (C, Forces, J, C'Length)));
+   procedure Compute_Activated
+     (C : Parameter_Array; Q, V, U : Real_Array;
+      Act : MJ.Activation.Value_Array; H : Nonneg_Tier0;
+      Enabled, Clamp_Control : Boolean;
+      Next, Drive : in out MJ.Activation.Value_Array;
+      Dot : in out MJ.Activation.Rate_Array;
+      Lengths, Velocities, Forces, Generalized : in out Real_Array;
+      Ok, Advance_Valid : out Boolean)
+     with Global => null,
+     Pre => Valid_Inputs (C, Q, V, U)
+       and then Next'First = Act'First and then Next'Last = Act'Last
+       and then Dot'First = Act'First and then Dot'Last = Act'Last
+       and then Drive'First = 0 and then Drive'Last >= C'Last
+       and then (for all P of C => (if P.Kind /= MJ.Activation.None then P.Activation_Id in Act'Range))
+       and then Lengths'First = 0 and then Lengths'Last = C'Last
+       and then Velocities'First = 0 and then Velocities'Last = C'Last
+       and then Forces'First = 0 and then Forces'Last = C'Last
+       and then Generalized'First = Q'First and then Generalized'Last = Q'Last,
+     Post => (if Ok then
+       (for all I in C'Range => Lengths (I) = Transmission (C (I).Gear, Q (C (I).Joint_Id))
+         and then Velocities (I) = (if Enabled then Transmission (C (I).Gear, V (C (I).Joint_Id)) else 0.0)
+         and then Forces (I) = Force_For (C (I), Q (C (I).Joint_Id), V (C (I).Joint_Id), Drive (I), Enabled, Clamp_Control))
+       and then (for all X of Forces => X in Actuator_Force_Real)
+       and then (for all X of Lengths => X in Transmission_Real)
+       and then (for all X of Velocities => X in Transmission_Real)
+       and then (for all X of Generalized => X in Accumulated_Real));
+   pragma Postcondition (Static => (if Ok then (for all J in Q'Range =>
+     Generalized (J) = Reduced_Force (C, Forces, J, C'Length))));
 end MJ.Smooth_Actuation;

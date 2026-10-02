@@ -3,7 +3,7 @@
 Implementazione Ada/SPARK indipendente del rilevamento delle **coppie di
 geometrie rigide in collisione**, e dei **precontatti geometrici**, riferita a MuJoCo **3.14.0**, commit
 `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. L'ultima versione stabile è stata
-controllata il 1 ottobre 2026: [release ufficiale](https://github.com/google-deepmind/mujoco/releases/tag/3.14.0).
+controllata il 2 ottobre 2026: [release ufficiale](https://github.com/google-deepmind/mujoco/releases/tag/3.14.0).
 La versione e gli hash delle sorgenti C esaminate sono in
 [results/reference.json](results/reference.json).
 
@@ -15,11 +15,12 @@ Il programma di confronto, invece, usa la libreria nativa ufficiale MuJoCo.
 La seconda fase aggiunge distanza/profondità, posizione, normale, tangente e
 manifold delle primitive; supporti e facce delle mesh convesse; contatti del
 terreno heightfield; materiali, attrito, adesione e frame dei contatti completi.
-Il driver `Rigid_Detector` continua a restituire coppie;
+Il driver `Rigid_Detector` continua a restituire coppie; `Collision_Scene`
+riusa la sua selezione e produce direttamente i contatti completi di scena;
 le API dei contatti sono descritte in [CONTACTS.md](CONTACTS.md).
 
 **Non è completato il rilevamento generale di MuJoCo:** mancano SDF, gestione
-completa dei flex, unificazione del driver dei contatti, costruzione dei vincoli e collegamento alla
+completa dei flex, costruzione dei vincoli e collegamento alla
 dinamica. La Gold dell'intero motore dei contatti e la parità prestazionale
 restano aperte. I risultati della prima fase sulle sole coppie non dimostrano
 la parità sui contatti completi o su una simulazione completa.
@@ -30,6 +31,11 @@ la parità sui contatti completi o su una simulazione completa.
   esclusioni fra corpi, maschere unsigned, filtri dei corpi saldati, genitori,
   corpi statici e stato di riposo fornito dal chiamante. Le coppie esplicite
   precedono la ricerca e scavalcano i filtri corrispondenti, come nel riferimento.
+- `MJ.Collision_Scene`: selezione condivisa delle coppie e generazione dei
+  contatti completi per primitive, hull convessi e heightfield. Usa
+  `Find_Candidates`, senza eseguire prima il test geometrico booleano;
+  conserva l'associazione ai parametri delle coppie esplicite e il riuso degli
+  endpoint e delle rotazioni. Dettagli in [SCENE.md](SCENE.md).
 - Broad phase sweep-and-prune con endpoint compatti, riuso dell'ordine fra frame,
   riparazione incrementale e ripiego sul mergesort. Usa l'asse di maggiore
   estensione oppure una diagonale per distribuzioni quasi isotrope. Controlla
@@ -66,11 +72,18 @@ Il risultato contiene ID canonici `First < Second`; il consumatore non deve
 presupporre l'ordinamento globale del buffer. `Candidate_Count` e
 `Narrowphase_Count` permettono di analizzare il lavoro svolto.
 
+Per produrre i contatti di scena usare `Collision_Scene.Initialize` e
+`Collision_Scene.Generate`, con un `Full_Array` del chiamante. Per consumatori
+diversi è disponibile `Rigid_Detector.Find_Candidates`: le coppie selezionate
+possono essere separate, perché la selezione comprende soltanto broad phase,
+filtri e sfere di ingombro. Il suo `Narrowphase_Count` rimane zero.
+
 Limiti dichiarati: 4.096 geometrie, 65.536 coppie, ID dei corpi a 16 bit,
 coordinate e dimensioni fino a `1e10`. Le dimensioni richieste sono positive.
 Le pose non sferiche richiedono matrici ortogonali entro `1e-10`; la validazione
 della rotazione viene riusata se la matrice non cambia. L'orientamento della
-sfera non influisce sul risultato.
+sfera non influisce sul risultato booleano. `Find_Candidates` richiede e
+valida anche il frame delle sfere, necessario ai generatori dei contatti.
 
 Un errore segnalato dall'API restituisce `Invalid_Input`, `Capacity_Limit`, `Numeric_Limit` oppure
 `Iteration_Limit` e azzera la lunghezza del risultato; un superamento del

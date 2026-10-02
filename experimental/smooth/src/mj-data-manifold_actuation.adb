@@ -1,5 +1,8 @@
 with MJ.Manifold_Math;
+with MJ.Muscle_Actuation;
+with MJ.Muscle_Kernels;
 package body MJ.Data.Manifold_Actuation with SPARK_Mode is
+   use type MJ.Activation.Dynamics;
    function Transmission_Moment (C : Actuator_Parameters; Q : Real_Array) return Moment is
       R : Moment := [others => 0.0];
       Gear_Axis : Vector;
@@ -37,9 +40,16 @@ package body MJ.Data.Manifold_Actuation with SPARK_Mode is
       R : Real;
    begin
       if not Enabled then return 0.0; end if;
+      if C.Muscle_Mode then
+         return MJ.Muscle_Actuation.Force (C.Muscle,
+           MJ.Muscle_Kernels.Gain (L, V, C.Muscle.Range_Of_Length,
+             C.Muscle.Acc0, C.Muscle.Gain_Parameters),
+           MJ.Muscle_Kernels.Bias (L, C.Muscle.Range_Of_Length,
+             C.Muscle.Acc0, C.Muscle.Bias_Parameters), U);
+      end if;
       R := MJ.Smooth_Kernels.Affine_Force
         (C.Gain, MJ.Smooth_Kernels.Control_Value (U, C.Control_Lower, C.Control_Upper,
-           Clamp_Control and then C.Control_Limited), C.Bias, L, V);
+           Clamp_Control and then C.Kind = MJ.Activation.None and then C.Control_Limited), C.Bias, L, V);
       return (if C.Force_Limited then MJ.Smooth_Kernels.Clamp (R, C.Force_Lower, C.Force_Upper) else R);
    end Force;
    function Reduced (C : Actuator_Parameter_Array; Q, F : Real_Array; Dof, Count : Natural) return Real is
@@ -60,8 +70,11 @@ package body MJ.Data.Manifold_Actuation with SPARK_Mode is
       L, V, F, Sum : Real;
       M : Moment;
       N : Natural;
+      Control : Tier0_Real;
+      Accepted : Boolean;
    begin
       Result := Numeric_Limit;
+      D.Activation_Can_Advance := True;
       D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False;
       D.Dynamics.Actuator.all := [others => 0.0];
       for A in 0 .. D.Na - 1 loop
@@ -71,7 +84,51 @@ package body MJ.Data.Manifold_Actuation with SPARK_Mode is
             L := Length (P, D.State.Qpos.all);
             V := (if D.Actuation_Enabled then Velocity (P, D.State.Qpos.all, D.State.Qvel.all) else 0.0);
             if L not in -1.0e20 .. 1.0e20 or else V not in -1.0e20 .. 1.0e20 then return; end if;
-            F := Force (P, L, V, D.State.Ctrl (A), D.Actuation_Enabled, D.Clamp_Control);
+            F := 0.0;
+            D.Drive (A) := D.State.Ctrl (A);
+            if P.Muscle_Mode then
+               if L not in Tier0_Real or else V not in Tier0_Real then return; end if;
+               D.Act_Dot (P.Activation_Id) := 0.0;
+               D.Next_Activation (P.Activation_Id) := D.Activation (P.Activation_Id);
+               D.Drive (A) := D.Activation (P.Activation_Id);
+               if D.Actuation_Enabled then
+                  declare
+                     E : MJ.Muscle_Actuation.Evaluation;
+                  begin
+                     MJ.Muscle_Actuation.Evaluate (P.Muscle,
+                       (Activation => D.Activation (P.Activation_Id)),
+                       D.State.Ctrl (A), L, V, D.Timestep, E);
+                     F := E.Force;
+                     if E.Derivative not in MJ.Activation.Rate then return; end if;
+                     D.Act_Dot (P.Activation_Id) := E.Derivative;
+                     if E.Next_Activation not in Tier0_Real then
+                        D.Activation_Can_Advance := False;
+                        if P.Early then return; end if;
+                     else
+                        D.Next_Activation (P.Activation_Id) := E.Next_Activation;
+                        if P.Early then D.Drive (A) := E.Next_Activation; end if;
+                     end if;
+                  end;
+               end if;
+            elsif P.Kind /= MJ.Activation.None then
+               Control := MJ.Smooth_Kernels.Control_Value
+                 (D.State.Ctrl (A), P.Control_Lower, P.Control_Upper,
+                  D.Clamp_Control and then P.Control_Limited);
+               MJ.Activation.Prepare
+                 (P.Kind, Control, D.Activation (P.Activation_Id), D.Timestep,
+                  P.Tau, P.Factor, D.Actuation_Enabled, P.Early,
+                  P.Activation_Limited, P.Activation_Lower, P.Activation_Upper,
+                  D.Act_Dot (P.Activation_Id), D.Next_Activation (P.Activation_Id),
+                  D.Drive (A), Accepted);
+               if not Accepted then
+                  D.Activation_Can_Advance := False;
+                  if P.Early then return; end if;
+               end if;
+            end if;
+            if not P.Muscle_Mode then
+               F := Force (P, L, V, D.Drive (A), D.Actuation_Enabled, D.Clamp_Control);
+            end if;
+            if F not in MJ.Smooth_Kernels.Actuator_Force_Real then return; end if;
             D.Actuators.Length (A) := L; D.Actuators.Velocity (A) := V; D.Actuators.Force (A) := F;
             M := Transmission_Moment (P, D.State.Qpos.all);
             N := (if P.Joint_Type = 0 then 6 elsif P.Joint_Type = 1 then 3 else 1);

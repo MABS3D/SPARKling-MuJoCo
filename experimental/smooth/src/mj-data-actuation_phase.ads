@@ -17,7 +17,8 @@ private package MJ.Data.Actuation_Phase with SPARK_Mode is
    pragma Postcondition (Stable_Ready (D));
    pragma Postcondition (Is_Ready (D) = Is_Ready (D)'Old);
    pragma Postcondition (Shape (D) = Shape (D)'Old);
-   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (if Result = Success then Is_Ready (D) and then Actuation_Current (D));
@@ -40,7 +41,8 @@ private
    pragma Postcondition (Stable_Ready (D));
    pragma Postcondition (Is_Ready (D) = Is_Ready (D)'Old);
    pragma Postcondition (Shape (D) = Shape (D)'Old);
-   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (if Result = Success then Is_Ready (D) and then Actuation_Current (D));
@@ -63,7 +65,7 @@ private
        (D.Actuator_Config (Index), D.State.Qpos.all, D.State.Qvel.all) else 0.0);
    function Expected_Force (D : Simulation; Index : Natural) return Real is
      (MJ.Data.Manifold_Actuation.Force (D.Actuator_Config (Index), Expected_Length (D, Index),
-       Expected_Velocity (D, Index), D.State.Ctrl (Index), D.Actuation_Enabled, D.Clamp_Control));
+       Expected_Velocity (D, Index), (if D.Nactivation = 0 then D.State.Ctrl (Index) else D.Drive (Index)), D.Actuation_Enabled, D.Clamp_Control));
    function Expected_Generalized (D : Simulation; Index : Natural) return Real is
      (MJ.Data.Manifold_Actuation.Reduced (D.Actuator_Config.all, D.State.Qpos.all, D.Actuators.Force.all, Index, D.Na));
 end MJ.Data.Actuation_Phase;

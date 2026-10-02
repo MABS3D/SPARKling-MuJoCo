@@ -5,7 +5,9 @@ sphere/cylinder `mju_wrap` from **MuJoCo 3.14.0**, commit
 `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. It is now connected to MJB loading,
 owned simulation state, passive forces, Forward and Euler in the **experimental
 smooth engine**. It is not a completed or formally certified MuJoCo port.
-The fixed-tendon candidate and other experimental modules remain separate.
+The 2026-10-02 integration also connects fixed tendons to the same owned
+configuration and passive-force order; see [current integration evidence](../../docs/force-integration.md).
+The old fixed-tendon candidate remains an archived, separate implementation.
 
 ## Implemented behavior
 
@@ -71,13 +73,16 @@ velocity and total passive scalar force; stale/incorrectly sized queries return
 an explicit status and zero outputs. Repeated force evaluation does not accumulate
 the previous result again.
 
-The integrated scope is the smooth engine's scalar hinge/slide joints (up to
-256 DOFs), with constraints disabled. Standalone routing tests can receive
-kinematics for free/ball bodies, but **combining these tendons with free/ball joints is
-explicitly rejected**. Concurrent engine work adds those joint types separately;
-that does not establish their compatibility with this adapter. Fixed tendons, tendon actuator transmissions,
-tendon limits/friction/constraint rows, sleep handling and tendon armature are
-not added. Unsupported armature/transmissions are rejected explicitly.
+The integrated scope now includes hinge/slide/ball/free joints (up to 256 DOFs
+and 512 position coordinates), with constraints disabled. The adapter uses
+velocity-space Jacobians even when `nq != nv`. Mixed fixed/spatial tendons are
+accepted. Fixed tendons retain wrap-order length, sparse velocity reduction,
+repeated-joint zero slots, polynomial spring/damper laws and cached armature
+updates in C's existing mass pattern. A fixed tendon still references only
+hinge/slide joints; other ball/free joints may coexist in the same model.
+
+Tendon actuator transmissions, tendon limits/friction/constraint rows, sleep
+handling and spatial tendon armature/Jdot remain unsupported and are rejected.
 MuJoCo 3.14 itself rejects tendon armature combined with geometry wrapping;
 its `mj_tendonDot` also does not support wrapping-geometry derivatives.
 Boxes, capsules, meshes and cylinder end caps are not wrapping primitives in

@@ -1,0 +1,22 @@
+project Advanced is
+   Build_Root := external ("ADVANCED_BUILD_ROOT", "/var/tmp/sparkling-advanced-collision-20261002");
+   Mode := external ("ADVANCED_MODE", "validation");
+   for Source_Dirs use ("vendor/base", "vendor/src", "src", "tests");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   for Main use ("advanced_probe.adb", "advanced_checks.adb");
+   package Compiler is
+      case Mode is
+         when "release" =>
+            for Default_Switches ("Ada") use
+              ("-gnat2022", "-O3", "-gnatp", "-gnatn", "-march=native", "-flto", "-ffp-contract=off");
+         when others =>
+            for Default_Switches ("Ada") use
+              ("-gnat2022", "-O1", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");
+      end case;
+   end Compiler;
+   package Linker is
+      for Default_Switches ("Ada") use ("-flto", "-ffp-contract=off");
+   end Linker;
+end Advanced;

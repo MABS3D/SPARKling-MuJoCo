@@ -1,3 +1,4 @@
+with MJ.Spatial_Tendon_Models;
 with MJ.Data.External_Loads;
 with MJ.Data.Mass_Publication;
 with MJ.Composite_Bounds;
@@ -657,6 +658,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -727,6 +729,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -787,6 +790,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -865,6 +869,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -914,6 +919,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -981,6 +987,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -1074,6 +1081,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -1149,7 +1157,12 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
          Prove_Configuration_Equality (Configuration (D), Initial_Config);
       end;
-      if Used_CRB then Result := Success; return; end if;
+      if Used_CRB then
+         if D.Tendons /= null and then D.Tendons.Nm > 0 then
+            MJ.Spatial_Tendon_Models.Add_Mass (D.Tendons.all, D.Nv, D.Dynamics.Mass.all, Used_CRB);
+         end if;
+         Result := Success; return;
+      end if;
       declare
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
@@ -1167,6 +1180,9 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
          pragma Assert (Static => Input_Values (D) = Initial_Inputs);
          Prove_Configuration_Equality (Configuration (D), Initial_Config);
       end;
+      if Result = Success and then D.Tendons /= null and then D.Tendons.Nm > 0 then
+         MJ.Spatial_Tendon_Models.Add_Mass (D.Tendons.all, D.Nv, D.Dynamics.Mass.all, Used_CRB);
+      end if;
    end Assemble_Ready;
    pragma Inline_Always (Assemble_Ready);
 
@@ -1949,7 +1965,8 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    pragma Postcondition (Static => Stable_Ready (D));
    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
    pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
-   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
@@ -2023,7 +2040,8 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    pragma Postcondition (Static => Stable_Ready (D));
    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
    pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
-   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
@@ -2067,7 +2085,8 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    pragma Postcondition (Static => Stable_Ready (D));
    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
    pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
-   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
@@ -2256,6 +2275,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
        and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then Configuration (D) = Configuration (D)'Old

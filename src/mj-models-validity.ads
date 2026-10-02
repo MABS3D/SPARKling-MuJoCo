@@ -322,7 +322,8 @@ package MJ.Models.Validity with SPARK_Mode is
    --  and strictly increasing within each row.
    ----------------------------------------------------------------------------
 
-   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer) return Boolean is
+   function CSR_OK (Rownnz, Rowadr, Colind : Int_Array; N, Nnz, Ncols : Integer;
+                    Strict : Boolean := True) return Boolean is
      (Rownnz'First = 0 and then Rowadr'First = 0 and then Colind'First = 0
       and then Int64 (Rownnz'Length) = Int64 (N)
       and then Int64 (Rowadr'Length) = Int64 (N)
@@ -335,7 +336,8 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (for all K in 0 .. Nnz - 1 => Colind (K) in 0 .. Ncols - 1)
       and then (for all I in 0 .. N - 1 =>
                   (for all K in Rowadr (I) .. (Rowadr (I) + Rownnz (I)) - 2 =>
-                     Colind (K) < Colind (K + 1))))
+                     (if Strict then Colind (K) < Colind (K + 1)
+                      else Colind (K) <= Colind (K + 1)))))
    with Pre => N >= 0 and then Nnz >= 0 and then Ncols >= 0;
 
    --  The CSR inertia is the reduced form of mj_makeDofDofSparse: a simple dof
@@ -356,9 +358,11 @@ package MJ.Models.Validity with SPARK_Mode is
               M.S.Nv, M.S.Nd, M.S.Nv))
    with Pre => Valid_Layout (M);
 
+   --  MuJoCo retains duplicate fixed-tendon columns; later slots are zero.
+   --  Every other CSR structure retains strict column ordering.
    function Sparse_Ten_J_OK (M : Model) return Boolean is
      (CSR_OK (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
-              M.S.Ntendon, M.S.Njten, M.S.Nv))
+              M.S.Ntendon, M.S.Njten, M.S.Nv, Strict => False))
    with Pre => Valid_Layout (M);
 
    --  Row I of the CSR inertia: one entry for a simple dof, else the length

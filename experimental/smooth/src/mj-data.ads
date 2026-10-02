@@ -1,6 +1,8 @@
 --  Owned smooth simulation state, with scalar and quaternion joint coordinates.
 with MJ.Manifold_Math;
 with MJ.Spatial_Tendon_Models;
+with MJ.Activation;
+with MJ.Fluid_Kernels;
 with MJ.Types;       use MJ.Types;
 with MJ.Bounds_Kernels;
 with MJ.Ancestor_Rows;
@@ -34,7 +36,8 @@ package MJ.Data with SPARK_Mode is
    --  Strict retains relative pivot and full condition-number rejection.
    subtype Dof_Diagnostic is Integer range -1 .. Max_Dofs - 1;
 
-   type State_Vector is array (Natural range <>) of Tier0_Real;
+   subtype State_Vector is MJ.Activation.Value_Array;
+   use type State_Vector;
    function As_Reals (Values : State_Vector) return Real_Array is
      ([for I in Values'Range => Real (Values (I))]) with Global => null;
    type Simulation is limited private;
@@ -150,6 +153,20 @@ package MJ.Data with SPARK_Mode is
          else State_Values (D) = State_Values (D)'Old
            and then Positions_Current (D) = Positions_Current (D)'Old
            and then Forces_Current (D) = Forces_Current (D)'Old);
+   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
+   function Activation_Count (D : Simulation) return Natural with Global => null;
+   function Activation_Values (D : Simulation) return Real_Array with Global => null;
+   --  State_Values retains its existing [qpos,qvel,time] layout. These queries
+   --  expose the additional dynamical state and the last evaluated derivative.
+   function Activation_Rates (D : Simulation) return Real_Array with Global => null;
+   function Complete_State_Values (D : Simulation) return Real_Array with Global => null;
+   procedure Set_Activation (D : in out Simulation; Values : State_Vector; Result : out Status)
+     with Global => null, Pre => Valid_State (D),
+     Post => Is_Ready (D) = Is_Ready (D)'Old;
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
+   pragma Postcondition (if Result = Success then Activation_Values (D) = As_Reals (Values)
+     else Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
    procedure Set_Control
      (D : in out Simulation; Index : Natural; Value : Tier0_Real; Result : out Status)
@@ -314,16 +331,26 @@ private
    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
    use type MJ.Spatial_Tendon_Models.Description_Access;
    use type MJ.Spatial_Tendon_Models.Description;
+   use type MJ.Activation.Dynamics;
    use type Actuator_Parameters;
    use type Actuator_Parameter_Array;
-   type Configuration_Snapshot (Nb, Nj, Na, Nt, Ns, Ng, Nw : Natural) is record
-      Nq, Nv, Nu, No : Natural;
+   type Fluid_Options is record
+      Density, Viscosity : Nonneg_Tier0 := 0.0;
+      Wind : Vector := Zero;
+   end record;
+   use type MJ.Fluid_Kernels.Element_Access;
+   use type MJ.Fluid_Kernels.Element_Array;
+   type Configuration_Snapshot (Nb, Nj, Na, Nt, Ns, Ng, Nw, Nm, Nf : Natural) is record
+      Nq, Nv, Nu, No, Nactivation : Natural;
+      Has_Muscles : Boolean;
       Timestep : Nonneg_Tier0;
       Gravity : Vector;
+      Fluid : Fluid_Options;
+      Fluid_Elements : MJ.Fluid_Kernels.Element_Array (1 .. Nf);
       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean;
       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean;
       Solver_Policy : Inertia_Policy;
-      Tendons : MJ.Spatial_Tendon_Models.Description (Nt, Ns, Ng, Nw);
+      Tendons : MJ.Spatial_Tendon_Models.Description (Nt, Ns, Ng, Nw, Nm);
       Bodies : Body_Parameter_Array (1 .. Nb);
       Joints : Joint_Parameter_Array (1 .. Nj);
       Actuators : Actuator_Parameter_Array (1 .. Na);
@@ -377,7 +404,13 @@ private
       Pose_Valid, Jacobian_Valid, Mass_Valid, Passive_Valid, Actuation_Valid, Force_Valid : Boolean := False;
       Spatial_Valid, Cartesian_Motion_Valid : Boolean := False;
    end record;
+   subtype Activation_Rate_Array is MJ.Activation.Rate_Array;
    type Simulation is limited record
+      Nactivation : Natural range 0 .. Max_Actuators := 0;
+      Has_Muscles : Boolean := False;
+      Activation_Can_Advance : Boolean := True;
+      Activation, Next_Activation, Drive : State_Vector (0 .. Max_Actuators - 1) := [others => 0.0];
+      Act_Dot : Activation_Rate_Array (0 .. Max_Actuators - 1) := [others => 0.0];
       Allocated : Boolean := False;
       Solver_Policy : Inertia_Policy := Compatible;
       First_Clamped : Dof_Diagnostic := -1;
@@ -389,6 +422,8 @@ private
       Clock : Nonneg_Tier0 := 0.0;
       Timestep : Nonneg_Tier0 := 0.0;
       Gravity : Vector := Zero;
+      Fluid : Fluid_Options;
+      Fluid_Elements : MJ.Fluid_Kernels.Element_Access := null;
       Gravity_Enabled, Spring_Enabled, Damper_Enabled : Boolean := True;
       Actuation_Enabled, Clamp_Control, Implicit_Damping : Boolean := True;
       Cache : Cache_Flags;
@@ -414,11 +449,15 @@ private
         and then Int64 (D.Body_Config'Length) = Int64 (D.Nb) and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
         and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na) then
         (Nb => D.Nb, Nj => D.Nj, Na => D.Na,
+         Nf => (if D.Fluid_Elements = null then 0 else D.Fluid_Elements'Length),
+         Fluid => D.Fluid,
+         Fluid_Elements => (if D.Fluid_Elements = null then [1 .. 0 => <>] else D.Fluid_Elements.all),
          Nt => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nt,
          Ns => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ns,
          Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
          Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
-         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+         Nm => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nm,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Has_Muscles => D.Has_Muscles,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
@@ -426,11 +465,15 @@ private
          Bodies => D.Body_Config.all, Joints => D.Joint_Config.all, Actuators => D.Actuator_Config.all)
       else
         (Nb => 0, Nj => 0, Na => 0,
+         Nf => (if D.Fluid_Elements = null then 0 else D.Fluid_Elements'Length),
+         Fluid => D.Fluid,
+         Fluid_Elements => (if D.Fluid_Elements = null then [1 .. 0 => <>] else D.Fluid_Elements.all),
          Nt => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nt,
          Ns => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ns,
          Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
          Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
-         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No,
+         Nm => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nm,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Has_Muscles => D.Has_Muscles,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
@@ -443,7 +486,7 @@ private
      with Global => null;
 
    function Is_Empty (D : Simulation) return Boolean is
-     (not D.Allocated and then D.Tendons = null and then D.Tendon_Outputs = null and then D.Body_Config = null and then D.Joint_Config = null
+     (not D.Allocated and then D.Fluid_Elements = null and then D.Tendons = null and then D.Tendon_Outputs = null and then D.Body_Config = null and then D.Joint_Config = null
       and then D.Actuator_Config = null and then D.State.Qpos = null
       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
@@ -463,6 +506,14 @@ private
    function Position_Count (D : Simulation) return Natural is (D.Nq);
 
    function Velocity_Count (D : Simulation) return Natural is (D.Nv);
+
+   function Activation_Count (D : Simulation) return Natural is (D.Nactivation);
+   function Activation_Values (D : Simulation) return Real_Array is
+     (As_Reals (D.Activation (0 .. Integer (D.Nactivation) - 1)));
+   function Complete_State_Values (D : Simulation) return Real_Array is
+     (State_Values (D) & Activation_Values (D));
+   function Activation_Rates (D : Simulation) return Real_Array is
+     ([for I in 0 .. Integer (D.Nactivation) - 1 => Real (D.Act_Dot (I))]);
 
    function Control_Count (D : Simulation) return Natural is (D.Nu);
    function Tendon_Count (D : Simulation) return Natural is (MJ.Spatial_Tendon_Models.Count (D.Tendons));
@@ -495,6 +546,17 @@ private
        and then Int64 (Qpos'Length) <= Max_Positions and then Int64 (Qvel'Length) <= Max_Dofs,
      Post => (if MJ.Smooth_Kernels.All_Tier0 (Qpos) and then MJ.Smooth_Kernels.All_Tier0 (Qvel)
        then MJ.Smooth_Kernels.All_Tier0 (State_Image'Result));
+   procedure Equal_Activation_Images (A, B : State_Vector)
+     with Ghost => Static, Global => null,
+     Pre => A'Length <= Max_Actuators and then B'Length <= Max_Actuators and then A = B,
+     Post => As_Reals (A) = As_Reals (B);
+   procedure Equal_State_Images (Q1, Q2, V1, V2 : Real_Array; T1, T2 : Nonneg_Tier0)
+     with Ghost => Static, Global => null,
+     Pre => Q1'First = 0 and then Q2'First = 0 and then V1'First = 0 and then V2'First = 0
+       and then Q1'Length <= Max_Positions and then Q2'Length <= Max_Positions
+       and then V1'Length <= Max_Dofs and then V2'Length <= Max_Dofs
+       and then Q1 = Q2 and then V1 = V2 and then T1 = T2,
+     Post => State_Image (Q1, V1, T1) = State_Image (Q2, V2, T2);
    function Input_Image (Ctrl, Applied : Real_Array) return Real_Array is
      (Ctrl & Applied) with Global => null,
      Pre => Ctrl'First = 0 and then Applied'First = 0
@@ -509,9 +571,11 @@ private
      Post => Input_Image (C1, F1) = Input_Image (C2, F2);
    procedure Prove_Configuration_Equality (A, B : Configuration_Snapshot) with Ghost => Static, Global => null,
      Pre => A.Nb = B.Nb and then A.Nj = B.Nj and then A.Na = B.Na
-       and then A.Nt = B.Nt and then A.Ns = B.Ns and then A.Ng = B.Ng and then A.Nw = B.Nw
+       and then A.Nt = B.Nt and then A.Ns = B.Ns and then A.Ng = B.Ng and then A.Nw = B.Nw and then A.Nm = B.Nm
        and then A.Tendons = B.Tendons
        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
+       and then A.Nactivation = B.Nactivation and then A.Has_Muscles = B.Has_Muscles
+       and then A.Nf = B.Nf and then A.Fluid = B.Fluid and then A.Fluid_Elements = B.Fluid_Elements
        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
        and then A.Damper_Enabled = B.Damper_Enabled and then A.Actuation_Enabled = B.Actuation_Enabled
@@ -581,7 +645,8 @@ private
      Post => Array_Bounded'Result =
        (P /= null and then (for all X of P.all => X in -Limit .. Limit));
    function Configuration_Bounded (D : Simulation) return Boolean is
-     (Bounded (D.Gravity, Max_Val)
+     (MJ.Fluid_Kernels.Storage_Valid (D.Fluid_Elements, D.Nb)
+      and then Bounded (D.Fluid.Wind, Max_Val) and then Bounded (D.Gravity, Max_Val)
       and then D.Body_Config /= null and then D.Joint_Config /= null and then D.Actuator_Config /= null
       and then (for all B of D.Body_Config.all => Bounded (B.Position, Max_Val)
         and then Bounded (B.Inertial_Position, Max_Val) and then Bounded (B.Inertia, Max_Val))
@@ -644,7 +709,8 @@ private
           Bodies (Joints (J).Body_Id).First_Joint + Bodies (Joints (J).Body_Id).Joint_Count - 1
         and then Joints (J).Qadr < Max_Positions and then Joints (J).Vadr = J
         and then Unit_Vector (Joints (J).Direction))
-      and then (for all A in 0 .. Na - 1 => Actuators (A).Joint_Id < Nj
+      and then (for all A in 0 .. Na - 1 => MJ.Smooth_Actuation.Valid_Parameter (Actuators (A))
+        and then Actuators (A).Joint_Id < Nj
         and then Actuators (A).Control_Id = A and then Actuators (A).Output_Id = A
         and then (if Actuators (A).Control_Limited then
           Actuators (A).Control_Lower <= Actuators (A).Control_Upper)
@@ -680,10 +746,18 @@ private
         and then (for all X of P.Wrench_Gear => X in Tier0_Real)
         and then (if Nq = Nv then P.Position_Id = P.Joint_Id and then P.Joint_Type in 2 .. 3)))
      with Global => null;
+   function Activation_Layout (C : Actuator_Parameter_Array; N : Natural; Has_Muscles : Boolean)
+     return Boolean is
+     (N <= Max_Actuators
+      and then Has_Muscles = (for some P of C => P.Muscle_Mode)
+      and then (for all P of C =>
+        (if P.Kind /= MJ.Activation.None then P.Activation_Id in 0 .. Integer (N) - 1)))
+     with Global => null;
    function Storage_Ready (D : Simulation) return Boolean is
      (D.Allocated and then MJ.Spatial_Tendon_Models.Ready (D.Tendons, D.Nb)
       and then (if D.Tendons = null then D.Tendon_Outputs = null
-        else D.Nq = D.Nv and then Has_Real_Layout (D.Tendon_Outputs, 3 * Tendon_Count (D)))
+        else D.Tendons.Nq = D.Nq and then D.Tendons.Nv = D.Nv
+          and then Has_Real_Layout (D.Tendon_Outputs, 3 * Tendon_Count (D)))
       and then Ancestor_Storage_Ready (D) and then Topology_Storage_Ready (D)
       and then D.Nb in 1 .. Max_Bodies and then D.Nv <= Max_Dofs
       and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
@@ -714,6 +788,7 @@ private
       and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
       and then Position_Layout (D.Joint_Config.all, D.Nq)
       and then Actuator_Layout (D.Actuator_Config.all, D.Nq, D.Nv)
+      and then Activation_Layout (D.Actuator_Config.all, D.Nactivation, D.Has_Muscles)
 );
    function Inputs_Bounded (D : Simulation) return Boolean is
      (Array_Bounded (D.State.Qpos, Max_Val) and then Array_Bounded (D.State.Qvel, Max_Val)
@@ -759,6 +834,7 @@ private
       and then Has_Real_Layout (D.Scratch.Next_Qpos, D.Nq) and then Has_Real_Layout (D.Scratch.Next_Qvel, D.Nv)
       and then Position_Layout (D.Joint_Config.all, D.Nq)
       and then Actuator_Layout (D.Actuator_Config.all, D.Nq, D.Nv)
+      and then Activation_Layout (D.Actuator_Config.all, D.Nactivation, D.Has_Muscles)
       and then Configuration_Bounded (D) and then Prior_Caches_Bounded (D)
       and then (for all X of D.State.Qpos.all => X in Tier0_Real)
       and then (for all X of D.State.Qvel.all => X in Tier0_Real)
@@ -845,7 +921,8 @@ private
       and then D.State.Qpos.all = Reset_Positions (D.Joint_Config.all, D.Nq)
       and then (for all X of D.State.Qvel.all => X = 0.0)
       and then (for all X of D.State.Ctrl.all => X = 0.0)
-      and then (for all X of D.State.Applied.all => X = 0.0));
+      and then (for all X of D.State.Applied.all => X = 0.0)
+      and then (for all X of D.Activation => X = 0.0));
    function Symmetric_Mass (D : Simulation) return Boolean is
      (Is_Ready (D) and then (for all I in 0 .. D.Nv - 1 =>
        (for all J in 0 .. D.Nv - 1 =>

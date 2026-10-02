@@ -6,7 +6,7 @@ package body MJ.Smooth_Actuation with SPARK_Mode is
    begin
       if not Enabled then return 0.0; end if;
       F := Affine_Force (C.Gain,
-        Control_Value (U, C.Control_Lower, C.Control_Upper, Clamp_Control and then C.Control_Limited),
+        Control_Value (U, C.Control_Lower, C.Control_Upper, Clamp_Control and then C.Kind = MJ.Activation.None and then C.Control_Limited),
         C.Bias, Transmission (C.Gear, Q), Transmission (C.Gear, V));
       if C.Force_Limited then
          F := Clamp (F, C.Force_Lower, C.Force_Upper);
@@ -67,4 +67,50 @@ package body MJ.Smooth_Actuation with SPARK_Mode is
       end loop;
       Project_All (C, Forces, Generalized);
    end Compute;
+   procedure Compute_Activated
+     (C : Parameter_Array; Q, V, U : Real_Array;
+      Act : MJ.Activation.Value_Array; H : Nonneg_Tier0;
+      Enabled, Clamp_Control : Boolean;
+      Next, Drive : in out MJ.Activation.Value_Array;
+      Dot : in out MJ.Activation.Rate_Array;
+      Lengths, Velocities, Forces, Generalized : in out Real_Array;
+      Ok, Advance_Valid : out Boolean) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Reduced_Force);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Force_Law);
+   begin
+      Ok := True; Advance_Valid := True;
+      for I in C'Range loop
+         pragma Loop_Invariant (Ok);
+         pragma Loop_Invariant (for all K in 0 .. I - 1 => Lengths (K) in Transmission_Real
+           and then Velocities (K) in Transmission_Real and then Forces (K) in Actuator_Force_Real);
+         pragma Loop_Invariant (for all K in 0 .. I - 1 => Lengths (K) = Transmission (C (K).Gear, Q (C (K).Joint_Id))
+           and then Velocities (K) = (if Enabled then Transmission (C (K).Gear, V (C (K).Joint_Id)) else 0.0)
+           and then Forces (K) = Force_For (C (K), Q (C (K).Joint_Id), V (C (K).Joint_Id), Drive (K), Enabled, Clamp_Control));
+         declare
+            P : constant Parameters := C (I);
+            Control : Tier0_Real;
+         begin
+            Drive (I) := U (I);
+            if P.Kind /= MJ.Activation.None then
+               Control := Control_Value (U (I), P.Control_Lower, P.Control_Upper,
+                 Clamp_Control and then P.Control_Limited);
+               MJ.Activation.Prepare
+                 (P.Kind, Control, Act (P.Activation_Id), H, P.Tau, P.Factor,
+                  Enabled, P.Early, P.Activation_Limited, P.Activation_Lower, P.Activation_Upper,
+                  Dot (P.Activation_Id), Next (P.Activation_Id), Drive (I), Ok);
+               if not Ok then
+                  Advance_Valid := False;
+                  if P.Early then return; end if;
+                  --  Forward uses current activation; defer a future-state
+                  --  domain failure until Euler actually attempts the commit.
+                  Ok := True;
+               end if;
+            end if;
+            Lengths (I) := Transmission (P.Gear, Q (P.Joint_Id));
+            Velocities (I) := (if Enabled then Transmission (P.Gear, V (P.Joint_Id)) else 0.0);
+            Forces (I) := Force_For (P, Q (P.Joint_Id), V (P.Joint_Id), Drive (I), Enabled, Clamp_Control);
+         end;
+      end loop;
+      Project_All (C, Forces, Generalized);
+   end Compute_Activated;
 end MJ.Smooth_Actuation;

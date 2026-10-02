@@ -1,0 +1,21 @@
+project Solvers is
+   Build_Root := external ("SOLVERS_BUILD_ROOT", "/var/tmp/sparkling-constraint-solvers-20261001/build");
+   Mode := external ("SOLVERS_MODE", "validation");
+   for Source_Dirs use ("src");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-constraint_scalar.ads",
+     "mj-constraint_scalar.adb", "mj-constraint_order.ads",
+     "mj-constraint_order.adb", "mj-constraint_solvers.ads",
+     "mj-constraint_solvers.adb", "solvers_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Main use ("solvers_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O2", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+end Solvers;

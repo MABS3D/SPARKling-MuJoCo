@@ -17,7 +17,8 @@ package MJ.Data.Euler with SPARK_Mode is
    pragma Postcondition (if Result = Success then Is_Ready (D));
    pragma Postcondition (if Result = Success then Time (D) = Time (D)'Old + Step_Size (D)'Old);
    pragma Postcondition (if Result = Success then not Positions_Current (D) and then not Forces_Current (D));
-   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old
+     and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then
@@ -32,7 +33,8 @@ private
    pragma Postcondition (if Result = Success then Is_Ready (D));
    pragma Postcondition (if Result = Success then Time (D) = Time (D)'Old + Step_Size (D)'Old);
    pragma Postcondition (if Result = Success then not Positions_Current (D) and then not Forces_Current (D));
-   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (if Result /= Success then State_Values (D) = State_Values (D)'Old
+     and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
 
    pragma Postcondition (Static => (if Result = Success then

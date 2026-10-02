@@ -7,6 +7,7 @@ private package MJ.Data.Inertia_Phase with SPARK_Mode is
    procedure Assemble (D : in out Simulation; Result : out Status) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then (if Result = Success then Is_Ready (D) and then Mass_Current (D)
@@ -22,6 +23,7 @@ private package MJ.Data.Inertia_Phase with SPARK_Mode is
       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then (if Result = Success then Is_Ready (D) and then Forces_Current (D));
@@ -37,6 +39,7 @@ private package MJ.Data.Inertia_Phase with SPARK_Mode is
    procedure Solve_Euler (D : in out Simulation; Result : out Status) with Global => null, Pre => Is_Ready (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then (if Result = Success then Is_Ready (D) and then Forces_Current (D));

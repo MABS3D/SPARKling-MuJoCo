@@ -45,8 +45,10 @@ produzione del candidato. C compare esclusivamente negli oracoli dei test.
 - `MJ.Collision_Contacts.Generate` / `Generate_Terrain`: collegano la geometria
   alla finalizzazione, ricevendo i parametri già configurati una volta per
   coppia. Non effettuano una seconda ricerca geometrica né una seconda
-  scansione di validazione dei contatti in release. Il chiamante sceglie le
-  coppie; l'integrazione con il driver di scena resta da completare.
+  scansione di validazione dei contatti in release. Restano utilizzabili per
+  coppie singole; `Collision_Scene` li collega alla selezione condivisa della
+  scena, con dispatch dedicato anche ai terreni e inversione della normale
+  quando il terreno è il secondo ID canonico. Vedere [SCENE.md](SCENE.md).
 
 Lo spazio di lavoro viene riusato. Non viene allocata memoria per ogni contatto
 o triangolo del terreno. I buffer di contatti sono inizializzati soltanto nel
@@ -113,8 +115,8 @@ quando almeno una sua verifica non riesce.
 
 ## Ambiti ancora mancanti
 
-SDF e relativi plugin/octree, collisioni complete dei flex, BVH e connessione
-con il driver di scena dei contatti; costruzione dei vincoli e collegamento alla
+SDF e relativi plugin/octree, collisioni complete dei flex, BVH dei corpi;
+costruzione dei vincoli e collegamento alla
 dinamica. Una mesh di MuJoCo in questo percorso collide come hull convesso:
 non si promette una superficie triangolare concava generale.
 

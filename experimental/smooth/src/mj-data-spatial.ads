@@ -8,6 +8,7 @@ private package MJ.Data.Spatial with SPARK_Mode is
        and then (if Ok then D.Cache.Spatial_Valid and then Spatial_Bounded (D.Kinematic))
        and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then Positions_Current (D) = Positions_Current (D)'Old
        and then Mass_Current (D) = Mass_Current (D)'Old

@@ -40,7 +40,7 @@ package MJ.Rigid_Geometry with SPARK_Mode is
    end record;
    type Explicit_Pair is record
       Geoms : Pair;
-      Margin : Real range 0.0 .. 1.0e10 := 0.0;
+      Margin : Real range 0.0 .. 4.0e10 := 0.0;
    end record;
    type Explicit_Array is array (Natural range <>) of Explicit_Pair;
    type Body_Pair is record

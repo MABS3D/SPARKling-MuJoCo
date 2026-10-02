@@ -1,0 +1,85 @@
+{
+  "reference": "MuJoCo 3.14.0 (official native library)",
+  "scope": "experimental rigid collision candidate shared pair selection and scene contact generation",
+  "differential_tests": {
+    "profiles": [
+      "validation",
+      "release"
+    ],
+    "legacy_pairs_per_profile": 6300,
+    "legacy_scenes_per_profile": 30,
+    "legacy_filter_and_motion_per_profile": 97,
+    "unified_scene_cases_per_profile": 270,
+    "unexpected_failures": 0,
+    "legacy_documented_corrections_per_profile": 162
+  },
+  "helper_proofs": {
+    "all_passed": true,
+    "checks": {
+      "Append_Pair": 14,
+      "Expanded": 7,
+      "Make_Proxy": 20
+    },
+    "total": 41,
+    "properties": {
+      "Append_Pair": "canonical append, new metadata, previous pair prefix preserved",
+      "Expanded": "exact binary64 per-axis max and monotonic enlargement",
+      "Make_Proxy": "valid installed shape and local vertex enclosure including skin"
+    }
+  },
+  "whole_unit_flow": {
+    "rigid_detector": "passed",
+    "collision_scene": "passed"
+  },
+  "whole_unit_proof": {
+    "complete": false,
+    "runs": [
+      {
+        "unit": "mj-rigid_detector.adb",
+        "subprogram": null,
+        "mode": "prove",
+        "exitcode": 99,
+        "command": [
+          "gnatprove",
+          "-P",
+          "/var/tmp/sparkling-scene-unified-20261002-e/source/rigid.gpr",
+          "-u",
+          "mj-rigid_detector.adb",
+          "-j1",
+          "--report=all",
+          "--checks-as-errors=on",
+          "--level=2",
+          "--timeout=10",
+          "--counterexamples=off"
+        ]
+      },
+      {
+        "unit": "mj-collision_scene.adb",
+        "subprogram": null,
+        "mode": "prove",
+        "exitcode": 99,
+        "command": [
+          "gnatprove",
+          "-P",
+          "/var/tmp/sparkling-scene-unified-20261002-e/source/rigid.gpr",
+          "-u",
+          "mj-collision_scene.adb",
+          "-j1",
+          "--report=all",
+          "--checks-as-errors=on",
+          "--level=2",
+          "--timeout=10",
+          "--counterexamples=off"
+        ]
+      }
+    ],
+    "reason": "both diagnostics stopped at the 180 s guarded limit; complete safety and functional proof remain open"
+  },
+  "performance": {
+    "measured": false,
+    "change": "shared selection supplies contact generators without preliminary boolean narrow phase; no claim of integrated C performance parity"
+  },
+  "silver_complete": false,
+  "gold_complete": false,
+  "assumptions_or_suppressions_added": false
+}

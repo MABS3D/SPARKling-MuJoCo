@@ -1,0 +1,217 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: analysis of data and information flow ...
+Summary logged in /var/tmp/sparkling-constrained-verified-flow/integration-flow/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 23.5 s, peak group RSS 133 MB
+ info: implicit aspect Always_Terminates on "Disabled" has been proved, subprogram will terminate
+--> mj-data-constrained.adb:22:13
+
+ info: implicit aspect Always_Terminates on "Parameters" has been proved, subprogram will terminate
+--> mj-data-constrained.adb:28:13
+
+ info: initialization of "Shapes" proved
+--> mj-data-constrained.adb:40:07
+
+ info: initialization of "Empty_Pairs" proved
+--> mj-data-constrained.adb:41:07
+
+ info: initialization of "Empty_Exclusions" proved
+--> mj-data-constrained.adb:42:07
+
+ info: initialization of "S" proved
+--> mj-data-constrained.adb:43:07
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:144:29
+  144 |             M.Opt.Disableflags := Original_Flags;
+      |             ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:145:17
+  145 |             MJ.Data.Free (E.D); E.Initialized := False; Result := Unsupported_Feature;
+      |             ~~~~~~~^~~~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:145:44
+  145 |             MJ.Data.Free (E.D); E.Initialized := False; Result := Unsupported_Feature;
+      |                                 ~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:145:61
+  145 |             MJ.Data.Free (E.D); E.Initialized := False; Result := Unsupported_Feature;
+      |                                                         ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:146:41
+  146 |          when others => M.Opt.Disableflags := Original_Flags; raise;
+      |                         ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.adb:170:52
+
+ info: initialization of "Poses" proved
+--> mj-data-constrained.adb:172:07
+
+ info: initialization of "S" proved
+--> mj-data-constrained.adb:173:07
+
+ info: non-aliasing of formal parameters "S" and "Contacts" proved
+--> mj-data-constrained.adb:190:24
+
+ info: non-aliasing of formal parameters "S" and "Length" proved
+--> mj-data-constrained.adb:190:24
+
+ info: non-aliasing of formal parameters "Contacts" and "Length" proved
+--> mj-data-constrained.adb:192:10
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.adb:197:43
+
+ info: initialization of "S" proved
+--> mj-data-constrained.adb:198:07
+
+ info: initialization of "C" proved
+--> mj-data-constrained.adb:221:22
+
+ medium: "J" might not be initialized
+--> mj-data-constrained.adb:227:63
+  227 |                         CA.Append (E.Rows, CA.Limit_Joint, I, C, J,
+      |                                                                  ^
+
+ medium: "Reverse_Chain" might not be initialized
+--> mj-data-constrained.adb:256:32
+  256 |                      Chain (K) := Reverse_Chain (N - K + 1);
+      |                                   ^~~~~~~~~~~~~
+
+ medium: "Chain" might not be initialized
+--> mj-data-constrained.adb:258:46
+  258 |                         V : constant Natural := Chain (K);
+      |                                                 ^~~~~
+
+ info: initialization of "Linear" proved
+--> mj-data-constrained.adb:267:22
+
+ info: initialization of "Angular" proved
+--> mj-data-constrained.adb:267:30
+
+ medium: "J" might not be initialized
+--> mj-data-constrained.adb:292:61
+  292 |                         for K in 1 .. N loop Compact (R, K) := J (R, K); end loop;
+      |                                                                ^
+
+ medium: "Chain" might not be initialized
+--> mj-data-constrained.adb:295:68
+  295 |                      CA.Add_Contact (E.Rows, Id, C.Dim, CA.Pyramidal, Chain (1 .. N), Compact,
+      |                                                                       ^~~~~
+
+ medium: "Compact" might not be initialized
+--> mj-data-constrained.adb:295:84
+  295 |                      CA.Add_Contact (E.Rows, Id, C.Dim, CA.Pyramidal, Chain (1 .. N), Compact,
+      |                                                                                       ^~~~~~~
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.adb:304:52
+
+ info: initialization of "A" proved
+--> mj-data-constrained.adb:309:07
+
+ medium: "A_Free" might not be initialized
+--> mj-data-constrained.adb:316:19
+  316 |             A (V) := A_Free (V); E.T.A_Free (V) := A_Free (V);
+      |                      ^~~~~~
+
+ medium: "A_Free" might not be initialized
+--> mj-data-constrained.adb:316:49
+  316 |             A (V) := A_Free (V); E.T.A_Free (V) := A_Free (V);
+      |                                                    ^~~~~~
+
+ info: initialization of "P" proved
+--> mj-data-constrained.adb:323:13
+
+ info: initialization of "Diag" proved
+--> mj-data-constrained.adb:324:13
+
+ medium: "Mass" might not be initialized
+--> mj-data-constrained.adb:368:17
+  368 |          CS.Solve (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings, A, Force, E.T.Report);
+      |                    ^~~~
+
+ medium: "A_Free" might not be initialized
+--> mj-data-constrained.adb:368:26
+  368 |          CS.Solve (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings, A, Force, E.T.Report);
+      |                             ^~~~~~
+
+ info: non-aliasing of formal parameters "Constraints" and "Result" proved
+--> mj-data-constrained.adb:368:41
+
+ info: non-aliasing of formal parameters "Settings" and "Result" proved
+--> mj-data-constrained.adb:368:66
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:412:42
+  412 |          when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:412:59
+  412 |          when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
+      |                                                       ~~~~~~~^~~~~~~~~~~~~~~~
+
+ info: initialization of "Next_Time" proved
+--> mj-data-constrained.adb:417:07
+
+ info: initialization of "Value" proved
+--> mj-data-constrained.adb:417:18
+
+ info: initialization of "Q" proved
+--> mj-data-constrained.adb:418:07
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:456:42
+  456 |          when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-constrained.adb:456:59
+  456 |          when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
+      |                                                       ~~~~~~~^~~~~~~~~~~~~~~~
+
+ info: implicit aspect Always_Terminates on "Ready" has been proved, subprogram will terminate
+--> mj-data-constrained.ads:26:13
+
+ info: data dependencies proved
+--> mj-data-constrained.ads:26:52
+
+ info: implicit aspect Always_Terminates on "State" has been proved, subprogram will terminate
+--> mj-data-constrained.ads:27:13
+
+ info: data dependencies proved
+--> mj-data-constrained.ads:27:55
+
+ info: implicit aspect Always_Terminates on "Diagnostics" has been proved, subprogram will terminate
+--> mj-data-constrained.ads:28:13
+
+ info: data dependencies proved
+--> mj-data-constrained.ads:28:56
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:29:69
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:32:39
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:35:50
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:36:83
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:37:89
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:39:43
+
+ info: initialization of "Result" proved
+--> mj-data-constrained.ads:42:39
+gnatprove: unproved check messages considered as errors

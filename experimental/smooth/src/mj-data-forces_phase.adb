@@ -1,5 +1,7 @@
 with MJ.Manifold_Math;
 with MJ.Data.Spatial_Tendon_Phase;
+with MJ.Data.Fluid_Phase;
+with MJ.Fluid_Kernels;
 with MJ.Gravity_Bounds;
 with MJ.Composite_Weights;
 with MJ.Smooth_Dynamics;
@@ -34,7 +36,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    use type SK.Motion;
    package SD renames MJ.Spatial_Dynamics;
    package T renames MJ.Smooth_Topology;
-   type Motion_Array is array (Natural range <>) of SK.Motion;
+   subtype Motion_Array is MJ.Fluid_Kernels.Motion_Array;
 
    procedure Transfer_Motion_Bound (Left, Right : SK.Motion; Limit : Real)
      with Ghost => Static, Global => null,
@@ -209,7 +211,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    procedure Forward_Bodies
      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array; Gravity_Vector : Vector;
-      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean)
+      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean; Velocity : in out Motion_Array)
      with Global => null, Relaxed_Initialization => (Bias, Gravity),
      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
@@ -230,12 +232,14 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
        and then (for all X of Spatial_Motions => X in -1.0e12 .. 1.0e12)
        and then Bounded (Gravity_Vector, Max_Val)
        and then Bias'First = 0 and then Bias'Last = Body_Config'Last
-       and then Gravity'First = 0 and then Gravity'Last = Body_Config'Last,
+       and then Gravity'First = 0 and then Gravity'Last = Body_Config'Last
+       and then Velocity'First = 0 and then Velocity'Last = Body_Config'Last,
      Post => (if Ok then Bias'Initialized and then Gravity'Initialized
        and then (for all X of Bias => SK.Bounded (X, 1.0e54))
-       and then (for all X of Gravity => SK.Bounded (X, 1.0e48)))
+       and then (for all X of Gravity => SK.Bounded (X, 1.0e48))
+       and then MJ.Fluid_Kernels.Motions_Bounded (Velocity))
    is
-      Velocity, Acceleration : Motion_Array (Body_Config'Range) with Relaxed_Initialization;
+      Acceleration : Motion_Array (Body_Config'Range) with Relaxed_Initialization;
       V, A, G, F : SK.Motion with Relaxed_Initialization;
       Accepted : Boolean;
    begin
@@ -382,7 +386,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array;
       Topology : MJ.Smooth_Topology.Cache; Gravity_Vector : Vector;
-      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean)
+      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
      with Global => null,
      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
@@ -405,7 +409,8 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
        and then MJ.Smooth_Topology.Dof_Count (Topology) = Qvel'Length
        and then Bounded (Gravity_Vector, Max_Val)
        and then Gravity_Out'First = 0 and then Gravity_Out'Last = Qvel'Last
-       and then Bias_Out'First = 0 and then Bias_Out'Last = Qvel'Last,
+       and then Bias_Out'First = 0 and then Bias_Out'Last = Qvel'Last
+       and then Velocity'First = 0 and then Velocity'Last = Body_Config'Last,
      Post => MJ.Smooth_Dynamics.Work_Array (Gravity_Out)
        and then MJ.Smooth_Dynamics.Work_Array (Bias_Out)
    is
@@ -414,7 +419,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       Gravity_Out := [others => 0.0];
       Bias_Out := [others => 0.0];
       Forward_Bodies (Body_Config, Joint_Config, Qvel, Spatial_Inertias, Spatial_Motions,
-                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok);
+                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok, Velocity);
       if not Ok then return; end if;
       Backward_Bodies (Body_Config, Bias, Gravity, Ok);
       if not Ok then return; end if;
@@ -423,11 +428,12 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    pragma Inline_Always (Recursive_Forces_Buffers);
 
    procedure Try_Recursive
-     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean)
+     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
      with Global => null,
      Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then D.Cache.Spatial_Valid
        and then Gravity_Out'First = 0 and then Gravity_Out'Last = D.Nv - 1
-       and then Bias_Out'First = 0 and then Bias_Out'Last = D.Nv - 1,
+       and then Bias_Out'First = 0 and then Bias_Out'Last = D.Nv - 1
+       and then Velocity'First = 0 and then Velocity'Length = D.Nb,
      Post => MJ.Smooth_Dynamics.Work_Array (Gravity_Out)
        and then MJ.Smooth_Dynamics.Work_Array (Bias_Out)
    is
@@ -438,7 +444,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       Recursive_Forces_Buffers
         (D.Body_Config.all, D.Joint_Config.all, D.State.Qvel.all,
          D.Kinematic.Spatial_Inertias.all, D.Kinematic.Spatial_Motions.all,
-         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok);
+         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok, Velocity);
    end Try_Recursive;
 
    procedure Manifold_Passive (D : in out Simulation; Result : out Status) is
@@ -666,6 +672,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -704,6 +711,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -747,14 +755,15 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       null;
    end Establish_Readiness;
 
-   procedure Complete_Passive (D : in out Simulation; Result : out Status)
+   procedure Complete_Passive (D : in out Simulation; Result : out Status; Velocity : Motion_Array; Reuse : Boolean)
      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all);
    pragma Postcondition (Static => Is_Ready (D));
    pragma Postcondition (Static => Stable_Ready (D));
    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
    pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
-   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
@@ -764,7 +773,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    pragma Postcondition (Static => Step_Size (D) = Step_Size (D)'Old);
    pragma Postcondition (Static => (if Result = Success then Passive_Current (D)));
 
-   procedure Complete_Passive (D : in out Simulation; Result : out Status)
+   procedure Complete_Passive (D : in out Simulation; Result : out Status; Velocity : Motion_Array; Reuse : Boolean)
    is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
@@ -785,6 +794,10 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       pragma Assert (Static => Configuration_Bounded (D));
       pragma Assert (Static => Configuration_Valid (D.Body_Config.all, D.Joint_Config.all, D.Actuator_Config.all, D.Nb, D.Nj, D.Na));
 
+      if Result = Success and then D.Fluid_Elements /= null then
+         MJ.Data.Fluid_Phase.Accumulate
+           (D, Result, (if Reuse then Velocity else MJ.Fluid_Kernels.No_Motions));
+      end if;
       if Result = Success then D.Cache.Passive_Valid := True; end if;
       pragma Assert (Static => Inputs_Bounded (D));
       pragma Assert (Static => Caches_Bounded (D));
@@ -798,6 +811,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -843,6 +857,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -865,14 +880,15 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    end Publish_Gravity_Bias;
    pragma Inline_Always (Publish_Gravity_Bias);
 
-   procedure Recursive_Path (D : in out Simulation; Used : out Boolean)
+   procedure Recursive_Path (D : in out Simulation; Used : out Boolean; Velocity : in out Motion_Array)
      with Global => null,
      Pre => Is_Ready (D) and then Positions_Current (D) and then not D.Cache.Passive_Valid;
    pragma Postcondition (Static => Is_Ready (D));
    pragma Postcondition (Static => Stable_Ready (D));
    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
    pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
-   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
    pragma Postcondition (Static => Positions_Current (D) = Positions_Current (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
@@ -883,7 +899,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
    pragma Postcondition (Static => not D.Cache.Passive_Valid);
    pragma Postcondition (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)));
 
-   procedure Recursive_Path (D : in out Simulation; Used : out Boolean)
+   procedure Recursive_Path (D : in out Simulation; Used : out Boolean; Velocity : in out Motion_Array)
    is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stable_Ready);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
@@ -943,7 +959,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
          Nv : constant Natural := D.Nv;
          Gravity, Bias : Real_Array (0 .. Nv - 1);
       begin
-         Try_Recursive (D, Gravity, Bias, Used);
+         Try_Recursive (D, Gravity, Bias, Used, Velocity);
          if Used then
             declare
                Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
@@ -980,6 +996,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -1076,6 +1093,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -1107,6 +1125,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
       Initial_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
       Initial_Config : constant Configuration_Snapshot := Capture_Configuration (D) with Ghost => Static;
       Used : Boolean;
+      Velocity : Motion_Array (0 .. D.Nb - 1) := [others => [others => 0.0]];
    begin
       Ready_Properties (D);
       declare
@@ -1131,7 +1150,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-         Recursive_Path (D, Used);
+         Recursive_Path (D, Used, Velocity);
          Ready_Properties (D);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
@@ -1164,7 +1183,7 @@ package body MJ.Data.Forces_Phase with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
-         Complete_Passive (D, Result);
+         Complete_Passive (D, Result, Velocity, Used);
          Ready_Properties (D);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);

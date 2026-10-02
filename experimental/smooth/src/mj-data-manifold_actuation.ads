@@ -1,3 +1,4 @@
+with MJ.Muscle_Actuation;
 private package MJ.Data.Manifold_Actuation with SPARK_Mode is
    type Moment is array (Natural range 0 .. 5) of Real;
    function Valid_Transmission (C : Actuator_Parameters; Q : Real_Array; Nv : Natural) return Boolean is
@@ -17,8 +18,10 @@ private package MJ.Data.Manifold_Actuation with SPARK_Mode is
        and then MJ.Smooth_Kernels.All_Tier0 (V), Post => Velocity'Result in -1.0e23 .. 1.0e23;
    function Force (C : Actuator_Parameters; L, V, U : Real; Enabled, Clamp_Control : Boolean) return Real
      with Global => null, Pre => MJ.Smooth_Actuation.Valid_Parameter (C)
-       and then L in -1.0e20 .. 1.0e20 and then V in -1.0e20 .. 1.0e20 and then U in Tier0_Real,
-     Post => Force'Result in MJ.Smooth_Kernels.Actuator_Force_Real;
+       and then L in -1.0e20 .. 1.0e20 and then V in -1.0e20 .. 1.0e20 and then U in Tier0_Real
+       and then (if C.Muscle_Mode then L in Tier0_Real and then V in Tier0_Real),
+     Post => (if not C.Muscle_Mode then Force'Result in MJ.Smooth_Kernels.Actuator_Force_Real)
+       and then Force'Result in MJ.Muscle_Actuation.Force_Value;
    function Reduced (C : Actuator_Parameter_Array; Q, F : Real_Array; Dof, Count : Natural) return Real
      with Ghost => Static, Global => null,
        Pre => C'First = 0 and then C'Length <= Max_Actuators and then Count <= C'Length

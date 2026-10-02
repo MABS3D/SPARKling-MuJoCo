@@ -88,7 +88,7 @@ def targets(source: Path) -> list[dict]:
 
 def source_files(repo: Path) -> list[Path]:
     paths = [repo / 'sparkling_mujoco.gpr', repo / 'experimental/smooth/smooth.gpr']
-    for directory in (repo / 'src', repo / 'experimental/smooth/src', repo / 'experimental/spatial-tendon-candidate/src'):
+    for directory in (repo / 'src', repo / 'experimental/smooth/src', repo / 'experimental/spatial-tendon-candidate/src', repo / 'experimental/muscle-candidate/src'):
         paths.extend(p for p in directory.rglob('*') if p.is_file() and p.suffix in ('.ads', '.adb'))
     return sorted(paths)
 
@@ -200,6 +200,10 @@ def main() -> int:
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument('--report-dir', type=Path)
     parser.add_argument('--toolchain-root', type=Path, help='Directory containing gnat/, gprbuild/, gnatprove/')
+    parser.add_argument('--source-dir', default='experimental/smooth/src',
+                        choices=['experimental/smooth/src', 'experimental/spatial-tendon-candidate/src',
+                                 'experimental/muscle-candidate/src'],
+                        help='Select proof targets in an integrated source directory')
     parser.add_argument('--unit', action='append', default=[], help='File name or stem; repeat to select units')
     parser.add_argument('--match', default='', help='Case-insensitive substring of target id or subprogram name')
     parser.add_argument('--name', action='append', default=[],
@@ -236,13 +240,13 @@ def main() -> int:
             selected = []
             for unit in args.whole_unit:
                 stem = Path(unit).stem
-                if Path(stem).name != stem or not (repo / 'experimental/smooth/src' / (stem + '.adb')).is_file():
+                if Path(stem).name != stem or not (repo / args.source_dir / (stem + '.adb')).is_file():
                     raise ValueError(f'unknown unit: {unit}')
                 selected.append(dict(id=stem+'__whole_unit', file=stem+'.adb', line=1,
                                      name='whole unit', selector='unit'))
         else:
-            selected = (line_targets(repo / 'experimental/smooth/src', args.line) if args.line
-                        else targets(repo / 'experimental/smooth/src'))
+            selected = (line_targets(repo / args.source_dir, args.line) if args.line
+                        else targets(repo / args.source_dir))
     except (ValueError, OSError) as error:
         parser.error(str(error))
     selected = [t for t in selected if
@@ -290,8 +294,8 @@ def main() -> int:
     # Take line numbers from the same immutable source snapshot used by the tool.
     selected_ids = {t['id'] for t in selected}
     snapshot_targets = (selected if args.whole_unit else
-                        line_targets(snapshot / 'experimental/smooth/src', args.line) if args.line
-                        else targets(snapshot / 'experimental/smooth/src'))
+                        line_targets(snapshot / args.source_dir, args.line) if args.line
+                        else targets(snapshot / args.source_dir))
     selected = [t for t in snapshot_targets if t['id'] in selected_ids]
     if args.name:
         # Honor helper-before-caller order requested on the command line.

@@ -1,0 +1,37 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                 Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                       .           .          .
+Flow Dependencies                 .          .                       .           .          .
+Initialization                    .          .                       .           .          .
+Non-Aliasing                      .          .                       .           .          .
+Run-time Checks                   4          .    4 (CVC5 50%, Z3 50%)           .          .
+Assertions                        .          .                       .           .          .
+Functional Contracts              1          .                1 (CVC5)           .          .
+LSP Verification                  .          .                       .           .          .
+Termination                       1          1                       .           .          .
+Concurrency                       .          .                       .           .          .
+---------------------------------------------------------------------------------------------
+Total                             7    2 (29%)                 5 (71%)           .          .
+
+
+max steps used for successful proof: 18818
+
+============================
+Most difficult proved checks
+============================
+
+mj-constraint_solvers-cholesky.ads:43:66: fp_overflow check proved in max 1 seconds
+mj-constraint_solvers-cholesky.ads:46:14: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-constraint_solvers-cholesky, 1 subprograms and packages out of 1 analyzed
+  MJ.Constraint_Solvers.Cholesky.Divide at mj-constraint_solvers-cholesky.ads:43 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)

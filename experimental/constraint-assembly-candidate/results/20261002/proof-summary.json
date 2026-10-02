@@ -1,0 +1,542 @@
+[
+  {
+    "label": "whole-mj-constraint_assembly",
+    "command": [
+      "/usr/bin/python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--min-free-mb",
+      "0",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-constraint-assembly-20261001/whole-parenthesized/assembly.gpr",
+      "-u",
+      "mj-constraint_assembly.ads",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--memlimit=800",
+      "--steps=0",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off"
+    ],
+    "code": 1,
+    "seconds": 205.4654505252838,
+    "unit": "mj-constraint_assembly",
+    "limit": null,
+    "checks": 400,
+    "open": [
+      {
+        "check_col": 43,
+        "check_file": "mj-constraint_assembly.adb",
+        "check_line": 92,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 13201,
+                "time": 0.574005
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 12,
+        "entity": 17,
+        "file": "mj-constraint_assembly.adb",
+        "how_proved": "prover",
+        "line": 93,
+        "message": {
+          "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove B.Values ((Old_Used + (Q - 1) * Width) + C) = J (Q, C)"
+        },
+        "msg_id": 75,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-constraint_assembly.ads",
+        "check_line": 102,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 10177,
+                "time": 0.398038
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 11676,
+                "time": 0.507926
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 192477,
+                "time": 3.03512
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 376,
+                "time": 0.102329
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1863,
+                "time": 0.100578
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1863,
+                "time": 0.095216
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1861,
+                "time": 0.101478
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1860,
+                "time": 0.092177
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 3058,
+                "time": 0.116853
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 20104,
+                "time": 0.941362
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 610,
+                "time": 0.077103
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 607,
+                "time": 0.084584
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 619,
+                "time": 0.082263
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1846,
+                "time": 0.10883
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 1877,
+                "time": 0.108726
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 21,
+        "entity": 17,
+        "file": "mj-constraint_assembly.ads",
+        "how_proved": "prover",
+        "line": 117,
+        "message": {
+          "text": "postcondition might fail, cannot prove B.Columns ((B.Used'Old + (R - 1) * Chain'Length) + C) = Chain (C)"
+        },
+        "msg_id": 151,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 25,
+        "check_file": "mj-constraint_assembly.ads",
+        "check_line": 180,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 14488,
+                "time": 1.27136
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 1,
+                "time": 0.038137
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 542,
+                "time": 0.104532
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 542,
+                "time": 0.106123
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 542,
+                "time": 0.102579
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 542,
+                "time": 0.101229
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 6097,
+                "time": 0.354043
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2502,
+                "time": 0.182582
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 30207,
+                "time": 1.42072
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 6216,
+                "time": 0.354799
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2525,
+                "time": 0.20168
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2527,
+                "time": 0.19433
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2529,
+                "time": 0.191968
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 12,
+        "entity": 11,
+        "file": "mj-constraint_assembly.ads",
+        "how_proved": "prover",
+        "line": 195,
+        "message": {
+          "text": "postcondition might fail, cannot prove B.Values ((B.Used'Old + (R - 1) * Chain'Length) + C) = Contact_Value (Dim, Cone, J, Mu, R, C)"
+        },
+        "msg_id": 329,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "complete_coverage": true,
+    "entities": [
+      "MJ.Constraint_Assembly",
+      "MJ.Constraint_Assembly.Add_Contact",
+      "MJ.Constraint_Assembly.Add_Dof_Friction",
+      "MJ.Constraint_Assembly.Add_Scalar_Limit",
+      "MJ.Constraint_Assembly.Append",
+      "MJ.Constraint_Assembly.Build_Contact",
+      "MJ.Constraint_Assembly.CONTACT_DIMENSIONPREDICATE",
+      "MJ.Constraint_Assembly.Contact_Parameter",
+      "MJ.Constraint_Assembly.Contact_Rows",
+      "MJ.Constraint_Assembly.Contact_Type",
+      "MJ.Constraint_Assembly.Contact_Value",
+      "MJ.Constraint_Assembly.Copy_Row",
+      "MJ.Constraint_Assembly.Edge_Value",
+      "MJ.Constraint_Assembly.Fits",
+      "MJ.Constraint_Assembly.Is_Contact",
+      "MJ.Constraint_Assembly.Limit_Distance",
+      "MJ.Constraint_Assembly.Parameter_Is",
+      "MJ.Constraint_Assembly.Reframe_Row",
+      "MJ.Constraint_Assembly.Reset",
+      "MJ.Constraint_Assembly.Row_Is",
+      "MJ.Constraint_Assembly.Valid",
+      "MJ.Constraint_Assembly.Valid_Chain"
+    ],
+    "missing_entities": [],
+    "passed": false
+  }
+]

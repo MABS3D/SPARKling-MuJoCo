@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                   Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                         .           .          .
+Flow Dependencies                 .         .                         .           .          .
+Initialization                    .         .                         .           .          .
+Non-Aliasing                      .         .                         .           .          .
+Run-time Checks                  24         .     24 (CVC5 88%, Z3 13%)           .          .
+Assertions                        .         .                         .           .          .
+Functional Contracts              9         .    9 (Z3 91%, altergo 9%)           .          .
+LSP Verification                  .         .                         .           .          .
+Termination                       1         1                         .           .          .
+Concurrency                       .         .                         .           .          .
+----------------------------------------------------------------------------------------------
+Total                            35    2 (6%)                  33 (94%)           .          .
+
+
+max steps used for successful proof: 60672
+
+============================
+Most difficult proved checks
+============================
+
+mj-sdf_fields.ads:38:60: fp_overflow check proved in max 2 seconds
+mj-sdf_fields.adb:46:46: fp_overflow check proved in max 2 seconds
+mj-sdf_fields.ads:36:16: postcondition proved in max 2 seconds
+mj-sdf_fields.ads:38:45: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.ads:38:30: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.ads:37:66: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.adb:46:24: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.ads:38:15: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.adb:45:46: fp_overflow check proved in max 1 seconds
+mj-sdf_fields.ads:37:51: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-sdf_fields, 1 subprograms and packages out of 1 analyzed
+  MJ.SDF_Fields.Interpolate at mj-sdf_fields.ads:32 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (33 checks)

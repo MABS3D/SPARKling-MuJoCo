@@ -1,0 +1,112 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "R" proved
+--> mj-bvh.adb:4:07
+
+ info: initialization of "Lo" proved
+--> mj-bvh.adb:5:07
+
+ info: initialization of "Hi" proved
+--> mj-bvh.adb:5:11
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-bvh.adb:7:21
+
+ info: float overflow check proved
+--> mj-bvh.adb:8:39
+
+ info: float overflow check proved
+--> mj-bvh.adb:8:66
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:9:39
+    9 |             Hi := Real'Max (A.Center (K) + A.Half (K), B.Center (K) + B.Half (K));
+      |                             ~~~~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:9:66
+    9 |             Hi := Real'Max (A.Center (K) + A.Half (K), B.Center (K) + B.Half (K));
+      |                                                        ~~~~~~~~~~~~~^~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:10:29
+   10 |             R.Center (K) := Lo + (Hi - Lo) * 0.5;
+      |                             ~~~^~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:10:35
+   10 |             R.Center (K) := Lo + (Hi - Lo) * 0.5;
+      |                                  ~~~~^~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-bvh.adb:10:41
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:12:47
+   12 |             R.Half (K) := Real'Max (R.Center (K) - Lo, Hi - R.Center (K))
+      |                                     ~~~~~~~~~~~~~^~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:12:56
+   12 |             R.Half (K) := Real'Max (R.Center (K) - Lo, Hi - R.Center (K))
+      |                                                        ~~~^~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + provers reached time limit before completing the proof
+
+ medium: float overflow check might fail
+--> mj-bvh.adb:13:12
+   12 |             R.Half (K) := Real'Max (R.Center (K) - Lo, Hi - R.Center (K))
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   13 |               + 32.0 * Real'Model_Epsilon * Real'Max (1.0, Real'Max (abs Lo, abs Hi));
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-bvh.adb:13:40
+
+ info: analyzing call to "Push" in context
+--> mj-bvh.adb:200:32
+
+ info: no contextual analysis of "Area" (in potentially unevaluated context)
+--> mj-bvh.adb:216:50
+
+ info: no contextual analysis of "Area" (in potentially unevaluated context)
+--> mj-bvh.adb:216:84
+
+ info: analyzing call to "Push" in context
+--> mj-bvh.adb:217:19
+
+ info: analyzing call to "Push" in context
+--> mj-bvh.adb:217:60
+
+ info: analyzing call to "Push" in context
+--> mj-bvh.adb:219:19
+
+ info: analyzing call to "Push" in context
+--> mj-bvh.adb:219:60
+
+ info: implicit aspect Always_Terminates on "Union_Box" has been proved, subprogram will terminate
+--> mj-bvh.ads:29:13
+
+ info: data dependencies proved
+--> mj-bvh.ads:30:11
+
+ medium: postcondition might fail, cannot prove Contains (Union_Box'Result, A)
+--> mj-bvh.ads:31:16
+   31 |           Post => Contains (Union_Box'Result, A) and Contains (Union_Box'Result, B);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-advanced-gold-union2-20261002/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 30.4 s, peak group RSS 195 MB

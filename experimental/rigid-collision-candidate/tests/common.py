@@ -51,7 +51,8 @@ def build(out):
             'reference_library_sha256':digest(library),'oracle_command':cmd,
             'binaries':{m:digest(out/'build'/m/'bin/rigid_probe') for m in ['validation','release']},
             'contact_binaries':{m:digest(out/'build'/m/'bin/contact_probe') for m in ['validation','release']},
-            'full_contact_binaries':{m:digest(out/'build'/m/'bin/full_contact_probe') for m in ['validation','release']}}
+            'full_contact_binaries':{m:digest(out/'build'/m/'bin/full_contact_probe') for m in ['validation','release']},
+            'scene_binaries':{m:digest(out/'build'/m/'bin/scene_probe') for m in ['validation','release']}}
     (out/'manifest.json').write_text(json.dumps(record,indent=2)+'\n')
     return out
 

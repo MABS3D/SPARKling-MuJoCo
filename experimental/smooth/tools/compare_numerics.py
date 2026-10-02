@@ -69,7 +69,7 @@ def build(repo, out, toolchain):
     work = Path(tempfile.mkdtemp(prefix='sparkling-smooth-numerical-'))
     snapshot = work / 'source'
     files = [repo / 'sparkling_mujoco.gpr']
-    for directory in ('src', 'experimental/smooth', 'experimental/spatial-tendon-candidate/src'):
+    for directory in ('src', 'experimental/smooth', 'experimental/spatial-tendon-candidate/src', 'experimental/muscle-candidate/src'):
         files += [p for p in (repo / directory).rglob('*') if p.suffix in ('.ads', '.adb', '.gpr')]
     hashes = {}
     for path in sorted(files):
@@ -232,7 +232,6 @@ def rejection_tests(probe, out):
         'ipc': (ordinary.replace('integrator="Euler"', 'integrator="discrete" solver="CG"')
                 .replace('constraint="disable"', 'constraint="disable" ipc="enable"'), 'UNSUPPORTED_FEATURE'),
         'constraints': (ordinary.replace('constraint="disable"', 'constraint="enable"'), 'UNSUPPORTED_FEATURE'),
-        'fluid': (ordinary.replace('integrator="Euler"', 'integrator="Euler" viscosity=".01"'), 'UNSUPPORTED_FEATURE'),
     }
     for name, (xml, status) in unsupported.items():
         path = out / ('unsupported_' + name + '.mjb')

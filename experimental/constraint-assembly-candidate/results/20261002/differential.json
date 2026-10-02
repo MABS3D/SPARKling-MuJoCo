@@ -1,0 +1,44 @@
+{
+  "seed": 20261001,
+  "reference_version": "3.14.0",
+  "native_reference": {
+    "source_sha256": "392bd4a918cb51a9f33a17ef4a84e9bb00fffc74ce45a3250e20d8b813eaaac3",
+    "helper_sha256": "39fb9bd75469312aec8de833f2842d78d085e7b80a9a1524302713810fb6fde9",
+    "library_sha256": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+    "command": [
+      "gcc",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fPIC",
+      "-shared",
+      "-I/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/include",
+      "/var/tmp/sparkling-constraint-assembly-20261001/differential-final/reference.c",
+      "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+      "-Wl,-rpath,/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco",
+      "-o",
+      "/var/tmp/sparkling-constraint-assembly-20261001/differential-final/reference.so"
+    ],
+    "compiler": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "cases": 894,
+  "operations": 1901,
+  "literal_c_calls": 1592,
+  "engine_scenes": 39,
+  "results": [
+    {
+      "binary": "/var/tmp/sparkling-constraint-assembly-20261001/build-checked-final/build/validation/bin/assembly_probe",
+      "binary_sha256": "845b777650d0b3428becbc3d7afa6019d3cedde63190e5f4911d4c2b3d0c3e3b",
+      "cases": 894,
+      "passed": true,
+      "engine_max_absolute_error": 2.220446049250313e-16
+    },
+    {
+      "binary": "/var/tmp/sparkling-constraint-assembly-20261001/build-release-final/build/release/bin/assembly_probe",
+      "binary_sha256": "549d55edd87425fa5beb72720a75bbe4188ae80791b802ce008f8c71f19eb50b",
+      "cases": 894,
+      "passed": true,
+      "engine_max_absolute_error": 2.220446049250313e-16
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------
+SPARK Analysis results        Total       Flow                 Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------
+Data Dependencies                 1          1                       .           .          .
+Flow Dependencies                 .          .                       .           .          .
+Initialization                    2          2                       .           .          .
+Non-Aliasing                      .          .                       .           .          .
+Run-time Checks                   4          .    4 (CVC5 25%, Z3 75%)           .          .
+Assertions                        8          .    8 (CVC5 13%, Z3 88%)           .          .
+Functional Contracts              4          .                  4 (Z3)           .          .
+LSP Verification                  .          .                       .           .          .
+Termination                       .          .                       .           .          .
+Concurrency                       .          .                       .           .          .
+---------------------------------------------------------------------------------------------
+Total                            19    3 (16%)                16 (84%)           .          .
+
+
+max steps used for successful proof: 45434
+
+============================
+Most difficult proved checks
+============================
+
+mj-constraint_solvers-cholesky.ads:94:25: postcondition proved in max 4 seconds
+mj-constraint_solvers-cholesky.adb:207:12: loop invariant after first iteration proved in max 2 seconds
+mj-constraint_solvers-cholesky.adb:207:12: loop invariant in first iteration proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-constraint_solvers-cholesky, 1 subprograms and packages out of 1 analyzed
+  MJ.Constraint_Solvers.Cholesky.Backsolve at mj-constraint_solvers-cholesky.ads:88 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)

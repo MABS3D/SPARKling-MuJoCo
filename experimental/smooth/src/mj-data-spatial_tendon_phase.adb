@@ -3,11 +3,13 @@ with MJ.Data.Pipeline;
 with MJ.Spatial_Tendons;
 with MJ.Spatial_Tendon_Models;
 with MJ.Tendon_Vectors;
+with MJ.Tendon_Kernels;
 
 package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
    package ST renames MJ.Spatial_Tendons;
    package TM renames MJ.Spatial_Tendon_Models;
    package TV renames MJ.Tendon_Vectors;
+   package TK renames MJ.Tendon_Kernels;
    use type ST.Evaluation_Status;
 
    procedure Compute_Passive (D : in out Simulation; Result : out Status) is
@@ -54,8 +56,10 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
          end loop;
       end if;
       if D.Tendons /= null then
-         Pipeline.Ensure_Jacobians (D, Result);
-         if Result /= Success then return; end if;
+         if D.Tendons.Has_Spatial then
+            Pipeline.Ensure_Jacobians (D, Result);
+            if Result /= Success then return; end if;
+         end if;
          Result := Numeric_Limit;
          declare
             Ns : constant Natural := D.Tendons.Ns;
@@ -67,6 +71,7 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
             V, Position : TV.Vector;
             B : Natural;
          begin
+            if D.Tendons.Has_Spatial then
             for Body_Id in Origins'Range loop
                --  The linear Jacobian is evaluated at the COM, not xpos.
                Origins (Body_Id) := (D.Kinematic.Bodies (Body_Id).Center (0),
@@ -97,6 +102,7 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
             end loop;
             if not ST.Valid_Flat_Kinematics (Sites, Geoms, Origins,
               D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all, Nv) then return; end if;
+            end if;
             for T in D.Tendons.Tendons'Range loop
                declare
                   P : constant TM.Parameters := D.Tendons.Tendons (T);
@@ -108,24 +114,47 @@ package body MJ.Data.Spatial_Tendon_Phase with SPARK_Mode is
                   Count : Natural;
                   Eval : ST.Evaluation_Status;
                begin
+                  if P.Fixed then
+                     MJ.Tendon_Kernels.Fixed_Kinematics
+                       (D.Tendons.Terms (P.First + 1 .. P.First + P.Count),
+                        D.Tendons.Jacobian (P.First + 1 .. P.First + P.Jacobian_Count),
+                        D.State.Qpos.all, D.State.Qvel.all, Length, Velocity);
+                  else
                   if not ST.Valid_Path (Route, Sites, Geoms) then return; end if;
                   ST.Evaluate_Flat (Route, Sites, Geoms, Origins,
                                D.Kinematic.Linear_Jacobian.all, D.Kinematic.Angular_Jacobian.all,
                                Eval, Length, Row, Points, Count);
                   if Eval /= ST.Success or else Length not in 0.0 .. 1.0e30 then return; end if;
                   Velocity := ST.Velocity (Row, D.State.Qvel.all);
+                  end if;
                   if Velocity not in -1.0e30 .. 1.0e30 then return; end if;
                   TM.Spring_Damper (P, Length, Velocity, D.Spring_Enabled, D.Damper_Enabled, Spring, Damper);
                   Outputs (T - 1) := Length;
                   Outputs (Nt + T - 1) := Velocity;
                   Outputs (2 * Nt + T - 1) := Spring + Damper;
                   if Spring /= 0.0 or else Damper /= 0.0 then
+                     if P.Fixed then
+                        if Spring in TK.Small_Force and then Damper in TK.Small_Force then
+                           for E of D.Tendons.Jacobian (P.First + 1 .. P.First + P.Jacobian_Count) loop
+                              Springs (E.Dof) := TK.Project_Small (Springs (E.Dof), E.Coefficient, Spring);
+                              Dampers (E.Dof) := TK.Project_Small (Dampers (E.Dof), E.Coefficient, Damper);
+                           end loop;
+                        else
+                           for E of D.Tendons.Jacobian (P.First + 1 .. P.First + P.Jacobian_Count) loop
+                              Springs (E.Dof) := Springs (E.Dof) + E.Coefficient * Spring;
+                              Dampers (E.Dof) := Dampers (E.Dof) + E.Coefficient * Damper;
+                              if Springs (E.Dof) not in -1.0e60 .. 1.0e60
+                                or else Dampers (E.Dof) not in -1.0e60 .. 1.0e60 then return; end if;
+                           end loop;
+                        end if;
+                     else
                      for K in Row'Range loop
                         Springs (K) := Springs (K) + Row (K) * Spring;
                         Dampers (K) := Dampers (K) + Row (K) * Damper;
                         if Springs (K) not in -1.0e60 .. 1.0e60
                           or else Dampers (K) not in -1.0e60 .. 1.0e60 then return; end if;
                      end loop;
+                     end if;
                   end if;
                end;
             end loop;

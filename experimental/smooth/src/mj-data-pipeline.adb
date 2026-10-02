@@ -856,6 +856,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old
@@ -931,6 +932,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
          and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
          and then Input_Values (D) = Input_Values (D)'Old
          and then Positions_Current (D) = Positions_Current (D)'Old
          and then Configuration (D) = Configuration (D)'Old

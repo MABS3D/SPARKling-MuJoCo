@@ -1,0 +1,62 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                               Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------
+Data Dependencies                13          13                                     .           .          .
+Flow Dependencies                 .           .                                     .           .          .
+Initialization                    8           8                                     .           .          .
+Non-Aliasing                      .           .                                     .           .          .
+Run-time Checks                 147           .    147 (CVC5 21%, Trivial 0%, Z3 78%)           .          .
+Assertions                       37           .     37 (CVC5 12%, Z3 84%, altergo 4%)           .          .
+Functional Contracts             49           .     49 (CVC5 21%, Z3 78%, altergo 1%)           .          .
+LSP Verification                  .           .                                     .           .          .
+Termination                      12          10                                2 (Z3)           .          .
+Concurrency                       .           .                                     .           .          .
+------------------------------------------------------------------------------------------------------------
+Total                           266    31 (12%)                             235 (88%)           .          .
+
+
+max steps used for successful proof: 116151
+
+============================
+Most difficult proved checks
+============================
+
+mj-constraint_solvers-cholesky.adb:185:12: assertion proved in max 4 seconds
+mj-constraint_solvers-cholesky.adb:107:49: assertion proved in max 4 seconds
+mj-constraint_solvers-cholesky.adb:78:35: assertion proved in max 4 seconds
+mj-constraint_solvers-cholesky.adb:152:25: postcondition proved in max 2 seconds
+mj-constraint_solvers-cholesky.adb:62:19: index check proved in max 2 seconds
+mj-constraint_solvers-cholesky.adb:52:25: postcondition proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:94:66: index check proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:58:10: precondition proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:53:51: index check proved in max 1 seconds
+mj-constraint_solvers-cholesky.adb:62:35: precondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-constraint_solvers-cholesky, 18 subprograms and packages out of 18 analyzed
+  MJ.Constraint_Solvers.Cholesky at mj-constraint_solvers-cholesky.ads:6 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Constraint_Solvers.Cholesky.Backsolve at mj-constraint_solvers-cholesky.ads:91 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
+  MJ.Constraint_Solvers.Cholesky.Bounded at mj-constraint_solvers-cholesky.ads:20 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Constraint_Solvers.Cholesky.Divide at mj-constraint_solvers-cholesky.ads:43 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.Constraint_Solvers.Cholesky.Extend at mj-constraint_solvers-cholesky.ads:48 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.Constraint_Solvers.Cholesky.Factor at mj-constraint_solvers-cholesky.ads:81 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (34 checks)
+  MJ.Constraint_Solvers.Cholesky.Factor_Cell at mj-constraint_solvers-cholesky.adb:44 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (49 checks)
+  MJ.Constraint_Solvers.Cholesky.Factor_Sum at mj-constraint_solvers-cholesky.ads:54 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.Constraint_Solvers.Cholesky.Positive_Diagonal at mj-constraint_solvers-cholesky.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Constraint_Solvers.Cholesky.Square at mj-constraint_solvers-cholesky.ads:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.Constraint_Solvers.Cholesky.Start at mj-constraint_solvers-cholesky.ads:32 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Constraint_Solvers.Cholesky.Store at mj-constraint_solvers-cholesky.adb:16 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.Constraint_Solvers.Cholesky.Substitute_Row at mj-constraint_solvers-cholesky.adb:145 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (43 checks)
+  MJ.Constraint_Solvers.Cholesky.Substitution_Sum at mj-constraint_solvers-cholesky.ads:65 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (18 checks)
+  MJ.Constraint_Solvers.Cholesky.Subtract at mj-constraint_solvers-cholesky.ads:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)
+  MJ.Constraint_Solvers.Cholesky.Triangular at mj-constraint_solvers-cholesky.ads:24 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.Constraint_Solvers.Cholesky.Unfold_Factor_Sum at mj-constraint_solvers-cholesky.adb:29 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.Constraint_Solvers.Cholesky.Unfold_Substitution_Sum at mj-constraint_solvers-cholesky.adb:125 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (19 checks)

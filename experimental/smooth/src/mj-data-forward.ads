@@ -11,6 +11,7 @@ package MJ.Data.Forward with SPARK_Mode is
       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Valid_State (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
        and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
        and then Input_Values (D) = Input_Values (D)'Old
        and then (if Result = Success then Is_Ready (D) and then Positions_Current (D) and then Forces_Current (D));
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old

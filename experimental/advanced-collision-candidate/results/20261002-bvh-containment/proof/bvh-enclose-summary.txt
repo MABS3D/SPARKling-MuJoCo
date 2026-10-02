@@ -1,0 +1,45 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+----------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                               Provers   Justified   Unproved
+----------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                     .           .          .
+Flow Dependencies                 .         .                                     .           .          .
+Initialization                    3         3                                     .           .          .
+Non-Aliasing                      .         .                                     .           .          .
+Run-time Checks                  35         .    35 (CVC5 60%, Trivial 11%, Z3 29%)           .          .
+Assertions                       10         .     10 (CVC5 69%, Z3 23%, altergo 8%)           .          .
+Functional Contracts             11         .                 11 (CVC5 52%, Z3 48%)           .          .
+LSP Verification                  .         .                                     .           .          .
+Termination                       .         .                                     .           .          .
+Concurrency                       .         .                                     .           .          .
+----------------------------------------------------------------------------------------------------------
+Total                            60    4 (7%)                              56 (93%)           .          .
+
+
+max steps used for successful proof: 33143
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.adb:88:22: assertion proved in max 11 seconds
+mj-bvh.adb:86:7: precondition proved in max 4 seconds
+mj-bvh.adb:85:7: precondition proved in max 3 seconds
+mj-bvh.adb:75:22: assertion proved in max 2 seconds
+mj-bvh.adb:74:22: assertion proved in max 2 seconds
+mj-bvh.adb:83:7: precondition proved in max 2 seconds
+mj-bvh.adb:79:7: precondition proved in max 2 seconds
+mj-bvh.adb:72:17: precondition proved in max 2 seconds
+mj-bvh.adb:71:22: assertion proved in max 1 seconds
+mj-bvh.adb:84:46: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 1 subprograms and packages out of 1 analyzed
+  MJ.BVH.Enclose at mj-bvh.adb:57 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (56 checks)

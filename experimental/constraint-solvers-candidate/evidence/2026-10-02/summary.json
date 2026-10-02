@@ -1,0 +1,286 @@
+{
+  "date": "2026-10-02",
+  "reference": {
+    "tag": "3.14.0",
+    "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+    "latest_stable_checked": "2026-10-02",
+    "url": "https://github.com/google-deepmind/mujoco/releases/tag/3.14.0"
+  },
+  "whole_unit": {
+    "unit": "mj-constraint_solvers-cholesky",
+    "checks": 266,
+    "passed": true,
+    "complete_coverage": true,
+    "open_obligations": 0,
+    "unreviewed_warnings": 0,
+    "reviewed_warnings_by_rule": {
+      "numeric-variant": 2,
+      "imprecise-call": 4
+    },
+    "checks_by_entity": {
+      "MJ.Constraint_Solvers.Cholesky.Backsolve": 21,
+      "MJ.Constraint_Solvers.Cholesky.Bounded": 3,
+      "MJ.Constraint_Solvers.Cholesky.Divide": 7,
+      "MJ.Constraint_Solvers.Cholesky.Extend": 3,
+      "MJ.Constraint_Solvers.Cholesky.Factor": 37,
+      "MJ.Constraint_Solvers.Cholesky.Factor_Cell": 53,
+      "MJ.Constraint_Solvers.Cholesky.Factor_Sum": 13,
+      "MJ.Constraint_Solvers.Cholesky.Positive_Diagonal": 3,
+      "MJ.Constraint_Solvers.Cholesky.Square": 1,
+      "MJ.Constraint_Solvers.Cholesky.Start": 4,
+      "MJ.Constraint_Solvers.Cholesky.Store": 10,
+      "MJ.Constraint_Solvers.Cholesky.Substitute_Row": 45,
+      "MJ.Constraint_Solvers.Cholesky.Substitution_Sum": 20,
+      "MJ.Constraint_Solvers.Cholesky.Subtract": 10,
+      "MJ.Constraint_Solvers.Cholesky.Triangular": 3,
+      "MJ.Constraint_Solvers.Cholesky.Unfold_Factor_Sum": 13,
+      "MJ.Constraint_Solvers.Cholesky.Unfold_Substitution_Sum": 20
+    }
+  },
+  "checks": {
+    "validation": {
+      "differential": {
+        "passed": 409,
+        "total": 409
+      },
+      "robustness": {
+        "binary_sha256": "15b0d4bfc0d34a4414f3aa12fe102574204ed70a8339a3926446686499d34d97",
+        "stress_cases": 240,
+        "replay_cases": 240,
+        "capacity_cases": 5,
+        "outcomes": {
+          "CONVERGED": 89,
+          "ITERATION_LIMIT": 65,
+          "STALLED": 62,
+          "LINE_SEARCH_LIMIT": 20,
+          "NUMERIC_LIMIT": 4
+        },
+        "failures": [],
+        "passed": true
+      },
+      "cholesky_edges": {
+        "label": "cholesky-edges",
+        "command": [
+          "/usr/bin/python3",
+          "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+          "--cap-mb",
+          "3800",
+          "--timeout",
+          "600",
+          "--",
+          "/var/tmp/constraint-solvers-20261002-validation-accepted/build/validation/bin/cholesky_edges"
+        ],
+        "code": 0,
+        "seconds": 0.34101438522338867,
+        "binary_sha256": "8886b9f535aed9a55c5931387a8178df6a2c73b35d51e39878f9be421da29abc",
+        "output": "18 Cholesky edge checks passed\nguarded: elapsed 0.3 s, peak group RSS 2 MB"
+      },
+      "binary_sha256": "15b0d4bfc0d34a4414f3aa12fe102574204ed70a8339a3926446686499d34d97"
+    },
+    "release": {
+      "differential": {
+        "passed": 409,
+        "total": 409
+      },
+      "robustness": {
+        "binary_sha256": "b39690e2654cf4d565b95f504674e3b8ded841a775ba6cee17f7fb686c64b0e2",
+        "stress_cases": 240,
+        "replay_cases": 240,
+        "capacity_cases": 5,
+        "outcomes": {
+          "CONVERGED": 89,
+          "ITERATION_LIMIT": 65,
+          "STALLED": 62,
+          "LINE_SEARCH_LIMIT": 20,
+          "NUMERIC_LIMIT": 4
+        },
+        "failures": [],
+        "passed": true
+      },
+      "cholesky_edges": {
+        "label": "cholesky-edges",
+        "command": [
+          "/usr/bin/python3",
+          "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+          "--cap-mb",
+          "3800",
+          "--timeout",
+          "600",
+          "--",
+          "/var/tmp/constraint-solvers-20261002-release-accepted/build/release/bin/cholesky_edges"
+        ],
+        "code": 0,
+        "seconds": 0.3470151424407959,
+        "binary_sha256": "ee8bb516c65c647fe527ae74d5dc86c46a5e4246d74bfc94c4d10febf053497f",
+        "output": "18 Cholesky edge checks passed\nguarded: elapsed 0.3 s, peak group RSS 0 MB"
+      },
+      "binary_sha256": "b39690e2654cf4d565b95f504674e3b8ded841a775ba6cee17f7fb686c64b0e2"
+    }
+  },
+  "compatibility_and_timing": {
+    "cases": 211,
+    "identical": 211,
+    "failures": [],
+    "passed": true,
+    "before_sha256": "71b352cb42528a8c3d67794594bbb2d44c7bbeddcb15b9c24f64692c1df21359",
+    "after_sha256": "b39690e2654cf4d565b95f504674e3b8ded841a775ba6cee17f7fb686c64b0e2",
+    "timing_scope": "Process wall time, startup and I/O included; diagnostic only",
+    "timings": {
+      "0": {
+        "problems": 67,
+        "repeats": 300,
+        "samples_seconds": {
+          "before": [
+            2.5815231570159085,
+            2.413799105968792,
+            2.241030885023065,
+            2.2373758389730938,
+            2.27958613098599,
+            2.2434913070173934,
+            2.246155592962168
+          ],
+          "after": [
+            2.7039571670466103,
+            2.670446645002812,
+            2.3447955349693075,
+            2.4235847480013035,
+            2.3311040659900755,
+            2.3661403320147656,
+            2.368305515963584
+          ]
+        },
+        "paired_ratios": [
+          1.0474270430997135,
+          1.1063251446234226,
+          1.0463021954046718,
+          1.0832264771008144,
+          1.0225996878572876,
+          1.054668821142181,
+          1.0543817727427902
+        ],
+        "median_ratio": 1.0543817727427902,
+        "min_ratio": 1.0225996878572876,
+        "max_ratio": 1.1063251446234226
+      },
+      "1": {
+        "problems": 63,
+        "repeats": 300,
+        "samples_seconds": {
+          "before": [
+            0.46855466900160536,
+            0.47172769403550774,
+            0.4960909949732013,
+            0.4550670930184424,
+            0.4580755369970575,
+            0.4641597139998339,
+            0.4713161429972388
+          ],
+          "after": [
+            0.4919610350043513,
+            0.47198754898272455,
+            0.4752167590195313,
+            0.4484465070418082,
+            0.4990452249767259,
+            0.4402374369674362,
+            0.447627101035323
+          ]
+        },
+        "paired_ratios": [
+          1.0499543971093492,
+          1.0005508579430515,
+          0.9579225662929084,
+          0.9854514068843782,
+          1.089438716261182,
+          0.9484611087286083,
+          0.9497385304664717
+        ],
+        "median_ratio": 0.9854514068843782,
+        "min_ratio": 0.9484611087286083,
+        "max_ratio": 1.089438716261182
+      },
+      "2": {
+        "problems": 63,
+        "repeats": 300,
+        "samples_seconds": {
+          "before": [
+            0.2451509180245921,
+            0.23237280501052737,
+            0.25260641903150827,
+            0.2365563019993715,
+            0.2598202810040675,
+            0.22692043404094875,
+            0.2450087070465088
+          ],
+          "after": [
+            0.2537507090019062,
+            0.256591118988581,
+            0.26116197695955634,
+            0.2520576809765771,
+            0.23151664400938898,
+            0.2273789739701897,
+            0.253053650027141
+          ]
+        },
+        "paired_ratios": [
+          1.0350795789247318,
+          1.104221808472624,
+          1.033869123203005,
+          1.0655293426815862,
+          0.8910645586045093,
+          1.002020707968319,
+          1.0328353350279305
+        ],
+        "median_ratio": 1.033869123203005,
+        "min_ratio": 0.8910645586045093,
+        "max_ratio": 1.104221808472624
+      }
+    }
+  },
+  "functional_scope": [
+    "Exact ordered binary64 factor and triangular-substitution reductions.",
+    "Exact factor-cell and substitution-row updates with preservation of other entries.",
+    "Bounded partial workspaces, lower-triangular factor and positive successful diagonal.",
+    "Safe composition of the Cholesky helper unit under its stated shape and diagonal contracts; exact zero-RHS preservation."
+  ],
+  "not_claimed": [
+    "Full functional model for the final complete factor/solution or a real-arithmetic error bound.",
+    "Complete proof of MJ.Constraint_Solvers.Solve or its callers of the new helpers.",
+    "Gold for QCQP, the cone/Hessian evaluation, line search or iterative PGS/CG/Newton drivers.",
+    "C performance parity or an integrated movement benchmark."
+  ],
+  "proof_history": "The initial 17 minimal runs precede explicit index parentheses and static-operand contracts. Affected minimal routines were rechecked. Each diagnostic carries its own snapshot; the whole-unit proof is on the final source hashes.",
+  "sources": {
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "src/mj-quaternion_math.ads": "d4ea9952d858b00ac80a0ae1ab6dca14600e29636552082f4f2af5419d322e98",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_order.adb": "78eee4cf603d362c2191795cd5235c9310cbe5d289b4c5bd11f04925e3d61e08",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_order.ads": "e3489bad8cf76e5656f66977967d353034c020b9b5bcc2e0907b5a3ab3485487",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_scalar.adb": "1aebed599b4f24024e1d65d060a64b4b5d0b9141344321db1baafb46cd56e0a5",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_scalar.ads": "2f39f11ca5a417247653f2e2a1d3ee6880a05ec3aaca4afa082d7dc7755d4e9f",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_solvers-cholesky.adb": "8daf54619d4b82d95f2fb097455169b6b02f3aee646b958ceec83a5b2001af6e",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_solvers-cholesky.ads": "d5b75c836d380d085ceb3f382cfa508efe3f98bf462071958b16e703b44a410d",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb": "2e47525b874b2837541d80b15654f91bbf98df29d82e5b6f5ed2d8c6a368c3dc",
+    "experimental/constraint-solvers-candidate/src/mj-constraint_solvers.ads": "d57fc5299a47f5fdd9bd8c571638e76df8c14aeffd725c16775d1bed06efde46",
+    "experimental/constraint-solvers-candidate/tests/solvers_probe.adb": "799f214ddc7c48cc77297790f62b93a6d3c2f05393085b5a1979fab44c6fb122",
+    "experimental/constraint-solvers-candidate/tests/cholesky_edges.adb": "45d59748c64c613963d06313d2973f8c09cf750e360820e3d7f4f8e8f3b92521"
+  },
+  "compiler": "gcc (GNAT-FSF-builds) 16.1.0",
+  "artifact_sources": {
+    "README.md": "d4e5ba0b1e9e870b732ae6048e61dea4551f592819684e820074c1a658c45ce8",
+    "solvers.gpr": "873f74555e1848630cc4f5ee8d4e4b3e5adf866c83e31f3962752a52cdaed07b",
+    "src/mj-constraint_order.adb": "78eee4cf603d362c2191795cd5235c9310cbe5d289b4c5bd11f04925e3d61e08",
+    "src/mj-constraint_order.ads": "e3489bad8cf76e5656f66977967d353034c020b9b5bcc2e0907b5a3ab3485487",
+    "src/mj-constraint_scalar.adb": "1aebed599b4f24024e1d65d060a64b4b5d0b9141344321db1baafb46cd56e0a5",
+    "src/mj-constraint_scalar.ads": "2f39f11ca5a417247653f2e2a1d3ee6880a05ec3aaca4afa082d7dc7755d4e9f",
+    "src/mj-constraint_solvers-cholesky.adb": "8daf54619d4b82d95f2fb097455169b6b02f3aee646b958ceec83a5b2001af6e",
+    "src/mj-constraint_solvers-cholesky.ads": "d5b75c836d380d085ceb3f382cfa508efe3f98bf462071958b16e703b44a410d",
+    "src/mj-constraint_solvers.adb": "2e47525b874b2837541d80b15654f91bbf98df29d82e5b6f5ed2d8c6a368c3dc",
+    "src/mj-constraint_solvers.ads": "d57fc5299a47f5fdd9bd8c571638e76df8c14aeffd725c16775d1bed06efde46",
+    "tests/check.py": "26f240613cd96fbbe445e2b1ab5396f11c14d454f99112db7a119addbaeddee1",
+    "tests/compare_previous.py": "a2abfc81815fd23f38ff2012c51d24844947bff22bd1240a8ad86a5f56a9c9d2",
+    "tests/differential.py": "3ef7284d2e3ffd1c1f4a6602503bfef21555674456216520455b38756bd67a9c",
+    "tests/robustness.py": "5fbb641092e70cbfad2fe8d3a5e4354579a5eae9fa9573a190e4406d554b505c",
+    "tests/cholesky_edges.adb": "45d59748c64c613963d06313d2973f8c09cf750e360820e3d7f4f8e8f3b92521",
+    "tests/solvers_probe.adb": "799f214ddc7c48cc77297790f62b93a6d3c2f05393085b5a1979fab44c6fb122"
+  }
+}

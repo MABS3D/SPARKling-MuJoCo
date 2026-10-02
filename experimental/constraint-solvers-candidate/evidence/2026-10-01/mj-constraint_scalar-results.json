@@ -1,0 +1,47 @@
+[
+  {
+    "label": "whole-mj-constraint_scalar",
+    "command": [
+      "/usr/bin/python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3800",
+      "--timeout",
+      "600",
+      "--",
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-constraint-solvers-20261001/scalar-whole-03/solvers.gpr",
+      "-u",
+      "mj-constraint_scalar.ads",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--memlimit=800",
+      "--steps=0",
+      "--proof=per_check",
+      "-j2",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off"
+    ],
+    "code": 0,
+    "seconds": 20.260159015655518,
+    "unit": "mj-constraint_scalar",
+    "limit": null,
+    "checks": 54,
+    "open": [],
+    "warnings": [],
+    "complete_coverage": true,
+    "entities": [
+      "MJ.Constraint_Scalar",
+      "MJ.Constraint_Scalar.Cone_Zone",
+      "MJ.Constraint_Scalar.Evaluate",
+      "MJ.Constraint_Scalar.Project",
+      "MJ.Constraint_Scalar.Step"
+    ],
+    "missing_entities": [],
+    "passed": true
+  }
+]
