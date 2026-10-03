@@ -2,6 +2,7 @@ with MJ.Types; use MJ.Types;
 with MJ.Contact_Rows;
 with MJ.Joint_Limits;
 with MJ.BLAS;
+with MJ.Solimp_Curve;
 
 --  Joint-limit KBIP, R, D and aref before solving J*M^-1*J' + R.
 --  Diag_Approx is dof_invweight0 at the first DOF, as in C; it is not
@@ -9,7 +10,9 @@ with MJ.BLAS;
 package MJ.Joint_Limit_Response with SPARK_Mode is
    use type MJ.Joint_Limits.Status;
    subtype Vector is MJ.Joint_Limits.Vector;
-   type Curve_Power is (Linear, Quadratic);
+   subtype Curve_Power is MJ.Solimp_Curve.Exponent;
+   Linear : constant Curve_Power := 1.0;
+   Quadratic : constant Curve_Power := 2.0;
    type Parameters is record
       Ref0 : Tier0_Real := 0.02;
       Ref1 : Tier0_Real := 1.0;
@@ -17,7 +20,7 @@ package MJ.Joint_Limit_Response with SPARK_Mode is
       D_Width : Tier0_Real := 0.95;
       Width : Tier0_Real := 0.001;
       Midpoint : Tier0_Real := 0.5;
-      Power : Curve_Power := Quadratic;
+      Power : Real := Quadratic;
    end record;
    subtype Reference_Time is Real range -2.0e10 .. 2.0e10;
    type Effective_Parameters is record
@@ -30,10 +33,15 @@ package MJ.Joint_Limit_Response with SPARK_Mode is
       Used_Default : Boolean;
    end record;
    subtype Gain is Real range 0.0 .. 1.0e26;
-   subtype Slope is Real range -1.0e21 .. 1.0e21;
-   subtype Curve_Slope is Real range 0.0 .. 3.0e4;
-   subtype Curve_Term is Real range -3.0e4 .. 3.0e4;
+   subtype Slope is Real range -1.1e35 .. 1.1e35;
+   subtype Curve_Slope is MJ.Solimp_Curve.Slope;
+   subtype Curve_Term is Real range -1.0e20 .. 1.0e20;
    subtype Positive_Width is Real range Min_Val .. 1.0e10;
+   function Scale_Impedance (Y : MJ.Solimp_Curve.Value;
+                            D0, DW : MJ.Contact_Rows.Impedance_Value)
+                            return MJ.Contact_Rows.Raw_Impedance
+     with Inline, Global => null,
+     Post => Scale_Impedance'Result = D0 + Y * (DW - D0);
    function Divide_Width (X : Curve_Term; Width : Positive_Width) return Slope
      with Global => null, Post => Divide_Width'Result = X / Width;
    subtype Acceleration is Real range -1.0e75 .. 1.0e75;
@@ -58,7 +66,7 @@ package MJ.Joint_Limit_Response with SPARK_Mode is
            Real'Min (Max_Imp, Real'Max (Min_Imp, P.D0)),
            Real'Min (Max_Imp, Real'Max (Min_Imp, P.D_Width)),
            Real'Max (0.0, P.Width),
-           Real'Min (Max_Imp, Real'Max (Min_Imp, P.Midpoint)), P.Power, Mixed))
+           Real'Min (Max_Imp, Real'Max (Min_Imp, P.Midpoint)), Real'Max (1.0, P.Power), Mixed))
         with Global => null, Annotate => (GNATprove, Hide_Info, "Expression_Function_Body");
       function K (P : Effective_Parameters) return Gain is
         (if P.Ref0 > 0.0 then
@@ -76,15 +84,20 @@ package MJ.Joint_Limit_Response with SPARK_Mode is
         (if P.D0 = P.D_Width or else P.Width <= Min_Val then 0.5 * (P.D0 + P.D_Width)
          else (declare X : constant Real := abs ((Position - Margin) / P.Width);
           begin (if X >= 1.0 then P.D_Width elsif X <= 0.0 then P.D0 else
-            P.D0 + (if P.Power = Linear then X else MJ.Contact_Rows.Model.Shape (X, P.Midpoint))
-                   * (P.D_Width - P.D0))))
+            (declare C : constant MJ.Solimp_Curve.Result :=
+               MJ.Solimp_Curve.Evaluate (X, P.Midpoint, P.Power);
+             begin (if P.Power = Linear then Scale_Impedance (X, P.D0, P.D_Width)
+               elsif P.Power = Quadratic then Scale_Impedance (MJ.Contact_Rows.Model.Shape (X, P.Midpoint), P.D0, P.D_Width)
+               elsif C.Valid then Scale_Impedance (C.Y, P.D0, P.D_Width) else 0.0)))))
         with Global => null, Annotate => (GNATprove, Hide_Info, "Expression_Function_Body");
       function Shape_Derivative (X : MJ.Contact_Rows.Unit_Fraction;
                                 Mid : MJ.Contact_Rows.Impedance_Value; Power : Curve_Power)
                                 return Curve_Slope is
-        (if Power = Linear then 1.0 elsif X <= Mid then (2.0 * (1.0 / Mid)) * X else
-          (declare D : constant MJ.Contact_Rows.Curve_Denominator := 1.0 - Mid;
-           begin (2.0 * (1.0 / D)) * (1.0 - X)))
+        (if Power = Linear then 1.0 elsif Power = Quadratic then
+           (if X <= Mid then (2.0 * (1.0 / Mid)) * X else
+             (declare D : constant MJ.Contact_Rows.Curve_Denominator := 1.0 - Mid;
+              begin (2.0 * (1.0 / D)) * (1.0 - X)))
+         else MJ.Solimp_Curve.Evaluate (X, Mid, Power).YP)
         with Global => null, Annotate => (GNATprove, Hide_Info, "Expression_Function_Body");
       function Derivative (P : Effective_Parameters; Position : MJ.Joint_Limits.Distance;
                            Margin : Tier0_Real) return Slope is

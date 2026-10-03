@@ -1,6 +1,7 @@
 with MJ.Types; use MJ.Types;
 with MJ.Rigid_Geometry; use MJ.Rigid_Geometry;
 with Interfaces;
+with MJ.Rigid_BVH;
 
 package MJ.Rigid_Detector with SPARK_Mode is
    type Scene is limited private;
@@ -45,6 +46,8 @@ package MJ.Rigid_Detector with SPARK_Mode is
    function Geom_Count (S : Scene) return Count with Global => null;
    function Candidate_Count (S : Scene) return Natural with Global => null;
    function Narrowphase_Count (S : Scene) return Natural with Global => null;
+   function BVH_Node_Tests (S : Scene) return Natural with Global => null;
+   function BVH_Leaf_Tests (S : Scene) return Natural with Global => null;
    function Initialized (S : Scene) return Boolean with Global => null;
 private
    subtype Endpoint_Count is Natural range 0 .. 2*Max_Geoms;
@@ -53,8 +56,8 @@ private
       Tag : Natural range 0 .. 2*Max_Geoms-1;
    end record;
    type Endpoint_Array is array (Natural range 0 .. 2*Max_Geoms-1) of Endpoint;
-   type Id_Array is array (Geom_Id) of Geom_Id;
-   type Vec_Array is array (Geom_Id) of Vec;
+   subtype Id_Array is MJ.Rigid_BVH.Id_Array;
+   subtype Vec_Array is MJ.Rigid_BVH.Vec_Array;
    type Rotation_Array is array (Geom_Id) of Matrix;
    type Link_Array is array (Geom_Id) of Count;
    type Boolean_Array is array (Geom_Id) of Boolean;
@@ -83,5 +86,8 @@ private
       Active_Groups, Active_Group_Position : Id_Array;
       Have_Order : Boolean := False;
       Axis_Used : Natural range 0 .. 3 := 0;
+      Midphase : MJ.Rigid_BVH.Cache;
+      Active_Now : MJ.Rigid_BVH.Boolean_Array := [others => False];
+      Sweep_Rank : MJ.Rigid_BVH.Rank_Array := [others => 0];
    end record;
 end MJ.Rigid_Detector;

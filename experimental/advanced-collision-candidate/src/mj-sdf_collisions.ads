@@ -7,6 +7,9 @@ generic
    --  Native Ada providers; successful outputs must be finite. No C callback in production.
    with procedure Custom_Query (Key : Natural; X : Vec; Need_Gradient : Boolean;
                                 Value : out Real; Gradient : out Vec; Result : out Status);
+   --  The engine owns immutable fields/octrees admitted at creation. This
+   --  opt-in removes repeated topology scans; static caller obligations stay.
+   Fields_Admitted : Boolean := False;
 package MJ.SDF_Collisions with SPARK_Mode is
    type Objective is (Single, Intersection, Midsurface, Collision);
    type Problem is record
@@ -22,14 +25,23 @@ package MJ.SDF_Collisions with SPARK_Mode is
      with Global => null, Pre => Base in 2 .. 16;
    procedure Evaluate (P : Problem; T : Octree; X : Vec; Need_Gradient : Boolean;
                        Value : out Real; Gradient : out Vec; Result : out Status)
-     with Global => null;
+     with Global => null,
+       Pre => (Static => (if Fields_Admitted then Valid (P.A, T)
+         and then (P.Kind = Single or else Valid (P.B, T))));
    procedure Descent (P : Problem; T : Octree; Iterations : Natural;
                       X : in out Vec; Depth : out Real; Result : out Status)
-     with Global => null, Pre => Iterations <= 1000;
+     with Global => null, Pre => (Static => Iterations <= 1000
+       and then (if Fields_Admitted then Valid (P.A, T)
+         and then (P.Kind = Single or else Valid (P.B, T))));
    procedure Generate (A, B : Field; T : Octree; PA, PB : Pose;
                        O : Search_Options; M : in out Manifold; Result : out Status)
      with Global => null,
        Pre => Valid (A, T) and Valid (B, T) and Valid_Pose (PA) and Valid_Pose (PB),
+       Post => (if Result /= Success then M.Length = 0);
+   procedure Generate_Admitted (A, B : Field; T : Octree; PA, PB : Pose;
+                                O : Search_Options; M : in out Manifold; Result : out Status)
+     with Global => null,
+       Pre => (Static => Valid (A, T) and Valid (B, T) and Valid_Pose (PA) and Valid_Pose (PB)),
        Post => (if Result /= Success then M.Length = 0);
    type Triangle is record
       Corners : Vertex_Array (0 .. 2) := [others => Zero];

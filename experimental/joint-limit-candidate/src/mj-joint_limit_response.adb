@@ -1,4 +1,10 @@
 package body MJ.Joint_Limit_Response with SPARK_Mode is
+   function Scale_Impedance (Y : MJ.Solimp_Curve.Value;
+                            D0, DW : MJ.Contact_Rows.Impedance_Value)
+                            return MJ.Contact_Rows.Raw_Impedance is
+   begin
+      return D0 + Y * (DW - D0);
+   end Scale_Impedance;
    function Divide_Width (X : Curve_Term; Width : Positive_Width) return Slope is
    begin
       return X / Width;
@@ -13,7 +19,7 @@ package body MJ.Joint_Limit_Response with SPARK_Mode is
       return (T, (if Mixed then 1.0 else P.Ref1),
         Real'Min (Max_Imp, Real'Max (Min_Imp, P.D0)),
         Real'Min (Max_Imp, Real'Max (Min_Imp, P.D_Width)), Real'Max (0.0, P.Width),
-        Real'Min (Max_Imp, Real'Max (Min_Imp, P.Midpoint)), P.Power, Mixed);
+        Real'Min (Max_Imp, Real'Max (Min_Imp, P.Midpoint)), Real'Max (1.0, P.Power), Mixed);
    end Sanitize;
    function Stiffness (P : Effective_Parameters) return Gain is
       pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.K);
@@ -33,13 +39,21 @@ package body MJ.Joint_Limit_Response with SPARK_Mode is
    function Impedance (P : Effective_Parameters; Position : MJ.Joint_Limits.Distance;
                        Margin : Tier0_Real) return MJ.Contact_Rows.Raw_Impedance is
       pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Impedance);
-      X, Y : Real;
+      X : Real;
+      Y : MJ.Solimp_Curve.Value;
+      Curve : MJ.Solimp_Curve.Result;
    begin
       if P.D0 = P.D_Width or else P.Width <= Min_Val then return 0.5*(P.D0 + P.D_Width); end if;
       X := abs ((Position - Margin) / P.Width);
       if X >= 1.0 then return P.D_Width; elsif X <= 0.0 then return P.D0; end if;
-      Y := (if P.Power = Linear then X else MJ.Contact_Rows.Shape (X, P.Midpoint));
-      return P.D0 + Y * (P.D_Width - P.D0);
+      if P.Power = Linear then Y := X;
+      elsif P.Power = Quadratic then Y := MJ.Contact_Rows.Shape (X, P.Midpoint);
+      else
+         Curve := MJ.Solimp_Curve.Evaluate (X, P.Midpoint, P.Power);
+         if not Curve.Valid then return 0.0; end if;
+         Y := Curve.Y;
+      end if;
+      return Scale_Impedance (Y, P.D0, P.D_Width);
    end Impedance;
    function Shape_Derivative (X : MJ.Contact_Rows.Unit_Fraction;
                              Mid : MJ.Contact_Rows.Impedance_Value; Power : Curve_Power)
@@ -47,9 +61,12 @@ package body MJ.Joint_Limit_Response with SPARK_Mode is
       pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Model.Shape_Derivative);
    begin
       if Power = Linear then return 1.0;
-      elsif X <= Mid then return (2.0 * (1.0 / Mid)) * X; end if;
-      declare D : constant MJ.Contact_Rows.Curve_Denominator := 1.0 - Mid;
-      begin return (2.0 * (1.0 / D)) * (1.0 - X); end;
+      elsif Power = Quadratic then
+         if X <= Mid then return (2.0 * (1.0 / Mid)) * X; end if;
+         declare D : constant MJ.Contact_Rows.Curve_Denominator := 1.0 - Mid;
+         begin return (2.0 * (1.0 / D)) * (1.0 - X); end;
+      end if;
+      return MJ.Solimp_Curve.Evaluate (X, Mid, Power).YP;
    end Shape_Derivative;
    function Impedance_Derivative (P : Effective_Parameters; Position : MJ.Joint_Limits.Distance;
                                   Margin : Tier0_Real) return Slope is

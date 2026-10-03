@@ -138,6 +138,8 @@ package body MJ.Smooth_Math with SPARK_Mode is
    begin
       null;
    end Expose_Unit_Quaternion;
+   --  Preserve mju_quat2Mat's ordered binary64 diagonals. The algebraic
+   --  unit-quaternion shortcut can perturb contact clipping by a few ULPs.
    function Rotation (Q : Quaternion) return Matrix is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
    begin
@@ -145,6 +147,7 @@ package body MJ.Smooth_Math with SPARK_Mode is
       declare
       subtype Square is Real range 0.0 .. 2.0;
       subtype Product is Real range -2.0 .. 2.0;
+      WW : constant Square := Q (0)*Q (0);
       XX : constant Square := Q (1)*Q (1);
       YY : constant Square := Q (2)*Q (2);
       ZZ : constant Square := Q (3)*Q (3);
@@ -155,27 +158,27 @@ package body MJ.Smooth_Math with SPARK_Mode is
       WY : constant Product := Q (0)*Q (2);
       WZ : constant Product := Q (0)*Q (3);
       subtype Component is Real range -8.0 .. 8.0;
-      R00 : constant Component := 1.0 - 2.0*(YY + ZZ);
+      R00 : constant Component := ((WW + XX) - YY) - ZZ;
       R01 : constant Component := 2.0*(XY - WZ);
       R02 : constant Component := 2.0*(XZ + WY);
       R10 : constant Component := 2.0*(XY + WZ);
-      R11 : constant Component := 1.0 - 2.0*(XX + ZZ);
+      R11 : constant Component := ((WW - XX) + YY) - ZZ;
       R12 : constant Component := 2.0*(YZ - WX);
       R20 : constant Component := 2.0*(XZ - WY);
       R21 : constant Component := 2.0*(YZ + WX);
-      R22 : constant Component := 1.0 - 2.0*(XX + YY);
+      R22 : constant Component := ((WW - XX) - YY) + ZZ;
       Result : constant Matrix :=
         [0 => [R00, R01, R02], 1 => [R10, R11, R12], 2 => [R20, R21, R22]];
    begin
-      pragma Assert (Result (0, 0) = 1.0 - 2.0*(Q (2)*Q (2) + Q (3)*Q (3)));
+      pragma Assert (Result (0, 0) = ((Q (0)*Q (0) + Q (1)*Q (1)) - Q (2)*Q (2)) - Q (3)*Q (3));
       pragma Assert (Result (0, 1) = 2.0*(Q (1)*Q (2) - Q (0)*Q (3)));
       pragma Assert (Result (0, 2) = 2.0*(Q (1)*Q (3) + Q (0)*Q (2)));
       pragma Assert (Result (1, 0) = 2.0*(Q (1)*Q (2) + Q (0)*Q (3)));
-      pragma Assert (Result (1, 1) = 1.0 - 2.0*(Q (1)*Q (1) + Q (3)*Q (3)));
+      pragma Assert (Result (1, 1) = ((Q (0)*Q (0) - Q (1)*Q (1)) + Q (2)*Q (2)) - Q (3)*Q (3));
       pragma Assert (Result (1, 2) = 2.0*(Q (2)*Q (3) - Q (0)*Q (1)));
       pragma Assert (Result (2, 0) = 2.0*(Q (1)*Q (3) - Q (0)*Q (2)));
       pragma Assert (Result (2, 1) = 2.0*(Q (2)*Q (3) + Q (0)*Q (1)));
-      pragma Assert (Result (2, 2) = 1.0 - 2.0*(Q (1)*Q (1) + Q (2)*Q (2)));
+      pragma Assert (Result (2, 2) = ((Q (0)*Q (0) - Q (1)*Q (1)) - Q (2)*Q (2)) + Q (3)*Q (3));
       return Result;
       end;
    end Rotation;

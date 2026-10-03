@@ -1,0 +1,17 @@
+project Equality is
+   Build_Root := external ("EQUALITY_BUILD_ROOT", "/var/tmp/sparkling-equality/build");
+   Mode := external ("EQUALITY_MODE", "validation");
+   for Source_Dirs use ("../../src", "../constraint-assembly-candidate/src", "tests");
+   for Main use ("equality_probe.adb", "scalar_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O1", "-g", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+end Equality;

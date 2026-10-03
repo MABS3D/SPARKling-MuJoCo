@@ -9,6 +9,7 @@ with MJ.Models;
 with MJ.MJB;
 with MJ.Data; use MJ.Data;
 with MJ.Data.Constrained;
+with MJ.Data.Constrained.Test_Export;
 with MJ.External_Forces;
 
 procedure Constrained_Probe is
@@ -25,6 +26,8 @@ procedure Constrained_Probe is
      and then Ada.Command_Line.Argument (2) = "loads";
    Benchmark : constant Boolean := Ada.Command_Line.Argument_Count >= 2
      and then Ada.Command_Line.Argument (2) = "benchmark";
+   Export_Problem : constant Boolean := Ada.Command_Line.Argument_Count >= 3
+     and then Ada.Command_Line.Argument (3) = "problem";
    procedure Check is
    begin
       if Result /= Success then raise Program_Error with Result'Image; end if;
@@ -46,10 +49,12 @@ begin
       Nq : constant Natural := M.S.Nq;
       Nv : constant Natural := M.S.Nv;
       Nu : constant Natural := M.S.Nu;
+      Na : constant Natural := M.S.Na;
       Loads : MJ.External_Forces.Wrench_Array
         (0 .. (if With_Loads then Integer (M.S.Nbody) - 1 else -1));
       Q : State_Vector (0 .. Nq - 1);
       V : State_Vector (0 .. Nv - 1);
+      Act : State_Vector (0 .. Na - 1);
       X, T : Real;
       D : C.Trace;
    begin
@@ -84,6 +89,8 @@ begin
          for I in 0 .. Nu - 1 loop
             Numbers.Get (X); C.Set_Control (E.all, I, X, Result); Check;
          end loop;
+         for I in Act'Range loop Numbers.Get (X); Act (I) := X; end loop;
+         C.Set_Activation (E.all, Act, Result); Check;
          for L of Loads loop
             for I in 0 .. 2 loop Numbers.Get (X); L.Force (I) := X; end loop;
             for I in 0 .. 2 loop Numbers.Get (X); L.Torque (I) := X; end loop;
@@ -97,6 +104,9 @@ begin
             end;
          else
             C.Evaluate (E.all, Result, Loads); Check;
+            if Export_Problem then
+               C.Test_Export.Write_Problem (E.all, Standard_Error);
+            end if;
             D := C.Diagnostics (E.all);
             Emit ("counts", [Real (D.Ncontact), Real (D.Nrow)]);
             Emit ("free", Real_Array (D.A_Free (1 .. Nv)));
@@ -106,9 +116,11 @@ begin
             Emit ("reg", Real_Array (D.R (1 .. D.Nrow)));
             Emit ("force", Real_Array (D.Force (1 .. D.Nrow)));
             for R in 1 .. D.Nrow loop Emit ("jac", [for I in 1 .. Nv => D.J (R, I)]); end loop;
+            if Na > 0 then Emit ("act_dot", C.Activation_Rates (E.all)); end if;
             for K in 1 .. Steps loop C.Step (E.all, Result, Loads); Check; end loop;
          end if;
          Emit ("state", C.State (E.all));
+         if Na > 0 then Emit ("activation", C.Activation_Values (E.all)); end if;
       end loop;
    end;
    C.Free (E.all, Result); Check;

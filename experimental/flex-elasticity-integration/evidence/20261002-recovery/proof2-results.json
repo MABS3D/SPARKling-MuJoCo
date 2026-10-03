@@ -1,0 +1,80 @@
+[
+  {
+    "label": "Tension",
+    "exit": 0,
+    "seconds": 37.83830578099969,
+    "command": [
+      "gnatprove",
+      "-P",
+      "/var/tmp/sparkling-recovery-flex-elasticity-proof2-20261002/kernels.gpr",
+      "-u",
+      "mj-flex_elastic_kernels.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=10",
+      "--memlimit=650",
+      "--steps=0",
+      "--proof=per_check",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-flex_elastic_kernels.adb:10"
+    ],
+    "proved": 51,
+    "open": 0,
+    "warnings": 0
+  },
+  {
+    "label": "whole",
+    "exit": 0,
+    "seconds": 78.08846902300002,
+    "command": [
+      "gnatprove",
+      "-P",
+      "/var/tmp/sparkling-recovery-flex-elasticity-proof2-20261002/kernels.gpr",
+      "-u",
+      "mj-flex_elastic_kernels.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=10",
+      "--memlimit=650",
+      "--steps=0",
+      "--proof=per_check",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off"
+    ],
+    "proved": 145,
+    "open": 0,
+    "warnings": 0
+  },
+  {
+    "label": "integration-flow",
+    "exit": 1,
+    "seconds": 33.083459590000075,
+    "command": [
+      "gnatprove",
+      "-P",
+      "/var/tmp/sparkling-recovery-flex-elasticity2-20261002/source/experimental/flex-elasticity-integration/flex.gpr",
+      "-u",
+      "mj-data-flex_elasticity.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=10",
+      "--memlimit=650",
+      "--steps=0",
+      "--proof=per_check",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--mode=flow",
+      "--no-inlining"
+    ],
+    "proved": 30,
+    "open": 17,
+    "warnings": 81
+  }
+]

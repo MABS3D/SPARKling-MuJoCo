@@ -65,7 +65,7 @@ package body MJ.SDF_Fields with SPARK_Mode is
       Distance := Sqrt (Sum);
    end Project;
 
-   procedure Locate (F : Field; T : Octree; X : Vec;
+   procedure Locate_Admitted (F : Field; T : Octree; X : Vec;
                      Leaf : out Natural; W : out Corner_Values;
                      DW : out Corner_Gradients; Result : out Status) is
       N : Natural := F.First;
@@ -102,6 +102,13 @@ package body MJ.SDF_Fields with SPARK_Mode is
          N := F.First + T (N).Child (Child);
       end loop;
       Result := Iteration_Limit;
+   end Locate_Admitted;
+
+   procedure Locate (F : Field; T : Octree; X : Vec;
+                     Leaf : out Natural; W : out Corner_Values;
+                     DW : out Corner_Gradients; Result : out Status) is
+   begin
+      Locate_Admitted (F, T, X, Leaf, W, DW, Result);
    end Locate;
 
    procedure Oct_Value (F : Field; T : Octree; X : Vec; Value : out Real; Result : out Status) is
@@ -114,13 +121,13 @@ package body MJ.SDF_Fields with SPARK_Mode is
       Value := 0.0;
       Project (P, T (F.First).Bounds, D);
       if (for some Q of P => Q not in -1.0e10 .. 1.0e10) then Result := Numeric_Limit; return; end if;
-      Locate (F, T, P, Leaf, W, DW, Result);
+      Locate_Admitted (F, T, P, Leaf, W, DW, Result);
       if Result /= Success then return; end if;
       Value := Interpolate (W, T (Leaf).Coeff);
       if D > 0.0 then Value := Value + D; end if;
    end Oct_Value;
 
-   procedure Evaluate (F : Field; T : Octree; X : Vec; Need_Gradient : Boolean;
+   procedure Evaluate_Admitted (F : Field; T : Octree; X : Vec; Need_Gradient : Boolean;
                        Value : out Real; Gradient : out Vec; Result : out Status) is
       A, B, P, G0, G1 : Vec := Zero;
       N, M, R, E, C, DF0, DF1 : Real;
@@ -137,7 +144,7 @@ package body MJ.SDF_Fields with SPARK_Mode is
          if Result /= Success or not Need_Gradient then return; end if;
          P := X; Project (P, T (F.First).Bounds, R);
          if R <= 0.0 then
-            Locate (F, T, P, Leaf, W, DW, Result);
+            Locate_Admitted (F, T, P, Leaf, W, DW, Result);
             if Result /= Success then return; end if;
             for J in 0 .. 7 loop
                for K in Axis loop Gradient (K) := Gradient (K) + DW (J)(K)*T (Leaf).Coeff (J); end loop;
@@ -208,10 +215,17 @@ package body MJ.SDF_Fields with SPARK_Mode is
             else
                N := Norm (B); Value := N + Real'Min (Real'Max (A (0), Real'Max (A (1), A (2))), 0.0);
                if Need_Gradient then
-                  if N = 0.0 then return; end if;
-                  for K in Axis loop
-                     if A (K) > 0.0 then Gradient (K) := (B (K)/N * X (K))/abs X (K); end if;
-                  end loop;
+                  if N = 0.0 then
+                     -- On the surface every conditional term in C is zero;
+                     -- its zero gradient is valid input to midsurface's
+                     -- normalization fallback. Retain numeric rejection only
+                     -- for an underflowed norm with a positive component.
+                     if (for some Q of A => Q > 0.0) then return; end if;
+                  else
+                     for K in Axis loop
+                        if A (K) > 0.0 then Gradient (K) := (B (K)/N * X (K))/abs X (K); end if;
+                     end loop;
+                  end if;
                end if;
             end if;
       end case;
@@ -219,5 +233,11 @@ package body MJ.SDF_Fields with SPARK_Mode is
          Value := 0.0; Gradient := Zero; return;
       end if;
       Result := Success;
+   end Evaluate_Admitted;
+
+   procedure Evaluate (F : Field; T : Octree; X : Vec; Need_Gradient : Boolean;
+                       Value : out Real; Gradient : out Vec; Result : out Status) is
+   begin
+      Evaluate_Admitted (F, T, X, Need_Gradient, Value, Gradient, Result);
    end Evaluate;
 end MJ.SDF_Fields;

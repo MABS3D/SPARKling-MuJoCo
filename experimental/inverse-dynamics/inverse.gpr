@@ -1,0 +1,27 @@
+project Inverse is
+   Build_Root := external ("INVERSE_BUILD_ROOT", "/var/tmp/sparkling-inverse");
+   Mode := external ("INVERSE_MODE", "validation");
+   for Source_Dirs use ("src", "tests", "../../src", "../../src/gen",
+     "../smooth/src", "../spatial-tendon-candidate/src", "../muscle-candidate/src",
+     "../rigid-collision-candidate/src", "../constraint-assembly-candidate/src",
+     "../constraint-solvers-candidate/src", "../joint-limit-candidate/src",
+     "../frictionless-contact-candidate/src", "../constrained-step/src");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Main use ("inverse_probe.adb", "inverse_bench.adb", "inverse_rows_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O1", "-g", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+   package Linker is
+      for Default_Switches ("Ada") use ("-lm");
+   end Linker;
+end Inverse;

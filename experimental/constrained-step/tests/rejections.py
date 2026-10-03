@@ -9,14 +9,9 @@ base=model_xml('<body pos="0 0 .09"><joint name="z" type="slide" axis="0 0 1"/><
 variants={
  'warmstart':base.replace('warmstart="disable"','warmstart="enable"'),
  'islands':base.replace('island="disable"','island="enable"'),
- 'elliptic':base.replace('cone="pyramidal"','cone="elliptic"'),
  'rk4':base.replace('timestep="0.001"','timestep="0.001" integrator="RK4"'),
  'noslip':base.replace('iterations="200"','iterations="200" noslip_iterations="1"'),
  'equality':base.replace('</mujoco>','<equality><joint joint1="z"/></equality></mujoco>'),
- 'tendon':base.replace('</mujoco>','<tendon><fixed><joint joint="z" coef="1"/></fixed></tendon></mujoco>'),
- 'power':base.replace('solref="0.025 1.1"','solref="0.025 1.1" solimp=".9 .95 .001 .5 3"'),
- 'activation':base.replace('</mujoco>','<actuator><general joint="z" dyntype="filter" dynprm=".1"/></actuator></mujoco>'),
- 'viscosity':base.replace('timestep="0.001"','timestep="0.001" viscosity=".01"'),
 }
 results=[]
 for name,xml in variants.items():

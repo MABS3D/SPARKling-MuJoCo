@@ -1,0 +1,38 @@
+--- a/experimental/constrained-step/src/mj-data-constrained-body_adhesion.adb
++++ b/experimental/constrained-step/src/mj-data-constrained-body_adhesion.adb
+@@ -43,7 +43,7 @@
+ 
+    -- C compresses zero moment entries before its four-lane sparse dot.
+    function Sparse_Velocity (Moment : A.Moment_Array; Velocity : Real_Array) return Real is
+-      Terms : Real_Array (0 .. Moment'Length - 1);
++      Terms : Real_Array (0 .. Moment'Length - 1) := [others => 0.0];
+       N : Natural := 0;
+       R0, R1, R2, R3 : Real := 0.0;
+       K : Natural := 0;
+@@ -55,12 +55,16 @@
+          end if;
+       end loop;
+       while K + 3 < N loop
++         pragma Loop_Variant (Decreases => N - K);
+          R0 := R0 + Terms (K); R1 := R1 + Terms (K+1);
+          R2 := R2 + Terms (K+2); R3 := R3 + Terms (K+3);
+          K := K + 4;
+       end loop;
+       R0 := ((R0 + R1) + R2) + R3;
+-      while K < N loop R0 := R0 + Terms (K); K := K + 1; end loop;
++      while K < N loop
++         pragma Loop_Variant (Decreases => N - K);
++         R0 := R0 + Terms (K); K := K + 1;
++      end loop;
+       return R0;
+    end Sparse_Velocity;
+ 
+@@ -109,7 +113,7 @@
+       end loop;
+       for Id in E.D.Actuator_Config'Range loop
+          declare
+-            C : Actuator_Parameters renames E.D.Actuator_Config (Id);
++            C : constant Actuator_Parameters := E.D.Actuator_Config (Id);
+             F : constant Real := E.D.Actuators.Force (Id);
+          begin
+             if C.Body_Transmission then

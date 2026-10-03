@@ -1,0 +1,663 @@
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -1,4 +1,5 @@
+ with Interfaces;
++with MJ.Data.Constrained.Body_Adhesion;
+ with MJ.Models.Validity;
+ with MJ.Data.Forward;
+ with MJ.Data.Pipeline;
+@@ -35,6 +36,12 @@
+    function Activation_Values (E : Engine) return Real_Array is (MJ.Data.Activation_Values (E.D));
+    function Activation_Rates (E : Engine) return Real_Array is (MJ.Data.Activation_Rates (E.D));
+    function Diagnostics (E : Engine) return Trace is (E.T);
++   function Adhesion_Moment (E : Engine; Index : Natural) return Real_Array is
++     (if Index < E.D.Na and then E.D.Actuator_Config (Index).Body_Transmission then
++        [for V in 0 .. E.D.Nv - 1 => E.Body_Moments (Index+1, V+1)]
++      else [0 .. E.D.Nv - 1 => 0.0]);
++   function Actuator_Forces (E : Engine) return Real_Array is (E.D.Actuators.Force.all);
++   function Actuator_Velocities (E : Engine) return Real_Array is (E.D.Actuators.Velocity.all);
+    function Equality_Count (E : Engine) return Natural is (E.Ne);
+    function Equality_Active (E : Engine; Index : Natural) return Boolean is
+      (E.Equalities (Index).Active);
+@@ -64,6 +71,7 @@
+ 
+    procedure Create (M : in out MJ.Models.Model; E : in out Engine; Result : out Status) is
+       Original_Flags : constant Integer := M.Opt.Disableflags;
++      Original_Adhesion : constant Boolean := M.Flg_Adhesion;
+       Shapes : Scene.Geometry_Array (0 .. Max_G - 1);
+       Empty_Pairs : Scene.Declared_Array (1 .. 0);
+       Empty_Exclusions : RG.Exclusion_Array (1 .. 0);
+@@ -81,7 +89,7 @@
+         or else M.S.Njnt > Max_V or else M.S.Nbody > Max_Bodies then Result := Capacity_Exceeded; return; end if;
+       if M.S.Nflex /= 0
+         or else M.S.Nplugin /= 0 or else M.S.Nhistory /= 0 or else M.S.Npair /= 0
+-        or else M.S.Nexclude /= 0 or else M.Flg_Adhesion
++        or else M.S.Nexclude /= 0
+         or else M.Opt.Integrator /= 0
+         or else M.Opt.Cone not in 0 .. 1 or else M.Opt.Noslip_Iterations /= 0
+         or else M.Opt.Enableflags /= 0
+@@ -189,17 +197,29 @@
+       if not Disabled (M.Opt.Disableflags, Dsbl_Constraint) then
+          M.Opt.Disableflags := M.Opt.Disableflags + Dsbl_Constraint;
+       end if;
++      -- This entry owns the contact-dependent transmission; restore the
++      -- exclusively borrowed feature flag on every exit.
++      M.Flg_Adhesion := False;
+       MJ.Data.Create (M, E.D, Result);
++      M.Flg_Adhesion := Original_Adhesion;
++      E.Has_Adhesion := False;
++      if Result = Success then
++         for C of E.D.Actuator_Config.all loop
++            E.Has_Adhesion := E.Has_Adhesion or else C.Body_Transmission;
++         end loop;
++      end if;
+       M.Opt.Disableflags := Original_Flags;
+       E.Initialized := Result = Success;
+       E.T.Valid := False;
+       if Result /= Success then MJ.Constrained_Assets.Release (E.Assets); end if;
+    exception
+       when Constraint_Error =>
++         M.Flg_Adhesion := Original_Adhesion;
+          M.Opt.Disableflags := Original_Flags;
+          MJ.Constrained_Assets.Release (E.Assets);
+          MJ.Data.Free (E.D); E.Initialized := False; Result := Unsupported_Feature;
+       when others =>
++         M.Flg_Adhesion := Original_Adhesion;
+          M.Opt.Disableflags := Original_Flags;
+          MJ.Constrained_Assets.Release (E.Assets); raise;
+    end Create;
+@@ -684,6 +704,9 @@
+       E.T.Valid := False;
+       Result := Not_Allocated;
+       if not Ready (E) then return; end if;
++      if E.Has_Adhesion then
++         E.D.Cache.Actuation_Valid := False; E.D.Cache.Force_Valid := False;
++      end if;
+       MJ.Data.Forward.Evaluate (E.D, Result, External);
+       if Result /= Success then return; end if;
+       Generate_Contacts (E, Result);
+@@ -694,6 +717,10 @@
+       end if;
+       Assemble (E, Result);
+       if Result /= Success then return; end if;
++      if E.Has_Adhesion then
++         Body_Adhesion.Apply (E, Result, External);
++         if Result /= Success then return; end if;
++      end if;
+       Prepare_And_Solve (E, Result);
+    exception
+       when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
+--- a/experimental/constrained-step/src/mj-data-constrained.ads
++++ b/experimental/constrained-step/src/mj-data-constrained.ads
+@@ -23,6 +23,7 @@
+       J : MJ.Constraint_Solvers.Matrix (1 .. Max_R, 1 .. Max_V) := [others => [others => 0.0]];
+       Aref, R, Force : MJ.Constraint_Solvers.Vector (1 .. Max_R) := [others => 0.0];
+       A_Free, Acceleration, Constraint_Force : MJ.Constraint_Solvers.Vector (1 .. Max_V) := [others => 0.0];
++      Adhesion_Force : MJ.Constraint_Solvers.Vector (1 .. Max_V) := [others => 0.0];
+       Report : MJ.Constraint_Solvers.Report;
+    end record;
+    function Ready (E : Engine) return Boolean with Global => null;
+@@ -37,6 +38,10 @@
+    procedure Set_Mocap (E : in out Engine; Index : Natural;
+                         Position, Quaternion : State_Vector; Result : out Status);
+    function Diagnostics (E : Engine) return Trace with Global => null;
++   function Adhesion_Moment (E : Engine; Index : Natural) return Real_Array
++     with Global => null, Pre => Ready (E);
++   function Actuator_Forces (E : Engine) return Real_Array with Global => null, Pre => Ready (E);
++   function Actuator_Velocities (E : Engine) return Real_Array with Global => null, Pre => Ready (E);
+    function Equality_Count (E : Engine) return Natural with Global => null;
+    function Equality_Active (E : Engine; Index : Natural) return Boolean
+      with Global => null, Pre => Index < Equality_Count (E);
+@@ -44,6 +49,7 @@
+      (E : in out Engine; Index : Natural; Active : Boolean; Result : out Status);
+    procedure Create (M : in out MJ.Models.Model; E : in out Engine; Result : out Status)
+      with Post => M.Opt.Disableflags = M.Opt.Disableflags'Old
++       and then M.Flg_Adhesion = M.Flg_Adhesion'Old
+        and then (if Result = Success then Ready (E));
+    procedure Free (E : in out Engine; Result : out Status)
+      with Post => not Ready (E) and then Result = Success;
+@@ -139,6 +145,9 @@
+    type Engine is limited record
+       Initialized : Boolean := False;
+       D : MJ.Data.Simulation;
++      Has_Adhesion : Boolean := False;
++      Body_Moments : CS.Matrix (1 .. Max_Actuators, 1 .. Max_V)
++        := [others => [others => 0.0]];
+       Scene : MJ.Collision_Scene.Scene;
+       Assets : MJ.Constrained_Assets.Store;
+       Ng, Nj : Natural := 0;
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -203,7 +203,9 @@
+      Global => null,
+      Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Actuator_Layout_OK (S, Fields)
+        and then A < S.Nactuator,
+-     Post => (Actuator_Element'Result = Success) = (Fields.Actuator_Trntype (A) in 0 .. 1 and then ((Fields.Actuator_Dyntype (A) in 0 .. 3
++     Post => (Actuator_Element'Result = Success) = ((Fields.Actuator_Trntype (A) in 0 .. 1 or else
++          (Fields.Actuator_Trntype (A) = 5 and then Fields.Actuator_Gaintype (A) = 0
++            and then Fields.Actuator_Biastype (A) = 0)) and then ((Fields.Actuator_Dyntype (A) in 0 .. 3
+           and then Fields.Actuator_Gaintype (A) = 0 and then Fields.Actuator_Biastype (A) in 0 .. 1)
+           or else (Fields.Actuator_Dyntype (A) = 4 and then Fields.Actuator_Gaintype (A) = 2
+             and then Fields.Actuator_Biastype (A) = 2))
+@@ -214,7 +216,9 @@
+           and then Fields.Actuator_Dampingpoly (2 * A + 1) = 0.0 and then Fields.Actuator_Armature (A) = 0.0)
+    is
+    begin
+-         if Fields.Actuator_Trntype (A) not in 0 .. 1
++         if not (Fields.Actuator_Trntype (A) in 0 .. 1 or else
++           (Fields.Actuator_Trntype (A) = 5 and then Fields.Actuator_Gaintype (A) = 0
++             and then Fields.Actuator_Biastype (A) = 0))
+            or else not ((Fields.Actuator_Dyntype (A) in 0 .. 3
+              and then Fields.Actuator_Gaintype (A) = 0 and then Fields.Actuator_Biastype (A) in 0 .. 1)
+              or else (Fields.Actuator_Dyntype (A) = 4 and then Fields.Actuator_Gaintype (A) = 2
+@@ -597,10 +601,12 @@
+      (S : MJ.Models.Sizes; Source : MJ.Models.Actuator_Arrays;
+       Index : Natural; Item : Actuator_Parameters) return Boolean is
+      (Bounded (Item.Bias, Max_Val)
+-       and then Item.Joint_Id = Source.Actuator_Trnid (2 * Index)
++       and then Item.Body_Transmission = (Source.Actuator_Trntype (Index) = 5)
++       and then Item.Body_Id = (if Item.Body_Transmission then Source.Actuator_Trnid (2 * Index) else -1)
++       and then Item.Joint_Id = (if Item.Body_Transmission then 0 else Source.Actuator_Trnid (2 * Index))
+        and then Item.Control_Id = Source.Actuator_Ctrladr (Index) and then Item.Control_Id < S.Nu
+        and then Item.Output_Id = Source.Actuator_Outadr (Index) and then Item.Output_Id < S.Nout
+-       and then Item.Gear = Source.Actuator_Gear (6 * Item.Output_Id)
++       and then Item.Gear = (if Item.Body_Transmission then 0.0 else Source.Actuator_Gear (6 * Item.Output_Id))
+        and then Item.Gain = Source.Actuator_Gainprm (10 * Index)
+        and then Item.Bias = (if Source.Actuator_Biastype (Index) = 1
+          then Read_Vector (Source.Actuator_Biasprm.all, 10 * Index) else Zero)
+@@ -639,8 +645,11 @@
+       then
+          return;
+       end if;
+-      Item := (Joint_Id => Source.Actuator_Trnid (2 * Index), Control_Id => U, Output_Id => O,
+-        Gear => Source.Actuator_Gear (6 * O), Gain => Source.Actuator_Gainprm (10 * Index), Bias => Bias,
++      Item := (Body_Transmission => Source.Actuator_Trntype (Index) = 5,
++        Body_Id => (if Source.Actuator_Trntype (Index) = 5 then Source.Actuator_Trnid (2 * Index) else -1),
++        Joint_Id => (if Source.Actuator_Trntype (Index) = 5 then 0 else Source.Actuator_Trnid (2 * Index)),
++        Control_Id => U, Output_Id => O,
++        Gear => (if Source.Actuator_Trntype (Index) = 5 then 0.0 else Source.Actuator_Gear (6 * O)), Gain => Source.Actuator_Gainprm (10 * Index), Bias => Bias,
+         Control_Limited => Source.Actuator_Ctrllimited (U) /= 0,
+         Force_Limited => Source.Actuator_Forcelimited (Index) /= 0,
+         Control_Lower => Source.Actuator_Ctrlrange (2 * U), Control_Upper => Source.Actuator_Ctrlrange (2 * U + 1),
+@@ -983,6 +992,15 @@
+       Ok := False;
+       for A in 0 .. D.Na - 1 loop
+          Id := M.Actuators.Actuator_Trnid (2 * A);
++         if D.Actuator_Config (A).Body_Transmission then
++            if Id not in 0 .. M.S.Nbody - 1 then return; end if;
++            -- A zero scalar smooth moment has a valid shape for any admitted
++            -- joint layout. Body_Id retains the actual contact producer.
++            D.Actuator_Config (A).Joint_Id := 0;
++            D.Actuator_Config (A).Position_Id := 0;
++            D.Actuator_Config (A).Joint_Type := 3;
++            D.Actuator_Config (A).Wrench_Gear := [others => 0.0];
++         else
+          if Id not in 0 .. M.S.Njnt - 1 then return; end if;
+          V := M.Joints.Jnt_Dofadr (Id); Q := M.Joints.Jnt_Qposadr (Id);
+          Kind := M.Joints.Jnt_Type (Id);
+@@ -995,6 +1013,7 @@
+             if M.Actuators.Actuator_Gear (6 * A + K) not in Tier0_Real then return; end if;
+             D.Actuator_Config (A).Wrench_Gear (K) := M.Actuators.Actuator_Gear (6 * A + K);
+          end loop;
++         end if;
+       end loop;
+       Ok := True;
+    end Remap_Actuators;
+--- a/experimental/smooth/src/mj-smooth_actuation.ads
++++ b/experimental/smooth/src/mj-smooth_actuation.ads
+@@ -6,6 +6,10 @@
+ package MJ.Smooth_Actuation with SPARK_Mode is
+    use type MJ.Activation.Dynamics;
+    type Parameters is record
++      -- Zero smooth moment; the constrained contact adapter supplies this
++      -- body transmission after contact assembly and before constraint solve.
++      Body_Transmission : Boolean := False;
++      Body_Id : Integer := -1;
+       Muscle_Mode : Boolean := False;
+       Muscle : MJ.Muscle_Actuation.Configuration;
+       Kind : MJ.Activation.Dynamics := MJ.Activation.None;
+--- /dev/null
++++ b/experimental/constrained-step/src/mj-adhesion.adb
+@@ -0,0 +1,116 @@
++package body MJ.Adhesion with SPARK_Mode is
++   procedure Select_Rows (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      W : out Weight_Array; Count : out Contact_Count) is
++   begin
++      W := (others => 0.0); Count := 0;
++      for I in Cs'Range loop
++         if Relevant (Cs (I), Body_Id) then
++            Count := Count + 1;
++            if Cs (I).Exclude = 0 then
++               for K in 0 .. Width (Cs (I), Kind)-1 loop
++                  W (Cs (I).Address+K) := Row_Weight (Cs (I), Kind);
++                  pragma Loop_Invariant (Static => (for all R in W'Range => W (R) =
++                    (if R >= Cs (I).Address and then R-Cs (I).Address <= K then Row_Weight (Cs (I), Kind)
++                     else Selected_Weight (Cs, Body_Id, Kind, R, I))));
++               end loop;
++            end if;
++         end if;
++         pragma Loop_Invariant (Static => Count = Relevant_Count (Cs, Body_Id, I+1));
++         pragma Loop_Invariant (Static => (for all R in W'Range => W (R) = Selected_Weight (Cs, Body_Id, Kind, R, I+1)));
++      end loop;
++   end Select_Rows;
++   function Add (Acc : Sum_Value; Term : Tier0_Real; Count : Natural) return Sum_Value is
++   begin
++      return Acc + Term;
++   end Add;
++   procedure Unfold_Active (J : Jacobian; W : Weight_Array; Col, Count : Natural) is
++   begin null; end Unfold_Active;
++   procedure Unfold_Gap (Cs : Contact_Array; G : Jacobian; Body_Id, Col, Count : Natural) is
++   begin null; end Unfold_Gap;
++   function Active_Column (J : Jacobian; W : Weight_Array; Col : Natural) return Sum_Value is
++      A : Sum_Value := 0.0;
++   begin
++      for R in W'Range loop
++         Unfold_Active (J,W,Col,R);
++         pragma Assert (Static => A = Active_Sum (J,W,Col,R));
++         pragma Assert (Static => Active_Sum (J,W,Col,R+1) = Add (A,J(R,Col)*W(R),R));
++         A := Add (A,J(R,Col)*W(R),R);
++         pragma Loop_Invariant (Static => A = Active_Sum (J,W,Col,R+1));
++         pragma Loop_Invariant (abs A <= Real(R+1)*Step_Bound);
++      end loop;
++      return A;
++   end Active_Column;
++   function Gap_Column (Cs : Contact_Array; G : Jacobian; Body_Id, Col : Natural) return Sum_Value is
++      A : Sum_Value := 0.0;
++   begin
++      for I in Cs'Range loop
++         Unfold_Gap (Cs,G,Body_Id,Col,I);
++         if Relevant (Cs(I),Body_Id) and then Cs(I).Exclude = 1 then
++            A := Add (A,G(I,Col),I);
++         end if;
++         pragma Loop_Invariant (Static => A = Gap_Sum (Cs,G,Body_Id,Col,I+1));
++         pragma Loop_Invariant (abs A <= Real(I+1)*Step_Bound);
++      end loop;
++      return A;
++   end Gap_Column;
++   function Normalize (Active, Gap : Sum_Value; Count : Contact_Count) return Component is
++      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Normalized);
++   begin
++      return (if Count = 0 then 0.0 else (Active+Gap)*(-1.0/Real(Count)));
++   end Normalize;
++   procedure Equal_Normalized (A,G,A2,G2 : Sum_Value; Count : Contact_Count) is
++      pragma Annotate (GNATprove, Unhide_Info, "Expression_Function_Body", Normalized);
++   begin null; end Equal_Normalized;
++   procedure Equal_Active (J : Jacobian; W,W2 : Weight_Array; Col,Count : Natural) is
++   begin
++      if Count>0 then
++         Equal_Active(J,W,W2,Col,Count-1);
++         Unfold_Active(J,W,Col,Count-1);
++         Unfold_Active(J,W2,Col,Count-1);
++         pragma Assert (J(Count-1,Col)*W(Count-1) = J(Count-1,Col)*W2(Count-1));
++      end if;
++   end Equal_Active;
++   function Column_For (Cs : Contact_Array; J, Gap_J : Jacobian; W : Weight_Array;
++      Body_Id, Col : Natural; Count : Contact_Count) return Component is
++      A : constant Sum_Value := Active_Column (J,W,Col);
++      G : constant Sum_Value := Gap_Column (Cs,Gap_J,Body_Id,Col);
++   begin
++      pragma Assert_And_Cut (Static => Cs'First = 0 and then Cs'Length <= 1024
++        and then J'First (1) = 0 and then W'First = 0 and then J'Length (1) = W'Length
++        and then W'Length <= 10240 and then Col in J'Range (2)
++        and then Gap_J'First (1) = 0 and then Gap_J'Length (1) = Cs'Length and then Col in Gap_J'Range (2)
++        and then A = Active_Sum (J,W,Col,W'Length)
++        and then G = Gap_Sum (Cs,Gap_J,Body_Id,Col,Cs'Length));
++      Equal_Normalized(A,G,Active_Sum(J,W,Col,W'Length),Gap_Sum(Cs,Gap_J,Body_Id,Col,Cs'Length),Count);
++      return Normalize (A,G,Count);
++   end Column_For;
++   procedure Project (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      J, Gap_J : Jacobian; Moment : out Moment_Array) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Active_Sum);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Gap_Sum);
++      W : Weight_Array (J'Range (1));
++      Expected : constant Weight_Array := Expected_Weights(Cs,Body_Id,Kind,J'Length(1)) with Ghost => Static;
++      N : Contact_Count;
++   begin
++      Select_Rows (Cs, Body_Id, Kind, W, N);
++      pragma Assert (Static => W = Expected);
++      for K in Moment'Range loop
++         Moment (K) := Column_For (Cs,J,Gap_J,W,Body_Id,K,N);
++         Equal_Active(J,W,Expected,K,W'Length);
++         Equal_Normalized(Active_Sum(J,W,K,W'Length),Gap_Sum(Cs,Gap_J,Body_Id,K,Cs'Length),
++           Active_Sum(J,Expected,K,W'Length),Gap_Sum(Cs,Gap_J,Body_Id,K,Cs'Length),N);
++         pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Moment (L)'Initialized));
++         pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Moment (L)'Initialized
++           and then Moment (L) = Normalized (Active_Sum (J,Expected,L,W'Length),
++             Gap_Sum (Cs,Gap_J,Body_Id,L,Cs'Length),N)));
++      end loop;
++   end Project;
++   procedure Apply_Force (Moment : Moment_Array; Force : Tier0_Real; Generalized : out Force_Array) is
++   begin
++      for K in Moment'Range loop
++         Generalized (K) := Force * Moment (K);
++         pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Generalized (L)'Initialized));
++         pragma Loop_Invariant (Static => (for all L in Moment'First .. K => Generalized (L) = Force * Moment (L)));
++      end loop;
++   end Apply_Force;
++end MJ.Adhesion;
+--- /dev/null
++++ b/experimental/constrained-step/src/mj-adhesion.ads
+@@ -0,0 +1,157 @@
++with MJ.Types; use MJ.Types;
++package MJ.Adhesion with SPARK_Mode is
++   -- Body transmission of MuJoCo 3.14.0. Rows are the assembled constraint
++   -- Jacobian; Gap_J is the normal projection of jacDifPair for excluded=1.
++   -- Flex contacts and exclusions 2/3 do not participate.
++   type Cone is (Pyramidal, Elliptic);
++   subtype Contact_Count is Natural range 0 .. 1024;
++   subtype Row_Count is Natural range 0 .. 10240;
++   type Contact is record
++      Rigid_Geoms : Boolean := True;
++      Body1, Body2 : Natural := 0;
++      Exclude : Natural range 0 .. 3 := 0;
++      Dim : Positive range 1 .. 6 := 1;
++      Address : Natural := 0;
++   end record;
++   type Contact_Array is array (Natural range <>) of Contact;
++   subtype Weight is Real range 0.0 .. 1.0;
++   type Weight_Array is array (Natural range <>) of Weight;
++   type Jacobian is array (Natural range <>, Natural range <>) of Tier0_Real;
++   subtype Sum_Value is Real range -1.0e25 .. 1.0e25;
++   subtype Component is Real range -1.0e26 .. 1.0e26;
++   type Moment_Array is array (Natural range <>) of Component;
++   type Force_Array is array (Natural range <>) of Tier3_Real;
++   Step_Bound : constant Real := 2.0 ** 60;
++   function Relevant (C : Contact; Body_Id : Natural) return Boolean is
++     (C.Rigid_Geoms and then (C.Body1 = Body_Id or else C.Body2 = Body_Id)
++      and then C.Exclude <= 1) with Global => null;
++   function Width (C : Contact; Kind : Cone) return Positive is
++     (if C.Dim = 1 or else Kind = Elliptic then 1 else 2*(C.Dim-1))
++     with Global => null;
++   function Row_Weight (C : Contact; Kind : Cone) return Weight is
++     (if C.Dim = 1 or else Kind = Elliptic then 1.0 else 0.5 / Real (C.Dim-1))
++     with Global => null;
++   function Covers (C : Contact; Kind : Cone; Row : Natural) return Boolean is
++     (Row >= C.Address and then Row-C.Address < Width (C, Kind)) with Global => null;
++   function Valid_Contacts (Cs : Contact_Array; Kind : Cone; Rows : Row_Count)
++      return Boolean is
++     (Cs'First = 0 and then Cs'Length <= 1024 and then
++       (for all C of Cs => (if C.Rigid_Geoms and then C.Exclude = 0 then
++         C.Address < Rows and then Width (C, Kind) <= Rows-C.Address)))
++      with Global => null;
++   function Selected_Weight (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      Row, Count : Natural) return Weight is
++     (if Count = 0 then 0.0
++      elsif Relevant (Cs (Count-1), Body_Id) and then Cs (Count-1).Exclude = 0
++        and then Covers (Cs (Count-1), Kind, Row) then Row_Weight (Cs (Count-1), Kind)
++      else Selected_Weight (Cs, Body_Id, Kind, Row, Count-1))
++      with Ghost => Static, Global => null,
++      Pre => Cs'First = 0 and then Cs'Length <= 1024 and then Count <= Cs'Length,
++      Subprogram_Variant => (Decreases => Count);
++   function Relevant_Count (Cs : Contact_Array; Body_Id, Count : Natural) return Contact_Count is
++     (if Count = 0 then 0 else Relevant_Count (Cs, Body_Id, Count-1)
++       + (if Relevant (Cs (Count-1), Body_Id) then 1 else 0))
++      with Ghost => Static, Global => null,
++      Pre => Cs'First = 0 and then Cs'Length <= 1024 and then Count <= Cs'Length,
++      Post => Relevant_Count'Result <= Count,
++      Subprogram_Variant => (Decreases => Count);
++   function Expected_Weights (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      Rows : Row_Count) return Weight_Array is
++     ([for R in 0 .. Integer(Rows)-1 => Selected_Weight(Cs,Body_Id,Kind,R,Cs'Length)])
++      with Ghost => Static, Global => null,
++      Pre => Cs'First=0 and then Cs'Length<=1024,
++      Post => Expected_Weights'Result'First=0 and then Expected_Weights'Result'Length=Rows
++        and then (for all R in Expected_Weights'Result'Range =>
++          Expected_Weights'Result(R) = Selected_Weight(Cs,Body_Id,Kind,R,Cs'Length)),
++      Annotate => (GNATprove, Hide_Info, "Expression_Function_Body");
++   procedure Select_Rows (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      W : out Weight_Array; Count : out Contact_Count) with Global => null,
++      Pre => W'First = 0 and then W'Length <= 10240
++        and then Valid_Contacts (Cs, Kind, W'Length),
++      Post => (Static => Count = Relevant_Count (Cs, Body_Id, Cs'Length)
++        and then (for all R in W'Range => W (R) = Selected_Weight (Cs, Body_Id, Kind, R, Cs'Length)));
++   function Add (Acc : Sum_Value; Term : Tier0_Real; Count : Natural) return Sum_Value
++      with Global => null, Pre => Count < 10240 and then abs Acc <= Real (Count)*Step_Bound,
++      Post => Add'Result = Acc + Term
++        and then abs Add'Result <= Real (Count+1)*Step_Bound;
++   function Active_Sum (J : Jacobian; W : Weight_Array; Col, Count : Natural)
++      return Sum_Value is
++     (if Count = 0 then 0.0 else
++       Add (Active_Sum (J, W, Col, Count-1), J (Count-1, Col)*W (Count-1), Count-1))
++      with Ghost => Static, Global => null,
++      Pre => J'First (1) = 0 and then W'First = 0 and then J'Length (1) = W'Length
++        and then W'Length <= 10240 and then Col in J'Range (2) and then Count <= W'Length,
++      Post => abs Active_Sum'Result <= Real (Count)*Step_Bound,
++      Subprogram_Variant => (Decreases => Count);
++   function Gap_Sum (Cs : Contact_Array; G : Jacobian; Body_Id, Col, Count : Natural)
++      return Sum_Value is
++     (if Count = 0 then 0.0
++      elsif Relevant (Cs (Count-1), Body_Id) and then Cs (Count-1).Exclude = 1 then
++        Add (Gap_Sum (Cs, G, Body_Id, Col, Count-1), G (Count-1, Col), Count-1)
++      else Gap_Sum (Cs, G, Body_Id, Col, Count-1))
++      with Ghost => Static, Global => null,
++      Pre => Cs'First = 0 and then Cs'Length <= 1024 and then G'First (1) = 0
++        and then G'Length (1) = Cs'Length and then Col in G'Range (2) and then Count <= Cs'Length,
++      Post => abs Gap_Sum'Result <= Real (Count)*Step_Bound,
++      Subprogram_Variant => (Decreases => Count);
++   procedure Unfold_Active (J : Jacobian; W : Weight_Array; Col, Count : Natural) with
++     Ghost => Static, Global => null,
++     Pre => J'First (1) = 0 and then W'First = 0 and then J'Length (1) = W'Length
++       and then W'Length <= 10240 and then Col in J'Range (2) and then Count < W'Length,
++     Post => Active_Sum (J,W,Col,Count+1) = Add (Active_Sum (J,W,Col,Count),J(Count,Col)*W(Count),Count);
++   procedure Unfold_Gap (Cs : Contact_Array; G : Jacobian; Body_Id, Col, Count : Natural) with
++     Ghost => Static, Global => null,
++     Pre => Cs'First = 0 and then Cs'Length <= 1024 and then G'First (1) = 0
++       and then G'Length (1) = Cs'Length and then Col in G'Range (2) and then Count < Cs'Length,
++     Post => Gap_Sum (Cs,G,Body_Id,Col,Count+1) =
++       (if Relevant (Cs(Count),Body_Id) and then Cs(Count).Exclude = 1 then
++         Add (Gap_Sum (Cs,G,Body_Id,Col,Count),G(Count,Col),Count)
++        else Gap_Sum (Cs,G,Body_Id,Col,Count));
++   function Active_Column (J : Jacobian; W : Weight_Array; Col : Natural) return Sum_Value with
++     Inline_Always, Global => null,
++     Pre => J'First (1) = 0 and then W'First = 0 and then J'Length (1) = W'Length
++       and then W'Length <= 10240 and then Col in J'Range (2),
++     Post => (Static => Active_Column'Result = Active_Sum (J,W,Col,W'Length));
++   function Gap_Column (Cs : Contact_Array; G : Jacobian; Body_Id, Col : Natural) return Sum_Value with
++     Inline_Always, Global => null,
++     Pre => Cs'First = 0 and then Cs'Length <= 1024 and then G'First (1) = 0
++       and then G'Length (1) = Cs'Length and then Col in G'Range (2),
++     Post => (Static => Gap_Column'Result = Gap_Sum (Cs,G,Body_Id,Col,Cs'Length));
++   function Normalized (Active, Gap : Sum_Value; Count : Contact_Count) return Component is
++     (if Count = 0 then 0.0 else (Active + Gap) * (-1.0 / Real (Count)))
++      with Ghost => Static, Global => null, Annotate => (GNATprove, Hide_Info, "Expression_Function_Body");
++   function Normalize (Active, Gap : Sum_Value; Count : Contact_Count) return Component with
++      Global => null, Post => (Static => Normalize'Result = Normalized (Active,Gap,Count));
++   procedure Equal_Normalized (A,G,A2,G2 : Sum_Value; Count : Contact_Count) with
++      Ghost => Static, Global => null, Pre => A = A2 and then G = G2,
++      Post => Normalized(A,G,Count) = Normalized(A2,G2,Count);
++   procedure Equal_Active (J : Jacobian; W,W2 : Weight_Array; Col,Count : Natural) with
++      Ghost => Static, Global => null,
++      Pre => J'First(1)=0 and then W'First=0 and then W2'First=0
++        and then W'Length=J'Length(1) and then W2'Length=W'Length and then W'Length<=10240
++        and then Col in J'Range(2) and then Count<=W'Length and then W=W2,
++      Post => Active_Sum(J,W,Col,Count) = Active_Sum(J,W2,Col,Count),
++      Subprogram_Variant => (Decreases => Count);
++   function Column_For (Cs : Contact_Array; J, Gap_J : Jacobian; W : Weight_Array;
++      Body_Id, Col : Natural; Count : Contact_Count) return Component with Global => null,
++      Pre => Cs'First = 0 and then Cs'Length <= 1024
++        and then J'First (1) = 0 and then W'First = 0 and then J'Length (1) = W'Length
++        and then W'Length <= 10240 and then Col in J'Range (2)
++        and then Gap_J'First (1) = 0 and then Gap_J'Length (1) = Cs'Length and then Col in Gap_J'Range (2),
++      Post => (Static => Column_For'Result = Normalized
++        (Active_Sum (J,W,Col,W'Length),Gap_Sum (Cs,Gap_J,Body_Id,Col,Cs'Length),Count));
++   procedure Project (Cs : Contact_Array; Body_Id : Natural; Kind : Cone;
++      J, Gap_J : Jacobian; Moment : out Moment_Array) with Global => null, Relaxed_Initialization => Moment,
++      Pre => J'First (1) = 0 and then J'Length (1) <= 10240
++        and then Valid_Contacts (Cs, Kind, J'Length (1))
++        and then Gap_J'First (1) = 0 and then Gap_J'Length (1) = Cs'Length
++        and then J'First (2) = Gap_J'First (2) and then J'Last (2) = Gap_J'Last (2)
++        and then Moment'First = J'First (2) and then Moment'Last = J'Last (2),
++      Post => (Static => Moment'Initialized and then (for all K in Moment'Range =>
++        Moment (K) = Normalized
++          (Active_Sum (J, Expected_Weights(Cs,Body_Id,Kind,J'Length(1)), K, J'Length (1)),
++           Gap_Sum (Cs, Gap_J, Body_Id, K, Cs'Length), Relevant_Count (Cs, Body_Id, Cs'Length))));
++   procedure Apply_Force (Moment : Moment_Array; Force : Tier0_Real; Generalized : out Force_Array)
++      with Global => null, Relaxed_Initialization => Generalized, Pre => Generalized'First = Moment'First and then Generalized'Last = Moment'Last,
++      Post => (Static => Generalized'Initialized and then (for all K in Moment'Range => Generalized (K) = Force * Moment (K)));
++end MJ.Adhesion;
+--- /dev/null
++++ b/experimental/constrained-step/src/mj-data-constrained-body_adhesion.adb
+@@ -0,0 +1,151 @@
++with MJ.Adhesion;
++with MJ.Constrained_Kernels;
++with MJ.Data.Inertia_Phase;
++with MJ.Data.Manifold_Actuation;
++
++package body MJ.Data.Constrained.Body_Adhesion with SPARK_Mode is
++   use type CA.Cone_Kind;
++   package A renames MJ.Adhesion;
++   package CK renames MJ.Constrained_Kernels;
++
++   function Gap_Normal (E : Engine; C : MJ.Full_Contacts.Full_Contact)
++     return A.Moment_Array is
++      B1 : constant Natural := E.Geoms (C.Geoms.First).Body_Id;
++      B2 : constant Natural := E.Geoms (C.Geoms.Second).Body_Id;
++      R1 : constant Vector := Vector (C.Position) - E.D.Kinematic.Bodies (B1).Center;
++      R2 : constant Vector := Vector (C.Position) - E.D.Kinematic.Bodies (B2).Center;
++      Out_J : A.Moment_Array (0 .. E.D.Nv - 1);
++   begin
++      for V in Out_J'Range loop
++         declare
++            O1 : constant Natural := Jacobian_Offset (E.D, B1, V);
++            O2 : constant Natural := Jacobian_Offset (E.D, B2, V);
++            W1 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O1);
++            W2 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O2);
++            L1 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O1);
++            L2 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O2);
++            Linear : Vector;
++         begin
++            for X in 0 .. 2 loop
++               Linear (X) := CK.Point_Component
++                 (L2 (X), W2 ((X+1) mod 3), W2 ((X+2) mod 3),
++                  R2 ((X+1) mod 3), R2 ((X+2) mod 3))
++                 - CK.Point_Component
++                 (L1 (X), W1 ((X+1) mod 3), W1 ((X+2) mod 3),
++                  R1 ((X+1) mod 3), R1 ((X+2) mod 3));
++            end loop;
++            Out_J (V) := CK.Frame_Component
++              (Linear (0), Linear (1), Linear (2), C.Frame (0), C.Frame (1), C.Frame (2));
++         end;
++      end loop;
++      return Out_J;
++   end Gap_Normal;
++
++   -- C compresses zero moment entries before its four-lane sparse dot.
++   function Sparse_Velocity (Moment : A.Moment_Array; Velocity : Real_Array) return Real is
++      Terms : Real_Array (0 .. Moment'Length - 1);
++      N : Natural := 0;
++      R0, R1, R2, R3 : Real := 0.0;
++      K : Natural := 0;
++   begin
++      for V in Moment'Range loop
++         if Moment (V) /= 0.0 then
++            Terms (N) := Moment (V) * Velocity (V);
++            N := N + 1;
++         end if;
++      end loop;
++      while K + 3 < N loop
++         R0 := R0 + Terms (K); R1 := R1 + Terms (K+1);
++         R2 := R2 + Terms (K+2); R3 := R3 + Terms (K+3);
++         K := K + 4;
++      end loop;
++      R0 := ((R0 + R1) + R2) + R3;
++      while K < N loop R0 := R0 + Terms (K); K := K + 1; end loop;
++      return R0;
++   end Sparse_Velocity;
++
++   procedure Apply
++     (E : in out Engine; Result : out Status;
++      External : MJ.External_Forces.Wrench_Array) is
++      Nv : constant Natural := E.D.Nv;
++      Nr : constant Natural := E.Rows.Rows;
++      Nc : constant Natural := E.T.Ncontact;
++      Contacts : A.Contact_Array (0 .. Nc - 1);
++      J : A.Jacobian (0 .. Nr - 1, 0 .. Nv - 1) := [others => [others => 0.0]];
++      Gap_J : A.Jacobian (0 .. Nc - 1, 0 .. Nv - 1) := [others => [others => 0.0]];
++      Moment : A.Moment_Array (0 .. Nv - 1);
++      Force : A.Force_Array (0 .. Nv - 1);
++      Combined : Real_Array (0 .. Nv - 1) := [others => 0.0];
++      Cone : constant A.Cone := (if E.Cone = CA.Pyramidal then A.Pyramidal else A.Elliptic);
++      Speed : Real;
++   begin
++      Result := Numeric_Limit;
++      E.T.Adhesion_Force (1 .. Nv) := [others => 0.0];
++      for R in 1 .. Nr loop
++         for K in E.Rows.Descriptors (R).Offset + 1 ..
++           E.Rows.Descriptors (R).Offset + E.Rows.Descriptors (R).Nonzeros loop
++            if E.Rows.Values (K) not in Tier0_Real then return; end if;
++            J (R-1, E.Rows.Columns (K)) := E.Rows.Values (K);
++         end loop;
++      end loop;
++      for Id in Contacts'Range loop
++         declare
++            C : MJ.Full_Contacts.Full_Contact renames E.Contacts (Id);
++         begin
++            Contacts (Id) :=
++              (Rigid_Geoms => E.Endpoints (Id).Geom0 >= 0 and then E.Endpoints (Id).Geom1 >= 0,
++               Body1 => E.Endpoints (Id).Body0,
++               Body2 => E.Endpoints (Id).Body1,
++               Exclude => (if C.Excluded then 1 elsif C.Efc_Address < 0 then 3 else 0),
++               Dim => C.Dim, Address => Integer'Max (0, C.Efc_Address));
++            if Contacts (Id).Rigid_Geoms and then C.Excluded then
++               Moment := Gap_Normal (E, C);
++               for V in Moment'Range loop
++                  if Moment (V) not in Tier0_Real then return; end if;
++                  Gap_J (Id, V) := Moment (V);
++               end loop;
++            end if;
++         end;
++      end loop;
++      for Id in E.D.Actuator_Config'Range loop
++         declare
++            C : Actuator_Parameters renames E.D.Actuator_Config (Id);
++            F : constant Real := E.D.Actuators.Force (Id);
++         begin
++            if C.Body_Transmission then
++               A.Project (Contacts, C.Body_Id, Cone, J, Gap_J, Moment);
++               for V in Moment'Range loop E.Body_Moments (Id+1, V+1) := Moment (V); end loop;
++               Speed := Sparse_Velocity (Moment, E.D.State.Qvel.all);
++               if Speed not in Tier0_Real or else F not in Tier0_Real then return; end if;
++               E.D.Actuators.Length (Id) := 0.0;
++               E.D.Actuators.Velocity (Id) := (if E.D.Actuation_Enabled then Speed else 0.0);
++               A.Apply_Force (Moment, F, Force);
++               for V in Force'Range loop
++                  Combined (V) := Combined (V) + Force (V);
++                  E.T.Adhesion_Force (V+1) := E.T.Adhesion_Force (V+1) + Force (V);
++               end loop;
++            else
++               -- Keep the C actuator-row order when ordinary and adhesive
++               -- transmissions are interleaved: do not regroup all body
++               -- forces after a separately reduced motor force vector.
++               declare
++                  M : constant MJ.Data.Manifold_Actuation.Moment :=
++                    MJ.Data.Manifold_Actuation.Transmission_Moment (C, E.D.State.Qpos.all);
++                  Width : constant Natural :=
++                    (if C.Joint_Type = 0 then 6 elsif C.Joint_Type = 1 then 3 else 1);
++               begin
++                  for K in 0 .. Width - 1 loop
++                     Combined (C.Joint_Id+K) := Combined (C.Joint_Id+K) + M (K) * F;
++                  end loop;
++               end;
++            end if;
++         end;
++      end loop;
++      if (for some X of Combined => abs X > 1.0e50) then return; end if;
++      E.D.Dynamics.Actuator.all := Combined;
++      E.D.Cache.Force_Valid := False;
++      -- Rebuild the complete smooth RHS, preserving external body loads and
++      -- passive/motor contributions; solve before the constraint response.
++      MJ.Data.Inertia_Phase.Solve_Acceleration (E.D, Result, External);
++   end Apply;
++end MJ.Data.Constrained.Body_Adhesion;
+--- /dev/null
++++ b/experimental/constrained-step/src/mj-data-constrained-body_adhesion.ads
+@@ -0,0 +1,9 @@
++with MJ.External_Forces;
++
++private package MJ.Data.Constrained.Body_Adhesion with SPARK_Mode is
++   procedure Apply
++     (E : in out Engine; Result : out Status;
++      External : MJ.External_Forces.Wrench_Array)
++     with Global => null, Pre => Ready (E),
++       Post => (Static => Complete_State (E) = Complete_State (E)'Old);
++end MJ.Data.Constrained.Body_Adhesion;

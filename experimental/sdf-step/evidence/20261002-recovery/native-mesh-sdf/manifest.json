@@ -1,0 +1,46 @@
+{
+  "reference": "3.14.0",
+  "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "build": [
+    "gcc",
+    "-O1",
+    "-g",
+    "-ffp-contract=off",
+    "-I/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/include",
+    "/var/tmp/sparkling-recovery-sdf-native-20261002/native_replay.c",
+    "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0",
+    "-Wl,-rpath,/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco",
+    "-lm",
+    "-o",
+    "/var/tmp/sparkling-recovery-sdf-native-20261002/native_replay"
+  ],
+  "build_exit": 0,
+  "runs": [
+    {
+      "mode": "mjb",
+      "exit": 1,
+      "command": [
+        "/var/tmp/sparkling-recovery-sdf-native-20261002/native_replay",
+        "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.mjb",
+        "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.input"
+      ]
+    },
+    {
+      "mode": "xml",
+      "exit": 1,
+      "command": [
+        "/var/tmp/sparkling-recovery-sdf-native-20261002/native_replay",
+        "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.xml",
+        "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.input"
+      ]
+    }
+  ],
+  "sources": {
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/sdf-step/tests/native_replay.c": "e105f9d7c662ab7cea56917e36f774655f23f1674ec64e62ff389295f8344748",
+    "/var/tmp/sparkling-movement-env/lib/python3.12/site-packages/mujoco/libmujoco.so.3.14.0": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+    "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/mujoco/src/engine/engine_collision_sdf.c": "053822ce38ecadc050332ed8423021ee0a6eb8a5bc48c222c456bd45b834d7fa",
+    "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.xml": "394967804cb84cbf13429b5d896fbc4b67034647677e5c4248eca1b8d83cc62e",
+    "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.mjb": "641ec80ea3ecd4624341b36efa25a4fffc4ae72d940de3ea9a8781e87ab1c78b",
+    "/var/tmp/sparkling-recovery-sdf-isolated2-20261002/mesh_sdf/mesh_sdf.input": "3db9e949f7bcd6691c0a6df1fabb329d1e76fb1a3a6f7f48705ae62a0c907ae5"
+  }
+}

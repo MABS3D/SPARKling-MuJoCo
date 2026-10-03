@@ -53,6 +53,12 @@ def cases():
             for refsafe in [0,1]:
                 add('solref', kind=kind, q=-1.01, ref0=refs[0], ref1=refs[1],
                     refsafe=refsafe, velocity=[.3,0,0])
+        for power in [-2., 0., .5, math.nextafter(1., math.inf), 1.25, 1.5,
+                      2.5, 3., 4., 6.5, 10., 32., 64., 256.]:
+            for mid in [.2, .5, .8]:
+                for x in [.01, mid, .9]:
+                    add('general-solimp', kind=kind, q=1.+.1*x, power=power,
+                        width=.1, mid=mid, velocity=[-.2,0,0])
     for quat in [[1.,0,0,0], [-1.,0,0,0], [0.,0,0,0], [0.,1.,0,0],
                  [1.,1e-16,0,0], [-1.,1e-16,0,0], [1e-20,0,0,0], [.5,.5,.5,.5]]:
         for margin in [-.1, 0., .1, 2.]:

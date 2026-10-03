@@ -96,7 +96,7 @@ package body MJ.Advanced_Contacts with SPARK_Mode is
          --  Compiled mesh geom_size contains its local AABB half-extents,
          --  whose diagonal is MuJoCo's geom_rbound used for distinctness.
          if S.Kind = Hull and S.Skin = 0.0 then return Norm (S.Rigid.Size); end if;
-         if S.Kind = Prism then for X of S.Prism_Vertices loop R := Real'Max (R, Norm (X)); end loop;
+         if S.Kind in Prism | Flex_Element then for X of S.Prism_Vertices loop R := Real'Max (R, Norm (X)); end loop;
          else for K in S.First .. S.First+S.Length-1 loop R := Real'Max (R, Norm (V (K))); end loop; end if;
          return R+S.Skin;
       end Radius;

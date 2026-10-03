@@ -8,7 +8,9 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--out', type=Path, required=True)
 ap.add_argument('--phase', choices=['small', 'whole', 'all'], default='all')
 ap.add_argument('--only', help='diagnostic subprogram name')
+ap.add_argument('--unit', choices=['mj-joint_limits', 'mj-joint_limit_response', 'mj-solimp_curve'])
 ap.add_argument('--timeout', type=int, default=10, help='seconds per prover/check')
+ap.add_argument('--proof-mode', choices=['per_check', 'per_path'], default='per_check')
 args = ap.parse_args()
 args.out.mkdir(parents=True, exist_ok=True)
 sources = snapshot()
@@ -18,7 +20,7 @@ env['LIMIT_BUILD_ROOT'] = str(args.out.resolve() / 'build')
 (args.out / 'environment.json').write_text(json.dumps(provenance(env), indent=2) + '\n')
 resource.setrlimit(resource.RLIMIT_STACK, (64*1024*1024, resource.getrlimit(resource.RLIMIT_STACK)[1]))
 common = ['gnatprove', '-P', str(HERE / 'limits.gpr'), '--prover=cvc5,z3,altergo',
-          '--timeout='+str(args.timeout), '--steps=0', '--proof=per_check', '-j2', '--checks-as-errors=on',
+          '--timeout='+str(args.timeout), '--steps=0', '--proof='+args.proof_mode, '-j1', '--checks-as-errors=on',
           '--warnings=continue', '--report=all', '--counterexamples=off']
 records = []
 
@@ -26,7 +28,7 @@ def run(unit, label, extra):
     env['LIMIT_BUILD_ROOT'] = str(args.out.resolve() / label / 'build')
     reports = Path(env['LIMIT_BUILD_ROOT']) / 'validation/obj/gnatprove'
     cmd = [sys.executable, str(ROOT / 'tools/guarded.py'), '--cap-mb', '3800',
-           '--min-free-mb', '2000', '--timeout', '900', '--', *common, '-u', unit + '.ads', *extra]
+           '--min-free-mb', '12000', '--timeout', '180', '--', *common, '-u', unit + '.ads', *extra]
     report = reports / (unit + '.spark')
     report.unlink(missing_ok=True)
     start = time.time(); steady = time.monotonic()
@@ -39,7 +41,7 @@ def run(unit, label, extra):
         entries = [m for s in ['proof', 'flow', 'warn_error'] for m in d.get(s, [])]
         warnings = [m for m in entries if m.get('severity') == 'warning']
         reviewed = [m for m in warnings if m['rule'] == 'imprecise-call'
-                    and m['message'].get('arguments') in [['Sqrt'], ['Atan2']]]
+                    and m['message'].get('arguments') in [['Sqrt'], ['Atan2'], ['Runtime_Pow']]]
         result.update(checks=sum(m.get('severity') == 'info' for m in entries),
                       open=sum(m.get('severity') not in ['info', 'warning'] for m in entries),
                       warnings=sum(m.get('severity') == 'warning' for m in entries),
@@ -49,7 +51,16 @@ def run(unit, label, extra):
             assert report.stat().st_mtime >= start-2
             assert not d['skip_proof'] and not d['skip_flow_proof'] and not d['pragma_assume']
             assert d['progress'] == 'PROGRESS_PROOF' and d['stop_reason'] == 'STOP_REASON_NONE'
-            assert all(v == 'all' for v in d['spark'].values())
+            # Runtime_Pow is the existing libm import, with no Ada body or
+            # assumed output/range contract. Report that boundary explicitly;
+            # every application body must still receive full coverage.
+            external = [d['entities'][k]['name'] for k, v in d['spark'].items()
+                        if v == 'spec' and d['entities'][k]['name'] == 'MJ.Solimp_Curve.Runtime_Pow']
+            result['external_runtime_boundaries'] = external
+            result['complete_application_coverage'] = all(
+                v == 'all' or (v == 'spec' and d['entities'][k]['name'] in external)
+                for k, v in d['spark'].items())
+            assert result['complete_application_coverage']
             result['subprograms'] = sorted(d['entities'][k]['name'] for k in d['spark'])
     else:
         result['open'] = 1
@@ -63,16 +74,16 @@ def run(unit, label, extra):
     return p.returncode == 0 and result.get('open', 1) == 0 and result.get('unreviewed_warnings', 1) == 0
 
 ok = True
-units = ['mj-joint_limits', 'mj-joint_limit_response']
+units = [args.unit] if args.unit else ['mj-solimp_curve', 'mj-joint_limits', 'mj-joint_limit_response']
 if args.phase in ['all', 'small']:
     for unit in units:
         for suffix in ['ads', 'adb']:
             in_model = False
             lines = (HERE / 'src' / (unit+'.'+suffix)).read_text().splitlines()
             for i, line in enumerate(lines, 1):
-                if 'package Model with' in line or 'package body Model is' in line:
+                if 'package Model with' in line or 'package Composition with' in line or 'package body Model is' in line:
                     in_model = True
-                if 'end Model;' in line:
+                if 'end Model;' in line or 'end Composition;' in line:
                     in_model = False
                 m = re.match(r'\s*(function|procedure) (\w+)\b', line)
                 if not m:
@@ -85,7 +96,7 @@ if args.phase in ['all', 'small']:
                 ok = run(unit, f'small-{unit}-{suffix}-{i}-{m[2]}',
                          [f'--limit-subp={unit}.{suffix}:{i}']) and ok
 if args.phase in ['all', 'whole']:
-    for unit in units + ['mj-contact_rows']:
+    for unit in units + ([] if args.unit else ['mj-contact_rows']):
         ok = run(unit, 'whole-'+unit, []) and ok
 (args.out / 'acceptance.json').write_text(json.dumps(
     {'passed': ok, 'phase': args.phase, 'filter': args.only, 'sources_unchanged': True}, indent=2) + '\n')

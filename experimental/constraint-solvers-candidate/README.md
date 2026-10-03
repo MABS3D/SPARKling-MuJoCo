@@ -1,15 +1,62 @@
 # General constraint solvers — experimental candidate
 
-Standalone Ada/SPARK implementation of **PGS, CG and Newton** on an assembled
-constraint problem. It is isolated from the production engine: no forward-step
-entry point, model layout, existing proof gate or benchmark was changed.
+Ada/SPARK PGS, CG and Newton on an assembled constraint problem, used by the
+experimental constrained-step pipeline. The iterative solver's global safety
+and functional proof remains open. Complete MuJoCo compatibility and integrated
+performance parity remain separate, unfinished objectives.
 
-**Status:** numerical differential tests pass; the scalar and shuffle primitives
-have complete functional proofs. The extracted Cholesky helper unit has **266
-discharged checks** on its stated contracts (see the scope below). The iterative
-solver unit is **not Gold**:
-its compositional safety and functional proofs remain open engineering work.
-There is no Silver exception or performance-parity claim for this candidate.
+## Recovery status (2026-10-03)
+
+- The current scalar and sparse arithmetic helper units pass 54 and 72 checks.
+  The domain now includes C regularization/inverse weights from 1e-15 to 1e15,
+  including equality rows with a zero Jacobian; `Aref` accepts ±1e30.
+- Standalone validation now passes 428 cases after the minval/reference and warm-start domain fixes. The
+  integrated elliptic corpus now passes 254/254 at the original tolerances,
+  after ordered reductions, diagonal inverse application and compiled simple
+  DOF metadata were restored. Other current integrated receipts are tracked in
+  `plans/2026-10-02-recovery-dynamics.md`.
+- The earlier wide four-lane model and runtime snapshots pass 123 and 165
+  whole-unit checks. New exact model contracts and a 60-check congruence lemma
+  are proved minimally; the expanded model's whole-unit renewal is pending. The latter frozen report has complete coverage, but its final
+  checkout-hash guard detected concurrently added solver files; a final closure
+  receipt still needs renewal. The 336-case C comparison matches exactly.
+- New `Dense_Cholesky` follows C's dense column order and deficient-pivot
+  clamping. Its 385 factor/rank/solve cases match exactly, including deficient
+  columns and pivot-threshold neighbors. All minimal routines and the final
+  whole unit pass 348 checks with complete coverage and no open obligations;
+  reviewed runtime-sqrt and recursive-model diagnostics remain explicit.
+  Per-column and substitution-row exact functional contracts are proved.
+  That 348-check receipt scopes the local-contract revision; the new global
+  factor/rank model and preservation lemmas require a fresh whole-unit proof.
+  Dense Newton now uses this factor and solve: validation/release have identical
+  records on the seven integrated r7 corpora, with 106/106 rigid, 254/254 elliptic,
+  92/92 surface, 452/452 force and 76/76 tendon cases. Asset trajectories remain
+  117/126 in each of two corpora. Global final-factor/solution and rank relations,
+  complete integrated compatibility remains open. No proof of real-arithmetic accuracy is inferred from these results.
+- `Sparse_Cholesky` now follows C's symbolic and numeric reverse L'L order,
+  retaining structural zeros and the CSC update order. The first 380 native C
+  cases match structures, factors, ranks and solves exactly (dimensions 1–128,
+  diagonal/chain/tree/random/dense structures, scale and deficient-pivot cases).
+  `Update`7, `Scale`5 and `Symbolic`91 checks pass locally; the symbolic post
+  establishes valid structure, not universal equivalence to C's symbolic
+  algorithm. Factor/solve and whole-unit proofs remain open.
+  The integrated dispatcher honors explicit dense/sparse and Auto at nv>=60;
+  the caller supplies Hessian support from mass ancestors and constraint CSR,
+  including zero-valued entries. R62 validation passes rigid106/106,
+  elliptic254/254 and forces452/452; standalone passes428/428 against each
+  dense and sparse oracle. R62 and later proof edits have separate manifests.
+  The previous universal dense dispatch caused a measured6.00x regression on
+  a96-DOF sparse workload relative to r7 with only the old Newton restored.
+  Performance of the new sparse path has not yet been measured in isolation.
+- The old Cholesky helper gained preservation lemmas during recovery; the fresh
+  whole-unit run reached its watchdog. The 266-check receipt below belongs to
+  the earlier frozen source, not the current modified unit.
+
+No new performance acceptance claim has been made during parallel recovery.
+The remaining sections retain the earlier isolated-candidate evidence and
+measurements; they must be read against their source manifests.
+
+## Historical baseline and scope (before recovery)
 
 ## Problem and supported rows
 
@@ -30,7 +77,8 @@ Input arrays must start at 1. The current workspace accepts **1–128 DOFs** and
 **0–256 rows**; these are explicit candidate limits, not MuJoCo limits.
 
 The checked input domain is documented in `Solve`: input matrix/vector entries
-within ±1e10, regularization and its reciprocal within [1e-12, 1e12], friction
+within ±1e10 in that snapshot, regularization and its reciprocal within
+[1e-12, 1e12] before the recovery extension described above, friction
 coefficients and cone `mu` within [1e-5, 1e5]. `R*D` is checked to 1e-12; elliptic
 regularization ratios to 1e-10. A cone header carries its dimension and following
 rows carry dimension zero. The metric must be exactly symmetric; Cholesky

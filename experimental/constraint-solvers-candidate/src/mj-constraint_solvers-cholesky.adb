@@ -41,6 +41,51 @@ package body MJ.Constraint_Solvers.Cholesky with SPARK_Mode is
       null;
    end Unfold_Factor_Sum;
 
+   procedure Equal_Extensions
+     (S, T : Sum_Result; A, B, C, D : Operand)
+     with Ghost => Static, Global => null,
+     Pre => S = T and then A = C and then B = D,
+     Post => Extend (S, A, B) = Extend (T, C, D)
+   is
+   begin
+      null;
+   end Equal_Extensions;
+
+   --  Later cell writes cannot change an already accumulated prefix. This
+   --  induction is the bridge from Factor_Cell's old-workspace contract to
+   --  the final factor's global ordered floating-point relation.
+   procedure Preserve_Factor_Sum
+     (M, Before, After : Matrix; I, K : Positive; Count : Natural)
+     with Ghost => Static, Global => null,
+     Pre => Square (M) and then Square (Before) and then Square (After)
+       and then M'Length (1) = Before'Length (1)
+       and then M'Length (1) = After'Length (1)
+       and then Bounded (Before) and then Bounded (After)
+       and then I in M'Range (1) and then K in 1 .. I and then Count < K
+       and then (for all T in 1 .. Count =>
+         Before (I, T) = After (I, T) and then Before (K, T) = After (K, T)),
+     Post => Factor_Sum (M, Before, I, K, Count) =
+       Factor_Sum (M, After, I, K, Count),
+     Subprogram_Variant => (Decreases => Count)
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Extend);
+   begin
+      Unfold_Factor_Sum (M, Before, I, K, Count);
+      Unfold_Factor_Sum (M, After, I, K, Count);
+      if Count > 0 then
+         Preserve_Factor_Sum (M, Before, After, I, K, Count - 1);
+         pragma Assert (Before (I, Count) = After (I, Count));
+         pragma Assert (Before (K, Count) = After (K, Count));
+         pragma Assert (Factor_Sum (M, Before, I, K, Count - 1) =
+           Factor_Sum (M, After, I, K, Count - 1));
+         Equal_Extensions
+           (Factor_Sum (M, Before, I, K, Count - 1),
+            Factor_Sum (M, After, I, K, Count - 1),
+            Before (I, Count), Before (K, Count),
+            After (I, Count), After (K, Count));
+      end if;
+   end Preserve_Factor_Sum;
+
    procedure Factor_Cell
      (M : Matrix; L : in out Matrix; I, K : Positive; Floor : Pivot;
       Result : out Status)

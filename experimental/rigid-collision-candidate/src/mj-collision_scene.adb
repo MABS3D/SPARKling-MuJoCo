@@ -3,6 +3,10 @@ with MJ.Collision_Contacts;
 with MJ.Heightfield_Contacts;
 
 package body MJ.Collision_Scene with SPARK_Mode is
+   function BVH_Node_Tests (S : Scene) return Natural is
+     (MJ.Rigid_Detector.BVH_Node_Tests (S.Search));
+   function BVH_Leaf_Tests (S : Scene) return Natural is
+     (MJ.Rigid_Detector.BVH_Leaf_Tests (S.Search));
    function Initialized (S : Scene) return Boolean is (S.Ready);
    function Geom_Count (S : Scene) return Count is (S.N);
    function Selected_Count (S : Scene) return Natural is (S.Candidates.Pairs.Length);

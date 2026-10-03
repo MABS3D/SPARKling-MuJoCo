@@ -8,7 +8,7 @@ procedure Limit_Probe is
    package I is new Integer_IO (Integer);
    package L renames MJ.Joint_Limits;
    package R renames MJ.Joint_Limit_Response;
-   Kind, Enabled, Ref_Safe, Metric, Power : Integer;
+   Kind, Enabled, Ref_Safe, Metric : Integer;
    Joint, Dof : Index_Type;
    Position, Low, High : Tier0_Real;
    Margin : Tier0_Real;
@@ -32,7 +32,7 @@ begin
       for X of Q loop Get (X); end loop;
       for X of V loop Get (X); end loop;
       Get (P.Ref0); Get (P.Ref1); Get (P.D0); Get (P.D_Width); Get (P.Width); Get (P.Midpoint);
-      I.Get (Power); P.Power := R.Curve_Power'Val (Power - 1);
+      Get (P.Power);
       Get (H); I.Get (Ref_Safe); I.Get (Metric); Get (Diag);
       for X of Forces loop Get (X); end loop;
       B := L.Build (Joint_Kind'Val (Kind), Joint, Dof, Position, Q, Low, High, Margin, Enabled /= 0);

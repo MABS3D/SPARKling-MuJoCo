@@ -33,6 +33,7 @@ def main():
     ap.add_argument('--gprbuild',type=Path,default=GPR/'gprbuild')
     ap.add_argument('--python',type=Path,default=Path('/var/tmp/sparkling-movement-env/bin/python'))
     ap.add_argument('--ccd-root',type=Path,default=Path('/var/tmp/sparkling-movement-c/build'))
+    ap.add_argument('--guarded',type=Path,default=ROOT.parents[1]/'tools/guarded.py')
     a=ap.parse_args(); out=a.out.resolve();upstream=a.upstream.resolve()
     def git_read(*args):
         return subprocess.check_output(['git','-C',str(upstream),*args],text=True,
@@ -41,6 +42,7 @@ def main():
     dirty=git_read('status','--porcelain','--untracked-files=no')
     if commit!=COMMIT or dirty:raise RuntimeError('the reference must be the clean pinned MuJoCo release')
     out.mkdir(parents=True,exist_ok=False)
+    shutil.copy2(a.guarded,out/'guarded.py')
     snap=out/'snapshot';snap.mkdir()
     for directory in ('src','vendor','tests'):
         shutil.copytree(ROOT/directory,snap/directory,ignore=shutil.ignore_patterns('__pycache__'))
@@ -52,7 +54,8 @@ def main():
     env=os.environ.copy();env['PATH']=str(a.gnat_bin)+':'+str(a.gprbuild.parent)+':'+env['PATH']
     commands=[]
     def run(argv,log):
-        args=[str(x) for x in argv];commands.append(args)
+        args=[sys.executable,str(out/'guarded.py'),'--cap-mb','3000','--timeout','360',
+              '--',*[str(x) for x in argv]];commands.append(args)
         with (out/log).open('w') as f:
             subprocess.run(args,cwd=snap,env=env,stdout=f,stderr=subprocess.STDOUT,check=True)
     def version(argv):
@@ -81,7 +84,7 @@ def main():
     run(cargv,'reference-build.log')
     for mode in ('validation','release'):
         print('build and compare',mode,flush=True)
-        run([a.gprbuild,'-Padvanced.gpr','-j2','-XADVANCED_MODE='+mode,
+        run([a.gprbuild,'-Padvanced.gpr','-j1','-XADVANCED_MODE='+mode,
              '-XADVANCED_BUILD_ROOT='+str(out/'build')],mode+'-build.log')
         binary=out/'build'/mode/'bin'
         run([binary/'advanced_checks'],mode+'-checks.log')

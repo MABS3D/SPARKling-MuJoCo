@@ -1,0 +1,26 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: in instantiation at mj-plugin_runtime.adb:48
+--> test_runtime.ads:4:01
+      + cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+
+ info: initialization of "Status" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:22:51
+
+ info: data dependencies proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:23:11
+
+ info: postcondition proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:23:35
+
+ info: initialization of "Ok" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:44:07
+ warning: generic compilation unit is not analyzed [generic-not-analyzed]
+--> mj-plugin_runtime.adb:1:16
+    1 |    package body MJ.Plugin_Runtime with SPARK_Mode is
+      |                   ^~~~~~~~~~~~~~~
+      + only instantiations of the generic will be analyzed
+Success: all checks proved (4 checks).
+Summary logged in /var/tmp/sparkling-services-plugin-proof-free/proof/obj/gnatprove/gnatprove.out
+guarded: elapsed 3.2 s, peak group RSS 154 MB

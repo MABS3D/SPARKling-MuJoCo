@@ -1,0 +1,85 @@
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
+@@ -4,16 +4,13 @@
+ with Interfaces;
+ with MJ.Constraint_Order;
+ with MJ.Constraint_Solvers.Cholesky;
+-with MJ.Constraint_Solvers.Dense_Cholesky;
+ with MJ.Constraint_Solvers.Sparse_Kernels;
+ package body MJ.Constraint_Solvers with SPARK_Mode is
+    package Math renames Ada.Numerics.Long_Elementary_Functions;
+    package Scalar renames MJ.Constraint_Scalar;
+    package Linear renames MJ.Constraint_Solvers.Cholesky;
+-   package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
+    package Sparse_Arithmetic renames MJ.Constraint_Solvers.Sparse_Kernels;
+    use type Linear.Status;
+-   use type Dense.Status;
+    use type Scalar.Row_State;
+    Tiny : constant Real := 1.0e-15;
+    subtype Work is Real range -1.0e100 .. 1.0e100;
+@@ -385,26 +382,6 @@
+          end Solve_Metric;
+          pragma Inline_Always (Solve_Metric);
+ 
+-         --  The dense Newton Hessian follows mju_cholFactor/mju_cholSolve.
+-         --  Keep the full dimension: cutting independent blocks changes the
+-         --  four-lane dot grouping even when the omitted entries are zero.
+-         procedure Factor_Hessian is
+-            Status : Dense.Status;
+-            Rank : Natural;
+-         begin
+-            Dense.Factor (H, HL, Rank, Status, Tiny);
+-            if Status /= Dense.Success then raise Constraint_Error; end if;
+-         end Factor_Hessian;
+-         pragma Inline_Always (Factor_Hessian);
+-
+-         procedure Solve_Hessian is
+-            Status : Dense.Status;
+-         begin
+-            Dense.Backsolve (HL, Grad, Mgrad, Status);
+-            if Status /= Dense.Success then raise Constraint_Error; end if;
+-         end Solve_Hessian;
+-         pragma Inline_Always (Solve_Hessian);
+-
+          procedure Residual is
+          begin
+             Multiply_Metric (Acc, Ma);
+@@ -423,8 +400,7 @@
+             end loop;
+             if not Changed then return; end if;
+             if not Nonzero_Curvature then
+-               H := M;
+-               Factor_Hessian;
++               HL := L;
+             else
+                H := M;
+                for Bi in 1 .. Count loop
+@@ -445,7 +421,8 @@
+                      end if;
+                   end;
+                end loop;
+-               Factor_Hessian;
++               Factor_Metric (H, HL, OK);
++               if not OK then raise Constraint_Error; end if;
+             end if;
+             Previous_Curvature := Curvature;
+             Hessian_Valid := True;
+@@ -509,7 +486,8 @@
+             if Build_H and Scalar_Rows then
+                Build_Scalar_Hessian;
+             elsif Build_H then
+-               Factor_Hessian;
++               Factor_Metric (H, HL, OK);
++               if not OK then raise Constraint_Error; end if;
+                Hessian_Valid := True;
+             end if;
+          end Update;
+@@ -533,7 +511,7 @@
+ 
+          procedure Precondition is
+          begin
+-            if Settings.Algorithm = Newton then Solve_Hessian;
++            if Settings.Algorithm = Newton then Solve_Metric (HL, Grad, Mgrad);
+             else Apply_Mass_Inverse (Grad, Mgrad); end if;
+          end Precondition;
+          pragma Inline_Always (Precondition);

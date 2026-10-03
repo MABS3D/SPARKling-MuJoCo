@@ -1,0 +1,133 @@
+--- a/experimental/constrained-step/src/mj-data-constrained.ads
++++ b/experimental/constrained-step/src/mj-data-constrained.ads
+@@ -78,6 +78,12 @@
+    --  follows mj_local2Global, including compiled same-frame shortcuts.
+    procedure Generate_Geom_Poses
+      (E : in out Engine; Poses : out RG.Pose_Array; Result : out Status);
++   -- Contact producers set real body endpoints independently of optional geom
++   -- ids. A flex vertex has one body endpoint and Geom_Id = -1.
++   procedure Set_Contact_Endpoints
++     (E : in out Engine; Id, Body0, Body1 : Natural;
++      Geom0, Geom1 : Integer; Result : out Status);
++   procedure Set_Rigid_Contact_Endpoints (E : in out Engine; Result : out Status);
+    function Disabled (Flags, Flag : Integer) return Boolean;
+    function Parameters (Ref, Imp : Real_Array; Id : Natural) return LR.Parameters;
+    type Geom_Description is record
+@@ -131,6 +137,11 @@
+       Jdot_V : CA.Value_Array (1 .. 6) := [others => 0.0];
+    end record;
+    type Equality_Array is array (Natural range 0 .. Max_R - 1) of Equality_Description;
++   type Contact_Endpoints is record
++      Body0, Body1 : Natural := 0;
++      Geom0, Geom1 : Integer range -1 .. Max_G - 1 := -1;
++   end record;
++   type Contact_Endpoint_Array is array (Natural range 0 .. Max_C - 1) of Contact_Endpoints;
+    type Engine is limited record
+       Initialized : Boolean := False;
+       D : MJ.Data.Simulation;
+@@ -153,6 +164,7 @@
+       Tendon_Columns : CA.Column_Array (1 .. Max_T_Entries);
+       Tendon_J : CA.Value_Array (1 .. Max_T_Entries);
+       Contacts : MJ.Full_Contacts.Full_Array (0 .. Max_C - 1);
++      Endpoints : Contact_Endpoint_Array;
+       Rows : CA.Storage (Max_R, Max_R * Max_V);
+       Solver_Rows : CS.Rows (1 .. Max_R);
+       Surface_Rows : CS.Vector (1 .. Max_R) := [others => 0.0];
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -284,6 +284,38 @@
+       Result := Success;
+    end Generate_Geom_Poses;
+ 
++   procedure Set_Contact_Endpoints
++     (E : in out Engine; Id, Body0, Body1 : Natural;
++      Geom0, Geom1 : Integer; Result : out Status) is
++   begin
++      Result := Invalid_Index;
++      if Id >= E.T.Ncontact or else Id >= Max_C or else Body0 >= E.D.Nb
++        or else Body1 >= E.D.Nb or else Geom0 not in -1 .. Integer (E.Ng) - 1
++        or else Geom1 not in -1 .. Integer (E.Ng) - 1 then return; end if;
++      if (Geom0 >= 0 and then E.Geoms (Geom0).Body_Id /= Body0)
++        or else (Geom1 >= 0 and then E.Geoms (Geom1).Body_Id /= Body1) then return; end if;
++      E.Endpoints (Id) := (Body0, Body1, Geom0, Geom1);
++      Result := Success;
++   end Set_Contact_Endpoints;
++
++   procedure Set_Rigid_Contact_Endpoints (E : in out Engine; Result : out Status) is
++   begin
++      Result := Invalid_Index;
++      if E.T.Ncontact > Max_C then return; end if;
++      for Id in 0 .. Integer (E.T.Ncontact) - 1 loop
++         declare
++            G0 : constant Natural := E.Contacts (Id).Geoms.First;
++            G1 : constant Natural := E.Contacts (Id).Geoms.Second;
++         begin
++            if G0 >= E.Ng or else G1 >= E.Ng then return; end if;
++            Set_Contact_Endpoints (E, Id, E.Geoms (G0).Body_Id,
++              E.Geoms (G1).Body_Id, G0, G1, Result);
++            if Result /= Success then return; end if;
++         end;
++      end loop;
++      Result := Success;
++   end Set_Rigid_Contact_Endpoints;
++
+    procedure Generate_Contacts (E : in out Engine; Result : out Status) is
+       Ng : constant Natural := E.Ng;
+       Poses : RG.Pose_Array (0 .. Ng - 1);
+@@ -296,6 +328,7 @@
+         E.Contacts, E.T.Ncontact, S, E.Assets.Incidence);
+       Result := (case S is when RG.Success => Success,
+         when RG.Capacity_Limit => Capacity_Exceeded, when others => Numeric_Limit);
++      if Result = Success then Set_Rigid_Contact_Endpoints (E, Result); end if;
+    end Generate_Contacts;
+ 
+    procedure Assemble (E : in out Engine; Result : out Status) is
+@@ -347,8 +380,8 @@
+       for Id in 0 .. E.T.Ncontact - 1 loop
+          declare
+             C : MJ.Full_Contacts.Full_Contact renames E.Contacts (Id);
+-            B1 : constant Natural := E.Geoms (C.Geoms.First).Body_Id;
+-            B2 : constant Natural := E.Geoms (C.Geoms.Second).Body_Id;
++            B1 : constant Natural := E.Endpoints (Id).Body0;
++            B2 : constant Natural := E.Endpoints (Id).Body1;
+             A : Integer := E.Bodies (B1).Leaf;
+             B : Integer := E.Bodies (B2).Leaf;
+             Chain, Reverse_Chain : CA.Column_Array (1 .. Max_V);
+@@ -409,16 +442,20 @@
+                   if S = CA.Capacity_Limit then Result := Capacity_Exceeded; return; end if;
+                   if S = CA.Success and then N > 0 and then E.Has_Surface_Velocity then
+                      declare
++                        G0 : constant Integer := E.Endpoints (Id).Geom0;
++                        G1 : constant Integer := E.Endpoints (Id).Geom1;
+                         Relative : SV.Motion := [others => 0.0];
+                      begin
+-                        if SV.Active (E.Geoms (C.Geoms.First).Surface)
+-                          or else SV.Active (E.Geoms (C.Geoms.Second).Surface)
++                        if (G0 >= 0 and then SV.Active (E.Geoms (G0).Surface))
++                          or else (G1 >= 0 and then SV.Active (E.Geoms (G1).Surface))
+                         then
+                            Relative := SV.Contact
+-                             (SV.Geometry (E.Geoms (C.Geoms.First).Surface,
+-                                E.Geoms (C.Geoms.First).Surface_Pose, SV.Vector (C.Position)),
+-                              SV.Geometry (E.Geoms (C.Geoms.Second).Surface,
+-                                E.Geoms (C.Geoms.Second).Surface_Pose, SV.Vector (C.Position)),
++                             ((if G0 >= 0 then SV.Geometry (E.Geoms (G0).Surface,
++                                E.Geoms (G0).Surface_Pose, SV.Vector (C.Position))
++                               else SV.Motion'[others => 0.0]),
++                              (if G1 >= 0 then SV.Geometry (E.Geoms (G1).Surface,
++                                E.Geoms (G1).Surface_Pose, SV.Vector (C.Position))
++                               else SV.Motion'[others => 0.0]),
+                               [for I in 0 .. 8 => C.Frame (I)]);
+                         end if;
+                         for Edge in 0 .. SV.Row_Count (C.Dim, E.Cone = CA.Pyramidal) - 1 loop
+@@ -507,8 +544,8 @@
+                declare
+                   Contact_Id : constant Natural := Row.Id;
+                   C : MJ.Full_Contacts.Full_Contact renames E.Contacts (Contact_Id);
+-                  B1 : constant Natural := E.Geoms (C.Geoms.First).Body_Id;
+-                  B2 : constant Natural := E.Geoms (C.Geoms.Second).Body_Id;
++                  B1 : constant Natural := E.Endpoints (Contact_Id).Body0;
++                  B2 : constant Natural := E.Endpoints (Contact_Id).Body1;
+                   Tran : constant Real := E.Bodies (B1).Translation + E.Bodies (B2).Translation;
+                   Rot : constant Real := E.Bodies (B1).Rotation + E.Bodies (B2).Rotation;
+                begin

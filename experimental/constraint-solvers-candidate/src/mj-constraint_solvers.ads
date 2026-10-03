@@ -1,13 +1,15 @@
 with MJ.Types; use MJ.Types;
 with MJ.Constraint_Scalar;
 
---  Standalone assembled dense problems. This candidate does not yet replace
---  the engine's constraint assembly or its smooth-step entry points.
+--  Assembled dense problem interface used by experimental constrained-step.
+--  Global Solve proof remains separate from the local arithmetic kernels.
 package MJ.Constraint_Solvers with SPARK_Mode is
    Max_Dofs : constant := 128;
    Max_Rows : constant := 256;
    type Vector is array (Positive range <>) of Real;
    type Matrix is array (Positive range <>, Positive range <>) of Real;
+   type Structural_Matrix is array (Positive range <>, Positive range <>) of Boolean;
+   Empty_Structure : constant Structural_Matrix (1 .. 0, 1 .. 0) := (others => (others => False));
    type Kind is (Equality, Friction, Unilateral, Elliptic);
    type Friction_Vector is array (Positive range 1 .. 5) of Real;
    type Row is record
@@ -26,6 +28,7 @@ package MJ.Constraint_Solvers with SPARK_Mode is
                   Stalled, Invalid_Input, Not_Positive_Definite, Numeric_Limit);
    type Options is record
       Algorithm : Method := Newton;
+      Sparse : Boolean := False;
       Iterations : Natural range 0 .. 100_000 := 100;
       LS_Iterations : Positive range 1 .. 1_000 := 50;
       Tolerance : Real := 1.0e-8;
@@ -43,15 +46,21 @@ package MJ.Constraint_Solvers with SPARK_Mode is
    --  M is the effective SPD metric, J the assembled Jacobian. A_Free and
    --  Aref define residual J*a - Aref. Arrays must start at 1; zero rows are
    --  represented by 1 .. 0. A and Force are warm starts and final iterates.
+   --  Warm starts admit the published finite domain +/-1e100. Smooth free
+   --  accelerations, matrix and Jacobian entries retain the +/-1e10 domain;
+   --  reference acceleration accepts +/-1e30. Numeric rejection is atomic.
    --  R and D must be reciprocal; elliptic R must have the MuJoCo ratio.
    --  Input/metric failures leave A and Force unchanged. Iteration_Limit
    --  publishes the last iterate. A line-search budget event is counted; the
    --  outer solve can continue if an improving step was found (as in C).
    --  Line_Search_Limit means no improving step was found before that limit.
    --  Global safety and functional proof of Solve is still OPEN.
+   --  Sparse Newton retains the supplied upper Hessian structure, including
+   --  explicit zeros. Empty structure derives support from the numeric M/J.
    procedure Solve
      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
-      Settings : Options; A, Force : in out Vector; Result : out Report)
+      Settings : Options; A, Force : in out Vector; Result : out Report;
+      Hessian_Pattern : Structural_Matrix := Empty_Structure)
    with Post =>
      (if Result.Outcome in Invalid_Input | Not_Positive_Definite | Numeric_Limit
       then A = A'Old and Force = Force'Old);

@@ -7,6 +7,8 @@ package body MJ.Rigid_Detector with SPARK_Mode is
    function Geom_Count (S : Scene) return Count is (S.N);
    function Candidate_Count (S : Scene) return Natural is (S.Candidates);
    function Narrowphase_Count (S : Scene) return Natural is (S.Calls);
+   function BVH_Node_Tests (S : Scene) return Natural is (MJ.Rigid_BVH.Node_Tests (S.Midphase));
+   function BVH_Leaf_Tests (S : Scene) return Natural is (MJ.Rigid_BVH.Leaf_Tests (S.Midphase));
    function Initialized (S : Scene) return Boolean is (S.Ready);
    function Key (A, B : Natural) return Interfaces.Unsigned_32 is
      (Interfaces.Unsigned_32 (Natural'Min (A, B))*65536+Interfaces.Unsigned_32 (Natural'Max (A, B)))
@@ -97,7 +99,9 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       for P of Exclusions loop
          S.Excluded (S.X) := Key (P.First, P.Second); S.X := S.X+1;
       end loop;
-      Sort_Keys (S.Excluded, S.X); S.Ready := True; Result := Success;
+      Sort_Keys (S.Excluded, S.X);
+      MJ.Rigid_BVH.Configure (S.Midphase, S.Group_Of, S.Shapes (0 .. S.N - 1), S.NG);
+      S.Ready := True; Result := Success;
    end Initialize;
 
    function Less (A, B : Endpoint) return Boolean is
@@ -223,7 +227,12 @@ package body MJ.Rigid_Detector with SPARK_Mode is
       end Try_Pair;
    begin
       Hits.Length := 0; S.Candidates := 0; S.Calls := 0; Result := Invalid_Input;
+      MJ.Rigid_BVH.Reset_Statistics (S.Midphase);
       if not S.Ready or Poses'Length /= S.N then return; end if;
+      Grouped := S.NG < S.N/4;
+      if Grouped then
+         for I in 0 .. S.N - 1 loop S.Active_Now (I) := False; end loop;
+      end if;
       for I in 0 .. S.N-1 loop
          if (for some X of Poses (Poses'First+I).Position => X not in Coordinate) then return; end if;
          if (S.Shapes (I).Kind /= Sphere or else not With_Narrowphase) and then
@@ -290,13 +299,14 @@ package body MJ.Rigid_Detector with SPARK_Mode is
             end loop;
          end if;
       end loop;
-      Grouped := S.NG < S.N/4;
+      if Grouped then MJ.Rigid_BVH.Update (S.Midphase, S.Lo, S.Hi, S.Group_Of); end if;
       Filter_Options := S.Config; Filter_Options.Sleep_Filter := False;
       if Grouped then for G in 0 .. S.NG-1 loop S.Group_Head (G) := Max_Geoms; end loop; end if;
       for E in 0 .. NE-1 loop
          Id := S.Sorted (E).Tag/2;
          if S.Sorted (E).Tag mod 2 = 0 then
             if Grouped then
+               S.Sweep_Rank (Id) := E;
                Group := S.Group_Of (Id);
                for J in 0 .. NGA-1 loop
                   Other_Group := S.Active_Groups (J);
@@ -304,14 +314,23 @@ package body MJ.Rigid_Detector with SPARK_Mode is
                     and then Body_Allowed (S.Groups (Group), S.Groups (Other_Group), Awake, Awake, Filter_Options)
                     and then not Contains (S.Excluded, S.X, Key (S.Groups (Group).Body_Id, S.Groups (Other_Group).Body_Id))
                   then
-                     Cursor := S.Group_Head (Other_Group);
-                     while Cursor < Max_Geoms loop
-                        Other := Cursor;
-                        if S.Lo (Other) (A_Y) <= S.Hi (Id) (A_Y) and S.Lo (Id) (A_Y) <= S.Hi (Other) (A_Y)
-                          and S.Lo (Other) (A_Z) <= S.Hi (Id) (A_Z) and S.Lo (Id) (A_Z) <= S.Hi (Other) (A_Z)
-                        then Try_Pair (Other, Id, 0, 0.0); end if;
-                        Cursor := S.Next_Id (Other);
-                     end loop;
+                     if MJ.Rigid_BVH.Available (S.Midphase, Other_Group) then
+                        MJ.Rigid_BVH.Query (S.Midphase, Other_Group, S.Lo (Id), S.Hi (Id),
+                          A_Y, A_Z, S.Active_Now, S.Sweep_Rank);
+                        for K in 0 .. MJ.Rigid_BVH.Selected_Count (S.Midphase) - 1 loop
+                           Other := MJ.Rigid_BVH.Selected_Id (S.Midphase, K);
+                           Try_Pair (Other, Id, 0, 0.0);
+                        end loop;
+                     else
+                        Cursor := S.Group_Head (Other_Group);
+                        while Cursor < Max_Geoms loop
+                           Other := Cursor;
+                           if S.Lo (Other) (A_Y) <= S.Hi (Id) (A_Y) and S.Lo (Id) (A_Y) <= S.Hi (Other) (A_Y)
+                             and S.Lo (Other) (A_Z) <= S.Hi (Id) (A_Z) and S.Lo (Id) (A_Z) <= S.Hi (Other) (A_Z)
+                           then Try_Pair (Other, Id, 0, 0.0); end if;
+                           Cursor := S.Next_Id (Other);
+                        end loop;
+                     end if;
                   end if;
                end loop;
                Cursor := S.Group_Head (Group);
@@ -319,6 +338,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
                   S.Active_Groups (NGA) := Group; S.Active_Group_Position (Group) := NGA; NGA := NGA+1;
                else S.Previous_Id (Cursor) := Id; end if;
                S.Next_Id (Id) := Cursor; S.Previous_Id (Id) := Max_Geoms; S.Group_Head (Group) := Id;
+               S.Active_Now (Id) := True;
             else
                for J in 0 .. NA-1 loop
                   Other := S.Active (J);
@@ -330,6 +350,7 @@ package body MJ.Rigid_Detector with SPARK_Mode is
             S.Active (NA) := Id; S.Active_Position (Id) := NA; NA := NA+1;
          else
             if Grouped then
+               S.Active_Now (Id) := False;
                Group := S.Group_Of (Id); Previous := S.Previous_Id (Id); Following := S.Next_Id (Id);
                if Previous = Max_Geoms then S.Group_Head (Group) := Following; else S.Next_Id (Previous) := Following; end if;
                if Following < Max_Geoms then S.Previous_Id (Following) := Previous; end if;

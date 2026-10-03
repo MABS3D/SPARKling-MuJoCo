@@ -5,7 +5,26 @@ MuJoCo 3.14.0, pinned to commit
 `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. It is deliberately isolated from
 the main thread's changes to the smooth pipeline and the constraint solvers.
 
-## Current receipts (2026-10-02)
+## Recovery receipts (2026-10-03)
+
+The current real-power curve was rebuilt from a frozen closure. All seven
+minimal proofs pass (78 checks in total), followed by the complete application
+unit with 78 checks, zero open obligations and zero warnings. The imported
+`Runtime_Pow` interface is listed separately: the receipt does not claim to
+prove libm's implementation or accuracy. The runner now uses `-j1`, explicit
+memory/free-memory/time limits, and the release profile retains runtime checks.
+
+The literal upstream `getimpedance` oracle produced 3,874 finite cases, all
+exactly matched. Another 197 cases produced nonfinite C results and explicit
+Ada numeric rejection; they are retained separately, not counted as equivalent
+outputs. Source, binary, input and output evidence is in
+`/var/tmp/sparkling-recovery-dynamics-20261003-solimp-02`; the final whole-unit
+receipt is in `/var/tmp/sparkling-recovery-dynamics-20261003-solimp-03/proof-whole`.
+The separate constrained-step recovery corpus currently passes 106/106 rigid
+contact/limit cases. This is evidence for its documented models, not full
+engine compatibility or a performance result.
+
+## Earlier receipts (2026-10-02)
 
 | Verification | Passed checks/cases | Open obligations | Warnings |
 | --- | ---: | ---: | ---: |
@@ -48,8 +67,12 @@ CPU, source, binary, official MuJoCo library and numerical-runtime provenance.
 `MJ.Joint_Limit_Response` computes velocity, impedance and its derivative,
 K/B/I/P, regularization R, inverse weight D, and reference acceleration aref.
 It supports the standard positive and direct nonpositive solref formats,
-mixed-sign replacement with defaults, refsafe, and linear/quadratic solimp.
+mixed-sign replacement with defaults, refsafe, and arbitrary real solimp powers.
 Sanitization clamps the impedance endpoints, midpoint and width as C does.
+The exponent is clamped to at least 1. Powers 1 and 2 retain the existing fast
+paths; other powers follow C's ordered `pow` expressions for both impedance and
+its derivative. `MJ.Solimp_Curve` returns an explicit invalid result on numeric
+failure; impedance zero propagates that rejection through `Prepare`.
 The returned `Used_Default` flag exposes replacement without printing a warning
 from a pure kernel.
 
@@ -101,17 +124,17 @@ result outside the typed working domain, clearing the entire row batch.
 
 ## Remaining integration and unsupported features
 
-This candidate is **not yet connected to the engine's movement entry point**.
-A caller must assemble these rows with the other constraints, solve them
-together using the actual mass metric, and accumulate the solved forces into
-the dynamics state. Solving the lower and upper sides independently is invalid
-when both are active. The projection test deliberately supplies forces solved
-by C; it does not test a new solver or a full trajectory.
+The candidate is connected to the experimental constrained-step entry point,
+which assembles joint rows with the other constraints and solves them together
+using the mass metric. The standalone projection test still supplies forces
+solved by C; its result alone is not a solver or trajectory test. The integrated
+recovery evidence is tracked in `plans/2026-10-02-recovery-dynamics.md`.
+Whole-step proof and complete upstream compatibility remain open.
 
 The discrete integrator is explicitly returned as `Unsupported_Integrator`.
 In 3.14.0 it changes K/B/R and aref together, including an implicit row factor
-and an additional refsafe bound. Other real solimp powers remain to implement;
-the typed API currently represents powers 1 and 2, not arbitrary powers.
+and an additional refsafe bound. The real-power implementation and its separately
+scoped evidence are documented in the recovery receipts above.
 Tendon limits, actuator/control limits, frictionloss and other constraint types
 are separate features. None of these gaps is a documented Silver-only
 mathematical exception: they are pending implementation/integration work.

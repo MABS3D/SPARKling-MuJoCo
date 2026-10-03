@@ -394,7 +394,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
    procedure Build_Bodies
      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
       Qpos, Qvel : Real_Array; With_Motion : Boolean;
-      Bodies : in out Body_State_Array; Joints : in out Joint_State_Array; Result : out Status)
+      Bodies : in out Body_State_Array; Joints : in out Joint_State_Array; Result : out Status;
+      Mocap_Pos, Mocap_Quat : Real_Array)
      with Global => null,
      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
        and then Bodies'First = 0 and then Bodies'Last = Body_Config'Last
@@ -449,7 +450,15 @@ package body MJ.Data.Pipeline with SPARK_Mode is
             pragma Assert (Static => (for all J in Joint_Config'Range =>
               (if Joint_Config (J).Body_Id = B then Body_Config (B).Joint_Count > 0
                 and then J in Body_Config (B).First_Joint .. Body_Config (B).First_Joint + Body_Config (B).Joint_Count - 1)));
-            Build_One_Body (Bodies (Body_Config (B).Parent), Body_Config (B), Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
+            declare
+               C : Body_Parameters := Body_Config (B);
+            begin
+               if C.Mocap_Id >= 0 then
+                  C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
+                  C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
+               end if;
+               Build_One_Body (Bodies (C.Parent), C, Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
+            end;
             if Result /= Success then return; end if;
             pragma Assert (Static => (for all J in Joints'Range =>
               (if Joint_Config (J).Body_Id = B then Joint_Bounded (Joints (J)))));
@@ -469,7 +478,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
    procedure Build_Manifold_Bodies
      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
       Qpos, Qvel : Real_Array; With_Motion : Boolean;
-      Bodies : in out Body_State_Array; Joints : in out Joint_State_Array; Result : out Status)
+      Bodies : in out Body_State_Array; Joints : in out Joint_State_Array; Result : out Status;
+      Mocap_Pos, Mocap_Quat : Real_Array)
      with Global => null,
      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
        and then Bodies'First = 0 and then Bodies'Last = Body_Config'Last
@@ -491,8 +501,12 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Initialize_World (Bodies (0));
       for B in 1 .. Body_Config'Last loop
          declare
-            C : constant Body_Parameters := Body_Config (B);
+            C : Body_Parameters := Body_Config (B);
          begin
+            if C.Mocap_Id >= 0 then
+               C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
+               C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
+            end if;
             if C.Joint_Count > 0 and then Joint_Config (C.First_Joint).Group_Type = 0 then
                --  C's free-body pose comes directly from qpos. A fixed frame
                --  would be overwritten in full by the following free group.
@@ -624,7 +638,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Invalidate (D.Cache);
       if D.Nq /= D.Nv then
          Build_Manifold_Bodies (D.Body_Config.all, D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
-           With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result);
+           With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result, D.State.Mocap_Pos.all, D.State.Mocap_Quat.all);
       else
       pragma Assert (Static => D.Body_Config.all'First = 0);
       pragma Assert (Static => D.Body_Config.all'Length in 1 .. Max_Bodies);
@@ -663,7 +677,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          and then Bounded (D.Joint_Config.all (J).Anchor, Max_Val)));
 
       Build_Bodies (D.Body_Config.all, D.Joint_Config.all, D.State.Qpos.all, D.State.Qvel.all,
-                    With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result);
+                    With_Motion, D.Kinematic.Bodies.all, D.Kinematic.Joints.all, Result, D.State.Mocap_Pos.all, D.State.Mocap_Quat.all);
       end if;
       if Result = Success then
          D.Cache := (D.Cache with delta Pose_Valid => True,
@@ -768,11 +782,11 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          begin
             if D.Nq /= D.Nv then
                Build_Manifold_Bodies (D.Body_Config.all, D.Joint_Config.all,
-                 D.State.Qpos.all, D.State.Qvel.all, True, Bodies, Joints, Result);
+                 D.State.Qpos.all, D.State.Qvel.all, True, Bodies, Joints, Result, D.State.Mocap_Pos.all, D.State.Mocap_Quat.all);
             else
             Build_Bodies (D.Body_Config.all, D.Joint_Config.all,
                           D.State.Qpos.all, D.State.Qvel.all,
-                          True, Bodies, Joints, Result);
+                          True, Bodies, Joints, Result, D.State.Mocap_Pos.all, D.State.Mocap_Quat.all);
             end if;
             if Result = Success then
                Copy_Motions (D.Kinematic.Bodies.all, Bodies);

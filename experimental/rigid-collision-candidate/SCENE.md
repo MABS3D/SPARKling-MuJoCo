@@ -30,8 +30,8 @@ le coordinate locali dei vertici, compreso `Skin`; i terreni usano il box
 `[±Half_X, ±Half_Y, ±max(Height, Base)]`. Questi box servono alla selezione,
 mentre il generatore riceve la geometria reale. I vertici decentrati sono
 inclusi direttamente; `Center_Offset` resta il seme di GJK. Dimensioni oltre
-il profilo `1e10` restituiscono `Numeric_Limit`. Non sono introdotti BVH o assi
-da covarianza.
+il profilo `1e10` restituiscono `Numeric_Limit`. La midphase per corpi composti
+usa ora il BVH descritto sotto; gli assi da covarianza restano da integrare.
 
 L'override del margine è usato esattamente nella sfera di ingombro e nel
 generatore (`Override.Margin + gap`). Le AABB sono conservativamente espanse
@@ -91,3 +91,53 @@ complessivi. Non sono state aggiunte assunzioni o soppressioni.
 /var/tmp/sparkling-movement-env/bin/python tests/check.py --out /var/tmp/scene-check --samples 300
 /var/tmp/sparkling-movement-env/bin/python tests/prove_scene.py --out /var/tmp/scene-check --whole
 ```
+
+## BVH per corpi composti
+
+La selezione condivisa ora usa `MJ.Rigid_BVH` quando il raggruppamento esistente
+per corpo è attivo e il corpo interrogato contiene almeno 32 geometrie finite.
+Questo segue la separazione fra broadphase, midphase per corpo e narrowphase di
+`engine_collision_driver.c` / `mj_collideTree` in MuJoCo 3.14.0. I corpi piccoli
+e quelli con box tutti identici mantengono la lista lineare: la gerarchia non
+potrebbe eliminare confronti nel secondo caso. Piani e coppie esplicite restano
+nei loro percorsi precedenti.
+
+La prima posa ammessa costruisce partizioni mediane deterministiche; i frame
+successivi riusano la topologia e aggiornano i box dal basso. La foresta usa al
+massimo `2 * Max_Geoms - 1` nodi in buffer posseduti dalla scena. Non alloca
+durante la ricerca. Lo stato uniforme dei box è aggiornato nello stesso passaggio
+di refit, senza una seconda scansione delle geometrie.
+
+I nodi conservano direttamente gli endpoint minimi/massimi dei box già ammessi.
+Le unioni selezionano questi endpoint: non restringono il dominio precedente e
+non richiedono conversioni centro/semiestensione che possano arrotondare verso
+l'interno. La query verifica i due assi complementari a quelli dello sweep;
+l'appartenenza al suo insieme attivo conserva anche il filtro sulla proiezione.
+I risultati vengono riordinati secondo il rango dello sweep, dal più recente:
+è esattamente l'ordine della precedente lista del corpo. Filtri per geometria,
+maschere, esclusioni, riposo e metadati vengono ancora applicati da `Try_Pair`.
+
+Questa è una midphase sui box in coordinate mondo, collegata alla selezione
+esistente. Non è ancora la traversal OBB fra due alberi locali di C, né sostituisce
+la broadphase con uno sweep sui soli corpi. Il modulo generale `MJ.BVH` del
+candidato SDF/flex rimane indipendente: le sue prove precedenti non sono attribuite
+a questo nuovo adattamento della scena.
+
+Le verifiche aggiunte in `check_bvh_scene.py` confrontano i contatti completi,
+compreso l'ordine, con lo snapshot Ada precedente; i casi fisici ammessi vengono
+confrontati anche con C. Sono inclusi refit, cambi di orientamento, maschere,
+esclusioni/coppie esplicite, override, riposo, capacità dei candidati/contatti,
+coordinate grandi, 4.096 geometrie e reinizializzazione a scena vuota.
+`prove_bvh.py` parte dai kernel `Merge_Bounds` e `Append_Id`, quindi esegue flow
+e prova dell'unità completa. Contenimento esatto degli endpoint e conservazione
+del buffer hanno contratti funzionali; il modello della query specifica insieme
+completo e ordine. La dimostrazione globale di costruzione/refit/query rimane
+aperta, senza assunzioni, soppressioni o eccezioni Silver.
+
+Il benchmark `benchmark_bvh_scene.py` misura l'intera fase collisioni su 16 pose
+in movimento, contro lo snapshot Ada precedente e C ufficiale. Cinematica,
+dinamica, vincoli e integrazione restano esclusi. Controlla separatamente i campi
+dei contatti e l'uguaglianza esatta dell'output Ada prima/dopo, conserva campioni
+alternati e intervalli di incertezza. I profili ottimizzati di questo candidato
+mantengono il precedente `-gnatp`: il benchmark non certifica una release con
+composizione formalmente chiusa. Non implica parità del motore completo.

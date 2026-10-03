@@ -1,0 +1,109 @@
+[
+  {
+    "unit": "mj-inverse_mass",
+    "subprogram": "Multiply",
+    "exit": 1,
+    "seconds": 30.179394808001234,
+    "checks": 29,
+    "diagnostics": [
+      "mj-inverse_mass.ads:35:54: medium: postcondition might fail, cannot prove Value = Model (Pattern, Mass, Acceleration) [provers reached time limit before completing the proof]"
+    ],
+    "command": [
+      "gnatprove",
+      "-P",
+      "/var/tmp/sparkling-services-inverse-proof-input-20261003/source/experimental/inverse-dynamics/inverse.gpr",
+      "-u",
+      "mj-inverse_mass.adb",
+      "--mode=all",
+      "--prover=cvc5,z3,altergo",
+      "--proof=per_check",
+      "--timeout=5",
+      "--steps=0",
+      "-j1",
+      "--checks-as-errors=on",
+      "--report=all",
+      "--output=oneline",
+      "--warnings=continue",
+      "--limit-subp=mj-inverse_mass.adb:30"
+    ],
+    "proof_checks": 27,
+    "flow_checks": 3,
+    "open": [
+      {
+        "check_col": 16,
+        "check_file": "mj-inverse_mass.ads",
+        "check_line": 34,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 17454,
+                "time": 1.29255
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 9696,
+                "time": 0.265821
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 34960,
+                "time": 1.23382
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 54,
+        "entity": 1,
+        "file": "mj-inverse_mass.ads",
+        "how_proved": "prover",
+        "line": 35,
+        "message": {
+          "text": "postcondition might fail, cannot prove Value = Model (Pattern, Mass, Acceleration)"
+        },
+        "msg_id": 30,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "coverage": true
+  }
+]

@@ -1,0 +1,20 @@
+# Body adhesion in the native constrained step
+
+The recovered implementation now runs on the current common engine. Its four productive units live in `experimental/constrained-step/src`; historical inputs and scoped patches remain under `integration`. Runtime projects compile one copy.
+
+`MJ.Adhesion` selects the appropriate contact constraint rows, combines active and gap normal Jacobians, averages over relevant rigid contacts and applies the body actuator force. The adapter runs after native contact/constraint assembly and before the constraint solve. It preserves actuator row order when motors and body transmissions are interleaved, forwards external loads, and recomputes the smooth acceleration after applying adhesion. Flex endpoints do not contribute to body adhesion, matching C.
+
+Fresh validation against official MuJoCo 3.14.0 passes **440/440 trajectories** across 55 configurations and 100 steps. Tests cover PGS/CG/Newton, both cones, contact dimensions 1/3/4/6, gaps, free/ball/hinge/slide motion, multiple contacts and actuators, activation modes, clamps and disable flags. They compare the native contact Jacobian, moments, actuator forces/velocities, generalized adhesion, constraint response and state. The source model is freed before simulation; repeat evaluation and failure preservation checks are included. The frozen closure and binary hashes are in `evidence/recovery-20261003`.
+
+The numerical thresholds are 3e-6 absolute for solver/trajectory outputs and 2e-10 for other fields, with 1e-8 relative tolerance. These are differential-test tolerances, not universal equivalence claims. All 12 minimum proofs pass. The whole `MJ.Adhesion` unit discharges 303 proof checks and 43 flow checks with full SPARK coverage and zero open obligations; recursive-model warnings remain recorded. The productive layout was rebuilt and retested in validation and release on exactly the same frozen source closure: 440/440 adhesion trajectories in each profile, 106/106 ordinary constrained regressions, numeric/capacity failure preservation and recovery pass in both profiles. Adapter flow closes 10 checks with zero errors after correcting the configuration alias, temporary-buffer initialization and loop variants; its 11 warnings remain visible. This is flow evidence, not a functional proof of the adapter. The contact selection, ordered reduction and force/frame contracts are functional proof targets; kernel proofs do not establish the entire movement pipeline.
+
+The common engine's existing supported model limits still apply. Full flex/plugin/history support, all advanced transmissions and integrators, complete adapter functional proofs and representative integrated performance remain pending. No benchmark result is claimed under concurrent load.
+
+```sh
+python3 experimental/adhesion-contact-integration/tests/build.py --out /var/tmp/adhesion-production --working-dependencies
+/var/tmp/sparkling-movement-env/bin/python experimental/adhesion-contact-integration/tests/compare_adhesion.py --binary /var/tmp/adhesion-production/build/validation/bin/adhesion_contact_probe --build /var/tmp/adhesion-production --out /var/tmp/adhesion-compare --samples 8 --steps 100
+python3 experimental/adhesion-contact-integration/tests/prove.py --build /var/tmp/adhesion-production --out /var/tmp/adhesion-small --phase small
+python3 experimental/adhesion-contact-integration/tests/prove.py --build /var/tmp/adhesion-production --out /var/tmp/adhesion-whole --phase whole
+```
+
+A subsequent C-order audit corrected the sparse velocity reduction to `(lane0+lane2)+(lane1+lane3)`. New exact cancellation/zero-compression checks run inside the probe in both profiles, and both 440-case corpora were renewed. The official shared library independently confirms the four dense/sparse cancellation fixtures. Current runtime receipts are under `evidence/recovery-order-20261003`; the four files of the proved adhesion kernel are hash-identical, as recorded separately. This change is in the adapter reduction, whose complete functional proof remains pending.

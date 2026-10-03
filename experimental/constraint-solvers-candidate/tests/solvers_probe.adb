@@ -14,7 +14,8 @@ procedure Solvers_Probe is
 begin
    while not End_Of_File loop
       Get (N); Get (K); Get (Algorithm); Get (Repeats);
-      Opt.Algorithm := Method'Val (Algorithm);
+      Opt.Sparse := Algorithm >= 3;
+      Opt.Algorithm := Method'Val (Algorithm mod 3);
       Get (Int_Value); Opt.Iterations := Int_Value;
       Get (Int_Value); Opt.LS_Iterations := Int_Value;
       Get (Opt.Tolerance); Get (Opt.LS_Tolerance); Get (Opt.Scale);

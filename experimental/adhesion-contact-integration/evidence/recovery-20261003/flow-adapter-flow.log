@@ -1,0 +1,61 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: analysis of data and information flow ...
+Summary logged in /var/tmp/sparkling-services-adhesion-flow-20261003/adapter-flow/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 27.9 s, peak group RSS 102 MB
+ info: implicit aspect Always_Terminates on "Gap_Normal" has been proved, subprogram will terminate
+--> mj-data-constrained-body_adhesion.adb:11:13
+
+ info: initialization of "Out_J" proved
+--> mj-data-constrained-body_adhesion.adb:17:07
+
+ info: initialization of "Linear" proved
+--> mj-data-constrained-body_adhesion.adb:27:13
+
+ medium: implicit aspect Always_Terminates on "Sparse_Velocity" could be incorrect, loop might be nonterminating
+--> mj-data-constrained-body_adhesion.adb:57:23
+   57 |          while K + 3 < N loop
+      |                          ^~~~
+      + possible fix: add loop variant in the loop body
+
+ medium: "Terms" might not be initialized
+--> mj-data-constrained-body_adhesion.adb:58:21
+   58 |             R0 := R0 + Terms (K); R1 := R1 + Terms (K+1);
+      |                        ^~~~~
+
+ medium: "Terms" might not be initialized
+--> mj-data-constrained-body_adhesion.adb:58:43
+   58 |             R0 := R0 + Terms (K); R1 := R1 + Terms (K+1);
+      |                                              ^~~~~
+
+ medium: "Terms" might not be initialized
+--> mj-data-constrained-body_adhesion.adb:59:21
+   59 |             R2 := R2 + Terms (K+2); R3 := R3 + Terms (K+3);
+      |                        ^~~~~
+
+ medium: "Terms" might not be initialized
+--> mj-data-constrained-body_adhesion.adb:59:45
+   59 |             R2 := R2 + Terms (K+2); R3 := R3 + Terms (K+3);
+      |                                                ^~~~~
+
+ medium: implicit aspect Always_Terminates on "Sparse_Velocity" could be incorrect, loop might be nonterminating
+--> mj-data-constrained-body_adhesion.adb:63:19
+   63 |          while K < N loop R0 := R0 + Terms (K); K := K + 1; end loop;
+      |                      ^~~~
+      + possible fix: add loop variant in the loop body
+
+ medium: "Terms" might not be initialized
+--> mj-data-constrained-body_adhesion.adb:63:35
+   63 |          while K < N loop R0 := R0 + Terms (K); K := K + 1; end loop;
+      |                                      ^~~~~
+
+ error: renamed dereference cannot depend on variable input "E" [E0007]
+--> mj-data-constrained-body_adhesion.adb:112:48
+  112 |                C : Actuator_Parameters renames E.D.Actuator_Config (Id);
+      |                                                ~~~^~~~~~~~~~~~~~~~
+      + introduce a constant of an anonymous access type for the prefix of the dereference
+      + launch "gnatprove --explain=E0007" for more information
+
+ info: data dependencies proved
+--> mj-data-constrained-body_adhesion.ads:7:11
+gnatprove: unproved check messages considered as errors

@@ -56,10 +56,19 @@ package body MJ.Convex_Contacts with SPARK_Mode is
          else
             Point := MJ.Rigid_Support.Support (S.Rigid, P, D);
          end if;
+      elsif S.Kind = Flex_Element then
+         Direction := Local (P.Rotation, D);
+         -- Starting at vertex zero preserves C's first strict maximum.
+         K := MJ.Convex_Assets.Best_Vertex (S.Prism_Vertices, 0, S.Length, Direction, 0);
+         Index := Integer (K);
+         Point := Add (P.Position, Transform (P.Rotation, S.Prism_Vertices (K)));
       elsif S.Kind = Prism then
          Direction := Local (P.Rotation, D); K := (if Direction (2) < 0.0 then 0 else 3); Best := Dot (S.Prism_Vertices (K), Direction);
          for I in K+1 .. K+2 loop Value := Dot (S.Prism_Vertices (I), Direction); if Value > Best then Best := Value; K := I; end if; end loop;
-         Index := Integer (K); Point := Add (P.Position, Transform (P.Rotation, S.Prism_Vertices (K)));
+         --  C's hfield support leaves meshindex/vertindex at -1. EPA uses
+         --  that sentinel in its repeated-support test for discrete pairs;
+         --  exposing the prism corner here changes native termination.
+         Index := -1; Point := Add (P.Position, Transform (P.Rotation, S.Prism_Vertices (K)));
       else
          Direction := Local (P.Rotation, D); K := S.First;
          Best := Dot (V (K), Direction);
@@ -161,8 +170,8 @@ package body MJ.Convex_Contacts with SPARK_Mode is
       R : GJK_Result;
       Full1, Full2, Full : Real := 0.0;
       Discrete : constant Boolean := M1 = 0.0 and M2 = 0.0 and A.Skin = 0.0 and B.Skin = 0.0
-        and (A.Kind in Hull | Prism or else A.Rigid.Kind = Box)
-        and (B.Kind in Hull | Prism or else B.Rigid.Kind = Box);
+        and (A.Kind in Hull | Prism | Flex_Element or else A.Rigid.Kind = Box)
+        and (B.Kind in Hull | Prism | Flex_Element or else B.Rigid.Kind = Box);
       Failed : Boolean := False;
       Seeded : Boolean;
       Cache1, Cache2 : Integer := -1;

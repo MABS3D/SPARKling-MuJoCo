@@ -1,0 +1,19 @@
+project Sleep is
+   Build_Root := external ("SLEEP_BUILD_ROOT", "/var/tmp/sparkling-sleep/build");
+   Mode := external ("SLEEP_MODE", "validation");
+   for Source_Dirs use ("src", "tests", "../../src");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-sleep_kernels.ads", "mj-sleep_kernels.adb",
+     "mj-sleep_manager.ads", "mj-sleep_manager.adb", "mj-sleep_bytes.ads", "sleep_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Main use ("sleep_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O1", "-g", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+end Sleep;

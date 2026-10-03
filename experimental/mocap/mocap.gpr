@@ -1,0 +1,27 @@
+project Mocap is
+   Build_Root := external ("MOCAP_BUILD_ROOT", "/var/tmp/sparkling-mocap-build");
+   Mode := external ("MOCAP_MODE", "validation");
+   for Source_Dirs use ("tests", "../smooth/src", "../../src", "../../src/gen",
+     "../spatial-tendon-candidate/src", "../muscle-candidate/src",
+     "../constrained-step/src", "../rigid-collision-candidate/src",
+     "../constraint-assembly-candidate/src", "../constraint-solvers-candidate/src",
+     "../joint-limit-candidate/src", "../frictionless-contact-candidate/src");
+   for Main use ("mocap_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      case Mode is
+         when "release" => for Default_Switches ("Ada") use
+           ("-gnat2022", "-ffp-contract=off", "-O3", "-gnatn", "-march=native");
+         when others => for Default_Switches ("Ada") use
+           ("-gnat2022", "-ffp-contract=off", "-O1", "-g", "-gnata", "-gnato", "-gnatVa");
+      end case;
+   end Compiler;
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+   package Linker is
+      for Default_Switches ("Ada") use ("-lm");
+   end Linker;
+end Mocap;

@@ -54,6 +54,16 @@ def fixture(name, body, equality='', tendon='', contact='', cone='elliptic'):
 
 
 def fixtures():
+    for kind in ['connect', 'weld']:
+        anchor = 'anchor="0 0 0"' if kind == 'connect' else ''
+        yield fixture('slide_' + kind, '''<body name="slider" pos="0 0 2">
+          <joint type="slide" axis="1 0 0"/><geom size=".1" mass="2"
+          contype="0" conaffinity="0"/></body>''',
+          f'<equality><{kind} body1="slider" {anchor}/></equality>')
+    yield fixture('large_reference_slide', '''<body name="slider" pos="0 0 2">
+      <joint type="slide" axis="1 0 0"/><geom size=".1" mass="2"
+      contype="0" conaffinity="0"/></body>''',
+      '<equality><connect body1="slider" anchor="0 0 0" solref="-1e12 -1"/></equality>')
     yield fixture('joint_equality', '''<body pos="0 0 2"><joint name="a" type="slide" axis="1 0 0"/>
       <geom size=".1" mass="2" contype="0" conaffinity="0"/>
       <body pos="0 0 .3"><joint name="b" type="slide" axis="0 1 0"/>
@@ -85,11 +95,14 @@ def fixtures():
           equality='<equality><joint joint1="x" joint2="y" polycoef=".01 1 0 0 0"/></equality>', cone=cone)
 
 
-def native_problem(name, xml, method, iterations=1000, tolerance=1e-12, seed=None):
+def native_problem(name, xml, method, iterations=1000, tolerance=1e-12, seed=None, jacobian='dense'):
     m = mujoco.MjModel.from_xml_string(xml)
+    m.opt.jacobian = 1 if jacobian == 'sparse' else 0
     m.opt.solver = method; m.opt.iterations = iterations; m.opt.tolerance = tolerance
     d = mujoco.MjData(m)
-    if 'slide' in name or 'box_' in name:
+    if name == 'large_reference_slide':
+        d.qpos[:] = .02
+    elif 'slide' in name or 'box_' in name:
         d.qvel[:] = np.linspace(1.1, -.35, m.nv)
     elif 'spin' in name:
         d.qvel[3:] = [2., -1., 3.]
@@ -125,7 +138,14 @@ def native_problem(name, xml, method, iterations=1000, tolerance=1e-12, seed=Non
         else:
             rows.append(row(kind, r=d.efc_R[i], bound=d.efc_frictionloss[i]))
             rows[-1][3] = d.efc_D[i]; i += 1
-    p = dict(name=name, method=method, M=full_m, J=d.efc_J.reshape(d.nefc, m.nv).copy(),
+    jac = np.zeros((d.nefc, m.nv))
+    if mujoco.mj_isSparse(m):
+        for r in range(d.nefc):
+            start, count = d.efc_J_rowadr[r], d.efc_J_rownnz[r]
+            jac[r, d.efc_J_colind[start:start+count]] = d.efc_J[start:start+count]
+    else:
+        jac[:] = d.efc_J.reshape(d.nefc, m.nv)
+    p = dict(name=name, method=method+(3 if jacobian == 'sparse' else 0), M=full_m, J=jac,
              free=d.qacc_smooth.copy(), ref=d.efc_aref.copy(), a0=d.qacc_smooth.copy(),
              f0=np.zeros(d.nefc), rows=rows, scale=1/(m.stat.meaninertia*max(1, m.nv)),
              iterations=iterations, tolerance=tolerance)
@@ -198,13 +218,14 @@ def certificate(p, a, f):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--binary', type=Path, required=True)
-    ap.add_argument('--out', type=Path, required=True); args = ap.parse_args()
+    ap.add_argument('--out', type=Path, required=True)
+    ap.add_argument('--jacobian', choices=['dense', 'sparse'], default='dense'); args = ap.parse_args()
     assert mujoco.__version__ == '3.14.0', mujoco.__version__
-    refs = [native_problem(name, xml, method) for name, xml in fixtures() for method in range(3)]
+    refs = [native_problem(name, xml, method, jacobian=args.jacobian) for name, xml in fixtures() for method in range(3)]
     # Fixed-work PGS exercises shuffle and momentum, independent of stopping.
-    refs += [native_problem(name, xml, 0, iterations=7, tolerance=0)
+    refs += [native_problem(name, xml, 0, iterations=7, tolerance=0, jacobian=args.jacobian)
              for name, xml in fixtures() if 'box_' in name or 'mixed' in name]
-    refs += [native_problem(name, xml, method, seed=seed)
+    refs += [native_problem(name, xml, method, seed=seed, jacobian=args.jacobian)
              for name, xml in fixtures() if 'box_' in name or 'mixed_' in name
              for method in range(3) for seed in range(8)]
     records, failures = [], []
@@ -237,6 +258,7 @@ def main():
     # Invalid problem data and SPD rejection must be atomic.
     base = cases[0][0]
     rejects = [dict(base, name='indefinite', M=[[-1.]], a0=[.7], f0=[.8]),
+               dict(base, name='below-minimum-regularization', rows=[row(0, r=1e-16)], a0=[.7], f0=[.8]),
                dict(base, name='bad-reciprocal', rows=[[0, 1, .1, .1, 0, 1, 1, 1, 1, 1, 1]], a0=[.7], f0=[.8]),
                dict(base, name='truncated-cone', rows=[row(3, 3)], a0=[.7], f0=[.8])]
     for p, o in zip(rejects, run(args.binary, rejects)):
@@ -258,7 +280,8 @@ def main():
         passed = o['status'] in ['CONVERGED', 'STALLED'] and np.allclose(o['a'], p['a0'], atol=2e-5, rtol=1e-6)
         rec = dict(name=p['name']+'-warm', method=p['method'], passed=bool(passed), status=o['status']); records.append(rec)
         if not passed: failures.append(rec); print('FAIL', rec)
-    result = dict(mujoco=mujoco.__version__, binary_sha256=hashlib.sha256(args.binary.read_bytes()).hexdigest(),
+    result = dict(mujoco=mujoco.__version__, jacobian=args.jacobian,
+                  binary_sha256=hashlib.sha256(args.binary.read_bytes()).hexdigest(),
                   total=len(records), passed=len(records)-len(failures), failures=failures, results=records)
     args.out.parent.mkdir(parents=True, exist_ok=True); args.out.write_text(json.dumps(result, indent=2)+'\n')
     print(f"{result['passed']}/{result['total']} passed")

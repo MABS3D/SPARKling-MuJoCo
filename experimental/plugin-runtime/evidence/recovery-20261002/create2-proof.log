@@ -1,0 +1,91 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: in instantiation at mj-plugin_runtime.adb:34
+--> test_runtime.ads:4:01
+      + cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+
+ info: initialization of "Status" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:18:78
+
+ info: data dependencies proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:19:11
+
+ info: postcondition proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:20:15
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:21:53
+
+ info: initialization of "Candidate" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:23:07
+
+ info: initialization of "Ok" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:24:07
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:28:32
+
+ info: loop invariant preservation proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:30:33
+
+ info: loop invariant initialization proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:30:33
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:30:57
+
+ info: index check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:31:28
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:32:27
+
+ info: overflow check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:29
+
+ warning: statement has no effect, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:33
+   34 |                for J in 0 .. I - 1 loop Call (Candidate, J, Destroy, Passive, F, Ok); end loop;
+      |                                    ^
+
+ warning: statement has no effect, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:38
+   34 |                for J in 0 .. I - 1 loop Call (Candidate, J, Destroy, Passive, F, Ok); end loop;
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ warning: "Candidate" is set by "Call" but not used after the call, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:44
+   34 |                for J in 0 .. I - 1 loop Call (Candidate, J, Destroy, Passive, F, Ok); end loop;
+      |                                               ^
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:55
+
+ warning: "Ok" is set by "Call" but not used after the call, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:34:79
+   34 |                for J in 0 .. I - 1 loop Call (Candidate, J, Destroy, Passive, F, Ok); end loop;
+      |                                                                                  ^
+
+ warning: statement has no effect, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:40:33
+   40 |          if Status /= Success then Free (Candidate, F, Status); Status := Callback_Failure; return; end if;
+      |                                    ^~~~~~~~~~~~~~~~~~~~~
+
+ warning: "Candidate" is set by "Free" but not used after the call, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:40:39
+   40 |          if Status /= Success then Free (Candidate, F, Status); Status := Callback_Failure; return; end if;
+      |                                          ^
+
+ warning: "Status" is set by "Free" but not used after the call, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:40:53
+   40 |          if Status /= Success then Free (Candidate, F, Status); Status := Callback_Failure; return; end if;
+      |                                                        ^
+ warning: generic compilation unit is not analyzed [generic-not-analyzed]
+--> mj-plugin_runtime.adb:1:16
+    1 |    package body MJ.Plugin_Runtime with SPARK_Mode is
+      |                   ^~~~~~~~~~~~~~~
+      + only instantiations of the generic will be analyzed
+Success: all checks proved (15 checks).
+Summary logged in /var/tmp/sparkling-services-plugin-proof-create2/proof/obj/gnatprove/gnatprove.out
+guarded: elapsed 3.9 s, peak group RSS 182 MB

@@ -1,0 +1,20 @@
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -254,11 +254,12 @@
+             --  Preserve mj_local2Global's floating-point order and frame
+             --  shortcuts. Multiplying two rotation matrices changes clipping
+             --  decisions even when their entries differ by only a few ULPs.
+-            Poses (G).Position := RG.Vec
+-              (case Local_Geom.Same_Frame is
+-                 when 1 => B.Position,
+-                 when 2 => B.Center,
+-                 when others => Apply (B.Rotation, Local_Geom.Position) + B.Position);
++            case Local_Geom.Same_Frame is
++               when 1 => Poses (G).Position := RG.Vec (B.Position);
++               when 2 => Poses (G).Position := RG.Vec (B.Center);
++               when others =>
++                  Poses (G).Position := RG.Vec (Apply (B.Rotation, Local_Geom.Position) + B.Position);
++            end case;
+             case Local_Geom.Same_Frame is
+                when 0 =>
+                   declare

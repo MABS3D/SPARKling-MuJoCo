@@ -108,15 +108,15 @@ package MJ.Smooth_Math with SPARK_Mode is
         <= 64.0 * Real'Model_Epsilon) with Global => null;
    function Rotation (Q : Quaternion) return Matrix with Global => null,
      Pre => Unit_Quaternion (Q), Post => Bounded (Rotation'Result, 8.0)
-       and then Rotation'Result (0, 0) = 1.0 - 2.0*(Q (2)*Q (2) + Q (3)*Q (3))
+       and then Rotation'Result (0, 0) = ((Q (0)*Q (0) + Q (1)*Q (1)) - Q (2)*Q (2)) - Q (3)*Q (3)
        and then Rotation'Result (0, 1) = 2.0*(Q (1)*Q (2) - Q (0)*Q (3))
        and then Rotation'Result (0, 2) = 2.0*(Q (1)*Q (3) + Q (0)*Q (2))
        and then Rotation'Result (1, 0) = 2.0*(Q (1)*Q (2) + Q (0)*Q (3))
-       and then Rotation'Result (1, 1) = 1.0 - 2.0*(Q (1)*Q (1) + Q (3)*Q (3))
+       and then Rotation'Result (1, 1) = ((Q (0)*Q (0) - Q (1)*Q (1)) + Q (2)*Q (2)) - Q (3)*Q (3)
        and then Rotation'Result (1, 2) = 2.0*(Q (2)*Q (3) - Q (0)*Q (1))
        and then Rotation'Result (2, 0) = 2.0*(Q (1)*Q (3) - Q (0)*Q (2))
        and then Rotation'Result (2, 1) = 2.0*(Q (2)*Q (3) + Q (0)*Q (1))
-       and then Rotation'Result (2, 2) = 1.0 - 2.0*(Q (1)*Q (1) + Q (2)*Q (2));
+       and then Rotation'Result (2, 2) = ((Q (0)*Q (0) - Q (1)*Q (1)) - Q (2)*Q (2)) + Q (3)*Q (3);
    function Unit_Vector (V : Vector) return Boolean is
      (Bounded (V, 1.000001)
       and then abs (Dot (V, V) - 1.0) <= 64.0 * Real'Model_Epsilon)

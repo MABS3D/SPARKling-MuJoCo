@@ -123,6 +123,13 @@ package body MJ.BVH with SPARK_Mode is
       if T.Length = 0 then return True; end if;
       Seen (0) := True;
       for I in 0 .. T.Length - 1 loop
+         pragma Loop_Invariant (for all J in 0 .. I - 1 => Node_Shaped (T, J));
+         pragma Loop_Invariant (for all J in 0 .. I - 1 =>
+           (if T.Nodes (J).Left = -1 then IDs (T.Nodes (J).Item)));
+         pragma Loop_Invariant (for all J in 0 .. I - 1 =>
+           (for all K in 0 .. J - 1 =>
+             (if T.Nodes (J).Left = -1 and then T.Nodes (K).Left = -1 then
+                T.Nodes (J).Item /= T.Nodes (K).Item)));
          if not Seen (I) then return False; end if;
          L := T.Nodes (I).Left; R := T.Nodes (I).Right;
          if L = -1 and R = -1 then
@@ -138,6 +145,9 @@ package body MJ.BVH with SPARK_Mode is
       end loop;
       --  C's self-pair pruning assumes contiguous subtrees in preorder.
       for I in reverse 0 .. T.Length-1 loop
+         pragma Loop_Invariant (Shaped (T) and then Unique_Leaves (T));
+         pragma Loop_Invariant (for all J in I + 1 .. T.Length - 1 =>
+           Ends (J) in J .. T.Length - 1);
          if T.Nodes (I).Left = -1 then Ends (I):=I;
          else
             L:=T.Nodes (I).Left; R:=T.Nodes (I).Right;
@@ -152,19 +162,151 @@ package body MJ.BVH with SPARK_Mode is
    begin
       if not Topology_Valid (T) then return False; end if;
       for I in 0 .. T.Length - 1 loop
+         pragma Loop_Invariant (Shaped (T) and then Unique_Leaves (T));
+         pragma Loop_Invariant (for all J in 0 .. I - 1 => Valid (T.Nodes (J).Bounds));
          if not Valid (T.Nodes (I).Bounds) then return False; end if;
          if T.Nodes (I).Left >= 0 and then
-           (not Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Left).Bounds)
+           (not Valid (T.Nodes (T.Nodes (I).Left).Bounds)
+            or else not Valid (T.Nodes (T.Nodes (I).Right).Bounds)
+            or else not Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Left).Bounds)
             or else not Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Right).Bounds))
          then return False; end if;
       end loop;
       return True;
    end Valid;
 
+   procedure Set_Bounds (T : in out Tree; I : Natural; Value : Box)
+     with Global => null, Inline, Pre => I < T.Length and then Shaped (T)
+       and then Bounded (Value)
+       and then (for all J in I + 1 .. T.Length - 1 => Valid (T.Nodes (J).Bounds))
+       and then (for all J in I + 1 .. T.Length - 1 =>
+         (if T.Nodes (J).Left >= 0 then
+           Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)
+           and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)))
+       and then (if T.Nodes (I).Left >= 0 then
+         Contains (Value, T.Nodes (T.Nodes (I).Left).Bounds)
+         and then Contains (Value, T.Nodes (T.Nodes (I).Right).Bounds)),
+       Post => T.Length = T.Length'Old and then Shaped (T)
+         and then T.Nodes (I).Bounds = Value
+         and then T.Nodes (I).Left = T.Nodes'Old (I).Left
+         and then T.Nodes (I).Right = T.Nodes'Old (I).Right
+         and then T.Nodes (I).Item = T.Nodes'Old (I).Item
+         and then (for all J in 0 .. Max_Nodes - 1 =>
+           (if J /= I then T.Nodes (J) = T.Nodes'Old (J)))
+         and then (for all J in I + 1 .. T.Length - 1 => Valid (T.Nodes (J).Bounds))
+         and then (for all J in I .. T.Length - 1 =>
+           (if T.Nodes (J).Left >= 0 then
+             Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)
+             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)))
+   is
+   begin
+      T.Nodes (I).Bounds := Value;
+   end Set_Bounds;
+
+   --  Refit needs forward, in-range children; uniqueness and reachability are
+   --  orthogonal to its box updates. Keep the public imported-tree precondition
+   --  and use this smaller proved boundary while constructing a new tree.
+   procedure Refit_Shaped (B : Box_Array; T : in out Tree; Result : out Status)
+     with Global => null, Pre => Shaped (T),
+       Post => T.Length in 0 | T.Length'Old
+         and then (for all I in 0 .. T.Length'Old - 1 =>
+           T.Nodes (I).Left = T.Nodes'Old (I).Left
+           and then T.Nodes (I).Right = T.Nodes'Old (I).Right
+           and then T.Nodes (I).Item = T.Nodes'Old (I).Item)
+         and then (if Result /= Success then T.Length = 0 else
+           T.Length = T.Length'Old and then Shaped (T) and then Boxes_Valid (T)
+           and then Enclosing (T) and then Leaves_Match (B, T))
+   is
+      V : Integer;
+      Initial_Length : constant Natural := T.Length;
+      Remaining : Natural := T.Length;
+   begin
+      Result := Invalid_Input;
+      if (for some X of B => not Valid (X)) then T.Length := 0; return; end if;
+      while Remaining > 0 loop
+         --  State the frame before the update: early numeric/input failures
+         --  must preserve topology just as a successful refit does.
+         pragma Loop_Invariant (T.Length = Initial_Length and then Shaped (T));
+         pragma Loop_Invariant (Remaining <= T.Length);
+         pragma Loop_Invariant (for all J in 0 .. Initial_Length - 1 =>
+           T.Nodes (J).Left = T.Nodes'Loop_Entry (J).Left);
+         pragma Loop_Invariant (for all J in 0 .. Initial_Length - 1 =>
+           T.Nodes (J).Right = T.Nodes'Loop_Entry (J).Right);
+         pragma Loop_Invariant (for all J in 0 .. Initial_Length - 1 =>
+           T.Nodes (J).Item = T.Nodes'Loop_Entry (J).Item);
+         pragma Loop_Invariant (for all J in Remaining .. T.Length - 1 =>
+           Valid (T.Nodes (J).Bounds));
+         pragma Loop_Invariant (for all J in Remaining .. T.Length - 1 =>
+           (if T.Nodes (J).Left = -1 then
+             T.Nodes (J).Item in B'Range and then T.Nodes (J).Bounds = B (T.Nodes (J).Item)));
+         pragma Loop_Invariant (for all J in Remaining .. T.Length - 1 =>
+           (if T.Nodes (J).Left >= 0 then
+             Valid (T.Nodes (T.Nodes (J).Left).Bounds)
+             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)));
+         pragma Loop_Invariant (for all J in Remaining .. T.Length - 1 =>
+           (if T.Nodes (J).Right >= 0 then
+             Valid (T.Nodes (T.Nodes (J).Right).Bounds)
+             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)));
+         declare
+            I : constant Natural := Remaining - 1;
+         begin
+            if T.Nodes (I).Left < 0 then
+               V := T.Nodes (I).Item;
+               if V not in B'Range then T.Length := 0; return; end if;
+               Set_Bounds (T, I, B (V));
+            else
+               Set_Bounds (T, I, Union_Box
+                 (T.Nodes (T.Nodes (I).Left).Bounds,
+                  T.Nodes (T.Nodes (I).Right).Bounds));
+            end if;
+            if not Valid (T.Nodes (I).Bounds) then T.Length := 0; Result := Numeric_Limit; return; end if;
+         end;
+         Remaining := Remaining - 1;
+      end loop;
+      pragma Assert (Remaining = 0);
+      pragma Assert (Boxes_Valid (T));
+      Result := Success;
+   end Refit_Shaped;
+   pragma Inline (Refit_Shaped);
+
+   type Node_Addresses is array (Natural range 0 .. Max_Nodes - 1) of Natural;
+   function Work_Fits (First, Last : Node_Addresses; Cursor, Length, Leaves : Natural)
+     return Boolean is
+     (for all V in Cursor .. Length - 1 =>
+        First (V) <= Last (V) and then Last (V) < Leaves
+        and then V + 2 * (Last (V) - First (V)) < Length)
+     with Ghost, Pre => Cursor <= Length and then Length <= Max_Nodes
+       and then Leaves in 1 .. Max_Leaves;
+
+   procedure Schedule (First, Last : in out Node_Addresses;
+                       Cursor, Length, Leaves, I, J : Natural;
+                       Mid, Left, Right : out Natural)
+     with Inline, Global => null,
+       Pre => Cursor < Length and then Length <= Max_Nodes
+         and then Leaves in 1 .. Max_Leaves
+         and then Work_Fits (First, Last, Cursor, Length, Leaves)
+         and then I = First (Cursor) and then J = Last (Cursor) and then I < J,
+       Post => Mid in I .. J - 1 and then Left = Cursor + 1
+         and then Right = Cursor + 2 * (Mid - I + 1)
+         and then Left < Right and then Right < Length
+         and then Work_Fits (First, Last, Cursor + 1, Length, Leaves)
+         and then First (Left) = I and then Last (Left) = Mid
+         and then First (Right) = Mid + 1 and then Last (Right) = J
+   is
+   begin
+      Mid := I + (J - I) / 2;
+      Left := Cursor + 1; Right := Cursor + 2 * (Mid - I + 1);
+      pragma Assert (Mid in I .. J - 1);
+      pragma Assert (Right + 2 * (J - (Mid + 1)) = Cursor + 2 * (J - I));
+      First (Left) := I; Last (Left) := Mid;
+      First (Right) := Mid + 1; Last (Right) := J;
+   end Schedule;
+
    procedure Build (B : Box_Array; T : in out Tree; Result : out Status) is
       Order : array (Natural range 0 .. Max_Leaves - 1) of Natural := [others => 0];
-      Start, Last : array (Natural range 0 .. Max_Nodes - 1) of Natural := [others => 0];
+      Start, Last : Node_Addresses := [others => 0];
       N, Mid, I, J, Key : Natural;
+      Left, Right : Natural;
       K : Axis;
       Bounds : Box;
    begin
@@ -172,15 +314,24 @@ package body MJ.BVH with SPARK_Mode is
       if B'Length > Max_Leaves or else B'First /= 0
         or else (for some X of B => not Valid (X)) then return; end if;
       if B'Length = 0 then Result := Success; return; end if;
-      for V in 0 .. B'Length - 1 loop Order (V) := V; end loop;
+      for V in 0 .. B'Length - 1 loop
+         pragma Loop_Invariant (for all X in 0 .. V - 1 => Order (X) = X);
+         Order (V) := V;
+      end loop;
       T.Length := 2*B'Length-1; Last (0) := B'Length - 1; N := 0;
       while N < T.Length loop
+         pragma Loop_Invariant (T.Length = 2 * B'Length - 1);
+         pragma Loop_Invariant (for all V in 0 .. N - 1 => Node_Shaped (T, V));
+         pragma Loop_Invariant (for all V in 0 .. B'Length - 1 => Order (V) in B'Range);
+         pragma Loop_Invariant (Work_Fits (Start, Last, N, T.Length, B'Length));
+         pragma Loop_Variant (Increases => N);
          I := Start (N); J := Last (N);
          if I = J then
             T.Nodes (N) := (Bounds => B (Order (I)), Item => Order (I), others => <>);
          else
             Bounds := B (Order (I));
             for V in I + 1 .. J loop
+               pragma Loop_Invariant (Valid (Bounds));
                Bounds := Union_Box (Bounds, B (Order (V)));
                if not Valid (Bounds) then T.Length := 0; Result := Numeric_Limit; return; end if;
             end loop;
@@ -189,42 +340,48 @@ package body MJ.BVH with SPARK_Mode is
             if Bounds.Half (2) > Bounds.Half (K) then K := 2; end if;
             --  Deterministic median split, preparation outside the simulation step.
             for V in I + 1 .. J loop
+               pragma Loop_Invariant (for all X in 0 .. B'Length - 1 => Order (X) in B'Range);
                Key := Order (V); Mid := V;
                while Mid > I and then B (Order (Mid - 1)).Center (K) > B (Key).Center (K) loop
+                  pragma Loop_Invariant (Mid in I + 1 .. V);
+                  pragma Loop_Invariant (Key in B'Range);
+                  pragma Loop_Invariant (for all X in 0 .. B'Length - 1 => Order (X) in B'Range);
+                  pragma Loop_Variant (Decreases => Mid);
                   Order (Mid) := Order (Mid - 1); Mid := Mid - 1;
                end loop;
                Order (Mid) := Key;
+               pragma Assert (for all X in 0 .. B'Length - 1 => Order (X) in B'Range);
             end loop;
-            Mid := I + (J - I) / 2;
-            T.Nodes (N) := (Bounds => Bounds, Left => N+1,
-                           Right => N+2*(Mid-I+1), Item => -1);
-            Start (N+1) := I; Last (N+1) := Mid;
-            Start (N+2*(Mid-I+1)) := Mid+1; Last (N+2*(Mid-I+1)) := J;
+            Schedule (Start, Last, N, T.Length, B'Length, I, J, Mid, Left, Right);
+            T.Nodes (N) := (Bounds => Bounds, Left => Left, Right => Right, Item => -1);
          end if;
          N := N + 1;
       end loop;
       --  Refit from children makes the imported containment invariant explicit.
-      Refit (B, T, Result);
+      Refit_Shaped (B, T, Result);
    end Build;
 
    procedure Refit (B : Box_Array; T : in out Tree; Result : out Status) is
-      V : Integer;
    begin
-      Result := Invalid_Input;
-      if (for some X of B => not Valid (X)) then T.Length := 0; return; end if;
-      for I in reverse 0 .. T.Length - 1 loop
-         if T.Nodes (I).Left < 0 then
-            V := T.Nodes (I).Item;
-            if V not in B'Range then T.Length := 0; return; end if;
-            T.Nodes (I).Bounds := B (V);
-         else
-            T.Nodes (I).Bounds := Union_Box
-              (T.Nodes (T.Nodes (I).Left).Bounds, T.Nodes (T.Nodes (I).Right).Bounds);
-         end if;
-         if not Valid (T.Nodes (I).Bounds) then T.Length := 0; Result := Numeric_Limit; return; end if;
-      end loop;
-      Result := Success;
+      Refit_Shaped (B, T, Result);
    end Refit;
+
+   function Frame_Product (A, B : Matrix; K, L : Axis) return Real is
+     ((A (L) * B (K) + A (3 + L) * B (3 + K)) + A (6 + L) * B (6 + K))
+     with Inline, Global => null,
+       Pre => (for all X of A => X in -4.0 .. 4.0)
+         and then (for all X of B => X in -4.0 .. 4.0),
+       Post => Frame_Product'Result in -1.0e2 .. 1.0e2
+         and then Frame_Product'Result =
+           ((A (L) * B (K) + A (3 + L) * B (3 + K)) + A (6 + L) * B (6 + K));
+   function Frame_Offset (P : Vec; R : Matrix; K : Axis) return Real is
+     ((P (0) * R (K) + P (1) * R (3 + K)) + P (2) * R (6 + K))
+     with Inline, Global => null,
+       Pre => (for all X of P => X in Coordinate)
+         and then (for all X of R => X in -4.0 .. 4.0),
+       Post => Frame_Offset'Result in -1.0e12 .. 1.0e12
+         and then Frame_Offset'Result =
+           ((P (0) * R (K) + P (1) * R (3 + K)) + P (2) * R (6 + K));
 
    procedure Prepare (PA, PB : Pose; Cache : out Frame_Cache) is
       type Pose_Array is array (Natural range 0 .. 1) of Pose;
@@ -234,14 +391,33 @@ package body MJ.BVH with SPARK_Mode is
          for J in 0 .. 1 loop
             for K in Axis loop
                for L in Axis loop
-                  Cache.Product (I, J, K, L) := Dot
-                    (Column (P (I).Rotation, L), Column (P (J).Rotation, K));
+                  Cache.Product (I, J, K, L) := Frame_Product
+                    (P (I).Rotation, P (J).Rotation, K, L);
                end loop;
-               Cache.Offset (I, J, K) := Dot (P (I).Position, Column (P (J).Rotation, K));
+               Cache.Offset (I, J, K) := Frame_Offset
+                 ((if I = 0 then PA.Position else PB.Position), P (J).Rotation, K);
             end loop;
          end loop;
       end loop;
    end Prepare;
+
+   function Projection (B : Box; X, Y, Z, Offset : Real) return Real is
+     (((B.Center (0) * X + B.Center (1) * Y) + B.Center (2) * Z) + Offset)
+     with Inline, Global => null,
+       Pre => Valid (B) and then X in -1.0e2 .. 1.0e2
+         and then Y in -1.0e2 .. 1.0e2 and then Z in -1.0e2 .. 1.0e2
+         and then Offset in -1.0e12 .. 1.0e12,
+       Post => Projection'Result in -1.0e14 .. 1.0e14
+         and then Projection'Result =
+           (((B.Center (0) * X + B.Center (1) * Y) + B.Center (2) * Z) + Offset);
+   function Projected_Radius (B : Box; X, Y, Z : Real) return Real is
+     ((abs (B.Half (0) * X) + abs (B.Half (1) * Y)) + abs (B.Half (2) * Z))
+     with Inline, Global => null,
+       Pre => Valid (B) and then X in -1.0e2 .. 1.0e2
+         and then Y in -1.0e2 .. 1.0e2 and then Z in -1.0e2 .. 1.0e2,
+       Post => Projected_Radius'Result in 0.0 .. 1.0e14
+         and then Projected_Radius'Result =
+           ((abs (B.Half (0) * X) + abs (B.Half (1) * Y)) + abs (B.Half (2) * Z));
 
    function Oriented_Overlap (A, B : Box; Cache : Frame_Cache; Margin : Real) return Boolean is
       Boxes : constant array (Natural range 0 .. 1) of Box := [A, B];
@@ -256,12 +432,15 @@ package body MJ.BVH with SPARK_Mode is
          if not Inf (1 - J) then
             for K in Axis loop
                for I in 0 .. 1 loop
-                  Proj (I) := ((Boxes (I).Center (0) * Cache.Product (I, J, K, 0)
-                    + Boxes (I).Center (1) * Cache.Product (I, J, K, 1))
-                    + Boxes (I).Center (2) * Cache.Product (I, J, K, 2)) + Cache.Offset (I, J, K);
-                  Radius (I) := (abs (Boxes (I).Half (0) * Cache.Product (I, J, K, 0))
-                    + abs (Boxes (I).Half (1) * Cache.Product (I, J, K, 1)))
-                    + abs (Boxes (I).Half (2) * Cache.Product (I, J, K, 2));
+                  pragma Loop_Invariant (for all V in 0 .. I - 1 =>
+                    Proj (V) in -1.0e14 .. 1.0e14 and then Radius (V) in 0.0 .. 1.0e14);
+                  pragma Assert (Valid (Boxes (I)));
+                  pragma Assert (Cache.Offset (I, J, K) in -1.0e12 .. 1.0e12);
+                  pragma Assert (for all L in Axis => Cache.Product (I, J, K, L) in -1.0e2 .. 1.0e2);
+                  Proj (I) := Projection (Boxes (I), Cache.Product (I, J, K, 0),
+                    Cache.Product (I, J, K, 1), Cache.Product (I, J, K, 2), Cache.Offset (I, J, K));
+                  Radius (I) := Projected_Radius (Boxes (I), Cache.Product (I, J, K, 0),
+                    Cache.Product (I, J, K, 1), Cache.Product (I, J, K, 2));
                end loop;
                if Radius (0) + Radius (1) + Margin < abs (Proj (1) - Proj (0)) then return False; end if;
             end loop;
@@ -270,12 +449,24 @@ package body MJ.BVH with SPARK_Mode is
       return True;
    end Oriented_Overlap;
 
-   function Area (B : Box) return Real is
+   function Area_Sum (X, Y, Z : Real) return Real is
+     ((X * Y + Y * Z) + Z * X)
+     with Inline, Global => null,
+       Pre => X in -2.0e10 .. 2.0e10 and then Y in -2.0e10 .. 2.0e10
+         and then Z in -2.0e10 .. 2.0e10,
+       Post => Area_Sum'Result in -1.0e23 .. 1.0e23
+         and then Area_Sum'Result = ((X * Y + Y * Z) + Z * X);
+   function Area (B : Box) return Real with Global => null,
+     Pre => Valid (B), Post => Area'Result in -1.0e23 .. 1.0e23
+   is
       X : constant Real := B.Half (0) - B.Center (0);
       Y : constant Real := B.Half (1) - B.Center (1);
       Z : constant Real := B.Half (2) - B.Center (2);
    begin
-      return (X * Y + Y * Z) + Z * X;
+      pragma Assert (X in -2.0e10 .. 2.0e10);
+      pragma Assert (Y in -2.0e10 .. 2.0e10);
+      pragma Assert (Z in -2.0e10 .. 2.0e10);
+      return Area_Sum (X, Y, Z);
    end Area;
 
    procedure Traverse (A, B : Tree; PA, PB : Pose; Margin : Real;
@@ -288,17 +479,66 @@ package body MJ.BVH with SPARK_Mode is
       C : Node_Pair;
       Cache : Frame_Cache;
       LA, LB, Hit : Boolean;
-      procedure Push (I, J : Natural) is
+      procedure Push (I, J : Natural) with
+        Global => (Proof_In => (A, B), In_Out => (Stack, Top, Result)),
+        Pre => I < A.Length and then J < B.Length and then Top <= Stack'Length
+          and then (for all Q in 0 .. Top - 1 => Stack (Q)'Initialized
+            and then Stack (Q).First < A.Length and then Stack (Q).Second < B.Length),
+        Post => Top = (if Top'Old = Stack'Length then Top'Old else Top'Old + 1)
+          and then Result = (if Top'Old = Stack'Length then Capacity_Limit else Result'Old)
+          and then (for all Q in 0 .. Top - 1 => Stack (Q)'Initialized
+            and then Stack (Q).First < A.Length and then Stack (Q).Second < B.Length)
+          and then (for all Q in 0 .. Top'Old - 1 => Stack (Q) = Stack'Old (Q))
+          and then (if Top'Old < Stack'Length then Stack (Top'Old) = Node_Pair'(I, J))
+      is
       begin
          if Top = Stack'Length then Result := Capacity_Limit;
          else Stack (Top) := (I, J); Top := Top + 1; end if;
       end Push;
+      procedure Emit (Value : Pair) with
+        Global => (Proof_In => (A, B, Self), In_Out => (Pairs, Count), Output => Result),
+        Pre => Int64 (Count) <= Int64 (Pairs'Length)
+          and then Leaf_Item (A, Value.First) and then Leaf_Item (B, Value.Second)
+          and then (if Self then Value.First /= Value.Second)
+          and then (if Count > 0 then Pairs (Pairs'First .. Pairs'First + (Count - 1))'Initialized)
+          and then (for all I in Pairs'First .. Pairs'First + (Count - 1) => Leaf_Item (A, Pairs (I).First)
+            and then Leaf_Item (B, Pairs (I).Second)
+            and then (if Self then Pairs (I).First /= Pairs (I).Second)),
+        Post => Int64 (Count) <= Int64 (Pairs'Length)
+          and then (if Int64 (Count'Old) = Int64 (Pairs'Length) or else Count'Old = Natural'Last then
+            Count = 0 and then Result = Capacity_Limit
+          else Count = Count'Old + 1 and then Result = Success
+            and then Pairs (Pairs'First + Count'Old) = Value)
+          and then (if Count > 0 then Pairs (Pairs'First .. Pairs'First + (Count - 1))'Initialized)
+          and then (for all I in Pairs'First .. Pairs'First + (Count - 1) => Leaf_Item (A, Pairs (I).First)
+            and then Leaf_Item (B, Pairs (I).Second)
+            and then (if Self then Pairs (I).First /= Pairs (I).Second))
+      is
+      begin
+         if Int64 (Count) = Int64 (Pairs'Length) or else Count = Natural'Last then
+            Result := Capacity_Limit; Count := 0; return;
+         end if;
+         Pairs (Pairs'First + Count) := Value;
+         Count := Count + 1; Result := Success;
+      end Emit;
    begin
       Count := 0; Result := Success;
       if A.Length = 0 or B.Length = 0 then return; end if;
       Prepare (PA, PB, Cache); Push (0, 0);
       while Top > 0 loop
-         pragma Loop_Invariant (for all I in 0 .. Top-1 => Stack (I)'Initialized);
+         pragma Loop_Invariant (Top <= Stack'Length);
+         pragma Loop_Invariant (Result = Success);
+         pragma Loop_Invariant (Shaped (A) and then Shaped (B)
+           and then Unique_Leaves (A) and then Unique_Leaves (B)
+           and then Boxes_Valid (A) and then Boxes_Valid (B) and then Prepared (Cache));
+         pragma Loop_Invariant (for all I in 0 .. Top-1 => Stack (I)'Initialized
+           and then Stack (I).First < A.Length and then Stack (I).Second < B.Length);
+         pragma Loop_Invariant (Int64 (Count) <= Int64 (Pairs'Length));
+         pragma Loop_Invariant (if Count > 0 then Pairs (Pairs'First .. Pairs'First + (Count - 1))'Initialized);
+         pragma Loop_Invariant (for all I in Pairs'First .. Pairs'First + (Count - 1) =>
+           Leaf_Item (A, Pairs (I).First)
+           and then Leaf_Item (B, Pairs (I).Second)
+           and then (if Self then Pairs (I).First /= Pairs (I).Second));
          Top := Top - 1; C := Stack (Top);
          if not Self or else C.First <= C.Second then
             LA := A.Nodes (C.First).Left = -1; LB := B.Nodes (C.Second).Left = -1;
@@ -308,9 +548,12 @@ package body MJ.BVH with SPARK_Mode is
             if Hit then
                if LA and LB then
                   if not Self or else C.First /= C.Second then
-                     if Count = Pairs'Length then Result := Capacity_Limit; Count := 0; return; end if;
-                     Pairs (Pairs'First + Count) := (A.Nodes (C.First).Item, B.Nodes (C.Second).Item);
-                     Count := Count + 1;
+                     pragma Assert (Leaf_Item (A, A.Nodes (C.First).Item));
+                     pragma Assert (Leaf_Item (B, B.Nodes (C.Second).Item));
+                     pragma Assert (if Self then A.Nodes (C.Second) = B.Nodes (C.Second));
+                     pragma Assert (if Self then A.Nodes (C.First).Item /= B.Nodes (C.Second).Item);
+                     Emit ((A.Nodes (C.First).Item, B.Nodes (C.Second).Item));
+                     if Result /= Success then return; end if;
                   end if;
                elsif LB or else (not LA and then Area (A.Nodes (C.First).Bounds) > Area (B.Nodes (C.Second).Bounds)) then
                   Push (A.Nodes (C.First).Left, C.Second); Push (A.Nodes (C.First).Right, C.Second);

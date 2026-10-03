@@ -416,7 +416,7 @@ package MJ.Models.Validity with SPARK_Mode is
    ----------------------------------------------------------------------------
 
    function Geom_Type_At (M : Model; G : Integer) return Boolean is
-     (M.Geoms.Geom_Type (G) in 0 .. 7            --  8 = SDF needs a plugin
+     (M.Geoms.Geom_Type (G) in 0 .. 8            --  8 also supports plugin-free mesh octrees
       and then M.Geoms.Geom_Condim (G) in 1 | 3 | 4 | 6)
    with Pre => Valid_Layout (M) and then G in 0 .. M.S.Ngeom - 1;
 
@@ -428,6 +428,9 @@ package MJ.Models.Validity with SPARK_Mode is
      (case M.Geoms.Geom_Type (G) is
         when 1      => M.Geoms.Geom_Dataid (G) in 0 .. M.S.Nhfield - 1,
         when 7      => M.Geoms.Geom_Dataid (G) in 0 .. M.S.Nmesh - 1,
+        when 8      => M.Geoms.Geom_Plugin (G) = -1
+          and then M.Geoms.Geom_Dataid (G) in 0 .. M.S.Nmesh - 1
+          and then M.Meshes.Mesh_Octnum (M.Geoms.Geom_Dataid (G)) > 0,
         when others => M.Geoms.Geom_Dataid (G) = -1)
    with Pre => Valid_Layout (M) and then G in 0 .. M.S.Ngeom - 1;
 
@@ -756,11 +759,20 @@ package MJ.Models.Validity with SPARK_Mode is
      (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Trnid_At (M, A))
    with Pre => Valid_Layout (M) and then Actuator_Types_OK (M);
 
-   --  Stateless actuators have no activation slot; every actuator has at least
-   --  one control and one force output.
+   --  MuJoCo 3.14: a DC motor can have no optional activation slots, and
+   --  mjINPUT_NONE (16) has no controls. Other stateful types need a slot.
+   --  engine_io.c checks block bounds; user_objects.cc checks actdim.
    function Actuator_Act_At (M : Model; A : Integer) return Boolean is
-     ((M.Actuators.Actuator_Actnum (A) > 0) = (M.Actuators.Actuator_Dyntype (A) /= 0)
-      and then M.Actuators.Actuator_Ctrlnum (A) >= 1
+     (M.Actuators.Actuator_Actnum (A) >= 0
+      and then (case M.Actuators.Actuator_Dyntype (A) is
+        when 0 => M.Actuators.Actuator_Actnum (A) = 0,
+        when 5 => True,
+        when others => M.Actuators.Actuator_Actnum (A) > 0)
+      and then (M.Actuators.Actuator_Ctrlnum (A) >= 1
+        or else (M.Actuators.Actuator_Dyntype (A) = 5
+          and then M.Actuators.Actuator_Gaintype (A) = 3
+          and then M.Actuators.Actuator_Ctrlspec (A) = 16
+          and then M.Actuators.Actuator_Ctrlnum (A) = 0))
       and then M.Actuators.Actuator_Outnum (A) >= 1)
    with Pre => Valid_Layout (M) and then A in 0 .. M.S.Nactuator - 1;
 
@@ -787,10 +799,13 @@ package MJ.Models.Validity with SPARK_Mode is
       and then (for all A in 0 .. M.S.Nactuator - 1 => Actuator_Range_At (M, A)))
    with Pre => Valid_Layout (M);
 
-   --  sensorSize in engine_io.c, by mjtSensor code.
+   --  Fixed dimensions follow sensorSize in engine_io.c. Rangefinder uses
+   --  compiled dataspec dimensions; C's value 1 is only its minimum address
+   --  bound, while the sensor adapter validates the selected data fields.
    function Sensor_Size (Sensor_Type, Dim : Integer) return Integer is
      (case Sensor_Type is
-        when 0 | 7 | 9 .. 17 | 20 .. 25 | 38 | 39 | 43 .. 45 => 1,
+        when 0 | 9 .. 17 | 20 .. 25 | 38 | 39 | 43 .. 45     => 1,
+        when 7                                               => (if Dim >= 1 then Dim else -1),
         when 8                                               => 2,
         when 1 .. 6 | 19 | 26 | 28 .. 37 | 40                => 3,
         when 18 | 27                                         => 4,

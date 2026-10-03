@@ -1,0 +1,244 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_EFFECTS"
+      }
+    },
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Integration_Kernels.Add_Weighted",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-integration_kernels.ads",
+          "line": 8
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "entity": 1,
+      "file": "mj-integration_kernels.ads",
+      "how_proved": "flow",
+      "line": 8,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Add_Weighted\" has been proved, subprogram will terminate"
+      },
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 11,
+      "entity": 1,
+      "file": "mj-integration_kernels.ads",
+      "how_proved": "flow",
+      "line": 9,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 25,
+      "check_file": "mj-integration_kernels.adb",
+      "check_line": 7,
+      "check_tree": {
+      },
+      "col": 25,
+      "entity": 1,
+      "file": "mj-integration_kernels.adb",
+      "how_proved": "trivial",
+      "line": 7,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 21,
+      "check_file": "mj-integration_kernels.adb",
+      "check_line": 7,
+      "check_tree": {
+      },
+      "col": 21,
+      "entity": 1,
+      "file": "mj-integration_kernels.adb",
+      "how_proved": "trivial",
+      "line": 7,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 65,
+      "check_file": "mj-integration_kernels.ads",
+      "check_line": 9,
+      "check_tree": {
+      },
+      "col": 65,
+      "entity": 1,
+      "file": "mj-integration_kernels.ads",
+      "how_proved": "trivial",
+      "line": 9,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 61,
+      "check_file": "mj-integration_kernels.ads",
+      "check_line": 9,
+      "check_tree": {
+      },
+      "col": 61,
+      "entity": 1,
+      "file": "mj-integration_kernels.ads",
+      "how_proved": "trivial",
+      "line": 9,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 35,
+      "check_file": "mj-integration_kernels.ads",
+      "check_line": 9,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 5949,
+              "time": 9.60110000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 35,
+      "entity": 1,
+      "file": "mj-integration_kernels.ads",
+      "how_proved": "prover",
+      "line": 9,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 5949,
+          "max_time": 9.60109978914261E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 1.53000000864267E-03,
+      "gnatwhy3.init": 2.72767990827560E-01,
+      "gnatwhy3.register_vcs": 5.47998992260545E-04,
+      "gnatwhy3.run_vcs": 3.00000010611257E-06,
+      "gnatwhy3.save_session": 3.69999004760757E-04,
+      "gnatwhy3.schedule_vcs": 1.23840002343059E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.73200008086860E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 2.59989992628107E-05,
+      "gnatwhy3.transformations.discriminate_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 2.30000005103648E-04,
+      "gnatwhy3.transformations.eliminate_builtin": 1.49799895007163E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 7.89990008343011E-05,
+      "gnatwhy3.transformations.eliminate_epsilon": 7.89990008343011E-05,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 7.59989998186938E-05,
+      "gnatwhy3.transformations.eliminate_inductive": 2.20999005250633E-04,
+      "gnatwhy3.transformations.eliminate_literal": 5.47998992260545E-04,
+      "gnatwhy3.transformations.eliminate_projections_sums": 1.48000006447546E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.inline_trivial": 4.13300003856421E-03,
+      "gnatwhy3.transformations.path_split": 1.25998994917609E-04,
+      "gnatwhy3.transformations.remove_unused": 1.05900003109127E-03,
+      "gnatwhy3.transformations.simplify_formula": 1.03999002021737E-04
+    },
+    "global": {
+      "flow analysis": 6.68000022415072E-04,
+      "globals (advanced)": 9.81000019237399E-04,
+      "globals (basic)": 2.44800001382828E-03,
+      "init_why_sections": 3.07999987853691E-04,
+      "marking": 2.68000003416091E-04,
+      "properties (advanced)": 2.70000000455184E-05,
+      "translation of standard": 1.63900002371520E-03
+    }
+  },
+  "warn_error": [
+  ]
+}

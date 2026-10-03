@@ -1,0 +1,91 @@
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -175,26 +175,29 @@
+    --  Raw inputs, independent of qpos/qvel; normalize only when building poses.
+    procedure Set_Mocap
+      (D : in out Simulation; Index : Natural; Position, Quaternion : State_Vector;
+-      Result : out Status) with Global => null, Pre => Valid_State (D),
+-     Post => (Static => Is_Ready (D) = Is_Ready (D)'Old
+-       and then Shape (D) = Shape (D)'Old
+-       and then Configuration (D) = Configuration (D)'Old
+-       and then State_Values (D) = State_Values (D)'Old
+-       and then Input_Values (D) = Input_Values (D)'Old
+-       and then Activation_Values (D) = Activation_Values (D)'Old
+-       and then (if Result = Success then
+-         not Positions_Current (D) and then not Forces_Current (D)
+-         and then (for all I in Mocap_Positions (D)'Range =>
+-           Mocap_Positions (D) (I) = (if I in 3 * Index .. 3 * Index + 2
+-             then Position (Position'First + I - 3 * Index)
+-             else Mocap_Positions (D)'Old (I)))
+-         and then (for all I in Mocap_Quaternions (D)'Range =>
+-           Mocap_Quaternions (D) (I) = (if I in 4 * Index .. 4 * Index + 3
+-             then Quaternion (Quaternion'First + I - 4 * Index)
+-             else Mocap_Quaternions (D)'Old (I)))
+-         else Mocap_Values (D) = Mocap_Values (D)'Old
+-           and then Positions_Current (D) = Positions_Current (D)'Old
+-           and then Forces_Current (D) = Forces_Current (D)'Old));
++      Result : out Status) with Global => null, Pre => Valid_State (D);
++   pragma Postcondition (Static => Is_Ready (D) = Is_Ready (D)'Old);
++   pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
++   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
++   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
++   pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
++   pragma Postcondition (Static => Activation_Values (D) = Activation_Values (D)'Old);
++   pragma Postcondition (Static => (if Result = Success then
++     not Positions_Current (D) and then not Forces_Current (D)));
++   pragma Postcondition (Static => (if Result = Success then
++     (for all I in Mocap_Positions (D)'Range =>
++       Mocap_Positions (D) (I) = (if I in 3 * Index .. 3 * Index + 2
++         then Position (Position'First + (I - 3 * Index))
++         else Mocap_Positions (D)'Old (I)))));
++   pragma Postcondition (Static => (if Result = Success then
++     (for all I in Mocap_Quaternions (D)'Range =>
++       Mocap_Quaternions (D) (I) = (if I in 4 * Index .. 4 * Index + 3
++         then Quaternion (Quaternion'First + (I - 4 * Index))
++         else Mocap_Quaternions (D)'Old (I)))));
++   pragma Postcondition (Static => (if Result /= Success then
++     Mocap_Values (D) = Mocap_Values (D)'Old
++     and then Positions_Current (D) = Positions_Current (D)'Old
++     and then Forces_Current (D) = Forces_Current (D)'Old));
+ 
+    procedure Set_Control
+      (D : in out Simulation; Index : Natural; Value : Tier0_Real; Result : out Status)
+@@ -809,6 +812,8 @@
+       and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
++      and then D.Nmocap <= D.Nb
++      and then (for all C of D.Body_Config.all => C.Mocap_Id in -1 .. Integer (D.Nmocap) - 1)
+       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+       and then D.Actuator_Config /= null and then D.Actuator_Config'First = 0 and then D.Actuator_Config'Last = D.Na - 1 and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na)
+       and then D.Kinematic.Bodies /= null and then D.Kinematic.Bodies'First = 0
+@@ -860,6 +865,8 @@
+       and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
+       and then D.Nu = D.Na and then D.No = D.Na
+       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
++      and then D.Nmocap <= D.Nb
++      and then (for all C of D.Body_Config.all => C.Mocap_Id in -1 .. Integer (D.Nmocap) - 1)
+       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
+       and then D.Actuator_Config /= null and then D.Actuator_Config'First = 0 and then D.Actuator_Config'Last = D.Na - 1 and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na)
+       and then D.Kinematic.Bodies /= null and then D.Kinematic.Bodies'First = 0
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -1219,6 +1219,8 @@
+        and then S.Qvel = null
+        and then S.Ctrl = null
+        and then S.Applied = null
++       and then S.Mocap_Pos = null
++       and then S.Mocap_Quat = null
+    is
+    begin
+       Free_Real (S.Qpos); Free_Real (S.Qvel);
+@@ -1549,6 +1551,9 @@
+       MJ.Mocap_Kernels.Write_Pose (D.State.Mocap_Pos.all, D.State.Mocap_Quat.all,
+         Index, As_Reals (Position), As_Reals (Quaternion));
+       Invalidate (D.Cache);
++      pragma Assert (Static => Stable_Ready (D));
++      pragma Assert (Static => Inputs_Bounded (D));
++      pragma Assert (Static => Caches_Bounded (D));
+       Result := Success;
+    end Set_Mocap;
+ 

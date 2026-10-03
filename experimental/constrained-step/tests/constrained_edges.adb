@@ -19,11 +19,17 @@ begin
    if Load.Status /= OK then raise Program_Error with "load"; end if;
    C.Create (M, E.all, Result);
    if Result /= Success then raise Program_Error with Result'Image; end if;
+   if C.Activation_Count (E.all) = 1 then
+      C.Set_Activation (E.all, [0.2], Result);
+      if Result /= Success then raise Program_Error with "activation"; end if;
+      C.Set_Control (E.all, 0, 0.6, Result);
+      if Result /= Success then raise Program_Error with "control"; end if;
+   end if;
    declare
-      Before : constant Real_Array := C.State (E.all);
+      Before : constant Real_Array := C.Complete_State (E.all);
    begin
       C.Step (E.all, Result);
-      if Result /= Capacity_Exceeded or else C.State (E.all) /= Before
+      if Result /= Capacity_Exceeded or else C.Complete_State (E.all) /= Before
         or else C.Diagnostics (E.all).Valid then
          raise Program_Error with "capacity rejection not atomic: " & Result'Image;
       end if;

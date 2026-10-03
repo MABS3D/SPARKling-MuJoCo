@@ -39,8 +39,16 @@ def fixtures():
  yield 'motor_limit_contact',motor.replace('</mujoco>','<actuator><motor joint="z" gear="2"/></actuator></mujoco>')
  yield 'no_contacts',model_xml('<body pos="0 0 1"><joint type="free"/><geom type="sphere" size=".1" mass="1"/></body>')
  yield 'margin_gap',model_xml('<body pos="0 0 .109"><joint type="free"/><geom type="sphere" size=".1" mass="1" margin=".004" gap=".015"/></body>')
+ for solver in ['PGS','CG','Newton']:
+  for power in [0.,1.25,1.5,2.5,3.,8.]:
+   impedance=f'.9 .95 .005 .3 {power}'
+   body=f'''<body pos="0 0 .0995"><joint type="slide" axis="0 0 1"
+    range="0 .2" margin=".001" frictionloss=".05"
+    solimplimit="{impedance}" solimpfriction="{impedance}"/>
+    <geom type="sphere" size=".1" mass="1" solimp="{impedance}"/></body>'''
+   yield f'solimp_{solver}_{power}',model_xml(body,solver=solver)
 
-def parse(text,nv):
+def parse(text,nv,na=0):
  lines=iter(text.splitlines());results=[]
  for line in lines:
   if not line:continue
@@ -53,23 +61,33 @@ def parse(text,nv):
   for _ in range(nr):
    line=next(lines);assert line.startswith('jac '),line;rows.append(np.fromstring(line[4:],sep=' '))
   r['jac']=np.array(rows).reshape(nr,nv)
+  if na:
+   line=next(lines);assert line.startswith('act_dot '),line;r['act_dot']=np.fromstring(line[8:],sep=' ')
   line=next(lines);assert line.startswith('state '),line;r['state']=np.fromstring(line[6:],sep=' ')
+  if na:
+   line=next(lines);assert line.startswith('activation '),line;r['activation']=np.fromstring(line[11:],sep=' ')
   results.append(r)
  return results
 
-def oracle(m,q,v,applied,steps,ctrl=None,loads=None):
+def oracle(m,q,v,applied,steps,ctrl=None,loads=None,act=None):
  d=mujoco.MjData(m);d.qpos[:]=q;d.qvel[:]=v;d.qfrc_applied[:]=applied
  if ctrl is not None:d.ctrl[:]=ctrl
  if loads is not None:d.xfrc_applied[:]=loads
+ if act is not None:d.act[:]=act
  mujoco.mj_forward(m,d);nr=d.nefc
  J=np.zeros((nr,m.nv))
- for i in range(nr):
-  adr=d.efc_J_rowadr[i];n=d.efc_J_rownnz[i]
-  J[i,d.efc_J_colind[adr:adr+n]]=d.efc_J[adr:adr+n]
+ if mujoco.mj_isSparse(m):
+  for i in range(nr):
+   adr=d.efc_J_rowadr[i];n=d.efc_J_rownnz[i]
+   J[i,d.efc_J_colind[adr:adr+n]]=d.efc_J[adr:adr+n]
+ else:
+  J[:]=d.efc_J.reshape(nr,m.nv)
  r={k:np.array(val).copy() for k,val in dict(counts=[d.ncon,nr],free=d.qacc_smooth,acc=d.qacc,
   qfrc=d.qfrc_constraint,aref=d.efc_aref,reg=d.efc_R,force=d.efc_force,jac=J).items()}
+ if m.na:r['act_dot']=d.act_dot.copy()
  for _ in range(steps):mujoco.mj_step(m,d)
  r['state']=np.r_[d.qpos,d.qvel,d.time]
+ if m.na:r['activation']=d.act.copy()
  return r
 
 def main():
@@ -89,15 +107,16 @@ def main():
    if name=='hinge_contact':q[:]=.11
    v=rng.uniform(-.1,.1,m.nv);applied=rng.uniform(-.1,.1,m.nv)
    ctrl=rng.uniform(-.2,.2,m.nu);loads=rng.uniform(-.1,.1,(m.nbody,6)) if a.loads else None
-   samples.extend([0.,*q,*v,*applied,*ctrl])
+   act=rng.uniform(-.2,.8,m.na)
+   samples.extend([0.,*q,*v,*applied,*ctrl,*act])
    if a.loads:samples.extend(loads.ravel())
-   refs.append(oracle(m,q,v,applied,a.steps,ctrl,loads))
+   refs.append(oracle(m,q,v,applied,a.steps,ctrl,loads,act))
   data=f'{a.samples} {a.steps}\n'+' '.join(format(x,'.17g') for x in samples)+'\n'
   run=subprocess.run([str(a.binary),str(file)]+(["loads"] if a.loads else []),input=data,text=True,capture_output=True,timeout=180)
   (a.out/(name+'.output')).write_text(run.stdout+run.stderr)
   if run.returncode or run.stdout.startswith('create'):
    failures.append(dict(model=name,error=run.stdout[-1800:]));print('FAIL',name,run.stdout[-800:],flush=True);continue
-  try: actual=parse(run.stdout,m.nv)
+  try: actual=parse(run.stdout,m.nv,m.na)
   except Exception as e:failures.append(dict(model=name,error=str(e)));continue
   assert len(actual)==len(refs)
   for i,(x,y) in enumerate(zip(actual,refs)):

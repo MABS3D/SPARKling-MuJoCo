@@ -6,8 +6,9 @@ project Limits is
    for Source_Files use ("mj.ads", "mj-types.ads", "mj-blas.ads", "mj-blas.adb",
      "mj-vector_models.ads", "mj-vector_models.adb", "mj-quaternion_math.ads", "mj-contact_rows.ads", "mj-contact_rows.adb",
      "mj-joint_limits.ads", "mj-joint_limits.adb", "mj-joint_limit_response.ads",
-     "mj-joint_limit_response.adb", "mj-joint_limit_math.ads", "limit_probe.adb");
-   for Main use ("limit_probe.adb");
+     "mj-joint_limit_response.adb", "mj-joint_limit_math.ads",
+     "mj-solimp_curve.ads", "mj-solimp_curve.adb", "limit_probe.adb", "solimp_probe.adb");
+   for Main use ("limit_probe.adb", "solimp_probe.adb");
    for Object_Dir use Build_Root & "/" & Mode & "/obj";
    for Exec_Dir use Build_Root & "/" & Mode & "/bin";
    for Create_Missing_Dirs use "True";
@@ -15,7 +16,7 @@ project Limits is
    case Mode is
       when "development" => Flags := Flags & ("-O0", "-g", "-gnata", "-gnato", "-gnatVa");
       when "validation" => Flags := Flags & ("-O2", "-g", "-gnata", "-gnato", "-gnatVa");
-      when "release" => Flags := Flags & ("-O3", "-gnatp", "-gnatn", "-march=native", "-flto");
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native", "-flto");
    end case;
    package Compiler is
       for Default_Switches ("Ada") use Flags;

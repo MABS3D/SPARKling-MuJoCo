@@ -1,0 +1,17 @@
+--- a/src/mj-models-validity.ads
++++ b/src/mj-models-validity.ads
+@@ -802,12 +802,12 @@
+    --  sensorSize in engine_io.c, by mjtSensor code.
+    function Sensor_Size (Sensor_Type, Dim : Integer) return Integer is
+      (case Sensor_Type is
+-        when 0 | 7 | 9 .. 17 | 20 .. 25 | 38 | 39 | 43 .. 45 => 1,
++        when 0 | 9 .. 17 | 20 .. 25 | 38 | 39 | 43 .. 45 => 1,
+         when 8                                               => 2,
+         when 1 .. 6 | 19 | 26 | 28 .. 37 | 40                => 3,
+         when 18 | 27                                         => 4,
+         when 41                                              => 6,
+-        when 42 | 46 | 48                                    => Dim,
++        when 7 | 42 | 46 | 48                                => Dim,
+         when others                                          => -1);
+ 
+    --  numObjects in engine_io.c: -1 means "no object check", -2 an invalid type.

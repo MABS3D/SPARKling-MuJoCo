@@ -1,7 +1,11 @@
 # Primo passo integrato con vincoli — 2 ottobre 2026
 
+Il collegamento di attivazioni, fluidi e tendini già presenti nello smooth è
+descritto in [FORCE-INTEGRATION.md](FORCE-INTEGRATION.md), con API dello stato
+di attivazione, atomicità del passo e verifiche dedicate.
+
 `MJ.Data.Constrained` collega il modello MJB alla simulazione con contatti,
-attrito piramidale e limiti articolari. Riusa lo stato posseduto e le fasi del
+attrito piramidale/ellittico e limiti articolari. Riusa lo stato posseduto e le fasi del
 simulatore smooth, i materiali/collisioni rigide, l'assemblaggio CSR, la risposta
 dei vincoli e i solver PGS/CG/Newton. I test forniscono ad Ada soltanto modello,
 stato, controlli, forze generalizzate e carichi esterni: nessun contatto,
@@ -12,6 +16,10 @@ Il percorso ordinario `MJ.Data.Create` / `MJ.Data.Euler.Step` conserva il suo
 ambito: questa integrazione non rimuove globalmente il controllo sui vincoli.
 Usare `Constrained.Create`, i relativi setter e `Constrained.Step`.
 L'API espone anche `Evaluate`, `State` e `Diagnostics` per verificare i passaggi.
+
+L'integrazione dei coni ellittici e i relativi limiti numerici/prove sono
+documentati in [ELLIPTIC.md](ELLIPTIC.md). I rapporti storici sottostanti
+restano riferiti ai rispettivi snapshot.
 
 ## Collegamenti implementati
 
@@ -46,21 +54,24 @@ volta sullo heap. `Free` libera lo stato smooth; l'oggetto Engine è del chiaman
 
 ## Ambito ammesso e limiti
 
+- Surface velocity locale lineare e angolare, trasformata al punto di contatto
+  e aggiunta alle righe tangenziali/torsionali dei due coni;
+  dettagli e riproduzione in [SURFACE_VELOCITY.md](SURFACE_VELOCITY.md).
 - Euler, giunti hinge/slide/ball/free; contatti fra primitive rigide supportate
   dal modulo collisioni (piano, sfera, capsula, ellissoide, cilindro, box).
-- Contatti senza attrito o piramidali con `condim` 1/3/4/6, compresa frizione
+- Contatti senza attrito, piramidali o ellittici con `condim` 1/3/4/6, compresa frizione
   torsionale e di rotolamento; attrito secco dei DOF; limiti hinge/slide/ball.
 - Le forze libere, motori, molle/smorzamento e carichi esterni del sottoinsieme
   ammesso dalla dinamica smooth. Attivazioni `na > 0` escluse da questo ingresso.
-- `solimp` lineare/quadratico: il parametro effettivo dopo la miscelazione deve
-  avere potenza 1 o 2 (valori <= 1 vengono portati a 1 come in C). Altri casi
-  restano esplicitamente non supportati.
+- `solimp` con esponente reale arbitrario, portato almeno a 1 come in C;
+  restano i percorsi rapidi per 1 e 2. Gli intermedi non validi o fuori dal
+  dominio numerico dichiarato producono `Numeric_Limit` senza avanzare lo stato.
 - 1–128 DOF, massimo 256 geometrie, 128 contatti e 256 righe.
 - Warmstart e isole devono essere disabilitati esplicitamente nel modello;
   tutti gli enable-flags sono esclusi. Limiti/contatti/frictionloss possono
   essere disabilitati singolarmente e i flag vengono rispettati.
-- Non ancora ammessi: coni ellittici, NoSlip, uguaglianze, tendini, coppie
-  esplicite/esclusioni, mesh/heightfield/SDF/flex, adesione, surface velocity,
+- Non ancora ammessi: NoSlip, uguaglianze, tendini, coppie
+  esplicite/esclusioni, mesh/heightfield/SDF/flex, adesione,
   attivazioni, mocap/plugin e gli altri integratori. I modelli vengono rifiutati
   quando queste funzioni non sono gestite. I sensori richiedono il flag disable.
 

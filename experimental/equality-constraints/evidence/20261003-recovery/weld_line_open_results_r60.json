@@ -1,0 +1,127 @@
+[
+  {
+    "label": "line-Weld-145",
+    "command": [
+      "/usr/bin/python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--min-free-mb",
+      "0",
+      "--cap-mb",
+      "2000",
+      "--timeout",
+      "180",
+      "--",
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-equality-weld-20261003-r60/equality.gpr",
+      "-u",
+      "mj-equality_geometry.ads",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=20",
+      "--memlimit=800",
+      "--steps=0",
+      "--proof=per_path",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-equality_geometry.adb:145",
+      "--limit-line=mj-equality_geometry.adb:170"
+    ],
+    "code": 1,
+    "seconds": 136.9612832069397,
+    "unit": "mj-equality_geometry",
+    "limit": "mj-equality_geometry.adb:145",
+    "diagnostic_line": "mj-equality_geometry.adb:170",
+    "checks": 3,
+    "open": [
+      {
+        "check_col": 43,
+        "check_file": "mj-equality_geometry.adb",
+        "check_line": 170,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 20
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 20
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 20
+              }
+            },
+            "transformations": {
+              "split_conj": [
+                {
+                  "proof_attempts": {
+                    "CVC5": {
+                      "result": "Unknown\n(unknown + incomplete)",
+                      "steps": 82719,
+                      "time": 2.78502
+                    },
+                    "Z3": {
+                      "result": "Valid",
+                      "steps": 1,
+                      "time": 0.114851
+                    }
+                  },
+                  "transformations": {}
+                },
+                {
+                  "proof_attempts": {
+                    "CVC5": {
+                      "result": "Timeout",
+                      "steps": 1,
+                      "time": 20
+                    },
+                    "Z3": {
+                      "result": "Timeout",
+                      "steps": 1,
+                      "time": 20
+                    },
+                    "altergo": {
+                      "result": "High failure (unrecognized prover answer)",
+                      "steps": 1,
+                      "time": 17.6244
+                    }
+                  },
+                  "transformations": {}
+                }
+              ]
+            }
+          }
+        ],
+        "col": 43,
+        "entity": 1,
+        "file": "mj-equality_geometry.adb",
+        "how_proved": "prover",
+        "line": 170,
+        "message": {
+          "text": "loop invariant might not be preserved by an arbitrary iteration"
+        },
+        "msg_id": 1,
+        "rule": "VC_LOOP_INVARIANT_PRESERV",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "passed": false
+  }
+]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import argparse, json, subprocess
-from evidence import HERE, environment, snapshot, provenance
+import argparse, json, subprocess, sys
+from evidence import HERE, ROOT, environment, snapshot, provenance
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--out', type=Path, required=True)
@@ -11,7 +11,9 @@ args.out.mkdir(parents=True, exist_ok=True)
 sources = snapshot()
 env = environment()
 env['LIMIT_BUILD_ROOT'] = str(args.out.resolve())
-cmd = ['gprbuild', '-P', str(HERE / 'limits.gpr'), '-p', '-f', '-j2', '-XLIMIT_MODE=' + args.mode]
+cmd = ['gprbuild', '-P', str(HERE / 'limits.gpr'), '-p', '-f', '-j1', '-XLIMIT_MODE=' + args.mode]
+cmd = [sys.executable, str(ROOT/'tools/guarded.py'), '--cap-mb', '2600',
+       '--min-free-mb', '12000', '--timeout', '180', '--', *cmd]
 p = subprocess.run(cmd, env=env, text=True, capture_output=True)
 (args.out / ('build-' + args.mode + '.log')).write_text(p.stdout + p.stderr)
 (args.out / ('build-' + args.mode + '.json')).write_text(json.dumps(

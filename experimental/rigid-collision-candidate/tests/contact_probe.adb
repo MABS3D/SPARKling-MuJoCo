@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO;
 with Ada.Long_Float_Text_IO;
 with Ada.Real_Time; use Ada.Real_Time;
+with Ada.Command_Line;
 with MJ.Rigid_Geometry; use MJ.Rigid_Geometry;
 with MJ.Contact_Geometry; use MJ.Contact_Geometry;
 with MJ.Convex_Contacts;
@@ -43,6 +44,14 @@ procedure Contact_Probe is
       Put (" "); Ada.Long_Float_Text_IO.Put (X, Fore => 1, Aft => 16, Exp => 3);
    end Real_Out;
 begin
+   --  Match the compiled model's CCD budget when diagnosing integrated
+   --  trajectories; the historical standalone fixtures keep their default.
+   if Ada.Command_Line.Argument_Count >= 1 then
+      O.Iterations := Positive'Value (Ada.Command_Line.Argument (1));
+   end if;
+   if Ada.Command_Line.Argument_Count >= 2 then
+      O.Tolerance := Long_Float'Value (Ada.Command_Line.Argument (2));
+   end if;
    while not End_Of_File loop
       Ada.Integer_Text_IO.Get (Mode); Ada.Integer_Text_IO.Get (Repeats);
       Ada.Long_Float_Text_IO.Get (Margin); NV := 0; NF := 0; NG := 0; Reuse_Mesh := False;

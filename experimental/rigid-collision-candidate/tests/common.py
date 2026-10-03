@@ -34,7 +34,7 @@ def build(out):
     env=environment();env['RIGID_BUILD_ROOT']=str(out/'build')
     for mode in ['validation','release']:
         env['RIGID_MODE']=mode
-        cmd=['gprbuild','-P',str(snapshot/'rigid.gpr'),'-j2']
+        cmd=['gprbuild','-P',str(snapshot/'rigid.gpr'),'-j1']
         with (out/(mode+'-build.log')).open('w') as f:
             subprocess.run(['python3',str(ROOT/'tools/guarded.py'),'--cap-mb','3000',
                             '--timeout','180','--',*cmd],env=env,stdout=f,

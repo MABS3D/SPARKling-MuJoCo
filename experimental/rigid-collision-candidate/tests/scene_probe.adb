@@ -1,4 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Command_Line;
 with Ada.Integer_Text_IO;
 with Ada.Long_Float_Text_IO;
 with Interfaces;
@@ -77,6 +78,11 @@ procedure Scene_Probe is
    begin Put (" "); Ada.Long_Float_Text_IO.Put (Value, Fore => 1, Aft => 16, Exp => 3); end Real_Out;
    procedure Emit is
    begin
+      if Ada.Command_Line.Argument_Count > 0
+        and then Ada.Command_Line.Argument (1) = "bvh-stats" then
+         Put_Line (Standard_Error, "BVH" & BVH_Node_Tests (S.all)'Image
+           & BVH_Leaf_Tests (S.all)'Image);
+      end if;
       Put (Status'Image (Result));
       Put (Natural'Image (Length)); Put (Natural'Image (Selected_Count (S.all)));
       Put (Natural'Image (Generation_Count (S.all)));

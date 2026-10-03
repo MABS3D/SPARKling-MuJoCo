@@ -22,9 +22,10 @@ package body MJ.SDF_Collisions with SPARK_Mode is
                     Value : out Real; Gradient : out Vec; Result : out Status) is
    begin
       Value := 0.0; Gradient := Zero; Result := Invalid_Input;
-      if not Valid (F, T) then return; end if;
+      if not Fields_Admitted and then not Valid (F, T) then return; end if;
       if (for some Q of X => Q not in -1.0e10 .. 1.0e10) then Result := Numeric_Limit; return; end if;
       if F.Kind = Custom then Custom_Query (F.Key, X, Need_Gradient, Value, Gradient, Result);
+      elsif Fields_Admitted then MJ.SDF_Fields.Evaluate_Admitted (F, T, X, Need_Gradient, Value, Gradient, Result);
       else MJ.SDF_Fields.Evaluate (F, T, X, Need_Gradient, Value, Gradient, Result); end if;
       if Result = Success and then (Value not in -1.0e100 .. 1.0e100
         or else (for some Q of Gradient => Q not in -1.0e60 .. 1.0e60)) then
@@ -120,7 +121,7 @@ package body MJ.SDF_Collisions with SPARK_Mode is
       Points (M.Length) := X; M.Length := M.Length + 1; Added := True;
    end Add_Contact;
 
-   procedure Generate (A, B : Field; T : Octree; PA, PB : Pose;
+   procedure Generate_Admitted (A, B : Field; T : Octree; PA, PB : Pose;
                        O : Search_Options; M : in out Manifold; Result : out Status) is
       P : Problem := (A => B, B => A, Relative => Relative_Pose (PB, PA), Kind => Collision);
       Map : constant Pose := Relative_Pose (PA, PB);
@@ -165,6 +166,12 @@ package body MJ.SDF_Collisions with SPARK_Mode is
          end if;
          exit when M.Length = Max_Manifold;
       end loop;
+   end Generate_Admitted;
+
+   procedure Generate (A, B : Field; T : Octree; PA, PB : Pose;
+                       O : Search_Options; M : in out Manifold; Result : out Status) is
+   begin
+      Generate_Admitted (A, B, T, PA, PB, O, M, Result);
    end Generate;
 
    procedure Frank_Wolfe (P : Problem; T : Octree; V : Vertex_Array; Steps : Natural;

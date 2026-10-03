@@ -30,6 +30,8 @@ package MJ.Constraint_Scalar with SPARK_Mode is
        when Friction => Project'Result in -Bound .. Bound,
        when Unilateral => Project'Result >= 0.0);
 
+   --  Includes C's mjMINVAL regularization (R=1e-15, D=1e15),
+   --  also for equality rows whose Jacobian is zero.
    function Evaluate
      (Kind : Row_Kind; Jar, R, D, Bound : Real) return Response
    with Pre => Jar in -1.0e30 .. 1.0e30 and R in 1.0e-30 .. 1.0e30

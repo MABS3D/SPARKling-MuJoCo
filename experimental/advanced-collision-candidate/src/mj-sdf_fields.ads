@@ -44,10 +44,21 @@ package MJ.SDF_Fields with SPARK_Mode is
                      DW : out Corner_Gradients; Result : out Status)
      with Global => null, Pre => F.Kind = Sampled and Valid (F, T)
        and (for all Q of X => Q in -1.0e10 .. 1.0e10);
+   procedure Locate_Admitted (F : Field; T : Octree; X : Vec;
+                             Leaf : out Natural; W : out Corner_Values;
+                             DW : out Corner_Gradients; Result : out Status)
+     with Global => null, Pre => (Static => F.Kind = Sampled and Valid (F, T)
+       and (for all Q of X => Q in -1.0e10 .. 1.0e10));
    --  Custom fields are serviced by the generic collision provider, not by C.
    procedure Evaluate (F : Field; T : Octree; X : Vec; Need_Gradient : Boolean;
                        Value : out Real; Gradient : out Vec; Result : out Status)
      with Global => null, Pre => Valid (F, T),
+       Post => (if Result = Success then Value in -1.0e100 .. 1.0e100
+         and (for all Q of Gradient => Q in -1.0e100 .. 1.0e100));
+   -- Same arithmetic; immutable engine assets are admitted once at loading.
+   procedure Evaluate_Admitted (F : Field; T : Octree; X : Vec; Need_Gradient : Boolean;
+                                Value : out Real; Gradient : out Vec; Result : out Status)
+     with Global => null, Pre => (Static => Valid (F, T)),
        Post => (if Result = Success then Value in -1.0e100 .. 1.0e100
          and (for all Q of Gradient => Q in -1.0e100 .. 1.0e100));
 end MJ.SDF_Fields;

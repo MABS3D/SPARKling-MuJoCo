@@ -1,0 +1,67 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: in instantiation at mj-plugin_runtime.adb:8
+--> test_runtime.ads:4:01
+      + cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+
+ info: initialization of "Accepted" proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:53:50
+
+ info: data dependencies proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:54:11
+
+ info: postcondition proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.ads:55:14
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:4:43
+
+ warning: initialization of "S" has no effect, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:5:07
+    5 |          S : Values (0 .. Integer (N) - 1) := [others => 0.0];
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ info: range check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:5:07
+
+ info: length check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:5:44
+
+ info: index check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:8:32
+
+ info: index check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:8:51
+
+ info: loop invariant initialization proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:12:33
+
+ info: loop invariant preservation proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:12:33
+
+ info: loop invariant initialization proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:14:33
+
+ info: loop invariant preservation proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:14:33
+
+ info: loop invariant preservation proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:16:33
+
+ info: loop invariant initialization proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:16:33
+
+ info: index check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:18:23
+
+ info: index check proved, in instantiation at test_runtime.ads:4
+--> mj-plugin_runtime.adb:18:32
+ warning: generic compilation unit is not analyzed [generic-not-analyzed]
+--> mj-plugin_runtime.adb:1:16
+    1 |    package body MJ.Plugin_Runtime with SPARK_Mode is
+      |                   ^~~~~~~~~~~~~~~
+      + only instantiations of the generic will be analyzed
+Success: all checks proved (16 checks).
+Summary logged in /var/tmp/sparkling-services-plugin-proof-call/proof/obj/gnatprove/gnatprove.out
+guarded: elapsed 6.9 s, peak group RSS 184 MB

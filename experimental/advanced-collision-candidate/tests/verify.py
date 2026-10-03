@@ -69,6 +69,12 @@ def main():
             add('sdf_analytic',[1,k,size,x,1],value)
     # Singular gradients: native NaNs must become explicit rejection, never NaN contacts.
     add('singular_sdf',[1,1,[.2,.2,.2],[0,0,0],1],[1e10],kind='numeric_rejection')
+    # A box face/edge/corner has a finite zero gradient in C. It must remain
+    # admitted so midsurface normalization can select its documented fallback.
+    for point in ([.2,0,0],[.2,.3,0],[.2,.3,.4],[-.2,-.3,-.4]):
+        size=np.array([.2,.3,.4]);x=np.array(point);value=np.empty(4)
+        lib.ref_query(6,p(size),p(x),1,0,None,None,None,p(value))
+        add('box_surface_gradient',[1,5,size,x,1],value)
     for split in (False,True):
         boxes=[[0,0,0,1,1,1]];children=[[-1]*8];coeff=[rng.uniform(-1,1,8)]
         if split:

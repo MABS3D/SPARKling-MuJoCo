@@ -1,0 +1,58 @@
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -998,6 +998,22 @@
+       end loop;
+       Ok := True;
+    end Remap_Actuators;
++
++   function Mocap_Mapping_Valid
++     (Config : Body_Parameter_Array; Count : Natural) return Boolean
++     with Global => null, Pre => Count <= Max_Bodies
++   is
++      Seen : array (0 .. Integer (Count) - 1) of Boolean := [others => False];
++   begin
++      for C of Config loop
++         if C.Mocap_Id not in -1 .. Integer (Count) - 1 then return False; end if;
++         if C.Mocap_Id >= 0 then
++            if Seen (C.Mocap_Id) then return False; end if;
++            Seen (C.Mocap_Id) := True;
++         end if;
++      end loop;
++      return (for all Present of Seen => Present);
++   end Mocap_Mapping_Valid;
+ 
+    procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) with
+      Global => null, Pre => Is_Empty (D) and then Creation_Inputs (M),
+@@ -1117,19 +1133,9 @@
+       Allocate_State (D.State, D.Nq, D.Nv, D.Nu);
+       D.State.Mocap_Pos := Zero_Array (3 * D.Nmocap);
+       D.State.Mocap_Quat := Zero_Array (4 * D.Nmocap);
+-      declare
+-         Seen : array (0 .. Integer (D.Nmocap) - 1) of Boolean := [others => False];
+-      begin
+-         for C of D.Body_Config.all loop
+-            if C.Mocap_Id >= 0 then
+-               if Seen (C.Mocap_Id) then Free (D); Result := Invalid_Model; return; end if;
+-               Seen (C.Mocap_Id) := True;
+-            end if;
+-         end loop;
+-         if (for some Present of Seen => not Present) then
+-            Free (D); Result := Invalid_Model; return;
+-         end if;
+-      end;
++      if not Mocap_Mapping_Valid (D.Body_Config.all, D.Nmocap) then
++         Free (D); Result := Invalid_Model; return;
++      end if;
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+       Allocate_Dynamics (D.Dynamics, D.Nv);
+       Allocate_Actuators (D.Actuators, D.No);
+@@ -1204,6 +1210,9 @@
+       Allocate_State (D.State, D.Nq, D.Nv, 0);
+       D.State.Mocap_Pos := Zero_Array (3 * D.Nmocap);
+       D.State.Mocap_Quat := Zero_Array (4 * D.Nmocap);
++      if not Mocap_Mapping_Valid (D.Body_Config.all, D.Nmocap) then
++         Free (D); Result := Invalid_Model; return;
++      end if;
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+       Allocate_Dynamics (D.Dynamics, D.Nv);
+       Allocate_Actuators (D.Actuators, 0);

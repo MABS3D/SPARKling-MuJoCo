@@ -10,7 +10,7 @@ tc=Path('/var/tmp/sparkling-matrix-recovery/toolchains');env=os.environ.copy()
 env['PATH']=':'.join(str(next((tc/x).glob('*/bin'))) for x in ['gnat','gprbuild','gnatprove'])+':/usr/bin:/bin'
 env['ACTUATION_BUILD_ROOT']=str(a.out/'build')
 resource.setrlimit(resource.RLIMIT_STACK,(64*1024*1024,resource.getrlimit(resource.RLIMIT_STACK)[1]))
-cmd=['gnatprove','-P',str(here/'actuation.gpr'),'-u',a.unit+'.ads','--prover='+a.provers,'--timeout='+str(a.timeout),'--steps=0','--proof=per_check','-j2','--checks-as-errors=on','--warnings=continue','--report=all','--counterexamples=off']
+cmd=['gnatprove','-P',str(here/'actuation.gpr'),'-u',a.unit+'.ads','--prover='+a.provers,'--timeout='+str(a.timeout),'--steps=0','--proof=per_check','-j1','--checks-as-errors=on','--warnings=continue','--report=all','--counterexamples=off']
 if a.subprogram:
  f=here/'src'/(a.unit+'.adb'); lines=f.read_text().splitlines()
  line=next(i for i,l in enumerate(lines,1) if re.match(r'\s*(function|procedure) '+a.subprogram+r'\b',l))

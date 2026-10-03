@@ -8,8 +8,11 @@ Questo progetto compila ed esegue i nuovi sottoprogrammi separatamente dal motor
 Il candidato usa ora buffer CSR dimensionati e riutilizzati dal chiamante:
 **tutti i 17 carichi di attuazione misurati sono più veloci di C**, con risultati
 numerici verificati. La parità della simulazione completa e la dimostrazione
-formale globale restano aperte. Model/Data, il caricatore MJCF/MJB e la pipeline
-smooth principale non sono ancora collegati a questi moduli.
+formale globale restano aperte. L’adapter [advanced-step](../advanced-step/README.md) collega ora PID/DC/SO3 e
+trasmissioni joint/SO3-site a Model/Data e al movimento Euler, con808/808
+traiettorie verificate nella ripresa del3ottobre. La composizione completa resta
+pendente; i numeri storici sotto sono riferiti ai propri hash, non alla pipeline
+attuale.
 
 ## Funzionalità implementate
 
@@ -108,10 +111,10 @@ sono riportati negli esiti delle prove. Eseguire da questa cartella, con un
 PATH contenente i binari GNAT/GPRbuild nativi Linux:
 
 ```sh
-gprbuild -P actuation.gpr -j2
+gprbuild -P actuation.gpr -j1
 /var/tmp/sparkling-movement-env/bin/python tests/build_oracle.py
 /var/tmp/sparkling-movement-env/bin/python tests/compare.py
-ACTUATION_MODE=release gprbuild -P actuation.gpr -j2
+ACTUATION_MODE=release gprbuild -P actuation.gpr -j1
 ACTUATION_MODE=release /var/tmp/sparkling-movement-env/bin/python tests/compare.py
 python3 tests/prove.py --unit mj-transmissions --subprogram Compress \
   --out /var/tmp/actuation-proof-compress --timeout 10 --provers cvc5,z3,altergo
@@ -168,7 +171,7 @@ Il [confronto iniziale](evidence/performance/20260930/README.md) e le
 [prove precedenti](evidence/history/20260930-fixed-capacity/proofs.md) sono
 conservati come evidenza storica; non descrivono i sorgenti correnti.
 
-Riproduzione del benchmark (build con `gprbuild -P performance.gpr -j2`):
+Riproduzione del benchmark (build con `gprbuild -P performance.gpr -j1`):
 
 ```sh
 /var/tmp/sparkling-movement-env/bin/python tests/performance/compare.py \

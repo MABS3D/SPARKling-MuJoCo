@@ -1,0 +1,39 @@
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -552,8 +552,35 @@
+                      Hessian_Pattern (E.Rows.Columns (K)+1, E.Rows.Columns (Q)+1) := True;
+                   end loop;
+                end if;
+-               Velocity := Velocity + E.Rows.Values (K) * E.D.State.Qvel (E.Rows.Columns (K));
+             end loop;
++            -- mj_mulJacVec: preserve the dense/sparse four-lane reduction.
++            declare
++               L : array (Natural range 0 .. 3) of Real := [others => 0.0];
++               Count : constant Natural := (if E.Settings.Sparse then Row.Nonzeros else Nv);
++               Offset : Natural := 0;
++               function Term (Index : Natural) return Real is
++                 (if E.Settings.Sparse then E.Rows.Values (Row.Offset+Index+1)
++                    * E.D.State.Qvel (E.Rows.Columns (Row.Offset+Index+1))
++                  else J (R, Index+1) * E.D.State.Qvel (Index));
++            begin
++               while Offset + 4 <= Count loop
++                  for Lane in 0 .. 3 loop L (Lane) := L (Lane) + Term (Offset+Lane); end loop;
++                  Offset := Offset + 4;
++               end loop;
++               Velocity := (L (0) + L (2)) + (L (1) + L (3));
++               if E.Settings.Sparse then
++                  while Offset < Count loop
++                     Velocity := Velocity + Term (Offset); Offset := Offset+1;
++                  end loop;
++               else
++                  case Count-Offset is
++                     when 3 => Velocity := Velocity + ((Term (Offset) + Term (Offset+1)) + Term (Offset+2));
++                     when 2 => Velocity := Velocity + (Term (Offset) + Term (Offset+1));
++                     when 1 => Velocity := Velocity + Term (Offset);
++                     when others => null;
++                  end case;
++               end if;
++            end;
+             --  C adds surface velocity after J*qvel, before computing aref.
+             --  Only contact rows read the cache; no full row-buffer scan.
+             if E.Has_Surface_Velocity

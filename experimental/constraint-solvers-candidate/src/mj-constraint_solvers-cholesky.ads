@@ -32,13 +32,15 @@ package MJ.Constraint_Solvers.Cholesky with SPARK_Mode is
    function Start (Value : Real) return Sum_Result
      with Global => null, Inline_Always,
      Post => (Start'Result.OK = (Value in Accumulator)
-       and then (if Start'Result.OK then Start'Result.Value = Value));
+       and then (if Start'Result.OK then Start'Result.Value = Value
+                 else Start'Result.Value = 0.0));
 
    function Subtract (S : Accumulator; A, B : Real) return Sum_Result
      with Global => null, Inline_Always,
      Pre => (Static => A in Operand and then B in Operand),
      Post => (Subtract'Result.OK = (S - A * B in Accumulator)
-       and then (if Subtract'Result.OK then Subtract'Result.Value = S - A * B));
+       and then (if Subtract'Result.OK then Subtract'Result.Value = S - A * B
+                 else Subtract'Result.Value = 0.0));
 
    function Divide (S : Accumulator; D : Real) return Real is (S / D)
      with Global => null, Inline_Always,

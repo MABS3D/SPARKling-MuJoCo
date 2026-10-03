@@ -1,0 +1,11 @@
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -1202,6 +1202,8 @@
+       else Build_Manifold_Topology (M, D, Normal); end if;
+       if not Normal then Free (D); Result := Invalid_Model; return; end if;
+       Allocate_State (D.State, D.Nq, D.Nv, 0);
++      D.State.Mocap_Pos := Zero_Array (3 * D.Nmocap);
++      D.State.Mocap_Quat := Zero_Array (4 * D.Nmocap);
+       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
+       Allocate_Dynamics (D.Dynamics, D.Nv);
+       Allocate_Actuators (D.Actuators, 0);

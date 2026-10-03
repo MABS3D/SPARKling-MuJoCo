@@ -4,11 +4,19 @@ with Ada.Numerics.Long_Elementary_Functions;
 with Interfaces;
 with MJ.Constraint_Order;
 with MJ.Constraint_Solvers.Cholesky;
+with MJ.Constraint_Solvers.Dense_Cholesky;
+with MJ.Constraint_Solvers.Sparse_Cholesky;
+with MJ.Constraint_Solvers.Sparse_Kernels;
 package body MJ.Constraint_Solvers with SPARK_Mode is
    package Math renames Ada.Numerics.Long_Elementary_Functions;
    package Scalar renames MJ.Constraint_Scalar;
    package Linear renames MJ.Constraint_Solvers.Cholesky;
+   package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
+   package Sparse renames MJ.Constraint_Solvers.Sparse_Cholesky;
+   package Sparse_Arithmetic renames MJ.Constraint_Solvers.Sparse_Kernels;
    use type Linear.Status;
+   use type Dense.Status;
+   use type Sparse.Status;
    use type Scalar.Row_State;
    Tiny : constant Real := 1.0e-15;
    subtype Work is Real range -1.0e100 .. 1.0e100;
@@ -22,10 +30,28 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
       Zone : State := Satisfied;
    end record;
 
+   --  mju_dot uses four accumulators even without AVX; keep that ordering.
    function Dot (X, Y : Vector) return Real is
-      S : Work := 0.0;
+      S0, S1, S2, S3, S : Work := 0.0;
+      Offset : Natural := 0;
    begin
-      for I in X'Range loop S := S + X (I) * Y (I); end loop;
+      while Offset + 4 <= X'Length loop
+         S0 := S0 + X (X'First + Offset) * Y (Y'First + Offset);
+         S1 := S1 + X (X'First + Offset + 1) * Y (Y'First + Offset + 1);
+         S2 := S2 + X (X'First + Offset + 2) * Y (Y'First + Offset + 2);
+         S3 := S3 + X (X'First + Offset + 3) * Y (Y'First + Offset + 3);
+         Offset := Offset + 4;
+      end loop;
+      S := (S0 + S2) + (S1 + S3);
+      case X'Length - Offset is
+         when 3 => S := S + (X (X'First + Offset) * Y (Y'First + Offset)
+           + X (X'First + Offset + 1) * Y (Y'First + Offset + 1)
+           + X (X'First + Offset + 2) * Y (Y'First + Offset + 2));
+         when 2 => S := S + (X (X'First + Offset) * Y (Y'First + Offset)
+           + X (X'First + Offset + 1) * Y (Y'First + Offset + 1));
+         when 1 => S := S + X (X'First + Offset) * Y (Y'First + Offset);
+         when others => null;
+      end case;
       return S;
    end Dot;
 
@@ -192,7 +218,8 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
 
    procedure Solve
      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
-      Settings : Options; A, Force : in out Vector; Result : out Report) is
+      Settings : Options; A, Force : in out Vector; Result : out Report;
+      Hessian_Pattern : Structural_Matrix := Empty_Structure) is
       N : constant Natural := A_Free'Length;
       K : constant Natural := Aref'Length;
       function Finite (X : Real) return Boolean is (X in -1.0e10 .. 1.0e10);
@@ -212,15 +239,21 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
         or Settings.Scale not in 1.0e-12 .. 1.0e12 then return;
       end if;
       for P in 1 .. N loop
-         if not Finite (A_Free (P)) or not Finite (A (P)) then return; end if;
+         --  Published iterates use Work; admit that same domain when the
+         --  caller supplies a previously solved warm start.
+         if not Finite (A_Free (P)) or A (P) not in Work then return; end if;
          for Q in 1 .. N loop
             if not Finite (M (P, Q)) or M (P, Q) /= M (Q, P) then return; end if;
          end loop;
       end loop;
       for P in 1 .. K loop
-         if not Finite (Aref (P)) or not Finite (Force (P))
-           or Constraints (P).R not in 1.0e-12 .. 1.0e12
-           or Constraints (P).D not in 1.0e-12 .. 1.0e12
+         --  Constraint references can exceed the state admission range for
+         --  a stiff equality even while the solved acceleration stays in it.
+         if Aref (P) not in -1.0e30 .. 1.0e30 or Force (P) not in Work
+           --  C clamps regularization at mjMINVAL, including equality rows
+           --  with an identically zero Jacobian (for example a slide weld).
+           or Constraints (P).R not in 1.0e-15 .. 1.0e15
+           or Constraints (P).D not in 1.0e-15 .. 1.0e15
            or abs (Constraints (P).R * Constraints (P).D - 1.0) > 1.0e-12
            or Constraints (P).Bound not in 0.0 .. 1.0e10 then return; end if;
          for Q in 1 .. N loop if not Finite (J (P, Q)) then return; end if; end loop;
@@ -254,13 +287,187 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          type Block_List is array (Positive range <>) of Positive;
          Blocks : Block_List (1 .. K);
          Count : Natural := 0;
+         type Column_Lists is array (Positive range <>, Positive range <>) of Positive;
+         type Lengths is array (Positive range <>) of Natural;
+         Columns : Column_Lists (1 .. K, 1 .. N);
+         Nonzeros : Lengths (1 .. K) := (others => 0);
+         Mass_Columns : Column_Lists (1 .. N, 1 .. N);
+         Mass_Nonzeros : Lengths (1 .. N) := (others => 0);
+         Mass_Is_Diagonal : Boolean := True;
+         Inverse_Mass_Diagonal : Vector (1 .. N) := (others => 0.0);
+         Curvature, Previous_Curvature : Vector (1 .. K) := (others => 0.0);
+         Scalar_Rows : Boolean := True;
+         Hessian_Valid : Boolean := False;
+         --  Contiguous structural blocks of M and every constraint block.
+         --  This only bounds linear algebra: stopping tests and line searches
+         --  remain global, including when independent bodies are present.
+         Factor_End : Block_List (1 .. N);
+         Hessian_Structure : Sparse.Pattern (N);
+
+         procedure Multiply_Metric (X : Vector; Y : out Vector) is
+            S : Work;
+         begin
+            for P in 1 .. N loop
+               S := 0.0;
+               for Qi in 1 .. Mass_Nonzeros (P) loop
+                  declare Q : constant Positive := Mass_Columns (P, Qi); begin
+                     S := S + M (P, Q) * X (Q);
+                  end;
+               end loop;
+               Y (P) := S;
+            end loop;
+         end Multiply_Metric;
+         pragma Inline_Always (Multiply_Metric);
+
+         procedure Multiply_Jacobian (X : Vector; Y : out Vector) is
+            S : Work;
+         begin
+            for R in 1 .. K loop
+               S := 0.0;
+               for Pi in 1 .. Nonzeros (R) loop
+                  declare P : constant Positive := Columns (R, Pi); begin
+                     S := S + J (R, P) * X (P);
+                  end;
+               end loop;
+               Y (R) := S;
+            end loop;
+         end Multiply_Jacobian;
+         pragma Inline_Always (Multiply_Jacobian);
+
+         procedure Factor_Metric (Input : Matrix; Output : out Matrix;
+                                  Accepted : out Boolean) is
+            First : Positive := 1;
+         begin
+            if Factor_End (1) = N then
+               Factor (Input, Output, Accepted);
+               return;
+            end if;
+            Output := (others => (others => 0.0));
+            while First <= N loop
+               declare
+                  Last : constant Positive := Factor_End (First);
+                  Size : constant Positive := Last - First + 1;
+                  Part, Cholesky_Part : Matrix (1 .. Size, 1 .. Size);
+               begin
+                  Sparse_Arithmetic.Copy_Block (Input, First, Part);
+                  Factor (Part, Cholesky_Part, Accepted);
+                  if not Accepted then return; end if;
+                  for P in 1 .. Size loop
+                     for Q in 1 .. P loop
+                        Output (First + P - 1, First + Q - 1) := Cholesky_Part (P, Q);
+                     end loop;
+                  end loop;
+                  First := Last + 1;
+               end;
+            end loop;
+            Accepted := True;
+         end Factor_Metric;
+         pragma Inline_Always (Factor_Metric);
+
+         procedure Solve_Metric (Input : Matrix; RHS : Vector; Output : out Vector) is
+            First : Positive := 1;
+         begin
+            if Factor_End (1) = N then
+               Backsolve (Input, RHS, Output);
+               return;
+            end if;
+            while First <= N loop
+               declare
+                  Last : constant Positive := Factor_End (First);
+                  Size : constant Positive := Last - First + 1;
+                  Part : Matrix (1 .. Size, 1 .. Size);
+                  B_Part, X_Part : Vector (1 .. Size);
+               begin
+                  for P in 1 .. Size loop
+                     B_Part (P) := RHS (First + P - 1);
+                  end loop;
+                  Sparse_Arithmetic.Copy_Block (Input, First, Part);
+                  Backsolve (Part, B_Part, X_Part);
+                  for P in 1 .. Size loop Output (First + P - 1) := X_Part (P); end loop;
+                  First := Last + 1;
+               end;
+            end loop;
+         end Solve_Metric;
+         pragma Inline_Always (Solve_Metric);
+
+         --  The dense Newton Hessian follows mju_cholFactor/mju_cholSolve.
+         --  Keep the full dimension: cutting independent blocks changes the
+         --  four-lane dot grouping even when the omitted entries are zero.
+         procedure Factor_Hessian is
+            Status : Dense.Status;
+            Sparse_Status : Sparse.Status;
+            Rank : Natural;
+         begin
+            if Settings.Sparse then
+               Sparse.Factor (H, Hessian_Structure, HL, Rank, Sparse_Status, Tiny);
+               if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
+            else
+               Dense.Factor (H, HL, Rank, Status, Tiny);
+               if Status /= Dense.Success then raise Constraint_Error; end if;
+            end if;
+         end Factor_Hessian;
+         pragma Inline_Always (Factor_Hessian);
+
+         procedure Solve_Hessian is
+            Status : Dense.Status;
+            Sparse_Status : Sparse.Status;
+         begin
+            if Settings.Sparse then
+               Sparse.Backsolve (HL, Hessian_Structure, Grad, Mgrad, Sparse_Status);
+               if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
+            else
+               Dense.Backsolve (HL, Grad, Mgrad, Status);
+               if Status /= Dense.Success then raise Constraint_Error; end if;
+            end if;
+         end Solve_Hessian;
+         pragma Inline_Always (Solve_Hessian);
 
          procedure Residual is
          begin
-            Multiply (M, Acc, Ma);
-            Multiply (J, Acc, Jar);
+            Multiply_Metric (Acc, Ma);
+            Multiply_Jacobian (Acc, Jar);
             for R in Jar'Range loop Jar (R) := Jar (R) - Aref (R); end loop;
          end Residual;
+         pragma Inline_Always (Residual);
+
+         procedure Build_Scalar_Hessian is
+            Changed : Boolean := not Hessian_Valid;
+            Nonzero_Curvature : Boolean := False;
+         begin
+            for R in 1 .. K loop
+               Changed := Changed or Curvature (R) /= Previous_Curvature (R);
+               Nonzero_Curvature := Nonzero_Curvature or Curvature (R) /= 0.0;
+            end loop;
+            if not Changed then return; end if;
+            if not Nonzero_Curvature then
+               H := M;
+               Factor_Hessian;
+            else
+               H := M;
+               for Bi in 1 .. Count loop
+                  declare R : constant Positive := Blocks (Bi); begin
+                     if Curvature (R) /= 0.0 then
+                        for Pi in 1 .. Nonzeros (R) loop
+                           declare P : constant Positive := Columns (R, Pi); begin
+                              --  Factor consumes only the lower triangle,
+                              --  as C's sparse/dense Hessian construction does.
+                              for Qi in 1 .. Pi loop
+                                 declare Q : constant Positive := Columns (R, Qi); begin
+                                    H (P, Q) := Sparse_Arithmetic.Outer_Update
+                                      (H (P, Q), J (R, P), Curvature (R), J (R, Q));
+                                 end;
+                              end loop;
+                           end;
+                        end loop;
+                     end if;
+                  end;
+               end loop;
+               Factor_Hessian;
+            end if;
+            Previous_Curvature := Curvature;
+            Hessian_Valid := True;
+         end Build_Scalar_Hessian;
+         pragma Inline_Always (Build_Scalar_Hessian);
 
          procedure Update (Build_H : Boolean) is
             B : Block_Value;
@@ -273,9 +480,28 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                Grad (P) := Grad (P) - Smooth (P);
                Cost := Cost + 0.5 * Grad (P) * (Acc (P) - A_Free (P));
             end loop;
-            if Build_H then H := M; end if;
+            if Build_H and not Scalar_Rows then H := M; end if;
             for Bi in 1 .. Count loop
                R := Blocks (Bi); Dim := Constraints (R).Dimension;
+               if Scalar_Rows then
+                  declare S : Scalar.Response; begin
+                  if Jar (R) not in -1.0e30 .. 1.0e30 then raise Constraint_Error; end if;
+                  S := Scalar.Evaluate (Scalar_Kind (Constraints (R).Form),
+                    Jar (R), Constraints (R).R, Constraints (R).D, Constraints (R).Bound);
+                  Cost := Cost + S.Cost;
+                  F (R) := S.Force;
+                  Curvature (R) := S.Curvature;
+                  --  The scalar Hessian is M + sum_r J_r' D_r J_r.  Visit
+                  --  only the columns present in the row, retaining row and
+                  --  floating-point product order.  C uses the same sparse
+                  --  row support in mju_sqrMatTDSparseNumeric.
+                  for Pi in 1 .. Nonzeros (R) loop
+                     declare P : constant Positive := Columns (R, Pi); begin
+                        Grad (P) := Grad (P) - J (R, P) * S.Force;
+                     end;
+                  end loop;
+                  end;
+               else
                Evaluate_Block (Constraints, R, Jar, Build_H, B);
                Cost := Cost + B.Cost;
                for T in 1 .. Dim loop F (R + T - 1) := B.F (T); end loop;
@@ -295,18 +521,39 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                      end loop;
                   end if;
                end loop;
+               end if;
             end loop;
-            if Build_H then
-               Factor (H, HL, OK);
-               if not OK then raise Constraint_Error; end if;
+            if Build_H and Scalar_Rows then
+               Build_Scalar_Hessian;
+            elsif Build_H then
+               Factor_Hessian;
+               Hessian_Valid := True;
             end if;
          end Update;
+         pragma Inline_Always (Update);
+
+         --  A diagonal LDL solve is one reciprocal multiply in C. Reusing
+         --  the Cholesky root here adds two rounding steps and changes CG's
+         --  stopping iteration on strongly scaled elliptic contacts.
+         procedure Apply_Mass_Inverse (RHS : Vector; Output : out Vector) is
+         begin
+            if Mass_Is_Diagonal then
+               for P in 1 .. N loop
+                  Output (P) := Sparse_Arithmetic.Diagonal_Scale
+                    (RHS (P), Inverse_Mass_Diagonal (P));
+               end loop;
+            else
+               Solve_Metric (L, RHS, Output);
+            end if;
+         end Apply_Mass_Inverse;
+         pragma Inline_Always (Apply_Mass_Inverse);
 
          procedure Precondition is
          begin
-            if Settings.Algorithm = Newton then Backsolve (HL, Grad, Mgrad);
-            else Backsolve (L, Grad, Mgrad); end if;
+            if Settings.Algorithm = Newton then Solve_Hessian;
+            else Apply_Mass_Inverse (Grad, Mgrad); end if;
          end Precondition;
+         pragma Inline_Always (Precondition);
 
          procedure Project_Forces is
             R, Dim : Natural;
@@ -346,17 +593,21 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          begin
             for Rj in 1 .. K loop
                for P in 1 .. N loop Col (P) := J (Rj, P); end loop;
-               Backsolve (L, Col, Sol);
+               Apply_Mass_Inverse (Col, Sol);
                for P in 1 .. N loop Inv_J (P, Rj) := Sol (P); end loop;
                for Ri in 1 .. K loop
                   V := 0.0;
-                  for P in 1 .. N loop V := V + J (Ri, P) * Sol (P); end loop;
+                  for Pi in 1 .. Nonzeros (Ri) loop
+                     declare P : constant Positive := Columns (Ri, Pi); begin
+                        V := V + J (Ri, P) * Sol (P);
+                     end;
+                  end loop;
                   AR (Ri, Rj) := V;
                end loop;
                AR (Rj, Rj) := AR (Rj, Rj) + Constraints (Rj).R;
                if AR (Rj, Rj) < Tiny then raise Constraint_Error; end if;
             end loop;
-            Multiply (J, A_Free, B);
+            Multiply_Jacobian (A_Free, B);
             for Ri in 1 .. K loop B (Ri) := B (Ri) - Aref (Ri); end loop;
             Project_Forces;
             Previous := F;
@@ -472,7 +723,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             R, Dim : Natural;
             DJ, U, V : Work;
          begin
-            Multiply (M, Search, Mv); Multiply (J, Search, Jv);
+            Multiply_Metric (Search, Mv); Multiply_Jacobian (Search, Jv);
             G1 := Dot (Search, Ma) - Dot (Smooth, Search); G2 := 0.5 * Dot (Search, Mv);
             for Bi in 1 .. Count loop
                R := Blocks (Bi); Dim := Constraints (R).Dimension;
@@ -664,13 +915,16 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             Gap, Decrement, Alpha, Improvement, Beta, DY, HZ, Eta : Work;
             Hit_Limit : Boolean;
          begin
-            Residual; Update (False); Backsolve (L, Grad, Mgrad);
+            Residual; Update (False); Apply_Mass_Inverse (Grad, Mgrad);
             Gap := Real'Max (0.0, 0.5 * Settings.Scale * Dot (Grad, Mgrad));
             Result.Gradient := Settings.Scale * Norm (Grad);
             if Gap < Settings.Tolerance and (Settings.Algorithm = CG or Result.Gradient < Settings.Tolerance) then
                Result.Outcome := Converged; return;
             end if;
-            if Settings.Algorithm = Newton then Update (True); Precondition; end if;
+            if Settings.Algorithm = Newton then
+               if Scalar_Rows then Build_Scalar_Hessian; else Update (True); end if;
+               Precondition;
+            end if;
             for P in 1 .. N loop Search (P) := -Mgrad (P); end loop;
             Result.Outcome := Iteration_Limit;
             for Iter in 1 .. Settings.Iterations loop
@@ -706,11 +960,120 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             end loop;
          end Run_Primal;
       begin
-         Factor (M, L, OK);
-         if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
          I := 1;
          while I <= K loop Count := Count + 1; Blocks (Count) := I; I := I + Constraints (I).Dimension; end loop;
-         Multiply (M, A_Free, Smooth);
+         for P in 1 .. N loop
+            Factor_End (P) := P;
+            for Q in 1 .. N loop
+               if M (P, Q) /= 0.0 then
+                  if P /= Q then Mass_Is_Diagonal := False; end if;
+                  Mass_Nonzeros (P) := Mass_Nonzeros (P) + 1;
+                  Mass_Columns (P, Mass_Nonzeros (P)) := Q;
+                  if Q > P then Factor_End (P) := Q; end if;
+               end if;
+            end loop;
+         end loop;
+         for R in 1 .. K loop
+            Scalar_Rows := Scalar_Rows and Constraints (R).Form /= Elliptic;
+            for P in 1 .. N loop
+               if J (R, P) /= 0.0 then
+                  Nonzeros (R) := Nonzeros (R) + 1;
+                  Columns (R, Nonzeros (R)) := P;
+               end if;
+            end loop;
+         end loop;
+         for Bi in 1 .. Count loop
+            declare
+               First : Positive := N;
+               Last : Natural := 0;
+               R : constant Positive := Blocks (Bi);
+            begin
+               for T in R .. R + Constraints (R).Dimension - 1 loop
+                  if Nonzeros (T) > 0 then
+                     First := Positive'Min (First, Columns (T, 1));
+                     Last := Natural'Max (Last, Columns (T, Nonzeros (T)));
+                  end if;
+               end loop;
+               if Last > 0 then Factor_End (First) := Positive'Max (Factor_End (First), Last); end if;
+            end;
+         end loop;
+         if Settings.Sparse and then Settings.Algorithm = Newton and then K > 0 then
+            declare
+               Pattern : Structural_Matrix (1 .. N, 1 .. N);
+               Status : Sparse.Status;
+            begin
+               if Hessian_Pattern'Length (1) /= 0 then
+                  if Hessian_Pattern'First (1) /= 1 or else Hessian_Pattern'First (2) /= 1
+                    or else Hessian_Pattern'Length (1) /= N or else Hessian_Pattern'Length (2) /= N
+                  then Result.Outcome := Invalid_Input; return; end if;
+                  Pattern := Hessian_Pattern;
+               else
+                  Pattern := (others => (others => False));
+               end if;
+               --  Always include numerical support; an optional symbolic
+               --  pattern augments it with compiled structural zero entries.
+               for P in 1 .. N loop
+                  Pattern (P, P) := True;
+                  for Qi in 1 .. Mass_Nonzeros (P) loop
+                     declare Q : constant Positive := Mass_Columns (P, Qi); begin
+                        if Q > P then Pattern (P, Q) := True; end if;
+                     end;
+                  end loop;
+               end loop;
+               for Bi in 1 .. Count loop
+                  declare
+                     R : constant Positive := Blocks (Bi);
+                     Present : array (1 .. N) of Boolean := (others => False);
+                     Support : Block_List (1 .. N);
+                     Width : Natural := 0;
+                  begin
+                     for T in R .. R+Constraints (R).Dimension-1 loop
+                        for Pi in 1 .. Nonzeros (T) loop
+                           declare P : constant Positive := Columns (T, Pi); begin
+                              if not Present (P) then
+                                 Present (P) := True; Width := Width+1; Support (Width) := P;
+                              end if;
+                           end;
+                        end loop;
+                     end loop;
+                     for Pi in 1 .. Width loop
+                        declare P : constant Positive := Support (Pi); begin
+                           for Qi in Pi .. Width loop
+                              declare Q : constant Positive := Support (Qi); begin
+                                 Pattern (Positive'Min (P, Q), Positive'Max (P, Q)) := True;
+                              end;
+                           end loop;
+                        end;
+                     end loop;
+                  end;
+               end loop;
+               Sparse.Symbolic (Pattern, Hessian_Structure, Status);
+               if Status /= Sparse.Success then Result.Outcome := Invalid_Input; return; end if;
+            end;
+         end if;
+         I := 1;
+         while I <= N loop
+            declare
+               Last : Positive := Factor_End (I);
+               Cursor : Positive := I;
+            begin
+               while Cursor <= Last loop
+                  Last := Positive'Max (Last, Factor_End (Cursor));
+                  Cursor := Cursor + 1;
+               end loop;
+               for P in I .. Last loop Factor_End (P) := Last; end loop;
+               I := Last + 1;
+            end;
+         end loop;
+         Factor_Metric (M, L, OK);
+         if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
+         if Mass_Is_Diagonal then
+            for P in 1 .. N loop
+               Inverse_Mass_Diagonal (P) :=
+                 Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+            end loop;
+         end if;
+         Multiply_Metric (A_Free, Smooth);
          if K = 0 then Acc := A_Free; Result.Outcome := Converged; Grad := (others => 0.0);
          elsif Settings.Algorithm = PGS then
             Run_PGS;

@@ -1,0 +1,47 @@
+Running main() from /var/tmp/sparkling-upstream-sdf-review-20261003/single/_deps/googletest-src/googletest/src/gtest_main.cc
+[==========] Running 14 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 14 tests from MjCollisionTest
+[ RUN      ] MjCollisionTest.AllCollisions
+[       OK ] MjCollisionTest.AllCollisions (1 ms)
+[ RUN      ] MjCollisionTest.EmptyModel
+[       OK ] MjCollisionTest.EmptyModel (0 ms)
+[ RUN      ] MjCollisionTest.ZeroedHessian
+[       OK ] MjCollisionTest.ZeroedHessian (0 ms)
+[ RUN      ] MjCollisionTest.ContactCount
+[       OK ] MjCollisionTest.ContactCount (0 ms)
+[ RUN      ] MjCollisionTest.InGapContactsMultiGeomBody
+[       OK ] MjCollisionTest.InGapContactsMultiGeomBody (0 ms)
+[ RUN      ] MjCollisionTest.FilterParent
+[       OK ] MjCollisionTest.FilterParent (0 ms)
+[ RUN      ] MjCollisionTest.FilterParentDoesntAffectWorldBody
+[       OK ] MjCollisionTest.FilterParentDoesntAffectWorldBody (0 ms)
+[ RUN      ] MjCollisionTest.TestOBB
+[       OK ] MjCollisionTest.TestOBB (0 ms)
+[ RUN      ] MjCollisionTest.PlaneInBody
+[       OK ] MjCollisionTest.PlaneInBody (0 ms)
+[ RUN      ] MjCollisionTest.PinchingSucceeds
+[       OK ] MjCollisionTest.PinchingSucceeds (1011 ms)
+[ RUN      ] MjCollisionTest.MarginSumming
+[       OK ] MjCollisionTest.MarginSumming (0 ms)
+[ RUN      ] MjCollisionTest.MaxContact
+[       OK ] MjCollisionTest.MaxContact (0 ms)
+[ RUN      ] MjCollisionTest.Flex3DActiveLayersMidphaseDisabled
+[       OK ] MjCollisionTest.Flex3DActiveLayersMidphaseDisabled (14 ms)
+[ RUN      ] MjCollisionTest.MeshSdfContactCapacity
+/var/tmp/sparkling-upstream-sdf-review-20261003/source/test/engine/engine_collision_driver_test.cc:568: Failure
+Expected: (ncon) <= (mj_maxContact(model.get(), 0, 1, -1)), actual: 2 vs 1
+Google Test trace:
+/var/tmp/sparkling-upstream-sdf-review-20261003/source/test/engine/engine_collision_driver_test.cc:556: 1
+/var/tmp/sparkling-upstream-sdf-review-20261003/source/test/engine/engine_collision_driver_test.cc:549: 0
+
+[  FAILED  ] MjCollisionTest.MeshSdfContactCapacity (56 ms)
+[----------] 14 tests from MjCollisionTest (1087 ms total)
+
+[----------] Global test environment tear-down
+[==========] 14 tests from 1 test suite ran. (1087 ms total)
+[  PASSED  ] 13 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MjCollisionTest.MeshSdfContactCapacity
+
+ 1 FAILED TEST

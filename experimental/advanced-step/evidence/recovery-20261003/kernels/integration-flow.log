@@ -1,0 +1,295 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: analysis of data and information flow ...
+Summary logged in /var/tmp/sparkling-services-advanced-proof-20261003/integration-flow/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 22.6 s, peak group RSS 150 MB
+ info: initialization of "Id" proved
+--> mj-data-advanced.adb:76:07
+
+ info: initialization of "Ref" proved
+--> mj-data-advanced.adb:76:11
+
+ info: initialization of "First" proved
+--> mj-data-advanced.adb:78:07
+
+ info: initialization of "Second" proved
+--> mj-data-advanced.adb:78:14
+
+ info: initialization of "C" proved
+--> mj-data-advanced.adb:98:13
+
+ info: initialization of "Expected" proved
+--> mj-data-advanced.adb:99:13
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:193:32
+  193 |          when Constraint_Error => Free (E); Result := Invalid_Model;
+      |                                   ^~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:193:49
+  193 |          when Constraint_Error => Free (E); Result := Invalid_Model;
+      |                                             ~~~~~~~^~~~~~~~~~~~~~~~
+
+ info: implicit aspect Always_Terminates on "Input" has been proved, subprogram will terminate
+--> mj-data-advanced.adb:196:13
+
+ info: implicit aspect Always_Terminates on "Servo" has been proved, subprogram will terminate
+--> mj-data-advanced.adb:201:13
+
+ info: initialization of "R" proved
+--> mj-data-advanced.adb:202:07
+
+ error: subtype constraint cannot depend on variable input "E" [E0007]
+--> mj-data-advanced.adb:213:55
+  213 |          JR, RR, Empty : TX.Jacobian (0 .. 2, 0 .. E.D.Nv-1) := [others => [others => 0.0]];
+      |                                                    ~~~~~~^~
+      + use instead a constant initialized to the expression with variable input
+      + launch "gnatprove --explain=E0007" for more information
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.adb:257:42
+
+ info: initialization of "F" proved
+--> mj-data-advanced.adb:258:07
+
+ info: initialization of "Drive" proved
+--> mj-data-advanced.adb:258:10
+
+ info: initialization of "G" proved
+--> mj-data-advanced.adb:258:17
+
+ info: initialization of "B" proved
+--> mj-data-advanced.adb:258:20
+
+ info: initialization of "Raw" proved
+--> mj-data-advanced.adb:258:23
+
+ info: initialization of "X" proved
+--> mj-data-advanced.adb:258:28
+
+ info: initialization of "U" proved
+--> mj-data-advanced.adb:259:07
+
+ info: initialization of "V" proved
+--> mj-data-advanced.adb:260:07
+
+ info: initialization of "Q" proved
+--> mj-data-advanced.adb:261:07
+
+ info: initialization of "S" proved
+--> mj-data-advanced.adb:262:07
+
+ info: initialization of "Enabled" proved
+--> mj-data-advanced.adb:263:07
+
+ info: initialization of "Previous_Advance" proved
+--> mj-data-advanced.adb:263:16
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:274:27
+  274 |                Transmission (E, C);
+      |                              ^
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:296:62
+  296 |                            E.Dot (C.Aadr) := P.Slew_Dot; Stage (E, C, 0, P.Effective_Position);
+      |                                                                 ^
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:299:73
+  299 |                            E.Dot (C.Aadr+C.Na-1) := P.Integral_Dot; Stage (E, C, C.Na-1, P.Next_Integral);
+      |                                                                            ^
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:318:63
+  318 |                            E.Dot (C.Aadr+K) := P.Dot (K); Stage (E, C, K, P.Next (K));
+      |                                                                  ^
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:326:32
+  326 |                            Stage (E, C, K, MJ.Advanced_State.Next_Value (E.Act (C.Aadr+K), E.Dot (C.Aadr+K), E.D.Timestep));
+      |                                   ^
+
+ medium: "Target" might not be initialized
+--> mj-data-advanced.adb:336:42
+  336 |                         V := AA.SO3_Expmap (Target, AM.Vector (E.L (C.Oadr .. C.Oadr+2)), V, C.Gain, C.Bias, C.Force_Limited, Real'Max (0.0,C.Force_Hi));
+      |                                             ^~~~~~
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:352:29
+  352 |                         Stage (E,C,0,X);
+      |                                ^
+
+ high: formal parameters "E" and "C" are aliased (SPARK RM 6.4.2)
+--> mj-data-advanced.adb:381:26
+  381 |                      Stage (E,C,K,X);
+      |                             ^
+
+ info: non-aliasing of formal parameters "Col" and "Generalized" proved
+--> mj-data-advanced.adb:386:33
+
+ info: non-aliasing of formal parameters "Val" and "Generalized" proved
+--> mj-data-advanced.adb:387:24
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:412:54
+  412 |          when Constraint_Error => E.D.Cache.Force_Valid := False; E.D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:412:90
+  412 |          when Constraint_Error => E.D.Cache.Force_Valid := False; E.D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:412:107
+  412 |          when Constraint_Error => E.D.Cache.Force_Valid := False; E.D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                       ~~~~~~~^~~~~~~~~~~~~~~~
+
+ info: initialization of "N" proved
+--> mj-data-advanced.adb:416:07
+
+ info: initialization of "Scale" proved
+--> mj-data-advanced.adb:416:10
+
+ warning: this statement is never reached
+--> mj-data-advanced.adb:444:39
+  444 |          when Constraint_Error => Result := Numeric_Limit;
+      |                                   ~~~~~~~^~~~~~~~~~~~~~~~
+
+ info: implicit aspect Always_Terminates on "Ready" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:10:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:10:52
+
+ info: implicit aspect Always_Terminates on "State" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:11:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:11:55
+
+ info: implicit aspect Always_Terminates on "Inputs" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:12:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:12:56
+
+ info: implicit aspect Always_Terminates on "Activation" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:13:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:13:60
+
+ info: implicit aspect Always_Terminates on "Rates" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:14:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:14:55
+
+ info: implicit aspect Always_Terminates on "Control_Count" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:15:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:15:60
+
+ info: implicit aspect Always_Terminates on "Output_Count" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:16:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:16:59
+
+ info: implicit aspect Always_Terminates on "Position_Count" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:17:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:17:61
+
+ info: implicit aspect Always_Terminates on "Velocity_Count" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:18:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:18:61
+
+ info: implicit aspect Always_Terminates on "Lengths" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:19:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:19:57
+
+ info: implicit aspect Always_Terminates on "Velocities" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:20:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:20:60
+
+ info: implicit aspect Always_Terminates on "Forces" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:21:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:21:56
+
+ info: implicit aspect Always_Terminates on "Generalized" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:22:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:22:61
+
+ info: implicit aspect Always_Terminates on "Accelerations" has been proved, subprogram will terminate
+--> mj-data-advanced.ads:23:13
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:23:63
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:24:62
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:25:11
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:26:44
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:27:40
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:27:66
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:29:47
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:29:73
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:31:27
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:31:53
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:33:29
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:33:55
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:35:26
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:35:52
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:36:43
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:38:11
+
+ info: initialization of "Result" proved
+--> mj-data-advanced.ads:41:39
+
+ info: data dependencies proved
+--> mj-data-advanced.ads:43:11
+gnatprove: unproved check messages considered as errors

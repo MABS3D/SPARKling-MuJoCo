@@ -29,6 +29,8 @@ package MJ.Collision_Scene with SPARK_Mode is
    function Geom_Count (S : Scene) return Count with Global => null;
    function Selected_Count (S : Scene) return Natural with Global => null;
    function Generation_Count (S : Scene) return Natural with Global => null;
+   function BVH_Node_Tests (S : Scene) return Natural with Global => null;
+   function BVH_Leaf_Tests (S : Scene) return Natural with Global => null;
    --  Asset admission is checked at initialization. Later calls retain this
    --  as a contract: vertices may change only within the installed bounds.
    function Assets_Admissible (S : Scene; V : Vertex_Array; E : Elevation_Array;

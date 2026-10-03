@@ -168,6 +168,37 @@ package MJ.Data with SPARK_Mode is
    pragma Postcondition (if Result = Success then Activation_Values (D) = As_Reals (Values)
      else Activation_Values (D) = Activation_Values (D)'Old);
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
+   function Mocap_Count (D : Simulation) return Natural with Global => null;
+   function Mocap_Positions (D : Simulation) return Real_Array with Global => null;
+   function Mocap_Quaternions (D : Simulation) return Real_Array with Global => null;
+   function Mocap_Values (D : Simulation) return Real_Array with Global => null;
+   --  Raw inputs, independent of qpos/qvel; normalize only when building poses.
+   procedure Set_Mocap
+     (D : in out Simulation; Index : Natural; Position, Quaternion : State_Vector;
+      Result : out Status) with Global => null, Pre => Valid_State (D);
+   pragma Postcondition (Static => Is_Ready (D) = Is_Ready (D)'Old);
+   pragma Postcondition (Static => Shape (D) = Shape (D)'Old);
+   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old);
+   pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Static => Input_Values (D) = Input_Values (D)'Old);
+   pragma Postcondition (Static => Activation_Values (D) = Activation_Values (D)'Old);
+   pragma Postcondition (Static => (if Result = Success then
+     not Positions_Current (D) and then not Forces_Current (D)));
+   pragma Postcondition (Static => (if Result = Success then
+     (for all I in Mocap_Positions (D)'Range =>
+       Mocap_Positions (D) (I) = (if I in 3 * Index .. 3 * Index + 2
+         then Position (Position'First + (I - 3 * Index))
+         else Mocap_Positions (D)'Old (I)))));
+   pragma Postcondition (Static => (if Result = Success then
+     (for all I in Mocap_Quaternions (D)'Range =>
+       Mocap_Quaternions (D) (I) = (if I in 4 * Index .. 4 * Index + 3
+         then Quaternion (Quaternion'First + (I - 4 * Index))
+         else Mocap_Quaternions (D)'Old (I)))));
+   pragma Postcondition (Static => (if Result /= Success then
+     Mocap_Values (D) = Mocap_Values (D)'Old
+     and then Positions_Current (D) = Positions_Current (D)'Old
+     and then Forces_Current (D) = Forces_Current (D)'Old));
+
    procedure Set_Control
      (D : in out Simulation; Index : Natural; Value : Tier0_Real; Result : out Status)
      with Global => null, Pre => Valid_State (D),
@@ -299,10 +330,19 @@ package MJ.Data with SPARK_Mode is
        else Position = MJ.Smooth_Math.Zero and then Orientation = MJ.Smooth_Math.Identity_Quaternion);
 
 private
+   --  Internal extension boundary: owns the supported dynamics but no actuator
+   --  blocks. The child engine must validate, own and supply those forces.
+   procedure Create_Dynamics (M : MJ.Models.Model; D : in out Simulation;
+                              Result : out Status) with Global => null,
+     Pre => Valid_State (D),
+     Post => (if Result = Success then Is_Ready (D) and then Control_Count (D) = 0
+       else Is_Empty (D) = Is_Empty (D)'Old);
    use MJ.Smooth_Math;
    type Scalar_Joint_Kind is (Slide_Joint, Hinge_Joint);
    type Body_Parameters is record
       Parent : Natural := 0;
+      Mocap_Id : Integer range -1 .. Max_Bodies - 1 := -1;
+      Mocap_Reference : Quaternion := Identity_Quaternion;
       --  Internal spans count expanded DOF entries; historical names are kept
       --  so the existing scalar CRB/Jacobian proof interfaces stay unchanged.
       First_Joint : Integer := -1;
@@ -341,7 +381,7 @@ private
    use type MJ.Fluid_Kernels.Element_Access;
    use type MJ.Fluid_Kernels.Element_Array;
    type Configuration_Snapshot (Nb, Nj, Na, Nt, Ns, Ng, Nw, Nm, Nf : Natural) is record
-      Nq, Nv, Nu, No, Nactivation : Natural;
+      Nq, Nv, Nu, No, Nactivation, Nmocap : Natural;
       Has_Muscles : Boolean;
       Timestep : Nonneg_Tier0;
       Gravity : Vector;
@@ -379,6 +419,7 @@ private
 
    type State_Buffers is record
       Qpos, Qvel, Ctrl, Applied : Real_Array_Access := null;
+      Mocap_Pos, Mocap_Quat : Real_Array_Access := null;
    end record;
    type Kinematic_Buffers is record
       Bodies : Body_State_Access := null;
@@ -418,7 +459,7 @@ private
       Nv, Nj : Natural range 0 .. Max_Dofs := 0;
       --  Nj counts expanded motion entries (Nv), not source-model joints.
       Nu, Na, No : Natural range 0 .. Max_Actuators := 0;
-      Nb : Natural range 0 .. Max_Bodies := 0;
+      Nb, Nmocap : Natural range 0 .. Max_Bodies := 0;
       Clock : Nonneg_Tier0 := 0.0;
       Timestep : Nonneg_Tier0 := 0.0;
       Gravity : Vector := Zero;
@@ -457,7 +498,7 @@ private
          Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
          Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
          Nm => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nm,
-         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Has_Muscles => D.Has_Muscles,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Nmocap => D.Nmocap, Has_Muscles => D.Has_Muscles,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
@@ -473,7 +514,7 @@ private
          Ng => MJ.Spatial_Tendon_Models.Image (D.Tendons).Ng,
          Nw => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nw,
          Nm => MJ.Spatial_Tendon_Models.Image (D.Tendons).Nm,
-         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Has_Muscles => D.Has_Muscles,
+         Tendons => MJ.Spatial_Tendon_Models.Image (D.Tendons), Nq => D.Nq, Nv => D.Nv, Nu => D.Nu, No => D.No, Nactivation => D.Nactivation, Nmocap => D.Nmocap, Has_Muscles => D.Has_Muscles,
          Timestep => D.Timestep, Gravity => D.Gravity, Gravity_Enabled => D.Gravity_Enabled,
          Spring_Enabled => D.Spring_Enabled, Damper_Enabled => D.Damper_Enabled,
          Actuation_Enabled => D.Actuation_Enabled, Clamp_Control => D.Clamp_Control,
@@ -489,6 +530,7 @@ private
      (not D.Allocated and then D.Fluid_Elements = null and then D.Tendons = null and then D.Tendon_Outputs = null and then D.Body_Config = null and then D.Joint_Config = null
       and then D.Actuator_Config = null and then D.State.Qpos = null
       and then D.State.Qvel = null and then D.State.Ctrl = null and then D.State.Applied = null
+      and then D.State.Mocap_Pos = null and then D.State.Mocap_Quat = null
       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
       and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
       and then D.Kinematic.Linear_Jacobian = null and then D.Kinematic.Angular_Jacobian = null
@@ -507,11 +549,18 @@ private
 
    function Velocity_Count (D : Simulation) return Natural is (D.Nv);
 
+   function Mocap_Count (D : Simulation) return Natural is (D.Nmocap);
+   function Mocap_Positions (D : Simulation) return Real_Array is
+     (if D.State.Mocap_Pos = null then [1 .. 0 => 0.0] else D.State.Mocap_Pos.all);
+   function Mocap_Quaternions (D : Simulation) return Real_Array is
+     (if D.State.Mocap_Quat = null then [1 .. 0 => 0.0] else D.State.Mocap_Quat.all);
+   function Mocap_Values (D : Simulation) return Real_Array is
+     (Mocap_Positions (D) & Mocap_Quaternions (D));
    function Activation_Count (D : Simulation) return Natural is (D.Nactivation);
    function Activation_Values (D : Simulation) return Real_Array is
      (As_Reals (D.Activation (0 .. Integer (D.Nactivation) - 1)));
    function Complete_State_Values (D : Simulation) return Real_Array is
-     (State_Values (D) & Activation_Values (D));
+     (State_Values (D) & Activation_Values (D) & Mocap_Values (D));
    function Activation_Rates (D : Simulation) return Real_Array is
      ([for I in 0 .. Integer (D.Nactivation) - 1 => Real (D.Act_Dot (I))]);
 
@@ -574,7 +623,7 @@ private
        and then A.Nt = B.Nt and then A.Ns = B.Ns and then A.Ng = B.Ng and then A.Nw = B.Nw and then A.Nm = B.Nm
        and then A.Tendons = B.Tendons
        and then A.Nq = B.Nq and then A.Nv = B.Nv and then A.Nu = B.Nu and then A.No = B.No
-       and then A.Nactivation = B.Nactivation and then A.Has_Muscles = B.Has_Muscles
+       and then A.Nactivation = B.Nactivation and then A.Nmocap = B.Nmocap and then A.Has_Muscles = B.Has_Muscles
        and then A.Nf = B.Nf and then A.Fluid = B.Fluid and then A.Fluid_Elements = B.Fluid_Elements
        and then A.Timestep = B.Timestep and then A.Gravity = B.Gravity
        and then A.Gravity_Enabled = B.Gravity_Enabled and then A.Spring_Enabled = B.Spring_Enabled
@@ -763,6 +812,8 @@ private
       and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
       and then D.Nu = D.Na and then D.No = D.Na
       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
+      and then D.Nmocap <= D.Nb
+      and then (for all C of D.Body_Config.all => C.Mocap_Id in -1 .. Integer (D.Nmocap) - 1)
       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
       and then D.Actuator_Config /= null and then D.Actuator_Config'First = 0 and then D.Actuator_Config'Last = D.Na - 1 and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na)
       and then D.Kinematic.Bodies /= null and then D.Kinematic.Bodies'First = 0
@@ -772,6 +823,8 @@ private
       and then Int64 (D.Kinematic.Joints'Length) = Int64 (D.Nj)
       and then Has_Real_Layout (D.State.Qpos, D.Nq) and then Has_Real_Layout (D.State.Qvel, D.Nv)
       and then Has_Real_Layout (D.State.Ctrl, D.Nu) and then Has_Real_Layout (D.State.Applied, D.Nv)
+      and then Has_Real_Layout (D.State.Mocap_Pos, 3 * D.Nmocap)
+      and then Has_Real_Layout (D.State.Mocap_Quat, 4 * D.Nmocap)
       and then Has_Real_Layout (D.Kinematic.Spatial_Inertias, 10 * D.Nb)
       and then Has_Real_Layout (D.Kinematic.Spatial_Motions, 6 * D.Nj)
       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
@@ -812,6 +865,8 @@ private
       and then D.Nq in D.Nv .. Max_Positions and then D.Nj = D.Nv and then D.Na <= Max_Actuators
       and then D.Nu = D.Na and then D.No = D.Na
       and then D.Body_Config /= null and then D.Body_Config'First = 0 and then Int64 (D.Body_Config'Length) = Int64 (D.Nb)
+      and then D.Nmocap <= D.Nb
+      and then (for all C of D.Body_Config.all => C.Mocap_Id in -1 .. Integer (D.Nmocap) - 1)
       and then D.Joint_Config /= null and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nj - 1 and then Int64 (D.Joint_Config'Length) = Int64 (D.Nj)
       and then D.Actuator_Config /= null and then D.Actuator_Config'First = 0 and then D.Actuator_Config'Last = D.Na - 1 and then Int64 (D.Actuator_Config'Length) = Int64 (D.Na)
       and then D.Kinematic.Bodies /= null and then D.Kinematic.Bodies'First = 0
@@ -820,6 +875,8 @@ private
       and then Int64 (D.Kinematic.Joints'Length) = Int64 (D.Nj)
       and then Has_Real_Layout (D.State.Qpos, D.Nq) and then Has_Real_Layout (D.State.Qvel, D.Nv)
       and then Has_Real_Layout (D.State.Ctrl, D.Nu) and then Has_Real_Layout (D.State.Applied, D.Nv)
+      and then Has_Real_Layout (D.State.Mocap_Pos, 3 * D.Nmocap)
+      and then Has_Real_Layout (D.State.Mocap_Quat, 4 * D.Nmocap)
       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
       and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
       and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
@@ -922,7 +979,11 @@ private
       and then (for all X of D.State.Qvel.all => X = 0.0)
       and then (for all X of D.State.Ctrl.all => X = 0.0)
       and then (for all X of D.State.Applied.all => X = 0.0)
-      and then (for all X of D.Activation => X = 0.0));
+      and then (for all X of D.Activation => X = 0.0)
+      and then (for all B in D.Body_Config'Range =>
+        (if D.Body_Config (B).Mocap_Id >= 0 then
+          Read_Vector (D.State.Mocap_Pos.all, 3 * D.Body_Config (B).Mocap_Id) = D.Body_Config (B).Position
+          and then Read_Quaternion (D.State.Mocap_Quat.all, 4 * D.Body_Config (B).Mocap_Id) = D.Body_Config (B).Mocap_Reference)));
    function Symmetric_Mass (D : Simulation) return Boolean is
      (Is_Ready (D) and then (for all I in 0 .. D.Nv - 1 =>
        (for all J in 0 .. D.Nv - 1 =>

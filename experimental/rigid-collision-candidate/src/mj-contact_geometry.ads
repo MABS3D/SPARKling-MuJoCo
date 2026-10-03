@@ -26,7 +26,7 @@ package MJ.Contact_Geometry with SPARK_Mode is
    type Graph_Array is array (Natural range <>) of Integer;
    Empty_Graph : constant Graph_Array (1 .. 0) := [others => 0];
    type Extrema_Array is array (Natural range 0 .. 26) of Natural;
-   type Object_Kind is (Primitive, Hull, Prism);
+   type Object_Kind is (Primitive, Hull, Prism, Flex_Element);
    type Object is record
       Kind : Object_Kind := Primitive;
       Rigid : Shape;
@@ -42,6 +42,8 @@ package MJ.Contact_Geometry with SPARK_Mode is
    end record;
    function Valid_Object (S : Object; V : Vertex_Array) return Boolean is
      (if S.Kind = Primitive then Valid_Shape (S.Rigid)
+      elsif S.Kind = Flex_Element then S.Length in 1 .. 4 and then
+        (for all I in 0 .. S.Length-1 => (for all X of S.Prism_Vertices (I) => X in Coordinate))
       elsif S.Kind = Prism then (for all P of S.Prism_Vertices => (for all X of P => X in -1.0e22 .. 1.0e22))
       else S.Length > 0 and then S.First >= V'First and then S.First <= V'Last
         and then S.Length-1 <= V'Last-S.First

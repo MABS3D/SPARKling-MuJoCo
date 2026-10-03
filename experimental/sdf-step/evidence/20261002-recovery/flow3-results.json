@@ -1,0 +1,65 @@
+{
+  "scopes": [
+    {
+      "scope": "scene-flow",
+      "kind": "flow",
+      "exit": 0,
+      "checks": 27,
+      "open": 0,
+      "warnings": 19,
+      "passed": true,
+      "seconds": 19.106906424000044,
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-recovery-sdf3-20261002/source/experimental/sdf-step/sdf.gpr",
+        "-u",
+        "mj-sdf_scene.adb",
+        "-j1",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--warnings=continue",
+        "--mode=flow"
+      ]
+    },
+    {
+      "scope": "step-flow",
+      "kind": "flow",
+      "exit": 0,
+      "checks": 29,
+      "open": 0,
+      "warnings": 19,
+      "passed": true,
+      "seconds": 27.616274402999807,
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-recovery-sdf3-20261002/source/experimental/sdf-step/sdf.gpr",
+        "-u",
+        "mj-data-constrained-sdf.adb",
+        "-j1",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--warnings=continue",
+        "--mode=flow"
+      ]
+    }
+  ],
+  "complete": true,
+  "runner_sha256": "ae9b69342ea66f84006dd3670abe5632bac97e964cacb2c8802236e28bd7576c",
+  "limits": "Flow does not establish runtime safety or functional behavior; a caller proof depends on every called contract being established."
+}

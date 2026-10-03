@@ -13,7 +13,9 @@ import time
 
 HERE = Path(__file__).resolve().parents[1]
 ROOT = HERE.parents[1]
-UNITS = ['mj-constraint_scalar', 'mj-constraint_order',
+UNITS = ['mj-constraint_solvers-sparse_cholesky', 'mj-constraint_solvers-dense_cholesky', 'mj-constraint_solvers-reduction_models', 'mj-constraint_solvers-reductions',
+         'mj-constraint_scalar', 'mj-constraint_order',
+         'mj-constraint_solvers-sparse_kernels',
          'mj-constraint_solvers-cholesky', 'mj-constraint_solvers']
 
 def digest(path):
@@ -22,7 +24,8 @@ def digest(path):
 def sources():
     return [ROOT/'src/mj.ads', ROOT/'src/mj-types.ads', ROOT/'src/mj-quaternion_math.ads',
             *sorted((HERE/'src').glob('*.ad?')), HERE/'tests/solvers_probe.adb',
-            HERE/'tests/cholesky_edges.adb']
+            HERE/'tests/cholesky_edges.adb', HERE/'tests/reductions_probe.adb',
+            HERE/'tests/dense_cholesky_probe.adb', HERE/'tests/sparse_cholesky_probe.adb']
 
 def environment():
     env = os.environ.copy()
@@ -56,6 +59,16 @@ def main():
         'for Source_Dirs use ("src");')
     (out/'solvers.gpr').write_text(project)
     (out/'sources.json').write_text(json.dumps(hashes, indent=2)+'\n')
+    def frozen_unchanged():
+        return hashes == {rel: digest(out/'src'/Path(rel).name) for rel in hashes}
+    def checkout_matches():
+        return hashes == {str(p.relative_to(ROOT)): digest(p) for p in sources()}
+    assert frozen_unchanged(), 'input changed during source capture'
+    (out/'runner-inputs.json').write_text(json.dumps({
+        str(Path(__file__).resolve()): digest(Path(__file__)),
+        str(HERE/'solvers.gpr'): digest(HERE/'solvers.gpr'),
+        str(ROOT/'tools/guarded.py'): digest(ROOT/'tools/guarded.py'),
+        'frozen_project_sha256': digest(out/'solvers.gpr')}, indent=2)+'\n')
     env = environment()
     env['SOLVERS_BUILD_ROOT'] = str(out/'build')
     env['SOLVERS_MODE'] = args.mode
@@ -64,14 +77,14 @@ def main():
     records = []
     def run(command, label):
         command = [sys.executable, str(ROOT/'tools/guarded.py'),
-                   '--cap-mb', '3800', '--timeout', str(args.wall_timeout), '--', *command]
+                   '--cap-mb', '3800', '--min-free-mb', '12000', '--timeout', str(args.wall_timeout), '--', *command]
         start = time.time()
         p = subprocess.run(command, env=env, text=True, capture_output=True)
         (out/(label+'.log')).write_text(p.stdout+p.stderr)
         return p, dict(label=label, command=command, code=p.returncode,
                       seconds=time.time()-start)
     if args.phase == 'build':
-        p, rec = run(['gprbuild', '-P', str(out/'solvers.gpr'), '-j2'], 'build')
+        p, rec = run(['gprbuild', '-P', str(out/'solvers.gpr'), '-j1'], 'build')
         binary = out/'build'/args.mode/'bin/solvers_probe'
         if p.returncode:
             print((p.stdout+p.stderr)[-5000:])
@@ -84,8 +97,9 @@ def main():
         if edge.returncode:
             print(edge.stdout+edge.stderr)
             raise SystemExit(edge.returncode)
+        assert frozen_unchanged(), 'frozen build inputs changed'
+        rec.update(snapshot_hashes_unchanged=True, checkout_matches_snapshot=checkout_matches())
         (out/'binary.json').write_text(json.dumps(rec, indent=2)+'\n')
-        assert hashes == {str(p.relative_to(ROOT)): digest(p) for p in sources()}
         print(binary)
         return
     targets = []
@@ -112,7 +126,7 @@ def main():
             report.unlink()
         command = ['gnatprove', '-f', '-P', str(out/'solvers.gpr'), '-u', unit+'.ads',
             '--prover=cvc5,z3,altergo', f'--timeout={args.timeout}', '--memlimit=800',
-            '--steps=0', '--proof='+args.proof, '-j2', '--checks-as-errors=on',
+            '--steps=0', '--proof='+args.proof, '-j1', '--checks-as-errors=on',
             '--warnings=continue', '--report=all', '--counterexamples=off']
         if args.no_inlining:
             command.append('--no-inlining')
@@ -149,7 +163,15 @@ def main():
         # ghost recurrences; neither is an assumed application theorem.
         reviewed = []
         for warning in rec.get('warnings', []):
-            if unit == 'mj-constraint_solvers-cholesky' and (
+            # Both diagnostics say that recursive bodies/contracts may be
+            # unavailable to the prover, reducing usable hypotheses. They
+            # do not assume a result. Keep them in the receipt and require
+            # proof of the recursive body, termination and unfolding lemma.
+            if (warning.get('file') in ('mj-constraint_solvers-reduction_models.ads',
+                                       'mj-constraint_solvers-dense_cholesky.ads')
+                    and warning.get('rule') in ('numeric-variant', 'contracts-recursive')):
+                reviewed.append(warning)
+            if unit in ('mj-constraint_solvers-cholesky', 'mj-constraint_solvers-dense_cholesky') and (
                 warning.get('rule') == 'numeric-variant'
                 or (warning.get('rule') == 'imprecise-call'
                     and warning.get('message', {}).get('arguments') == ['Sqrt'])
@@ -169,9 +191,9 @@ def main():
                             if re.search(r'error:|medium:|high:|low:', x))[-3500:], flush=True)
             if 'open' not in rec:
                 raise SystemExit(p.returncode or 1)
-    assert hashes == {str(p.relative_to(ROOT)): digest(p) for p in sources()}
+    assert frozen_unchanged(), 'frozen proof inputs changed'
     (out/'acceptance.json').write_text(json.dumps(dict(passed=ok, phase=args.phase,
-        source_hashes_unchanged=True), indent=2)+'\n')
+        snapshot_hashes_unchanged=True, checkout_matches_snapshot=checkout_matches()), indent=2)+'\n')
     raise SystemExit(0 if ok else 1)
 
 if __name__ == '__main__':
