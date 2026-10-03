@@ -72,9 +72,20 @@ package MJ.Data.Constrained with SPARK_Mode is
                    External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads)
      with Post => (Static => (if Result /= Success then Complete_State (E) = Complete_State (E)'Old));
 private
+   --  Child force producers can own activation/control while sharing D.
+   procedure Create_Core (M : in out MJ.Models.Model; E : in out Engine;
+                          Result : out Status; Dynamics_Only : Boolean)
+     with Post => M.Opt.Disableflags = M.Opt.Disableflags'Old
+       and then M.Flg_Adhesion = M.Flg_Adhesion'Old
+       and then (if Result = Success then Ready (E));
+   procedure Generate_Contacts (E : in out Engine; Result : out Status);
    --  Shared stages for child contact producers. The ordinary entry retains
    --  its own admission and collision dispatch.
    procedure Assemble (E : in out Engine; Result : out Status);
+   --  Specialized equality producers insert their ordered rows between
+   --  these stages. Friction, limits and contacts follow all equalities.
+   procedure Begin_Assembly (E : in out Engine; Result : out Status);
+   procedure Finish_Assembly (E : in out Engine; Result : out Status);
    procedure Prepare_And_Solve (E : in out Engine; Result : out Status);
    procedure Advance (E : in out Engine; Result : out Status);
    package CA renames MJ.Constraint_Assembly;
@@ -129,7 +140,7 @@ private
    type Equality_Tendon_Map is array (Positive range 1 .. Max_V) of Natural range 0 .. Max_T_Entries;
    type Equality_Description is record
       Weld, Site, Active : Boolean := False;
-      Kind : Natural range 0 .. 3 := 0;
+      Kind : Natural range 0 .. 6 := 0;
       Object0 : Natural := 0;
       Object1 : Integer := -1;
       Reference0, Reference1 : Tier0_Real := 0.0;
@@ -197,6 +208,9 @@ private
       Contact_Weights : Weighted_Contact_Array;
       Rows : CA.Storage (Max_R, Max_R * Max_V);
       Solver_Rows : CS.Rows (1 .. Max_R);
+      --  Only rows produced by specialized flex equalities read this cache.
+      --  The producer writes each consumed slot; no per-step clear is needed.
+      Equality_Weights : CA.Value_Array (1 .. Max_R) := [others => 0.0];
       Surface_Rows : CS.Vector (1 .. Max_R) := [others => 0.0];
       T : Trace;
    end record;

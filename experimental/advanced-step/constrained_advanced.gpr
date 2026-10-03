@@ -1,0 +1,22 @@
+project Constrained_Advanced is
+   Build_Root := external ("ADVANCED_BUILD_ROOT", "/var/tmp/sparkling-constrained-advanced");
+   Mode := external ("ADVANCED_MODE", "validation");
+   for Source_Dirs use ("src", "tests", "../../src", "../../src/gen",
+     "../smooth/src", "../spatial-tendon-candidate/src", "../muscle-candidate/src",
+     "../advanced-actuation-candidate/src", "../constrained-step/src", "../constrained-step/tests",
+     "../rigid-collision-candidate/src", "../constraint-assembly-candidate/src",
+     "../constraint-solvers-candidate/src", "../joint-limit-candidate/src",
+     "../frictionless-contact-candidate/src");
+   for Main use ("advanced_probe.adb", "constrained_advanced_probe.adb", "constrained_probe.adb", "advanced_edges.adb", "constrained_advanced_edges.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O1", "-g", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is for Default_Switches ("Ada") use Flags; end Compiler;
+   package Binder is for Switches ("Ada") use ("-Es"); end Binder;
+   package Linker is for Default_Switches ("Ada") use ("-lm"); end Linker;
+end Constrained_Advanced;

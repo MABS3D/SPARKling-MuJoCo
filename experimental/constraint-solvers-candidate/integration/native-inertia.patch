@@ -1,0 +1,568 @@
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.ads
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.ads
+@@ -87,12 +87,19 @@
+    --  describe the same linear map for the current matrix/dual algorithms;
+    --  their native slot-wise traversal is a separate, unfinished port step.
+    --  Omitting CSR derives ordered nonzero slots from J for compatibility.
++   --  Optional Native_Factor holds the current Ada LDL strict-lower CSR,
++   --  with Native_Inverse holding reciprocals of its clamped diagonal.
++   --  These must come from the factorization used for this M/A_Free pair;
++   --  that provenance is a caller obligation, with its global proof OPEN.
++   --  Shape/domain rejection is atomic. Empty preserves the assembled API.
+    procedure Solve
+      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+       Settings : Options; A, Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+       Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+-      Smooth_Force : Vector := Empty_Vector)
++      Smooth_Force : Vector := Empty_Vector;
++      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
++      Native_Inverse : Vector := Empty_Vector)
+    with Post =>
+      (if Result.Outcome in Invalid_Input | Not_Positive_Definite | Numeric_Limit
+       then A = A'Old and Force = Force'Old);
+@@ -105,7 +112,9 @@
+       Settings : Options; A, Force, Generalized_Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+       Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+-      Smooth_Force : Vector := Empty_Vector)
++      Smooth_Force : Vector := Empty_Vector;
++      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
++      Native_Inverse : Vector := Empty_Vector)
+    with Post =>
+      (if Result.Outcome in Invalid_Input | Not_Positive_Definite | Numeric_Limit
+       then A = A'Old and Force = Force'Old and Generalized_Force = Generalized_Force'Old);
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
+@@ -3,6 +3,7 @@
+ with Ada.Numerics.Long_Elementary_Functions;
+ with Interfaces;
+ with MJ.Constraint_Order;
++with MJ.Constraint_Solvers.Native_Inertia;
+ with MJ.Constraint_Solvers.Cholesky;
+ with MJ.Constraint_Solvers.Dense_Cholesky;
+ with MJ.Constraint_Solvers.Cholesky_Updates;
+@@ -13,6 +14,7 @@
+ package body MJ.Constraint_Solvers with SPARK_Mode is
+    package Math renames Ada.Numerics.Long_Elementary_Functions;
+    package Scalar renames MJ.Constraint_Scalar;
++   package NI renames MJ.Constraint_Solvers.Native_Inertia;
+    package Linear renames MJ.Constraint_Solvers.Cholesky;
+    package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
+    package Updates renames MJ.Constraint_Solvers.Cholesky_Updates;
+@@ -230,7 +232,9 @@
+       Settings : Options; A, Force, Generalized_Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+       Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+-      Smooth_Force : Vector := Empty_Vector) is
++      Smooth_Force : Vector := Empty_Vector;
++      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
++      Native_Inverse : Vector := Empty_Vector) is
+       N : constant Natural := A_Free'Length;
+       K : constant Natural := Aref'Length;
+       function Finite (X : Real) return Boolean is (X in -1.0e10 .. 1.0e10);
+@@ -250,6 +254,11 @@
+         or Settings.LS_Tolerance not in 1.0e-12 .. 1.0
+         or Settings.Scale not in 1.0e-12 .. 1.0e12
+         or not Smooth_Force_Valid (Smooth_Force, N) then return;
++      end if;
++      if Native_Factor.Row_Count /= 0 then
++         if Native_Factor.Row_Count /= N or else not NI.Lower_Valid (Native_Factor)
++           or else not NI.Inverse_Valid (Native_Inverse, N) then return; end if;
++      elsif Native_Factor.Stored /= 0 or else Native_Inverse'Length /= 0 then return;
+       end if;
+       if Ordered_Jacobian.Row_Count /= 0 then
+          if not Settings.Sparse or else Ordered_Jacobian.Row_Count /= K
+@@ -646,8 +655,13 @@
+          --  the Cholesky root here adds two rounding steps and changes CG's
+          --  stopping iteration on strongly scaled elliptic contacts.
+          procedure Apply_Mass_Inverse (RHS : Vector; Output : out Vector) is
+-         begin
+-            if Mass_Is_Diagonal then
++            Accepted : Boolean;
++         begin
++            if Native_Factor.Row_Count /= 0 then
++               if not NI.Bounded (RHS) then raise Constraint_Error; end if;
++               NI.Apply (Native_Factor, Native_Inverse, RHS, Output, Accepted);
++               if not Accepted then raise Constraint_Error; end if;
++            elsif Mass_Is_Diagonal then
+                for P in 1 .. N loop
+                   Output (P) := Sparse_Arithmetic.Diagonal_Scale
+                     (RHS (P), Inverse_Mass_Diagonal (P));
+@@ -1192,13 +1206,15 @@
+                I := Last + 1;
+             end;
+          end loop;
+-         Factor_Metric (M, L, OK);
+-         if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
+-         if Mass_Is_Diagonal then
+-            for P in 1 .. N loop
+-               Inverse_Mass_Diagonal (P) :=
+-                 Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+-            end loop;
++         if Native_Factor.Row_Count = 0 then
++            Factor_Metric (M, L, OK);
++            if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
++            if Mass_Is_Diagonal then
++               for P in 1 .. N loop
++                  Inverse_Mass_Diagonal (P) :=
++                    Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
++               end loop;
++            end if;
+          end if;
+          if Smooth_Force'Length = 0 then Multiply_Metric (A_Free, Smooth);
+          else Smooth := Smooth_Force;
+@@ -1224,14 +1240,16 @@
+       Settings : Options; A, Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+       Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+-      Smooth_Force : Vector := Empty_Vector) is
++      Smooth_Force : Vector := Empty_Vector;
++      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
++      Native_Inverse : Vector := Empty_Vector) is
+    begin
+       if A_Free'Length not in 1 .. Max_Dofs then Result := (others => <>); return; end if;
+       declare
+          Generalized : Vector (1 .. A_Free'Length) := (others => 0.0);
+       begin
+          Solve_With_Force (M, J, A_Free, Aref, Constraints, Settings,
+-           A, Force, Generalized, Result, Hessian_Pattern, Ordered_Jacobian, Smooth_Force);
++           A, Force, Generalized, Result, Hessian_Pattern, Ordered_Jacobian, Smooth_Force, Native_Factor, Native_Inverse);
+       end;
+    end Solve;
+ end MJ.Constraint_Solvers;
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -11,6 +11,7 @@
+ with MJ.Joint_Limits;
+ with MJ.Joint_Limit_Math;
+ with MJ.Constrained_Kernels;
++with MJ.Constraint_Solvers.Native_Inertia;
+ with MJ.Data.Constrained.Tendons;
+ with MJ.Data.Constrained.Equalities;
+ with MJ.Elliptic_Response;
+@@ -20,6 +21,7 @@
+    package CG renames MJ.Contact_Geometry;
+    package CP renames MJ.Contact_Parameters;
+    package JL renames MJ.Joint_Limits;
++   package NI renames MJ.Constraint_Solvers.Native_Inertia;
+    package CK renames MJ.Constrained_Kernels;
+    package Step_Publication renames MJ.Owned_Step_Publication;
+    package SV renames MJ.Surface_Velocity;
+@@ -640,6 +642,11 @@
+       J : CS.Matrix (1 .. Nr, 1 .. Nv) := [others => [others => 0.0]];
+       Ordered_J : CS.Sparse_Jacobian (Nr, E.Rows.Used);
+       A, A_Free, Original_Smooth : CS.Vector (1 .. Nv);
++      Use_Native : constant Boolean := E.D.Solver_Policy = Compatible;
++      Native_Factor : CS.Sparse_Jacobian
++        ((if Use_Native then Nv else 0),
++         (if Use_Native then MJ.Ancestor_Rows.Count (E.D.Ancestors) else 0));
++      Native_Inverse : CS.Vector (1 .. (if Use_Native then Nv else 0));
+       Generalized_Force : CS.Vector (1 .. Nv) := [others => 0.0];
+       Aref, Force : CS.Vector (1 .. Nr) := [others => 0.0];
+       Hessian_Pattern : CS.Structural_Matrix (1 .. Nv, 1 .. Nv) := [others => [others => False]];
+@@ -659,6 +666,26 @@
+          E.T.Valid := True;
+          Result := Success;
+          return;
++      end if;
++      --  Solve_Acceleration has just factored the undamped mass in Ada.
++      --  Reuse that factor, including structural zeros, as C reuses qLD.
++      if Use_Native then
++         for V in 1 .. Nv loop
++            declare
++               First : constant Natural := MJ.Ancestor_Rows.Start (E.D.Ancestors, V-1);
++               Width : constant Positive := MJ.Ancestor_Rows.Length (E.D.Ancestors, V-1);
++               Diagonal : constant Real := E.D.Scratch.Ancestor_Factor (First+Width-1);
++            begin
++               if Diagonal not in 1.0e-15 .. 1.0e60 then return; end if;
++               Native_Factor.Offsets (V) := First;
++               Native_Factor.Widths (V) := Width-1;
++               Native_Inverse (V) := NI.Reciprocal (Diagonal);
++               for K in 0 .. Width-1 loop
++                  Native_Factor.Columns (First+K+1) := MJ.Ancestor_Rows.Column (E.D.Ancestors, V-1, K)+1;
++                  Native_Factor.Values (First+K+1) := E.D.Scratch.Ancestor_Factor (First+K);
++               end loop;
++            end;
++         end loop;
+       end if;
+       for V in 1 .. Nv loop
+          A_Free (V) := E.D.Dynamics.Acceleration (V - 1);
+@@ -862,11 +889,12 @@
+       if E.Settings.Sparse then
+          CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                    A, Force, Generalized_Force, E.T.Report,
+-                   Hessian_Pattern, Ordered_J, Original_Smooth);
++                   Hessian_Pattern, Ordered_J, Original_Smooth, Native_Factor, Native_Inverse);
+       else
+          CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                    A, Force, Generalized_Force, E.T.Report,
+-                   Hessian_Pattern, Smooth_Force => Original_Smooth);
++                   Hessian_Pattern, Smooth_Force => Original_Smooth,
++                   Native_Factor => Native_Factor, Native_Inverse => Native_Inverse);
+       end if;
+       --  C's primal solver publishes its current iterate when alpha=0 (no
+       --  improvement), as well as at the iteration budget. The candidate
+--- a/experimental/constraint-solvers-candidate/tests/solvers_probe.adb
++++ b/experimental/constraint-solvers-candidate/tests/solvers_probe.adb
+@@ -12,6 +12,8 @@
+      and then Ada.Command_Line.Argument (1) = "--with-force";
+    With_Smooth : constant Boolean := Ada.Command_Line.Argument_Count >= 2
+      and then Ada.Command_Line.Argument (2) = "--smooth-force";
++   With_Native : constant Boolean := Ada.Command_Line.Argument_Count >= 3
++     and then Ada.Command_Line.Argument (3) = "--native-mass";
+    procedure Get (V : out Integer) is begin Ada.Integer_Text_IO.Get (V); end Get;
+    procedure Get (V : out Real) is begin IO.Get (V); end Get;
+    procedure Put (V : Real) is
+@@ -29,6 +31,8 @@
+          J : Matrix (1 .. K, 1 .. N);
+          Free, A0, A : Vector (1 .. N);
+          Original_Smooth : Vector (1 .. (if With_Smooth then N else 0));
++         Mass_Lower : Sparse_Jacobian ((if With_Native then N else 0), (if With_Native then N*N else 0));
++         Mass_Inverse : Vector (1 .. (if With_Native then N else 0));
+          Generalized : Vector (1 .. N) := (others => 0.375);
+          Aref, F0, F : Vector (1 .. K);
+          C : Rows (1 .. K);
+@@ -59,15 +63,30 @@
+                for V of Native.Columns loop Get (Int_Value); V := Int_Value; end loop;
+                for V of Native.Values loop Get (V); end loop;
+                for X of Original_Smooth loop Get (X); end loop;
++               if With_Native then
++                  declare Entries : Natural; begin
++                     Mass_Lower.Columns := (others => 1); Mass_Lower.Values := (others => 0.0);
++                     Get (Int_Value); Entries := Int_Value;
++                     for R in 1 .. N loop
++                        Get (Int_Value); Mass_Lower.Offsets (R) := Int_Value;
++                        Get (Int_Value); Mass_Lower.Widths (R) := Int_Value-1;
++                     end loop;
++                     for K in 1 .. Entries loop Get (Int_Value); Mass_Lower.Columns (K) := Int_Value+1; end loop;
++                     for K in 1 .. Entries loop Get (Mass_Lower.Values (K)); end loop;
++                     for K in 1 .. N loop Get (Mass_Inverse (K)); end loop;
++                  end;
++               end if;
+                for Repeat in 1 .. Repeats loop
+                   A := A0; F := F0;
+                   if With_Force then
+                      Generalized := (others => 0.375);
+                      Solve_With_Force (M, J, Free, Aref, C, Opt, A, F,
+-                       Generalized, Info, Ordered_Jacobian => Native, Smooth_Force => Original_Smooth);
++                       Generalized, Info, Ordered_Jacobian => Native, Smooth_Force => Original_Smooth,
++                       Native_Factor => Mass_Lower, Native_Inverse => Mass_Inverse);
+                   else
+                      Solve (M, J, Free, Aref, C, Opt, A, F, Info,
+-                            Ordered_Jacobian => Native, Smooth_Force => Original_Smooth);
++                            Ordered_Jacobian => Native, Smooth_Force => Original_Smooth,
++                       Native_Factor => Mass_Lower, Native_Inverse => Mass_Inverse);
+                   end if;
+                end loop;
+                if With_Smooth then
+@@ -82,7 +101,8 @@
+                         Rejected : Report;
+                      begin
+                         Solve_With_Force (M, J, Free, Aref, C, Opt, A, F,
+-                          Generalized, Rejected, Ordered_Jacobian => Native, Smooth_Force => Bad);
++                          Generalized, Rejected, Ordered_Jacobian => Native, Smooth_Force => Bad,
++                          Native_Factor => Mass_Lower, Native_Inverse => Mass_Inverse);
+                         if Rejected.Outcome /= Invalid_Input or A /= Saved_A
+                           or F /= Saved_F or Generalized /= Saved_G
+                         then raise Program_Error with "smooth force rejection was not atomic";
+@@ -103,7 +123,8 @@
+                      Rejected : Report;
+                   begin
+                      Solve_With_Force (M, J, Free, Aref, C, Opt, A, F,
+-                       Bad_Force, Rejected, Ordered_Jacobian => Native, Smooth_Force => Original_Smooth);
++                       Bad_Force, Rejected, Ordered_Jacobian => Native, Smooth_Force => Original_Smooth,
++                       Native_Factor => Mass_Lower, Native_Inverse => Mass_Inverse);
+                      if Rejected.Outcome /= Invalid_Input or A /= Saved_A
+                        or F /= Saved_F or (for some X of Bad_Force => X /= 0.625)
+                      then raise Program_Error with "force shape rejection was not atomic";
+--- a/experimental/constraint-solvers-candidate/solvers.gpr
++++ b/experimental/constraint-solvers-candidate/solvers.gpr
+@@ -5,6 +5,7 @@
+    for Source_Files use ("mj.ads", "mj-types.ads", "mj-quaternion_math.ads", "mj-constraint_scalar.ads",
+      "mj-constraint_scalar.adb", "mj-constraint_order.ads",
+      "mj-constraint_order.adb", "mj-constraint_solvers.ads",
++     "mj-constraint_solvers-native_inertia.ads", "mj-constraint_solvers-native_inertia.adb",
+      "mj-constraint_solvers.adb", "mj-constraint_solvers-cholesky.ads",
+      "mj-constraint_solvers-sparse_kernels.ads", "mj-constraint_solvers-sparse_kernels.adb",
+      "mj-constraint_solvers-jacobians.ads", "mj-constraint_solvers-jacobians.adb",
+@@ -15,10 +16,10 @@
+      "mj-constraint_solvers-sparse_cholesky.ads", "mj-constraint_solvers-sparse_cholesky.adb",
+      "mj-constraint_solvers-reductions.ads", "mj-constraint_solvers-reductions.adb",
+      "mj-constraint_solvers-cholesky.adb", "solvers_probe.adb", "cholesky_edges.adb",
+-     "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb");
++     "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb", "native_inertia_probe.adb");
+    for Object_Dir use Build_Root & "/" & Mode & "/obj";
+    for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+-   for Main use ("solvers_probe.adb", "cholesky_edges.adb", "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb");
++   for Main use ("solvers_probe.adb", "cholesky_edges.adb", "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb", "native_inertia_probe.adb");
+    for Create_Missing_Dirs use "True";
+    Flags := ("-gnat2022", "-ffp-contract=off");
+    case Mode is
+--- /dev/null
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers-native_inertia.ads
+@@ -0,0 +1,105 @@
++with MJ.Constraint_Solvers.Jacobians;
++
++--  Single-RHS mj_solveLD, MuJoCo 3.14.0 engine_core_smooth.c.
++--  Values are supplied by the Ada mass factorization. The CSR contains the
++--  strict lower triangle, retaining explicit zeros and ascending columns.
++package MJ.Constraint_Solvers.Native_Inertia with SPARK_Mode is
++   subtype Operand is Real range -1.0e100 .. 1.0e100;
++   subtype Inverse_Value is Real range 1.0e-100 .. 1.0e16;
++   type Status is (Success, Invalid_Input, Numeric_Limit);
++
++   function Bounded (X : Vector) return Boolean is
++     (for all V of X => V in Operand) with Global => null;
++   function Lower_Valid (L : Sparse_Jacobian) return Boolean is
++     (L.Row_Count in 1 .. Max_Dofs
++      and then Jacobians.Valid (L, L.Row_Count)
++      and then (for all V of L.Values => V in Operand)
++      and then (for all R in 1 .. L.Row_Count =>
++        (for all S in L.Offsets (R)+1 .. L.Offsets (R)+L.Widths (R) =>
++          L.Columns (S) < R
++          and then (if S > L.Offsets (R)+1 then L.Columns (S-1) < L.Columns (S)))))
++     with Global => null;
++   function Inverse_Valid (Inverse : Vector; N : Natural) return Boolean is
++     (Inverse'First = 1 and then Inverse'Length = N
++      and then (for all V of Inverse => V in Inverse_Value)) with Global => null;
++   function Ready (L : Sparse_Jacobian; X : Vector) return Boolean is
++     (Lower_Valid (L) and then X'First = 1 and then X'Length = L.Row_Count
++      and then Bounded (X)) with Global => null;
++
++   function Subtract_Product (Previous, Factor, Xi : Real) return Real with
++     Global => null, Inline_Always,
++     Pre => (Static => Previous in Operand and then Factor in Operand and then Xi in Operand),
++     Post => Subtract_Product'Result = Previous-Factor*Xi
++       and then Subtract_Product'Result in -2.0e200 .. 2.0e200;
++   function Scale_Value (Value, Inverse : Real) return Real with
++     Global => null, Inline_Always,
++     Pre => (Static => Value in Operand and then Inverse in Inverse_Value),
++     Post => Scale_Value'Result = Value*Inverse
++       and then Scale_Value'Result in -2.0e116 .. 2.0e116;
++   function Reciprocal (Diagonal : Real) return Real with
++     Global => null, Inline_Always,
++     Pre => (Static => Diagonal in 1.0e-15 .. 1.0e60),
++     Post => Reciprocal'Result = 1.0/Diagonal
++       and then Reciprocal'Result in 1.0e-61 .. 1.0e16;
++   function Subtract_Dot (Previous, Dot : Real) return Real with
++     Global => null, Inline_Always,
++     Pre => (Static => Previous in Operand and then Dot in Jacobians.Sum_Value),
++     Post => Subtract_Dot'Result = Previous-Dot
++       and then Subtract_Dot'Result in -2.0e250 .. 2.0e250;
++
++   procedure Store (X : in out Vector; Index : Positive; Value : Real) with
++     Global => null, Inline_Always,
++     Pre => (Static => Index in X'Range and then Bounded (X) and then Value in Operand),
++     Post => Bounded (X) and then X (Index) = Value
++       and then (for all P in X'Range => (if P /= Index then X (P) = X'Old (P)));
++
++   procedure Distinct_Prefix (L : Sparse_Jacobian; Row, Slot : Positive) with
++     Ghost => Static, Global => null,
++     Pre => Lower_Valid (L) and then Row <= L.Row_Count
++       and then Slot in L.Offsets (Row)+1 .. L.Offsets (Row)+L.Widths (Row),
++     Post => (for all T in L.Offsets (Row)+1 .. Slot-1 =>
++       L.Columns (T) < L.Columns (Slot));
++
++   procedure Scatter_Row (L : Sparse_Jacobian; X : in out Vector;
++                          Row : Positive; Accepted : out Boolean) with
++     Global => null,
++     Pre => Ready (L, X) and then Row <= L.Row_Count,
++     Post => Bounded (X)
++       and then (for all P in X'Range =>
++         (if (for all S in L.Offsets (Row)+1 .. L.Offsets (Row)+L.Widths (Row) =>
++                  L.Columns (S) /= P) then X (P) = X'Old (P)))
++       and then (if Accepted then
++         (for all S in L.Offsets (Row)+1 .. L.Offsets (Row)+L.Widths (Row) =>
++           X (L.Columns (S)) = (if X'Old (Row) = 0.0 then X'Old (L.Columns (S))
++             else Subtract_Product (X'Old (L.Columns (S)), L.Values (S), X'Old (Row)))));
++
++   procedure Scale_Vector (Inverse : Vector; X : in out Vector;
++                           Accepted : out Boolean) with
++     Global => null,
++     Pre => X'First = 1 and then Bounded (X) and then Inverse_Valid (Inverse, X'Length),
++     Post => Bounded (X) and then (if Accepted then
++       (for all P in X'Range => X (P) = Scale_Value (X'Old (P), Inverse (P))));
++
++   procedure Forward_Row (L : Sparse_Jacobian; X : in out Vector;
++                          Row : Positive; Accepted : out Boolean) with
++     Global => null,
++     Pre => Ready (L, X) and then Row <= L.Row_Count,
++     Post => (Static => Bounded (X)
++       and then (for all P in X'Range => (if P /= Row then X (P) = X'Old (P)))
++       and then (if Accepted then X (Row) =
++         (if L.Widths (Row) = 0 then X'Old (Row)
++          else Subtract_Dot (X'Old (Row), Jacobians.Row_Value (L, X'Old, Row)))));
++
++   --  Atomic public boundary. Stage contracts above specify ordered FP
++   --  arithmetic and frames; their whole-solve composition remains pending.
++   --  A caller that has admitted immutable structure once may use Apply on
++   --  disposable solver workspace without repeating the structural scan.
++   procedure Apply (L : Sparse_Jacobian; Inverse, RHS : Vector;
++                    X : out Vector; Accepted : out Boolean) with Global => null,
++     Pre => (Static => Ready (L, RHS) and then Inverse_Valid (Inverse, L.Row_Count)
++       and then X'First = 1 and then X'Length = L.Row_Count),
++     Post => Bounded (X);
++   procedure Solve (L : Sparse_Jacobian; Inverse, RHS : Vector;
++                    X : in out Vector; Result : out Status) with Global => null,
++     Post => (if Result /= Success then X = X'Old else Bounded (X));
++end MJ.Constraint_Solvers.Native_Inertia;
+--- /dev/null
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers-native_inertia.adb
+@@ -0,0 +1,110 @@
++package body MJ.Constraint_Solvers.Native_Inertia with SPARK_Mode is
++   function Subtract_Product (Previous, Factor, Xi : Real) return Real is
++     (Previous-Factor*Xi);
++   function Scale_Value (Value, Inverse : Real) return Real is (Value*Inverse);
++   function Reciprocal (Diagonal : Real) return Real is (1.0/Diagonal);
++   function Subtract_Dot (Previous, Dot : Real) return Real is (Previous-Dot);
++
++   procedure Store (X : in out Vector; Index : Positive; Value : Real) is
++   begin
++      X (Index) := Value;
++   end Store;
++
++   procedure Distinct_Prefix (L : Sparse_Jacobian; Row, Slot : Positive) is
++   begin
++      for T in reverse L.Offsets (Row)+1 .. Slot-1 loop
++         pragma Loop_Invariant
++           (for all P in T .. Slot-1 => L.Columns (P) < L.Columns (Slot));
++      end loop;
++   end Distinct_Prefix;
++
++   procedure Scatter_Row (L : Sparse_Jacobian; X : in out Vector;
++                          Row : Positive; Accepted : out Boolean) is
++      Before : constant Vector := X with Ghost => Static;
++      Xi : constant Real := X (Row);
++      Value : Real;
++   begin
++      Accepted := True;
++      if Xi = 0.0 then return; end if;
++      for S in L.Offsets (Row)+1 .. L.Offsets (Row)+L.Widths (Row) loop
++         Distinct_Prefix (L, Row, S);
++         Value := Subtract_Product (X (L.Columns (S)), L.Values (S), Xi);
++         if Value not in Operand then Accepted := False; return; end if;
++         Store (X, L.Columns (S), Value);
++         pragma Loop_Invariant (Bounded (X));
++         pragma Loop_Invariant (Static => Xi = Before (Row));
++         pragma Loop_Invariant (Static =>
++           (for all T in L.Offsets (Row)+1 .. S =>
++             X (L.Columns (T)) = Subtract_Product
++               (Before (L.Columns (T)), L.Values (T), Xi)));
++         pragma Loop_Invariant (Static =>
++           (for all P in X'Range =>
++             (if (for all T in L.Offsets (Row)+1 .. S => L.Columns (T) /= P)
++              then X (P) = Before (P))));
++      end loop;
++   end Scatter_Row;
++
++   procedure Scale_Vector (Inverse : Vector; X : in out Vector;
++                           Accepted : out Boolean) is
++      Value : Real;
++   begin
++      Accepted := True;
++      for P in X'Range loop
++         Value := Scale_Value (X (P), Inverse (P));
++         if Value not in Operand then Accepted := False; return; end if;
++         Store (X, P, Value);
++         pragma Loop_Invariant (Bounded (X));
++         pragma Loop_Invariant (Static =>
++           (for all Q in X'First .. P => X (Q) = Scale_Value (X'Loop_Entry (Q), Inverse (Q))));
++         pragma Loop_Invariant (Static =>
++           (for all Q in X'Range => (if Q > P then X (Q) = X'Loop_Entry (Q))));
++      end loop;
++   end Scale_Vector;
++
++   procedure Forward_Row (L : Sparse_Jacobian; X : in out Vector;
++                          Row : Positive; Accepted : out Boolean) is
++      Value : Real;
++   begin
++      Accepted := True;
++      if L.Widths (Row) = 0 then return; end if;
++      Value := Subtract_Dot (X (Row), Jacobians.Sparse_Row (L, X, Row));
++      if Value not in Operand then Accepted := False; return; end if;
++      Store (X, Row, Value);
++   end Forward_Row;
++
++   procedure Apply (L : Sparse_Jacobian; Inverse, RHS : Vector;
++                    X : out Vector; Accepted : out Boolean) is
++   begin
++      X := RHS;
++      for Row in reverse 1 .. L.Row_Count loop
++         Scatter_Row (L, X, Row, Accepted);
++         if not Accepted then return; end if;
++         pragma Loop_Invariant (Bounded (X));
++      end loop;
++      Scale_Vector (Inverse, X, Accepted);
++      if not Accepted then return; end if;
++      for Row in 1 .. L.Row_Count loop
++         Forward_Row (L, X, Row, Accepted);
++         if not Accepted then return; end if;
++         pragma Loop_Invariant (Bounded (X));
++      end loop;
++   end Apply;
++
++   procedure Solve (L : Sparse_Jacobian; Inverse, RHS : Vector;
++                    X : in out Vector; Result : out Status) is
++   begin
++      Result := Invalid_Input;
++      if not Ready (L, RHS) or else not Inverse_Valid (Inverse, L.Row_Count)
++        or else X'First /= 1 or else X'Length /= L.Row_Count then return; end if;
++      declare
++         Work : Vector (RHS'Range);
++         Accepted : Boolean;
++      begin
++         Result := Numeric_Limit;
++         Apply (L, Inverse, RHS, Work, Accepted);
++         if not Accepted then return; end if;
++         X := Work;
++         Result := Success;
++      end;
++   end Solve;
++end MJ.Constraint_Solvers.Native_Inertia;
+--- /dev/null
++++ b/experimental/constraint-solvers-candidate/tests/native_inertia_probe.adb
+@@ -0,0 +1,43 @@
++with Ada.Text_IO; use Ada.Text_IO;
++with Ada.Integer_Text_IO;
++with MJ.Types; use MJ.Types;
++with MJ.Constraint_Solvers; use MJ.Constraint_Solvers;
++with MJ.Constraint_Solvers.Native_Inertia;
++procedure Native_Inertia_Probe is
++   package NI renames MJ.Constraint_Solvers.Native_Inertia;
++   use type NI.Status;
++   package IO is new Ada.Text_IO.Float_IO (Real);
++   N, Count, V : Integer;
++begin
++   while not End_Of_File loop
++      Ada.Integer_Text_IO.Get (N); Ada.Integer_Text_IO.Get (Count);
++      declare
++         L : Sparse_Jacobian (N, Count);
++         Inverse, RHS : Vector (1 .. N);
++         X : Vector (1 .. N) := (others => 0.375);
++         Bad_X : Vector (2 .. N+1) := (others => 0.625);
++         Result, Bad : NI.Status;
++      begin
++         for Row in 1 .. N loop
++            Ada.Integer_Text_IO.Get (V); L.Offsets (Row) := V;
++            Ada.Integer_Text_IO.Get (V); L.Widths (Row) := V;
++         end loop;
++         for C of L.Columns loop Ada.Integer_Text_IO.Get (V); C := V; end loop;
++         for A of L.Values loop IO.Get (A); end loop;
++         for A of Inverse loop IO.Get (A); end loop;
++         for A of RHS loop IO.Get (A); end loop;
++         NI.Solve (L, Inverse, RHS, X, Result);
++         if Result /= NI.Success and then (for some A of X => A /= 0.375) then
++            raise Program_Error with "native inertia rejection modified output";
++         end if;
++         NI.Solve (L, Inverse, RHS, Bad_X, Bad);
++         if Bad /= NI.Invalid_Input or else (for some A of Bad_X => A /= 0.625) then
++            raise Program_Error with "native inertia output origin was not rejected atomically";
++         end if;
++         Put (NI.Status'Image (Result)); Put (' ');
++         for A of X loop IO.Put (A, Fore => 1, Aft => 17, Exp => 3); Put (' '); end loop;
++         New_Line;
++      end;
++      if not End_Of_File then Skip_Line; end if;
++   end loop;
++end Native_Inertia_Probe;

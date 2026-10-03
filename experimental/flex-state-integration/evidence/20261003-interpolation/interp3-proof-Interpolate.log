@@ -1,0 +1,105 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Weights" proved
+--> mj-flex_interpolation.adb:111:07
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:113:07
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-flex_interpolation.adb:116:24
+
+ medium: precondition might fail, cannot prove Acc in -1.0e16 .. 1.0e16
+--> mj-flex_interpolation.adb:117:27
+  117 |                Result (K) := Add_Node (Result (K), Nodes (Indices (J)) (K), Weights (J));
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-flex_interpolation.adb:117:56
+
+ info: index check proved
+--> mj-flex_interpolation.adb:117:65
+
+ info: index check proved
+--> mj-flex_interpolation.adb:117:83
+
+ medium: loop invariant might fail in first iteration, cannot prove X in -Real (J + 1) * 7.0e12 .. Real (J + 1) * 7.0e12
+--> mj-flex_interpolation.adb:120:12
+  120 |               X in -Real (J + 1) * 7.0e12 .. Real (J + 1) * 7.0e12);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove X in -Real (J + 1) * 7.0e12 .. Real (J + 1) * 7.0e12
+--> mj-flex_interpolation.adb:120:12
+  120 |               X in -Real (J + 1) * 7.0e12 .. Real (J + 1) * 7.0e12);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: range check proved
+--> mj-flex_interpolation.adb:120:26
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:120:26
+
+ info: float overflow check proved
+--> mj-flex_interpolation.adb:120:31
+
+ info: range check proved
+--> mj-flex_interpolation.adb:120:51
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:120:51
+
+ info: float overflow check proved
+--> mj-flex_interpolation.adb:120:56
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Result (K) = Ordered_Component (Local, Degree, Nodes, Indices, J + 1, K)
+--> mj-flex_interpolation.adb:121:65
+  121 |             pragma Loop_Invariant (Static => (for all K in Axis => Result (K) =
+      |                                                                    ^~~~~~~~~~~~
+  122 |               Ordered_Component (Local, Degree, Nodes, Indices, J + 1, K)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Result (K) = Ordered_Component (Local, Degree, Nodes, Indices, J + 1, K)
+--> mj-flex_interpolation.adb:121:65
+  121 |             pragma Loop_Invariant (Static => (for all K in Axis => Result (K) =
+      |                                                                    ^~~~~~~~~~~~
+  122 |               Ordered_Component (Local, Degree, Nodes, Indices, J + 1, K)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:122:12
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:122:64
+
+ info: initialization of "Result" proved
+--> mj-flex_interpolation.ads:118:06
+
+ info: data dependencies proved
+--> mj-flex_interpolation.ads:119:11
+
+ info: index check proved
+--> mj-flex_interpolation.ads:122:21
+
+ info: index check proved
+--> mj-flex_interpolation.ads:123:50
+
+ info: index check proved
+--> mj-flex_interpolation.ads:123:59
+
+ medium: postcondition might fail, cannot prove Result (K) in -2.0e14 .. 2.0e14
+--> mj-flex_interpolation.ads:124:49
+  124 |           Post => (Static => (for all K in Axis => Result (K) in -2.0e14 .. 2.0e14
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_interpolation.ads:125:32
+Summary logged in /var/tmp/sparkling-recovery-flex-interpolation3-20261003/proof/Interpolate/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 106.7 s, peak group RSS 224 MB

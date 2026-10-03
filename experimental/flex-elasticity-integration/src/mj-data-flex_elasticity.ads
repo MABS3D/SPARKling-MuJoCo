@@ -1,5 +1,6 @@
 with MJ.External_Forces;
 with MJ.Flex_Elastic_Kernels;
+with MJ.Flex_Ancestors;
 
 -- Explicit contact-free flex entry. Owns compiled topology and material data;
 -- uses the existing rigid Model/Data dynamics, actuators, fluids and Euler.
@@ -8,6 +9,7 @@ package MJ.Data.Flex_Elasticity with SPARK_Mode is
    Max_Vertices : constant := 4096;
    Max_Edges : constant := 4096;
    Max_Elements : constant := 4096;
+   Max_Edge_Entries : constant := Max_Edges * Max_Dofs;
    type Engine is limited private;
    --  The force model owns only compiled flex data. A constrained child can
    --  evaluate it on the Simulation created from the same compiled model.
@@ -29,6 +31,16 @@ package MJ.Data.Flex_Elasticity with SPARK_Mode is
       Position : Real_Array (1 .. Npos);
       Length, Velocity : Real_Array (1 .. Nedge);
    end record;
+   type Edge_Jacobian_Trace (Nedge, Slots : Natural) is record
+      Valid : Boolean := False;
+      Rowadr, Rownnz : Int_Array (1 .. Nedge);
+      Columns : Int_Array (1 .. Slots);
+      Values : Real_Array (1 .. Slots);
+   end record;
+   function Edge_Jacobians (Model : Force_Model) return Edge_Jacobian_Trace
+     with Global => null;
+   function Edge_Jacobians (E : Engine) return Edge_Jacobian_Trace
+     with Global => null;
    function Ready (E : Engine) return Boolean with Global => null;
    function State (E : Engine) return Real_Array with Global => null;
    function Complete_State (E : Engine) return Real_Array with Global => null;
@@ -51,11 +63,8 @@ package MJ.Data.Flex_Elasticity with SPARK_Mode is
 private
    package K renames MJ.Flex_Elastic_Kernels;
    subtype Index is Natural range 0 .. Max_Vertices - 1;
-   type Columns is array (Natural range 0 .. Max_Dofs - 1) of Natural;
-   type Chain is record
-      Count : Natural range 0 .. Max_Dofs := 0;
-      Col : Columns := [others => 0];
-   end record;
+   subtype Columns is MJ.Flex_Ancestors.Columns;
+   subtype Chain is MJ.Flex_Ancestors.Chain;
    type Vertex is record
       Body_Id, Dofadr, Dofnum : Natural := 0;
       Simple : Boolean := False;
@@ -67,6 +76,8 @@ private
    type Edge is record
       Vert : Four_Indices := [0, 0, -1, -1];
       Rest : Nonneg_Tier0 := 0.0;
+      Weight : Nonneg_Tier0 := 0.0;
+      Rowadr, Rownnz : Natural := 0;
       Rigid, Bending : Boolean := False;
       B : Bending_Metric := [others => 0.0];
       Ancestors : Chain;
@@ -81,6 +92,7 @@ private
       Dim : Natural range 1 .. 3 := 1;
       First_Vertex, Nvert, First_Edge, Nedge, First_Element, Nelem : Natural := 0;
       Stretch, Rigid : Boolean := False;
+      Edge_Equality : Natural range 0 .. 2 := 0;
       Damping, Edge_Stiffness, Edge_Damping : Nonneg_Tier0 := 0.0;
    end record;
    type Vertex_Array is array (Integer range <>) of Vertex;
@@ -88,7 +100,10 @@ private
    type Element_Array is array (Integer range <>) of Element;
    type Flex_Array is array (Integer range <>) of Flex;
    type Vector_Array is array (Integer range <>) of Vector;
-   type Storage (Last_Flex, Last_Vertex, Last_Edge, Last_Element, Last_Dof : Integer) is record
+   type Edge_Value_Array is array (Integer range <>) of Tier2_Real;
+   type Edge_Length_Array is array (Integer range <>) of Nonneg_Tier0;
+   type Storage (Last_Flex, Last_Vertex, Last_Edge, Last_Element, Last_Dof,
+                 Last_Edge_Entry : Integer) is record
       Nb : Natural := 0;
       Nf : Natural := Last_Flex + 1;
       Nvert : Natural := Last_Vertex + 1;
@@ -100,11 +115,31 @@ private
       Edges : Edge_Array (0 .. Last_Edge) := [others => <>];
       Elements : Element_Array (0 .. Last_Element) := [others => <>];
       Positions, Offsets, Spring_Vertex, Damper_Vertex : Vector_Array (0 .. Last_Vertex) := [others => Zero];
-      Length, Velocity : Real_Array (0 .. Last_Edge) := [others => 0.0];
+      Length : Edge_Length_Array (0 .. Last_Edge) := [others => 0.0];
+      Velocity : Real_Array (0 .. Last_Edge) := [others => 0.0];
+      Edge_Columns : Int_Array (0 .. Last_Edge_Entry) := [others => 0];
+      Edge_J : Edge_Value_Array (0 .. Last_Edge_Entry) := [others => 0.0];
       Spring, Damper : Real_Array (0 .. Last_Dof) := [others => 0.0];
       Valid : Boolean := False;
    end record;
    type Storage_Access is access Storage;
+   --  Immutable topology carried from admission to the row producer. This is
+   --  a proof predicate, not another per-step validation scan.
+   function Edge_Layout_Shape (S : Storage) return Boolean is
+     (S.Nf = S.Flexes'Length and then S.Nf <= Max_Flexes
+      and then S.Nedge = S.Edges'Length and then S.Nedge <= Max_Edges
+      and then S.Nv <= Max_Dofs
+      and then S.Edge_Columns'Length <= Max_Edge_Entries)
+     with Ghost, Global => null;
+   function Edge_Layout_Valid (S : Storage) return Boolean is
+     (Edge_Layout_Shape (S)
+      and then (for all F of S.Flexes =>
+        F.First_Edge <= S.Nedge and then F.Nedge <= S.Nedge-F.First_Edge)
+      and then (for all C of S.Edges => C.Rownnz <= S.Nv
+        and then C.Rowadr <= S.Edge_Columns'Length
+        and then C.Rownnz <= S.Edge_Columns'Length-C.Rowadr)
+      and then (for all Column of S.Edge_Columns => Column in 0 .. S.Nv-1))
+     with Ghost, Global => null;
    type Force_Model is limited record
       S : Storage_Access := null;
    end record;

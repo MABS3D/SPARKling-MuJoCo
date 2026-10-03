@@ -1,0 +1,53 @@
+--- a/experimental/constrained-step/src/mj-data-constrained.ads
++++ b/experimental/constrained-step/src/mj-data-constrained.ads
+@@ -72,6 +72,13 @@
+                    External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads)
+      with Post => (Static => (if Result /= Success then Complete_State (E) = Complete_State (E)'Old));
+ private
++   --  Child force producers can own activation/control while sharing D.
++   procedure Create_Core (M : in out MJ.Models.Model; E : in out Engine;
++                          Result : out Status; Dynamics_Only : Boolean)
++     with Post => M.Opt.Disableflags = M.Opt.Disableflags'Old
++       and then M.Flg_Adhesion = M.Flg_Adhesion'Old
++       and then (if Result = Success then Ready (E));
++   procedure Generate_Contacts (E : in out Engine; Result : out Status);
+    --  Shared stages for child contact producers. The ordinary entry retains
+    --  its own admission and collision dispatch.
+    procedure Assemble (E : in out Engine; Result : out Status);
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -70,6 +70,12 @@
+    end Parameters;
+ 
+    procedure Create (M : in out MJ.Models.Model; E : in out Engine; Result : out Status) is
++   begin
++      Create_Core (M, E, Result, Dynamics_Only => False);
++   end Create;
++
++   procedure Create_Core (M : in out MJ.Models.Model; E : in out Engine;
++                          Result : out Status; Dynamics_Only : Boolean) is
+       Original_Flags : constant Integer := M.Opt.Disableflags;
+       Original_Adhesion : constant Boolean := M.Flg_Adhesion;
+       Shapes : Scene.Geometry_Array (0 .. Max_G - 1);
+@@ -201,7 +207,11 @@
+       -- This entry owns the contact-dependent transmission; restore the
+       -- exclusively borrowed feature flag on every exit.
+       M.Flg_Adhesion := False;
+-      MJ.Data.Create (M, E.D, Result);
++      if Dynamics_Only then
++         MJ.Data.Create_Dynamics (M, E.D, Result);
++      else
++         MJ.Data.Create (M, E.D, Result);
++      end if;
+       M.Flg_Adhesion := Original_Adhesion;
+       E.Has_Adhesion := False;
+       if Result = Success then
+@@ -223,7 +233,7 @@
+          M.Flg_Adhesion := Original_Adhesion;
+          M.Opt.Disableflags := Original_Flags;
+          MJ.Constrained_Assets.Release (E.Assets); raise;
+-   end Create;
++   end Create_Core;
+ 
+    procedure Free (E : in out Engine; Result : out Status) is
+    begin

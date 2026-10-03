@@ -9,6 +9,13 @@ package body MJ.Collision_Scene with SPARK_Mode is
      (MJ.Rigid_Detector.BVH_Leaf_Tests (S.Search));
    function Initialized (S : Scene) return Boolean is (S.Ready);
    function Geom_Count (S : Scene) return Count is (S.N);
+   function Type_Number (G : Geometry) return Natural is
+     (if G.Terrain then 1
+      elsif G.Solid.Kind = Primitive then
+        (if G.Solid.Rigid.Kind = Plane then 0 else Shape_Kind'Pos (G.Solid.Rigid.Kind)+1)
+      else 7);
+   function Contact_Type (S : Scene; G : Geom_Id) return Natural is
+     (Type_Number (S.Geometries (G)));
    function Selected_Count (S : Scene) return Natural is (S.Candidates.Pairs.Length);
    function Generation_Count (S : Scene) return Natural is (S.Calls);
 
@@ -153,6 +160,10 @@ package body MJ.Collision_Scene with SPARK_Mode is
       if Result /= Success then return; end if;
       for I in 0 .. S.Candidates.Pairs.Length-1 loop
          Geoms := S.Candidates.Pairs.Items (I); A := Geoms.First; B := Geoms.Second;
+         if Type_Number (S.Geometries (A)) > Type_Number (S.Geometries (B)) then
+            declare Temp : constant Geom_Id := A; begin A := B; B := Temp; end;
+            Geoms := (A, B);
+         end if;
          --  These dispatch-table entries are empty in MuJoCo 3.14 as well.
          if (S.Geometries (A).Terrain and S.Geometries (B).Terrain)
            or else (S.Geometries (A).Terrain and then S.Geometries (B).Solid.Kind = Primitive

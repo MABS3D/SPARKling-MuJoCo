@@ -1,0 +1,17 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -214,10 +214,14 @@
+              and then C.Vert (Q) = VA+Vertex_Data (Vertex_Dataadr+Q)
+              and then C.Vert (Q) in VA .. VA+N-1 else C.Vert (Q) = C.Vert'Loop_Entry (Q))));
+       end loop;
++      pragma Assert (Static => (for all Q in 0 .. Dim =>
++        Vertex_Data (Vertex_Dataadr+Q) in 0 .. N-1));
+       for J in 0 .. EdA-1 loop
+          V := Edge_Data (Edge_Dataadr+J);
+          if V not in 0 .. Nedge-1 then return; end if;
+          C.Edges (J) := EA+V;
++         pragma Loop_Invariant (Static => (for all Q in 0 .. Dim =>
++           Vertex_Data (Vertex_Dataadr+Q) in 0 .. N-1));
+          pragma Loop_Invariant (Static => (for all Q in C.Edges'Range =>
+            (if Q <= J then Edge_Data (Edge_Dataadr+Q) in 0 .. Nedge-1
+              and then C.Edges (Q) = EA+Edge_Data (Edge_Dataadr+Q)

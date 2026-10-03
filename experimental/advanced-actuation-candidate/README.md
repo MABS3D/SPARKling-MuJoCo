@@ -10,7 +10,7 @@ Il candidato usa ora buffer CSR dimensionati e riutilizzati dal chiamante:
 numerici verificati. La parità della simulazione completa e la dimostrazione
 formale globale restano aperte. L’adapter [advanced-step](../advanced-step/README.md) collega ora PID/DC/SO3 e
 trasmissioni joint/SO3-site a Model/Data e al movimento Euler, con808/808
-traiettorie verificate nella ripresa del3ottobre. La composizione completa resta
+traiettorie verificate nella ripresa del 3 ottobre. La composizione completa resta
 pendente; i numeri storici sotto sono riferiti ai propri hash, non alla pipeline
 attuale.
 
@@ -204,3 +204,15 @@ del toolchain e degli estratti C sono registrati negli esiti.
    aggregata ancora non misurata.**
 
 Licenza e attribuzione: [LICENSE](LICENSE), [NOTICE](NOTICE).
+
+Il progetto usa ora le unità comuni di `../../src`, inclusa `MJ.Trigonometry`,
+con una sola copia compilata. Per una closure isolata che contiene quelle unità
+in `base`, impostare `ACTUATION_BASE_SOURCE=base`; i vecchi manifest con copie
+locali restano attribuiti esclusivamente ai rispettivi snapshot.
+
+Ripresa Expmap del 3 ottobre: il helper Cosine comune corregge i piccoli angoli.
+Sulla closure terms3, validation/release passano 2222/2222 casi bitwise mirati
+e 4836/4836 nel corpus completo. I minimi del modello FP e del chiamante
+Expmap sono chiusi; whole geometry e accuratezza dei primitivi rimangono
+obblighi distinti. Le ricevute, incluse prove fallite e boundary standard,
+sono in `evidence/recovery-expmap-20261003`.

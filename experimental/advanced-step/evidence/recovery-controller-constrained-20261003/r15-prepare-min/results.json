@@ -1,0 +1,109 @@
+[
+  {
+    "label": "Prepare",
+    "exit": 1,
+    "seconds": 135.6098200460001,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-components1-r15-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-controller_dynamics.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--steps=0",
+      "--memlimit=900",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-controller_dynamics.adb:5",
+      "--no-inlining"
+    ],
+    "stack_mb": 64,
+    "proof_checks": 4,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 36,
+        "check_file": "mj-data-controller_dynamics.ads",
+        "check_line": 6,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 18773,
+                "time": 1.3221
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-data-controller_dynamics.ads",
+        "how_proved": "prover",
+        "line": 6,
+        "message": {
+          "text": "postcondition might fail, cannot prove Inputs_Bounded (D)"
+        },
+        "msg_id": 5,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "coverage": true,
+    "verified": false
+  }
+]

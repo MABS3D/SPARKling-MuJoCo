@@ -1,0 +1,101 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:21:37
+
+ info: initialization of "Terms" proved
+--> mj-flex_shell_node_weights.adb:22:07
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:25:10
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:25:37
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:27:12
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:27:37
+
+ info: initialization check proved
+--> mj-flex_shell_node_weights.adb:27:59
+      + in value of subprogram parameter after the call at mj-flex_shell_node_weights.adb:27
+
+ medium: precondition might fail, cannot prove X.Weight in Weight_Value
+--> mj-flex_shell_node_weights.adb:28:12
+   28 |             SW.Accumulate (R, Terms, Visited);
+      |             ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:30:12
+
+ info: index check proved
+--> mj-flex_shell_node_weights.adb:30:31
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:30:39
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:31:10
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:31:28
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:31:41
+
+ info: implicit aspect Always_Terminates on "After_Node" has been proved, subprogram will terminate
+--> mj-flex_shell_node_weights.ads:32:13
+
+ info: data dependencies proved
+--> mj-flex_shell_node_weights.ads:35:11
+
+ info: range check proved
+--> mj-flex_shell_node_weights.ads:36:75
+
+ info: range check proved
+--> mj-flex_shell_node_weights.ads:40:66
+
+ medium: postcondition might fail, cannot prove After_Node'Result = (if Weight < 1.0e-5 then E elsif SW.Inside (G, Unflat (G, Index)) then SW.Fold (E, SW.Model_Terms (G, Unflat (G, Index), Bodies, Signed (Weight, Sgn)), 26, Visited) else SW.After (E, (Bodies (Index), Signed (Weight, Sgn)), Visited))
+--> mj-flex_shell_node_weights.ads:41:19
+   41 |             and then After_Node'Result =
+      |                      ^~~~~~~~~~~~~~~~~~~
+      :
+   46 |                else SW.After (E, (Bodies (Index), Signed (Weight, Sgn)), Visited)));
+      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:43:33
+
+ medium: precondition might fail, cannot prove X.Weight in Weight_Value
+--> mj-flex_shell_node_weights.ads:44:17
+   44 |                  SW.Fold (E, SW.Model_Terms (G, Unflat (G, Index), Bodies, Signed (Weight, Sgn)),
+      |                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   45 |                    26, Visited)
+      |                    ~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:44:29
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:44:46
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:44:73
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:46:20
+
+ info: index check proved
+--> mj-flex_shell_node_weights.ads:46:40
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:46:48
+Summary logged in /var/tmp/sparkling-recovery-shell-node-weights1-20261003/proof/After_Node/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 41.1 s, peak group RSS 267 MB

@@ -38,9 +38,13 @@ def main():
            'bvh-transitive','bvh-enclose','bvh-axis','bvh-contains','bvh-overlap','bvh-sphere','bvh-union','flow']
     topology_scopes = {
         'bvh-work': 'Work_Fits', 'bvh-schedule': 'Schedule', 'bvh-set-bounds': 'Set_Bounds',
-        'bvh-topology': 'Topology_Valid', 'bvh-valid': 'Valid',
+        'bvh-enclosing-lemma': 'Lemma_Enclosing',
+        'bvh-refitted-lemma': 'Lemma_Refitted',
+        'bvh-topology': 'Topology_Valid', 'bvh-valid': 'Valid', 'bvh-traversable': 'Traversable',
         'bvh-refit-shaped': 'Refit_Shaped', 'bvh-build': 'Build',
         'bvh-refit': 'Refit', 'bvh-push': 'Push', 'bvh-emit': 'Emit',
+        'bvh-prepare-bounded': 'Prepare_Bounded', 'bvh-prepare': 'Prepare',
+        'bvh-oriented': 'Oriented_Overlap',
         'bvh-traverse': 'Traverse', 'bvh-whole': None,
     }
     ap.add_argument('--scope',action='append',choices=names + list(topology_scopes),
@@ -133,7 +137,7 @@ def main():
                         '--checks-as-errors=on']
                 if subp:
                     opts += ['--limit-subp=mj-bvh.adb:' + str(line_of('mj-bvh.adb', subp))]
-                run(name, opts, required=False, seconds=180)
+                run(name, opts, required=False, seconds=900 if name == 'bvh-whole' else 180)
         manifest['complete']=True
     finally:
         save_manifest()

@@ -116,6 +116,12 @@ package body MJ.Data.Sleeping with SPARK_Mode is
          Saved_V : constant Real_Array := E.D.State.Qvel.all;
          Saved_Time : constant Nonneg_Tier0 := E.D.Clock;
          Saved_S : constant SM.State := E.S.all;
+         Saved_Frame : constant Boolean := E.Have_Frame;
+         Saved_Pos : constant Positions (0 .. E.D.Nb-1) :=
+           (if E.Have_Frame then E.Previous_Pos (0 .. E.D.Nb-1) else [others => Zero]);
+         Saved_Quat : constant Orientations (0 .. E.D.Nb-1) :=
+           (if E.Have_Frame then E.Previous_Quat (0 .. E.D.Nb-1)
+            else [others => Identity_Quaternion]);
          V, A, Applied : SM.K.Samples (0 .. E.D.Nv-1);
          Loads : SM.K.Samples (0 .. 6*E.D.Nb-1) := (others => 0.0);
          Changed : SM.Flags (0 .. Integer (E.M.Nt)-1) := (others => False);
@@ -123,7 +129,13 @@ package body MJ.Data.Sleeping with SPARK_Mode is
          procedure Rollback is
          begin
             E.D.State.Qpos.all := Saved_Q; E.D.State.Qvel.all := Saved_V;
-            E.D.Clock := Saved_Time; E.S.all := Saved_S; Invalidate (E.D.Cache);
+            E.D.Clock := Saved_Time; E.S.all := Saved_S;
+            --  Capture precedes wake/forward/integration. Restore its history
+            --  too, so a failed step cannot consume a user's pose perturbation.
+            E.Previous_Pos (0 .. E.D.Nb-1) := Saved_Pos;
+            E.Previous_Quat (0 .. E.D.Nb-1) := Saved_Quat;
+            E.Have_Frame := Saved_Frame;
+            Invalidate (E.D.Cache);
          end Rollback;
       begin
          MJ.Data.Kinematics.Update (E.D, Result); if Result /= Success then return; end if;

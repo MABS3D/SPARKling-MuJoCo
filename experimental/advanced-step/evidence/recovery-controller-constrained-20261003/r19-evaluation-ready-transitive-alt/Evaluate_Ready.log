@@ -1,0 +1,140 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-evaluation-ready-transitive-alt-min-r19-20261003/Evaluate_Ready/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 145.5 s, peak group RSS 803 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control-evaluation.adb:7:76
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:12:54
+
+ medium: postcondition might fail
+--> mj-data-advanced_control-evaluation.adb:13:27
+   13 |           Post => (Static => Output_Count (E) = Output_Count (E)'Old);
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:37:41
+
+ medium: assertion might fail
+--> mj-data-advanced_control-evaluation.adb:41:32
+   41 |          pragma Assert (Static => Activation (E)'Length = E.Na);
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail, cannot prove upper bound for Activation (E)'Length
+--> mj-data-advanced_control-evaluation.adb:41:46
+   41 |          pragma Assert (Static => Activation (E)'Length = E.Na);
+      |                                   ~~~~~~~~~~~~~~^~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:42:26
+
+ medium: precondition might fail, cannot prove A = B
+--> mj-data-advanced_control-evaluation.adb:49:27
+   49 |             MJ.Smooth_Kernels.Equal_Transitive
+      |             ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+   50 |               (Activation (E), Before_Activation, Initial_Activation);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail, cannot prove A = B
+--> mj-data-advanced_control-evaluation.adb:51:27
+   51 |             MJ.Smooth_Kernels.Equal_Transitive
+      |             ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+   52 |               (Inputs (E), Before_Controller_Inputs, Initial_Controller_Inputs);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:54:32
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:55:32
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:61:27
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:61:41
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:62:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:63:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:70:23
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:71:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:72:27
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:78:36
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:78:42
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:78:51
+
+ info: length check proved
+--> mj-data-advanced_control-evaluation.adb:78:55
+
+ medium: pointer dereference check might fail
+--> mj-data-advanced_control-evaluation.adb:78:82
+   78 |             if Result = Success then E.Acc (0 .. D.Nv-1) := D.Dynamics.Acceleration.all; E.Valid := True; end if;
+      |                                                             ~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached time limit before completing the proof
+
+ medium: length check might fail
+--> mj-data-advanced_control-evaluation.adb:78:82
+   78 |             if Result = Success then E.Acc (0 .. D.Nv-1) := D.Dynamics.Acceleration.all; E.Valid := True; end if;
+      |                                                             ~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + reason for check: array must be of the appropriate length
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail, cannot prove A = B
+--> mj-data-advanced_control-evaluation.adb:79:27
+   79 |             MJ.Smooth_Kernels.Equal_Transitive
+      |             ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+   80 |               (Activation (E), Before_Activation, Initial_Activation);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail, cannot prove A = B
+--> mj-data-advanced_control-evaluation.adb:81:27
+   81 |             MJ.Smooth_Kernels.Equal_Transitive
+      |             ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+   82 |               (Inputs (E), Before_Controller_Inputs, Initial_Controller_Inputs);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:84:32
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:85:32
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:87:52
+   87 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:87:86
+   87 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:87:103
+   87 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                   ~~~~~~~^~~~~~~~~~~~~~~~
+gnatprove: unproved check messages considered as errors

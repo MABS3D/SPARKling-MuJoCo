@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Differential tests against actual MuJoCo 3.14 C and verbatim private helpers."""
 from pathlib import Path
-import ctypes as ct,hashlib,json,math,os,random,subprocess,itertools
+import argparse,ctypes as ct,hashlib,json,math,os,random,subprocess,itertools
 import mujoco,numpy as np
 here=Path(__file__).resolve().parents[1]
 assert mujoco.__version__=='3.14.0'
@@ -267,7 +267,13 @@ for trial in range(80):
  activation=b.mj_nextActivation(m._address,d._address,0,0,float(d.act_dot[0])) if trial%2 else d.act[0]
  add('C-muscle-force',20,[d.actuator_length[0],d.actuator_velocity[0],*m.actuator_lengthrange[0],m.actuator_acc0[0],activation,*m.actuator_gainprm[0],*m.actuator_biasprm[0]],[d.actuator_force[0]])
 # Run exact same cases with checks enabled and optimized build.
-mode=os.environ.get('ACTUATION_MODE','validation');exe=Path('/var/tmp/sparkling-actuators-20260930/build')/mode/'bin/actuation_probe'
+mode=os.environ.get('ACTUATION_MODE','validation')
+parser=argparse.ArgumentParser();parser.add_argument('--binary',type=Path);parser.add_argument('--out',type=Path);parser.add_argument('--source-manifest',type=Path);args=parser.parse_args()
+compiled_manifest=None
+if args.source_manifest:
+ compiled_manifest=json.loads(args.source_manifest.read_text());compiled_root=args.source_manifest.parent/'source'
+ assert all(hashlib.sha256((compiled_root/n).read_bytes()).hexdigest()==h for n,h in compiled_manifest['sources'].items()),'compiled closure changed'
+exe=args.binary or Path('/var/tmp/sparkling-actuators-20260930/build')/mode/'bin/actuation_probe'
 input_text=''.join(str(code)+' '+' '.join(format(x,'.17e') for x in a)+'\n' for _,code,a,_,_,_ in cases)
 r=subprocess.run([str(exe)],input=input_text,text=True,capture_output=True)
 if r.returncode:raise RuntimeError(r.stderr+'\n'+r.stdout[-2000:])
@@ -282,6 +288,17 @@ for i,((label,code,a,expected,atol,rtol),line) in enumerate(zip(cases,lines)):
   if not math.isfinite(x) or err>atol+rtol*abs(y):
    fail.append({'case':i,'label':label,'field':k,'got':x,'expected':y,'inputs':a[:95]});break
 result={'passed':not fail,'cases':len(cases),'mode':mode,'seed':3140930,'counts':labels,'max_scaled_error':maxerr,'failures':fail[:20],'input_sha256':hashlib.sha256(input_text.encode()).hexdigest(),'expected_sha256':hashlib.sha256(json.dumps([x[3] for x in cases]).encode()).hexdigest(),'sources':{str(f.relative_to(here)):hashlib.sha256(f.read_bytes()).hexdigest() for d in ['src','base','tests'] for f in (here/d).iterdir() if f.is_file()},'binary_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'reference_library_sha256':hashlib.sha256(lib.read_bytes()).hexdigest()}
-(here/'evidence'/('numerics-'+mode+'.json')).write_text(json.dumps(result,indent=2)+'\n')
+result['driver_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+if compiled_manifest is not None:
+ result['sources']=compiled_manifest['sources']
+ result['source_root']=str(compiled_root)
+ result['source_manifest_sha256']=hashlib.sha256(args.source_manifest.read_bytes()).hexdigest()
+else:
+ result['sources']={str(f.relative_to(here)):hashlib.sha256(f.read_bytes()).hexdigest() for d in ['src','tests'] for f in (here/d).iterdir() if f.is_file()}
+ for name in ['mj.ads','mj-types.ads','mj-trigonometry.ads','mj-trigonometry.adb']:
+  result['sources']['../../src/'+name]=hashlib.sha256((here.parents[1]/'src'/name).read_bytes()).hexdigest()
+destination=args.out or here/'evidence'/('numerics-'+mode+'.json')
+destination.parent.mkdir(parents=True,exist_ok=True)
+destination.write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({k:v for k,v in result.items() if k not in ['sources','failures']},indent=2));print(json.dumps(fail[:8],indent=2))
 raise SystemExit(0 if not fail else 1)

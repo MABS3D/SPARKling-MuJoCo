@@ -1,0 +1,35 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-normalize-min2-20261003/Normalize/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 17.4 s, peak group RSS 164 MB
+ info: precondition proved
+--> mj-actuator_geometry.adb:20:28
+
+ info: initialization of "Inv" proved
+--> mj-actuator_geometry.adb:22:07
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:25:19
+
+ info: precondition proved
+--> mj-actuator_geometry.adb:26:17
+
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-actuator_geometry.adb:27:26
+
+ info: precondition proved
+--> mj-actuator_geometry.adb:27:40
+
+ info: implicit aspect Always_Terminates on "Normalize" has been proved, subprogram will terminate
+--> mj-actuator_geometry.ads:48:13
+
+ medium: postcondition might fail
+--> mj-actuator_geometry.ads:49:41
+   49 |         Pre => Bounded (Q,1.0e10), Post => Bounded (Normalize'Result,1.0e26);
+      |                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-actuator_geometry.ads:50:58
+gnatprove: unproved check messages considered as errors

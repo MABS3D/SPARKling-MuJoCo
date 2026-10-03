@@ -1,0 +1,83 @@
+{
+  "checked_utc": "2026-10-03T01:47:30.869039+00:00",
+  "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fmujoco+mj_maxContact&per_page=100",
+  "response": {
+    "total_count": 1,
+    "incomplete_results": false,
+    "items": [
+      {
+        "url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471",
+        "repository_url": "https://api.github.com/repos/google-deepmind/mujoco",
+        "labels_url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471/labels{/name}",
+        "comments_url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471/comments",
+        "events_url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471/events",
+        "html_url": "https://github.com/google-deepmind/mujoco/pull/3471",
+        "id": 5121428246,
+        "node_id": "PR_kwDOF98pkM79kp7s",
+        "number": 3471,
+        "title": "Do not set geom_dataid for primitives fitted to a mesh.",
+        "user": {
+          "login": "robertomeroni",
+          "id": 150194833,
+          "node_id": "U_kgDOCPPKkQ",
+          "avatar_url": "https://avatars.githubusercontent.com/u/150194833?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/robertomeroni",
+          "html_url": "https://github.com/robertomeroni",
+          "followers_url": "https://api.github.com/users/robertomeroni/followers",
+          "following_url": "https://api.github.com/users/robertomeroni/following{/other_user}",
+          "gists_url": "https://api.github.com/users/robertomeroni/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/robertomeroni/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/robertomeroni/subscriptions",
+          "organizations_url": "https://api.github.com/users/robertomeroni/orgs",
+          "repos_url": "https://api.github.com/users/robertomeroni/repos",
+          "events_url": "https://api.github.com/users/robertomeroni/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/robertomeroni/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "labels": [],
+        "state": "closed",
+        "locked": false,
+        "assignees": [],
+        "milestone": null,
+        "comments": 0,
+        "created_at": "2026-08-11T14:47:22Z",
+        "updated_at": "2026-09-24T16:24:50Z",
+        "closed_at": "2026-09-24T16:24:50Z",
+        "assignee": null,
+        "author_association": "CONTRIBUTOR",
+        "issue_field_values": [],
+        "type": null,
+        "active_lock_reason": null,
+        "draft": false,
+        "pull_request": {
+          "url": "https://api.github.com/repos/google-deepmind/mujoco/pulls/3471",
+          "html_url": "https://github.com/google-deepmind/mujoco/pull/3471",
+          "diff_url": "https://github.com/google-deepmind/mujoco/pull/3471.diff",
+          "patch_url": "https://github.com/google-deepmind/mujoco/pull/3471.patch",
+          "merged_at": "2026-09-24T16:24:50Z"
+        },
+        "body": "A geom whose type is a primitive but which carries a mesh= attribute is fitted to that mesh, and XMLreference states that the compiled mjModel holds \"no reference to the mesh used for fitting\". mjCGeom::Compile clears meshname_ to that end, but IndexAssets runs afterwards and re-resolves geom->mesh from spec_meshname_, which is untouched, so CopyTree stored the mesh id anyway.\r\n\r\nThe stale id defeats the geom_dataid == -1 early-out in mjc_PlaneConvex, which then walks the fitting mesh and can emit up to 3 contacts into a buffer that mj_maxContact sized at 1 for a plane-ellipsoid pair: SIGSEGV, or the driver's own contact-count check firing. Saving and reloading the same model produced a correct geom_dataid of -1, so the two paths disagreed.\r\n\r\nGate the assignment on the geom type, matching the guard used elsewhere in the compiler (user_model.cc:5317). Fitted primitives now also render as primitives: texture repeat is no longer divided by geom size, and mjVIS_MESHBVH no longer draws the fitting mesh's bounding volumes on them.",
+        "reactions": {
+          "url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471/reactions",
+          "total_count": 0,
+          "+1": 0,
+          "-1": 0,
+          "laugh": 0,
+          "hooray": 0,
+          "confused": 0,
+          "heart": 0,
+          "rocket": 0,
+          "eyes": 0
+        },
+        "timeline_url": "https://api.github.com/repos/google-deepmind/mujoco/issues/3471/timeline",
+        "performed_via_github_app": null,
+        "state_reason": null,
+        "score": 1.0
+      }
+    ],
+    "search_type": "lexical"
+  }
+}

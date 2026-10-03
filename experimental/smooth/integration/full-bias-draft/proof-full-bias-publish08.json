@@ -1,0 +1,104 @@
+{
+  "unit": "mj-data-forces_phase.adb",
+  "subprogram": "Publish_Full_Bias",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-recovery-dynamics-20261003-19/full-bias-reference08/source/experimental/constrained-step/constrained.gpr",
+    "-u",
+    "mj-data-forces_phase.adb",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=5",
+    "--memlimit=800",
+    "--steps=0",
+    "--proof=per_check",
+    "--no-inlining",
+    "-j1",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--report=all",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-forces_phase.adb:1108"
+  ],
+  "code": 0,
+  "seconds": 132.1084720439976,
+  "complete_unit": false,
+  "passed": false,
+  "runner_sha256": "ac088e6b3b4bb2abb449986d154a56159985a44aeb3ffed5fa3202a07b90c5f4",
+  "checks": 15,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-composite_weights.ads",
+      "how_proved": "trivial",
+      "line": 8,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-composite_weights.ads",
+      "how_proved": "trivial",
+      "line": 8,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 45,
+      "file": "mj-manifold_math.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 45,
+      "file": "mj-manifold_math.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "snapshot_hashes_unchanged": true,
+  "checkout_matches_snapshot": false
+}

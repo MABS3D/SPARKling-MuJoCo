@@ -1,0 +1,78 @@
+[
+  {
+    "label": "Publish",
+    "exit": 1,
+    "seconds": 107.01697319199957,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-publication-isolated-r14-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-controller_forces.adb",
+      "--prover=cvc5,z3",
+      "--timeout=5",
+      "--steps=0",
+      "--memlimit=700",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-controller_forces.adb:2",
+      "--no-inlining"
+    ],
+    "stack_mb": 64,
+    "proof_checks": 35,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 32,
+        "check_file": "mj-data-controller_forces.adb",
+        "check_line": 36,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Unknown\n(unknown + incomplete)",
+                "steps": 14662,
+                "time": 1.0818
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-data-controller_forces.adb",
+        "how_proved": "prover",
+        "line": 36,
+        "message": {
+          "text": "assertion might fail"
+        },
+        "msg_id": 23,
+        "rule": "VC_ASSERT",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "coverage": true,
+    "verified": false
+  }
+]

@@ -1,0 +1,113 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-flex_interpolation.adb:49:39
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:50:46
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:50:55
+
+ info: division check proved
+--> mj-flex_interpolation.adb:50:59
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:50:64
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:51:46
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:51:55
+
+ info: division check proved
+--> mj-flex_interpolation.adb:51:60
+
+ info: division check proved
+--> mj-flex_interpolation.adb:51:65
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:52:46
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:52:55
+
+ info: division check proved
+--> mj-flex_interpolation.adb:52:59
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:56:27
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:56:32
+
+ medium: overflow check might fail, cannot prove upper bound for (I0 * Ny * Nz + I1 * Nz)
+--> mj-flex_interpolation.adb:56:37
+   56 |          return Natural ((I0 * Ny * Nz + I1 * Nz) + I2);
+      |                          ~~~~~~~~~~~~~~^~~~~~~~~~
+      + reason for check: result of addition must fit in a 64-bits machine integer
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-flex_interpolation.adb:56:42
+
+ medium: overflow check might fail, cannot prove upper bound for (I0 * Ny * Nz + I1 * Nz) + I2
+--> mj-flex_interpolation.adb:56:48
+   56 |          return Natural ((I0 * Ny * Nz + I1 * Nz) + I2);
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+      + reason for check: result of addition must fit in a 64-bits machine integer
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail, cannot prove upper bound for (I0 * Ny * Nz + I1 * Nz) + I2
+--> mj-flex_interpolation.adb:56:48
+   56 |          return Natural ((I0 * Ny * Nz + I1 * Nz) + I2);
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+      + reason for check: result of addition must be convertible to the target type of the conversion
+      + provers reached time limit before completing the proof
+
+ info: implicit aspect Always_Terminates on "Index_Of" has been proved, subprogram will terminate
+--> mj-flex_interpolation.ads:63:13
+
+ info: data dependencies proved
+--> mj-flex_interpolation.ads:65:11
+
+ medium: postcondition might fail, cannot prove Int64 (Index_Of'Result) < Node_Count (Cells, Degree)
+--> mj-flex_interpolation.ads:69:16
+   69 |           Post => Int64 (Index_Of'Result) < Node_Count (Cells, Degree)
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:71:30
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:71:39
+
+ info: division check proved
+--> mj-flex_interpolation.ads:71:43
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:73:29
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:73:38
+
+ info: division check proved
+--> mj-flex_interpolation.ads:73:43
+
+ info: division check proved
+--> mj-flex_interpolation.ads:73:59
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:75:29
+
+ info: overflow check proved
+--> mj-flex_interpolation.ads:75:38
+
+ info: division check proved
+--> mj-flex_interpolation.ads:75:42
+Summary logged in /var/tmp/sparkling-recovery-flex-interpolation2-20261003/proof/Index_Of/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 81.8 s, peak group RSS 159 MB

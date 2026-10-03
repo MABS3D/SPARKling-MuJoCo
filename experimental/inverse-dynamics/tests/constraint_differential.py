@@ -10,6 +10,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('--binary', type=Path, required=True)
     p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--jacobian', choices=['dense','sparse'], default='sparse')
     args = p.parse_args()
     binary = args.binary.resolve()
     out = args.out.resolve(); out.mkdir(parents=True, exist_ok=False); os.chdir(out)
@@ -21,6 +22,8 @@ def main():
     inputs, expected, names, rowtypes = [], [], [], set()
     for name, xml in module.fixtures():
         m = mujoco.MjModel.from_xml_string(xml.replace('jacobian="dense"', 'jacobian="sparse"'))
+        m.opt.jacobian = (mujoco.mjtJacobian.mjJAC_DENSE if args.jacobian=='dense'
+                          else mujoco.mjtJacobian.mjJAC_SPARSE)
         d = mujoco.MjData(m)
         if name == 'joint_limit': d.qpos[0] = .08
         d.qvel[:] = rng.uniform(-.5, .5, m.nv)
@@ -38,10 +41,16 @@ def main():
                     contact = d.contact[int(d.efc_id[i])]
                     dim = int(contact.dim) if int(contact.efc_address) == i else 0
                     mu, friction = float(contact.mu), np.array(contact.friction)
-                width, adr = int(d.efc_J_rownnz[i]), int(d.efc_J_rowadr[i])
+                if args.jacobian=='dense':
+                    dense=d.efc_J.reshape(d.nefc,m.nv)[i]
+                    indices=np.flatnonzero(dense); values=dense[indices]
+                else:
+                    width, adr = int(d.efc_J_rownnz[i]), int(d.efc_J_rowadr[i])
+                    indices=d.efc_J_colind[adr:adr+width];values=d.efc_J[adr:adr+width]
+                width=len(indices)
                 fields.extend([kind, dim, width, d.efc_R[i], d.efc_D[i], d.efc_frictionloss[i], mu,
                                *friction, d.efc_aref[i]])
-                for k in range(width): fields.extend([d.efc_J_colind[adr+k], d.efc_J[adr+k]])
+                for k in range(width): fields.extend([indices[k], values[k]])
             fields.extend(acc)
             inputs.append(' '.join(format(float(x), '.17g') for x in fields))
             expected.append((d.efc_force.copy(), d.qfrc_constraint.copy()))
@@ -52,6 +61,7 @@ def main():
     lib = ctypes.CDLL(str(library)); D=ctypes.c_double; I=ctypes.c_int
     lib.mju_mulMatVecSparse.argtypes=[ctypes.POINTER(D)]*3+[I]+[ctypes.POINTER(I)]*4
     lib.mju_mulMatVecSparse.restype=None
+    lib.mju_dot.argtypes=[ctypes.POINTER(D),ctypes.POINTER(D),I];lib.mju_dot.restype=D
     for label, values, acc in [
         ('lane-order',[1e8,1,-1e8,1],[1e8,1,1e8,1]),
         ('zero-compression',[1e8,0,1,-1e8,1],[1e8,123,1,1e8,1]),
@@ -62,6 +72,7 @@ def main():
         packed=(D*count)(*(values[i] for i in indices)); vector=(D*len(acc))(*acc)
         dot=(D*1)();nnz=(I*1)(count);adr=(I*1)(0);cols=(I*count)(*indices)
         lib.mju_mulMatVecSparse(dot,packed,vector,1,nnz,adr,cols,None)
+        if args.jacobian=='dense': dot[0]=lib.mju_dot((D*len(values))(*values),vector,len(values))
         fields=[len(acc),1,0,1,count,1.,1.,0.,1.,1.,1.,1.,1.,1.,0.]
         for i in indices:fields.extend([i,values[i]])
         fields.extend(acc);inputs.append(' '.join(format(float(x),'.17g') for x in fields))
@@ -69,7 +80,7 @@ def main():
         names.append(('C-equality-'+label,0));rowtypes.add(0)
     encoded = str(len(inputs)) + '\n' + '\n'.join(inputs) + '\n'
     (out/'input.txt').write_text(encoded)
-    run = subprocess.run([str(binary)],input=encoded,text=True,capture_output=True,timeout=120)
+    run = subprocess.run([str(binary),args.jacobian],input=encoded,text=True,capture_output=True,timeout=120)
     (out/'output.txt').write_text(run.stdout+run.stderr)
     if run.returncode: raise RuntimeError(run.stdout[-2000:])
     lines = run.stdout.splitlines(); assert len(lines) == 2*len(expected)
@@ -83,7 +94,7 @@ def main():
                 raise AssertionError((name,sample,key,actual,want))
             maxima[key] = max(maxima.get(key,0.),float(delta.max(initial=0.)))
             comparisons += want.size
-    result = dict(reference=mujoco.__version__,cases=len(expected),comparisons=comparisons,
+    result = dict(reference=mujoco.__version__,jacobian=args.jacobian,cases=len(expected),comparisons=comparisons,
                   max_abs_error=maxima,row_types=sorted(rowtypes),
                   binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
                   provider_sha256=hashlib.sha256(data).hexdigest(),

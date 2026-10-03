@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                                          Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                                .           .          .
+Flow Dependencies                 .         .                                                .           .          .
+Initialization                    .         .                                                .           .          .
+Non-Aliasing                      .         .                                                .           .          .
+Run-time Checks                  52         .                                        52 (CVC5)           .          .
+Assertions                        .         .                                                .           .          .
+Functional Contracts              9         .    9 (CVC5 42%, Trivial 17%, Z3 39%, altergo 3%)           .          .
+LSP Verification                  .         .                                                .           .          .
+Termination                       .         .                                                .           .          .
+Concurrency                       .         .                                                .           .          .
+---------------------------------------------------------------------------------------------------------------------
+Total                            62    1 (2%)                                         61 (98%)           .          .
+
+
+max steps used for successful proof: 13952
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.adb:189:16: postcondition proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 1 subprograms and packages out of 1 analyzed
+  MJ.BVH.Set_Bounds at mj-bvh.adb:178 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (61 checks)

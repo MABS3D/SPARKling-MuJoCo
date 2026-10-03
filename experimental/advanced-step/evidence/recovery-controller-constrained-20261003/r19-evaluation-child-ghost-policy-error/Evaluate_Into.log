@@ -1,0 +1,42 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+guarded: elapsed 2.3 s, peak group RSS 68 MB
+ error: incompatible ghost policies in effect
+--> mj-data-advanced_control-evaluation.adb:38:29
+   38 |          pragma Assert (E.Na = Initial_Na);
+      |                                ^~~~~~~~~~
+      + "Initial_Na" declared at line 27 with ghost policy "Ignore"
+   27 |          Initial_Na : constant Natural := E.Na with Ghost => Static;
+      |          ^
+      + "Initial_Na" used at line 38 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-data-advanced_control-evaluation.adb:39:39
+   39 |          pragma Assert (Activation (E) = Initial_Activation);
+      |                                          ^~~~~~~~~~~~~~~~~~
+      + "Initial_Activation" declared at line 28 with ghost policy "Ignore"
+   28 |          Initial_Activation : constant Real_Array := Activation (E) with Ghost => Static;
+      |          ^
+      + "Initial_Activation" used at line 39 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-data-advanced_control-evaluation.adb:45:39
+   45 |          pragma Assert (Activation (E) = Initial_Activation);
+      |                                          ^~~~~~~~~~~~~~~~~~
+      + "Initial_Activation" declared at line 28 with ghost policy "Ignore"
+   28 |          Initial_Activation : constant Real_Array := Activation (E) with Ghost => Static;
+      |          ^
+      + "Initial_Activation" used at line 45 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-data-advanced_control-evaluation.adb:46:46
+   46 |          pragma Assert (Activation (E)'Length = Initial_Activation'Length);
+      |                                                 ^~~~~~~~~~~~~~~~~~
+      + "Initial_Activation" declared at line 28 with ghost policy "Ignore"
+   28 |          Initial_Activation : constant Real_Array := Activation (E) with Ghost => Static;
+      |          ^
+      + "Initial_Activation" used at line 46 with ghost policy "Check"
+gnatprove: error during generation of Global contracts

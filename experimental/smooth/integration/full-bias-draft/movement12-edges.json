@@ -1,0 +1,86 @@
+[
+  {
+    "profile": "validation",
+    "code": 0,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "1600",
+      "--min-free-mb",
+      "12000",
+      "--timeout",
+      "120",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/source/experimental/constrained-step/tests/activation_edges.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/build/validation/bin/constrained_activation_edges",
+      "--capacity-binary",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/build/validation/bin/constrained_edges",
+      "--out",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12-validation-edges"
+    ],
+    "results": [
+      {
+        "case": "early-False",
+        "passed": true,
+        "output": "activation atomicity PASS\n"
+      },
+      {
+        "case": "early-True",
+        "passed": true,
+        "output": "activation atomicity PASS\n"
+      },
+      {
+        "case": "capacity-activation",
+        "nv": 102,
+        "rows": 272,
+        "passed": true,
+        "output": "capacity atomicity PASS\n"
+      }
+    ]
+  },
+  {
+    "profile": "release",
+    "code": 0,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "1600",
+      "--min-free-mb",
+      "12000",
+      "--timeout",
+      "120",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/source/experimental/constrained-step/tests/activation_edges.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/build/release/bin/constrained_activation_edges",
+      "--capacity-binary",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12/build/release/bin/constrained_edges",
+      "--out",
+      "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12-release-edges"
+    ],
+    "results": [
+      {
+        "case": "early-False",
+        "passed": true,
+        "output": "activation atomicity PASS\n"
+      },
+      {
+        "case": "early-True",
+        "passed": true,
+        "output": "activation atomicity PASS\n"
+      },
+      {
+        "case": "capacity-activation",
+        "nv": 102,
+        "rows": 272,
+        "passed": true,
+        "output": "capacity atomicity PASS\n"
+      }
+    ]
+  }
+]

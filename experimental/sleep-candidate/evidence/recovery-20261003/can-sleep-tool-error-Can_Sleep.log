@@ -1,0 +1,73 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-sleep-can-sleep-20261003/build/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 4.5 s, peak group RSS 160 MB
++===========================GNAT BUG DETECTED==============================+
+| 1.0 (spark) GCC error:                                                   |
+| could not add file /var/tmp/sparkling-services-sleep-can-sleep-2026100   |
+|    3/build/validation/obj/gnatprove/ada___mj__sleep_manager__can_sleep.gnat-json to the session:
+File /var/tmp/sparkling-services-sleep-can-sleep-20261003/build/validation/obj/gnatprove/ada___mj__sleep_manager__can_sleep.mlw, marked by (* ERROR: *)(...):
+unbound function or predicate symbol 'Float64.copy_sign'                   |
+| No source file position information available                            |
+| Compiling /var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_manager.adb|
+| Please submit a bug report at the SPARK issue tracker:                   |
+| https://github.com/AdaCore/spark2014 .                                   |
+| Use a subject line meaningful to you and us to track the bug.            |
+| Include the entire contents of this bug box in the report.               |
+| Include the exact command that you entered.                              |
+| Also include sources listed below.                                       |
++==========================================================================+
+
+Please include these source files with error report
+Note that list may not be accurate in some cases,
+so please double check that the problem can still
+be reproduced with the set of files listed.
+Consider also -gnatd.n switch (see debug.adb).
+
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_manager.adb
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_manager.ads
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj.ads
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-types.ads
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_kernels.ads
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_cycles.ads
+/var/tmp/sparkling-services-sleep-can-sleep-20261003/src/mj-sleep_bytes.ads
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:75:62
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:78:52
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:82:55
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:138:19
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:139:19
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:142:16
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:147:66
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:155:13
+
+ info: analyzing call to "Sleep_Trees" in context
+--> mj-sleep_manager.adb:226:13
+
+ info: analyzing call to "Sleep_Trees" in context
+--> mj-sleep_manager.adb:233:44
+
+ info: implicit aspect Always_Terminates on "Can_Sleep" has been proved, subprogram will terminate
+--> mj-sleep_manager.ads:119:13
+
+ info: data dependencies proved
+--> mj-sleep_manager.ads:120:46
+
+compilation abandoned
+gnatprove: error during flow analysis and proof

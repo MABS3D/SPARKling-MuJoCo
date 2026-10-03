@@ -1,0 +1,139 @@
+[
+  {
+    "label": "Evaluate_Into",
+    "exit": 1,
+    "seconds": 116.76359085700096,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-evaluation-child13-r19-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-advanced_control-evaluation.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--steps=0",
+      "--memlimit=900",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-advanced_control-evaluation.adb:79",
+      "--no-inlining"
+    ],
+    "stack_mb": 64,
+    "driver_sha256": "6d1ca2e57bd939192039f242a13fe89cfe08e2ad28a98e7f75f55c3166e4f360",
+    "sources_unchanged_after": true,
+    "proof_checks": 3,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 30,
+        "check_file": "mj-data-advanced_control-evaluation.adb",
+        "check_line": 72,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 32093,
+                "time": 3.96971
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 33832,
+                "time": 4.30283
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 17525,
+                "time": 2.20492
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 18536,
+                "time": 2.28595
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 17525,
+                "time": 2.23695
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "prover",
+        "line": 77,
+        "message": {
+          "text": "postcondition might fail, cannot prove Activation (E) = Activation (E)'Old"
+        },
+        "msg_id": 4,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "coverage": true,
+    "verified": false
+  }
+]

@@ -1,0 +1,587 @@
+[
+  {
+    "label": "Evaluate_Into",
+    "exit": 1,
+    "seconds": 172.03262527900006,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-constrained-r13-r2-20261003/source/experimental/advanced-step/constrained_advanced.gpr",
+      "-u",
+      "mj-data-advanced_control.adb",
+      "--prover=cvc5,z3",
+      "--timeout=2",
+      "--steps=0",
+      "--memlimit=700",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-advanced_control.adb:415",
+      "--no-inlining"
+    ],
+    "proof_checks": 20,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 77,
+        "check_file": "mj-data-advanced_control.adb",
+        "check_line": 421,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 2051,
+                "time": 0.125094
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 77,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "prover",
+        "line": 421,
+        "message": {
+          "text": "range check might fail, cannot prove upper bound for External'Length"
+        },
+        "msg_id": 4,
+        "rule": "VC_RANGE_CHECK",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 20,
+        "check_file": "mj-data-advanced_control.adb",
+        "check_line": 430,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 20,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "prover",
+        "line": 430,
+        "message": {
+          "text": "precondition might fail, cannot prove Stable_Ready (D)"
+        },
+        "msg_id": 17,
+        "rule": "VC_PRECONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 30,
+        "check_file": "mj-data-advanced_control.adb",
+        "check_line": 409,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 30,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "prover",
+        "line": 409,
+        "message": {
+          "text": "postcondition might fail, cannot prove Output_Count (E) = Output_Count (E)'Old"
+        },
+        "msg_id": 26,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 52,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "flow",
+        "line": 433,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 0,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 86,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "flow",
+        "line": 433,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 1,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 103,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "flow",
+        "line": 433,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 2,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-actuator_transmissions.ads",
+        "how_proved": "trivial",
+        "line": 30,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "coverage": true,
+    "verified": false
+  },
+  {
+    "label": "Evaluate",
+    "exit": 1,
+    "seconds": 88.20896315900245,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-constrained-r13-r2-20261003/source/experimental/advanced-step/constrained_advanced.gpr",
+      "-u",
+      "mj-data-advanced_control.adb",
+      "--prover=cvc5,z3",
+      "--timeout=2",
+      "--steps=0",
+      "--memlimit=700",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-advanced_control.adb:435",
+      "--no-inlining"
+    ],
+    "proof_checks": 1,
+    "flow_checks": 2,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 27,
+        "check_file": "mj-data-advanced_control.ads",
+        "check_line": 50,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 2
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 27,
+        "entity": 1,
+        "file": "mj-data-advanced_control.ads",
+        "how_proved": "prover",
+        "line": 50,
+        "message": {
+          "text": "postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old"
+        },
+        "msg_id": 3,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-actuator_transmissions.ads",
+        "how_proved": "trivial",
+        "line": 30,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "coverage": true,
+    "verified": false
+  }
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "mode": "validation",
+    "command": [
+      "python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2800",
+      "--min-free-mb",
+      "700",
+      "--timeout",
+      "180",
+      "--",
+      "gprbuild",
+      "-p",
+      "-j1",
+      "-P",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/source/actuation.gpr"
+    ],
+    "exit": 0,
+    "seconds": 4.329836218999844
+  },
+  {
+    "mode": "validation",
+    "label": "exact",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/tests/expmap_exact.py",
+      "--binary",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/build/validation/bin/actuation_probe",
+      "--out",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/exact-validation"
+    ],
+    "exit": 0
+  },
+  {
+    "mode": "validation",
+    "label": "differential",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/build/validation/bin/actuation_probe",
+      "--out",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/differential-validation.json",
+      "--source-manifest",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/manifest.json"
+    ],
+    "exit": 0
+  },
+  {
+    "mode": "release",
+    "command": [
+      "python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2800",
+      "--min-free-mb",
+      "700",
+      "--timeout",
+      "180",
+      "--",
+      "gprbuild",
+      "-p",
+      "-j1",
+      "-P",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/source/actuation.gpr"
+    ],
+    "exit": 0,
+    "seconds": 1.8192029380006716
+  },
+  {
+    "mode": "release",
+    "label": "exact",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/tests/expmap_exact.py",
+      "--binary",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/build/release/bin/actuation_probe",
+      "--out",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/exact-release"
+    ],
+    "exit": 0
+  },
+  {
+    "mode": "release",
+    "label": "differential",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-actuation-candidate/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/build/release/bin/actuation_probe",
+      "--out",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/differential-release.json",
+      "--source-manifest",
+      "/var/tmp/sparkling-services-geometry-expmap-terms3-20261003/manifest.json"
+    ],
+    "exit": 0
+  }
+]

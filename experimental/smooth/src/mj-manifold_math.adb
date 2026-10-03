@@ -8,27 +8,20 @@ package body MJ.Manifold_Math with SPARK_Mode is
    begin
       return Unit_Quaternion (Q);
    end Already_Normalized;
-   function Normalized (Q : Quaternion) return Quaternion is
-      R : Quaternion := Q;
-      Ok : Boolean;
-      N : Real;
+   function Normalization_Component (X, N : Real) return Real is
    begin
-      if Already_Normalized (Q) then return Q; end if;
-      --  The threshold is the norm, not the largest component: four small
-      --  components can still form a nonvanishing MuJoCo quaternion.
-      if Scale_Of (Q) < Min_Val then
-         N := E.Sqrt (((Q (0)*Q (0) + Q (1)*Q (1)) + Q (2)*Q (2)) + Q (3)*Q (3));
-         if N < Min_Val then return Identity_Quaternion; end if;
-         declare
-            subtype Tiny is Real range -Min_Val .. Min_Val;
-            Q0 : constant Tiny := Q (0); Q1 : constant Tiny := Q (1);
-            Q2 : constant Tiny := Q (2); Q3 : constant Tiny := Q (3);
-         begin
-            R := [Q0/Min_Val, Q1/Min_Val, Q2/Min_Val, Q3/Min_Val];
+      return X * (1.0 / N);
+   end Normalization_Component;
+   function Normalized (Q : Quaternion) return Quaternion is
+      N : constant Real := Normalization_Length (Q);
+   begin
+      if N < Min_Val then return Identity_Quaternion;
+      elsif abs (N - 1.0) <= Min_Val then return Q;
+      else
+         declare Inverse : constant Real := 1.0/N; begin
+            return [Q (0)*Inverse, Q (1)*Inverse, Q (2)*Inverse, Q (3)*Inverse];
          end;
       end if;
-      Normalize (R, Ok);
-      return (if Ok then R else Identity_Quaternion);
    end Normalized;
    function Rotation_Increment (V : Vector; H : Nonneg_Tier0) return Quaternion is
       N : constant Real := E.Sqrt ((V (0)*V (0) + V (1)*V (1)) + V (2)*V (2));
@@ -37,15 +30,15 @@ package body MJ.Manifold_Math with SPARK_Mode is
       R : Quaternion;
    begin
       if N >= Min_Val then
-         Direction := [V (0)/N, V (1)/N, V (2)/N];
-      else
-         --  normalize3 returns zero for a vector shorter than mjMINVAL.
-         Angle := 0.0;
+         declare Inverse : constant Real := 1.0 / N; begin
+            Direction := [V (0)*Inverse, V (1)*Inverse, V (2)*Inverse];
+         end;
       end if;
+      if Angle = 0.0 then return Identity_Quaternion; end if;
       declare
          Sine : constant Real := E.Sin (0.5 * Angle);
       begin
-         R := [E.Cos (0.5 * Angle), Sine*Direction (0),
+         R := [MJ.Trigonometry.Cosine (0.5 * Angle), Sine*Direction (0),
                Sine*Direction (1), Sine*Direction (2)];
       end;
       return R;

@@ -1,0 +1,47 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -182,18 +182,21 @@
+        and then (if Stiffness_Index >= 0 then Stiffness_Index <= Stiffness'Length-21)),
+      Post => (Static => (if Result = Success then
+        (for all J in C.Vert'Range =>
+-          (if J <= Dim then C.Vert (J) = VA+Vertex_Data (Vertex_Dataadr+J)
++          (if J <= Dim then Vertex_Data (Vertex_Dataadr+J) in 0 .. N-1
++           and then C.Vert (J) = VA+Vertex_Data (Vertex_Dataadr+J)
+            and then C.Vert (J) in VA .. VA+N-1 else C.Vert (J) = C.Vert'Old (J)))
+        and then (for all J in C.Edges'Range =>
+           (if J < (if Dim = 2 then 3 else 6) then
+-            C.Edges (J) = EA+Edge_Data (Edge_Dataadr+J)
++            Edge_Data (Edge_Dataadr+J) in 0 .. Nedge-1
++            and then C.Edges (J) = EA+Edge_Data (Edge_Dataadr+J)
+             and then C.Edges (J) in EA .. EA+Nedge-1 else C.Edges (J) = C.Edges'Old (J)))
+        and then (if Stiffness_Index >= 0 then
+          (for all R in 0 .. (if Dim = 2 then 2 else 5) =>
+            (for all C2 in R .. (if Dim = 2 then 2 else 5) =>
+              C.M (R, C2) = Stiffness (Stiffness_Index+
+                (Packed_Row_First ((if Dim = 2 then 3 else 6), R)+C2-R))
+-             and then C.M (C2, R) = C.M (R, C2)))
++             and then C.M (C2, R) = Stiffness (Stiffness_Index+
++               (Packed_Row_First ((if Dim = 2 then 3 else 6), R)+C2-R))))
+          and then (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
+            (if A >= (if Dim = 2 then 3 else 6) or else B >= (if Dim = 2 then 3 else 6)
+             then C.M (A, B) = C.M'Old (A, B))))
+@@ -207,7 +210,8 @@
+          if V not in 0 .. N-1 then return; end if;
+          C.Vert (J) := VA+V;
+          pragma Loop_Invariant (Static => (for all Q in C.Vert'Range =>
+-           (if Q <= J then C.Vert (Q) = VA+Vertex_Data (Vertex_Dataadr+Q)
++           (if Q <= J then Vertex_Data (Vertex_Dataadr+Q) in 0 .. N-1
++             and then C.Vert (Q) = VA+Vertex_Data (Vertex_Dataadr+Q)
+              and then C.Vert (Q) in VA .. VA+N-1 else C.Vert (Q) = C.Vert'Loop_Entry (Q))));
+       end loop;
+       for J in 0 .. EdA-1 loop
+@@ -215,7 +219,8 @@
+          if V not in 0 .. Nedge-1 then return; end if;
+          C.Edges (J) := EA+V;
+          pragma Loop_Invariant (Static => (for all Q in C.Edges'Range =>
+-           (if Q <= J then C.Edges (Q) = EA+Edge_Data (Edge_Dataadr+Q)
++           (if Q <= J then Edge_Data (Edge_Dataadr+Q) in 0 .. Nedge-1
++             and then C.Edges (Q) = EA+Edge_Data (Edge_Dataadr+Q)
+              and then C.Edges (Q) in EA .. EA+Nedge-1 else C.Edges (Q) = C.Edges'Loop_Entry (Q))));
+       end loop;
+       if Stiffness_Index >= 0 then

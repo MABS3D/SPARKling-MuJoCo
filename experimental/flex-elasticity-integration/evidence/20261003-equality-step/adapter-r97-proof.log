@@ -1,0 +1,262 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Result" proved
+--> mj-data-flex_elasticity-equalities.adb:8:07
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:19:42
+   19 |          declare F : Flex renames S.Flexes (Flex_Id); begin
+      |                                             ^~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: add precondition (Flex_Id in 0 .. Last_Flex) to subprogram at line 5
+    5 |       procedure Append_Storage
+      |                 ^
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:23:19
+   23 |             for I in F.First_Edge .. F.First_Edge+F.Nedge-1 loop
+      |                      ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: add precondition (Flex_Id in 0 .. Last_Flex) to subprogram at line 5
+    5 |       procedure Append_Storage
+      |                 ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:23:35
+
+ medium: overflow check might fail, cannot prove upper bound for F.First_Edge+F.Nedge
+--> mj-data-flex_elasticity-equalities.adb:23:47
+   23 |             for I in F.First_Edge .. F.First_Edge+F.Nedge-1 loop
+      |                                      ~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: add precondition (F.First_Edge <= Integer'Last - F.Nedge) to subprogram at line 5
+    5 |       procedure Append_Storage
+      |                 ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:23:48
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-flex_elasticity-equalities.adb:23:58
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:24:47
+   24 |                declare C : Edge renames S.Edges (I); begin
+      |                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:25:28
+   25 |                   if Include (C) then
+      |                               ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:28:24
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:28:36
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:28:39
+
+ medium: range check might fail, cannot prove lower bound for S.Edge_Columns (C.Rowadr+K-1)
+--> mj-data-flex_elasticity-equalities.adb:28:52
+   28 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                      ~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:28:67
+
+ medium: overflow check might fail, cannot prove upper bound for C.Rowadr+K
+--> mj-data-flex_elasticity-equalities.adb:28:75
+   28 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                                      ~~~~~~~~^~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:28:77
+   28 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                                      ~~~~~~~~~~^~
+      + reason for check: result of subtraction must be a valid index into the array
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for Needed_Rows+1
+--> mj-data-flex_elasticity-equalities.adb:34:45
+   34 |                      Needed_Rows := Needed_Rows+1;
+      |                                     ~~~~~~~~~~~^~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: loop at line 23 should mention Needed_Rows in a loop invariant
+   23 |             for I in F.First_Edge .. F.First_Edge+F.Nedge-1 loop
+      |                                                             ^
+      + provers reached time limit before completing the proof
+
+ medium: overflow check might fail, cannot prove upper bound for Needed_Entries+C.Rownnz
+--> mj-data-flex_elasticity-equalities.adb:35:51
+   35 |                      Needed_Entries := Needed_Entries+C.Rownnz;
+      |                                        ~~~~~~~~~~~~~~^~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: loop at line 23 should mention Needed_Entries in a loop invariant
+   23 |             for I in F.First_Edge .. F.First_Edge+F.Nedge-1 loop
+      |                                                             ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:35:52
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:42:19
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:42:35
+
+ info: overflow check proved
+--> mj-data-flex_elasticity-equalities.adb:42:47
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:42:48
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-data-flex_elasticity-equalities.adb:42:58
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:43:47
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:44:28
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:47:24
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:47:36
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:47:39
+
+ medium: range check might fail, cannot prove lower bound for S.Edge_Columns (C.Rowadr+K-1)
+--> mj-data-flex_elasticity-equalities.adb:47:52
+   47 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                      ~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:47:67
+
+ medium: overflow check might fail, cannot prove upper bound for C.Rowadr+K
+--> mj-data-flex_elasticity-equalities.adb:47:75
+   47 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                                      ~~~~~~~~^~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:47:77
+   47 |                           [for K in 1 .. C.Rownnz => S.Edge_Columns (C.Rowadr+K-1)];
+      |                                                                      ~~~~~~~~~~^~
+      + reason for check: result of subtraction must be a valid index into the array
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:49:24
+
+ info: range check proved
+--> mj-data-flex_elasticity-equalities.adb:49:36
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:49:39
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:49:61
+
+ medium: overflow check might fail, cannot prove upper bound for C.Rowadr+K
+--> mj-data-flex_elasticity-equalities.adb:49:69
+   49 |                           [for K in 1 .. C.Rownnz => S.Edge_J (C.Rowadr+K-1)];
+      |                                                                ~~~~~~~~^~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:49:71
+   49 |                           [for K in 1 .. C.Rownnz => S.Edge_J (C.Rowadr+K-1)];
+      |                                                                ~~~~~~~~~~^~
+      + reason for check: result of subtraction must be a valid index into the array
+      + possible fix: subprogram at line 5 should mention S in a precondition
+    5 |       procedure Append_Storage
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: initialization of "Added" proved
+--> mj-data-flex_elasticity-equalities.adb:50:22
+
+ medium: precondition might fail, cannot prove B.Rows <= B.Row_Cap
+--> mj-data-flex_elasticity-equalities.adb:52:43
+   52 |                         MJ.Equality_Flex_Rows.Append
+      |                         ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+   53 |                           (Rows, Eq_Id, Chain, Values, S.Length (I), C.Rest, Added);
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_assembly.ads:65
+      + possible fix: loop at line 42 should mention Rows in a loop invariant
+   42 |             for I in F.First_Edge .. F.First_Edge+F.Nedge-1 loop
+      |                                                             ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:53:63
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:53:67
+
+ medium: assertion might fail
+--> mj-data-flex_elasticity-equalities.adb:55:47
+   55 |                         pragma Assert (Static => Added = CA.Success);
+      |                                                  ^~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity-equalities.adb:56:37
+   56 |                         Responses (Rows.Rows) :=
+      |                                    ~~~~^~~~~
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:57:35
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:58:79
+
+ info: index check proved
+--> mj-data-flex_elasticity-equalities.adb:58:83
+Summary logged in /var/tmp/sparkling-flex-equality-adapter-20261003-r97-storage/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 200.0 s, peak group RSS 477 MB

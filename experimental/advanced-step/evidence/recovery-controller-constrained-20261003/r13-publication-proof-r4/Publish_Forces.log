@@ -1,0 +1,60 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-publication-proof-r13-r4-20261003/Publish_Forces/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 122.7 s, peak group RSS 1690 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control.adb:409:51
+
+ medium: postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old
+--> mj-data-advanced_control.adb:412:14
+  412 |             and State_Values (D) = State_Values (D)'Old
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control.adb:417:41
+
+ info: assertion proved
+--> mj-data-advanced_control.adb:431:32
+
+ info: assertion proved
+--> mj-data-advanced_control.adb:432:32
+
+ info: range check proved
+--> mj-data-advanced_control.adb:434:23
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:437:21
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:438:21
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:439:21
+
+ info: length check proved
+--> mj-data-advanced_control.adb:441:27
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control.adb:441:27
+
+ info: length check proved
+--> mj-data-advanced_control.adb:441:31
+
+ info: length check proved
+--> mj-data-advanced_control.adb:441:34
+
+ info: assertion proved
+--> mj-data-advanced_control.adb:444:32
+
+ info: assertion proved
+--> mj-data-advanced_control.adb:445:32
+
+ medium: assertion might fail, cannot prove Array_Bounded (D.Dynamics.Actuator, 1.0e50)
+--> mj-data-advanced_control.adb:446:32
+  446 |          pragma Assert (Static => Caches_Bounded (D));
+      |                                   ^~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:724
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

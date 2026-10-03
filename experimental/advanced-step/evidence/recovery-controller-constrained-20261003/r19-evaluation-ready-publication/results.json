@@ -1,0 +1,259 @@
+[
+  {
+    "label": "Evaluate_Ready",
+    "exit": 1,
+    "seconds": 204.37302562999685,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-evaluation-child11-r19-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-advanced_control-evaluation.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--steps=0",
+      "--memlimit=900",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-advanced_control-evaluation.adb:20",
+      "--no-inlining"
+    ],
+    "stack_mb": 64,
+    "driver_sha256": "6d1ca2e57bd939192039f242a13fe89cfe08e2ad28a98e7f75f55c3166e4f360",
+    "sources_unchanged_after": true,
+    "proof_checks": 17,
+    "flow_checks": 2,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 32,
+        "check_file": "mj-data-advanced_control-evaluation.adb",
+        "check_line": 68,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "prover",
+        "line": 68,
+        "message": {
+          "text": "assertion might fail"
+        },
+        "msg_id": 20,
+        "rule": "VC_ASSERT",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 27,
+        "check_file": "mj-data-advanced_control-evaluation.adb",
+        "check_line": 13,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4415,
+                "time": 0.312833
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Valid",
+                "steps": 4415,
+                "time": 0.36353
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 10040,
+                "time": 0.799555
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 10108,
+                "time": 0.800894
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 10037,
+                "time": 0.821747
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "prover",
+        "line": 18,
+        "message": {
+          "text": "postcondition might fail, cannot prove E.Act = E.Act'Old"
+        },
+        "msg_id": 23,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 52,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "flow",
+        "line": 71,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 0,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 86,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "flow",
+        "line": 71,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 1,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 103,
+        "entity": 1,
+        "file": "mj-data-advanced_control-evaluation.adb",
+        "how_proved": "flow",
+        "line": 71,
+        "message": {
+          "text": "this statement is never reached"
+        },
+        "msg_id": 2,
+        "rule": "DEAD_CODE",
+        "severity": "warning",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "coverage": true,
+    "verified": false
+  }
+]

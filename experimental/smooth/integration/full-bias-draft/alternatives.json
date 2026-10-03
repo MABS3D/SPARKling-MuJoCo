@@ -1,0 +1,49 @@
+{
+  "public_requirement": "Gravity_Force/Velocity_Bias remain available after Evaluate with existing preconditions and values; no new Stale_Results",
+  "reference_two_pass": {
+    "snapshot": "/var/tmp/sparkling-recovery-dynamics-20261003-19/full-bias-reference03",
+    "status": "validation634/634 plus5/6 extreme replay trajectories, old getter output6/6 preserved; publication minimum15closed, caller proof open",
+    "role": "correctness/lifecycle/consumer oracle, not accepted final Step path",
+    "Full_Bias_Value": "read-only full C bias; includes gravity in world cacc",
+    "old_diagnostics": "unchanged producer, getters and bulk availability",
+    "cost": "extra recursive pass; no timing performed"
+  },
+  "lazy_alternative": {
+    "status": "design only, no implementation or proof claim",
+    "physical_step": "one C-ordered RNE publishing Full_Bias",
+    "getter_miss": "pure local calculation without mutation of Simulation, zero placeholders, or new preconditions",
+    "bulk_cache": "optional Compute_Diagnostics plus explicit diagnostic cache; getter falls back when absent",
+    "proof_obligations": [
+      "bounded total calculation for every state admitted by the new physical path",
+      "exact FP relation of diagnostic gravity and velocity-only bias",
+      "old dense/recursive fallback behavior, including Nv < 3",
+      "frame and cache invalidation under state/mocap/input changes",
+      "availability after Evaluate and lifecycle through both constructors/reset/free"
+    ],
+    "domain_observation": "full cacc may satisfy its guard due to cancellation even when separate velocity cacc exceeds the old intermediate guard; this is unresolved proof work, not a permitted runtime refusal",
+    "possible_reuse": "body velocity and per-body delta-cacc can bound pure diagnostics, but extra cache writes/memory and legacy fallback semantics need evaluation"
+  },
+  "consumers": {
+    "dynamics": "Fill_Total and noslip will consume full bias through the verified C-ordered composition",
+    "services": "inverse and finite differences await tested API; owner notified",
+    "diagnostic_clients": "keep old enum and availability"
+  },
+  "not_allowed": [
+    "integrate diagnostic gravity-disabled toggle",
+    "claim universal equality Full_Bias = Velocity_Bias - Gravity_Force",
+    "benchmark as final before compatibility and quiet coordination"
+  ],
+  "private_movement": {
+    "snapshot": "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement12",
+    "status": "validation/release634C+3lifecycle+3activation/capacity each, numeric records identical; minPhysical caller watchdog; cleanup12 14closed6open, publication13 28closed0open4warnings; cleanup13 active",
+    "public_Evaluate": "legacy diagnostics always computed; existing getters/preconditions unchanged",
+    "ordinary_Step": "constrained and smooth Euler use private physical path; one combined RNE traversal",
+    "failure_before_invalidation": "Complete_Diagnostics writes only legacy Gravity/Bias, preserving caller-added passive and physical outputs",
+    "remaining_callers": [
+      "SDF",
+      "flex FE and constrained flex",
+      "advanced controller"
+    ],
+    "timing": "not measured"
+  }
+}

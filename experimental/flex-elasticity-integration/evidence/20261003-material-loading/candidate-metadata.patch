@@ -1,0 +1,114 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -225,6 +225,61 @@
+       Result := Success;
+    end Load_Element;
+ 
++   procedure Load_Flex
++     (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays; F : Natural;
++      C : out Flex; Result : out Status) with
++     Pre => (Static => MJ.Models.Sizes_In_Range (Z)
++       and then MJ.Models.Flex_Layout_OK (Z, G) and then F < Z.Nflex
++       and then Z.Nflexvert <= Max_Vertices and then Z.Nflexedge <= Max_Edges
++       and then Z.Nflexelem <= Max_Elements and then G.Flex_Dim (F) in 1 .. 3),
++     Post => (Static => (if Result = Success then
++       C.Dim = G.Flex_Dim (F)
++       and then C.First_Vertex = G.Flex_Vertadr (F) and then C.Nvert = G.Flex_Vertnum (F)
++       and then C.First_Vertex <= Z.Nflexvert and then C.Nvert <= Z.Nflexvert-C.First_Vertex
++       and then C.First_Edge = G.Flex_Edgeadr (F) and then C.Nedge = G.Flex_Edgenum (F)
++       and then C.First_Edge <= Z.Nflexedge and then C.Nedge <= Z.Nflexedge-C.First_Edge
++       and then C.First_Element = G.Flex_Elemadr (F) and then C.Nelem = G.Flex_Elemnum (F)
++       and then C.First_Element <= Z.Nflexelem and then C.Nelem <= Z.Nflexelem-C.First_Element
++       and then G.Flex_Stiffnessadr (F) >= -1 and then G.Flex_Bendingadr (F) >= -1
++       and then (if G.Flex_Stiffnessadr (F) >= 0 then C.Dim /= 1
++         and then G.Flex_Stiffnessadr (F) <= Z.Nflexstiffness-21*C.Nelem)
++       and then (if G.Flex_Bendingadr (F) >= 0 then C.Dim = 2
++         and then G.Flex_Bendingadr (F) <= Z.Nflexbending-17*C.Nedge)
++       and then C.Rigid = (G.Flex_Rigid (F) /= 0)
++       and then C.Edge_Equality = G.Flex_Edgeequality (F)
++       and then C.Stretch = (G.Flex_Stiffnessadr (F) >= 0 and then C.Nelem > 0
++         and then G.Flex_Stiffness (G.Flex_Stiffnessadr (F)) /= 0.0)
++       and then C.Damping = G.Flex_Damping (F)
++       and then C.Edge_Stiffness = G.Flex_Edgestiffness (F)
++       and then C.Edge_Damping = G.Flex_Edgedamping (F))) is
++      VA : constant Integer := G.Flex_Vertadr (F);
++      EA : constant Integer := G.Flex_Edgeadr (F);
++      TA : constant Integer := G.Flex_Elemadr (F);
++      N : constant Integer := G.Flex_Vertnum (F);
++      Dim : constant Integer := G.Flex_Dim (F);
++      KA : constant Integer := G.Flex_Stiffnessadr (F);
++      BA : constant Integer := G.Flex_Bendingadr (F);
++   begin
++      C := (others => <>);
++      Result := Invalid_Model;
++      if VA < 0 or else N < 0 or else VA > Z.Nflexvert-N
++        or else EA < 0 or else G.Flex_Edgenum (F) < 0 or else EA > Z.Nflexedge-G.Flex_Edgenum (F)
++        or else TA < 0 or else G.Flex_Elemnum (F) < 0 or else TA > Z.Nflexelem-G.Flex_Elemnum (F)
++        or else G.Flex_Damping (F) not in Nonneg_Tier0
++        or else G.Flex_Edgestiffness (F) not in Nonneg_Tier0
++        or else G.Flex_Edgedamping (F) not in Nonneg_Tier0 then return; end if;
++      if G.Flex_Edgeequality (F) not in 0 .. 2 then return; end if;
++      if KA < -1 or else BA < -1 then return; end if;
++      if KA >= 0 and then (Dim = 1 or else KA > Z.Nflexstiffness-21*G.Flex_Elemnum (F)) then return; end if;
++      if BA >= 0 and then (Dim /= 2 or else BA > Z.Nflexbending-17*G.Flex_Edgenum (F)) then return; end if;
++      C := (Dim => Dim, First_Vertex => VA, Nvert => N,
++        First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
++        Rigid => G.Flex_Rigid (F) /= 0, Edge_Equality => G.Flex_Edgeequality (F),
++        Stretch => KA >= 0 and then G.Flex_Elemnum (F) > 0 and then G.Flex_Stiffness (KA) /= 0.0,
++        Damping => G.Flex_Damping (F), Edge_Stiffness => G.Flex_Edgestiffness (F), Edge_Damping => G.Flex_Edgedamping (F));
++      Result := Success;
++   end Load_Flex;
++
+    procedure Load
+      (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays;
+       Bodies : MJ.Models.Body_Arrays; Dofs : MJ.Models.Dof_Arrays;
+@@ -240,24 +295,11 @@
+          -- Compiled flex blocks own disjoint contiguous ranges. Reject gaps
+          -- and overlaps before any frame can observe default topology.
+          if VA /= Next_Vertex or else EA /= Next_Edge or else TA /= Next_Element then return; end if;
+-         if VA < 0 or else N < 0 or else VA > Z.Nflexvert - N
+-           or else EA < 0 or else G.Flex_Edgenum (F) < 0 or else EA > Z.Nflexedge - G.Flex_Edgenum (F)
+-           or else TA < 0 or else G.Flex_Elemnum (F) < 0 or else TA > Z.Nflexelem - G.Flex_Elemnum (F)
+-           or else G.Flex_Damping (F) not in Nonneg_Tier0
+-           or else G.Flex_Edgestiffness (F) not in Nonneg_Tier0
+-           or else G.Flex_Edgedamping (F) not in Nonneg_Tier0 then return; end if;
+-         if G.Flex_Edgeequality (F) not in 0 .. 2 then return; end if;
+-         Next_Vertex := VA + N; Next_Edge := EA + G.Flex_Edgenum (F);
+-         Next_Element := TA + G.Flex_Elemnum (F);
+-         if KA < -1 or else BA < -1 then return; end if;
+-         if KA >= 0 and then (Dim = 1 or else KA > Z.Nflexstiffness - 21 * G.Flex_Elemnum (F)) then return; end if;
+-         if BA >= 0 and then (Dim /= 2 or else BA > Z.Nflexbending - 17 * G.Flex_Edgenum (F)) then return; end if;
+-         S.Flexes (F) := (Dim => Dim, First_Vertex => VA, Nvert => N,
+-           First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
+-           Rigid => G.Flex_Rigid (F) /= 0,
+-           Edge_Equality => G.Flex_Edgeequality (F),
+-           Stretch => KA >= 0 and then G.Flex_Elemnum (F) > 0 and then G.Flex_Stiffness (KA) /= 0.0,
+-           Damping => G.Flex_Damping (F), Edge_Stiffness => G.Flex_Edgestiffness (F), Edge_Damping => G.Flex_Edgedamping (F));
++         Load_Flex (Z, G, F, S.Flexes (F), Result);
++         if Result /= Success then return; end if;
++         Result := Invalid_Model;
++         Next_Vertex := VA+N; Next_Edge := EA+G.Flex_Edgenum (F);
++         Next_Element := TA+G.Flex_Elemnum (F);
+          for I in VA .. VA + N - 1 loop
+             declare
+                B : constant Integer := G.Flex_Vertbodyid (I);
+--- a/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
++++ b/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
+@@ -21,7 +21,7 @@
+     p.add_argument('--analysis-build',type=Path,help='Reuse analysis only for this exact frozen source manifest')
+     p.add_argument('--scope',choices=['chain','storage','model','engine','columns','ranges','rows','admission','load','flow','whole',
+         'factory','release','allocation','loading-whole','loading-flow',
+-        'materials-load','materials-vertex','materials-edge','materials-row-first','materials-metric','materials-element','materials-whole','materials-flow',
++        'materials-load','materials-vertex','materials-edge','materials-row-first','materials-metric','materials-element','materials-flex','materials-whole','materials-flow',
+         *['ancestors-'+s for s in ('last','advance','reverse','count','links','column','unfold-pair','unfold-column','shift','merge','build','whole','flow')]],required=True)
+     a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+     source=a.build.resolve()/'source';manifest=json.loads((a.build/'manifest.json').read_text())
+@@ -52,7 +52,7 @@
+             'count':'Merged_Count','links':'Links_Valid','column':'Descending_Column',
+             'unfold-pair':'Unfold_Pair','unfold-column':'Unfold_Column','shift':'Shift_Suffix','merge':'Merge','build':'Build'}
+         if materials:names={'load':'Load','vertex':'Load_Vertex','edge':'Load_Edge',
+-            'row-first':'Packed_Row_First','metric':'Load_Metric','element':'Load_Element'}
++            'row-first':'Packed_Row_First','metric':'Load_Metric','element':'Load_Element','flex':'Load_Flex'}
+         if scope in names:
+             target_name=names[scope]
+             matches=[i for i,line in enumerate(lines,1) if re.match(r'\s*(?:procedure|function) '+target_name+r'\b',line)]

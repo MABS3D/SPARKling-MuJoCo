@@ -1,0 +1,27 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-prepare-min2-r15-20261003/Prepare/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 176.1 s, peak group RSS 698 MB
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:20:18
+
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:24:18
+
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:27:20
+
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:29:19
+
+ info: initialization of "Result" proved
+--> mj-data-controller_dynamics.ads:4:67
+
+ medium: postcondition might fail, cannot prove Inputs_Bounded (D)
+--> mj-data-controller_dynamics.ads:6:36
+    6 |       pragma Postcondition (Static => Is_Ready (D));
+      |                                       ^~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:854
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

@@ -301,7 +301,7 @@ package body MJ.SDF_Collisions with SPARK_Mode is
                end if;
             end if;
          end loop;
-         if Path = Tree_Flex and L > 0 then
+         if Path in Tree_Flex | Tree_Flex_Zero_Bounds and L > 0 then
             for J in 1 .. L-1 loop if Local_Depths (J) < Local_Depths (Best) then Best := J; end if; end loop;
             if N < Max_Manifold then
                Candidates (N) := Local_Points (Best); Depths (N) := Local_Depths (Best);
@@ -339,10 +339,11 @@ package body MJ.SDF_Collisions with SPARK_Mode is
       while Top > 0 loop
          pragma Loop_Invariant (for all I in 0 .. Top-1 => Stack (I)'Initialized);
          Top := Top-1; Node := Stack (Top);
-         X := Add (Transform (Map.Rotation, Tree.Nodes (Node).Bounds.Center), Map.Position);
+         X := (if Path = Tree_Flex_Zero_Bounds then Map.Position
+               else Add (Transform (Map.Rotation, Tree.Nodes (Node).Bounds.Center), Map.Position));
          Evaluate (P, T, X, False, D, Unused, Result);
          if Result /= Success then M.Length := 0; return; end if;
-         if D < Norm (Tree.Nodes (Node).Bounds.Half) then
+         if D < (if Path = Tree_Flex_Zero_Bounds then 0.0 else Norm (Tree.Nodes (Node).Bounds.Half)) then
             if Tree.Nodes (Node).Item >= 0 then Process (Tree.Nodes (Node).Item);
             else
                Stack (Top) := Tree.Nodes (Node).Left; Stack (Top+1) := Tree.Nodes (Node).Right; Top := Top+2;
@@ -352,7 +353,8 @@ package body MJ.SDF_Collisions with SPARK_Mode is
       end loop;
       for I in 0 .. N-1 loop
          if M.Length = IDs'Length then Result := Capacity_Limit; M.Length := 0; return; end if;
-         Add_Contact (P, T, Candidates (I), Depths (I), PB, Path = Tree_Flex, Global_Points, M, Added, Result);
+         Add_Contact (P, T, Candidates (I), Depths (I), PB,
+           Path in Tree_Flex | Tree_Flex_Zero_Bounds, Global_Points, M, Added, Result);
          if Result /= Success then M.Length := 0; return; end if;
          if Added then IDs (IDs'First+M.Length-1) := Candidate_IDs (I); end if;
       end loop;

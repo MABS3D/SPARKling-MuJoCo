@@ -1,0 +1,87 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-controller-compose-r13-r2-modular-20261003/Evaluate_Into/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 172.0 s, peak group RSS 2029 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control.adb:407:75
+
+ medium: postcondition might fail, cannot prove Output_Count (E) = Output_Count (E)'Old
+--> mj-data-advanced_control.adb:409:30
+  409 |         with Post => (Static => Output_Count (E) = Output_Count (E)'Old
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail, cannot prove upper bound for External'Length
+--> mj-data-advanced_control.adb:421:77
+  421 |          if External'Length /= 0 and then (External'First /= 0 or else External'Length /= D.Nb) then Result := Invalid_Size; return; end if;
+      |                                                                        ~~~~~~~~^~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:423:49
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:424:35
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:425:20
+
+ info: precondition proved
+--> mj-data-advanced_control.adb:426:19
+
+ info: length check proved
+--> mj-data-advanced_control.adb:428:27
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control.adb:428:27
+
+ info: length check proved
+--> mj-data-advanced_control.adb:428:31
+
+ info: range check proved
+--> mj-data-advanced_control.adb:428:35
+
+ info: length check proved
+--> mj-data-advanced_control.adb:428:35
+
+ medium: precondition might fail, cannot prove Stable_Ready (D)
+--> mj-data-advanced_control.adb:430:20
+  430 |          Inertia_Phase.Solve_Acceleration (D, Result, External);
+      |          ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-data.ads:854
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-advanced_control.adb:431:33
+
+ info: index check proved
+--> mj-data-advanced_control.adb:431:39
+
+ info: index check proved
+--> mj-data-advanced_control.adb:431:48
+
+ info: length check proved
+--> mj-data-advanced_control.adb:431:52
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control.adb:431:79
+
+ info: length check proved
+--> mj-data-advanced_control.adb:431:79
+
+ warning: this statement is never reached
+--> mj-data-advanced_control.adb:433:52
+  433 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control.adb:433:86
+  433 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control.adb:433:103
+  433 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                   ~~~~~~~^~~~~~~~~~~~~~~~
+gnatprove: unproved check messages considered as errors

@@ -1,0 +1,175 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -101,11 +101,118 @@
+       Result := Success;
+    end Load_Edge;
+ 
++   --  Row starts in C's ordered upper-triangular packing. Ghost only;
++   --  runtime retains the original sequential counter and stride21.
++   function Packed_Row_First (Width, Row : Integer) return Integer is
++     (case Row is when 0 => 0, when 1 => Width, when 2 => 2*Width-1,
++       when 3 => 3*Width-3, when 4 => 4*Width-6,
++       when 5 => 5*Width-10, when others => 21)
++     with Ghost => Static, Global => null,
++       Pre => Width in 3 | 6 and then Row in 0 .. Width;
++
++   procedure Load_Metric
++     (Values : Real_Array; Address, Width : Natural;
++      M : in out K.Metric; Result : out Status) with
++     Pre => (Static => Values'First = 0
++       and then Int64 (Values'Length) <= Int64 (Integer'Last)
++       and then Width in 3 | 6 and then Address <= Values'Length-21),
++     Post => (Static => (if Result = Success then
++       (for all R in 0 .. 5 => (for all C2 in 0 .. 5 =>
++         (if R < Width and then C2 < Width then
++           M (R, C2) = Values (Address + Packed_Row_First (Width, Integer'Min (R, C2)) + abs (C2-R))
++          else M (R, C2) = M'Old (R, C2)))))) is
++      P : Natural := 0;
++      Initial : constant K.Metric := M with Ghost => Static;
++   begin
++      Result := Invalid_Model;
++      for R in 0 .. Width-1 loop
++         pragma Loop_Invariant (Static => P = Packed_Row_First (Width, R));
++         pragma Loop_Invariant (Static => P in 0 .. 20);
++         pragma Loop_Invariant (Static => (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
++           (if A < Width and then B < Width and then Integer'Min (A, B) < R then
++             M (A, B) = Values (Address + Packed_Row_First (Width, Integer'Min (A, B)) + abs (B-A))
++            else M (A, B) = Initial (A, B)))));
++         for C2 in R .. Width-1 loop
++            if Values (Address+P) not in K.Coefficient then return; end if;
++            M (R, C2) := Values (Address+P);
++            M (C2, R) := M (R, C2);
++            P := P+1;
++            pragma Loop_Invariant (Static => P = Packed_Row_First (Width, R) + C2-R+1);
++            pragma Loop_Invariant (Static => P in 1 .. 21);
++            pragma Loop_Invariant (Static => (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
++              (if A < Width and then B < Width and then
++                (Integer'Min (A, B) < R or else
++                 (Integer'Min (A, B) = R and then Integer'Max (A, B) <= C2)) then
++                 M (A, B) = Values (Address + Packed_Row_First (Width, Integer'Min (A, B)) + abs (B-A))
++               else M (A, B) = Initial (A, B)))));
++         end loop;
++         pragma Assert (Static => P = Packed_Row_First (Width, R+1));
++      end loop;
++      Result := Success;
++   end Load_Metric;
++
++   procedure Load_Element
++     (Vertex_Data, Edge_Data : Int_Array; Stiffness : Real_Array;
++      Vertex_Dataadr, Edge_Dataadr, VA, N, EA, Nedge, Dim : Natural;
++      Stiffness_Index : Integer; C : in out Element; Result : out Status) with
++     Pre => (Static => Dim in 2 .. 3
++       and then Vertex_Data'First = 0 and then Edge_Data'First = 0
++       and then Stiffness'First = 0
++       and then Int64 (Vertex_Data'Length) <= Int64 (Integer'Last)
++       and then Int64 (Edge_Data'Length) <= Int64 (Integer'Last)
++       and then Int64 (Stiffness'Length) <= Int64 (Integer'Last)
++       and then Vertex_Dataadr <= Vertex_Data'Length-(Dim+1)
++       and then Edge_Dataadr <= Edge_Data'Length-(if Dim = 2 then 3 else 6)
++       and then VA <= Max_Vertices and then N <= Max_Vertices-VA
++       and then EA <= Max_Edges and then Nedge <= Max_Edges-EA
++       and then Stiffness_Index >= -1
++       and then (if Stiffness_Index >= 0 then Stiffness_Index <= Stiffness'Length-21)),
++     Post => (Static => (if Result = Success then
++       (for all J in C.Vert'Range =>
++          (if J <= Dim then C.Vert (J) = VA+Vertex_Data (Vertex_Dataadr+J)
++           and then C.Vert (J) in VA .. VA+N-1 else C.Vert (J) = C.Vert'Old (J)))
++       and then (for all J in C.Edges'Range =>
++          (if J < (if Dim = 2 then 3 else 6) then
++            C.Edges (J) = EA+Edge_Data (Edge_Dataadr+J)
++            and then C.Edges (J) in EA .. EA+Nedge-1 else C.Edges (J) = C.Edges'Old (J)))
++       and then (for all R in 0 .. 5 => (for all C2 in 0 .. 5 =>
++          (if Stiffness_Index >= 0 and then R < (if Dim = 2 then 3 else 6)
++            and then C2 < (if Dim = 2 then 3 else 6) then
++             C.M (R, C2) = Stiffness (Stiffness_Index +
++               Packed_Row_First ((if Dim = 2 then 3 else 6), Integer'Min (R, C2)) + abs (C2-R))
++           else C.M (R, C2) = C.M'Old (R, C2)))))) is
++      V : Integer;
++      EdA : constant Natural := (if Dim = 2 then 3 else 6);
++   begin
++      Result := Invalid_Model;
++      for J in 0 .. Dim loop
++         V := Vertex_Data (Vertex_Dataadr+J);
++         if V not in 0 .. N-1 then return; end if;
++         C.Vert (J) := VA+V;
++         pragma Loop_Invariant (Static => (for all Q in C.Vert'Range =>
++           (if Q <= J then C.Vert (Q) = VA+Vertex_Data (Vertex_Dataadr+Q)
++             and then C.Vert (Q) in VA .. VA+N-1 else C.Vert (Q) = C.Vert'Loop_Entry (Q))));
++      end loop;
++      for J in 0 .. EdA-1 loop
++         V := Edge_Data (Edge_Dataadr+J);
++         if V not in 0 .. Nedge-1 then return; end if;
++         C.Edges (J) := EA+V;
++         pragma Loop_Invariant (Static => (for all Q in C.Edges'Range =>
++           (if Q <= J then C.Edges (Q) = EA+Edge_Data (Edge_Dataadr+Q)
++             and then C.Edges (Q) in EA .. EA+Nedge-1 else C.Edges (Q) = C.Edges'Loop_Entry (Q))));
++      end loop;
++      if Stiffness_Index >= 0 then
++         Load_Metric (Stiffness, Stiffness_Index, EdA, C.M, Result);
++         if Result /= Success then return; end if;
++      end if;
++      Result := Success;
++   end Load_Element;
++
+    procedure Load
+      (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays;
+       Bodies : MJ.Models.Body_Arrays; Dofs : MJ.Models.Dof_Arrays;
+       S : in out Storage; Result : out Status) is
+-      VA, EA, TA, N, Dim, KA, BA, IA, EleA, EdA, P, V : Integer;
++      VA, EA, TA, N, Dim, KA, BA, IA, EleA, EdA : Integer;
+       Next_Vertex, Next_Edge, Next_Element : Natural := 0;
+    begin
+       Result := Invalid_Model;
+@@ -179,25 +286,12 @@
+                declare
+                      C : Element renames S.Elements (I);
+                begin
+-                  for J in 0 .. Dim loop
+-                     V := G.Flex_Elem (IA + (Dim + 1) * (I - TA) + J);
+-                     if V not in 0 .. N - 1 then return; end if;
+-                     C.Vert (J) := VA + V;
+-                  end loop;
+-                  for J in 0 .. EdA - 1 loop
+-                     V := G.Flex_Elemedge (EleA + EdA * (I - TA) + J);
+-                     if V not in 0 .. G.Flex_Edgenum (F) - 1 then return; end if;
+-                     C.Edges (J) := EA + V;
+-                  end loop;
+-                  if KA >= 0 then
+-                     P := 0;
+-                     for R in 0 .. EdA - 1 loop
+-                        for C2 in R .. EdA - 1 loop
+-                           C.M (R, C2) := G.Flex_Stiffness (KA + 21 * (I - TA) + P);
+-                           C.M (C2, R) := C.M (R, C2); P := P + 1;
+-                        end loop;
+-                     end loop;
+-                  end if;
++                  Load_Element (G.Flex_Elem.all, G.Flex_Elemedge.all, G.Flex_Stiffness.all,
++                    IA+(Dim+1)*(I-TA), EleA+EdA*(I-TA),
++                    VA, N, EA, G.Flex_Edgenum (F), Dim,
++                    (if KA >= 0 then KA+21*(I-TA) else -1), C, Result);
++                  if Result /= Success then return; end if;
++                  Result := Invalid_Model;
+                end;
+             end loop;
+          end if;
+--- a/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
++++ b/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
+@@ -21,7 +21,7 @@
+     p.add_argument('--analysis-build',type=Path,help='Reuse analysis only for this exact frozen source manifest')
+     p.add_argument('--scope',choices=['chain','storage','model','engine','columns','ranges','rows','admission','load','flow','whole',
+         'factory','release','allocation','loading-whole','loading-flow',
+-        'materials-load','materials-vertex','materials-edge','materials-whole','materials-flow',
++        'materials-load','materials-vertex','materials-edge','materials-row-first','materials-metric','materials-element','materials-whole','materials-flow',
+         *['ancestors-'+s for s in ('last','advance','reverse','count','links','column','unfold-pair','unfold-column','shift','merge','build','whole','flow')]],required=True)
+     a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+     source=a.build.resolve()/'source';manifest=json.loads((a.build/'manifest.json').read_text())
+@@ -51,7 +51,8 @@
+         if ancestors:names={'last':'Last_Dof','advance':'Advance','reverse':'Reverse_Chain',
+             'count':'Merged_Count','links':'Links_Valid','column':'Descending_Column',
+             'unfold-pair':'Unfold_Pair','unfold-column':'Unfold_Column','shift':'Shift_Suffix','merge':'Merge','build':'Build'}
+-        if materials:names={'load':'Load','vertex':'Load_Vertex','edge':'Load_Edge'}
++        if materials:names={'load':'Load','vertex':'Load_Vertex','edge':'Load_Edge',
++            'row-first':'Packed_Row_First','metric':'Load_Metric','element':'Load_Element'}
+         if scope in names:
+             target_name=names[scope]
+             matches=[i for i,line in enumerate(lines,1) if re.match(r'\s*(?:procedure|function) '+target_name+r'\b',line)]

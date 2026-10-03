@@ -7,6 +7,10 @@ with MJ.Flex_Collisions;
 with MJ.Builtin_Flex;
 with MJ.BVH;
 with MJ.Convex_Contacts;
+with MJ.Constrained_Assets;
+with MJ.SDF_Scene;
+with MJ.Full_Contacts;
+with MJ.Flex_Interpolation;
 package MJ.Flex_State with SPARK_Mode is
    Max_Flex : constant := 16;
    Max_Vertices : constant := 4096;
@@ -33,8 +37,22 @@ package MJ.Flex_State with SPARK_Mode is
    function Current (S : State) return Boolean;
    function Body_Count (S : State) return Natural;
    function Flex_Count (S : State) return Natural;
+   function Has_SDF (S : State) return Boolean;
+   procedure Generate_Rigid_Contacts (S : in out State;
+     Poses : MJ.Rigid_Geometry.Pose_Array; Contacts : in out MJ.Full_Contacts.Full_Array;
+     Length : out Natural; Result : out Status)
+     with Pre => Ready (S) and then Has_SDF (S),
+       Post => Length <= Contacts'Length and then (if Result /= Success then Length = 0);
    function Vertex_Count (S : State; F : Natural) return Natural
      with Pre => Ready (S) and F < Flex_Count (S);
+   function Interpolation_Order (S : State; F : Natural) return Natural
+     with Pre => Ready (S) and F < Flex_Count (S);
+   function Node_Count (S : State; F : Natural) return Natural
+     with Pre => Ready (S) and F < Flex_Count (S);
+   function Node_Body (S : State; F, N : Natural) return Integer
+     with Pre => Ready (S) and then F < Flex_Count (S) and then N < Node_Count (S, F);
+   function Node_Position (S : State; F, N : Natural) return MJ.Rigid_Geometry.Vec
+     with Pre => Ready (S) and then F < Flex_Count (S) and then N < Node_Count (S, F);
    function Dimension (S : State; F : Natural) return Positive
      with Pre => Ready (S) and F < Flex_Count (S), Post => Dimension'Result in 1 .. 3;
    function Element_Count (S : State; F : Natural) return Natural
@@ -65,13 +83,19 @@ private
    package FC renames MJ.Flex_Collisions;
    package CG renames MJ.Contact_Geometry;
    package CP renames MJ.Contact_Parameters;
+   package CA renames MJ.Constrained_Assets;
    type Flex_Block is limited record
       Description : FC.Flex;
       Material : CP.Material;
       Centered : Boolean := False;
       Nv, Ne, Ni : Natural := 0;
+      Interp : Natural range 0 .. 2 := 0;
+      Nn : Natural range 0 .. Max_Vertices := 0;
+      Cells : MJ.Flex_Interpolation.Grid := [others => 1];
       Local, World, Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
       Bodies : FC.Body_Array (0 .. Max_Vertices-1);
+      Node_Local, Node_World, Node_Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
+      Node_Bodies : FC.Body_Array (0 .. Max_Vertices-1);
       Elements : FC.Element_Array (0 .. Max_Elements-1);
       Internal : FC.Internal_Array (0 .. Max_Elements-1);
       Tree : MJ.BVH.Tree;
@@ -82,6 +106,7 @@ private
       Local : RG.Pose;
       Body_Id : Natural := 0;
       Material : CP.Material;
+      Elevation_First, Elevation_Length : Natural := 0;
    end record;
    type Geom_Array is array (Natural range 0 .. Max_Geometries-1) of Geom_Block;
    type State is limited record
@@ -89,6 +114,9 @@ private
       Nf, Ng, Nb : Natural := 0;
       Flexes : Flex_Array;
       Geoms : Geom_Array;
+      Assets : CA.Store;
+      SDF : MJ.SDF_Scene.Scene;
+      Uses_SDF : Boolean := False;
       Geom_Candidate : RG.Pose_Array (0 .. Max_Geometries-1);
       Options : RG.Options;
       Midphase : Boolean := True;
@@ -100,7 +128,12 @@ private
    function Current (S : State) return Boolean is (S.Initialized and S.Positions_Current);
    function Body_Count (S : State) return Natural is (S.Nb);
    function Flex_Count (S : State) return Natural is (S.Nf);
+   function Has_SDF (S : State) return Boolean is (S.Uses_SDF);
    function Vertex_Count (S : State; F : Natural) return Natural is (S.Flexes (F).Nv);
+   function Interpolation_Order (S : State; F : Natural) return Natural is (S.Flexes (F).Interp);
+   function Node_Count (S : State; F : Natural) return Natural is (S.Flexes (F).Nn);
+   function Node_Body (S : State; F, N : Natural) return Integer is (S.Flexes (F).Node_Bodies (N));
+   function Node_Position (S : State; F, N : Natural) return RG.Vec is (S.Flexes (F).Node_World (N));
    function Dimension (S : State; F : Natural) return Positive is (S.Flexes (F).Description.Dimension);
    function Element_Count (S : State; F : Natural) return Natural is (S.Flexes (F).Ne);
    function Element_Vertex (S : State; F, E, Corner : Natural) return Natural is

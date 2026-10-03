@@ -1,0 +1,120 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "Result" proved
+--> mj-data-flex_elasticity.adb:188:48
+
+ info: range check proved
+--> mj-data-flex_elasticity.adb:191:54
+
+ medium: postcondition might fail, cannot prove S.Edge_Columns = M.Flexes.Flexedge_J_Colind.all
+--> mj-data-flex_elasticity.adb:193:17
+  193 |           and then S.Edge_Columns = M.Flexes.Flexedge_J_Colind.all
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: pointer dereference check might fail
+--> mj-data-flex_elasticity.adb:193:61
+  193 |           and then S.Edge_Columns = M.Flexes.Flexedge_J_Colind.all
+      |                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity.adb:195:20
+
+ medium: pointer dereference check might fail
+--> mj-data-flex_elasticity.adb:195:44
+  195 |             S.Flexes (F).First_Edge = M.Flexes.Flex_Edgeadr (F)
+      |                                       ~~~~~~~~^~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity.adb:195:59
+  195 |             S.Flexes (F).First_Edge = M.Flexes.Flex_Edgeadr (F)
+      |                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity.adb:196:29
+
+ medium: pointer dereference check might fail
+--> mj-data-flex_elasticity.adb:196:48
+  196 |             and then S.Flexes (F).Nedge = M.Flexes.Flex_Edgenum (F))
+      |                                           ~~~~~~~~^~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity.adb:196:63
+  196 |             and then S.Flexes (F).Nedge = M.Flexes.Flex_Edgenum (F))
+      |                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity.adb:198:19
+
+ medium: pointer dereference check might fail
+--> mj-data-flex_elasticity.adb:198:39
+  198 |             S.Edges (I).Rowadr = M.Flexes.Flexedge_J_Rowadr (I)
+      |                                  ~~~~~~~~^~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: array index check might fail
+--> mj-data-flex_elasticity.adb:198:59
+  198 |             S.Edges (I).Rowadr = M.Flexes.Flexedge_J_Rowadr (I)
+      |                                                              ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-data-flex_elasticity.adb:199:28
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:199:48
+
+ info: index check proved
+--> mj-data-flex_elasticity.adb:199:68
+
+ medium: precondition might fail, cannot prove Source'Last = Target'Last
+--> mj-data-flex_elasticity.adb:202:07
+  202 |          Copy_Edge_Columns (G.Flexedge_J_Colind.all, S.Edge_Columns, S.Nv, Result);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:202:46
+
+ medium: precondition might fail, cannot prove Address'Last = Target'Last
+--> mj-data-flex_elasticity.adb:204:07
+  204 |          Copy_Flex_Edge_Ranges (G.Flex_Edgeadr.all, G.Flex_Edgenum.all,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  205 |            S.Flexes, S.Nedge, Result);
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:204:45
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:204:65
+
+ medium: precondition might fail, cannot prove Address'Last = Target'Last
+--> mj-data-flex_elasticity.adb:207:07
+  207 |          Copy_Edge_Rows (G.Flexedge_J_Rowadr.all, G.Flexedge_J_Rownnz.all,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  208 |            S.Edges, S.Nv, S.Edge_Columns'Length, Result);
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:207:43
+
+ info: pointer dereference check proved
+--> mj-data-flex_elasticity.adb:207:68
+
+ info: range check proved
+--> mj-data-flex_elasticity.adb:208:38
+Summary logged in /var/tmp/sparkling-flex-equality-adapter-20261003-r114-analysis/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 144.4 s, peak group RSS 1915 MB

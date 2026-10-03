@@ -1,0 +1,1074 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-equalities.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-equalities.adb
+@@ -8,6 +8,7 @@
+      Pre => (Static => Edge_Layout_Valid (S) and then Index in S.Edges'Range),
+      Post => (Static => Edge_Chain'Result'First = 1
+        and then Edge_Chain'Result'Length = S.Edges (Index).Rownnz
++       and then CA.Valid_Chain (Edge_Chain'Result, S.Nv)
+        and then (for all K in Edge_Chain'Result'Range =>
+          Edge_Chain'Result (K) = S.Edge_Columns (S.Edges (Index).Rowadr+K-1)));
+    procedure Append_Storage
+@@ -53,18 +54,8 @@
+               Entry_Prefix (K) = Entry_Prefix (K-1)
+                 + (if Include (S.Edges (F.First_Edge+K-1)) then
+                    S.Edges (F.First_Edge+K-1).Rownnz else 0));
+-            pragma Loop_Invariant (for all P in F.First_Edge .. I-1 =>
+-              (if Include (S.Edges (P)) then CA.Valid_Chain
+-                (Edge_Chain (S, P), S.Nv)));
+             declare C : Edge renames S.Edges (I); begin
+                if Include (C) then
+-                  declare
+-                     Chain : constant CA.Column_Array := Edge_Chain (S, I);
+-                  begin
+-                     if not CA.Valid_Chain (Chain, Rows.Dofs) then
+-                        Result := Invalid_Model; return;
+-                     end if;
+-                  end;
+                   Needed_Rows := Needed_Rows+1;
+                   Needed_Entries := Needed_Entries+C.Rownnz;
+                end if;
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-loading.adb
+@@ -0,0 +1,171 @@
++with MJ.Data.Flex_Elasticity.Material_Loading;
++with Interfaces;
++with MJ.Models.Validity;
++package body MJ.Data.Flex_Elasticity.Loading with SPARK_Mode is
++   use type Interfaces.Unsigned_8;
++   procedure Copy_Edge_Columns
++     (Source : Int_Array; Target : in out Int_Array; Nv : Natural;
++      Result : out Status) with
++     Pre => (Static => Source'First = 0 and then Target'First = 0
++       and then Source'Length = Target'Length and then Nv <= Max_Dofs),
++     Post => (Static => (if Result = Success then Target = Source
++       and then (for all Column of Target => Column in 0 .. Nv-1))) is
++   begin
++      Result := Invalid_Model;
++      for I in Target'Range loop
++         if Source (I) not in 0 .. Nv-1 then return; end if;
++         Target (I) := Source (I);
++         pragma Loop_Invariant (for all K in Target'First .. I =>
++           Target (K) = Source (K) and then Target (K) in 0 .. Nv-1);
++      end loop;
++      Result := Success;
++   end Copy_Edge_Columns;
++
++   procedure Copy_Flex_Edge_Ranges
++     (Address, Count : Int_Array; Target : in out Flex_Array;
++      Nedge : Natural; Result : out Status) with
++     Pre => (Static => Address'First = 0 and then Count'First = 0
++       and then Target'First = 0 and then Address'Length = Target'Length
++       and then Count'Length = Target'Length and then Nedge <= Max_Edges),
++     Post => (Static => (if Result = Success then
++       (for all F in Target'Range => Target (F).First_Edge <= Nedge
++         and then Target (F).Nedge <= Nedge-Target (F).First_Edge
++         and then Target (F).First_Edge = Address (F)
++         and then Target (F).Nedge = Count (F)))) is
++   begin
++      Result := Invalid_Model;
++      for F in Target'Range loop
++         if Address (F) not in 0 .. Nedge
++           or else Count (F) not in 0 .. Nedge-Address (F) then return; end if;
++         Target (F).First_Edge := Address (F); Target (F).Nedge := Count (F);
++         pragma Loop_Invariant (for all K in Target'First .. F =>
++           Target (K).First_Edge <= Nedge
++           and then Target (K).Nedge <= Nedge-Target (K).First_Edge
++           and then Target (K).First_Edge = Address (K)
++           and then Target (K).Nedge = Count (K));
++      end loop;
++      Result := Success;
++   end Copy_Flex_Edge_Ranges;
++
++   procedure Copy_Edge_Rows
++     (Address, Width, Columns : Int_Array; Target : in out Edge_Array;
++      Nv, Slots : Natural; Result : out Status) with
++     Pre => (Static => Address'First = 0 and then Width'First = 0
++       and then Target'First = 0 and then Address'Length = Target'Length
++       and then Width'Length = Target'Length and then Nv <= Max_Dofs
++       and then Slots <= Max_Edge_Entries
++       and then Columns'First = 0 and then Int64 (Columns'Length) = Int64 (Slots)),
++     Post => (Static => (if Result = Success then
++       (for all I in Target'Range => Target (I).Rownnz <= Nv
++         and then Target (I).Rowadr <= Slots
++         and then Target (I).Rownnz <= Slots-Target (I).Rowadr
++         and then Target (I).Rowadr = Address (I)
++         and then Target (I).Rownnz = Width (I)
++         and then (for all P in Target (I).Rowadr+1 ..
++           Target (I).Rowadr+Target (I).Rownnz-1 =>
++             Columns (P-1) < Columns (P))))) is
++   begin
++      Result := Invalid_Model;
++      for I in Target'Range loop
++         if Address (I) not in 0 .. Slots
++           or else Width (I) not in 0 .. Nv
++           or else Width (I) > Slots-Address (I) then return; end if;
++         --  Validate ordering once at admission. Row producers consume this
++         --  immutable cache without repeating the chain scan every frame.
++         for P in Address (I)+1 .. Address (I)+Width (I)-1 loop
++            if Columns (P-1) >= Columns (P) then return; end if;
++            pragma Loop_Invariant (for all K in Address (I)+1 .. P =>
++              Columns (K-1) < Columns (K));
++         end loop;
++         Target (I).Rowadr := Address (I); Target (I).Rownnz := Width (I);
++         pragma Loop_Invariant (for all K in Target'First .. I =>
++           Target (K).Rownnz <= Nv and then Target (K).Rowadr <= Slots
++           and then Target (K).Rownnz <= Slots-Target (K).Rowadr
++           and then Target (K).Rowadr = Address (K)
++           and then Target (K).Rownnz = Width (K)
++           and then (for all P in Target (K).Rowadr+1 ..
++             Target (K).Rowadr+Target (K).Rownnz-1 =>
++               Columns (P-1) < Columns (P)));
++      end loop;
++      Result := Success;
++   end Copy_Edge_Rows;
++
++   --  Admission only: copy the compiled CSR topology once, before any frame
++   --  can consume it. The force/equality paths share this owned cache.
++   procedure Load_Edge_Layout
++     (Columns, Flex_Address, Flex_Count, Row_Address, Row_Width : Int_Array;
++      S : in out Storage; Result : out Status) with
++     Pre => (Static => Edge_Layout_Shape (S)
++       and then Columns'First = 0 and then Columns'Length = S.Edge_Columns'Length
++       and then Flex_Address'First = 0 and then Flex_Address'Length = S.Flexes'Length
++       and then Flex_Count'First = 0 and then Flex_Count'Length = S.Flexes'Length
++       and then Row_Address'First = 0 and then Row_Address'Length = S.Edges'Length
++       and then Row_Width'First = 0 and then Row_Width'Length = S.Edges'Length),
++     Post => (Static => (if Result = Success then Edge_Layout_Valid (S)
++       and then S.Edge_Columns = Columns
++       and then (for all F in S.Flexes'Range =>
++         S.Flexes (F).First_Edge = Flex_Address (F)
++         and then S.Flexes (F).Nedge = Flex_Count (F))
++       and then (for all I in S.Edges'Range =>
++         S.Edges (I).Rowadr = Row_Address (I)
++         and then S.Edges (I).Rownnz = Row_Width (I)))) is
++   begin
++      Copy_Edge_Columns (Columns, S.Edge_Columns, S.Nv, Result);
++      if Result /= Success then return; end if;
++      Copy_Flex_Edge_Ranges (Flex_Address, Flex_Count, S.Flexes, S.Nedge, Result);
++      if Result /= Success then return; end if;
++      Copy_Edge_Rows (Row_Address, Row_Width, S.Edge_Columns,
++        S.Edges, S.Nv, S.Edge_Columns'Length, Result);
++   end Load_Edge_Layout;
++
++   --  Scalar dimensions keep allocation independent of the model's pointer
++   --  graph. The caller already rejects an occupied owning handle.
++   procedure Allocate
++     (Nf, Nvert, Nedge, Nelem, Nv, Slots, Nb : Natural;
++      S : in out Storage_Access) with
++     Pre => (Static => S = null and then Nf <= Max_Flexes
++       and then Nvert <= Max_Vertices and then Nedge <= Max_Edges
++       and then Nelem <= Max_Elements and then Nv <= Max_Dofs
++       and then Slots <= Max_Edge_Entries),
++     Post => (Static => S /= null and then Edge_Layout_Shape (S.all)
++       and then S.Nf = Nf and then S.Nvert = Nvert
++       and then S.Nedge = Nedge and then S.Nelem = Nelem
++       and then S.Nv = Nv and then S.Nb = Nb
++       and then S.Vertices'Length = Nvert
++       and then S.Elements'Length = Nelem
++       and then S.Edge_Columns'Length = Slots) is
++   begin
++      S := new Storage (Nf-1, Nvert-1, Nedge-1, Nelem-1, Nv-1, Slots-1);
++      S.Nb := Nb;
++   end Allocate;
++
++   procedure Load (M : MJ.Models.Model; S : in out Storage_Access; Result : out Status) is
++      G : MJ.Models.Flex_Arrays renames M.Flexes;
++   begin
++      Result := Invalid_Model;
++      if not MJ.Models.Valid_Layout (M) then return; end if;
++      -- The rigid submodel is validated by Create before this loader runs.
++      -- The existing full validator explicitly excludes flex models.
++      if M.S.Nflex > Max_Flexes or else M.S.Nflexvert > Max_Vertices
++        or else M.S.Nflexedge > Max_Edges or else M.S.Nflexelem > Max_Elements
++        or else M.S.Nv > Max_Dofs or else M.S.NJfe > Max_Edge_Entries
++      then Result := Capacity_Exceeded; return; end if;
++      -- All constraints remain explicitly disabled by the smooth entry.
++      -- Interpolated finite elements have a different state/rotation producer.
++      for F in 0 .. M.S.Nflex - 1 loop
++         if G.Flex_Interp (F) /= 0 then Result := Unsupported_Feature; return; end if;
++         if G.Flex_Dim (F) not in 1 .. 3 then return; end if;
++         pragma Loop_Invariant (Static => (for all K in 0 .. F =>
++           G.Flex_Dim (K) in 1 .. 3));
++      end loop;
++      Allocate (M.S.Nflex, M.S.Nflexvert, M.S.Nflexedge,
++        M.S.Nflexelem, M.S.Nv, M.S.NJfe, M.S.Nbody, S);
++      Load_Edge_Layout (G.Flexedge_J_Colind.all, G.Flex_Edgeadr.all,
++        G.Flex_Edgenum.all, G.Flexedge_J_Rowadr.all, G.Flexedge_J_Rownnz.all, S.all, Result);
++      if Result /= Success then return; end if;
++      Material_Loading.Load (M.S, G, M.Bodies, M.Dofs, S.all, Result);
++   exception
++      when Constraint_Error => Result := Invalid_Model;
++   end Load;
++
++end MJ.Data.Flex_Elasticity.Loading;
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-loading.ads
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-loading.ads
+@@ -0,0 +1,8 @@
++--  Admission is isolated from the per-frame dynamics implementation so its
++--  contracts and immutable row topology can be proved independently.
++private package MJ.Data.Flex_Elasticity.Loading with SPARK_Mode is
++   procedure Load (M : MJ.Models.Model; S : in out Storage_Access; Result : out Status)
++     with Pre => (Static => S = null),
++     Post => (Static => (if Result = Success then
++       S /= null and then Edge_Layout_Valid (S.all)));
++end MJ.Data.Flex_Elasticity.Loading;
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -0,0 +1,211 @@
++with Interfaces;
++package body MJ.Data.Flex_Elasticity.Material_Loading with SPARK_Mode is
++   use type Interfaces.Unsigned_8;
++   procedure Load_Vertex
++     (Weld, Address, Width, Parents : Int_Array; Simple : Byte_Array;
++      Nb, Nv : Natural; Body_Id : Integer; Offset : Vector;
++      C : in out Vertex; Result : out Status) with
++     Pre => (Static => MJ.Flex_Ancestors.Body_Shape (Weld, Address, Width)
++       and then Int64 (Weld'Length) = Int64 (Nb)
++       and then Simple'First = 0 and then Int64 (Simple'Length) = Int64 (Nb)
++       and then Parents'First = 0 and then Int64 (Parents'Length) = Int64 (Nv)
++       and then Nv <= Max_Dofs),
++     Post => (Static => (if Result = Success then Body_Id in 0 .. Nb-1
++       and then C.Body_Id = Body_Id and then C.Dofnum = Width (Body_Id)
++       and then C.Dofadr = (if C.Dofnum = 0 then 0 else Address (Body_Id))
++       and then C.Simple = (Simple (Body_Id) = 2)
++       and then (if C.Simple then C.Dofnum = 3)
++       and then C.Offset = Offset and then Bounded (C.Offset, Max_Val)
++       and then MJ.Flex_Ancestors.Valid_Chain (C.Ancestors, Nv))) is
++      Chain_Result : MJ.Flex_Ancestors.Status;
++      use type MJ.Flex_Ancestors.Status;
++   begin
++      Result := Invalid_Model;
++      if Body_Id not in 0 .. Nb-1 then return; end if;
++      --  Reject malformed scalar metadata before conversion. In addition to
++      --  formerly failing conversions, validate the local body block even
++      --  when its weld root has a different, valid block.
++      if Width (Body_Id) not in 0 .. Nv then return; end if;
++      if Width (Body_Id) /= 0 and then
++        Address (Body_Id) not in 0 .. Nv-Width (Body_Id) then return; end if;
++      C.Body_Id := Body_Id; C.Dofnum := Width (Body_Id);
++      C.Dofadr := (if C.Dofnum = 0 then 0 else Address (Body_Id));
++      C.Simple := Simple (Body_Id) = 2;
++      if C.Simple and then C.Dofnum /= 3 then return; end if;
++      C.Offset := Offset;
++      if not Bounded (C.Offset, Max_Val) then return; end if;
++      MJ.Flex_Ancestors.Build (Weld, Address, Width, Parents,
++        Body_Id, 0, C.Ancestors, Chain_Result);
++      if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
++      Result := Success;
++   end Load_Vertex;
++
++   procedure Load_Edge
++     (Weld, Address, Width, Parents : Int_Array; Vertices : Vertex_Array;
++      VA, N, Nv : Natural; V1, V2 : Integer;
++      Rest, Weight : Real; Rigid, Needs_Chain : Boolean;
++      Flap1, Flap2, Bending_Index : Integer; Bending_Data : Real_Array;
++      C : in out Edge; Result : out Status) with
++     Pre => (Static => MJ.Flex_Ancestors.Body_Shape (Weld, Address, Width)
++       and then Parents'First = 0 and then Int64 (Parents'Length) = Int64 (Nv)
++       and then Nv <= Max_Dofs and then Vertices'First = 0
++       and then Vertices'Length <= Max_Vertices
++       and then VA <= Vertices'Length and then N <= Vertices'Length-VA
++       and then Bending_Data'First = 0
++       and then Int64 (Bending_Data'Length) <= Int64 (Integer'Last)),
++     Post => (Static => C.Rowadr = C.Rowadr'Old and then C.Rownnz = C.Rownnz'Old
++       and then (if Result = Success then V1 in 0 .. N-1 and then V2 in 0 .. N-1
++         and then C.Vert (0) = VA+V1 and then C.Vert (1) = VA+V2
++         and then C.Rest = Rest and then C.Weight = Weight and then C.Rigid = Rigid
++         and then MJ.Flex_Ancestors.Valid_Chain (C.Ancestors, Nv)
++         and then (if Needs_Chain then C.Rownnz = C.Ancestors.Count)
++         and then (if Bending_Index >= 0 then
++           Bending_Index <= Bending_Data'Length-17
++           and then Flap1 in -1 .. N-1 and then Flap2 in -1 .. N-1
++           and then C.Vert (2) = (if Flap1 = -1 then -1 else VA+Flap1)
++           and then C.Vert (3) = (if Flap2 = -1 then -1 else VA+Flap2)
++           and then C.Bending = (C.Vert (3) >= 0)
++           and then (if C.Bending then C.Vert (2) >= 0)
++           and then (for all J in C.B'Range => C.B (J) = Bending_Data (Bending_Index+J))
++           else C.Vert (2) = C.Vert'Old (2) and then C.Vert (3) = C.Vert'Old (3)
++             and then C.Bending = C.Bending'Old and then C.B = C.B'Old))) is
++      Chain_Result : MJ.Flex_Ancestors.Status;
++      use type MJ.Flex_Ancestors.Status;
++   begin
++      Result := Invalid_Model;
++      if V1 not in 0 .. N-1 or else V2 not in 0 .. N-1 then return; end if;
++      if Rest not in Nonneg_Tier0 or else Weight not in Nonneg_Tier0 then return; end if;
++      C.Vert (0) := VA+V1; C.Vert (1) := VA+V2;
++      C.Rest := Rest; C.Rigid := Rigid; C.Weight := Weight;
++      if Vertices (VA+V1).Body_Id >= Weld'Length
++        or else Vertices (VA+V2).Body_Id >= Weld'Length then return; end if;
++      MJ.Flex_Ancestors.Build (Weld, Address, Width, Parents,
++        Vertices (VA+V1).Body_Id, Vertices (VA+V2).Body_Id,
++        C.Ancestors, Chain_Result);
++      if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
++      if Needs_Chain and then C.Rownnz /= C.Ancestors.Count then return; end if;
++      if Bending_Index >= 0 then
++         if Bending_Index > Bending_Data'Length-17
++           or else Flap1 not in -1 .. N-1 or else Flap2 not in -1 .. N-1 then return; end if;
++         C.Vert (2) := (if Flap1 = -1 then -1 else VA+Flap1);
++         C.Vert (3) := (if Flap2 = -1 then -1 else VA+Flap2);
++         C.Bending := C.Vert (3) >= 0;
++         if C.Bending and then C.Vert (2) < 0 then return; end if;
++         for J in C.B'Range loop
++            if Bending_Data (Bending_Index+J) not in K.Coefficient then return; end if;
++            C.B (J) := Bending_Data (Bending_Index+J);
++            pragma Loop_Invariant (Static => (for all K2 in C.B'First .. J =>
++              C.B (K2) = Bending_Data (Bending_Index+K2)));
++         end loop;
++      end if;
++      Result := Success;
++   end Load_Edge;
++
++   procedure Load
++     (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays;
++      Bodies : MJ.Models.Body_Arrays; Dofs : MJ.Models.Dof_Arrays;
++      S : in out Storage; Result : out Status) is
++      VA, EA, TA, N, Dim, KA, BA, IA, EleA, EdA, P, V : Integer;
++      Next_Vertex, Next_Edge, Next_Element : Natural := 0;
++   begin
++      Result := Invalid_Model;
++      for F in 0 .. Z.Nflex - 1 loop
++         VA := G.Flex_Vertadr (F); EA := G.Flex_Edgeadr (F); TA := G.Flex_Elemadr (F);
++         N := G.Flex_Vertnum (F); Dim := G.Flex_Dim (F);
++         KA := G.Flex_Stiffnessadr (F); BA := G.Flex_Bendingadr (F);
++         -- Compiled flex blocks own disjoint contiguous ranges. Reject gaps
++         -- and overlaps before any frame can observe default topology.
++         if VA /= Next_Vertex or else EA /= Next_Edge or else TA /= Next_Element then return; end if;
++         if VA < 0 or else N < 0 or else VA > Z.Nflexvert - N
++           or else EA < 0 or else G.Flex_Edgenum (F) < 0 or else EA > Z.Nflexedge - G.Flex_Edgenum (F)
++           or else TA < 0 or else G.Flex_Elemnum (F) < 0 or else TA > Z.Nflexelem - G.Flex_Elemnum (F)
++           or else G.Flex_Damping (F) not in Nonneg_Tier0
++           or else G.Flex_Edgestiffness (F) not in Nonneg_Tier0
++           or else G.Flex_Edgedamping (F) not in Nonneg_Tier0 then return; end if;
++         if G.Flex_Edgeequality (F) not in 0 .. 2 then return; end if;
++         Next_Vertex := VA + N; Next_Edge := EA + G.Flex_Edgenum (F);
++         Next_Element := TA + G.Flex_Elemnum (F);
++         if KA < -1 or else BA < -1 then return; end if;
++         if KA >= 0 and then (Dim = 1 or else KA > Z.Nflexstiffness - 21 * G.Flex_Elemnum (F)) then return; end if;
++         if BA >= 0 and then (Dim /= 2 or else BA > Z.Nflexbending - 17 * G.Flex_Edgenum (F)) then return; end if;
++         S.Flexes (F) := (Dim => Dim, First_Vertex => VA, Nvert => N,
++           First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
++           Rigid => G.Flex_Rigid (F) /= 0,
++           Edge_Equality => G.Flex_Edgeequality (F),
++           Stretch => KA >= 0 and then G.Flex_Elemnum (F) > 0 and then G.Flex_Stiffness (KA) /= 0.0,
++           Damping => G.Flex_Damping (F), Edge_Stiffness => G.Flex_Edgestiffness (F), Edge_Damping => G.Flex_Edgedamping (F));
++         for I in VA .. VA + N - 1 loop
++            declare
++               B : constant Integer := G.Flex_Vertbodyid (I);
++               C : Vertex renames S.Vertices (I);
++            begin
++               if B not in 0 .. Z.Nbody - 1 then return; end if;
++               Load_Vertex (Bodies.Body_Weldid.all, Bodies.Body_Dofadr.all,
++                 Bodies.Body_Dofnum.all, Dofs.Dof_Parentid.all, Bodies.Body_Simple.all,
++                 Z.Nbody, Z.Nv, B,
++                 (if G.Flex_Centered (F) /= 0 then Zero else Read_Vector (G.Flex_Vert.all, 3 * I)),
++                 C, Result);
++               if Result /= Success then return; end if;
++               Result := Invalid_Model;
++            end;
++         end loop;
++         for I in EA .. EA + G.Flex_Edgenum (F) - 1 loop
++            declare
++               C : Edge renames S.Edges (I);
++               V1 : constant Integer := G.Flex_Edge (2 * I);
++               V2 : constant Integer := G.Flex_Edge (2 * I + 1);
++            begin
++               Load_Edge (Bodies.Body_Weldid.all, Bodies.Body_Dofadr.all,
++                 Bodies.Body_Dofnum.all, Dofs.Dof_Parentid.all, S.Vertices,
++                 VA, N, Z.Nv, V1, V2, G.Flexedge_Length0 (I), G.Flexedge_Invweight0 (I),
++                 G.Flexedge_Rigid (I) /= 0,
++                 not S.Flexes (F).Rigid and then (S.Flexes (F).Edge_Equality /= 0
++                   or else S.Flexes (F).Edge_Stiffness /= 0.0
++                   or else S.Flexes (F).Edge_Damping /= 0.0
++                   or else S.Flexes (F).Damping /= 0.0),
++                 (if BA >= 0 then G.Flex_Edgeflap (2*I) else -1),
++                 (if BA >= 0 then G.Flex_Edgeflap (2*I+1) else -1),
++                 (if BA >= 0 then BA+17*(I-EA) else -1), G.Flex_Bending.all, C, Result);
++               if Result /= Success then return; end if;
++               Result := Invalid_Model;
++            end;
++         end loop;
++         IA := G.Flex_Elemdataadr (F); EleA := G.Flex_Elemedgeadr (F);
++         if Dim > 1 then
++            EdA := (if Dim = 2 then 3 else 6);
++            if IA < 0 or else IA > Z.Nflexelemdata - (Dim + 1) * G.Flex_Elemnum (F)
++              or else EleA < 0 or else EleA > Z.Nflexelemedge - EdA * G.Flex_Elemnum (F) then return; end if;
++            for I in TA .. TA + G.Flex_Elemnum (F) - 1 loop
++               declare
++                     C : Element renames S.Elements (I);
++               begin
++                  for J in 0 .. Dim loop
++                     V := G.Flex_Elem (IA + (Dim + 1) * (I - TA) + J);
++                     if V not in 0 .. N - 1 then return; end if;
++                     C.Vert (J) := VA + V;
++                  end loop;
++                  for J in 0 .. EdA - 1 loop
++                     V := G.Flex_Elemedge (EleA + EdA * (I - TA) + J);
++                     if V not in 0 .. G.Flex_Edgenum (F) - 1 then return; end if;
++                     C.Edges (J) := EA + V;
++                  end loop;
++                  if KA >= 0 then
++                     P := 0;
++                     for R in 0 .. EdA - 1 loop
++                        for C2 in R .. EdA - 1 loop
++                           C.M (R, C2) := G.Flex_Stiffness (KA + 21 * (I - TA) + P);
++                           C.M (C2, R) := C.M (R, C2); P := P + 1;
++                        end loop;
++                     end loop;
++                  end if;
++               end;
++            end loop;
++         end if;
++      end loop;
++      if Next_Vertex /= Z.Nflexvert or else Next_Edge /= Z.Nflexedge
++        or else Next_Element /= Z.Nflexelem then return; end if;
++      Result := Success;
++   exception
++      when Constraint_Error => Result := Invalid_Model;
++   end Load;
++end MJ.Data.Flex_Elasticity.Material_Loading;
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.ads
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.ads
+@@ -0,0 +1,34 @@
++--  Only the compiled arrays consumed by FLEX admission cross this boundary.
++--  CSR topology has already been checked and copied by Loading.
++private package MJ.Data.Flex_Elasticity.Material_Loading with SPARK_Mode is
++   pragma Unevaluated_Use_Of_Old (Allow);
++   procedure Load
++     (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays;
++      Bodies : MJ.Models.Body_Arrays; Dofs : MJ.Models.Dof_Arrays;
++      S : in out Storage; Result : out Status)
++     with Pre => (Static => MJ.Models.Sizes_In_Range (Z)
++       and then MJ.Models.Flex_Layout_OK (Z, G)
++       and then MJ.Models.Body_Layout_OK (Z, Bodies)
++       and then MJ.Models.Dof_Layout_OK (Z, Dofs)
++       and then Edge_Layout_Valid (S)
++       and then S.Nf = Z.Nflex and then S.Nvert = Z.Nflexvert
++       and then S.Nedge = Z.Nflexedge and then S.Nelem = Z.Nflexelem
++       and then S.Nv = Z.Nv and then S.Nb = Z.Nbody
++       and then Int64 (S.Vertices'Length) = Int64 (Z.Nflexvert)
++       and then Int64 (S.Elements'Length) = Int64 (Z.Nflexelem)
++       and then Z.Nflexvert <= Max_Vertices and then Z.Nflexelem <= Max_Elements
++       and then (for all F in S.Flexes'Range =>
++         S.Flexes (F).First_Edge = G.Flex_Edgeadr (F)
++         and then S.Flexes (F).Nedge = G.Flex_Edgenum (F))
++       and then (for all F in S.Flexes'Range => G.Flex_Dim (F) in 1 .. 3)),
++     Post => (Static => (if Result = Success then Edge_Layout_Valid (S)
++       and then S.Nf = S.Nf'Old and then S.Nedge = S.Nedge'Old
++       and then S.Nv = S.Nv'Old
++       and then S.Edge_Columns = S.Edge_Columns'Old
++       and then (for all F in S.Flexes'Range =>
++         S.Flexes (F).First_Edge = S.Flexes'Old (F).First_Edge
++         and then S.Flexes (F).Nedge = S.Flexes'Old (F).Nedge)
++       and then (for all I in S.Edges'Range =>
++         S.Edges (I).Rowadr = S.Edges'Old (I).Rowadr
++         and then S.Edges (I).Rownnz = S.Edges'Old (I).Rownnz)));
++end MJ.Data.Flex_Elasticity.Material_Loading;
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity.adb
+@@ -10,6 +10,7 @@
+ with MJ.Validation;
+ with MJ.Fields;
+ with MJ.Equality_Flex;
++with MJ.Data.Flex_Elasticity.Loading;
+ 
+ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
+    use type MJ.Models.Sizes;
+@@ -78,262 +79,11 @@
+       return Jacobian_Trace (E.S.all);
+    end Edge_Jacobians;
+ 
+-   procedure Copy_Edge_Columns
+-     (Source : Int_Array; Target : in out Int_Array; Nv : Natural;
+-      Result : out Status) with
+-     Pre => (Static => Source'First = 0 and then Target'First = 0
+-       and then Source'Length = Target'Length and then Nv <= Max_Dofs),
+-     Post => (Static => (if Result = Success then Target = Source
+-       and then (for all Column of Target => Column in 0 .. Nv-1))) is
+-   begin
+-      Result := Invalid_Model;
+-      for I in Target'Range loop
+-         if Source (I) not in 0 .. Nv-1 then return; end if;
+-         Target (I) := Source (I);
+-         pragma Loop_Invariant (for all K in Target'First .. I =>
+-           Target (K) = Source (K) and then Target (K) in 0 .. Nv-1);
+-      end loop;
+-      Result := Success;
+-   end Copy_Edge_Columns;
+-
+-   procedure Copy_Flex_Edge_Ranges
+-     (Address, Count : Int_Array; Target : in out Flex_Array;
+-      Nedge : Natural; Result : out Status) with
+-     Pre => (Static => Address'First = 0 and then Count'First = 0
+-       and then Target'First = 0 and then Address'Length = Target'Length
+-       and then Count'Length = Target'Length and then Nedge <= Max_Edges),
+-     Post => (Static => (if Result = Success then
+-       (for all F in Target'Range => Target (F).First_Edge <= Nedge
+-         and then Target (F).Nedge <= Nedge-Target (F).First_Edge
+-         and then Target (F).First_Edge = Address (F)
+-         and then Target (F).Nedge = Count (F)))) is
+-   begin
+-      Result := Invalid_Model;
+-      for F in Target'Range loop
+-         if Address (F) not in 0 .. Nedge
+-           or else Count (F) not in 0 .. Nedge-Address (F) then return; end if;
+-         Target (F).First_Edge := Address (F); Target (F).Nedge := Count (F);
+-         pragma Loop_Invariant (for all K in Target'First .. F =>
+-           Target (K).First_Edge <= Nedge
+-           and then Target (K).Nedge <= Nedge-Target (K).First_Edge
+-           and then Target (K).First_Edge = Address (K)
+-           and then Target (K).Nedge = Count (K));
+-      end loop;
+-      Result := Success;
+-   end Copy_Flex_Edge_Ranges;
+-
+-   procedure Copy_Edge_Rows
+-     (Address, Width : Int_Array; Target : in out Edge_Array;
+-      Nv, Slots : Natural; Result : out Status) with
+-     Pre => (Static => Address'First = 0 and then Width'First = 0
+-       and then Target'First = 0 and then Address'Length = Target'Length
+-       and then Width'Length = Target'Length and then Nv <= Max_Dofs
+-       and then Slots <= Max_Edge_Entries),
+-     Post => (Static => (if Result = Success then
+-       (for all I in Target'Range => Target (I).Rownnz <= Nv
+-         and then Target (I).Rowadr <= Slots
+-         and then Target (I).Rownnz <= Slots-Target (I).Rowadr
+-         and then Target (I).Rowadr = Address (I)
+-         and then Target (I).Rownnz = Width (I)))) is
+-   begin
+-      Result := Invalid_Model;
+-      for I in Target'Range loop
+-         if Address (I) not in 0 .. Slots
+-           or else Width (I) not in 0 .. Nv
+-           or else Width (I) > Slots-Address (I) then return; end if;
+-         Target (I).Rowadr := Address (I); Target (I).Rownnz := Width (I);
+-         pragma Loop_Invariant (for all K in Target'First .. I =>
+-           Target (K).Rownnz <= Nv and then Target (K).Rowadr <= Slots
+-           and then Target (K).Rownnz <= Slots-Target (K).Rowadr
+-           and then Target (K).Rowadr = Address (K)
+-           and then Target (K).Rownnz = Width (K));
+-      end loop;
+-      Result := Success;
+-   end Copy_Edge_Rows;
+-
+-   --  Admission only: copy the compiled CSR topology once, before any frame
+-   --  can consume it. The force/equality paths share this owned cache.
+-   procedure Load_Edge_Layout
+-     (Columns, Flex_Address, Flex_Count, Row_Address, Row_Width : Int_Array;
+-      S : in out Storage; Result : out Status) with
+-     Pre => (Static => Edge_Layout_Shape (S)
+-       and then Columns'First = 0 and then Columns'Length = S.Edge_Columns'Length
+-       and then Flex_Address'First = 0 and then Flex_Address'Length = S.Flexes'Length
+-       and then Flex_Count'First = 0 and then Flex_Count'Length = S.Flexes'Length
+-       and then Row_Address'First = 0 and then Row_Address'Length = S.Edges'Length
+-       and then Row_Width'First = 0 and then Row_Width'Length = S.Edges'Length),
+-     Post => (Static => (if Result = Success then Edge_Layout_Valid (S)
+-       and then S.Edge_Columns = Columns
+-       and then (for all F in S.Flexes'Range =>
+-         S.Flexes (F).First_Edge = Flex_Address (F)
+-         and then S.Flexes (F).Nedge = Flex_Count (F))
+-       and then (for all I in S.Edges'Range =>
+-         S.Edges (I).Rowadr = Row_Address (I)
+-         and then S.Edges (I).Rownnz = Row_Width (I)))) is
+-   begin
+-      Copy_Edge_Columns (Columns, S.Edge_Columns, S.Nv, Result);
+-      if Result /= Success then return; end if;
+-      Copy_Flex_Edge_Ranges (Flex_Address, Flex_Count, S.Flexes, S.Nedge, Result);
+-      if Result /= Success then return; end if;
+-      Copy_Edge_Rows (Row_Address, Row_Width, S.Edges, S.Nv, S.Edge_Columns'Length, Result);
+-   end Load_Edge_Layout;
+-
+-   procedure Load (M : MJ.Models.Model; S : in out Storage_Access; Result : out Status)
+-     with Post => (Static => (if Result = Success then
+-       S /= null and then Edge_Layout_Valid (S.all))) is
+-      G : MJ.Models.Flex_Arrays renames M.Flexes;
+-      VA, EA, TA, N, Dim, KA, BA, IA, EleA, EdA, P, V : Integer;
+-      Next_Vertex, Next_Edge, Next_Element : Natural := 0;
+-      Chain_Result : MJ.Flex_Ancestors.Status;
+-      use type MJ.Flex_Ancestors.Status;
+-   begin
+-      Result := Invalid_Model;
+-      if not MJ.Models.Valid_Layout (M) then return; end if;
+-      -- The rigid submodel is validated by Create before this loader runs.
+-      -- The existing full validator explicitly excludes flex models.
+-      if M.S.Nflex > Max_Flexes or else M.S.Nflexvert > Max_Vertices
+-        or else M.S.Nflexedge > Max_Edges or else M.S.Nflexelem > Max_Elements
+-        or else M.S.Nv > Max_Dofs or else M.S.NJfe > Max_Edge_Entries
+-      then Result := Capacity_Exceeded; return; end if;
+-      -- All constraints remain explicitly disabled by the smooth entry.
+-      -- Interpolated finite elements have a different state/rotation producer.
+-      for F in 0 .. M.S.Nflex - 1 loop
+-         if G.Flex_Interp (F) /= 0 then Result := Unsupported_Feature; return; end if;
+-         if G.Flex_Dim (F) not in 1 .. 3 then return; end if;
+-      end loop;
+-      S := new Storage (M.S.Nflex - 1, M.S.Nflexvert - 1, M.S.Nflexedge - 1,
+-                        M.S.Nflexelem - 1, M.S.Nv - 1, M.S.NJfe - 1);
+-      S.Nb := M.S.Nbody;
+-      Load_Edge_Layout (G.Flexedge_J_Colind.all, G.Flex_Edgeadr.all,
+-        G.Flex_Edgenum.all, G.Flexedge_J_Rowadr.all, G.Flexedge_J_Rownnz.all, S.all, Result);
+-      if Result /= Success then return; end if;
+-      Result := Invalid_Model;
+-      for F in 0 .. M.S.Nflex - 1 loop
+-         VA := G.Flex_Vertadr (F); EA := G.Flex_Edgeadr (F); TA := G.Flex_Elemadr (F);
+-         N := G.Flex_Vertnum (F); Dim := G.Flex_Dim (F);
+-         KA := G.Flex_Stiffnessadr (F); BA := G.Flex_Bendingadr (F);
+-         -- Compiled flex blocks own disjoint contiguous ranges. Reject gaps
+-         -- and overlaps before any frame can observe default topology.
+-         if VA /= Next_Vertex or else EA /= Next_Edge or else TA /= Next_Element then return; end if;
+-         if VA < 0 or else N < 0 or else VA > M.S.Nflexvert - N
+-           or else EA < 0 or else G.Flex_Edgenum (F) < 0 or else EA > M.S.Nflexedge - G.Flex_Edgenum (F)
+-           or else TA < 0 or else G.Flex_Elemnum (F) < 0 or else TA > M.S.Nflexelem - G.Flex_Elemnum (F)
+-           or else G.Flex_Damping (F) not in Nonneg_Tier0
+-           or else G.Flex_Edgestiffness (F) not in Nonneg_Tier0
+-           or else G.Flex_Edgedamping (F) not in Nonneg_Tier0 then return; end if;
+-         if G.Flex_Edgeequality (F) not in 0 .. 2 then return; end if;
+-         Next_Vertex := VA + N; Next_Edge := EA + G.Flex_Edgenum (F);
+-         Next_Element := TA + G.Flex_Elemnum (F);
+-         if KA < -1 or else BA < -1 then return; end if;
+-         if KA >= 0 and then (Dim = 1 or else KA > M.S.Nflexstiffness - 21 * G.Flex_Elemnum (F)) then return; end if;
+-         if BA >= 0 and then (Dim /= 2 or else BA > M.S.Nflexbending - 17 * G.Flex_Edgenum (F)) then return; end if;
+-         S.Flexes (F) := (Dim => Dim, First_Vertex => VA, Nvert => N,
+-           First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
+-           Rigid => G.Flex_Rigid (F) /= 0,
+-           Edge_Equality => G.Flex_Edgeequality (F),
+-           Stretch => KA >= 0 and then G.Flex_Elemnum (F) > 0 and then G.Flex_Stiffness (KA) /= 0.0,
+-           Damping => G.Flex_Damping (F), Edge_Stiffness => G.Flex_Edgestiffness (F), Edge_Damping => G.Flex_Edgedamping (F));
+-         for I in VA .. VA + N - 1 loop
+-            declare
+-               B : constant Integer := G.Flex_Vertbodyid (I);
+-               Target : constant access Storage := S;
+-               C : Vertex renames Target.Vertices (I);
+-            begin
+-               if B not in 0 .. M.S.Nbody - 1 then return; end if;
+-               C.Body_Id := B; C.Dofnum := M.Bodies.Body_Dofnum (B);
+-               C.Dofadr := (if C.Dofnum = 0 then 0 else M.Bodies.Body_Dofadr (B));
+-               C.Simple := M.Bodies.Body_Simple (B) = 2;
+-               if C.Simple and then C.Dofnum /= 3 then return; end if;
+-               C.Offset := (if G.Flex_Centered (F) /= 0 then Zero else Read_Vector (G.Flex_Vert.all, 3 * I));
+-               if not Bounded (C.Offset, Max_Val) then return; end if;
+-               MJ.Flex_Ancestors.Build (M.Bodies.Body_Weldid.all,
+-                 M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+-                 M.Dofs.Dof_Parentid.all, B, 0, C.Ancestors, Chain_Result);
+-               if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
+-            end;
+-         end loop;
+-         for I in EA .. EA + G.Flex_Edgenum (F) - 1 loop
+-            declare
+-               Target : constant access Storage := S;
+-               C : Edge renames Target.Edges (I);
+-               V1 : constant Integer := G.Flex_Edge (2 * I);
+-               V2 : constant Integer := G.Flex_Edge (2 * I + 1);
+-            begin
+-               if V1 not in 0 .. N - 1 or else V2 not in 0 .. N - 1 then return; end if;
+-               if G.Flexedge_Length0 (I) not in Nonneg_Tier0
+-                 or else G.Flexedge_Invweight0 (I) not in Nonneg_Tier0
+-               then return; end if;
+-               C.Vert (0) := VA + V1; C.Vert (1) := VA + V2;
+-               C.Rest := G.Flexedge_Length0 (I); C.Rigid := G.Flexedge_Rigid (I) /= 0;
+-               C.Weight := G.Flexedge_Invweight0 (I);
+-               MJ.Flex_Ancestors.Build (M.Bodies.Body_Weldid.all,
+-                 M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+-                 M.Dofs.Dof_Parentid.all, Target.Vertices (VA + V1).Body_Id,
+-                 Target.Vertices (VA + V2).Body_Id, C.Ancestors, Chain_Result);
+-               if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
+-               if not Target.Flexes (F).Rigid
+-                 and then (Target.Flexes (F).Edge_Equality /= 0
+-                   or else Target.Flexes (F).Edge_Stiffness /= 0.0
+-                   or else Target.Flexes (F).Edge_Damping /= 0.0
+-                   or else Target.Flexes (F).Damping /= 0.0)
+-                 and then C.Rownnz /= C.Ancestors.Count then return; end if;
+-               if BA >= 0 then
+-                  for J in 0 .. 1 loop
+-                     V := G.Flex_Edgeflap (2 * I + J);
+-                     if V not in -1 .. N - 1 then return; end if;
+-                     C.Vert (J + 2) := (if V = -1 then -1 else VA + V);
+-                  end loop;
+-                  C.Bending := C.Vert (3) >= 0;
+-                  if C.Bending and then C.Vert (2) < 0 then return; end if;
+-                  for J in C.B'Range loop C.B (J) := G.Flex_Bending (BA + 17 * (I - EA) + J); end loop;
+-               end if;
+-            end;
+-         end loop;
+-         IA := G.Flex_Elemdataadr (F); EleA := G.Flex_Elemedgeadr (F);
+-         if Dim > 1 then
+-            EdA := (if Dim = 2 then 3 else 6);
+-            if IA < 0 or else IA > M.S.Nflexelemdata - (Dim + 1) * G.Flex_Elemnum (F)
+-              or else EleA < 0 or else EleA > M.S.Nflexelemedge - EdA * G.Flex_Elemnum (F) then return; end if;
+-            for I in TA .. TA + G.Flex_Elemnum (F) - 1 loop
+-               declare
+-                  Target : constant access Storage := S;
+-                  C : Element renames Target.Elements (I);
+-               begin
+-                  for J in 0 .. Dim loop
+-                     V := G.Flex_Elem (IA + (Dim + 1) * (I - TA) + J);
+-                     if V not in 0 .. N - 1 then return; end if;
+-                     C.Vert (J) := VA + V;
+-                  end loop;
+-                  for J in 0 .. EdA - 1 loop
+-                     V := G.Flex_Elemedge (EleA + EdA * (I - TA) + J);
+-                     if V not in 0 .. G.Flex_Edgenum (F) - 1 then return; end if;
+-                     C.Edges (J) := EA + V;
+-                  end loop;
+-                  if KA >= 0 then
+-                     P := 0;
+-                     for R in 0 .. EdA - 1 loop
+-                        for C2 in R .. EdA - 1 loop
+-                           C.M (R, C2) := G.Flex_Stiffness (KA + 21 * (I - TA) + P);
+-                           C.M (C2, R) := C.M (R, C2); P := P + 1;
+-                        end loop;
+-                     end loop;
+-                  end if;
+-               end;
+-            end loop;
+-         end if;
+-      end loop;
+-      if Next_Vertex /= M.S.Nflexvert or else Next_Edge /= M.S.Nflexedge
+-        or else Next_Element /= M.S.Nflexelem then return; end if;
+-      Result := Success;
+-   exception
+-      when Constraint_Error => Result := Invalid_Model;
+-   end Load;
+-
+    procedure Create_Forces (M : MJ.Models.Model; Model : in out Force_Model;
+                             Result : out Status) is
+    begin
+       if Model.S /= null then Result := Already_Allocated; return; end if;
+-      Load (M, Model.S, Result);
++      Loading.Load (M, Model.S, Result);
+       if Result /= Success then Release (Model.S); end if;
+    exception
+       when others => Release (Model.S); raise;
+@@ -392,7 +142,7 @@
+       end;
+       Restore;
+       MJ.Models.Free_Flex (Empty); Release_Int (Empty_Names);
+-      if Result = Success then Load (M, E.S, Result); end if;
++      if Result = Success then Loading.Load (M, E.S, Result); end if;
+       if Result /= Success then MJ.Data.Free (E.D); Release (E.S); end if;
+    exception
+       when others =>
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity.ads
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity.ads
+@@ -131,7 +131,7 @@
+       and then S.Nv <= Max_Dofs
+       and then S.Edge_Columns'Length <= Max_Edge_Entries)
+      with Ghost, Global => null;
+-   function Edge_Layout_Valid (S : Storage) return Boolean is
++   function Edge_Layout_Bounds (S : Storage) return Boolean is
+      (Edge_Layout_Shape (S)
+       and then (for all F of S.Flexes =>
+         F.First_Edge <= S.Nedge and then F.Nedge <= S.Nedge-F.First_Edge)
+@@ -140,14 +140,22 @@
+         and then C.Rownnz <= S.Edge_Columns'Length-C.Rowadr)
+       and then (for all Column of S.Edge_Columns => Column in 0 .. S.Nv-1))
+      with Ghost, Global => null;
++   function Edge_Layout_Valid (S : Storage) return Boolean is
++     (Edge_Layout_Bounds (S)
++      and then (for all C of S.Edges =>
++        (for all P in C.Rowadr+1 .. C.Rowadr+C.Rownnz-1 =>
++          S.Edge_Columns (P-1) < S.Edge_Columns (P))))
++     with Ghost => Static, Global => null;
+    type Force_Model is limited record
+       S : Storage_Access := null;
+-   end record;
++   end record with Type_Invariant => (Static =>
++     Force_Model.S = null or else Edge_Layout_Valid (Force_Model.S.all));
+    procedure Evaluate_Model
+      (D : in out Simulation; S : in out Storage; Result : out Status;
+       External : MJ.External_Forces.Wrench_Array);
+    type Engine is limited record
+       D : Simulation;
+       S : Storage_Access := null;
+-   end record;
++   end record with Type_Invariant => (Static =>
++     Engine.S = null or else Edge_Layout_Valid (Engine.S.all));
+ end MJ.Data.Flex_Elasticity;
+--- a/experimental/flex-elasticity-integration/tests/build_constrained.py
++++ b/experimental/flex-elasticity-integration/tests/build_constrained.py
+@@ -82,7 +82,8 @@
+  if a.base and project_origin==a.base/'source'/project_name:
+   if base_hashes.get(project_name)!=hashes[project_name]:raise RuntimeError('Base project mismatch')
+   borrowed.append(project_name)
+- changed=[name for name,h in hashes.items() if hashlib.sha256((ROOT/name).read_bytes()).hexdigest()!=h]
++ changed=[name for name,h in hashes.items() if not (ROOT/name).is_file()
++   or hashlib.sha256((ROOT/name).read_bytes()).hexdigest()!=h]
+  current_changed=[name for name in changed if name not in borrowed]
+  if current_changed and not a.resume:raise RuntimeError('Concurrent source change: '+repr(current_changed))
+  overlays=[];overlay_folders=set()
+--- a/experimental/flex-elasticity-integration/tests/check_flex_load.py
++++ b/experimental/flex-elasticity-integration/tests/check_flex_load.py
+@@ -19,7 +19,13 @@
+     rigid=ET.fromstring(fixture(dim=1,edge=True))
+     for body in rigid.findall('.//body'):
+         for joint in list(body.findall('joint')):body.remove(joint)
+-    fixtures=[('slides',fixture(dim=1,edge=True)),
++    welded=ET.fromstring(fixture(dim=1,edge=True))
++    parent=welded.find('worldbody/body')
++    ET.SubElement(parent,'body',{'name':'welded_vertex'})
++    flex=welded.find('deformable/flex');names=flex.get('body').split()
++    names[0]='welded_vertex';flex.set('body',' '.join(names))
++    fixtures=[('welded',ET.tostring(welded,encoding='unicode')),
++              ('slides',fixture(dim=1,edge=True)),
+               ('shared',fixture(dim=2,shared=True,pinned=True)),
+               ('free',fixture(dim=3,mode='none',free=True)),
+               ('zero_dofs',ET.tostring(rigid,encoding='unicode'))]
+--- a/experimental/flex-elasticity-integration/tests/check_proof_receipts.py
++++ b/experimental/flex-elasticity-integration/tests/check_proof_receipts.py
+@@ -18,30 +18,50 @@
+ class ReceiptChecks(unittest.TestCase):
+     def invoke(self, *, fresh=True, report_line=1, exit_code=0,
+                stop_reason='STOP_REASON_NONE', duplicate=False, whole=False, warning=False,
+-               specification=False, wrong_entity=False):
++               specification=False, wrong_entity=False, missing_spec_model=False,
++               overloaded=False, wrong_overload=False, ambiguous_profile=False,
++               loading=False, materials=False):
+         with tempfile.TemporaryDirectory() as directory:
+             root = Path(directory)
+             build, analysis, out = root/'source-build', root/'cache', root/'receipt'
+-            name = 'mj-data-flex_elasticity-equalities' if whole else 'mj-data-flex_elasticity'
++            name = ('mj-data-flex_elasticity-material_loading' if materials else
++                    'mj-data-flex_elasticity-loading' if loading else
++                    'mj-data-flex_elasticity-equalities' if whole or overloaded else 'mj-data-flex_elasticity')
+             source_name = 'experimental/flex-elasticity-integration/src/'+name+'.adb'
+             source = build/'source'/source_name
+             source.parent.mkdir(parents=True)
+             source.write_text('procedure '+('Append_Edges' if whole else 'Load')+' is\nbegin null; end;\n')
++            if overloaded:
++                source.write_text('procedure Append_Edges (Model : Force_Model) is\n'
++                                  'begin null; end;\n'
++                                  'procedure Append_Edges (E : Engine) is\n'
++                                  'begin null; end;\n')
+             hashes={source_name:hashlib.sha256(source.read_bytes()).hexdigest()}
+             if specification:
+                 spec=source.with_suffix('.ads')
+                 spec.write_text('package Dummy is\n\nprocedure Load;\nend Dummy;\n')
+                 hashes[str(spec.relative_to(build/'source'))]=hashlib.sha256(spec.read_bytes()).hexdigest()
++            if overloaded:
++                spec=source.with_suffix('.ads')
++                other='Model : Force_Model' if ambiguous_profile else 'E : Engine'
++                spec.write_text('package Dummy is\nprocedure Append_Edges (Model : Force_Model);\n'
++                                'procedure Append_Edges ('+other+');\nend Dummy;\n')
++                hashes[str(spec.relative_to(build/'source'))]=hashlib.sha256(spec.read_bytes()).hexdigest()
++            if missing_spec_model:
++                spec=source.with_suffix('.ads')
++                spec.write_text('package Dummy is\nfunction Omitted_Model return Boolean is (True);\nend Dummy;\n')
++                hashes[str(spec.relative_to(build/'source'))]=hashlib.sha256(spec.read_bytes()).hexdigest()
+             (build/'manifest.json').write_text(json.dumps({'sources':hashes}))
+             report_path = analysis/'gnatprove'/(name+'.spark')
+             report_path.parent.mkdir(parents=True)
+-            report = {'entities': {'1': {'name': 'MJ.Data.'+('Append_Edges' if whole else 'Load'),
++            report = {'entities': {'1': {'name': 'MJ.Data.'+('Append_Edges' if whole or overloaded else 'Load'),
+                 'sloc': [{'file': name+'.adb', 'line': report_line}]}},
+                 'spark': {'1': 'all'}, 'proof': [{'severity': 'info'}],
+                 'flow': [], 'warn_error': [], 'skip_proof': [],
+                 'skip_flow_proof': [], 'pragma_assume': [],
+                 'progress': 'PROGRESS_PROOF', 'stop_reason': stop_reason}
+             if specification:report['entities']['1']['sloc'][0]={'file':name+'.ads','line':3}
++            if overloaded:report['entities']['1']['sloc'][0]={'file':name+'.ads','line':3 if wrong_overload else 2}
+             if wrong_entity:report['entities']['1']['name']='MJ.Data.Other'
+             if warning:report['warn_error'].append({'severity':'warning','rule':'imprecise-call'})
+             # This is the previous invocation's report. The prover must see a
+@@ -59,7 +79,9 @@
+                 return subprocess.CompletedProcess(command, exit_code)
+ 
+             args = ['proof', '--build', str(build), '--out', str(out),
+-                    '--analysis-build', str(analysis), '--scope', 'whole' if whole else 'load']
++                    '--analysis-build', str(analysis), '--scope',
++                    'materials-load' if materials else
++                    'whole' if whole else 'model' if overloaded else 'load']
+             with patch.object(sys, 'argv', args), patch.object(runner, 'environment', return_value={}), \
+                  patch.object(runner.subprocess, 'run', side_effect=prover), \
+                  patch('builtins.print'):
+@@ -105,10 +127,39 @@
+         self.assertFalse(result['passed'])
+         self.assertNotIn('proof_checks',result)
+ 
++    def test_overloaded_specification_matches_only_its_body_profile(self):
++        self.assertTrue(self.invoke(overloaded=True)['passed'])
++
++    def test_another_overload_at_same_name_is_rejected(self):
++        result=self.invoke(overloaded=True,wrong_overload=True)
++        self.assertFalse(result['passed'])
++        self.assertNotIn('proof_checks',result)
++
++    def test_ambiguous_overload_profiles_are_rejected(self):
++        result=self.invoke(overloaded=True,ambiguous_profile=True)
++        self.assertFalse(result['passed'])
++        self.assertNotIn('proof_checks',result)
++
++    def test_admission_scope_follows_the_private_loader_unit(self):
++        result=self.invoke(loading=True)
++        self.assertTrue(result['passed'])
++        self.assertEqual(result['limit_file'],'mj-data-flex_elasticity-loading.adb')
++
++    def test_material_scope_selects_the_reduced_interface_child(self):
++        result=self.invoke(materials=True)
++        self.assertTrue(result['passed'])
++        self.assertEqual(result['limit_file'],'mj-data-flex_elasticity-material_loading.adb')
++
+     def test_ambiguous_reports_are_rejected(self):
+         result = self.invoke(duplicate=True)
+         self.assertFalse(result['passed'])
+         self.assertNotIn('proof_checks', result)
++
++    def test_whole_scope_cannot_omit_specification_expression_function(self):
++        result=self.invoke(whole=True,missing_spec_model=True)
++        self.assertFalse(result['passed'])
++        self.assertFalse(result['obligations_closed'])
++        self.assertEqual(result['missing_entities'],['omitted_model'])
+ 
+     def test_whole_scope_checks_expected_entities(self):
+         result = self.invoke(whole=True)
+--- a/experimental/flex-elasticity-integration/tests/flex_load_checks.adb
++++ b/experimental/flex-elasticity-integration/tests/flex_load_checks.adb
+@@ -1,3 +1,4 @@
++with Interfaces;
+ with Ada.Text_IO;
+ with MJ.Types; use MJ.Types;
+ with MJ.Data; use MJ.Data;
+@@ -95,9 +96,68 @@
+       Reject_Value (Ancestor, Dof_Index);
+       if Dof_Index < M.S.Nv-1 then Reject_Value (Ancestor, Dof_Index+1); end if;
+    end if;
++   --  A vertex on a fixed child inherits its weld root's DOFs. The local
++   --  scalar block must still be valid independently of the root's block.
++   if Body_Index /= Weld_Index then
++      declare
++         Saved_Count : constant Integer := M.Bodies.Body_Dofnum (Body_Index);
++         Saved_Address : constant Integer := M.Bodies.Body_Dofadr (Body_Index);
++         Saved_Simple : constant Interfaces.Unsigned_8 := M.Bodies.Body_Simple (Body_Index);
++         Saved_Centered : constant Interfaces.Unsigned_8 := M.Flexes.Flex_Centered (0);
++         Saved_Offset : constant Real := M.Flexes.Flex_Vert (0);
++      begin
++         M.Bodies.Body_Dofnum (Body_Index) := M.S.Nv+1;
++         M.Bodies.Body_Dofadr (Body_Index) := 0;
++         Reject ("welded local width");
++         M.Bodies.Body_Dofnum (Body_Index) := Saved_Count;
++         M.Bodies.Body_Dofadr (Body_Index) := Saved_Address; Expect_Accept;
++         M.Bodies.Body_Dofnum (Body_Index) := 1;
++         M.Bodies.Body_Dofadr (Body_Index) := M.S.Nv;
++         Reject ("welded local span");
++         M.Bodies.Body_Dofnum (Body_Index) := Saved_Count;
++         M.Bodies.Body_Dofadr (Body_Index) := Saved_Address; Expect_Accept;
++         M.Bodies.Body_Simple (Body_Index) := 2;
++         M.Flexes.Flex_Centered (0) := 0;
++         M.Flexes.Flex_Vert (0) := 2.0*Max_Val;
++         Reject ("welded simple and invalid offset");
++         M.Bodies.Body_Simple (Body_Index) := Saved_Simple;
++         M.Flexes.Flex_Centered (0) := Saved_Centered;
++         M.Flexes.Flex_Vert (0) := Saved_Offset; Expect_Accept;
++      exception when others =>
++         M.Bodies.Body_Dofnum (Body_Index) := Saved_Count;
++         M.Bodies.Body_Dofadr (Body_Index) := Saved_Address;
++         M.Bodies.Body_Simple (Body_Index) := Saved_Simple;
++         M.Flexes.Flex_Centered (0) := Saved_Centered;
++         M.Flexes.Flex_Vert (0) := Saved_Offset; raise;
++      end;
++   end if;
+    if M.S.NJfe > 0 then
+       Reject_Value (Column, -1); Reject_Value (Column, M.S.Nv);
+    end if;
++   --  In-range columns must also be strictly ordered, independently of
++   --  the capacity checks. Restore and re-admit after every rejection.
++   for I in M.Flexes.Flexedge_J_Rownnz'Range loop
++      if M.Flexes.Flexedge_J_Rownnz (I) >= 2 then
++         declare
++            P : constant Natural := M.Flexes.Flexedge_J_Rowadr (I);
++            First : constant Integer := M.Flexes.Flexedge_J_Colind (P);
++            Second : constant Integer := M.Flexes.Flexedge_J_Colind (P+1);
++         begin
++            M.Flexes.Flexedge_J_Colind (P+1) := First;
++            Reject ("duplicate CSR column");
++            M.Flexes.Flexedge_J_Colind (P+1) := Second; Expect_Accept;
++            M.Flexes.Flexedge_J_Colind (P) := Second;
++            M.Flexes.Flexedge_J_Colind (P+1) := First;
++            Reject ("unordered CSR columns");
++            M.Flexes.Flexedge_J_Colind (P) := First;
++            M.Flexes.Flexedge_J_Colind (P+1) := Second; Expect_Accept;
++         exception when others =>
++            M.Flexes.Flexedge_J_Colind (P) := First;
++            M.Flexes.Flexedge_J_Colind (P+1) := Second; raise;
++         end;
++         exit;
++      end if;
++   end loop;
+    Reject_Value (Row_Address, -1); Reject_Value (Row_Address, M.S.NJfe+1);
+    Reject_Value (Row_Width, -1); Reject_Value (Row_Width, M.S.Nv+1);
+    Reject_Value (Flex_Address, -1); Reject_Value (Flex_Address, M.S.Nflexedge+1);
+--- a/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
++++ b/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
+@@ -2,12 +2,26 @@
+ import argparse, hashlib, json, re, shutil, subprocess, time
+ from pathlib import Path
+ from build import ROOT, environment
++
++def subprogram_profile(lines, line):
++    """Conservative textual profile for overloaded spec/body correspondence."""
++    text='\n'.join(part.split('--',1)[0] for part in lines[line-1:])
++    depth=0
++    for token in re.finditer(r'\(|\)|;|\b(?:is|with)\b',text,re.IGNORECASE):
++        value=token.group().lower()
++        if value=='(':depth+=1
++        elif value==')':depth-=1
++        elif depth==0:
++            return re.sub(r'\s+','',text[:token.start()]).lower()
++    return None
+ 
+ def main():
+     p=argparse.ArgumentParser();p.add_argument('--build',type=Path,required=True)
+     p.add_argument('--out',type=Path,required=True)
+     p.add_argument('--analysis-build',type=Path,help='Reuse analysis only for this exact frozen source manifest')
+     p.add_argument('--scope',choices=['chain','storage','model','engine','columns','ranges','rows','admission','load','flow','whole',
++        'factory','release','allocation','loading-whole','loading-flow',
++        'materials-load','materials-vertex','materials-edge','materials-whole','materials-flow',
+         *['ancestors-'+s for s in ('last','advance','reverse','count','links','column','unfold-pair','unfold-column','shift','merge','build','whole','flow')]],required=True)
+     a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+     source=a.build.resolve()/'source';manifest=json.loads((a.build/'manifest.json').read_text())
+@@ -15,19 +29,29 @@
+         assert hashlib.sha256((source/name).read_bytes()).hexdigest()==h,name
+     (a.out/'sources.json').write_text(json.dumps(manifest,indent=2)+'\n')
+     ancestors=a.scope.startswith('ancestors-')
+-    scope=a.scope.removeprefix('ancestors-') if ancestors else a.scope
+-    unit=('mj-flex_ancestors' if ancestors else
+-        'mj-data-flex_elasticity'+('' if scope in ('columns','ranges','rows','admission','load') else '-equalities'))
++    materials=a.scope.startswith('materials-')
++    scope=(a.scope.removeprefix('materials-') if materials else
++        a.scope.removeprefix('ancestors-') if ancestors else a.scope)
++    loader_scopes=('columns','ranges','rows','admission','load','allocation')
++    loading=(scope.startswith('loading-') or (scope in loader_scopes and
++        (source/'experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-loading.adb').is_file()))
++    if scope.startswith('loading-'):scope=scope.removeprefix('loading-')
++    unit=('mj-data-flex_elasticity-material_loading' if materials else
++        'mj-flex_ancestors' if ancestors else
++        'mj-data-flex_elasticity'+('-loading' if loading else
++            '' if scope in (*loader_scopes,'factory','release') else '-equalities'))
+     path=source/'experimental/flex-elasticity-integration/src'/f'{unit}.adb'
+     lines=path.read_text().splitlines();limit=None;limit_file=unit+'.adb';target_name=None
+     if scope not in ('flow','whole'):
+         definitions=[i for i,line in enumerate(lines,1) if re.match(r'\s*procedure Append_Edges\b',line)]
+         names={'chain':'Edge_Chain','storage':'Append_Storage','columns':'Copy_Edge_Columns',
+                'ranges':'Copy_Flex_Edge_Ranges','rows':'Copy_Edge_Rows',
+-               'admission':'Load_Edge_Layout','load':'Load'}
++               'admission':'Load_Edge_Layout','load':'Load','allocation':'Allocate',
++               'factory':'Create_Forces','release':'Free_Forces'}
+         if ancestors:names={'last':'Last_Dof','advance':'Advance','reverse':'Reverse_Chain',
+             'count':'Merged_Count','links':'Links_Valid','column':'Descending_Column',
+             'unfold-pair':'Unfold_Pair','unfold-column':'Unfold_Column','shift':'Shift_Suffix','merge':'Merge','build':'Build'}
++        if materials:names={'load':'Load','vertex':'Load_Vertex','edge':'Load_Edge'}
+         if scope in names:
+             target_name=names[scope]
+             matches=[i for i,line in enumerate(lines,1) if re.match(r'\s*(?:procedure|function) '+target_name+r'\b',line)]
+@@ -77,8 +101,13 @@
+         if limit is not None:
+             spec=path.with_suffix('.ads')
+             if spec.is_file():
+-                declarations=[i for i,line in enumerate(spec.read_text().splitlines(),1)
++                spec_lines=spec.read_text().splitlines()
++                declarations=[i for i,line in enumerate(spec_lines,1)
+                     if re.match(r'\s*(?:procedure|function)\s+'+re.escape(target_name)+r'\b',line)]
++                if len(declarations)>1:
++                    profile=subprogram_profile(lines,limit)
++                    declarations=[i for i in declarations if profile is not None
++                        and subprogram_profile(spec_lines,i)==profile]
+                 if len(declarations)==1:requested.add((unit+'.ads',declarations[0]))
+         result['report_scope_matches']=(limit is None or any(
+             (loc.get('file'),loc.get('line')) in requested

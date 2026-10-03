@@ -1,0 +1,66 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -119,8 +119,8 @@
+        and then Width in 3 | 6 and then Address <= Values'Length-21),
+      Post => (Static => (if Result = Success then
+        (for all R in 0 .. Width-1 => (for all C2 in R .. Width-1 =>
+-         M (R, C2) = Values (Address+Packed_Row_First (Width, R)+C2-R)
+-         and then M (C2, R) = Values (Address+Packed_Row_First (Width, R)+C2-R)))
++         M (R, C2) = Values (Address+(Packed_Row_First (Width, R)+C2-R))
++         and then M (C2, R) = Values (Address+(Packed_Row_First (Width, R)+C2-R))))
+        and then (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
+          (if A >= Width or else B >= Width then M (A, B) = M'Old (A, B)))))) is
+       P : Natural := 0;
+@@ -132,8 +132,8 @@
+          pragma Loop_Invariant (Static => P in 0 .. 20);
+          pragma Loop_Invariant (Static => (for all A in 0 .. R-1 =>
+            (for all B in A .. Width-1 =>
+-             M (A, B) = Values (Address+Packed_Row_First (Width, A)+B-A)
+-             and then M (B, A) = Values (Address+Packed_Row_First (Width, A)+B-A))));
++             M (A, B) = Values (Address+(Packed_Row_First (Width, A)+B-A))
++             and then M (B, A) = Values (Address+(Packed_Row_First (Width, A)+B-A)))));
+          pragma Loop_Invariant (Static => (for all A in R .. 5 =>
+            (for all B in R .. 5 => M (A, B) = Initial (A, B))));
+          pragma Loop_Invariant (Static => (for all A in 0 .. 5 =>
+@@ -147,11 +147,11 @@
+             pragma Loop_Invariant (Static => P in 1 .. 21);
+             pragma Loop_Invariant (Static => (for all A in 0 .. R-1 =>
+               (for all B in A .. Width-1 =>
+-                M (A, B) = Values (Address+Packed_Row_First (Width, A)+B-A)
+-                and then M (B, A) = Values (Address+Packed_Row_First (Width, A)+B-A))));
++                M (A, B) = Values (Address+(Packed_Row_First (Width, A)+B-A))
++                and then M (B, A) = Values (Address+(Packed_Row_First (Width, A)+B-A)))));
+             pragma Loop_Invariant (Static => (for all B in R .. C2 =>
+-              M (R, B) = Values (Address+Packed_Row_First (Width, R)+B-R)
+-              and then M (B, R) = Values (Address+Packed_Row_First (Width, R)+B-R)));
++              M (R, B) = Values (Address+(Packed_Row_First (Width, R)+B-R))
++              and then M (B, R) = Values (Address+(Packed_Row_First (Width, R)+B-R))));
+             pragma Loop_Invariant (Static => (for all A in R+1 .. 5 =>
+               (for all B in R+1 .. 5 => M (A, B) = Initial (A, B))));
+             pragma Loop_Invariant (Static => (for all B in C2+1 .. Width-1 =>
+@@ -192,7 +192,7 @@
+          (for all R in 0 .. (if Dim = 2 then 2 else 5) =>
+            (for all C2 in R .. (if Dim = 2 then 2 else 5) =>
+              C.M (R, C2) = Stiffness (Stiffness_Index+
+-               Packed_Row_First ((if Dim = 2 then 3 else 6), R)+C2-R)
++               (Packed_Row_First ((if Dim = 2 then 3 else 6), R)+C2-R))
+              and then C.M (C2, R) = C.M (R, C2)))
+          and then (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
+            (if A >= (if Dim = 2 then 3 else 6) or else B >= (if Dim = 2 then 3 else 6)
+@@ -227,7 +227,7 @@
+ 
+    procedure Load_Flex
+      (Z : MJ.Models.Sizes; G : MJ.Models.Flex_Arrays; F : Natural;
+-      C : out Flex; Result : out Status) with
++      C : in out Flex; Result : out Status) with
+      Pre => (Static => MJ.Models.Sizes_In_Range (Z)
+        and then MJ.Models.Flex_Layout_OK (Z, G) and then F < Z.Nflex
+        and then Z.Nflexvert <= Max_Vertices and then Z.Nflexedge <= Max_Edges
+@@ -260,7 +260,6 @@
+       KA : constant Integer := G.Flex_Stiffnessadr (F);
+       BA : constant Integer := G.Flex_Bendingadr (F);
+    begin
+-      C := (others => <>);
+       Result := Invalid_Model;
+       if VA < 0 or else N < 0 or else VA > Z.Nflexvert-N
+         or else EA < 0 or else G.Flex_Edgenum (F) < 0 or else EA > Z.Nflexedge-G.Flex_Edgenum (F)

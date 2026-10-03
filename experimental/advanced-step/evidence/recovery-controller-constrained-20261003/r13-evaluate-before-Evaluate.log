@@ -1,0 +1,48 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-controller-evaluate-r13-20261003/Evaluate/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 106.0 s, peak group RSS 1701 MB
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:303:55
+
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:306:66
+
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:325:56
+
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:333:25
+
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:359:22
+
+ info: analyzing call to "Stage" in context
+--> mj-data-advanced_control.adb:388:19
+
+ medium: precondition might fail, cannot prove Saved.No = Output_Count (E)
+--> mj-data-advanced_control.adb:428:10
+  428 |             Restore_Evaluation (E, Saved);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: call at line 426 should mention E (for argument E) in a postcondition
+  426 |          Evaluate_Into (D, E, Result, External);
+      |          ^
+      + provers reached time limit before completing the proof
+
+ info: initialization of "Result" proved
+--> mj-data-advanced_control.ads:47:70
+
+ info: data dependencies proved
+--> mj-data-advanced_control.ads:49:11
+
+ medium: postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old
+--> mj-data-advanced_control.ads:50:27
+   50 |           Post => (Static => State_Values (D) = State_Values (D)'Old
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: call at mj-data-advanced_control.adb:426 should mention D (for argument D) in a postcondition
+      --> mj-data-advanced_control.adb:426:07
+  426 |          Evaluate_Into (D, E, Result, External);
+      |          ^
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

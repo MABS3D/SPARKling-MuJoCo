@@ -1,0 +1,163 @@
+{
+  "scope": "storage",
+  "limit": 5,
+  "exit": 1,
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-flex-equality-step-20261003-r102-source/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-data-flex_elasticity-equalities.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-flex_elasticity-equalities.adb:5"
+  ],
+  "seconds": 137.4360566719988,
+  "runner_sha256": "ae2ce8852b768551d0d7a116f3ee7265e0f771a8a36b660583d837fc4c955f42",
+  "proof_checks": 151,
+  "flow_checks": 2,
+  "checks": 151,
+  "open": [
+    {
+      "check_col": 36,
+      "check_file": "mj-data-flex_elasticity-equalities.adb",
+      "check_line": 48,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1241,
+              "time": 0.135647
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1063,
+              "time": 0.096918
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 953,
+              "time": 0.09281
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 46,
+      "entity": 1,
+      "file": "mj-data-flex_elasticity-equalities.adb",
+      "how_proved": "prover",
+      "line": 49,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove Chain (K - 1) < Chain (K)"
+      },
+      "msg_id": 38,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 47,
+      "check_file": "mj-data-flex_elasticity-equalities.adb",
+      "check_line": 90,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 47,
+      "entity": 1,
+      "file": "mj-data-flex_elasticity-equalities.adb",
+      "how_proved": "prover",
+      "line": 90,
+      "message": {
+        "text": "assertion might fail"
+      },
+      "msg_id": 98,
+      "rule": "VC_ASSERT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "passed": false,
+  "claim": "Minimal scope only; no whole producer or caller Gold claim."
+}

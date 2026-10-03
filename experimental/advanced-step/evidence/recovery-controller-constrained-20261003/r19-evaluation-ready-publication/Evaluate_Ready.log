@@ -1,0 +1,89 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-evaluation-ready-publication-min-r19-20261003/Evaluate_Ready/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 204.3 s, peak group RSS 810 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control-evaluation.adb:7:76
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:12:54
+
+ medium: postcondition might fail, cannot prove E.Act = E.Act'Old
+--> mj-data-advanced_control-evaluation.adb:18:36
+   18 |       pragma Postcondition (Static => E.Act = E.Act'Old);
+      |                                       ^~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:37:41
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:40:32
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:40:46
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:41:26
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:44:32
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:45:32
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:51:27
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:51:41
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:52:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:53:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:60:23
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:61:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:62:27
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:65:37
+
+ info: non-aliasing of formal parameters "Target" and "Valid" proved
+--> mj-data-advanced_control-evaluation.adb:66:14
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control-evaluation.adb:66:53
+
+ medium: assertion might fail
+--> mj-data-advanced_control-evaluation.adb:68:32
+   68 |          pragma Assert (Static => Activation (E) = Initial_Activation);
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:69:32
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:71:52
+   71 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:71:86
+   71 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:71:103
+   71 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                   ~~~~~~~^~~~~~~~~~~~~~~~
+gnatprove: unproved check messages considered as errors

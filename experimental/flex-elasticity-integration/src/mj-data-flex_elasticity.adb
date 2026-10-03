@@ -9,6 +9,7 @@ with MJ.Smooth_Dynamics;
 with Interfaces;
 with MJ.Validation;
 with MJ.Fields;
+with MJ.Equality_Flex;
 
 package body MJ.Data.Flex_Elasticity with SPARK_Mode is
    use type MJ.Models.Sizes;
@@ -34,7 +35,8 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
          T.Position := [others => 0.0];
          T.Valid := E.S.Valid;
          T.Spring := E.S.Spring; T.Damper := E.S.Damper;
-         T.Length := E.S.Length; T.Velocity := E.S.Velocity;
+         T.Length := [for K in T.Length'Range => Real (E.S.Length (K-1))];
+         T.Velocity := E.S.Velocity;
          for V in E.S.Positions'Range loop
             for A in Axis loop T.Position (3 * V + A + 1) := E.S.Positions (V) (A); end loop;
          end loop;
@@ -42,41 +44,148 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
       end;
    end Diagnostics;
 
-   procedure Make_Chain (M : MJ.Models.Model; B1, B2 : Natural; C : out Chain) is
-      Included : array (Natural range 0 .. Max_Dofs - 1) of Boolean := [others => False];
-      P : Integer;
+   function Jacobian_Trace (S : Storage) return Edge_Jacobian_Trace is
+      T : Edge_Jacobian_Trace (S.Nedge, S.Edge_J'Length);
    begin
-      C := (others => <>);
-      for B of Int_Array'[Integer (B1), Integer (B2)] loop
-         if M.Bodies.Body_Dofnum (B) > 0 then
-            P := M.Bodies.Body_Dofadr (B) + M.Bodies.Body_Dofnum (B) - 1;
-         else
-            P := -1;
-            declare
-               Parent : Integer := B;
-            begin
-               while Parent > 0 loop
-                  if M.Bodies.Body_Dofnum (Parent) > 0 then
-                     P := M.Bodies.Body_Dofadr (Parent) + M.Bodies.Body_Dofnum (Parent) - 1;
-                     exit;
-                  end if;
-                  Parent := M.Bodies.Body_Parentid (Parent);
-               end loop;
-            end;
-         end if;
-         while P >= 0 loop
-            Included (P) := True; P := M.Dofs.Dof_Parentid (P);
-         end loop;
+      T.Valid := S.Valid;
+      for I in S.Edges'Range loop
+         T.Rowadr (I+1) := S.Edges (I).Rowadr;
+         T.Rownnz (I+1) := S.Edges (I).Rownnz;
       end loop;
-      for V in 0 .. M.S.Nv - 1 loop
-         if Included (V) then C.Col (C.Count) := V; C.Count := C.Count + 1; end if;
-      end loop;
-   end Make_Chain;
+      T.Columns := S.Edge_Columns;
+      --  Use the declared target range also for a zero-slot cache. The
+      --  iterated component aggregate otherwise attempts an invalid null
+      --  bound when the compiled model has no DOFs.
+      T.Values := [for K in T.Values'Range => Real (S.Edge_J (K-1))];
+      return T;
+   end Jacobian_Trace;
 
-   procedure Load (M : MJ.Models.Model; S : in out Storage_Access; Result : out Status) is
+   function Edge_Jacobians (Model : Force_Model) return Edge_Jacobian_Trace is
+   begin
+      if Model.S = null then
+         return (Nedge => 0, Slots => 0, Valid => False,
+                 Rowadr | Rownnz | Columns => [others => 0], Values => [others => 0.0]);
+      end if;
+      return Jacobian_Trace (Model.S.all);
+   end Edge_Jacobians;
+
+   function Edge_Jacobians (E : Engine) return Edge_Jacobian_Trace is
+   begin
+      if E.S = null then
+         return (Nedge => 0, Slots => 0, Valid => False,
+                 Rowadr | Rownnz | Columns => [others => 0], Values => [others => 0.0]);
+      end if;
+      return Jacobian_Trace (E.S.all);
+   end Edge_Jacobians;
+
+   procedure Copy_Edge_Columns
+     (Source : Int_Array; Target : in out Int_Array; Nv : Natural;
+      Result : out Status) with
+     Pre => (Static => Source'First = 0 and then Target'First = 0
+       and then Source'Length = Target'Length and then Nv <= Max_Dofs),
+     Post => (Static => (if Result = Success then Target = Source
+       and then (for all Column of Target => Column in 0 .. Nv-1))) is
+   begin
+      Result := Invalid_Model;
+      for I in Target'Range loop
+         if Source (I) not in 0 .. Nv-1 then return; end if;
+         Target (I) := Source (I);
+         pragma Loop_Invariant (for all K in Target'First .. I =>
+           Target (K) = Source (K) and then Target (K) in 0 .. Nv-1);
+      end loop;
+      Result := Success;
+   end Copy_Edge_Columns;
+
+   procedure Copy_Flex_Edge_Ranges
+     (Address, Count : Int_Array; Target : in out Flex_Array;
+      Nedge : Natural; Result : out Status) with
+     Pre => (Static => Address'First = 0 and then Count'First = 0
+       and then Target'First = 0 and then Address'Length = Target'Length
+       and then Count'Length = Target'Length and then Nedge <= Max_Edges),
+     Post => (Static => (if Result = Success then
+       (for all F in Target'Range => Target (F).First_Edge <= Nedge
+         and then Target (F).Nedge <= Nedge-Target (F).First_Edge
+         and then Target (F).First_Edge = Address (F)
+         and then Target (F).Nedge = Count (F)))) is
+   begin
+      Result := Invalid_Model;
+      for F in Target'Range loop
+         if Address (F) not in 0 .. Nedge
+           or else Count (F) not in 0 .. Nedge-Address (F) then return; end if;
+         Target (F).First_Edge := Address (F); Target (F).Nedge := Count (F);
+         pragma Loop_Invariant (for all K in Target'First .. F =>
+           Target (K).First_Edge <= Nedge
+           and then Target (K).Nedge <= Nedge-Target (K).First_Edge
+           and then Target (K).First_Edge = Address (K)
+           and then Target (K).Nedge = Count (K));
+      end loop;
+      Result := Success;
+   end Copy_Flex_Edge_Ranges;
+
+   procedure Copy_Edge_Rows
+     (Address, Width : Int_Array; Target : in out Edge_Array;
+      Nv, Slots : Natural; Result : out Status) with
+     Pre => (Static => Address'First = 0 and then Width'First = 0
+       and then Target'First = 0 and then Address'Length = Target'Length
+       and then Width'Length = Target'Length and then Nv <= Max_Dofs
+       and then Slots <= Max_Edge_Entries),
+     Post => (Static => (if Result = Success then
+       (for all I in Target'Range => Target (I).Rownnz <= Nv
+         and then Target (I).Rowadr <= Slots
+         and then Target (I).Rownnz <= Slots-Target (I).Rowadr
+         and then Target (I).Rowadr = Address (I)
+         and then Target (I).Rownnz = Width (I)))) is
+   begin
+      Result := Invalid_Model;
+      for I in Target'Range loop
+         if Address (I) not in 0 .. Slots
+           or else Width (I) not in 0 .. Nv
+           or else Width (I) > Slots-Address (I) then return; end if;
+         Target (I).Rowadr := Address (I); Target (I).Rownnz := Width (I);
+         pragma Loop_Invariant (for all K in Target'First .. I =>
+           Target (K).Rownnz <= Nv and then Target (K).Rowadr <= Slots
+           and then Target (K).Rownnz <= Slots-Target (K).Rowadr
+           and then Target (K).Rowadr = Address (K)
+           and then Target (K).Rownnz = Width (K));
+      end loop;
+      Result := Success;
+   end Copy_Edge_Rows;
+
+   --  Admission only: copy the compiled CSR topology once, before any frame
+   --  can consume it. The force/equality paths share this owned cache.
+   procedure Load_Edge_Layout
+     (Columns, Flex_Address, Flex_Count, Row_Address, Row_Width : Int_Array;
+      S : in out Storage; Result : out Status) with
+     Pre => (Static => Edge_Layout_Shape (S)
+       and then Columns'First = 0 and then Columns'Length = S.Edge_Columns'Length
+       and then Flex_Address'First = 0 and then Flex_Address'Length = S.Flexes'Length
+       and then Flex_Count'First = 0 and then Flex_Count'Length = S.Flexes'Length
+       and then Row_Address'First = 0 and then Row_Address'Length = S.Edges'Length
+       and then Row_Width'First = 0 and then Row_Width'Length = S.Edges'Length),
+     Post => (Static => (if Result = Success then Edge_Layout_Valid (S)
+       and then S.Edge_Columns = Columns
+       and then (for all F in S.Flexes'Range =>
+         S.Flexes (F).First_Edge = Flex_Address (F)
+         and then S.Flexes (F).Nedge = Flex_Count (F))
+       and then (for all I in S.Edges'Range =>
+         S.Edges (I).Rowadr = Row_Address (I)
+         and then S.Edges (I).Rownnz = Row_Width (I)))) is
+   begin
+      Copy_Edge_Columns (Columns, S.Edge_Columns, S.Nv, Result);
+      if Result /= Success then return; end if;
+      Copy_Flex_Edge_Ranges (Flex_Address, Flex_Count, S.Flexes, S.Nedge, Result);
+      if Result /= Success then return; end if;
+      Copy_Edge_Rows (Row_Address, Row_Width, S.Edges, S.Nv, S.Edge_Columns'Length, Result);
+   end Load_Edge_Layout;
+
+   procedure Load (M : MJ.Models.Model; S : in out Storage_Access; Result : out Status)
+     with Post => (Static => (if Result = Success then
+       S /= null and then Edge_Layout_Valid (S.all))) is
       G : MJ.Models.Flex_Arrays renames M.Flexes;
       VA, EA, TA, N, Dim, KA, BA, IA, EleA, EdA, P, V : Integer;
       Next_Vertex, Next_Edge, Next_Element : Natural := 0;
+      Chain_Result : MJ.Flex_Ancestors.Status;
+      use type MJ.Flex_Ancestors.Status;
    begin
       Result := Invalid_Model;
       if not MJ.Models.Valid_Layout (M) then return; end if;
@@ -84,15 +193,21 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
       -- The existing full validator explicitly excludes flex models.
       if M.S.Nflex > Max_Flexes or else M.S.Nflexvert > Max_Vertices
         or else M.S.Nflexedge > Max_Edges or else M.S.Nflexelem > Max_Elements
-        or else M.S.Nv > Max_Dofs then Result := Capacity_Exceeded; return; end if;
+        or else M.S.Nv > Max_Dofs or else M.S.NJfe > Max_Edge_Entries
+      then Result := Capacity_Exceeded; return; end if;
       -- All constraints remain explicitly disabled by the smooth entry.
       -- Interpolated finite elements have a different state/rotation producer.
       for F in 0 .. M.S.Nflex - 1 loop
          if G.Flex_Interp (F) /= 0 then Result := Unsupported_Feature; return; end if;
          if G.Flex_Dim (F) not in 1 .. 3 then return; end if;
       end loop;
-      S := new Storage (M.S.Nflex - 1, M.S.Nflexvert - 1, M.S.Nflexedge - 1, M.S.Nflexelem - 1, M.S.Nv - 1);
+      S := new Storage (M.S.Nflex - 1, M.S.Nflexvert - 1, M.S.Nflexedge - 1,
+                        M.S.Nflexelem - 1, M.S.Nv - 1, M.S.NJfe - 1);
       S.Nb := M.S.Nbody;
+      Load_Edge_Layout (G.Flexedge_J_Colind.all, G.Flex_Edgeadr.all,
+        G.Flex_Edgenum.all, G.Flexedge_J_Rowadr.all, G.Flexedge_J_Rownnz.all, S.all, Result);
+      if Result /= Success then return; end if;
+      Result := Invalid_Model;
       for F in 0 .. M.S.Nflex - 1 loop
          VA := G.Flex_Vertadr (F); EA := G.Flex_Edgeadr (F); TA := G.Flex_Elemadr (F);
          N := G.Flex_Vertnum (F); Dim := G.Flex_Dim (F);
@@ -106,6 +221,7 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
            or else G.Flex_Damping (F) not in Nonneg_Tier0
            or else G.Flex_Edgestiffness (F) not in Nonneg_Tier0
            or else G.Flex_Edgedamping (F) not in Nonneg_Tier0 then return; end if;
+         if G.Flex_Edgeequality (F) not in 0 .. 2 then return; end if;
          Next_Vertex := VA + N; Next_Edge := EA + G.Flex_Edgenum (F);
          Next_Element := TA + G.Flex_Elemnum (F);
          if KA < -1 or else BA < -1 then return; end if;
@@ -114,6 +230,7 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
          S.Flexes (F) := (Dim => Dim, First_Vertex => VA, Nvert => N,
            First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
            Rigid => G.Flex_Rigid (F) /= 0,
+           Edge_Equality => G.Flex_Edgeequality (F),
            Stretch => KA >= 0 and then G.Flex_Elemnum (F) > 0 and then G.Flex_Stiffness (KA) /= 0.0,
            Damping => G.Flex_Damping (F), Edge_Stiffness => G.Flex_Edgestiffness (F), Edge_Damping => G.Flex_Edgedamping (F));
          for I in VA .. VA + N - 1 loop
@@ -129,7 +246,10 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
                if C.Simple and then C.Dofnum /= 3 then return; end if;
                C.Offset := (if G.Flex_Centered (F) /= 0 then Zero else Read_Vector (G.Flex_Vert.all, 3 * I));
                if not Bounded (C.Offset, Max_Val) then return; end if;
-               Make_Chain (M, B, 0, C.Ancestors);
+               MJ.Flex_Ancestors.Build (M.Bodies.Body_Weldid.all,
+                 M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+                 M.Dofs.Dof_Parentid.all, B, 0, C.Ancestors, Chain_Result);
+               if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
             end;
          end loop;
          for I in EA .. EA + G.Flex_Edgenum (F) - 1 loop
@@ -140,10 +260,23 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
                V2 : constant Integer := G.Flex_Edge (2 * I + 1);
             begin
                if V1 not in 0 .. N - 1 or else V2 not in 0 .. N - 1 then return; end if;
-               if G.Flexedge_Length0 (I) not in Nonneg_Tier0 then return; end if;
+               if G.Flexedge_Length0 (I) not in Nonneg_Tier0
+                 or else G.Flexedge_Invweight0 (I) not in Nonneg_Tier0
+               then return; end if;
                C.Vert (0) := VA + V1; C.Vert (1) := VA + V2;
                C.Rest := G.Flexedge_Length0 (I); C.Rigid := G.Flexedge_Rigid (I) /= 0;
-               Make_Chain (M, Target.Vertices (VA + V1).Body_Id, Target.Vertices (VA + V2).Body_Id, C.Ancestors);
+               C.Weight := G.Flexedge_Invweight0 (I);
+               MJ.Flex_Ancestors.Build (M.Bodies.Body_Weldid.all,
+                 M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+                 M.Dofs.Dof_Parentid.all, Target.Vertices (VA + V1).Body_Id,
+                 Target.Vertices (VA + V2).Body_Id, C.Ancestors, Chain_Result);
+               if Chain_Result /= MJ.Flex_Ancestors.Success then return; end if;
+               if not Target.Flexes (F).Rigid
+                 and then (Target.Flexes (F).Edge_Equality /= 0
+                   or else Target.Flexes (F).Edge_Stiffness /= 0.0
+                   or else Target.Flexes (F).Edge_Damping /= 0.0
+                   or else Target.Flexes (F).Damping /= 0.0)
+                 and then C.Rownnz /= C.Ancestors.Count then return; end if;
                if BA >= 0 then
                   for J in 0 .. 1 loop
                      V := G.Flex_Edgeflap (2 * I + J);
@@ -307,12 +440,9 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
       Lanes : array (Natural range 0 .. 3) of Real;
       Blocks : Natural;
       function Product (C : Edge; P : Natural) return Real is
-         A : constant Vector := Point_Jacobian (D, S, C.Vert (0), C.Ancestors.Col (P));
-         B : constant Vector := Point_Jacobian (D, S, C.Vert (1), C.Ancestors.Col (P));
-         Delta_J : constant Vector := B - A;
+         Slot : constant Natural := C.Rowadr + P;
       begin
-         return ((Dir (0) * Delta_J (0) + Dir (1) * Delta_J (1)) + Dir (2) * Delta_J (2))
-           * D.State.Qvel (C.Ancestors.Col (P));
+         return S.Edge_J (Slot) * D.State.Qvel (S.Edge_Columns (Slot));
       end Product;
    begin
       Result := Numeric_Limit;
@@ -328,25 +458,61 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
             if not Bounded (S.Offsets (I), Max_Val) then return; end if;
          end;
       end loop;
-      for I in S.Edges'Range loop
+      --  As mj_flex, clear the CSR value buffer once, then produce each edge
+      --  Jacobian once. The passive and equality producers share this cache.
+      S.Edge_J := [others => 0.0];
+      S.Length := [others => 0.0]; S.Velocity := [others => 0.0];
+      for F of S.Flexes loop
+         if not F.Rigid then
+         for I in F.First_Edge .. F.First_Edge + F.Nedge - 1 loop
          declare C : Edge renames S.Edges (I); begin
             Diff := S.Positions (C.Vert (1)) - S.Positions (C.Vert (0));
             L := Ada.Numerics.Long_Elementary_Functions.Sqrt ((Diff (0) * Diff (0) + Diff (1) * Diff (1)) + Diff (2) * Diff (2));
             if L not in Nonneg_Tier0 then return; end if;
             Dir := (if L < Min_Val then [1.0, 0.0, 0.0] else (1.0 / L) * Diff);
-            S.Length (I) := L; Lanes := [others => 0.0];
-            Blocks := C.Ancestors.Count / 4;
-            for P in 0 .. Blocks - 1 loop
+            S.Length (I) := L;
+            if F.Edge_Equality = 1 or else F.Edge_Stiffness /= 0.0
+              or else F.Edge_Damping /= 0.0 or else F.Damping /= 0.0
+            then
+               for P in 0 .. C.Rownnz - 1 loop
+                  declare
+                     Column : constant Natural := C.Ancestors.Col (P);
+                     Delta_J : constant Vector := Point_Jacobian (D, S, C.Vert (1), Column)
+                       - Point_Jacobian (D, S, C.Vert (0), Column);
+                  begin
+                     S.Edge_J (C.Rowadr + P) := MJ.Equality_Flex.Edge_Projection
+                       (Delta_J (0), Delta_J (1), Delta_J (2), Dir (0), Dir (1), Dir (2));
+                  end;
+               end loop;
+            end if;
+         end;
+         end loop;
+         end if;
+      end loop;
+      --  mj_fwdVelocity consumes the completed cache after all edge rows have
+      --  been produced; do not interleave reads with potentially shared slots.
+      for F of S.Flexes loop
+         if not F.Rigid then
+         for I in F.First_Edge .. F.First_Edge + F.Nedge - 1 loop
+         declare C : Edge renames S.Edges (I); begin
+            Lanes := [others => 0.0];
+            Blocks := C.Rownnz / 4;
+            if Blocks > 0 then
+               --  The ordinary x86 C SIMD path starts with the first products.
+               for Lane in 0 .. 3 loop Lanes (Lane) := Product (C, Lane); end loop;
+            end if;
+            for P in 1 .. Blocks - 1 loop
                for Lane in 0 .. 3 loop
                   Lanes (Lane) := Lanes (Lane) + Product (C, 4 * P + Lane);
                end loop;
             end loop;
             Val := (Lanes (0) + Lanes (2)) + (Lanes (1) + Lanes (3));
-            for P in 4 * Blocks .. C.Ancestors.Count - 1 loop Val := Val + Product (C, P); end loop;
-            if C.Rigid then Val := 0.0; end if;
+            for P in 4 * Blocks .. C.Rownnz - 1 loop Val := Val + Product (C, P); end loop;
             if Val not in Tier0_Real then return; end if;
             S.Velocity (I) := Val;
          end;
+         end loop;
+         end if;
       end loop;
       Result := Success;
    end Geometry;
@@ -479,22 +645,20 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
    end Stretch_Forces;
 
    procedure Edge_Forces (D : Simulation; S : in out Storage; F : Flex) is
-      Diff, Dir, J : Vector;
       Fs, Fd, L, Jv : Real;
+      Column : Natural;
    begin
       if F.Edge_Stiffness = 0.0 and then F.Edge_Damping = 0.0 then return; end if;
       for P in F.First_Edge .. F.First_Edge + F.Nedge - 1 loop
          declare C : Edge renames S.Edges (P); begin
             if not C.Rigid then
-               L := S.Length (P); Diff := S.Positions (C.Vert (1)) - S.Positions (C.Vert (0));
-               Dir := (if L < Min_Val then [1.0, 0.0, 0.0] else (1.0 / L) * Diff);
+               L := S.Length (P);
                Fs := (if D.Spring_Enabled then F.Edge_Stiffness * (C.Rest - L) else 0.0);
                Fd := (if D.Damper_Enabled then -F.Edge_Damping * S.Velocity (P) else 0.0);
-               for I in 0 .. C.Ancestors.Count - 1 loop
-                  J := Point_Jacobian (D, S, C.Vert (1), C.Ancestors.Col (I)) - Point_Jacobian (D, S, C.Vert (0), C.Ancestors.Col (I));
-                  Jv := (J (0) * Dir (0) + J (1) * Dir (1)) + J (2) * Dir (2);
-                  S.Spring (C.Ancestors.Col (I)) := S.Spring (C.Ancestors.Col (I)) + Jv * Fs;
-                  S.Damper (C.Ancestors.Col (I)) := S.Damper (C.Ancestors.Col (I)) + Jv * Fd;
+               for I in C.Rowadr .. C.Rowadr + C.Rownnz - 1 loop
+                  Column := S.Edge_Columns (I); Jv := S.Edge_J (I);
+                  S.Spring (Column) := S.Spring (Column) + Jv * Fs;
+                  S.Damper (Column) := S.Damper (Column) + Jv * Fd;
                end loop;
             end if;
          end;

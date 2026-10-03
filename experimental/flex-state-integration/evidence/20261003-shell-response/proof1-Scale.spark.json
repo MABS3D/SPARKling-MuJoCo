@@ -1,0 +1,239 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Flex_Response_Kernels.Scale",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-flex_response_kernels.ads",
+          "line": 27
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.ads",
+      "how_proved": "flow",
+      "line": 27,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Scale\" has been proved, subprogram will terminate"
+      },
+      "msg_id": 0,
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 11,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.ads",
+      "how_proved": "flow",
+      "line": 28,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 1,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 14,
+      "check_file": "mj-flex_response_kernels.adb",
+      "check_line": 3,
+      "check_tree": {
+      },
+      "col": 14,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.adb",
+      "how_proved": "trivial",
+      "line": 3,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-flex_response_kernels.adb",
+      "check_line": 3,
+      "check_tree": {
+      },
+      "col": 14,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.adb",
+      "how_proved": "trivial",
+      "line": 3,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 3,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 65,
+      "check_file": "mj-flex_response_kernels.ads",
+      "check_line": 28,
+      "check_tree": {
+      },
+      "col": 65,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.ads",
+      "how_proved": "trivial",
+      "line": 28,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 4,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-flex_response_kernels.ads",
+      "check_line": 28,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 4435,
+              "time": 5.02260000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-flex_response_kernels.ads",
+      "how_proved": "prover",
+      "line": 28,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 5,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 4435,
+          "max_time": 5.02259992063046E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 2.07799999043345E-03,
+      "gnatwhy3.init": 2.06633001565933E-01,
+      "gnatwhy3.register_vcs": 2.92999902740121E-03,
+      "gnatwhy3.run_vcs": 1.99900000552589E-06,
+      "gnatwhy3.save_session": 1.03399902582169E-03,
+      "gnatwhy3.schedule_vcs": 1.17159988731146E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.73000006563962E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 2.40000008489005E-05,
+      "gnatwhy3.transformations.discriminate_if_poly": 1.99900000552589E-06,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 7.10000022081658E-05,
+      "gnatwhy3.transformations.eliminate_builtin": 1.99200003407896E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 7.10000022081658E-05,
+      "gnatwhy3.transformations.eliminate_epsilon": 8.90000010258518E-05,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 7.92998995166272E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 8.19990018499084E-05,
+      "gnatwhy3.transformations.eliminate_literal": 7.10000022081658E-05,
+      "gnatwhy3.transformations.eliminate_projections_sums": 1.27998995594680E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 0.00000000000000E+00,
+      "gnatwhy3.transformations.inline_trivial": 3.34899895824492E-03,
+      "gnatwhy3.transformations.remove_unused": 5.23000024259090E-04,
+      "gnatwhy3.transformations.simplify_formula": 2.70999007625505E-04,
+      "gnatwhy3.transformations.split_goal_wp_conj": 2.24300008267164E-03
+    },
+    "global": {
+      "flow analysis": 5.93999982811511E-04,
+      "globals (advanced)": 4.03000012738630E-04,
+      "globals (basic)": 2.27600010111928E-03,
+      "init_why_sections": 3.56000004103407E-04,
+      "marking": 3.64000006811693E-04,
+      "properties (advanced)": 3.40000005962793E-05,
+      "translation of standard": 8.68999981321394E-04
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-flex_response_kernels.ads",
+      "how_proved": "trivial",
+      "line": 45,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

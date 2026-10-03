@@ -9,6 +9,7 @@ FOLDERS = ['src', 'src/gen', 'experimental/smooth/src',
     'experimental/constraint-assembly-candidate/src', 'experimental/constraint-solvers-candidate/src',
     'experimental/joint-limit-candidate/src', 'experimental/frictionless-contact-candidate/src',
     'experimental/inverse-dynamics/src',
+    'experimental/inverse-dynamics/tests',
     'experimental/dynamics-derivatives-candidate/src', 'experimental/dynamics-derivatives-candidate/tests']
 def environment():
     env = os.environ.copy(); tc = Path('/var/tmp/sparkling-matrix-recovery/toolchains')

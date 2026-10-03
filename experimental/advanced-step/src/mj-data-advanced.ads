@@ -1,3 +1,4 @@
+with MJ.Data.Advanced_Control;
 with MJ.Actuator_Math;
 with MJ.Actuator_Transmissions;
 with MJ.Transmissions;
@@ -44,38 +45,9 @@ package MJ.Data.Advanced with SPARK_Mode is
        Post => (if Ready (E)'Old then Ready (E) and then Inputs (E) = Inputs (E)'Old
          and then (if Result /= Success then State (E) = State (E)'Old));
 private
-   package AM renames MJ.Actuator_Math;
-   package TX renames MJ.Actuator_Transmissions;
-   type Configuration is record
-      Dyn_Kind, Gain_Kind, Bias_Kind : Natural := 0;
-      Trn, Joint_Kind, Qadr, Vadr : Natural := 0;
-      Uadr, Oadr, Aadr, Nu, No, Na, Spec, Group : Natural := 0;
-      Gain, Dyn, Bias : AM.Parameters := [others => 0.0];
-      Gear : TX.Gear_Vector := [others => 0.0];
-      Early, Force_Limited, Act_Limited : Boolean := False;
-      Force_Lo, Force_Hi, Act_Lo, Act_Hi, Period : Tier0_Real := 0.0;
-      Length_Lo, Length_Hi, Acc0 : Tier0_Real := 0.0;
-      Site_Body, Reference_Body : Natural := 0;
-      Site_Quat, Reference_Quat : AM.Quaternion := AM.Identity;
-      Site_SO3 : Boolean := False;
-      Common : MJ.Transmissions.Mask (0 .. Max_Dofs - 1) := [others => False];
-   end record;
-   type Config_Array is array (Natural range <>) of Configuration;
-   type Bool_Array is array (Natural range <>) of Boolean;
+   package AC renames MJ.Data.Advanced_Control;
    type Engine is limited record
       D : Simulation;
-      Initialized, Valid, Can_Advance, Has_Sites : Boolean := False;
-      Nu : Natural range 0 .. Max_Controls := 0;
-      No : Natural range 0 .. Max_Outputs := 0;
-      Na, Nactuator : Natural range 0 .. Max_Actuators := 0;
-      Disabled_Groups : Natural := 0;
-      Config : Config_Array (0 .. Max_Actuators - 1);
-      Control : Real_Array (0 .. Max_Controls - 1) := [others => 0.0];
-      Control_Lo, Control_Hi : State_Vector (0 .. Max_Controls - 1) := [others => 0.0];
-      Control_Limited : Bool_Array (0 .. Max_Controls - 1) := [others => False];
-      Act, Next_Act, Dot : Real_Array (0 .. Max_Actuators - 1) := [others => 0.0];
-      L, V, F : Real_Array (0 .. Max_Outputs - 1) := [others => 0.0];
-      Qforce, Acc : Real_Array (0 .. Max_Dofs - 1) := [others => 0.0];
-      Rows : TX.Result (3 * Max_Dofs - 1);
+      C : AC.Controller;
    end record;
 end MJ.Data.Advanced;

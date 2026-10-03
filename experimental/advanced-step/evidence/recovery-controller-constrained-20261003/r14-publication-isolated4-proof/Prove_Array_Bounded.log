@@ -1,0 +1,15 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-publication-isolated4-proof-r14-20261003/Prove_Array_Bounded/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 44.7 s, peak group RSS 475 MB
+ warning: "Values" is not modified, parameter type could be rewritten as 'access constant Real_Array'
+--> mj-data-controller_forces.adb:3:35
+    3 |       procedure Prove_Array_Bounded (Values : Real_Array_Access; Limit : Real)
+      |                                      ^~~~~~
+
+ error: non-ghost object "D" cannot be borrowed in a call to ghost subprogram "Prove_Array_Bounded"
+--> mj-data-controller_forces.adb:50:38
+   50 |          Prove_Array_Bounded (D.Dynamics.Actuator, 1.0e50);
+      |                               ~~~~~~~~~~^~~~~~~~~
+gnatprove: error during flow analysis and proof

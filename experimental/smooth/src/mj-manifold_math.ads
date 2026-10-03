@@ -1,17 +1,39 @@
+with MJ.Trigonometry;
+with Ada.Numerics.Long_Elementary_Functions;
 with MJ.Types; use MJ.Types;
 with MJ.Smooth_Math; use MJ.Smooth_Math;
 with MJ.Spatial_Kernels;
 with MJ.Spatial_Dynamics;
 package MJ.Manifold_Math with SPARK_Mode is
    use type MJ.Spatial_Kernels.Motion;
-   --  Reuse the existing checked near-unit tolerance (64 model epsilons).
-   --  Already normalized inputs are preserved; all others use the original
-   --  scaled normalization, including the tiny-norm identity fallback.
+   --  Pipeline geometric predicate; normalization below uses the distinct
+   --  C near-unit threshold on the original ordered norm.
    function Already_Normalized (Q : Quaternion) return Boolean with Global => null,
      Post => Already_Normalized'Result = Unit_Quaternion (Q);
+   function Normalization_Length (Q : Quaternion) return Real is
+     (Ada.Numerics.Long_Elementary_Functions.Sqrt
+        (((Q (0)*Q (0) + Q (1)*Q (1)) + Q (2)*Q (2)) + Q (3)*Q (3)))
+     with Global => null, Pre => Bounded (Q, Work_Limit),
+       Post => Normalization_Length'Result in 0.0 .. 1.0e61;
+   function Normalization_Unchanged (Q : Quaternion) return Boolean is
+     (abs (Normalization_Length (Q)-1.0) <= Min_Val)
+     with Global => null, Pre => Bounded (Q, Work_Limit);
+   function Normalization_Component (X, N : Real) return Real
+     with Global => null,
+       Pre => X in -Work_Limit .. Work_Limit and then N in Min_Val .. 1.0e61,
+       Post => Normalization_Component'Result in -1.0e76 .. 1.0e76
+         and then Normalization_Component'Result = X * (1.0 / N);
+   function Normalization_Value (Q : Quaternion; I : Natural) return Real is
+     (if Normalization_Length (Q) < Min_Val then Identity_Quaternion (I)
+      elsif Normalization_Unchanged (Q) then Q (I)
+      else Normalization_Component (Q (I), Normalization_Length (Q)))
+     with Ghost => Static, Global => null,
+       Pre => Bounded (Q, Work_Limit) and then I <= 3;
    function Normalized (Q : Quaternion) return Quaternion with Global => null,
      Pre => Bounded (Q, Work_Limit), Post => Unit_Quaternion (Normalized'Result)
-       and then (if Already_Normalized (Q) then Normalized'Result = Q);
+       and then (if Normalization_Unchanged (Q) then Normalized'Result = Q);
+   pragma Postcondition (Static =>
+     (for all I in Quaternion'Range => Normalized'Result (I) = Normalization_Value (Q, I)));
    --  MuJoCo uses a right multiplication: angular speeds are in the child frame.
    function Rotation_Increment (V : Vector; H : Nonneg_Tier0) return Quaternion
      with Global => null,
@@ -50,5 +72,5 @@ package MJ.Manifold_Math with SPARK_Mode is
          and then Acceleration = (if Translation then Acceleration'Old else
            MJ.Spatial_Dynamics.Add_Scaled (Acceleration'Old,
              MJ.Spatial_Dynamics.Cross_Motion (Derivative_Velocity, Axis), Speed)));
-   pragma Inline_Always (Already_Normalized, Normalized, Rotation_Increment, Rotation_Vector, Advance_Axis);
+   pragma Inline_Always (Normalization_Length, Normalization_Component, Normalization_Unchanged, Already_Normalized, Normalized, Rotation_Increment, Rotation_Vector, Advance_Axis);
 end MJ.Manifold_Math;

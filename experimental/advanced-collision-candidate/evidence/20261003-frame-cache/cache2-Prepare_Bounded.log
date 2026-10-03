@@ -1,0 +1,254 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: data dependencies proved
+--> mj-bvh.adb:466:19
+
+ info: precondition proved
+--> mj-bvh.adb:471:53
+
+ medium: postcondition might fail, cannot prove Row_Matches ((if I = 0 then PA else PB), (if J = 0 then PA else PB), Cache, I, J, K)
+--> mj-bvh.adb:471:53
+  471 |           Post => (Static => Prepared (Cache) and then Cache_Matches (PA, PB, Cache))
+      |                                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:460
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:477:33
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:477:33
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:479:12
+
+ info: precondition proved
+--> mj-bvh.adb:480:36
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:480:36
+  480 |                 (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:480:52
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-bvh.adb:482:36
+  482 |                pragma Loop_Invariant (Prepared (Cache));
+      |                                       ^~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:482:36
+
+ medium: precondition might fail, cannot prove X in Coordinate
+--> mj-bvh.adb:485:39
+  485 |                    (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:485:39
+  485 |                    (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:485:39
+  485 |                    (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:485:55
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:487:15
+
+ medium: precondition might fail, cannot prove X in Coordinate
+--> mj-bvh.adb:488:39
+  488 |                    (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:488:39
+  488 |                    (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:488:62
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:490:39
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:490:39
+
+ info: precondition proved
+--> mj-bvh.adb:493:42
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:493:42
+  493 |                       (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:493:42
+  493 |                       (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:493:58
+
+ info: precondition proved
+--> mj-bvh.adb:496:42
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:496:42
+  496 |                       (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:496:42
+  496 |                       (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:496:65
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:498:18
+
+ medium: precondition might fail, cannot prove X in Coordinate
+--> mj-bvh.adb:498:46
+  498 |                     (for all Z in 0 .. K - 1 => Row_Matches (P (I), P (J), Cache, I, J, Z)));
+      |                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:498:46
+  498 |                     (for all Z in 0 .. K - 1 => Row_Matches (P (I), P (J), Cache, I, J, Z)));
+      |                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-bvh.adb:498:86
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:500:42
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:500:42
+
+ info: precondition proved
+--> mj-bvh.adb:503:45
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:503:45
+  503 |                          (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:503:45
+  503 |                          (for all Z in Axis => Row_Matches (P (X), P (Y), Cache, X, Y, Z)))));
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:503:61
+
+ info: precondition proved
+--> mj-bvh.adb:506:45
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:506:45
+  506 |                          (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:506:45
+  506 |                          (for all Z in Axis => Row_Matches (P (I), P (Y), Cache, I, Y, Z))));
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:506:68
+
+ info: precondition proved
+--> mj-bvh.adb:508:49
+
+ medium: loop invariant might fail in first iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:508:49
+  508 |                        (for all Z in 0 .. K - 1 => Row_Matches (P (I), P (J), Cache, I, J, Z)));
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Offset (I, J, K) = Frame_Offset (PA.Position, PB.Rotation, K)
+--> mj-bvh.adb:508:49
+  508 |                        (for all Z in 0 .. K - 1 => Row_Matches (P (I), P (J), Cache, I, J, Z)));
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:448
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-bvh.adb:508:89
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:510:21
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Product (I, J, K, M) = Frame_Product (P (I).Rotation, P (J).Rotation, K, M)
+--> mj-bvh.adb:510:49
+  510 |                        (for all M in 0 .. L - 1 => Cache.Product (I, J, K, M) =
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  511 |                          Frame_Product (P (I).Rotation, P (J).Rotation, K, M)));
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-bvh.adb:510:73
+
+ info: precondition proved
+--> mj-bvh.adb:511:23
+
+ info: range check proved
+--> mj-bvh.adb:511:73
+
+ info: precondition proved
+--> mj-bvh.adb:512:49
+
+ info: range check proved
+--> mj-bvh.adb:512:49
+
+ info: precondition proved
+--> mj-bvh.adb:515:42
+
+ info: range check proved
+--> mj-bvh.adb:515:42
+Summary logged in /var/tmp/sparkling-recovery-bvh-cache2-20261003/Prepare_Bounded/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 62.6 s, peak group RSS 293 MB

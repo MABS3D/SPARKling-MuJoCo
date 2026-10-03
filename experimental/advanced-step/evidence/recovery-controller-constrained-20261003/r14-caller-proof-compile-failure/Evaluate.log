@@ -1,0 +1,16 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+guarded: elapsed 2.3 s, peak group RSS 72 MB
+ error: component subtypes must statically match
+--> mj-data-advanced_control.adb:77:52
+   77 |          E.Act (0 .. Integer (E.Na)-1) := Real_Array (Values);
+      |                                                       ^~~~~~
+
+ error: component subtypes must statically match
+--> mj-data-advanced_control.ads:54:91
+   54 |           and then (if Result = Success then Ready (E) and then Activation (E) = Real_Array (Values)
+      |                                                                                              ^~~~~~
+gnatprove: error during generation of Global contracts

@@ -1,0 +1,143 @@
+--- a/experimental/flex-state-integration/src/mj-flex_state.ads
++++ b/experimental/flex-state-integration/src/mj-flex_state.ads
+@@ -11,6 +11,7 @@
+ with MJ.SDF_Scene;
+ with MJ.Full_Contacts;
+ with MJ.Flex_Interpolation;
++with MJ.Flex_Shell_Weights;
+ package MJ.Flex_State with SPARK_Mode is
+    Max_Flex : constant := 16;
+    Max_Vertices : constant := 4096;
+@@ -45,7 +46,7 @@
+        Post => Length <= Contacts'Length and then (if Result /= Success then Length = 0);
+    function Vertex_Count (S : State; F : Natural) return Natural
+      with Pre => Ready (S) and F < Flex_Count (S);
+-   function Interpolation_Order (S : State; F : Natural) return Natural
++   function Interpolation_Order (S : State; F : Natural) return Integer
+      with Pre => Ready (S) and F < Flex_Count (S);
+    function Node_Count (S : State; F : Natural) return Natural
+      with Pre => Ready (S) and F < Flex_Count (S);
+@@ -89,13 +90,13 @@
+       Material : CP.Material;
+       Centered : Boolean := False;
+       Nv, Ne, Ni : Natural := 0;
+-      Interp : Natural range 0 .. 2 := 0;
++      Interp : Integer range -2 .. 2 := 0;
+       Nn : Natural range 0 .. Max_Vertices := 0;
+       Cells : MJ.Flex_Interpolation.Grid := [others => 1];
+       Local, World, Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
+       Bodies : FC.Body_Array (0 .. Max_Vertices-1);
+       Node_Local, Node_World, Node_Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
+-      Node_Bodies : FC.Body_Array (0 .. Max_Vertices-1);
++      Node_Bodies : MJ.Flex_Shell_Weights.Node_Bodies (0 .. Max_Vertices-1);
+       Elements : FC.Element_Array (0 .. Max_Elements-1);
+       Internal : FC.Internal_Array (0 .. Max_Elements-1);
+       Tree : MJ.BVH.Tree;
+@@ -130,7 +131,7 @@
+    function Flex_Count (S : State) return Natural is (S.Nf);
+    function Has_SDF (S : State) return Boolean is (S.Uses_SDF);
+    function Vertex_Count (S : State; F : Natural) return Natural is (S.Flexes (F).Nv);
+-   function Interpolation_Order (S : State; F : Natural) return Natural is (S.Flexes (F).Interp);
++   function Interpolation_Order (S : State; F : Natural) return Integer is (S.Flexes (F).Interp);
+    function Node_Count (S : State; F : Natural) return Natural is (S.Flexes (F).Nn);
+    function Node_Body (S : State; F, N : Natural) return Integer is (S.Flexes (F).Node_Bodies (N));
+    function Node_Position (S : State; F, N : Natural) return RG.Vec is (S.Flexes (F).Node_World (N));
+--- a/experimental/flex-state-integration/src/mj-flex_state.adb
++++ b/experimental/flex-state-integration/src/mj-flex_state.adb
+@@ -5,6 +5,8 @@
+ with MJ.Heightfield_Contacts;
+ with MJ.Collision_Scene;
+ with MJ.SDF_Kernels;
++with MJ.Flex_Shell_Geometry;
++with MJ.Flex_Shell_Weights;
+ package body MJ.Flex_State with SPARK_Mode is
+    use type RG.Status;
+    use type CA.Status;
+@@ -69,8 +71,8 @@
+             Dim : constant Integer := M.Flexes.Flex_Dim (F);
+             Nadr : constant Integer := M.Flexes.Flex_Nodeadr (F);
+          begin
+-            --  Negative interpolation orders additionally require shell TFI.
+-            if M.Flexes.Flex_Interp (F) not in 0 .. 2 then
++            --  Signed order selects the separately verified shell reconstruction.
++            if M.Flexes.Flex_Interp (F) not in -2 .. 2 then
+                Result := Unsupported_Feature; Free (S); return;
+             end if;
+             B.Interp := M.Flexes.Flex_Interp (F); B.Nn := 0;
+@@ -92,7 +94,7 @@
+               or (B.Ne > 0 and then Data not in 0 .. M.S.Nflexelemdata-B.Ne*(Dim+1))
+               or (B.Ni > 0 and then Iadr not in 0 .. M.S.Nflexevpair-B.Ni) then Free (S); return; end if;
+             B.Centered := M.Flexes.Flex_Centered (F) /= 0;
+-            if B.Interp > 0 then
++            if B.Interp /= 0 then
+                if M.Flexes.Flex_Nodenum (F) not in 1 .. Max_Vertices then
+                   Result := Capacity_Limit; Free (S); return;
+                end if;
+@@ -102,8 +104,11 @@
+                    M.Flexes.Flex_Cellnum (3 * F + K) not in FI.Cell_Count)
+                then Free (S); return; end if;
+                for K in RG.Axis loop B.Cells (K) := M.Flexes.Flex_Cellnum (3 * F + K); end loop;
+-               if FI.Node_Count (B.Cells, B.Interp) /= Int64 (B.Nn) then Free (S); return; end if;
++               if FI.Node_Count (B.Cells, abs B.Interp) /= Int64 (B.Nn) then Free (S); return; end if;
+                for N in 0 .. B.Nn - 1 loop
++                  if M.Flexes.Flex_Nodebodyid (Nadr + N) not in 0 .. S.Nb - 1 then
++                     Free (S); return;
++                  end if;
+                   B.Node_Bodies (N) := M.Flexes.Flex_Nodebodyid (Nadr + N);
+                   B.Node_Local (N) := Vector_At (M.Flexes.Flex_Node.all, Nadr + N);
+                   B.Node_World (N) := RG.Zero;
+@@ -262,19 +267,41 @@
+       Result := Numeric_Limit;
+       for F in 0 .. S.Nf-1 loop
+          declare B : Flex_Block renames S.Flexes (F); begin
+-            if B.Interp > 0 then
++            if B.Interp /= 0 then
+                for N in 0 .. B.Nn - 1 loop
+                   B.Node_Candidate (N) := K.Point
+                     (Bodies (B.Node_Bodies (N)), B.Node_Local (N), B.Centered);
+-               end loop;
++                  if (for some X of B.Node_Candidate (N) =>
++                    X not in MJ.Flex_Shell_Geometry.Position_Value) then return; end if;
++               end loop;
++               if B.Interp < 0 then
++                  declare
++                     package SW renames MJ.Flex_Shell_Weights;
++                     Grid : constant SW.Grid := [for K in RG.Axis => B.Cells (K) * abs B.Interp + 1];
++                     Point : RG.Vec;
++                  begin
++                     for I in 1 .. Grid (0) - 2 loop
++                        for J in 1 .. Grid (1) - 2 loop
++                           for L in 1 .. Grid (2) - 2 loop
++                              --  Avoid aliasing an input array with its output element.
++                              MJ.Flex_Shell_Geometry.Reconstruct
++                                (Grid, [I, J, L], B.Node_Candidate (0 .. B.Nn - 1), Point);
++                              if (for some X of Point =>
++                                X not in MJ.Flex_Shell_Geometry.Position_Value) then return; end if;
++                              B.Node_Candidate (SW.Flat (Grid, [I, J, L])) := Point;
++                           end loop;
++                        end loop;
++                     end loop;
++                  end;
++               end if;
+             end if;
+             for V in 0 .. B.Nv-1 loop
+                if B.Interp = 0 then
+                   B.Candidate (V) := K.Point (Bodies (B.Bodies (V)),B.Local (V),B.Centered);
+                else
+                   declare Local : RG.Vec; Indices : FI.Node_Indices; begin
+-                     FI.Lookup (B.Local (V), B.Cells, B.Interp, Local, Indices);
+-                     FI.Interpolate (Local, B.Interp, B.Node_Candidate (0 .. B.Nn - 1),
++                     FI.Lookup (B.Local (V), B.Cells, abs B.Interp, Local, Indices);
++                     FI.Interpolate (Local, abs B.Interp, B.Node_Candidate (0 .. B.Nn - 1),
+                        Indices, B.Candidate (V));
+                   end;
+                end if;
+@@ -309,7 +336,7 @@
+       for F in 0 .. S.Nf-1 loop
+          declare B : Flex_Block renames S.Flexes (F); begin
+             B.World (0 .. B.Nv-1) := B.Candidate (0 .. B.Nv-1);
+-            if B.Interp > 0 then
++            if B.Interp /= 0 then
+                B.Node_World (0 .. B.Nn - 1) := B.Node_Candidate (0 .. B.Nn - 1);
+             end if;
+          end;

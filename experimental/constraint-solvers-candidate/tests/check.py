@@ -13,7 +13,7 @@ import time
 
 HERE = Path(__file__).resolve().parents[1]
 ROOT = HERE.parents[1]
-UNITS = ['mj-constraint_solvers-sparse_cholesky', 'mj-constraint_solvers-dense_cholesky', 'mj-constraint_solvers-reduction_models', 'mj-constraint_solvers-reductions',
+UNITS = ['mj-constraint_solvers-native_inertia', 'mj-constraint_solvers-cholesky_updates', 'mj-constraint_solvers-jacobian_transpose', 'mj-constraint_solvers-jacobians', 'mj-constraint_solvers-sparse_cholesky', 'mj-constraint_solvers-dense_cholesky', 'mj-constraint_solvers-reduction_models', 'mj-constraint_solvers-reductions',
          'mj-constraint_scalar', 'mj-constraint_order',
          'mj-constraint_solvers-sparse_kernels',
          'mj-constraint_solvers-cholesky', 'mj-constraint_solvers']
@@ -25,7 +25,9 @@ def sources():
     return [ROOT/'src/mj.ads', ROOT/'src/mj-types.ads', ROOT/'src/mj-quaternion_math.ads',
             *sorted((HERE/'src').glob('*.ad?')), HERE/'tests/solvers_probe.adb',
             HERE/'tests/cholesky_edges.adb', HERE/'tests/reductions_probe.adb',
-            HERE/'tests/dense_cholesky_probe.adb', HERE/'tests/sparse_cholesky_probe.adb']
+            HERE/'tests/dense_cholesky_probe.adb', HERE/'tests/sparse_cholesky_probe.adb',
+            HERE/'tests/jacobians_probe.adb', HERE/'tests/transpose_probe.adb',
+            HERE/'tests/cholesky_updates_probe.adb', HERE/'tests/native_inertia_probe.adb']
 
 def environment():
     env = os.environ.copy()
@@ -78,11 +80,11 @@ def main():
     def run(command, label):
         command = [sys.executable, str(ROOT/'tools/guarded.py'),
                    '--cap-mb', '3800', '--min-free-mb', '12000', '--timeout', str(args.wall_timeout), '--', *command]
-        start = time.time()
+        start = time.monotonic()
         p = subprocess.run(command, env=env, text=True, capture_output=True)
         (out/(label+'.log')).write_text(p.stdout+p.stderr)
         return p, dict(label=label, command=command, code=p.returncode,
-                      seconds=time.time()-start)
+                      seconds=time.monotonic()-start)
     if args.phase == 'build':
         p, rec = run(['gprbuild', '-P', str(out/'solvers.gpr'), '-j1'], 'build')
         binary = out/'build'/args.mode/'bin/solvers_probe'
@@ -168,10 +170,13 @@ def main():
             # do not assume a result. Keep them in the receipt and require
             # proof of the recursive body, termination and unfolding lemma.
             if (warning.get('file') in ('mj-constraint_solvers-reduction_models.ads',
-                                       'mj-constraint_solvers-dense_cholesky.ads')
+                                       'mj-constraint_solvers-dense_cholesky.ads',
+                                       'mj-constraint_solvers-jacobians.ads',
+                                       'mj-constraint_solvers-jacobian_transpose.ads')
                     and warning.get('rule') in ('numeric-variant', 'contracts-recursive')):
                 reviewed.append(warning)
-            if unit in ('mj-constraint_solvers-cholesky', 'mj-constraint_solvers-dense_cholesky') and (
+            if unit in ('mj-constraint_solvers-cholesky', 'mj-constraint_solvers-dense_cholesky', 'mj-constraint_solvers-cholesky_updates',
+                        'mj-constraint_solvers-sparse_cholesky') and (
                 warning.get('rule') == 'numeric-variant'
                 or (warning.get('rule') == 'imprecise-call'
                     and warning.get('message', {}).get('arguments') == ['Sqrt'])

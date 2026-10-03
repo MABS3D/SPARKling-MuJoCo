@@ -8,6 +8,30 @@ spec = importlib.util.spec_from_file_location('constrained_compare', ROOT/'exper
 base = importlib.util.module_from_spec(spec); spec.loader.exec_module(base)
 VERTICES = '-.2 -.2 -.2 .2 -.2 -.2 .2 .2 -.2 -.2 .2 -.2 -.2 -.2 .2 .2 -.2 .2 .2 .2 .2 -.2 .2 .2'
 def fixtures():
+    # An inactive distant SDF selects the SDF scene wrapper, while the contact
+    # itself is ordinary rigid/rigid. Exercise both endpoint ID/type orders and
+    # asymmetric material mixing, including the row order used by PGS.
+    for solver in ['PGS', 'Newton']:
+        for first, size0, second, size1 in [
+                ('box', '.2 .2 .2', 'sphere', '.08'),
+                ('box', '.2 .2 .2', 'capsule', '.06 .08'),
+                ('mesh', '', 'cylinder', '.06 .08'),
+                ('cylinder', '.2 .2', 'sphere', '.08')]:
+            for reverse in [False, True]:
+                a, sa, b, sb = ((second, size1, first, size0) if reverse else
+                                (first, size0, second, size1))
+                ga = f'type="{a}" ' + ('mesh="field"' if a == 'mesh' else f'size="{sa}"')
+                gb = f'type="{b}" ' + ('mesh="field"' if b == 'mesh' else f'size="{sb}"')
+                yield f'mixedrigid_{first}_{second}_{solver}_{reverse}', f'''<mujoco>
+                  <option gravity="0 0 0" jacobian="sparse" timestep=".001" solver="{solver}"
+                    iterations="200" tolerance="1e-12"><flag warmstart="disable" island="disable"/></option>
+                  <default><geom condim="3" solimp=".8 .95 .01 .5 2"/></default>
+                  <asset><mesh name="field" vertex="{VERTICES}"/></asset><worldbody>
+                  <geom {ga} solmix=".173" solref=".017 1.4" friction=".4 .01 .002"/>
+                  <geom type="sdf" mesh="field" pos="5 0 0" contype="0" conaffinity="0"/>
+                  <body pos=".24 .019 .013" quat=".99 .01 .02 .03"><freejoint/>
+                    <geom {gb} mass="1" solmix=".871" solref=".039 .6" friction=".8 .03 .004"/>
+                  </body></worldbody></mujoco>'''
     for solver in ['PGS', 'CG', 'Newton']:
         for dim in [1, 3, 4, 6]:
             xml = f'''<mujoco><option timestep=".001" jacobian="sparse" gravity="0 0 0"
@@ -152,9 +176,12 @@ def main():
             # Detailed frame/row diagnostics are available via the probe's
             # optional "contacts" argument for a failing replay.
             errors={}
-            for key in ['counts','free','acc','qfrc','state']:
+            fields = ['counts','free','acc','qfrc','state']
+            if name.startswith('mixedrigid_'):
+                fields += ['jac', 'aref', 'reg', 'force']
+            for key in fields:
                 delta=float(np.max(np.abs(x[key]-y[key]))) if y[key].size else 0.
-                tol=2e-10 if key in ('counts','free') else 3e-6
+                tol=2e-10 if key in ('counts','free','jac','aref','reg') else 3e-6
                 errors[key]=dict(max_abs=delta,passed=bool(np.allclose(x[key],y[key],atol=tol,rtol=1e-8)))
             ok=all(e['passed'] for e in errors.values());record=dict(model=name,sample=i,passed=ok,errors=errors)
             records.append(record)

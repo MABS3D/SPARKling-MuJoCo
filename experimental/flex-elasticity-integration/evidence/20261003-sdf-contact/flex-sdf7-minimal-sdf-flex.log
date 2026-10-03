@@ -1,0 +1,79 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "C" proved
+--> mj-sdf_scene.adb:251:07
+
+ medium: array index check might fail
+--> mj-sdf_scene.adb:254:41
+  254 |          if G >= S.N or else not S.Is_SDF (G) then return; end if;
+      |                                            ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: add precondition (G in 0 .. 255) to subprogram at mj-sdf_scene.ads:32
+      --> mj-sdf_scene.ads:32:14
+   32 |       procedure Collide_Flex (S : in out Scene; G : Natural; Placement : Pose;
+      |                 ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-sdf_scene.adb:255:67
+
+ info: index check proved
+--> mj-sdf_scene.adb:256:53
+
+ medium: precondition might fail, cannot prove MJ.BVH.Valid (T)
+--> mj-sdf_scene.adb:257:23
+  257 |          MJ.Admitted_Flex.Collide (C, S.Vertices.all,
+      |          ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+  260 |            S.Options, (S.Starts, S.Iterations), S.Convex, Contacts, Result);
+      |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: precondition of subprogram at mj-sdf_scene.ads:32 should mention Elements and F and Midphase and Tree and Vertices
+      --> mj-sdf_scene.ads:32:04
+   32 |       procedure Collide_Flex (S : in out Scene; G : Natural; Placement : Pose;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: non-aliasing of formal parameters "Assets" and "W" proved
+--> mj-sdf_scene.adb:257:47
+
+ medium: pointer dereference check might fail
+--> mj-sdf_scene.adb:257:47
+  257 |          MJ.Admitted_Flex.Collide (C, S.Vertices.all,
+      |                                       ~~~~~~~~~~~^~~
+      + provers reached time limit before completing the proof
+
+ info: non-aliasing of formal parameters "Samples" and "W" proved
+--> mj-sdf_scene.adb:259:53
+
+ medium: pointer dereference check might fail
+--> mj-sdf_scene.adb:259:53
+  259 |            F, Elements, Vertices, Bodies, Tree, S.Tree.all, Midphase,
+      |                                                 ~~~~~~~^~~
+      + provers reached time limit before completing the proof
+
+ info: non-aliasing of formal parameters "O" and "W" proved
+--> mj-sdf_scene.adb:260:10
+
+ medium: range check might fail, cannot prove upper bound for S.Starts
+--> mj-sdf_scene.adb:260:22
+  260 |            S.Options, (S.Starts, S.Iterations), S.Convex, Contacts, Result);
+      |                        ~^~~~~~~
+      + reason for check: value must fit in component type
+      + provers reached time limit before completing the proof
+
+ medium: range check might fail, cannot prove upper bound for S.Iterations
+--> mj-sdf_scene.adb:260:32
+  260 |            S.Options, (S.Starts, S.Iterations), S.Convex, Contacts, Result);
+      |                                  ~^~~~~~~~~~~
+      + reason for check: value must fit in component type
+      + provers reached time limit before completing the proof
+
+ info: initialization of "Result" proved
+--> mj-sdf_scene.ads:36:06
+
+ info: postcondition proved
+--> mj-sdf_scene.ads:38:16
+Summary logged in /var/tmp/sparkling-recovery-flex-sdf7-minimal-20261003/sdf-flex/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 76.1 s, peak group RSS 639 MB

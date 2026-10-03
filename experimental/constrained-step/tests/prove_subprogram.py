@@ -1,6 +1,6 @@
-"""Diagnose one real integration subprogram on an immutable build closure.
+"""Prove a minimal subprogram or a complete unit on an immutable build closure.
 
-This receipt deliberately claims no complete-unit or complete-engine coverage.
+Whole-unit evidence requires complete coverage; it is not complete-engine proof.
 """
 import argparse
 import hashlib
@@ -19,7 +19,9 @@ def main():
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--unit', default='mj-data-constrained.adb')
-    parser.add_argument('--name', required=True)
+    scope = parser.add_mutually_exclusive_group(required=True)
+    scope.add_argument('--name')
+    scope.add_argument('--whole', action='store_true')
     parser.add_argument('--timeout', type=int, default=10)
     parser.add_argument('--wall-timeout', type=int, default=240)
     args = parser.parse_args()
@@ -35,20 +37,23 @@ def main():
     if len(paths) != 1:
         raise ValueError('Unit must name exactly one frozen source')
     text = paths[0].read_text()
-    matches = list(re.finditer(r'^[ \t]*(?:function|procedure) '
-        + re.escape(args.name) + r'\b', text, re.M))
-    if len(matches) != 1:
-        raise ValueError('Subprogram must name exactly one frozen body')
-    line = text[:matches[0].start()].count('\n') + 1
+    if args.name:
+        matches = list(re.finditer(r'^[ \t]*(?:function|procedure) '
+            + re.escape(args.name) + r'\b', text, re.M))
+        if len(matches) != 1:
+            raise ValueError('Subprogram must name exactly one frozen body')
+        line = text[:matches[0].start()].count('\n') + 1
     env = environment()
     env.update(CONSTRAINED_BUILD_ROOT=str(args.out / 'build'),
                CONSTRAINED_MODE='validation')
     command = ['gnatprove', '-P', str(source / 'experimental/constrained-step/constrained.gpr'),
-        '-u', args.unit, '--limit-subp=' + args.unit + ':' + str(line),
+        '-u', args.unit,
         '--prover=cvc5,z3,altergo', '--timeout=' + str(args.timeout),
         '--memlimit=800', '--steps=0', '--proof=per_check', '--no-inlining',
         '-j1', '--checks-as-errors=on', '--warnings=continue', '--report=all',
         '--counterexamples=off']
+    if args.name:
+        command.append('--limit-subp=' + args.unit + ':' + str(line))
     start = time.monotonic()
     run = subprocess.run(['python3', str(ROOT / 'tools/guarded.py'),
         '--cap-mb', '3000', '--min-free-mb', '12000',
@@ -57,7 +62,8 @@ def main():
     (args.out / 'proof.log').write_text(run.stdout + run.stderr)
     record = dict(unit=args.unit, subprogram=args.name, command=command,
                   code=run.returncode, seconds=time.monotonic() - start,
-                  complete_unit=False, passed=False)
+                  complete_unit=args.whole, passed=False,
+                  runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     report = args.out / 'build/validation/obj/gnatprove' / (Path(args.unit).stem + '.spark')
     if report.is_file():
         data = json.loads(report.read_text())
@@ -69,6 +75,24 @@ def main():
                       warnings=[item for item in entries if item.get('severity') == 'warning'])
         record['passed'] = (run.returncode == 0 and not record['open']
                             and not record['warnings'] and not data['pragma_assume'])
+        if args.whole:
+            record['entities'] = sorted(data['entities'][key]['name']
+                for key, value in data['spark'].items() if value == 'all')
+            expected = set()
+            for suffix in ('.ads', '.adb'):
+                path = paths[0].with_suffix(suffix)
+                if path.is_file():
+                    expected.update(name.lower() for name in re.findall(
+                        r'\b(?:function|procedure)\s+(\w+)', path.read_text()))
+            proved = {name.split('.')[-1].lower() for name in record['entities']}
+            record['missing_entities'] = sorted(expected - proved)
+            record['complete_coverage'] = (
+                not data['skip_proof'] and not data['skip_flow_proof']
+                and not data['pragma_assume'] and not record['missing_entities']
+                and all(value == 'all' for value in data['spark'].values())
+                and data['progress'] == 'PROGRESS_PROOF'
+                and data['stop_reason'] == 'STOP_REASON_NONE')
+            record['passed'] = record['passed'] and record['complete_coverage']
     assert unchanged(), 'frozen source changed during proof'
     record['snapshot_hashes_unchanged'] = True
     record['checkout_matches_snapshot'] = all((ROOT / name).is_file()

@@ -1,0 +1,86 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -117,10 +117,11 @@
+        and then Int64 (Values'Length) <= Int64 (Integer'Last)
+        and then Width in 3 | 6 and then Address <= Values'Length-21),
+      Post => (Static => (if Result = Success then
+-       (for all R in 0 .. 5 => (for all C2 in 0 .. 5 =>
+-         (if R < Width and then C2 < Width then
+-           M (R, C2) = Values (Address + Packed_Row_First (Width, Integer'Min (R, C2)) + abs (C2-R))
+-          else M (R, C2) = M'Old (R, C2)))))) is
++       (for all R in 0 .. Width-1 => (for all C2 in R .. Width-1 =>
++         M (R, C2) = Values (Address+Packed_Row_First (Width, R)+C2-R)
++         and then M (C2, R) = Values (Address+Packed_Row_First (Width, R)+C2-R)))
++       and then (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
++         (if A >= Width or else B >= Width then M (A, B) = M'Old (A, B)))))) is
+       P : Natural := 0;
+       Initial : constant K.Metric := M with Ghost => Static;
+    begin
+@@ -128,10 +129,14 @@
+       for R in 0 .. Width-1 loop
+          pragma Loop_Invariant (Static => P = Packed_Row_First (Width, R));
+          pragma Loop_Invariant (Static => P in 0 .. 20);
+-         pragma Loop_Invariant (Static => (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
+-           (if A < Width and then B < Width and then Integer'Min (A, B) < R then
+-             M (A, B) = Values (Address + Packed_Row_First (Width, Integer'Min (A, B)) + abs (B-A))
+-            else M (A, B) = Initial (A, B)))));
++         pragma Loop_Invariant (Static => (for all A in 0 .. R-1 =>
++           (for all B in A .. Width-1 =>
++             M (A, B) = Values (Address+Packed_Row_First (Width, A)+B-A)
++             and then M (B, A) = Values (Address+Packed_Row_First (Width, A)+B-A))));
++         pragma Loop_Invariant (Static => (for all A in R .. 5 =>
++           (for all B in R .. 5 => M (A, B) = Initial (A, B))));
++         pragma Loop_Invariant (Static => (for all A in 0 .. 5 =>
++           (for all B in 0 .. 5 => (if A >= Width or else B >= Width then M (A, B) = Initial (A, B)))));
+          for C2 in R .. Width-1 loop
+             if Values (Address+P) not in K.Coefficient then return; end if;
+             M (R, C2) := Values (Address+P);
+@@ -139,12 +144,19 @@
+             P := P+1;
+             pragma Loop_Invariant (Static => P = Packed_Row_First (Width, R) + C2-R+1);
+             pragma Loop_Invariant (Static => P in 1 .. 21);
+-            pragma Loop_Invariant (Static => (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
+-              (if A < Width and then B < Width and then
+-                (Integer'Min (A, B) < R or else
+-                 (Integer'Min (A, B) = R and then Integer'Max (A, B) <= C2)) then
+-                 M (A, B) = Values (Address + Packed_Row_First (Width, Integer'Min (A, B)) + abs (B-A))
+-               else M (A, B) = Initial (A, B)))));
++            pragma Loop_Invariant (Static => (for all A in 0 .. R-1 =>
++              (for all B in A .. Width-1 =>
++                M (A, B) = Values (Address+Packed_Row_First (Width, A)+B-A)
++                and then M (B, A) = Values (Address+Packed_Row_First (Width, A)+B-A))));
++            pragma Loop_Invariant (Static => (for all B in R .. C2 =>
++              M (R, B) = Values (Address+Packed_Row_First (Width, R)+B-R)
++              and then M (B, R) = Values (Address+Packed_Row_First (Width, R)+B-R)));
++            pragma Loop_Invariant (Static => (for all A in R+1 .. 5 =>
++              (for all B in R+1 .. 5 => M (A, B) = Initial (A, B))));
++            pragma Loop_Invariant (Static => (for all B in C2+1 .. Width-1 =>
++              M (R, B) = Initial (R, B) and then M (B, R) = Initial (B, R)));
++            pragma Loop_Invariant (Static => (for all A in 0 .. 5 =>
++              (for all B in 0 .. 5 => (if A >= Width or else B >= Width then M (A, B) = Initial (A, B)))));
+          end loop;
+          pragma Assert (Static => P = Packed_Row_First (Width, R+1));
+       end loop;
+@@ -175,12 +187,16 @@
+           (if J < (if Dim = 2 then 3 else 6) then
+             C.Edges (J) = EA+Edge_Data (Edge_Dataadr+J)
+             and then C.Edges (J) in EA .. EA+Nedge-1 else C.Edges (J) = C.Edges'Old (J)))
+-       and then (for all R in 0 .. 5 => (for all C2 in 0 .. 5 =>
+-          (if Stiffness_Index >= 0 and then R < (if Dim = 2 then 3 else 6)
+-            and then C2 < (if Dim = 2 then 3 else 6) then
+-             C.M (R, C2) = Stiffness (Stiffness_Index +
+-               Packed_Row_First ((if Dim = 2 then 3 else 6), Integer'Min (R, C2)) + abs (C2-R))
+-           else C.M (R, C2) = C.M'Old (R, C2)))))) is
++       and then (if Stiffness_Index >= 0 then
++         (for all R in 0 .. (if Dim = 2 then 2 else 5) =>
++           (for all C2 in R .. (if Dim = 2 then 2 else 5) =>
++             C.M (R, C2) = Stiffness (Stiffness_Index+
++               Packed_Row_First ((if Dim = 2 then 3 else 6), R)+C2-R)
++             and then C.M (C2, R) = C.M (R, C2)))
++         and then (for all A in 0 .. 5 => (for all B in 0 .. 5 =>
++           (if A >= (if Dim = 2 then 3 else 6) or else B >= (if Dim = 2 then 3 else 6)
++            then C.M (A, B) = C.M'Old (A, B))))
++         else C.M = C.M'Old))) is
+       V : Integer;
+       EdA : constant Natural := (if Dim = 2 then 3 else 6);
+    begin

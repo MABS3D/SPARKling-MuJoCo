@@ -82,6 +82,11 @@ package MJ.BVH with SPARK_Mode is
    function Valid (T : Tree) return Boolean with Global => null,
      Post => (if Valid'Result then Shaped (T) and then Unique_Leaves (T)
        and then Boxes_Valid (T));
+   --  Imported C trees can pad a degenerate leaf beyond its parent's box.
+   --  Their exact bounds remain safe for traversal, but are not Enclosing.
+   function Traversable (T : Tree) return Boolean with Global => null,
+     Post => (if Traversable'Result then Shaped (T) and then Unique_Leaves (T)
+       and then Boxes_Valid (T));
    --  Build once, refit only boxes when vertices move. Leaf IDs index input B.
    procedure Build (B : Box_Array; T : in out Tree; Result : out Status)
      with Global => null,
@@ -101,9 +106,18 @@ package MJ.BVH with SPARK_Mode is
            and then Enclosing (T) and then Leaves_Match (B, T));
    type Frame_Cache is private;
    function Prepared (Cache : Frame_Cache) return Boolean with Ghost, Global => null;
-   procedure Prepare (PA, PB : Pose; Cache : out Frame_Cache)
+   --  Exact ordered floating-point products and projected origins for both
+   --  frame directions. This does not assert real-valued orthogonality.
+   function Cache_Matches (PA, PB : Pose; Cache : Frame_Cache) return Boolean
+     with Ghost => Static, Global => null,
+       Pre => (Static =>
+         (for all X of PA.Position => X in Coordinate)
+         and then (for all X of PB.Position => X in Coordinate)
+         and then (for all X of PA.Rotation => X in -4.0 .. 4.0)
+         and then (for all X of PB.Rotation => X in -4.0 .. 4.0));
+   procedure Prepare (PA, PB : Pose; Cache : in out Frame_Cache)
      with Global => null, Pre => Valid_Pose (PA) and Valid_Pose (PB),
-       Post => Prepared (Cache);
+       Post => (Static => Prepared (Cache) and then Cache_Matches (PA, PB, Cache));
    --  Matches C's conservative six face-axis test (not a 15-axis SAT).
    function Oriented_Overlap (A, B : Box; Cache : Frame_Cache; Margin : Real)
       return Boolean with Global => null,

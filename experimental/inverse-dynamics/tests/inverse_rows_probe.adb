@@ -11,6 +11,8 @@ procedure Inverse_Rows_Probe is
    package CS renames MJ.Constraint_Solvers;
    package Numbers is new Ada.Text_IO.Float_IO (Real);
    Nv, Nr, Cases : Natural;
+   Sparse : constant Boolean := Ada.Command_Line.Argument_Count = 0
+     or else Ada.Command_Line.Argument (1) /= "dense";
    procedure Get (X : out Natural) is
    begin Ada.Integer_Text_IO.Get (X); end Get;
    procedure Emit (Name : String; V : Real_Array) is
@@ -49,7 +51,7 @@ begin
             end loop;
          end loop;
          for V of Acc loop Numbers.Get (V); end loop;
-         MJ.Inverse_Constraints.Evaluate (J, Rows, Ref, Acc, F, G, Ok);
+         MJ.Inverse_Constraints.Evaluate (J, Rows, Ref, Acc, F, G, Ok, Sparse);
          if not Ok then raise Program_Error with "row response rejected"; end if;
          Emit ("force", F); Emit ("generalized", G);
       end;

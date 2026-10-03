@@ -46,7 +46,8 @@ package body MJ.Flex_Driver with SPARK_Mode is
         or else (for some Elem of E => not Valid (F,Elem,V,Bodies)) then return; end if;
       if G.Kind=Rigid_Geom and then not Valid_Object (G.Geometry,Assets) then return; end if;
       if G.Kind=Terrain_Geom and then not MJ.Heightfield_Contacts.Valid (G.Terrain,Elevation) then return; end if;
-      if G.Kind=SDF_Geom and then not MJ.SDF_Fields.Valid (G.Field,Samples) then return; end if;
+      if G.Kind=SDF_Geom and then not Fields_Admitted
+        and then not MJ.SDF_Fields.Valid (G.Field,Samples) then return; end if;
       Result:=Success;
       if not O.Enabled or else ((G.Geometry.Rigid.Contype and F.Conaffinity)=0 and
         (F.Contype and G.Geometry.Rigid.Conaffinity)=0) then return; end if;
@@ -58,7 +59,8 @@ package body MJ.Flex_Driver with SPARK_Mode is
             Faces (I).Id:=I;
          end loop;
          SDF.Triangles (G.Field,Samples,Faces,T,Origin,G.Placement,
-           (if Midphase and T.Length>0 then SDF.Tree_Flex else SDF.Linear_Flex),Search,M,IDs,Result);
+           (if T.Length=0 then SDF.Linear_Flex elsif Midphase then SDF.Tree_Flex
+            else SDF.Tree_Flex_Zero_Bounds),Search,M,IDs,Result);
          if Result/=Success then return; end if;
          if M.Length>C.Capacity then Result:=Capacity_Limit; return; end if;
          for I in 0 .. M.Length-1 loop

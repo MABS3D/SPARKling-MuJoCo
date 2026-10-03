@@ -46,6 +46,8 @@ mapping={
  'mj_forward':('MJ.API.Runtime.Forward','API smoke; component trajectories separately','composition pending'),
  'mj_inverse':('MJ.Data.Inverse.Evaluate / MJ.Data.Constrained.Inverse.Current','2848 scenarios on 712 model configurations','Inverse_Kernels 35 proof + 9 flow; mass exact relation and composition pending'),
  'mj_invConstraint':('MJ.Inverse_Constraints.Evaluate','412 prepared-row cases, including cancellation; exact C values','constraint response/composition proof pending'),
+ 'mjd_transitionFD':('MJ.Dynamics_Derivatives.Transition_FD','960 scenarios on 80 models, including adhesion and dense/sparse elliptic contacts','Derivative_Kernels82 proof +14flow; workspace composition pending'),
+ 'mjd_inverseFD':('MJ.Dynamics_Derivatives.Inverse_FD','960 scenarios on 80 models, including adhesion and dense/sparse elliptic contacts','Derivative_Kernels82 proof +14flow; workspace composition pending'),
  'mj_loadModel':('MJ.API.MJB.Load','API and component probes','current closure proof pending'),
  'mj_ray':('MJ.Rays.Cast','1440 primitives and6480 scene queries','Ray_Kernels72; composition pending'),
  'mj_multiRay':('MJ.Rays.Cast_Many','batch lifecycle/atomicity','Ray_Kernels72; composition pending'),
@@ -59,7 +61,8 @@ for s,r in records.items():
   if s in ['mj_RungeKutta','mj_implicit','mj_discrete']:r['remaining']='opt-in smooth adapter; link constraints, advanced actuation, flex, sleep and plugin; warning/public ABI and full composition proof pending'
   if s=='mj_multiRay':r['remaining']='repeat-query adapter; C angular aperture and bounding-sphere acceleration still missing'
   if s=='mj_inverse':r['remaining']='owned force API; constrained rows require current forward preparation; inverse-discrete, sensor side effects, all producers and full composition proof pending'
-  if s=='mj_invConstraint':r['remaining']='prepared-row interface, no automatic geometry/equality producer; constrain dense/sparse policy in all public adapters and prove full response'
+  if s=='mj_invConstraint':r['remaining']='prepared-row interface, no automatic geometry/equality producer; prove full response and composed callers'
+  if s in ['mjd_transitionFD','mjd_inverseFD']:r['remaining']='owned scratch workspace; Euler currently admitted; sensor Jacobians, inverse-discrete, history, all producer combinations and full success/frame/composition proof pending'
 report=dict(reference_version='3.14.0',reference_commit='9ecbb9d7b5ee623f54745638d36799ff90e6f7cd',header_sha256=hashes,scope='All top-level stable public C headers, including non-MJAPI Filament functions and public callbacks/data. Experimental USD C++ headers require a separate inventory.',symbols=sorted(records.values(),key=lambda r:r['symbol']),plugin_callback_contracts=callbacks)
 (a.out/'public-symbols.json').write_text(json.dumps(report,indent=2)+'\n')
 fields=['symbol','kind','group','header','line','ada_entry','implementation','linked','tested','proved','remaining']

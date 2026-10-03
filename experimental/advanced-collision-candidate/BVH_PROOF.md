@@ -89,3 +89,67 @@ performance parity with C. Integrated acceptance remains pending.
 Receipts: [results/20261002-bvh-containment](results/20261002-bvh-containment/).
 Source hashes bind the proof, numerical and benchmark snapshots to these files.
 No main simulator integration is introduced by this change.
+
+## Recovery: exact frame cache, 2026-10-03
+
+The integrated SDF7 snapshot subsequently closed the complete BVH unit with
+853 checks and no open obligations, retaining eight warnings. Its exact source
+closure and reports are in `evidence/20261003-recovery/sdf7-bvh-*`; the earlier
+standalone numerical and timing evidence above is not automatically renewed.
+
+The new `Cache_Matches` contract specifies the 36 rotation products and 12
+projected origins using the implementation's floating-point evaluation order.
+`Model_Cache`, component-equality lemmas, and prefix invariants are Static ghost
+code with proved bodies. The operational loops and arithmetic assignments are
+unchanged. Both the existing bound and the new functional postcondition are
+Static; this proof does not assert exact real orthogonality.
+
+The immutable cache11 closure refreshes only `mj-bvh.ads` and `mj-bvh.adb` over
+the 350-source SDF stage2 closure. All twelve minimal scopes have complete
+reports with 141 proof checks and 19 flow checks closed, zero open obligations
+and zero warnings. In particular, `Prepare_Bounded` closes 65 proof checks and
+one flow check. The complete-unit renewal reached its 900-second watchdog with
+no final report (exit99, peak group RSS 507 MB). Its proof count is unknown;
+the successful minima do not close the complete unit. Source manifest SHA256:
+`12ae9ad4b4bf296e8717a19d775cbaa420dba2d81dd74cb0ac424028e3d63c50`.
+The serial runner is `tests/prove_frame_cache.py`; receipts are retained in
+`evidence/20261003-frame-cache/`, including all preceding failed attempts.
+
+The fresh cache12 renewal uses all 350 identical source hashes and an explicit
+1,200-second total limit. It completes in 1,027 seconds: 857 proof checks and
+109 flow checks close, with eight warnings and two open initialization checks
+in the `Traverse` pair-prefix invariant. The prover reports memory limits for
+those two checks, not counterexamples. This is a complete report with open
+obligations, distinct from the report-less cache11 watchdog. Cache13 makes
+per-element initialization explicit in that invariant; its minimal traversal
+proof is pending. No operational traversal statement was changed.
+
+Cache13's traversal minimum subsequently closes 93 proof and 8 flow checks,
+with zero open obligations or warnings. The fresh complete cache14 unit then
+closes **860 proof + 109 flow checks, zero open**, in 974.4 seconds (499 MB peak
+group RSS). The 350-source manifest SHA256 is
+`28eeaf9ff52e00643bec20bd3bf57a15c0b5950cf31935a7b4f271686381c698`.
+Eight warnings remain: five existing operator-reassociation diagnostics outside
+the new cache formulas and three array-initialization-analysis diagnostics whose
+runtime obligations are proved. This is not a warning-free build or a universal
+C-equivalence proof. Validation/release numerical renewal uses these same
+frozen sources and is pending separately.
+
+The numerical renewal is now complete: **2,429/2,429** native-C comparisons
+and all **3,969** containment cases pass in each profile. All 350 runtime-source
+hashes match the proof snapshot, and the two complete outputs are byte-identical.
+`cache14-composition.json` records the linkage. The first harness attempt hit
+its default stack limit; the identical binary passed with an explicit 128 MiB stack,
+then both complete profiles were rebuilt and tested under that recorded limit.
+The failed attempt and separate replay remain in the evidence directory. No
+performance measurement was made.
+
+Universal pair enumeration remains open. A future contract must distinguish
+the exact stack/pruning algorithm from an exhaustive geometric leaf test:
+the self-pair pruning requires contiguous preorder topology, imported C bounds
+may not enclose padded leaves, and rounded oriented projections do not imply
+exact real geometry. `Topology_Valid` checks reachability and preorder at
+runtime, but its current postcondition exposes only shaped nodes and unique
+leaf identifiers. Those topology facts need their own proved model before a
+modular completeness claim can use them. No assumption or stronger admission
+restriction has been introduced to bypass this work.

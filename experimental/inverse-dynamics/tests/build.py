@@ -25,35 +25,38 @@ def main():
     parser.add_argument('--dependencies', type=Path,
                         help='An immutable repository-shaped dependency snapshot; new inverse files still come from this checkout')
     parser.add_argument('--resume', action='store_true', help='Refresh only inverse files in an existing frozen closure')
+    parser.add_argument('--working-dependencies', action='store_true',
+                        help='On resume, also refresh the explicitly selected dependency closure')
     parser.add_argument('--snapshot-only', action='store_true')
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=args.resume)
     snap = args.out / 'source'
     hashes = json.loads((args.out / 'manifest.json').read_text())['sources'] if args.resume else {}
-    for folder in (FOLDERS[-2:] if args.resume else FOLDERS):
+    for folder in (FOLDERS[-2:] if args.resume and not args.working_dependencies else FOLDERS):
         origin = ROOT if folder.startswith('experimental/inverse-dynamics/') else (args.dependencies or ROOT)
         for f in (origin / folder).iterdir():
             if f.is_file() and f.suffix in ('.ads', '.adb', '.py', '.c'):
                 data = f.read_bytes()
                 target = snap / f.relative_to(origin)
                 target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(data)
+                if not target.exists() or target.read_bytes()!=data: target.write_bytes(data)
                 hashes[str(f.relative_to(origin))] = hashlib.sha256(data).hexdigest()
     project = snap / 'experimental/inverse-dynamics/inverse.gpr'
-    shutil.copyfile(HERE / 'inverse.gpr', project)
+    data=(HERE / 'inverse.gpr').read_bytes()
+    if not project.exists() or project.read_bytes()!=data: project.write_bytes(data)
     hashes['experimental/inverse-dynamics/inverse.gpr'] = hashlib.sha256(project.read_bytes()).hexdigest()
     # Refresh only changed files before accepting the immutable closure. A
     # busy shared checkout must never silently mix proof/build source revisions.
     for attempt in range(8):
         changed = []
         for name, digest in hashes.items():
-            origin = ROOT if name.startswith('experimental/inverse-dynamics/') else (snap if args.resume else (args.dependencies or ROOT))
+            origin = ROOT if name.startswith('experimental/inverse-dynamics/') else (snap if args.resume and not args.working_dependencies else (args.dependencies or ROOT))
             if hashlib.sha256((origin / name).read_bytes()).hexdigest() != digest:
                 changed.append(name)
         if not changed:
             break
         for name in changed:
-            origin = ROOT if name.startswith('experimental/inverse-dynamics/') else (snap if args.resume else (args.dependencies or ROOT))
+            origin = ROOT if name.startswith('experimental/inverse-dynamics/') else (snap if args.resume and not args.working_dependencies else (args.dependencies or ROOT))
             data = (origin / name).read_bytes()
             (snap / name).write_bytes(data)
             hashes[name] = hashlib.sha256(data).hexdigest()

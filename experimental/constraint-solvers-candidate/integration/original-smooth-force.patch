@@ -1,0 +1,139 @@
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.ads
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.ads
+@@ -7,6 +7,7 @@
+    Max_Dofs : constant := 128;
+    Max_Rows : constant := 256;
+    type Vector is array (Positive range <>) of Real;
++   Empty_Vector : constant Vector (1 .. 0) := (others => 0.0);
+    type Matrix is array (Positive range <>, Positive range <>) of Real;
+    Max_Jacobian_Entries : constant := 1_048_576;
+    subtype Entry_Count is Natural range 0 .. Max_Jacobian_Entries;
+@@ -58,6 +59,16 @@
+       Cost, Gradient, Improvement : Real := 0.0;
+    end record;
+ 
++   function Smooth_Force_Valid (Value : Vector; N : Natural) return Boolean
++     with Global => null,
++       Post => Smooth_Force_Valid'Result =
++         (Value'Length = 0 or else (Value'First = 1 and then Value'Length = N
++           and then (for all X of Value => X in -1.0e100 .. 1.0e100)));
++
++   --  A supplied Smooth_Force is the original generalized smooth force used
++   --  to obtain A_Free, preserving its rounded value. Empty retains the
++   --  historical assembled API which reconstructs M*A_Free. Shape/domain
++   --  rejection preserves all published output vectors.
+    --  M is the effective SPD metric, J the assembled Jacobian. A_Free and
+    --  Aref define residual J*a - Aref. Arrays must start at 1; zero rows are
+    --  represented by 1 .. 0. A and Force are warm starts and final iterates.
+@@ -80,7 +91,8 @@
+      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+       Settings : Options; A, Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+-      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian)
++      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
++      Smooth_Force : Vector := Empty_Vector)
+    with Post =>
+      (if Result.Outcome in Invalid_Input | Not_Positive_Definite | Numeric_Limit
+       then A = A'Old and Force = Force'Old);
+@@ -92,7 +104,8 @@
+      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+       Settings : Options; A, Force, Generalized_Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+-      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian)
++      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
++      Smooth_Force : Vector := Empty_Vector)
+    with Post =>
+      (if Result.Outcome in Invalid_Input | Not_Positive_Definite | Numeric_Limit
+       then A = A'Old and Force = Force'Old and Generalized_Force = Generalized_Force'Old);
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
+@@ -221,11 +221,16 @@
+       for I in X'Range loop X (I) := V (I) * D (I); end loop;
+    end QCQP;
+ 
++   function Smooth_Force_Valid (Value : Vector; N : Natural) return Boolean is
++     (Value'Length = 0 or else (Value'First = 1 and then Value'Length = N
++       and then (for all X of Value => X in -1.0e100 .. 1.0e100)));
++
+    procedure Solve_With_Force
+      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+       Settings : Options; A, Force, Generalized_Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+-      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian) is
++      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
++      Smooth_Force : Vector := Empty_Vector) is
+       N : constant Natural := A_Free'Length;
+       K : constant Natural := Aref'Length;
+       function Finite (X : Real) return Boolean is (X in -1.0e10 .. 1.0e10);
+@@ -243,7 +248,8 @@
+         or Constraints'First /= 1 or Constraints'Length /= K
+         or Settings.Tolerance not in 0.0 .. 1.0
+         or Settings.LS_Tolerance not in 1.0e-12 .. 1.0
+-        or Settings.Scale not in 1.0e-12 .. 1.0e12 then return;
++        or Settings.Scale not in 1.0e-12 .. 1.0e12
++        or not Smooth_Force_Valid (Smooth_Force, N) then return;
+       end if;
+       if Ordered_Jacobian.Row_Count /= 0 then
+          if not Settings.Sparse or else Ordered_Jacobian.Row_Count /= K
+@@ -1194,7 +1200,9 @@
+                  Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+             end loop;
+          end if;
+-         Multiply_Metric (A_Free, Smooth);
++         if Smooth_Force'Length = 0 then Multiply_Metric (A_Free, Smooth);
++         else Smooth := Smooth_Force;
++         end if;
+          if K = 0 then Acc := A_Free; Result.Outcome := Converged; Grad := (others => 0.0);
+          elsif Settings.Algorithm = PGS then
+             Run_PGS;
+@@ -1215,14 +1223,15 @@
+      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+       Settings : Options; A, Force : in out Vector; Result : out Report;
+       Hessian_Pattern : Structural_Matrix := Empty_Structure;
+-      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian) is
++      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
++      Smooth_Force : Vector := Empty_Vector) is
+    begin
+       if A_Free'Length not in 1 .. Max_Dofs then Result := (others => <>); return; end if;
+       declare
+          Generalized : Vector (1 .. A_Free'Length) := (others => 0.0);
+       begin
+          Solve_With_Force (M, J, A_Free, Aref, Constraints, Settings,
+-           A, Force, Generalized, Result, Hessian_Pattern, Ordered_Jacobian);
++           A, Force, Generalized, Result, Hessian_Pattern, Ordered_Jacobian, Smooth_Force);
+       end;
+    end Solve;
+ end MJ.Constraint_Solvers;
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -639,7 +639,7 @@
+       Mass : CS.Matrix (1 .. Nv, 1 .. Nv);
+       J : CS.Matrix (1 .. Nr, 1 .. Nv) := [others => [others => 0.0]];
+       Ordered_J : CS.Sparse_Jacobian (Nr, E.Rows.Used);
+-      A, A_Free : CS.Vector (1 .. Nv);
++      A, A_Free, Original_Smooth : CS.Vector (1 .. Nv);
+       Generalized_Force : CS.Vector (1 .. Nv) := [others => 0.0];
+       Aref, Force : CS.Vector (1 .. Nr) := [others => 0.0];
+       Hessian_Pattern : CS.Structural_Matrix (1 .. Nv, 1 .. Nv) := [others => [others => False]];
+@@ -662,6 +662,7 @@
+       end if;
+       for V in 1 .. Nv loop
+          A_Free (V) := E.D.Dynamics.Acceleration (V - 1);
++         Original_Smooth (V) := E.D.Dynamics.Total (V - 1);
+          A (V) := A_Free (V); E.T.A_Free (V) := A_Free (V);
+          for W in 1 .. Nv loop Mass (V, W) := E.D.Dynamics.Mass ((V - 1) * Nv + W - 1); end loop;
+          if E.Settings.Sparse and then E.Settings.Algorithm = CS.Newton then
+@@ -861,11 +862,11 @@
+       if E.Settings.Sparse then
+          CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                    A, Force, Generalized_Force, E.T.Report,
+-                   Hessian_Pattern, Ordered_J);
++                   Hessian_Pattern, Ordered_J, Original_Smooth);
+       else
+          CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                    A, Force, Generalized_Force, E.T.Report,
+-                   Hessian_Pattern);
++                   Hessian_Pattern, Smooth_Force => Original_Smooth);
+       end if;
+       --  C's primal solver publishes its current iterate when alpha=0 (no
+       --  improvement), as well as at the iteration budget. The candidate

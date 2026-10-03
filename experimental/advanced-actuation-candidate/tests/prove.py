@@ -4,7 +4,11 @@ import argparse,hashlib,json,os,re,resource,subprocess,time,shutil
 here=Path(__file__).resolve().parents[1]
 ap=argparse.ArgumentParser();ap.add_argument('--unit',default='mj-actuator_curves');ap.add_argument('--subprogram');ap.add_argument('--out',type=Path,required=True);ap.add_argument('--timeout',type=int,default=2);ap.add_argument('--provers',default='z3,cvc5');a=ap.parse_args()
 a.out.mkdir(parents=True,exist_ok=True)
-manifest={str(f.relative_to(here)):hashlib.sha256(f.read_bytes()).hexdigest() for d in ['base','src'] for f in (here/d).glob('*.ad*')}
+base=Path(os.environ.get('ACTUATION_BASE_SOURCE',str(here.parents[1]/'src'))).resolve()
+def source_manifest():
+ files=list((here/'src').glob('*.ad*'))+[base/n for n in ['mj.ads','mj-types.ads','mj-trigonometry.ads','mj-trigonometry.adb']]
+ return {os.path.relpath(f,here):hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
+manifest=source_manifest()
 (a.out/'sources.json').write_text(json.dumps(manifest,indent=2)+'\n')
 tc=Path('/var/tmp/sparkling-matrix-recovery/toolchains');env=os.environ.copy()
 env['PATH']=':'.join(str(next((tc/x).glob('*/bin'))) for x in ['gnat','gprbuild','gnatprove'])+':/usr/bin:/bin'
@@ -27,7 +31,7 @@ if report.exists():
  info['skip_proof']=d.get('skip_proof');info['skip_flow_proof']=d.get('skip_flow_proof');info['pragma_assume']=d.get('pragma_assume');info['spark']=d.get('spark');info['progress']=d.get('progress');info['stop_reason']=d.get('stop_reason')
  info['fresh']=report.stat().st_mtime>=start-2
  info['covered']=[d['entities'][k]['name'] for k,v in d.get('spark',{}).items() if v=='all']
-info['sources_unchanged']=manifest=={str(f.relative_to(here)):hashlib.sha256(f.read_bytes()).hexdigest() for folder in ['base','src'] for f in (here/folder).glob('*.ad*')}
+info['sources_unchanged']=manifest==source_manifest()
 if not a.subprogram and report.exists():
  prefix='MJ.'+a.unit.removeprefix('mj-').replace('-','.')
  declared=set()

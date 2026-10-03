@@ -10,10 +10,11 @@ scatter order. Required force is evaluated as
 `(bias - gravity) + ((mass_times_acceleration - passive) - constraint)`.
 Constraint response supports equality, friction, unilateral/pyramidal and elliptic
 rows. Its explicit dense/sparse choice preserves the different C remainder
-grouping; the constrained inverse entry currently selects sparse rows.
+grouping; the constrained inverse entry now uses the engine's dense/sparse policy.
 
 Fresh validation evidence in `evidence/recovery-20261003` records 2,848 scenarios
-on 712 model configurations and 412 independent prepared-row cases. The latter
+on 712 model configurations and 412 independent prepared-row cases in each of
+the dense and sparse modes. The latter
 coincide exactly with the official C response, including cancellation, structural
 zero and tail cases. These are differential results, not universal equivalence
 proofs. Prepared rows do not establish coverage of every geometry/equality

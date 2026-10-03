@@ -1,0 +1,61 @@
+--- a/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
++++ b/experimental/flex-elasticity-integration/src/mj-data-flex_elasticity-material_loading.adb
+@@ -164,6 +164,19 @@
+       Result := Success;
+    end Load_Metric;
+ 
++   --  The wide translation relation plus the output span implies the
++   --  original source-index bounds. No source-domain restriction is added.
++   procedure Source_Range_Lemma
++     (Offset, Count, Target : Natural; Source : Integer) with
++     Ghost => Static, Global => null,
++     Pre => Count <= Natural'Last-Offset and then Target >= Offset
++       and then Int64 (Target) < Int64 (Offset)+Int64 (Count)
++       and then Int64 (Target) = Int64 (Offset)+Int64 (Source),
++     Post => Source in 0 .. Count-1 is
++   begin
++      null;
++   end Source_Range_Lemma;
++
+    procedure Load_Element
+      (Vertex_Data, Edge_Data : Int_Array; Stiffness : Real_Array;
+       Vertex_Dataadr, Edge_Dataadr, VA, N, EA, Nedge, Dim : Natural;
+@@ -182,14 +195,12 @@
+        and then (if Stiffness_Index >= 0 then Stiffness_Index <= Stiffness'Length-21)),
+      Post => (Static => (if Result = Success then
+        (for all J in C.Vert'Range =>
+-          (if J <= Dim then Vertex_Data (Vertex_Dataadr+J) in 0 .. N-1
+-           and then C.Vert (J) = VA+Vertex_Data (Vertex_Dataadr+J)
+-           and then C.Vert (J) in VA .. VA+N-1 else C.Vert (J) = C.Vert'Old (J)))
++          (if J <= Dim then C.Vert (J) in VA .. VA+N-1
++           and then Int64 (C.Vert (J)) = Int64 (VA)+Int64 (Vertex_Data (Vertex_Dataadr+J)) else C.Vert (J) = C.Vert'Old (J)))
+        and then (for all J in C.Edges'Range =>
+           (if J < (if Dim = 2 then 3 else 6) then
+-            Edge_Data (Edge_Dataadr+J) in 0 .. Nedge-1
+-            and then C.Edges (J) = EA+Edge_Data (Edge_Dataadr+J)
+-            and then C.Edges (J) in EA .. EA+Nedge-1 else C.Edges (J) = C.Edges'Old (J)))
++            C.Edges (J) in EA .. EA+Nedge-1
++            and then Int64 (C.Edges (J)) = Int64 (EA)+Int64 (Edge_Data (Edge_Dataadr+J)) else C.Edges (J) = C.Edges'Old (J)))
+        and then (if Stiffness_Index >= 0 then
+          (for all R in 0 .. (if Dim = 2 then 2 else 5) =>
+            (for all C2 in R .. (if Dim = 2 then 2 else 5) =>
+--- a/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
++++ b/experimental/flex-elasticity-integration/tests/prove_equality_adapter.py
+@@ -21,7 +21,7 @@
+     p.add_argument('--analysis-build',type=Path,help='Reuse analysis only for this exact frozen source manifest')
+     p.add_argument('--scope',choices=['chain','storage','model','engine','columns','ranges','rows','admission','load','flow','whole',
+         'factory','release','allocation','loading-whole','loading-flow',
+-        'materials-load','materials-vertex','materials-edge','materials-row-first','materials-metric','materials-element','materials-flex','materials-whole','materials-flow',
++        'materials-load','materials-vertex','materials-edge','materials-row-first','materials-metric','materials-element','materials-flex','materials-source-range','materials-whole','materials-flow',
+         *['ancestors-'+s for s in ('last','advance','reverse','count','links','column','unfold-pair','unfold-column','shift','merge','build','whole','flow')]],required=True)
+     a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+     source=a.build.resolve()/'source';manifest=json.loads((a.build/'manifest.json').read_text())
+@@ -52,7 +52,7 @@
+             'count':'Merged_Count','links':'Links_Valid','column':'Descending_Column',
+             'unfold-pair':'Unfold_Pair','unfold-column':'Unfold_Column','shift':'Shift_Suffix','merge':'Merge','build':'Build'}
+         if materials:names={'load':'Load','vertex':'Load_Vertex','edge':'Load_Edge',
+-            'row-first':'Packed_Row_First','metric':'Load_Metric','element':'Load_Element','flex':'Load_Flex'}
++            'row-first':'Packed_Row_First','metric':'Load_Metric','element':'Load_Element','flex':'Load_Flex','source-range':'Source_Range_Lemma'}
+         if scope in names:
+             target_name=names[scope]
+             matches=[i for i,line in enumerate(lines,1) if re.match(r'\s*(?:procedure|function) '+target_name+r'\b',line)]

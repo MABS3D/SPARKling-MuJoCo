@@ -2,10 +2,11 @@ project Flex is
    Build_Root := external ("FLEX_BUILD_ROOT", "/var/tmp/sparkling-flex-elasticity");
    Mode := external ("FLEX_MODE", "validation");
    for Source_Dirs use ("src", "tests", "../../src", "../../src/gen",
-     "../smooth/src", "../spatial-tendon-candidate/src", "../muscle-candidate/src");
+     "../smooth/src", "../spatial-tendon-candidate/src", "../muscle-candidate/src",
+     "../constraint-assembly-candidate/src");
    for Object_Dir use Build_Root & "/" & Mode & "/obj";
    for Exec_Dir use Build_Root & "/" & Mode & "/bin";
-   for Main use ("flex_probe.adb");
+   for Main use ("flex_probe.adb", "flex_rows_probe.adb");
    for Create_Missing_Dirs use "True";
    Flags := ("-gnat2022", "-ffp-contract=off");
    case Mode is

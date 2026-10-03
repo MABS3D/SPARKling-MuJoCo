@@ -1,0 +1,191 @@
+{
+  "scope": "storage",
+  "limit": 5,
+  "exit": 1,
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-flex-equality-step-20261003-r98-validation/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-data-flex_elasticity-equalities.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-flex_elasticity-equalities.adb:5"
+  ],
+  "seconds": 103.52693380900018,
+  "runner_sha256": "ae2ce8852b768551d0d7a116f3ee7265e0f771a8a36b660583d837fc4c955f42",
+  "proof_checks": 66,
+  "flow_checks": 2,
+  "checks": 66,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-data-flex_elasticity-equalities.adb",
+      "check_line": 59,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 921,
+              "time": 0.075976
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 835,
+              "time": 0.076936
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 816,
+              "time": 0.071471
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 168,
+              "time": 0.031097
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 758,
+              "time": 0.062856
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 756,
+              "time": 0.067568
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 754,
+              "time": 0.072859
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-data-flex_elasticity-equalities.adb",
+      "how_proved": "prover",
+      "line": 59,
+      "message": {
+        "text": "precondition might fail, cannot prove Chain (K - 1) < Chain (K)"
+      },
+      "msg_id": 31,
+      "rule": "VC_PRECONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 47,
+      "check_file": "mj-data-flex_elasticity-equalities.adb",
+      "check_line": 62,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 2203,
+              "time": 0.132243
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 47,
+      "entity": 1,
+      "file": "mj-data-flex_elasticity-equalities.adb",
+      "how_proved": "prover",
+      "line": 62,
+      "message": {
+        "text": "assertion might fail"
+      },
+      "msg_id": 32,
+      "rule": "VC_ASSERT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "passed": false,
+  "claim": "Minimal scope only; no whole producer or caller Gold claim."
+}

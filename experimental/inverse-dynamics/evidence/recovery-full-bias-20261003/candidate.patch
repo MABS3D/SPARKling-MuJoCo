@@ -1,0 +1,53 @@
+--- a/experimental/inverse-dynamics/src/mj-inverse_kernels.ads
++++ b/experimental/inverse-dynamics/src/mj-inverse_kernels.ads
+@@ -24,6 +24,15 @@
+          and then Constraint in -1.0e60 .. 1.0e60,
+        Post => Required'Result = (Bias - Gravity) + ((Inertial - Passive) - Constraint)
+          and then Required'Result in -1.1e100 .. 1.1e100;
++   -- Complete RNE bias (gravity already included), in C inverse order.
++   function Required_Full_Bias (Inertial, Full_Bias, Passive, Constraint : Real) return Real
++     with Global => null,
++       Pre => Inertial in -1.0e100 .. 1.0e100
++         and then Full_Bias in -1.0e60 .. 1.0e60
++         and then Passive in -1.0e60 .. 1.0e60
++         and then Constraint in -1.0e60 .. 1.0e60,
++       Post => Required_Full_Bias'Result = Full_Bias + ((Inertial - Passive) - Constraint)
++         and then Required_Full_Bias'Result in -1.1e100 .. 1.1e100;
+    procedure Initialize_Entry
+      (Values : in out Real_Array; Index : Natural; Coefficient, Acceleration : Real)
+      with Global => null, Inline_Always,
+--- a/experimental/inverse-dynamics/src/mj-data-inverse.adb
++++ b/experimental/inverse-dynamics/src/mj-data-inverse.adb
+@@ -29,8 +29,8 @@
+          if not Ok then return; end if;
+          for I in Candidate'Range loop
+             declare
+-               F : constant Real := MJ.Inverse_Kernels.Required
+-                 (Candidate (I), D.Dynamics.Bias (I), D.Dynamics.Gravity (I),
++               F : constant Real := MJ.Inverse_Kernels.Required_Full_Bias
++                 (Candidate (I), Full_Bias_Value (D, I),
+                   D.Dynamics.Passive (I),
+                   (if Constraint_Force'Length = 0 then 0.0
+                    else Constraint_Force (Constraint_Force'First + I)));
+--- a/experimental/inverse-dynamics/src/mj-inverse_kernels.adb
++++ b/experimental/inverse-dynamics/src/mj-inverse_kernels.adb
+@@ -5,6 +5,8 @@
+      (Previous + Coefficient * Acceleration);
+    function Required (Inertial, Bias, Gravity, Passive, Constraint : Real) return Real is
+      ((Bias - Gravity) + ((Inertial - Passive) - Constraint));
++   function Required_Full_Bias (Inertial, Full_Bias, Passive, Constraint : Real) return Real is
++     (Full_Bias + ((Inertial - Passive) - Constraint));
+    procedure Initialize_Entry
+      (Values : in out Real_Array; Index : Natural; Coefficient, Acceleration : Real) is
+    begin
+--- a/experimental/dynamics-derivatives-candidate/src/mj-dynamics_derivatives.adb
++++ b/experimental/dynamics-derivatives-candidate/src/mj-dynamics_derivatives.adb
+@@ -326,7 +326,7 @@
+             Force (I) := DK.Smooth_Force
+               ((if W.Mode = Constrained then Actuation (I) else Force_Value (W.S, Actuator_Force, I)),
+               Force_Value (W.S, MJ.Data.Passive_Force, I),
+-              Force_Value (W.S, Velocity_Bias, I) - Force_Value (W.S, Gravity_Force, I));
++              Full_Bias_Value (W.S, I));
+          end if;
+       end loop;
+    end Force_Sample;

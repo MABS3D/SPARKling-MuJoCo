@@ -1,5 +1,5 @@
 """Compare owned flex state and detected contacts from real MJB/Model/Data to C."""
-import argparse,hashlib,json,pathlib,subprocess,xml.etree.ElementTree as ET
+import argparse,hashlib,json,pathlib,resource,subprocess,xml.etree.ElementTree as ET
 import mujoco,numpy as np
 
 def fixture(dim=2,shape='plane',pin=False,offset=False,selfmode='none',two=False,large=False,internal=False,mask=False,gap=False):
@@ -61,7 +61,9 @@ def parse(text):
  samples=[];s=None
  for line in text.splitlines():
   p=line.split()
-  if p[0]=='sample':s={'vertices':{},'contacts':[]};samples.append(s)
+  if p[0]=='sample':s={'vertices':{},'nodes':{},'metadata':{},'contacts':[]};samples.append(s)
+  elif p[0]=='meta':s['metadata'][int(p[1])]=tuple(map(int,p[2:]))
+  elif p[0]=='n':s['nodes'][tuple(map(int,p[1:3]))]=(int(p[3]),np.array(list(map(float,p[4:]))))
   elif p[0]=='v':s['vertices'][tuple(map(int,p[1:3]))]=np.array(list(map(float,p[3:])))
   elif p[0]=='detect':s['status']=p[1];s['count']=int(p[2])
   elif p[0]=='c':s['contacts'].append((tuple(map(int,p[1:8])),np.array(list(map(float,p[8:])))))
@@ -82,11 +84,29 @@ def oracle(m,q,v):
   key=(geom,f1,f2,*map(int,c.elem),*map(int,c.vert))
   values=np.r_[c.dist,c.pos,c.frame[:3],c.dim,c.solref,c.solimp,c.friction,c.includemargin,c.includemargin+gap]
   contacts.append((key,values.copy()))
- return dict(vertices=verts,contacts=contacts)
+ # mj_flex keeps node positions in a temporary stack array. Reproduce that
+ # observable input using the official C vector operations and body poses.
+ nodes={}
+ for f in range(m.nflex):
+  for i in range(int(m.flex_nodenum[f])):
+   n=int(m.flex_nodeadr[f])+i;body=int(m.flex_nodebodyid[n]);local=m.flex_node[n]
+   if m.flex_centered[f] or np.all(local==0):position=d.xpos[body].copy()
+   else:
+    position=np.empty(3);mujoco.mju_mulMatVec3(position,d.xmat[body],local)
+    mujoco.mju_addTo3(position,d.xpos[body])
+   nodes[(f,i)]=(body,position)
+ metadata={f:(int(m.flex_interp[f]),int(m.flex_nodenum[f])) for f in range(m.nflex)}
+ return dict(vertices=verts,nodes=nodes,metadata=metadata,contacts=contacts)
 
-def compare(a,b):
+def compare(a,b,*,check_nodes=True):
  errors=[];vertex_error=0.;contact_error=0.
  if a.get('status')!='SUCCESS':return ['status '+str(a.get('status'))],0,0
+ if check_nodes:
+  if a['metadata']!=b['metadata']:errors.append('interpolation metadata')
+  if a['nodes'].keys()!=b['nodes'].keys():errors.append('node indices')
+  for k,(body,v) in b['nodes'].items():
+   ab,av=a['nodes'].get(k,(-1,np.array([np.nan]*3)))
+   if ab!=body or not np.allclose(av,v,atol=2e-10,rtol=2e-12):errors.append('node '+str(k))
  if a['vertices'].keys()!=b['vertices'].keys():errors.append('vertex indices')
  for k,v in b['vertices'].items():
   av=a['vertices'].get(k,np.array([np.nan]*3));vertex_error=max(vertex_error,float(np.max(np.abs(av-v))))
@@ -104,6 +124,7 @@ def compare(a,b):
 def main():
  p=argparse.ArgumentParser();p.add_argument('--binary',required=True,type=pathlib.Path);p.add_argument('--out',required=True,type=pathlib.Path);p.add_argument('--samples',type=int,default=8);p.add_argument('--only');a=p.parse_args()
  assert mujoco.__version__=='3.14.0';a.out.mkdir(parents=True,exist_ok=False)
+ resource.setrlimit(resource.RLIMIT_STACK,(128*1024*1024,resource.getrlimit(resource.RLIMIT_STACK)[1]))
  warnings=[];mujoco.set_mju_user_warning(warnings.append);rng=np.random.default_rng(20261002);records=[];failures=[]
  for name,xml in fixtures():
   if a.only and a.only not in name:continue
@@ -116,8 +137,16 @@ def main():
   for sample in range(a.samples):
    q=m.qpos0.copy()
    if sample:mujoco.mj_integratePos(m,q,rng.uniform(-1,1,m.nv),.015)
-   v=rng.uniform(-.1,.1,m.nv);inputs.extend(q);inputs.extend(v);expected.append(oracle(m,q,v))
+   v=rng.uniform(-.1,.1,m.nv);inputs.extend(q);inputs.extend(v)
+   (a.out/(name+'.pending.input')).write_text(str(sample+1)+'\n'+' '.join(format(x,'.17g') for x in inputs)+'\n')
+   expected.append(oracle(m,q,v))
+   if name.startswith('interp') and sample==0 and not expected[-1]['contacts']:
+    failures.append(dict(model=name,error='Fixture did not exercise any flex contact'))
   data=str(a.samples)+'\n'+' '.join(format(x,'.17g') for x in inputs)+'\n'
+  (a.out/(name+'.input')).write_text(data)
+  (a.out/(name+'.expected.json')).write_text(json.dumps([
+   dict(metadata=row['metadata'],nodes=[dict(flex=k[0],node=k[1],body=b,position=v.tolist()) for k,(b,v) in row['nodes'].items()],vertices=[dict(flex=k[0],vertex=k[1],position=v.tolist()) for k,v in row['vertices'].items()],
+        contacts=[dict(key=list(map(int,k)),values=v.tolist()) for k,v in row['contacts']]) for row in expected],indent=2)+'\n')
   r=subprocess.run([str(a.binary),str(mf),str(cf)],input=data,text=True,capture_output=True,timeout=180,cwd=a.out)
   (a.out/(name+'.output')).write_text(r.stdout+r.stderr)
   try:
@@ -132,6 +161,8 @@ def main():
   print(name,'PASS' if not any(x.get('model')==name for x in failures) else 'FAIL',flush=True)
  result=dict(reference=mujoco.__version__,cases=len(records),passed=sum(x['passed'] for x in records),failures=failures,
   warnings=warnings,records=records,binary_sha256=hashlib.sha256(a.binary.read_bytes()).hexdigest(),
+  library_sha256=hashlib.sha256((pathlib.Path(mujoco.__file__).parent/'libmujoco.so.3.14.0').read_bytes()).hexdigest(),
+  runner_sha256=hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
   scope='actual MJB metadata, owned Model/Data body kinematics, updated flex vertices/BVH and geometric/material contacts; no flex dynamics/solver')
  (a.out/'results.json').write_text(json.dumps(result,indent=2)+'\n');print('RESULT',result['passed'],result['cases'],'failures',len(failures));raise SystemExit(bool(failures))
 if __name__=='__main__':main()

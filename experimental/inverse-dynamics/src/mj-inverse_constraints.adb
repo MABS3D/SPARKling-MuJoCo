@@ -156,6 +156,7 @@ package body MJ.Inverse_Constraints with SPARK_Mode is
          end loop;
          if (for some X of F => X not in -1.0e60 .. 1.0e60) then return; end if;
          for I in 1 .. Nr loop
+            if F (I) /= 0.0 then
             for K in Jacobian.Descriptors (I).Offset + 1 ..
               Jacobian.Descriptors (I).Offset + Jacobian.Descriptors (I).Nonzeros
             loop
@@ -167,6 +168,7 @@ package body MJ.Inverse_Constraints with SPARK_Mode is
                   G (V) := Sum;
                end;
             end loop;
+            end if;
          end loop;
          Force := F;
          Generalized := G;

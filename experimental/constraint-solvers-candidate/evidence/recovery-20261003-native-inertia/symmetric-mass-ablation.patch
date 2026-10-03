@@ -1,0 +1,25 @@
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
+@@ -358,6 +358,22 @@
+          procedure Multiply_Metric (X : Vector; Y : out Vector) is
+             S : Work;
+          begin
++            if Native_Factor.Row_Count /= 0 then
++               --  Diagnostic ablation: mju_mulSymVecSparse, C 3.14.0.
++               Y := (others => 0.0);
++               for P in 1 .. N loop
++                  Y (P) := M (P, P) * X (P);
++                  for Slot in reverse Native_Factor.Offsets (P)+1 ..
++                    Native_Factor.Offsets (P)+Native_Factor.Widths (P)
++                  loop
++                     declare Q : constant Positive := Native_Factor.Columns (Slot); begin
++                        Y (P) := Y (P) + M (P, Q) * X (Q);
++                        Y (Q) := Y (Q) + M (P, Q) * X (P);
++                     end;
++                  end loop;
++               end loop;
++               return;
++            end if;
+             for P in 1 .. N loop
+                S := 0.0;
+                for Qi in 1 .. Mass_Nonzeros (P) loop

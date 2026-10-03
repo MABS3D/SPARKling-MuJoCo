@@ -1,0 +1,82 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: unrolling loop [info-unrolling-inlining]
+--> mj-bvh.adb:492:23
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:499:33
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:499:33
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:502:39
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:502:39
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:504:42
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:504:42
+
+ medium: "Proj" might not be initialized
+--> mj-bvh.adb:505:21
+  505 |                        Proj (V) in -1.0e14 .. 1.0e14 and then Radius (V) in 0.0 .. 1.0e14);
+      |                        ^~~~
+
+ info: index check proved
+--> mj-bvh.adb:505:27
+
+ medium: "Radius" might not be initialized
+--> mj-bvh.adb:505:60
+  505 |                        Proj (V) in -1.0e14 .. 1.0e14 and then Radius (V) in 0.0 .. 1.0e14);
+      |                                                               ^~~~~~
+
+ info: index check proved
+--> mj-bvh.adb:505:68
+
+ info: assertion proved
+--> mj-bvh.adb:506:34
+
+ info: assertion proved
+--> mj-bvh.adb:507:34
+
+ info: assertion proved
+--> mj-bvh.adb:508:34
+
+ info: precondition proved
+--> mj-bvh.adb:509:31
+
+ info: precondition proved
+--> mj-bvh.adb:511:33
+
+ medium: "Radius" might not be initialized
+--> mj-bvh.adb:514:19
+  514 |                   if Radius (0) + Radius (1) + Margin < abs (Proj (1) - Proj (0)) then return False; end if;
+      |                      ^~~~~~
+
+ info: float overflow check proved
+--> mj-bvh.adb:514:30
+
+ info: float overflow check proved
+--> mj-bvh.adb:514:43
+
+ medium: "Proj" might not be initialized
+--> mj-bvh.adb:514:59
+  514 |                   if Radius (0) + Radius (1) + Margin < abs (Proj (1) - Proj (0)) then return False; end if;
+      |                                                              ^~~~
+
+ info: float overflow check proved
+--> mj-bvh.adb:514:68
+
+ info: implicit aspect Always_Terminates on "Oriented_Overlap" has been proved, subprogram will terminate
+--> mj-bvh.ads:108:13
+
+ info: data dependencies proved
+--> mj-bvh.ads:109:27
+Summary logged in /var/tmp/sparkling-recovery-bvh-oriented-20261003/bvh-oriented/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 31.4 s, peak group RSS 222 MB

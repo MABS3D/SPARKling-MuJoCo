@@ -21,10 +21,18 @@ def row(kind=2, dimension=1, r=0.1, bound=0., mu=1., friction=None):
 
 def encode(p):
     n, k = len(p['free']), len(p['ref'])
-    fields = [n, k, p['method'], p.get('repeat', 1), p.get('iterations', 1000),
+    native = p.get('native_jacobian')
+    has_csr = native is not None and native['layout'] == 'sparse'
+    method = p['method'] % 3 + 6 if has_csr else p['method']
+    fields = [n, k, method, p.get('repeat', 1), p.get('iterations', 1000),
               p.get('ls_iterations', 100), p.get('tolerance', 1e-12), .01, p.get('scale', 1.)]
     for name in ['M', 'J', 'free', 'ref', 'a0', 'f0', 'rows']:
         fields.extend(np.asarray(p[name]).ravel())
+    if has_csr:
+        fields.append(len(native['values']))
+        fields.extend(np.column_stack([native['rowadr'], native['rownnz']]).ravel())
+        fields.extend(np.asarray(native['colind']) + 1)
+        fields.extend(native['values'])
     return ' '.join(format(float(x), '.17g') for x in fields) + '\n'
 
 
@@ -148,7 +156,14 @@ def native_problem(name, xml, method, iterations=1000, tolerance=1e-12, seed=Non
     p = dict(name=name, method=method+(3 if jacobian == 'sparse' else 0), M=full_m, J=jac,
              free=d.qacc_smooth.copy(), ref=d.efc_aref.copy(), a0=d.qacc_smooth.copy(),
              f0=np.zeros(d.nefc), rows=rows, scale=1/(m.stat.meaninertia*max(1, m.nv)),
-             iterations=iterations, tolerance=tolerance)
+             iterations=iterations, tolerance=tolerance,
+             native_smooth_force=d.qfrc_smooth.copy())
+    if mujoco.mj_isSparse(m):
+        addresses = np.asarray(d.efc_J_rowadr[:d.nefc], dtype=np.int64)
+        widths = np.asarray(d.efc_J_rownnz[:d.nefc], dtype=np.int64)
+        used = int(np.max(addresses+widths, initial=0))
+        p['native_jacobian'] = dict(layout='sparse', rowadr=addresses.tolist(), rownnz=widths.tolist(),
+            colind=np.asarray(d.efc_J_colind[:used]).tolist(), values=np.asarray(d.efc_J[:used]).tolist())
     return p, d.qacc.copy(), d.efc_force.copy(), int(d.solver_niter[0])
 
 
@@ -219,7 +234,8 @@ def certificate(p, a, f):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
-    ap.add_argument('--jacobian', choices=['dense', 'sparse'], default='dense'); args = ap.parse_args()
+    ap.add_argument('--jacobian', choices=['dense', 'sparse'], default='dense')
+    ap.add_argument('--native-jacobian', action='store_true'); args = ap.parse_args()
     assert mujoco.__version__ == '3.14.0', mujoco.__version__
     refs = [native_problem(name, xml, method, jacobian=args.jacobian) for name, xml in fixtures() for method in range(3)]
     # Fixed-work PGS exercises shuffle and momentum, independent of stopping.
@@ -228,6 +244,9 @@ def main():
     refs += [native_problem(name, xml, method, seed=seed, jacobian=args.jacobian)
              for name, xml in fixtures() if 'box_' in name or 'mixed_' in name
              for method in range(3) for seed in range(8)]
+    if not args.native_jacobian:
+        for p, *_ in refs:
+            p.pop('native_jacobian', None)
     records, failures = [], []
     outputs = run(args.binary, [r[0] for r in refs])
     for (p, ca, cf, ci), o in zip(refs, outputs):
@@ -261,6 +280,14 @@ def main():
                dict(base, name='below-minimum-regularization', rows=[row(0, r=1e-16)], a0=[.7], f0=[.8]),
                dict(base, name='bad-reciprocal', rows=[[0, 1, .1, .1, 0, 1, 1, 1, 1, 1, 1]], a0=[.7], f0=[.8]),
                dict(base, name='truncated-cone', rows=[row(3, 3)], a0=[.7], f0=[.8])]
+    if args.native_jacobian:
+        csr = dict(layout='sparse', rowadr=[0], rownnz=[1], colind=[0], values=[1.])
+        for name, changes in [('offset-outside', dict(rowadr=[2])),
+                              ('width-outside', dict(rownnz=[2])),
+                              ('column-outside', dict(colind=[1])),
+                              ('value-outside', dict(values=[1e11]))]:
+            rejects.append(dict(base, name='csr-'+name, a0=[.7], f0=[.8],
+                                native_jacobian=dict(csr, **changes)))
     for p, o in zip(rejects, run(args.binary, rejects)):
         expected = 'NOT_POSITIVE_DEFINITE' if p['name'] == 'indefinite' else 'INVALID_INPUT'
         passed = o['status'] == expected and np.array_equal(o['a'], p['a0']) and np.array_equal(o['f'], p['f0'])
@@ -280,7 +307,7 @@ def main():
         passed = o['status'] in ['CONVERGED', 'STALLED'] and np.allclose(o['a'], p['a0'], atol=2e-5, rtol=1e-6)
         rec = dict(name=p['name']+'-warm', method=p['method'], passed=bool(passed), status=o['status']); records.append(rec)
         if not passed: failures.append(rec); print('FAIL', rec)
-    result = dict(mujoco=mujoco.__version__, jacobian=args.jacobian,
+    result = dict(mujoco=mujoco.__version__, jacobian=args.jacobian, native_jacobian=args.native_jacobian,
                   binary_sha256=hashlib.sha256(args.binary.read_bytes()).hexdigest(),
                   total=len(records), passed=len(records)-len(failures), failures=failures, results=records)
     args.out.parent.mkdir(parents=True, exist_ok=True); args.out.write_text(json.dumps(result, indent=2)+'\n')

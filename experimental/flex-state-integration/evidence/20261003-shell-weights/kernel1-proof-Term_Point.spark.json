@@ -1,0 +1,202 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Flex_Shell_Weights.Term_Point",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-flex_shell_weights.ads",
+          "line": 45
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Flex_Shell_Weights.Inside",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-flex_shell_weights.ads",
+          "line": 30
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "entity": 1,
+      "file": "mj-flex_shell_weights.ads",
+      "how_proved": "flow",
+      "line": 45,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Term_Point\" has been proved, subprogram will terminate"
+      },
+      "msg_id": 0,
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 11,
+      "entity": 1,
+      "file": "mj-flex_shell_weights.ads",
+      "how_proved": "flow",
+      "line": 61,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 1,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 16,
+      "check_file": "mj-flex_shell_weights.ads",
+      "check_line": 62,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 2.03700000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 16,
+      "entity": 1,
+      "file": "mj-flex_shell_weights.ads",
+      "how_proved": "prover",
+      "line": 62,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 2.03699991106987E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 1.31860002875328E-02,
+      "gnatwhy3.init": 2.55331993103027E-01,
+      "gnatwhy3.register_vcs": 2.34650000929832E-02,
+      "gnatwhy3.run_vcs": 9.99900021270150E-06,
+      "gnatwhy3.save_session": 4.62599890306592E-03,
+      "gnatwhy3.schedule_vcs": 2.38370001316071E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 5.49100013449788E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 7.38998991437256E-04,
+      "gnatwhy3.transformations.discriminate_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 6.20000006165355E-04,
+      "gnatwhy3.transformations.eliminate_builtin": 3.54900001548231E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 4.50999010354280E-04,
+      "gnatwhy3.transformations.eliminate_epsilon": 4.40000003436580E-04,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 4.86000004457310E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 6.56999007333070E-04,
+      "gnatwhy3.transformations.eliminate_literal": 5.86998998187482E-04,
+      "gnatwhy3.transformations.eliminate_projections_sums": 4.50999010354280E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.inline_trivial": 5.49799902364612E-03,
+      "gnatwhy3.transformations.remove_unused": 2.02100002206862E-03,
+      "gnatwhy3.transformations.simplify_formula": 8.59998981468379E-04,
+      "gnatwhy3.transformations.split_goal_wp_conj": 1.12720001488924E-02
+    },
+    "global": {
+      "flow analysis": 1.16200000047684E-03,
+      "globals (advanced)": 5.95999998040497E-04,
+      "globals (basic)": 2.39800009876490E-03,
+      "init_why_sections": 5.72999997530133E-04,
+      "marking": 7.66000011935830E-04,
+      "properties (advanced)": 5.99999984842725E-05,
+      "translation of standard": 9.05999972019345E-04
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-flex_shell_weights.ads",
+      "how_proved": "trivial",
+      "line": 130,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

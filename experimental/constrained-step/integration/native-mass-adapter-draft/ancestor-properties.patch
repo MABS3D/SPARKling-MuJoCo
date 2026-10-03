@@ -1,0 +1,29 @@
+--- a/experimental/smooth/src/mj-ancestor_rows.ads
++++ b/experimental/smooth/src/mj-ancestor_rows.ads
+@@ -34,6 +34,14 @@
+    function Parent (P : Pattern; Row : Natural) return Integer with
+      Global => null, Pre => Row < Size (P),
+      Post => Parent'Result in -1 .. Integer (Row) - 1;
++
++   procedure Row_Properties (P : Pattern; Row : Natural) with
++     Ghost => Static, Global => null, Pre => Row < Size (P),
++     Post => (if Row = 0 then Start (P, Row) = 0)
++       and then (if Row > 0 then Start (P, Row-1)+Length (P, Row-1) = Start (P, Row))
++       and then (if Row+1 = Size (P) then Start (P, Row)+Length (P, Row) = Count (P))
++       and then (for all K in 1 .. Length (P, Row)-1 =>
++         Column (P, Row, K-1) < Column (P, Row, K));
+ 
+    --  Expose the proved separation of packed rows sharing one factor buffer.
+    procedure Rows_Disjoint (P : Pattern; Earlier, Later : Natural) with
+--- a/experimental/smooth/src/mj-ancestor_rows.adb
++++ b/experimental/smooth/src/mj-ancestor_rows.adb
+@@ -191,4 +191,9 @@
+       Free_Int (P.Columns);
+       P.N := 0;
+    end Free;
++   procedure Row_Properties (P : Pattern; Row : Natural) is
++   begin
++      null;
++   end Row_Properties;
++
+ end MJ.Ancestor_Rows;

@@ -1,0 +1,20 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-prepare-stages-min-r16-20261003/Compute_Forces/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 86.1 s, peak group RSS 587 MB
+ info: initialization of "Result" proved
+--> mj-data-controller_dynamics.adb:17:53
+
+ medium: postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old
+--> mj-data-controller_dynamics.adb:21:36
+   21 |       pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:87:20
+
+ info: precondition proved
+--> mj-data-controller_dynamics.adb:89:19
+gnatprove: unproved check messages considered as errors

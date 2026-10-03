@@ -119,7 +119,9 @@ package body MJ.Data.Constrained.Equalities with SPARK_Mode is
       Result := Success;
    end Initialize_Scalar;
 
-   procedure Initialize (M : MJ.Models.Model; E : in out Engine; Result : out Status) is
+   procedure Initialize
+     (M : MJ.Models.Model; E : in out Engine; Result : out Status;
+      Allow_Flex : Boolean := False) is
    begin
       E.Ne := 0;
       Result := Capacity_Exceeded;
@@ -134,7 +136,9 @@ package body MJ.Data.Constrained.Equalities with SPARK_Mode is
             Reverse_Chain : CA.Column_Array (1 .. Max_V);
          begin
             Result := Unsupported_Feature;
-            if M.Equalities.Eq_Type (Id) not in 0 .. 3 then return; end if;
+            if M.Equalities.Eq_Type (Id) not in 0 .. 6
+              or else (M.Equalities.Eq_Type (Id) >= 4 and then not Allow_Flex)
+            then return; end if;
             P.Kind := M.Equalities.Eq_Type (Id);
             P.Weld := M.Equalities.Eq_Type (Id) = 1;
             P.Site := M.Equalities.Eq_Objtype (Id) = 6;
@@ -142,7 +146,14 @@ package body MJ.Data.Constrained.Equalities with SPARK_Mode is
             P.Params := Parameters (M.Equalities.Eq_Solref.all, M.Equalities.Eq_Solimp.all, Id);
             P.Width := 0; P.First_Row := 0; P.Position_Norm := 0.0;
             P.Jdot_V := [others => 0.0];
-            if P.Kind in 2 .. 3 then
+            if P.Kind >= 4 then
+               if Obj0 not in 0 .. M.S.Nflex-1 then
+                  Result := Invalid_Model; return;
+               end if;
+               --  Keep the original source ID and activity. The specialized
+               --  producer owns the rows; no rigid body chain is fabricated.
+               P.Object0 := Obj0; P.Object1 := Obj1;
+            elsif P.Kind in 2 .. 3 then
                Initialize_Scalar (M, E, Id, Result);
                if Result /= Success then return; end if;
             else
@@ -226,11 +237,10 @@ package body MJ.Data.Constrained.Equalities with SPARK_Mode is
       Result := (if S = CA.Success then Success else Capacity_Exceeded);
    end Assemble_Scalar;
 
-   procedure Assemble (E : in out Engine; Result : out Status) is
+   procedure Prepare (E : in out Engine; Result : out Status) is
    begin
       Result := Success;
       if E.Ne = 0 or else Disabled (E.Flags, Dsbl_Equality) then return; end if;
-      if not (for some P of E.Equalities (0 .. E.Ne-1) => P.Active and then P.Width > 0) then return; end if;
       if (for some P of E.Equalities (0 .. E.Ne-1) =>
         P.Active and then P.Width > 0 and then P.Kind in 0 .. 1)
       then
@@ -239,68 +249,88 @@ package body MJ.Data.Constrained.Equalities with SPARK_Mode is
          Pipeline.Ensure_Cartesian_Motion (E.D, Result);
          if Result /= Success then return; end if;
       end if;
-      for Id in 0 .. E.Ne-1 loop
-         if E.Equalities (Id).Active and then E.Equalities (Id).Width > 0 then
-            if E.Equalities (Id).Kind in 2 .. 3 then
-               Assemble_Scalar (E, Id, Result);
-               if Result /= Success then return; end if;
-            else
-            declare
-               P : Equality_Description renames E.Equalities (Id);
-               B0 : Body_State renames E.D.Kinematic.Bodies (P.Body0);
-               B1 : Body_State renames E.D.Kinematic.Bodies (P.Body1);
-               Rows : constant Positive := (if P.Weld then 6 else 3);
-               Point0 : constant G.Vector := G.Anchor (G.Rotation (B0.Rotation), G.Vector (P.Anchor0), G.Vector (B0.Position));
-               Point1 : constant G.Vector := G.Anchor (G.Rotation (B1.Rotation), G.Vector (P.Anchor1), G.Vector (B1.Position));
-               Offset0 : constant Vector := Vector (Point0) - B0.Center;
-               Offset1 : constant Vector := Vector (Point1) - B1.Center;
-               J0, J1, J : CA.Matrix (1 .. Rows, 1 .. P.Width);
-               Pos : CA.Parameter_Array (1 .. Rows);
-               A, B : G.Quaternion := G.Identity;
-               Sum : Real;
-               S : CA.Result;
-            begin
-               for K in 1 .. P.Width loop
-                  declare
-                     O0 : constant Natural := Jacobian_Offset (E.D, P.Body0, P.Columns (K));
-                     O1 : constant Natural := Jacobian_Offset (E.D, P.Body1, P.Columns (K));
-                     L0 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O0);
-                     L1 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O1);
-                     W0 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O0);
-                     W1 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O1);
-                  begin
-                     for X in 0 .. 2 loop
-                        J0 (X+1, K) := CK.Point_Component (L0 (X), W0 ((X+1) mod 3), W0 ((X+2) mod 3),
-                          Offset0 ((X+1) mod 3), Offset0 ((X+2) mod 3));
-                        J1 (X+1, K) := CK.Point_Component (L1 (X), W1 ((X+1) mod 3), W1 ((X+2) mod 3),
-                          Offset1 ((X+1) mod 3), Offset1 ((X+2) mod 3));
-                        if P.Weld then J0 (X+4, K) := W0 (X); J1 (X+4, K) := W1 (X); end if;
-                     end loop;
-                  end;
-               end loop;
-               if P.Weld then
-                  A := G.Multiply (G.Quaternion (B0.Orientation), G.Quaternion (P.Local0));
-                  B := (if P.Site then G.Multiply (G.Quaternion (B1.Orientation), G.Quaternion (P.Local1))
-                        else G.Quaternion (B1.Orientation));
-                  G.Weld (Point0, Point1, A, B, P.Torque, J0, J1, J, Pos);
-                  --  mju_norm: four lanes, horizontal reduction, then two-element tail.
-                  Sum := ((Pos (1).Position**2 + Pos (3).Position**2)
-                          + (Pos (2).Position**2 + Pos (4).Position**2))
-                         + (Pos (5).Position**2 + Pos (6).Position**2);
-               else
-                  G.Connect (Point0, Point1, J0, J1, J, Pos);
-                  Sum := (Pos (1).Position**2 + Pos (2).Position**2) + Pos (3).Position**2;
-               end if;
-               --  C computes one impedance from the norm of the entire block.
-               P.Position_Norm := MJ.Joint_Limit_Math.Sqrt (Sum);
-               Bias (P, B0, B1, Point0, Point1, A, B);
-               P.First_Row := E.Rows.Rows+1;
-               CA.Append (E.Rows, CA.Equality, Id, P.Columns (1 .. P.Width), J, Pos, 0.0, S);
-               if S /= CA.Success then Result := Capacity_Exceeded; return; end if;
-            end;
-            end if;
-         end if;
-      end loop;
+   end Prepare;
+
+   procedure Assemble_One (E : in out Engine; Id : Natural; Result : out Status) is
+   begin
+      Result := Invalid_Index;
+      if Id >= E.Ne then return; end if;
       Result := Success;
+      if Disabled (E.Flags, Dsbl_Constraint) or else Disabled (E.Flags, Dsbl_Equality)
+        or else not E.Equalities (Id).Active then return; end if;
+      --  Never silently omit an active flex equality on the ordinary path,
+      --  including after a runtime activation of an initially inactive row.
+      if E.Equalities (Id).Kind >= 4 then Result := Unsupported_Feature; return; end if;
+      if E.Equalities (Id).Width = 0 then return; end if;
+      if E.Equalities (Id).Kind in 2 .. 3 then
+         Assemble_Scalar (E, Id, Result);
+         return;
+      end if;
+      declare
+         P : Equality_Description renames E.Equalities (Id);
+         B0 : Body_State renames E.D.Kinematic.Bodies (P.Body0);
+         B1 : Body_State renames E.D.Kinematic.Bodies (P.Body1);
+         Rows : constant Positive := (if P.Weld then 6 else 3);
+         Point0 : constant G.Vector := G.Anchor (G.Rotation (B0.Rotation), G.Vector (P.Anchor0), G.Vector (B0.Position));
+         Point1 : constant G.Vector := G.Anchor (G.Rotation (B1.Rotation), G.Vector (P.Anchor1), G.Vector (B1.Position));
+         Offset0 : constant Vector := Vector (Point0) - B0.Center;
+         Offset1 : constant Vector := Vector (Point1) - B1.Center;
+         J0, J1, J : CA.Matrix (1 .. Rows, 1 .. P.Width);
+         Pos : CA.Parameter_Array (1 .. Rows);
+         A, B : G.Quaternion := G.Identity;
+         Sum : Real;
+         S : CA.Result;
+      begin
+         for K in 1 .. P.Width loop
+            declare
+               O0 : constant Natural := Jacobian_Offset (E.D, P.Body0, P.Columns (K));
+               O1 : constant Natural := Jacobian_Offset (E.D, P.Body1, P.Columns (K));
+               L0 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O0);
+               L1 : constant Vector := Read_Vector (E.D.Kinematic.Linear_Jacobian.all, O1);
+               W0 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O0);
+               W1 : constant Vector := Read_Vector (E.D.Kinematic.Angular_Jacobian.all, O1);
+            begin
+               for X in 0 .. 2 loop
+                  J0 (X+1, K) := CK.Point_Component (L0 (X), W0 ((X+1) mod 3), W0 ((X+2) mod 3),
+                    Offset0 ((X+1) mod 3), Offset0 ((X+2) mod 3));
+                  J1 (X+1, K) := CK.Point_Component (L1 (X), W1 ((X+1) mod 3), W1 ((X+2) mod 3),
+                    Offset1 ((X+1) mod 3), Offset1 ((X+2) mod 3));
+                  if P.Weld then J0 (X+4, K) := W0 (X); J1 (X+4, K) := W1 (X); end if;
+               end loop;
+            end;
+         end loop;
+         if P.Weld then
+            A := G.Multiply (G.Quaternion (B0.Orientation), G.Quaternion (P.Local0));
+            B := (if P.Site then G.Multiply (G.Quaternion (B1.Orientation), G.Quaternion (P.Local1))
+                  else G.Quaternion (B1.Orientation));
+            G.Weld (Point0, Point1, A, B, P.Torque, J0, J1, J, Pos);
+            --  mju_norm: four lanes, horizontal reduction, then two-element tail.
+            Sum := ((Pos (1).Position**2 + Pos (3).Position**2)
+                    + (Pos (2).Position**2 + Pos (4).Position**2))
+                   + (Pos (5).Position**2 + Pos (6).Position**2);
+         else
+            G.Connect (Point0, Point1, J0, J1, J, Pos);
+            Sum := (Pos (1).Position**2 + Pos (2).Position**2) + Pos (3).Position**2;
+         end if;
+         --  C computes one impedance from the norm of the entire block.
+         P.Position_Norm := MJ.Joint_Limit_Math.Sqrt (Sum);
+         Bias (P, B0, B1, Point0, Point1, A, B);
+         P.First_Row := E.Rows.Rows+1;
+         CA.Append (E.Rows, CA.Equality, Id, P.Columns (1 .. P.Width), J, Pos, 0.0, S);
+         if S /= CA.Success then Result := Capacity_Exceeded; return; end if;
+      end;
+      Result := Success;
+   end Assemble_One;
+
+   procedure Assemble (E : in out Engine; Result : out Status) is
+   begin
+      Result := Success;
+      if Disabled (E.Flags, Dsbl_Constraint) then return; end if;
+      Prepare (E, Result);
+      if Result /= Success then return; end if;
+      for Id in 0 .. E.Ne-1 loop
+         Assemble_One (E, Id, Result);
+         if Result /= Success then return; end if;
+      end loop;
    end Assemble;
 end MJ.Data.Constrained.Equalities;

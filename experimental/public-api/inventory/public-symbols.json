@@ -1167,7 +1167,7 @@
       "linked": "explicit Ada entry; C ABI is not provided",
       "tested": "412 prepared-row cases, including cancellation; exact C values",
       "proved": "constraint response/composition proof pending",
-      "remaining": "prepared-row interface, no automatic geometry/equality producer; constrain dense/sparse policy in all public adapters and prove full response"
+      "remaining": "prepared-row interface, no automatic geometry/equality producer; prove full response and composed callers"
     },
     {
       "symbol": "mj_invPosition",
@@ -2674,12 +2674,12 @@
       "line": 1515,
       "group": "engine-model-runtime",
       "declaration": "MJAPI void mjd_inverseFD(const mjModel* m, mjData* d, mjtNum eps, mjtBool flg_actuation, mjtNum *DfDq, mjtNum *DfDv, mjtNum *DfDa, mjtNum *DsDq, mjtNum *DsDv, mjtNum *DsDa, mjtNum *DmDq);",
-      "ada_entry": "",
-      "implementation": "unmapped",
-      "linked": "no public mapping recorded",
-      "tested": "pending",
-      "proved": "pending",
-      "remaining": "audit and connect native implementation; add missing implementation as required"
+      "ada_entry": "MJ.Dynamics_Derivatives.Inverse_FD",
+      "implementation": "native candidate",
+      "linked": "explicit Ada entry; C ABI is not provided",
+      "tested": "960 scenarios on 80 models, including adhesion and dense/sparse elliptic contacts",
+      "proved": "Derivative_Kernels82 proof +14flow; workspace composition pending",
+      "remaining": "owned scratch workspace; Euler currently admitted; sensor Jacobians, inverse-discrete, history, all producer combinations and full success/frame/composition proof pending"
     },
     {
       "symbol": "mjd_quatIntegrate",
@@ -2716,12 +2716,12 @@
       "line": 1496,
       "group": "engine-model-runtime",
       "declaration": "MJAPI void mjd_transitionFD(const mjModel* m, mjData* d, mjtNum eps, mjtBool flg_centered, mjtNum* A, mjtNum* B, mjtNum* C, mjtNum* D);",
-      "ada_entry": "",
-      "implementation": "unmapped",
-      "linked": "no public mapping recorded",
-      "tested": "pending",
-      "proved": "pending",
-      "remaining": "audit and connect native implementation; add missing implementation as required"
+      "ada_entry": "MJ.Dynamics_Derivatives.Transition_FD",
+      "implementation": "native candidate",
+      "linked": "explicit Ada entry; C ABI is not provided",
+      "tested": "960 scenarios on 80 models, including adhesion and dense/sparse elliptic contacts",
+      "proved": "Derivative_Kernels82 proof +14flow; workspace composition pending",
+      "remaining": "owned scratch workspace; Euler currently admitted; sensor Jacobians, inverse-discrete, history, all producer combinations and full success/frame/composition proof pending"
     },
     {
       "symbol": "mjp_archiveResourceProviderCount",

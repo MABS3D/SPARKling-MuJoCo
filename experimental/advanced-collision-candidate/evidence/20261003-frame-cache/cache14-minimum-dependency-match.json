@@ -1,0 +1,48 @@
+{
+  "minimum_manifest": "/var/tmp/sparkling-recovery-bvh-cache13-20261003/manifest.json",
+  "minimum_manifest_sha256": "2e59911cbbed6a7edcbfa7ac9dd9527b756a76ed2e71223ebfffbdb3d01cda94",
+  "matching_source_count": 350,
+  "minimal_scope": [
+    {
+      "scope": "Traverse",
+      "exit": 0,
+      "report_available": true,
+      "counts": {
+        "proof": 93,
+        "flow": 8,
+        "warnings": 0,
+        "open": 0
+      },
+      "passed": true,
+      "seconds": 171.194396881001,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-recovery-bvh-cache13-20261003/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "480",
+        "--",
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-recovery-bvh-cache13-20261003/source/experimental/sdf-step/sdf.gpr",
+        "-u",
+        "mj-bvh.adb",
+        "-j1",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--warnings=continue",
+        "--mode=prove",
+        "--prover=cvc5,z3,altergo",
+        "--timeout=15",
+        "--memlimit=650",
+        "--steps=0",
+        "--proof=per_check",
+        "--counterexamples=off",
+        "--no-inlining",
+        "--limit-subp=mj-bvh.adb:679"
+      ]
+    }
+  ],
+  "whole_not_inherited": true
+}

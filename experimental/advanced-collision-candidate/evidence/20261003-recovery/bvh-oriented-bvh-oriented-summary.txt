@@ -1,0 +1,38 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                     Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                           .           .          .
+Flow Dependencies                 .         .                           .           .          .
+Initialization                    4         .                           .           .          4
+Non-Aliasing                      .         .                           .           .          .
+Run-time Checks                   5         .        5 (CVC5 82%, Z3 18%)           .          .
+Assertions                        9         .    9 (CVC5 94%, altergo 6%)           .          .
+Functional Contracts              2         .                    2 (CVC5)           .          .
+LSP Verification                  .         .                           .           .          .
+Termination                       1         1                           .           .          .
+Concurrency                       .         .                           .           .          .
+------------------------------------------------------------------------------------------------
+Total                            22    2 (9%)                    16 (73%)           .    4 (18%)
+
+
+max steps used for successful proof: 41662
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.adb:504:42: loop invariant after first iteration proved in max 3 seconds
+mj-bvh.adb:514:68: fp_overflow check proved in max 1 seconds
+mj-bvh.adb:514:43: fp_overflow check proved in max 1 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 1 subprograms and packages out of 1 analyzed
+  MJ.BVH.Oriented_Overlap at mj-bvh.ads:108 flow analyzed (0 errors, 4 checks, 0 warnings and 0 pragma Assume statements) and proved (16 checks)

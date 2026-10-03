@@ -1,0 +1,90 @@
+[
+  {
+    "name": "edges",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-step/tests/controller_edges.py",
+      "--bin-dir",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-controller-edges-r14-r1-20261003"
+    ],
+    "exit": 0,
+    "log": "/var/tmp/advanced-r14-r1-edges.log"
+  },
+  {
+    "name": "min",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-step/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin/constrained_advanced_probe",
+      "--only",
+      "combo_",
+      "--samples",
+      "2",
+      "--steps",
+      "10",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-min-20261003"
+    ],
+    "exit": 0,
+    "log": "/var/tmp/advanced-r14-r1-min.log"
+  },
+  {
+    "name": "smooth",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-step/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin/advanced_probe",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-smooth-r14-r1-20261003"
+    ],
+    "exit": 0,
+    "log": "/var/tmp/advanced-r14-r1-smooth.log"
+  },
+  {
+    "name": "fixed",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-step/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin/constrained_advanced_probe",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-fixed-20261003"
+    ],
+    "exit": 1,
+    "log": "/var/tmp/advanced-r14-r1-fixed.log"
+  },
+  {
+    "name": "mobile",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/advanced-step/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin/constrained_advanced_probe",
+      "--contact-mobility",
+      "free-carrier",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-mobile-20261003"
+    ],
+    "exit": 1,
+    "log": "/var/tmp/advanced-r14-r1-mobile.log"
+  },
+  {
+    "name": "parent",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/constrained-step/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-r1-20261003/build/validation/bin/constrained_probe",
+      "--samples",
+      "2",
+      "--out",
+      "/var/tmp/sparkling-services-advanced-constrained-r14-parent-regression-20261003"
+    ],
+    "exit": 0,
+    "log": "/var/tmp/advanced-r14-r1-parent.log"
+  }
+]

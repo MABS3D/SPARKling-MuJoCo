@@ -10,8 +10,11 @@ with MJ.BVH;
 generic
    with procedure Custom_Query (Key : Natural; X : Vec; Need_Gradient : Boolean;
                                 Value : out Real; Gradient : out Vec; Result : out Status);
+   --  Immutable fields validated at model creation use the same admitted
+   --  query boundary as the integrated rigid/SDF scene.
+   Fields_Admitted : Boolean := False;
 package MJ.Flex_Driver with SPARK_Mode is
-   package SDF is new MJ.SDF_Collisions (Custom_Query);
+   package SDF is new MJ.SDF_Collisions (Custom_Query, Fields_Admitted);
    type Collider_Kind is (Rigid_Geom, Terrain_Geom, SDF_Geom);
    type Collider is record
       Kind : Collider_Kind := Rigid_Geom;
@@ -28,6 +31,7 @@ package MJ.Flex_Driver with SPARK_Mode is
                       W : in out MJ.Convex_Contacts.Workspace; C : in out Batch; Result : out Status;
                       Graphs : Graph_Array := Empty_Graph)
      with Global => null, Pre => MJ.BVH.Valid (T)
-         and then (if Midphase and T.Length>0 then Fits (F,E,V,T)),
+         and then (if (Midphase or G.Kind = SDF_Geom) and T.Length>0 then Fits (F,E,V,T))
+         and then (if Fields_Admitted and G.Kind = SDF_Geom then MJ.SDF_Fields.Valid (G.Field, Samples)),
        Post => C.Length <= C.Capacity and (if Result /= Success then C.Length = 0);
 end MJ.Flex_Driver;

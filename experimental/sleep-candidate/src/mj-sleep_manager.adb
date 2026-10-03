@@ -1,22 +1,6 @@
 with MJ.Sleep_Bytes;
 package body MJ.Sleep_Manager with SPARK_Mode is
    use type K.Object_State;
-   function Sleep_Cycle (T : Tree_Array; Start : Integer) return Integer is
-      Current, Smallest : Integer := Start;
-      Next : Integer;
-   begin
-      if Start not in T'Range then return -1; end if;
-      for Count in 0 .. T'Length loop
-         pragma Loop_Invariant (Current in T'Range and Smallest in T'Range);
-         Next := T (Current);
-         if Next not in T'Range then return -1; end if;
-         Smallest := Integer'Min (Smallest, Next);
-         Current := Next;
-         if Current = Start then return Smallest; end if;
-      end loop;
-      return -1;
-   end Sleep_Cycle;
-
    procedure Wake_Island (T : in out Tree_Array; Start : Integer; Value : K.Counter;
      Woke : out Natural; Status : out Result) is
       Current, Next : Integer;
@@ -33,7 +17,9 @@ package body MJ.Sleep_Manager with SPARK_Mode is
          pragma Loop_Invariant (Current in T'Range);
          pragma Loop_Invariant (Woke = Count-1);
          pragma Loop_Invariant (Static =>
-           (for all J in T'Range => T (J) = T'Loop_Entry (J) or T (J) < 0));
+           (for all J in T'Range =>
+             (T (J) = T'Loop_Entry (J) or T (J) = Value)
+             and then (if T'Loop_Entry (J) < 0 then T (J) = T'Loop_Entry (J))));
          Next := T (Current);
          --  The checked cycle must end at Start; guard also keeps invalid data
          --  from accessing any array if callers bypass static preconditions.
@@ -48,10 +34,20 @@ package body MJ.Sleep_Manager with SPARK_Mode is
    begin
       S.Trees_Awake := 0; S.Bodies_Awake := 0; S.Parents_Awake := 0; S.Dofs_Awake := 0;
       for T in M.Trees'Range loop
+         pragma Loop_Invariant (S.Trees_Awake <= T);
+         pragma Loop_Invariant (Static =>
+           (for all I in M.Trees'First .. T-1 =>
+             S.Tree_Awake (I) = (S.Tree_Asleep (I) < 0)));
          S.Tree_Awake (T) := S.Tree_Asleep (T) < 0;
          if S.Tree_Awake (T) then S.Trees_Awake := S.Trees_Awake + 1; end if;
       end loop;
       for J in M.Bodies'Range loop
+         pragma Loop_Invariant (S.Bodies_Awake <= J and S.Parents_Awake <= J);
+         pragma Loop_Invariant (Static =>
+           (for all I in M.Bodies'First .. J-1 =>
+             S.Body_Awake (I) = K.Body_State (M.Bodies (I).Tree,
+               (if M.Bodies (I).Tree >= 0 then S.Tree_Awake (M.Bodies (I).Tree) else False),
+               M.Bodies (I).Mocap_Root, Static_Awake)));
          S.Body_Awake (J) := K.Body_State (M.Bodies (J).Tree,
            (if M.Bodies (J).Tree >= 0 then S.Tree_Awake (M.Bodies (J).Tree) else False),
            M.Bodies (J).Mocap_Root, Static_Awake);
@@ -63,6 +59,7 @@ package body MJ.Sleep_Manager with SPARK_Mode is
          end if;
       end loop;
       for V in M.Dof_Body'Range loop
+         pragma Loop_Invariant (S.Dofs_Awake <= V);
          B := M.Dof_Body (V);
          if M.Bodies (B).Tree >= 0 and then S.Body_Awake (B) = K.Awake then
             S.Dof_Index (S.Dofs_Awake) := V; S.Dofs_Awake := S.Dofs_Awake + 1;

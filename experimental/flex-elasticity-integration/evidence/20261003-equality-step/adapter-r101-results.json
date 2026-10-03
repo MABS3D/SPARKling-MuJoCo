@@ -1,0 +1,50 @@
+{
+  "scope": "storage",
+  "limit": 5,
+  "exit": 1,
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-flex-equality-step-20261003-r100-validation/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-data-flex_elasticity-equalities.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-flex_elasticity-equalities.adb:5"
+  ],
+  "seconds": 84.47842764699817,
+  "runner_sha256": "ae2ce8852b768551d0d7a116f3ee7265e0f771a8a36b660583d837fc4c955f42",
+  "proof_checks": 0,
+  "flow_checks": 0,
+  "checks": 0,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 22,
+      "file": "mj-data-flex_elasticity-equalities.adb",
+      "how_proved": "trivial",
+      "line": 37,
+      "message": {
+        "text": "non-scalar object or object with address clause declared before loop-invariant is not yet supported"
+      },
+      "rule": "error",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [],
+  "passed": false,
+  "claim": "Minimal scope only; no whole producer or caller Gold claim."
+}

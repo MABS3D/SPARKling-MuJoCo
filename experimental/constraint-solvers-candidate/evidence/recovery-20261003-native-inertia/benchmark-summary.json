@@ -1,0 +1,701 @@
+{
+  "scope": {
+    "ldl-only": "Optional Ada native LDL API, parent adapter and backsolve; full step, not isolated backsolve timing.",
+    "ldl-vs-r16": "Cumulative comparison including sparse H add, original force, procedural legality fix, native LDL and ghost/domain changes; no single-change attribution."
+  },
+  "proof_scope": "181 native kernel checks closed; global factor provenance and whole-solver functional proof OPEN.",
+  "production_applied": false,
+  "runs": [
+    {
+      "label": "ldl-only",
+      "results_sha256": "2954d70b58423639fdad061d6b378f166ab9d2c918dc08ad582f3f22905f8849",
+      "driver_sha256": "4b48fdc0e46e237985fa8deeb350b197bdf34ea4cd968b7731f0104d5bbd5944",
+      "candidate_sha256": "76f26e62d84c8b0e27c6601af2454a3be05ed431348048ab75dc806bc648fa2b",
+      "baseline_sha256": "c0271af15c7995fd7c201769246df06914006f3f59cfc7bc50f2ef709e4addf5",
+      "reference_sha256": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+      "affinity": [
+        2
+      ],
+      "blocks": 15,
+      "batches": 8,
+      "steps": 100,
+      "records": [
+        {
+          "model": "sphere_Newton_3_0.2",
+          "nv": 6,
+          "paired_ratio": {
+            "median": 0.9648700903109201,
+            "bootstrap_95": [
+              0.9447726385205893,
+              0.9866711545374762
+            ]
+          },
+          "significant_gain": true,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 1.585012503535825,
+            "bootstrap_95": [
+              1.54718233617637,
+              1.606358889509762
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 3.82141125,
+              "median_absolute_deviation_us": 0.05376250000000038,
+              "min_block_mean_us": 3.7508675,
+              "max_block_mean_us": 5.32010375,
+              "p95_trajectory_us": 517.3818000000001
+            },
+            "ada": {
+              "median_block_mean_us": 3.70277375,
+              "median_absolute_deviation_us": 0.038791250000000055,
+              "min_block_mean_us": 3.63350375,
+              "max_block_mean_us": 4.28414625,
+              "p95_trajectory_us": 437.9788
+            },
+            "c": {
+              "median_block_mean_us": 2.36951,
+              "median_absolute_deviation_us": 0.022198749999999823,
+              "min_block_mean_us": 2.32884125,
+              "max_block_mean_us": 3.14358125,
+              "p95_trajectory_us": 308.71205000000003
+            }
+          }
+        },
+        {
+          "model": "coupled_limits_friction",
+          "nv": 3,
+          "paired_ratio": {
+            "median": 0.990060079382652,
+            "bootstrap_95": [
+              0.9294080020961817,
+              1.0161430712031871
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 1.2737778890201066,
+            "bootstrap_95": [
+              1.2426179014854002,
+              1.3007294300976424
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 2.57015375,
+              "median_absolute_deviation_us": 0.06291124999999997,
+              "min_block_mean_us": 2.4373625,
+              "max_block_mean_us": 3.51329,
+              "p95_trajectory_us": 354.77925000000005
+            },
+            "ada": {
+              "median_block_mean_us": 2.4984525,
+              "median_absolute_deviation_us": 0.0763212499999999,
+              "min_block_mean_us": 2.411995,
+              "max_block_mean_us": 3.6778262500000003,
+              "p95_trajectory_us": 365.5534
+            },
+            "c": {
+              "median_block_mean_us": 1.9645437500000003,
+              "median_absolute_deviation_us": 0.04236750000000011,
+              "min_block_mean_us": 1.90476,
+              "max_block_mean_us": 2.7440762500000004,
+              "p95_trajectory_us": 284.16535
+            }
+          }
+        },
+        {
+          "model": "box_multiple",
+          "nv": 6,
+          "paired_ratio": {
+            "median": 0.9676799438680378,
+            "bootstrap_95": [
+              0.9304677878776978,
+              1.012506539179024
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.0973875455702378,
+            "bootstrap_95": [
+              2.0587507648903647,
+              2.266731632687534
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 6.9115312499999995,
+              "median_absolute_deviation_us": 0.17739999999999956,
+              "min_block_mean_us": 6.5044225,
+              "max_block_mean_us": 9.813465,
+              "p95_trajectory_us": 982.9801
+            },
+            "ada": {
+              "median_block_mean_us": 6.6862675,
+              "median_absolute_deviation_us": 0.16457374999999974,
+              "min_block_mean_us": 6.447135,
+              "max_block_mean_us": 9.0558025,
+              "p95_trajectory_us": 953.2494499999998
+            },
+            "c": {
+              "median_block_mean_us": 3.24477625,
+              "median_absolute_deviation_us": 0.07222624999999994,
+              "min_block_mean_us": 3.108035,
+              "max_block_mean_us": 3.6030425000000004,
+              "p95_trajectory_us": 351.3808
+            }
+          }
+        },
+        {
+          "model": "shared_ancestors",
+          "nv": 8,
+          "paired_ratio": {
+            "median": 1.0082481115683657,
+            "bootstrap_95": [
+              0.9890804342093977,
+              1.0288673451651136
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.0026649307728897,
+            "bootstrap_95": [
+              1.94143809959836,
+              2.0294411482430217
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 1.1102230246251565e-16,
+            "ada": 1.1102230246251565e-16
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 4.8321175,
+              "median_absolute_deviation_us": 0.11043249999999993,
+              "min_block_mean_us": 4.64338625,
+              "max_block_mean_us": 5.96314625,
+              "p95_trajectory_us": 570.6281499999999
+            },
+            "ada": {
+              "median_block_mean_us": 4.817015,
+              "median_absolute_deviation_us": 0.14688874999999957,
+              "min_block_mean_us": 4.64269,
+              "max_block_mean_us": 6.4899825,
+              "p95_trajectory_us": 667.0632499999999
+            },
+            "c": {
+              "median_block_mean_us": 2.4414275,
+              "median_absolute_deviation_us": 0.06546999999999992,
+              "min_block_mean_us": 2.31869375,
+              "max_block_mean_us": 3.27523,
+              "p95_trajectory_us": 318.22240000000005
+            }
+          }
+        },
+        {
+          "model": "4_free_bodies",
+          "nv": 24,
+          "paired_ratio": {
+            "median": 0.9784471336799099,
+            "bootstrap_95": [
+              0.9499671557757488,
+              1.0849169915657166
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.5459381794991978,
+            "bootstrap_95": [
+              2.53046569111621,
+              2.6445921543463418
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 13.013177500000001,
+              "median_absolute_deviation_us": 0.20310875000000195,
+              "min_block_mean_us": 12.6174125,
+              "max_block_mean_us": 19.242492499999997,
+              "p95_trajectory_us": 1914.7785999999996
+            },
+            "ada": {
+              "median_block_mean_us": 12.677267500000001,
+              "median_absolute_deviation_us": 0.2514025000000011,
+              "min_block_mean_us": 12.37942,
+              "max_block_mean_us": 19.39480375,
+              "p95_trajectory_us": 1947.67925
+            },
+            "c": {
+              "median_block_mean_us": 4.98603125,
+              "median_absolute_deviation_us": 0.06814874999999976,
+              "min_block_mean_us": 4.880662500000001,
+              "max_block_mean_us": 6.451078750000001,
+              "p95_trajectory_us": 699.5794999999999
+            }
+          }
+        },
+        {
+          "model": "8_free_bodies",
+          "nv": 48,
+          "paired_ratio": {
+            "median": 0.9709746777891748,
+            "bootstrap_95": [
+              0.8559550376986688,
+              1.0072797449698812
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 3.3911553239441448,
+            "bootstrap_95": [
+              3.3387566586939634,
+              3.835001288720031
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 29.7074775,
+              "median_absolute_deviation_us": 1.0246774999999992,
+              "min_block_mean_us": 28.32451,
+              "max_block_mean_us": 39.86762125,
+              "p95_trajectory_us": 4334.281349999999
+            },
+            "ada": {
+              "median_block_mean_us": 28.5395525,
+              "median_absolute_deviation_us": 0.7988437499999996,
+              "min_block_mean_us": 27.73113875,
+              "max_block_mean_us": 41.538881249999996,
+              "p95_trajectory_us": 4445.9896499999995
+            },
+            "c": {
+              "median_block_mean_us": 8.475695,
+              "median_absolute_deviation_us": 0.26663500000000084,
+              "min_block_mean_us": 8.1722625,
+              "max_block_mean_us": 9.429662500000001,
+              "p95_trajectory_us": 953.1821500000001
+            }
+          }
+        },
+        {
+          "model": "16_free_bodies",
+          "nv": 96,
+          "paired_ratio": {
+            "median": 0.9594785394426039,
+            "bootstrap_95": [
+              0.8699116743456736,
+              0.9832712612665444
+            ]
+          },
+          "significant_gain": true,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 4.94531730774943,
+            "bootstrap_95": [
+              4.788570884892833,
+              5.204617576483902
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 78.46991125,
+              "median_absolute_deviation_us": 3.5694925000000097,
+              "min_block_mean_us": 71.70671625,
+              "max_block_mean_us": 92.53725250000001,
+              "p95_trajectory_us": 11257.9798
+            },
+            "ada": {
+              "median_block_mean_us": 73.859055,
+              "median_absolute_deviation_us": 3.3472425000000072,
+              "min_block_mean_us": 70.0839675,
+              "max_block_mean_us": 90.547105,
+              "p95_trajectory_us": 9684.774999999998
+            },
+            "c": {
+              "median_block_mean_us": 15.0366475,
+              "median_absolute_deviation_us": 0.969581250000001,
+              "min_block_mean_us": 13.850007500000002,
+              "max_block_mean_us": 17.28286375,
+              "p95_trajectory_us": 1986.5132500000004
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "ldl-vs-r16",
+      "results_sha256": "7328e2c21ee34770edb3a05c43bef8198bf94eb604e8db0752a1f4ee274ee8d4",
+      "driver_sha256": "4b48fdc0e46e237985fa8deeb350b197bdf34ea4cd968b7731f0104d5bbd5944",
+      "candidate_sha256": "76f26e62d84c8b0e27c6601af2454a3be05ed431348048ab75dc806bc648fa2b",
+      "baseline_sha256": "70ea1c7e37eedf23c34dcdcccbc6e428e2284785c7328e42d768b49c89d81a3e",
+      "reference_sha256": "5e7623e30f55bf324d4c9648379ebeba5bcd153ee0304c52eac74bf8d441000b",
+      "affinity": [
+        2
+      ],
+      "blocks": 15,
+      "batches": 8,
+      "steps": 100,
+      "records": [
+        {
+          "model": "sphere_Newton_3_0.2",
+          "nv": 6,
+          "paired_ratio": {
+            "median": 0.9942676148927269,
+            "bootstrap_95": [
+              0.9686557299880951,
+              1.0258225236034908
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 1.5710247231608174,
+            "bootstrap_95": [
+              1.4994689424880165,
+              1.6138265382303398
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 3.6873375,
+              "median_absolute_deviation_us": 0.09680875000000011,
+              "min_block_mean_us": 3.56895375,
+              "max_block_mean_us": 5.207655,
+              "p95_trajectory_us": 525.2782000000001
+            },
+            "ada": {
+              "median_block_mean_us": 3.66128625,
+              "median_absolute_deviation_us": 0.12263125000000041,
+              "min_block_mean_us": 3.4570875,
+              "max_block_mean_us": 5.1182675,
+              "p95_trajectory_us": 526.6730999999999
+            },
+            "c": {
+              "median_block_mean_us": 2.3165525000000002,
+              "median_absolute_deviation_us": 0.05332250000000016,
+              "min_block_mean_us": 2.24284125,
+              "max_block_mean_us": 3.2110075,
+              "p95_trajectory_us": 320.25425000000007
+            }
+          }
+        },
+        {
+          "model": "coupled_limits_friction",
+          "nv": 3,
+          "paired_ratio": {
+            "median": 1.0232646513280734,
+            "bootstrap_95": [
+              0.9862006703550318,
+              1.0482000162771699
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 1.2839823416594423,
+            "bootstrap_95": [
+              1.22308058162634,
+              1.3266676692179642
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 2.43192625,
+              "median_absolute_deviation_us": 0.060911250000000194,
+              "min_block_mean_us": 2.31693,
+              "max_block_mean_us": 3.16210625,
+              "p95_trajectory_us": 315.1076
+            },
+            "ada": {
+              "median_block_mean_us": 2.490795,
+              "median_absolute_deviation_us": 0.07279750000000007,
+              "min_block_mean_us": 2.376975,
+              "max_block_mean_us": 2.74634875,
+              "p95_trajectory_us": 318.40934999999996
+            },
+            "c": {
+              "median_block_mean_us": 1.9696075000000002,
+              "median_absolute_deviation_us": 0.050976249999999945,
+              "min_block_mean_us": 1.8526025000000002,
+              "max_block_mean_us": 2.1286862500000003,
+              "p95_trajectory_us": 255.12305
+            }
+          }
+        },
+        {
+          "model": "box_multiple",
+          "nv": 6,
+          "paired_ratio": {
+            "median": 0.9906978711720372,
+            "bootstrap_95": [
+              0.9782726321896266,
+              1.044722886758737
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.064746727181454,
+            "bootstrap_95": [
+              2.0017071381589595,
+              2.1353088726429346
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 6.522915,
+              "median_absolute_deviation_us": 0.1327462499999994,
+              "min_block_mean_us": 6.19009125,
+              "max_block_mean_us": 9.06816875,
+              "p95_trajectory_us": 897.99725
+            },
+            "ada": {
+              "median_block_mean_us": 6.53459375,
+              "median_absolute_deviation_us": 0.1754150000000001,
+              "min_block_mean_us": 6.32330625,
+              "max_block_mean_us": 9.459855000000001,
+              "p95_trajectory_us": 920.3639999999998
+            },
+            "c": {
+              "median_block_mean_us": 3.1661175000000004,
+              "median_absolute_deviation_us": 0.049981249999999644,
+              "min_block_mean_us": 3.06147375,
+              "max_block_mean_us": 3.3005837500000004,
+              "p95_trajectory_us": 368.37969999999996
+            }
+          }
+        },
+        {
+          "model": "shared_ancestors",
+          "nv": 8,
+          "paired_ratio": {
+            "median": 0.9819886317188632,
+            "bootstrap_95": [
+              0.843837866128075,
+              1.0165379420315999
+            ]
+          },
+          "significant_gain": false,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.0026531019139258,
+            "bootstrap_95": [
+              1.9544836681880253,
+              2.045317342069103
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 1.1102230246251565e-16,
+            "ada": 1.1102230246251565e-16
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 4.7274,
+              "median_absolute_deviation_us": 0.14084750000000046,
+              "min_block_mean_us": 4.490205,
+              "max_block_mean_us": 6.88732625,
+              "p95_trajectory_us": 672.08105
+            },
+            "ada": {
+              "median_block_mean_us": 4.6515,
+              "median_absolute_deviation_us": 0.10252749999999988,
+              "min_block_mean_us": 4.3822575,
+              "max_block_mean_us": 5.2245075,
+              "p95_trajectory_us": 553.3979499999999
+            },
+            "c": {
+              "median_block_mean_us": 2.36078125,
+              "median_absolute_deviation_us": 0.03621624999999984,
+              "min_block_mean_us": 2.2501925000000003,
+              "max_block_mean_us": 2.5104775000000004,
+              "p95_trajectory_us": 268.24145
+            }
+          }
+        },
+        {
+          "model": "4_free_bodies",
+          "nv": 24,
+          "paired_ratio": {
+            "median": 0.952817618749103,
+            "bootstrap_95": [
+              0.9199711674661306,
+              0.9929307217205088
+            ]
+          },
+          "significant_gain": true,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 2.535878740096192,
+            "bootstrap_95": [
+              2.4970219346794704,
+              2.5778553688416403
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 12.80234375,
+              "median_absolute_deviation_us": 0.2641374999999986,
+              "min_block_mean_us": 12.34992125,
+              "max_block_mean_us": 16.39312125,
+              "p95_trajectory_us": 1784.0121
+            },
+            "ada": {
+              "median_block_mean_us": 12.24382375,
+              "median_absolute_deviation_us": 0.2525675000000014,
+              "min_block_mean_us": 11.93616125,
+              "max_block_mean_us": 15.90532125,
+              "p95_trajectory_us": 1826.9388499999998
+            },
+            "c": {
+              "median_block_mean_us": 4.78568875,
+              "median_absolute_deviation_us": 0.044795000000000584,
+              "min_block_mean_us": 4.721511250000001,
+              "max_block_mean_us": 6.1201625,
+              "p95_trajectory_us": 666.35895
+            }
+          }
+        },
+        {
+          "model": "8_free_bodies",
+          "nv": 48,
+          "paired_ratio": {
+            "median": 0.9386716562846501,
+            "bootstrap_95": [
+              0.9047832985215577,
+              0.9531885905488916
+            ]
+          },
+          "significant_gain": true,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 3.390491121733423,
+            "bootstrap_95": [
+              3.35242606376627,
+              3.582967602714584
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 29.35408625,
+              "median_absolute_deviation_us": 0.6196074999999972,
+              "min_block_mean_us": 28.16450125,
+              "max_block_mean_us": 33.60580125,
+              "p95_trajectory_us": 3950.4254
+            },
+            "ada": {
+              "median_block_mean_us": 27.584135,
+              "median_absolute_deviation_us": 0.686171250000001,
+              "min_block_mean_us": 26.76967375,
+              "max_block_mean_us": 33.31461875,
+              "p95_trajectory_us": 3387.00845
+            },
+            "c": {
+              "median_block_mean_us": 8.0025475,
+              "median_absolute_deviation_us": 0.022907499999999636,
+              "min_block_mean_us": 7.958117500000001,
+              "max_block_mean_us": 9.52323125,
+              "p95_trajectory_us": 887.2492999999998
+            }
+          }
+        },
+        {
+          "model": "16_free_bodies",
+          "nv": 96,
+          "paired_ratio": {
+            "median": 0.940224890404105,
+            "bootstrap_95": [
+              0.8935545836572658,
+              0.9914495321562078
+            ]
+          },
+          "significant_gain": true,
+          "significant_regression": false,
+          "ada_over_c": {
+            "median": 5.106269654354178,
+            "bootstrap_95": [
+              4.972995004376511,
+              5.2386285977121325
+            ]
+          },
+          "trajectory_max_abs": {
+            "baseline": 0.0,
+            "ada": 0.0
+          },
+          "dispersion": {
+            "baseline": {
+              "median_block_mean_us": 83.30283874999999,
+              "median_absolute_deviation_us": 4.504132499999983,
+              "min_block_mean_us": 75.47416625,
+              "max_block_mean_us": 90.6141375,
+              "p95_trajectory_us": 10808.35005
+            },
+            "ada": {
+              "median_block_mean_us": 75.25880125,
+              "median_absolute_deviation_us": 2.1081687500000044,
+              "min_block_mean_us": 72.36543875,
+              "max_block_mean_us": 92.85659749999999,
+              "p95_trajectory_us": 10314.874799999998
+            },
+            "c": {
+              "median_block_mean_us": 14.81531125,
+              "median_absolute_deviation_us": 0.1783487500000014,
+              "min_block_mean_us": 14.20691,
+              "max_block_mean_us": 19.71870875,
+              "p95_trajectory_us": 1995.5599
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "frozen_sources_unchanged": true
+}

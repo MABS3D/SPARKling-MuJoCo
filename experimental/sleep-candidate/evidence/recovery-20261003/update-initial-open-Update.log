@@ -1,0 +1,154 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-sleep-update-20261003/build/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 97.1 s, peak group RSS 245 MB
+ info: initialization of "B" proved
+--> mj-sleep_manager.adb:33:07
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:36:30
+
+ info: index check proved
+--> mj-sleep_manager.adb:37:24
+
+ info: index check proved
+--> mj-sleep_manager.adb:37:45
+
+ info: index check proved
+--> mj-sleep_manager.adb:38:27
+
+ medium: range check might fail
+--> mj-sleep_manager.adb:38:66
+   38 |             if S.Tree_Awake (T) then S.Trees_Awake := S.Trees_Awake + 1; end if;
+      |                                                       ~~~~~~~~~~~~~~^~~
+      + reason for check: result of addition must fit in the target type of the assignment
+      + possible fix: loop at line 36 should mention S in a loop invariant
+   36 |          for T in M.Trees'Range loop
+      |                                 ^
+      + provers reached time limit before completing the proof
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:40:31
+
+ info: index check proved
+--> mj-sleep_manager.adb:41:24
+
+ info: index check proved
+--> mj-sleep_manager.adb:41:54
+
+ info: index check proved
+--> mj-sleep_manager.adb:42:26
+
+ info: index check proved
+--> mj-sleep_manager.adb:42:68
+
+ info: index check proved
+--> mj-sleep_manager.adb:42:70
+
+ info: index check proved
+--> mj-sleep_manager.adb:43:22
+
+ info: index check proved
+--> mj-sleep_manager.adb:44:27
+
+ medium: array index check might fail
+--> mj-sleep_manager.adb:45:28
+   45 |                S.Body_Index (S.Bodies_Awake) := J; S.Bodies_Awake := S.Bodies_Awake + 1;
+      |                              ~^~~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 40 should mention S in a loop invariant
+   40 |          for J in M.Bodies'Range loop
+      |                                  ^
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-sleep_manager.adb:45:82
+
+ info: index check proved
+--> mj-sleep_manager.adb:47:52
+
+ info: index check proved
+--> mj-sleep_manager.adb:47:54
+
+ medium: array index check might fail
+--> mj-sleep_manager.adb:48:30
+   48 |                S.Parent_Index (S.Parents_Awake) := J; S.Parents_Awake := S.Parents_Awake + 1;
+      |                                ~^~~~~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 40 should mention S in a loop invariant
+   40 |          for J in M.Bodies'Range loop
+      |                                  ^
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-sleep_manager.adb:48:87
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-sleep_manager.adb:51:33
+
+ info: index check proved
+--> mj-sleep_manager.adb:52:27
+
+ info: index check proved
+--> mj-sleep_manager.adb:53:23
+
+ info: index check proved
+--> mj-sleep_manager.adb:53:59
+
+ medium: array index check might fail
+--> mj-sleep_manager.adb:54:27
+   54 |                S.Dof_Index (S.Dofs_Awake) := V; S.Dofs_Awake := S.Dofs_Awake + 1;
+      |                             ~^~~~~~~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 51 should mention S in a loop invariant
+   51 |          for V in M.Dof_Body'Range loop
+      |                                    ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-sleep_manager.adb:54:75
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:127:19
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:128:19
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:131:16
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:136:66
+
+ info: analyzing call to "Wake" in context
+--> mj-sleep_manager.adb:144:13
+
+ info: analyzing call to "Sleep_Trees" in context
+--> mj-sleep_manager.adb:215:13
+
+ info: analyzing call to "Sleep_Trees" in context
+--> mj-sleep_manager.adb:222:44
+
+ info: data dependencies proved
+--> mj-sleep_manager.ads:109:06
+
+ medium: postcondition might fail
+--> mj-sleep_manager.ads:110:14
+  110 |         Post => S.Tree_Asleep = S.Tree_Asleep'Old
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+  113 |           and then S.Parents_Awake <= S.Nb and then S.Dofs_Awake <= S.Nv;
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at mj-sleep_manager.adb:51 should mention S in a loop invariant
+      --> mj-sleep_manager.adb:51:33
+   51 |          for V in M.Dof_Body'Range loop
+      |                                    ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-sleep_manager.ads:111:67
+
+ info: index check proved
+--> mj-sleep_manager.ads:111:88
+gnatprove: unproved check messages considered as errors

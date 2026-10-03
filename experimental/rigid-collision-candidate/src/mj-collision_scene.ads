@@ -27,6 +27,16 @@ package MJ.Collision_Scene with SPARK_Mode is
 
    function Initialized (S : Scene) return Boolean with Global => null;
    function Geom_Count (S : Scene) return Count with Global => null;
+   --  C orders each emitted pair by geom type before narrowphase. Candidate
+   --  list ordering still uses the original canonical geom IDs.
+   function Contact_Type (S : Scene; G : Geom_Id) return Natural
+     with Global => null, Pre => Initialized (S) and then G < Geom_Count (S),
+       Post => Contact_Type'Result <= 7;
+   function Contact_Order (S : Scene; P : Pair) return Boolean is
+     (Initialized (S) and then P.First < Geom_Count (S) and then P.Second < Geom_Count (S)
+      and then (Contact_Type (S, P.First) < Contact_Type (S, P.Second)
+        or else (Contact_Type (S, P.First) = Contact_Type (S, P.Second) and then P.First < P.Second)))
+     with Global => null;
    function Selected_Count (S : Scene) return Natural with Global => null;
    function Generation_Count (S : Scene) return Natural with Global => null;
    function BVH_Node_Tests (S : Scene) return Natural with Global => null;
@@ -61,8 +71,7 @@ package MJ.Collision_Scene with SPARK_Mode is
          and then (if Result /= Success then Length = 0)
          and then (for all I in 0 .. Length-1 =>
            Contacts (Contacts'First+I)'Initialized
-           and then Contacts (Contacts'First+I).Geoms.First < Contacts (Contacts'First+I).Geoms.Second
-           and then Contacts (Contacts'First+I).Geoms.Second < Geom_Count (S));
+           and then Contact_Order (S, Contacts (Contacts'First+I).Geoms));
 private
    type Parameter_Array is array (Natural range 0 .. Max_Pairs-1) of Parameters;
    type Scene is limited record

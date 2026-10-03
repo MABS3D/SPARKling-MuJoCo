@@ -1,0 +1,78 @@
+[
+  {
+    "label": "whole",
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-sleep-cycles-whole-20261003/sleep.gpr",
+      "-u",
+      "mj-sleep_cycles.ads",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--steps=0",
+      "--level=2",
+      "--proof=per_path",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off"
+    ],
+    "exit": 0,
+    "seconds": 3.584428548812866,
+    "checks": 46,
+    "proof_checks": 40,
+    "flow_checks": 6,
+    "open": [],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-sleep_cycles.ads",
+        "how_proved": "trivial",
+        "line": 11,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-sleep_cycles.ads",
+        "how_proved": "trivial",
+        "line": 11,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "coverage": {
+      "skip_proof": [],
+      "skip_flow": [],
+      "assumptions": [],
+      "spark": {
+        " 1": "all",
+        " 2": "all",
+        " 3": "all",
+        " 4": "all"
+      },
+      "progress": "PROGRESS_PROOF",
+      "stop_reason": "STOP_REASON_NONE"
+    },
+    "complete_coverage": true,
+    "expression_definition_only": false
+  }
+]

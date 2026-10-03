@@ -1,0 +1,100 @@
+--- a/experimental/advanced-step/src/mj-advanced_state.ads
++++ b/experimental/advanced-step/src/mj-advanced_state.ads
+@@ -8,4 +8,30 @@
+      Post => Next_Value'Result = Value + Rate * H;
+    function PID_Count (Slew, Integral : Tier0_Real) return Natural
+      with Global => null, Post => PID_Count'Result = Boolean'Pos (Slew > 0.0) + Boolean'Pos (Integral > 0.0);
++   --  Activation staging keeps the C clamp order. Even an invalid value
++   --  may be admitted for evaluation: it clears Can_Advance without writing.
++   function Staged_Value (Value : Real; Lower, Upper : Tier0_Real;
++                          Apply_Limit : Boolean) return Real is
++     (if Apply_Limit then Real'Min (Upper, Real'Max (Lower, Value)) else Value)
++     with Global => null,
++       Post => Staged_Value'Result =
++         (if Apply_Limit then Real'Min (Upper, Real'Max (Lower, Value)) else Value)
++         and then (if Apply_Limit then Staged_Value'Result in Tier0_Real);
++
++   procedure Stage_Activation
++     (Next_Act : in out Real_Array; Can_Advance : in out Boolean;
++      Base, Offset : Natural; Value : Real; Lower, Upper : Tier0_Real;
++      Apply_Limit : Boolean)
++     with Global => null,
++       --  Static admission preserves the existing Constraint_Error boundary
++       --  for an invalid private index; the caller must still prove this VC.
++       Pre => (Static => (if Staged_Value (Value, Lower, Upper, Apply_Limit) in Tier0_Real then
++         Base <= Natural'Last - Offset and then Base + Offset in Next_Act'Range)),
++       Post => Can_Advance =
++         (Can_Advance'Old and then Staged_Value (Value, Lower, Upper, Apply_Limit) in Tier0_Real)
++         and then (for all I in Next_Act'Range => Next_Act (I) =
++           (if Staged_Value (Value, Lower, Upper, Apply_Limit) in Tier0_Real
++              and then I = Base + Offset
++            then Staged_Value (Value, Lower, Upper, Apply_Limit)
++            else Next_Act'Old (I)));
+ end MJ.Advanced_State;
+--- a/experimental/advanced-step/src/mj-advanced_state.adb
++++ b/experimental/advanced-step/src/mj-advanced_state.adb
+@@ -11,4 +11,16 @@
+    begin
+       return Boolean'Pos (Slew > 0.0) + Boolean'Pos (Integral > 0.0);
+    end PID_Count;
++   procedure Stage_Activation
++     (Next_Act : in out Real_Array; Can_Advance : in out Boolean;
++      Base, Offset : Natural; Value : Real; Lower, Upper : Tier0_Real;
++      Apply_Limit : Boolean) is
++      X : constant Real := Staged_Value (Value, Lower, Upper, Apply_Limit);
++   begin
++      if X not in Tier0_Real then
++         Can_Advance := False;
++      else
++         Next_Act (Base + Offset) := X;
++      end if;
++   end Stage_Activation;
+ end MJ.Advanced_State;
+--- a/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
++++ b/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
+@@ -65,12 +65,24 @@
+       end if;
+    end Transmission;
+    procedure Stage (Next_Act : in out Real_Array; Can_Advance : in out Boolean;
+-                    C : Configuration; Offset : Natural; Value : Real) is
+-      X : Real := Value;
+-   begin
+-      if C.Act_Limited and then C.Dyn_Kind /= 5 then X := Real'Min (C.Act_Hi, Real'Max (C.Act_Lo, X)); end if;
+-      if X not in Tier0_Real then Can_Advance := False;
+-      else Next_Act (C.Aadr+Offset) := X; end if;
++                    C : Configuration; Offset : Natural; Value : Real)
++     with Pre => (Static =>
++       (if MJ.Advanced_State.Staged_Value (Value, C.Act_Lo, C.Act_Hi,
++             C.Act_Limited and then C.Dyn_Kind /= 5) in Tier0_Real then
++          C.Aadr <= Natural'Last - Offset and then C.Aadr + Offset in Next_Act'Range)),
++       Post => (Static => Can_Advance = (Can_Advance'Old and then
++           MJ.Advanced_State.Staged_Value (Value, C.Act_Lo, C.Act_Hi,
++             C.Act_Limited and then C.Dyn_Kind /= 5) in Tier0_Real)
++         and then (for all I in Next_Act'Range => Next_Act (I) =
++           (if MJ.Advanced_State.Staged_Value (Value, C.Act_Lo, C.Act_Hi,
++                 C.Act_Limited and then C.Dyn_Kind /= 5) in Tier0_Real
++              and then I = C.Aadr + Offset
++            then MJ.Advanced_State.Staged_Value (Value, C.Act_Lo, C.Act_Hi,
++                 C.Act_Limited and then C.Dyn_Kind /= 5)
++            else Next_Act'Old (I)))) is
++   begin
++      MJ.Advanced_State.Stage_Activation (Next_Act, Can_Advance, C.Aadr, Offset,
++        Value, C.Act_Lo, C.Act_Hi, C.Act_Limited and then C.Dyn_Kind /= 5);
+    end Stage;
+    procedure Compute_Core (D : Simulation; E : Input_Storage; Work : in out Evaluation_Storage;
+                            Result : out Status) is
+--- /dev/null
++++ b/experimental/advanced-step/controller_state_proof.gpr
+@@ -0,0 +1,12 @@
++project Controller_State_Proof is
++   Build_Root := external ("ADVANCED_BUILD_ROOT");
++   Mode := external ("ADVANCED_MODE", "validation");
++   for Source_Dirs use ("src", "../../src");
++   for Source_Files use ("mj.ads", "mj-types.ads",
++     "mj-advanced_state.ads", "mj-advanced_state.adb");
++   for Object_Dir use Build_Root & "/" & Mode & "/obj";
++   for Create_Missing_Dirs use "True";
++   package Compiler is
++      for Default_Switches ("Ada") use ("-gnat2022", "-ffp-contract=off", "-O1", "-g", "-gnata", "-gnato", "-gnatVa");
++   end Compiler;
++end Controller_State_Proof;

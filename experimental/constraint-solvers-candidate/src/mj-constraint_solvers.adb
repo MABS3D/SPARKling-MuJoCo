@@ -3,19 +3,26 @@
 with Ada.Numerics.Long_Elementary_Functions;
 with Interfaces;
 with MJ.Constraint_Order;
+with MJ.Constraint_Solvers.Native_Inertia;
 with MJ.Constraint_Solvers.Cholesky;
 with MJ.Constraint_Solvers.Dense_Cholesky;
+with MJ.Constraint_Solvers.Cholesky_Updates;
 with MJ.Constraint_Solvers.Sparse_Cholesky;
 with MJ.Constraint_Solvers.Sparse_Kernels;
+with MJ.Constraint_Solvers.Jacobians;
+with MJ.Constraint_Solvers.Jacobian_Transpose;
 package body MJ.Constraint_Solvers with SPARK_Mode is
    package Math renames Ada.Numerics.Long_Elementary_Functions;
    package Scalar renames MJ.Constraint_Scalar;
+   package NI renames MJ.Constraint_Solvers.Native_Inertia;
    package Linear renames MJ.Constraint_Solvers.Cholesky;
    package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
+   package Updates renames MJ.Constraint_Solvers.Cholesky_Updates;
    package Sparse renames MJ.Constraint_Solvers.Sparse_Cholesky;
    package Sparse_Arithmetic renames MJ.Constraint_Solvers.Sparse_Kernels;
    use type Linear.Status;
    use type Dense.Status;
+   use type Updates.Status;
    use type Sparse.Status;
    use type Scalar.Row_State;
    Tiny : constant Real := 1.0e-15;
@@ -216,10 +223,18 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
       for I in X'Range loop X (I) := V (I) * D (I); end loop;
    end QCQP;
 
-   procedure Solve
+   function Smooth_Force_Valid (Value : Vector; N : Natural) return Boolean is
+     (Value'Length = 0 or else (Value'First = 1 and then Value'Length = N
+       and then (for all X of Value => X in -1.0e100 .. 1.0e100)));
+
+   procedure Solve_With_Force
      (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
-      Settings : Options; A, Force : in out Vector; Result : out Report;
-      Hessian_Pattern : Structural_Matrix := Empty_Structure) is
+      Settings : Options; A, Force, Generalized_Force : in out Vector; Result : out Report;
+      Hessian_Pattern : Structural_Matrix := Empty_Structure;
+      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+      Smooth_Force : Vector := Empty_Vector;
+      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
+      Native_Inverse : Vector := Empty_Vector) is
       N : constant Natural := A_Free'Length;
       K : constant Natural := Aref'Length;
       function Finite (X : Real) return Boolean is (X in -1.0e10 .. 1.0e10);
@@ -233,10 +248,27 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
         or J'Length (1) /= K or J'Length (2) /= N
         or A_Free'First /= 1 or Aref'First /= 1
         or A'First /= 1 or A'Length /= N or Force'First /= 1 or Force'Length /= K
+        or Generalized_Force'First /= 1 or Generalized_Force'Length /= N
         or Constraints'First /= 1 or Constraints'Length /= K
         or Settings.Tolerance not in 0.0 .. 1.0
         or Settings.LS_Tolerance not in 1.0e-12 .. 1.0
-        or Settings.Scale not in 1.0e-12 .. 1.0e12 then return;
+        or Settings.Scale not in 1.0e-12 .. 1.0e12
+        or not Smooth_Force_Valid (Smooth_Force, N) then return;
+      end if;
+      if Native_Factor.Row_Count /= 0 then
+         if Native_Factor.Row_Count /= N or else not NI.Lower_Valid (Native_Factor)
+           or else not NI.Inverse_Valid (Native_Inverse, N) then return; end if;
+      elsif Native_Factor.Stored /= 0 or else Native_Inverse'Length /= 0 then return;
+      end if;
+      if Ordered_Jacobian.Row_Count /= 0 then
+         if not Settings.Sparse or else Ordered_Jacobian.Row_Count /= K
+           or else not Jacobians.Valid (Ordered_Jacobian, N)
+           or else Jacobian_Transpose.Total_Width (Ordered_Jacobian) > Max_Jacobian_Entries
+         then return; end if;
+         for V of Ordered_Jacobian.Values loop
+            if not Finite (V) then return; end if;
+         end loop;
+      elsif Ordered_Jacobian.Stored /= 0 then return;
       end if;
       for P in 1 .. N loop
          --  Published iterates use Work; admit that same domain when the
@@ -276,6 +308,18 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          I := I + Constraints (I).Dimension;
       end loop;
       declare
+         function Slot_Count return Natural is
+            Sum : Natural := 0;
+         begin
+            if not Settings.Sparse then return 0;
+            elsif Ordered_Jacobian.Row_Count /= 0 then
+               return Jacobian_Transpose.Total_Width (Ordered_Jacobian);
+            end if;
+            for R in 1 .. K loop
+               for P in 1 .. N loop if J (R, P) /= 0.0 then Sum := Sum+1; end if; end loop;
+            end loop;
+            return Sum;
+         end Slot_Count;
          L, HL : Matrix (1 .. N, 1 .. N);
          H : Matrix (1 .. N, 1 .. N) := M;
          Acc : Vector (1 .. N) := A;
@@ -291,6 +335,13 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          type Lengths is array (Positive range <>) of Natural;
          Columns : Column_Lists (1 .. K, 1 .. N);
          Nonzeros : Lengths (1 .. K) := (others => 0);
+         --  Keep native slots separate from the coalesced support used by
+         --  the current Hessian/dual paths. They carry reduction order.
+         Native : Sparse_Jacobian ((if Settings.Sparse then K else 0),
+           (if not Settings.Sparse then 0
+            elsif Ordered_Jacobian.Row_Count /= 0 then Ordered_Jacobian.Stored else K*N));
+         Native_T : Sparse_Jacobian ((if Settings.Sparse then N else 0), Slot_Count);
+         Qfrc : Vector (1 .. N) := (others => 0.0);
          Mass_Columns : Column_Lists (1 .. N, 1 .. N);
          Mass_Nonzeros : Lengths (1 .. N) := (others => 0);
          Mass_Is_Diagonal : Boolean := True;
@@ -320,16 +371,10 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          pragma Inline_Always (Multiply_Metric);
 
          procedure Multiply_Jacobian (X : Vector; Y : out Vector) is
-            S : Work;
          begin
             for R in 1 .. K loop
-               S := 0.0;
-               for Pi in 1 .. Nonzeros (R) loop
-                  declare P : constant Positive := Columns (R, Pi); begin
-                     S := S + J (R, P) * X (P);
-                  end;
-               end loop;
-               Y (R) := S;
+               Y (R) := (if Settings.Sparse then Jacobians.Sparse_Row (Native, X, R)
+                         else Jacobians.Dense_Row (J, X, R));
             end loop;
          end Multiply_Jacobian;
          pragma Inline_Always (Multiply_Jacobian);
@@ -430,6 +475,48 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          end Residual;
          pragma Inline_Always (Residual);
 
+         procedure Incremental_Hessian (Accepted : out Boolean) is
+            X : Vector (1 .. N);
+            Root_D : Real;
+            Plus : Boolean;
+            Rank : Natural;
+            Start : Natural;
+            Status : Updates.Status;
+         begin
+            Accepted := False;
+            for Row in 1 .. K loop
+               if Curvature (Row) /= Previous_Curvature (Row) then
+                  Plus := Curvature (Row) /= 0.0;
+                  Root_D := Math.Sqrt (Constraints (Row).D);
+                  X := (others => 0.0); Rank := N;
+                  if Settings.Sparse then
+                     if Native.Widths (Row) > 0 then
+                        --  C's update consumes canonical increasing columns.
+                        --  General ordered/duplicate CSR remains admissible for
+                        --  products and retains the full-factorization path.
+                        for Slot in Native.Offsets (Row)+2 .. Native.Offsets (Row)+Native.Widths (Row) loop
+                           if Native.Columns (Slot) <= Native.Columns (Slot-1) then return; end if;
+                        end loop;
+                        Start := Native.Columns (Native.Offsets (Row)+Native.Widths (Row));
+                        for Slot in Native.Offsets (Row)+1 .. Native.Offsets (Row)+Native.Widths (Row) loop
+                           X (Native.Columns (Slot)) := Native.Values (Slot)*Root_D;
+                        end loop;
+                        if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
+                        Updates.Update_Sparse (HL, Hessian_Structure, X, Start, Plus, Rank, Status);
+                        if Status /= Updates.Success then raise Constraint_Error; end if;
+                     end if;
+                  else
+                     for P in 1 .. N loop X (P) := J (Row, P)*Root_D; end loop;
+                     if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
+                     Updates.Update_Dense (HL, X, Plus, Rank, Status);
+                     if Status /= Updates.Success then raise Constraint_Error; end if;
+                  end if;
+                  if Rank < N then return; end if;
+               end if;
+            end loop;
+            Accepted := True;
+         end Incremental_Hessian;
+
          procedure Build_Scalar_Hessian is
             Changed : Boolean := not Hessian_Valid;
             Nonzero_Curvature : Boolean := False;
@@ -439,11 +526,17 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                Nonzero_Curvature := Nonzero_Curvature or Curvature (R) /= 0.0;
             end loop;
             if not Changed then return; end if;
+            if Hessian_Valid then
+               declare Accepted : Boolean; begin
+                  Incremental_Hessian (Accepted);
+                  if Accepted then Previous_Curvature := Curvature; return; end if;
+               end;
+            end if;
             if not Nonzero_Curvature then
                H := M;
                Factor_Hessian;
             else
-               H := M;
+               H := (others => (others => 0.0));
                for Bi in 1 .. Count loop
                   declare R : constant Positive := Blocks (Bi); begin
                      if Curvature (R) /= 0.0 then
@@ -462,12 +555,44 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                      end if;
                   end;
                end loop;
+               if Settings.Sparse then
+                  --  The reverse sparse factor reads precisely these columns,
+                  --  including symbolic fill and compiled structural zeros.
+                  Sparse.Add_Mass (H, M, Hessian_Structure);
+               else
+                  for P in 1 .. N loop
+                     for Q in 1 .. P loop H (P, Q) := H (P, Q)+M (P, Q); end loop;
+                  end loop;
+               end if;
                Factor_Hessian;
             end if;
             Previous_Curvature := Curvature;
             Hessian_Valid := True;
          end Build_Scalar_Hessian;
          pragma Inline_Always (Build_Scalar_Hessian);
+
+         procedure Update_Generalized_Force (Primal : Boolean) is
+         begin
+            if Settings.Sparse and Primal then
+               for P in 1 .. N loop Qfrc (P) := Jacobians.Sparse_Row (Native_T, F, P); end loop;
+            else
+               Qfrc := (others => 0.0);
+               for R in 1 .. K loop
+                  if F (R) /= 0.0 then
+                     if Settings.Sparse then
+                        for Slot in Native.Offsets (R)+1 .. Native.Offsets (R)+Native.Widths (R) loop
+                           declare P : constant Positive := Native.Columns (Slot); begin
+                              Qfrc (P) := Qfrc (P)+Native.Values (Slot)*F (R);
+                           end;
+                        end loop;
+                     else
+                        for P in 1 .. N loop Qfrc (P) := Qfrc (P)+J (R, P)*F (R); end loop;
+                     end if;
+                  end if;
+               end loop;
+            end if;
+         end Update_Generalized_Force;
+         pragma Inline_Always (Update_Generalized_Force);
 
          procedure Update (Build_H : Boolean) is
             B : Block_Value;
@@ -495,20 +620,12 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   --  only the columns present in the row, retaining row and
                   --  floating-point product order.  C uses the same sparse
                   --  row support in mju_sqrMatTDSparseNumeric.
-                  for Pi in 1 .. Nonzeros (R) loop
-                     declare P : constant Positive := Columns (R, Pi); begin
-                        Grad (P) := Grad (P) - J (R, P) * S.Force;
-                     end;
-                  end loop;
                   end;
                else
                Evaluate_Block (Constraints, R, Jar, Build_H, B);
                Cost := Cost + B.Cost;
                for T in 1 .. Dim loop F (R + T - 1) := B.F (T); end loop;
                for P in 1 .. N loop
-                  for T in 1 .. Dim loop
-                     Grad (P) := Grad (P) - J (R + T - 1, P) * B.F (T);
-                  end loop;
                   if Build_H then
                      for Q in 1 .. N loop
                         V := 0.0;
@@ -523,6 +640,8 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                end loop;
                end if;
             end loop;
+            Update_Generalized_Force (True);
+            for P in 1 .. N loop Grad (P) := Grad (P)-Qfrc (P); end loop;
             if Build_H and Scalar_Rows then
                Build_Scalar_Hessian;
             elsif Build_H then
@@ -536,8 +655,13 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          --  the Cholesky root here adds two rounding steps and changes CG's
          --  stopping iteration on strongly scaled elliptic contacts.
          procedure Apply_Mass_Inverse (RHS : Vector; Output : out Vector) is
+            Accepted : Boolean;
          begin
-            if Mass_Is_Diagonal then
+            if Native_Factor.Row_Count /= 0 then
+               if not NI.Bounded (RHS) then raise Constraint_Error; end if;
+               NI.Apply (Native_Factor, Native_Inverse, RHS, Output, Accepted);
+               if not Accepted then raise Constraint_Error; end if;
+            elsif Mass_Is_Diagonal then
                for P in 1 .. N loop
                   Output (P) := Sparse_Arithmetic.Diagonal_Scale
                     (RHS (P), Inverse_Mass_Diagonal (P));
@@ -815,7 +939,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                         P.Cost := P.Cost + Bound * (Start - X);
                      elsif S0.State = Scalar.Linear_Positive and S1.State = Scalar.Linear_Positive then
                         P.Cost := P.Cost + Bound * (X - Start);
-                     else P.Cost := P.Cost + S1.Cost - S0.Cost; end if;
+                     else P.Cost := P.Cost + (S1.Cost - S0.Cost); end if;
                      if -Rf < X and X < Rf then P.First := P.First + D * X * Dir; P.Second := P.Second + D * Dir * Dir;
                      elsif X <= -Rf then P.First := P.First - Bound * Dir;
                      else P.First := P.First + Bound * Dir; end if;
@@ -833,7 +957,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                      T := Math.Sqrt (Real'Max (0.0, Q (5) + P.Alpha * (2.0 * Q (6) + P.Alpha * Q (7))));
                      Z := Cone_Zone (Normal, T, Mu);
                      if Z = Quadratic then
-                        P.First := P.First + 2.0 * P.Alpha * Q (2) + Q (1); P.Second := P.Second + 2.0 * Q (2);
+                        P.First := P.First + (2.0 * P.Alpha * Q (2) + Q (1)); P.Second := P.Second + 2.0 * Q (2);
                      elsif Z = Cone then
                         T1 := (Q (6) + P.Alpha * Q (7)) / T;
                         T2 := Q (7) / T - (Q (6) + P.Alpha * Q (7)) * T1 / (T * T);
@@ -842,8 +966,8 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                      end if;
                end case;
             end loop;
-            P.Cost := P.Cost + P.Alpha * P.Alpha * Total (2) + P.Alpha * Total (1) + Total (0);
-            P.First := P.First + 2.0 * P.Alpha * Total (2) + Total (1);
+            P.Cost := P.Cost + ((P.Alpha * P.Alpha * Total (2) + P.Alpha * Total (1)) + Total (0));
+            P.First := P.First + (2.0 * P.Alpha * Total (2) + Total (1));
             P.Second := P.Second + 2.0 * Total (2);
             if P.Second <= 0.0 then
                P.Second := Tiny;
@@ -886,7 +1010,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             end loop;
             if LS_Count >= Settings.LS_Iterations then
                Hit_Limit := True;
-               if P1.Cost < 0.0 then Alpha := P1.Alpha; Improvement := -P1.Cost; end if;
+               Alpha := P1.Alpha; Improvement := -P1.Cost;
                return;
             end if;
             N2 := P1; N1.Alpha := P1.Alpha - P1.First / P1.Second; Evaluate_Line (N1);
@@ -894,14 +1018,14 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                Mid.Alpha := 0.5 * (P1.Alpha + P2.Alpha); Evaluate_Line (Mid);
                Choices := (N1, N2, Mid); Best := 0;
                for T in Choices'Range loop
-                  if abs Choices (T).First < Gtol and then Choices (T).Cost < 0.0
+                  if abs Choices (T).First < Gtol
                     and then (Best = 0 or else Choices (T).Cost < Choices (Best).Cost)
                   then Best := T; end if;
                end loop;
                if Best /= 0 then Alpha := Choices (Best).Alpha; Improvement := -Choices (Best).Cost; return; end if;
                Bracket (P1, N1, Changed_1); Bracket (P2, N2, Changed_2);
                if not Changed_1 and not Changed_2 then
-                  if Mid.Cost < 0.0 then Alpha := Mid.Alpha; Improvement := -Mid.Cost; end if;
+                  Alpha := Mid.Alpha; Improvement := -Mid.Cost;
                   return;
                end if;
             end loop;
@@ -982,6 +1106,23 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                end if;
             end loop;
          end loop;
+         if not Settings.Sparse then
+            null;
+         elsif Ordered_Jacobian.Row_Count /= 0 then
+            Native := Ordered_Jacobian;
+         else
+            Native.Columns := (others => 1); Native.Values := (others => 0.0);
+            for R in 1 .. K loop
+               Native.Offsets (R) := (R-1)*N; Native.Widths (R) := Nonzeros (R);
+               for Pi in 1 .. Nonzeros (R) loop
+                  Native.Columns ((R-1)*N+Pi) := Columns (R, Pi);
+                  Native.Values ((R-1)*N+Pi) := J (R, Columns (R, Pi));
+               end loop;
+            end loop;
+         end if;
+         if Settings.Sparse and K > 0 then
+            Jacobian_Transpose.Build (Native, Native_T);
+         end if;
          for Bi in 1 .. Count loop
             declare
                First : Positive := N;
@@ -1065,27 +1206,50 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                I := Last + 1;
             end;
          end loop;
-         Factor_Metric (M, L, OK);
-         if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
-         if Mass_Is_Diagonal then
-            for P in 1 .. N loop
-               Inverse_Mass_Diagonal (P) :=
-                 Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
-            end loop;
+         if Native_Factor.Row_Count = 0 then
+            Factor_Metric (M, L, OK);
+            if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
+            if Mass_Is_Diagonal then
+               for P in 1 .. N loop
+                  Inverse_Mass_Diagonal (P) :=
+                    Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+               end loop;
+            end if;
          end if;
-         Multiply_Metric (A_Free, Smooth);
+         if Smooth_Force'Length = 0 then Multiply_Metric (A_Free, Smooth);
+         else Smooth := Smooth_Force;
+         end if;
          if K = 0 then Acc := A_Free; Result.Outcome := Converged; Grad := (others => 0.0);
          elsif Settings.Algorithm = PGS then
             Run_PGS;
             --  Compute primal diagnostic cost without replacing PGS's dual force.
             declare Saved : constant Vector := F; begin Residual; Update (False); F := Saved; end;
+            Update_Generalized_Force (False);
          else Run_Primal; end if;
          Result.Cost := Cost; Result.Gradient := Settings.Scale * Norm (Grad);
          for X of Acc loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
          for X of F loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
-         A := Acc; Force := F;
+         A := Acc; Force := F; Generalized_Force := Qfrc;
       exception
          when Constraint_Error => Result.Outcome := Numeric_Limit;
+      end;
+   end Solve_With_Force;
+
+   procedure Solve
+     (M, J : Matrix; A_Free, Aref : Vector; Constraints : Rows;
+      Settings : Options; A, Force : in out Vector; Result : out Report;
+      Hessian_Pattern : Structural_Matrix := Empty_Structure;
+      Ordered_Jacobian : Sparse_Jacobian := Empty_Jacobian;
+      Smooth_Force : Vector := Empty_Vector;
+      Native_Factor : Sparse_Jacobian := Empty_Jacobian;
+      Native_Inverse : Vector := Empty_Vector) is
+   begin
+      if A_Free'Length not in 1 .. Max_Dofs then Result := (others => <>); return; end if;
+      declare
+         Generalized : Vector (1 .. A_Free'Length) := (others => 0.0);
+      begin
+         Solve_With_Force (M, J, A_Free, Aref, Constraints, Settings,
+           A, Force, Generalized, Result, Hessian_Pattern, Ordered_Jacobian, Smooth_Force, Native_Factor, Native_Inverse);
       end;
    end Solve;
 end MJ.Constraint_Solvers;

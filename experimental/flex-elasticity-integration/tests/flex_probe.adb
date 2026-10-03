@@ -56,7 +56,7 @@ begin
       F.Create (M, E, Result); if Result /= Already_Allocated then raise Program_Error with "double create"; end if;
       MJ.Models.Free (M);
       declare Before : constant Real_Array := F.Complete_State (E); begin
-         F.Set_State (E, State_Vector'(1 .. 0 => 0.0), State_Vector'(1 .. 0 => 0.0), 0.0, Result);
+         F.Set_State (E, State_Vector'(0 .. Q'Length => 0.0), State_Vector'(1 .. 0 => 0.0), 0.0, Result);
          if Result /= Invalid_Size or else F.Complete_State (E) /= Before then raise Program_Error with "state atomicity"; end if;
       end;
       Ada.Integer_Text_IO.Get (Cases); Ada.Integer_Text_IO.Get (Steps);
@@ -73,12 +73,17 @@ begin
          declare
             Before : constant Real_Array := F.Passive (E);
             D : constant F.Trace := F.Diagnostics (E);
+            J : constant F.Edge_Jacobian_Trace := F.Edge_Jacobians (E);
          begin
             F.Evaluate (E, Result); Check;
             if F.Passive (E) /= Before then raise Program_Error with "duplicate elastic forces"; end if;
             if not Benchmark then
                Put_Line ("case" & Sample'Image);
                Emit ("pos", D.Position); Emit ("length", D.Length); Emit ("velocity", D.Velocity);
+               Emit ("edge_rowadr", [for V of J.Rowadr => Real (V)]);
+               Emit ("edge_rownnz", [for V of J.Rownnz => Real (V)]);
+               Emit ("edge_columns", [for V of J.Columns => Real (V)]);
+               Emit ("edge_J", J.Values);
                Emit ("spring", D.Spring); Emit ("damper", D.Damper);
                Emit ("passive", F.Passive (E)); Emit ("acc", F.Acceleration (E));
             end if;

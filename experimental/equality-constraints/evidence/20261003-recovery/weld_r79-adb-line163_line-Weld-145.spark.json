@@ -1,0 +1,235 @@
+{
+  "assumptions": [
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Equality_Geometry.Weld",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-equality_geometry.ads",
+          "line": 315
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 7,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "flow",
+      "line": 153,
+      "message": {
+        "text": "initialization of \"Angular\" proved"
+      },
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 6,
+      "entity": 1,
+      "file": "mj-equality_geometry.ads",
+      "how_proved": "flow",
+      "line": 318,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 65,
+      "check_file": "mj-equality_geometry.adb",
+      "check_line": 163,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 13442,
+              "time": 3.14747000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 13442,
+              "time": 3.45280000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 500,
+              "time": 5.42310000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 563,
+              "time": 7.59870000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 65,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "prover",
+      "line": 163,
+      "message": {
+        "text": "overflow check proved"
+      },
+      "msg_id": 0,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 4,
+          "max_steps": 13442,
+          "max_time": 3.45279991626740E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 35,
+      "check_file": "mj-equality_geometry.adb",
+      "check_line": 163,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 158,
+              "time": 4.46238000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 177,
+              "time": 4.58500000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 35,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "prover",
+      "line": 163,
+      "message": {
+        "text": "assertion proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_ASSERT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 177,
+          "max_time": 4.58500012755394E-02
+        },
+        "Z3": {
+          "count": 1,
+          "max_steps": 158,
+          "max_time": 4.46238011121750E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 2.57719997316599E-02,
+      "gnatwhy3.init": 5.36701023578644E-01,
+      "gnatwhy3.register_vcs": 6.75377321243286E+00,
+      "gnatwhy3.run_vcs": 5.34999009687454E-04,
+      "gnatwhy3.save_session": 1.29334199428558E+00,
+      "gnatwhy3.schedule_vcs": 8.88009965419769E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.45650000870228E-02,
+      "gnatwhy3.transformations.detect_polymorphism": 5.38499886170030E-03,
+      "gnatwhy3.transformations.discriminate_if_poly": 9.99900021270150E-06,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 1.59029997885227E-02,
+      "gnatwhy3.transformations.eliminate_builtin": 1.89970005303621E-02,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 3.66699905134737E-03,
+      "gnatwhy3.transformations.eliminate_epsilon": 9.37400013208389E-03,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 1.14979986101389E-02,
+      "gnatwhy3.transformations.eliminate_inductive": 5.67199895158410E-03,
+      "gnatwhy3.transformations.eliminate_literal": 1.00649986416101E-02,
+      "gnatwhy3.transformations.eliminate_projections_sums": 5.59999886900187E-03,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.00000031833770E-06,
+      "gnatwhy3.transformations.inline_trivial": 1.05493001639843E-01,
+      "gnatwhy3.transformations.introduce_premises": 6.42200000584126E-03,
+      "gnatwhy3.transformations.remove_unused": 3.66879999637604E-02,
+      "gnatwhy3.transformations.simplify_formula": 1.34100001305342E-02,
+      "gnatwhy3.transformations.split_goal_wp_conj": 3.75466990470886E+00
+    },
+    "global": {
+      "flow analysis": 2.84199998714030E-03,
+      "globals (advanced)": 9.96000017039478E-04,
+      "globals (basic)": 3.11699998565018E-03,
+      "init_why_sections": 7.08999985363334E-04,
+      "marking": 1.00899999961257E-03,
+      "properties (advanced)": 1.40000003739260E-04,
+      "translation of standard": 7.62999989092350E-04
+    }
+  },
+  "warn_error": [
+  ]
+}

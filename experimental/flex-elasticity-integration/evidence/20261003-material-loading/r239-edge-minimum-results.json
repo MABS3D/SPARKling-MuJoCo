@@ -1,0 +1,178 @@
+{
+  "scope": "materials-edge",
+  "limit": 43,
+  "limit_file": "mj-data-flex_elasticity-material_loading.adb",
+  "exit": 1,
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-flex-equality-step-20261003-r238-edge/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-data-flex_elasticity-material_loading.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-flex_elasticity-material_loading.adb:43"
+  ],
+  "seconds": 125.1793142259994,
+  "runner_sha256": "fdf4c4b9c115f6ae592c09482500e3ea6772d9813262f4e3321a1bff232a2072",
+  "report_scope_matches": true,
+  "proof_checks": 32,
+  "flow_checks": 2,
+  "checks": 34,
+  "open": [
+    {
+      "check_col": 29,
+      "check_file": "mj-data-flex_elasticity-material_loading.adb",
+      "check_line": 55,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 783,
+              "time": 0.034599
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 267,
+              "time": 0.023591
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 29,
+      "entity": 1,
+      "file": "mj-data-flex_elasticity-material_loading.adb",
+      "how_proved": "prover",
+      "line": 55,
+      "message": {
+        "text": "range check might fail, cannot prove upper bound for Bending_Data'Length"
+      },
+      "msg_id": 32,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_ancestors.ads",
+      "how_proved": "trivial",
+      "line": 63,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_ancestors.ads",
+      "how_proved": "trivial",
+      "line": 53,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_ancestors.ads",
+      "how_proved": "trivial",
+      "line": 53,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_ancestors.ads",
+      "how_proved": "trivial",
+      "line": 71,
+      "message": {
+        "text": "implicit function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_ancestors.ads",
+      "how_proved": "trivial",
+      "line": 71,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Data.Flex_Elasticity.Material_Loading.Load_Edge"
+  ],
+  "scope_coverage_complete": true,
+  "complete_coverage": false,
+  "obligations_closed": false,
+  "passed": false,
+  "claim": "Minimal scope only; no whole producer or caller Gold claim."
+}

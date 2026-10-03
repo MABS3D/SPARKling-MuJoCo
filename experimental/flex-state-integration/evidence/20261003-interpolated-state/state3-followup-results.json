@@ -1,0 +1,222 @@
+[
+  {
+    "name": "validation-build",
+    "exit": 0,
+    "seconds": 88.79330412000127,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/flex-state-integration/tests/build.py",
+      "--base",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state2-20261003",
+      "--refresh-owned",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003"
+    ]
+  },
+  {
+    "name": "flow",
+    "exit": 0,
+    "seconds": 18.80516420799904,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/flex-state-integration/tests/prove.py",
+      "--build",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003-flow",
+      "--only",
+      "flow"
+    ]
+  },
+  {
+    "name": "validation-interpolated",
+    "exit": 0,
+    "seconds": 114.18183700399823,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/compare_interpolated_state.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/build/validation/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-interpolated",
+      "--samples",
+      "8"
+    ]
+  },
+  {
+    "name": "validation-ordinary",
+    "exit": 0,
+    "seconds": 2.317626072999701,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "180",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/build/validation/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-ordinary",
+      "--samples",
+      "8"
+    ]
+  },
+  {
+    "name": "validation-policy",
+    "exit": 0,
+    "seconds": 0.31022514100186527,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "60",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/policy.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/build/validation/bin/flex_state_probe",
+      "--fixtures",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-ordinary",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-policy"
+    ]
+  },
+  {
+    "name": "validation-interpolated-policy",
+    "exit": 0,
+    "seconds": 0.31070723199809436,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "60",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/policy_interpolation.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/build/validation/bin/flex_state_probe",
+      "--fixtures",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-interpolated",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/validation-interpolated-policy"
+    ]
+  },
+  {
+    "name": "release-build",
+    "exit": 0,
+    "seconds": 54.85888721400261,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/flex-state-integration/tests/build.py",
+      "--base",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-release-20261003",
+      "--mode",
+      "release"
+    ]
+  },
+  {
+    "name": "release-interpolated",
+    "exit": 0,
+    "seconds": 3.069900596001389,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/compare_interpolated_state.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-release-20261003/build/release/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-interpolated",
+      "--samples",
+      "8"
+    ]
+  },
+  {
+    "name": "release-ordinary",
+    "exit": 0,
+    "seconds": 0.8105727520014625,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "180",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-release-20261003/build/release/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-ordinary",
+      "--samples",
+      "8"
+    ]
+  },
+  {
+    "name": "release-policy",
+    "exit": 0,
+    "seconds": 0.30968075700002373,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "60",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/policy.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-release-20261003/build/release/bin/flex_state_probe",
+      "--fixtures",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-ordinary",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-policy"
+    ]
+  },
+  {
+    "name": "release-interpolated-policy",
+    "exit": 0,
+    "seconds": 0.3103507979976712,
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "60",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-20261003/source/experimental/flex-state-integration/tests/policy_interpolation.py",
+      "--binary",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-release-20261003/build/release/bin/flex_state_probe",
+      "--fixtures",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-interpolated",
+      "--out",
+      "/var/tmp/sparkling-recovery-flex-interpolated-state3-followup-20261003/release-interpolated-policy"
+    ]
+  }
+]

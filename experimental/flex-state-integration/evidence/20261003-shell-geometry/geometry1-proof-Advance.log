@@ -1,0 +1,111 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: float overflow check proved
+--> mj-flex_shell_geometry.adb:34:36
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.adb:35:39
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.adb:36:39
+
+ medium: float overflow check might fail
+--> mj-flex_shell_geometry.adb:37:40
+   37 |          elsif Index < 15 then return Acc - Coefficient (S, U, V, Index + 3) * Values (Index + 3);
+      |                                       ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point subtraction must be bounded
+      + possible fix: precondition of subprogram at mj-flex_shell_geometry.ads:45 should mention S and U and V and Values
+      --> mj-flex_shell_geometry.ads:45:04
+   45 |       function Advance (Acc : Real; Values : Row; S, U, V : Unit_Value;
+      |       ^
+      + provers reached time and memory limit before completing the proof
+
+ info: range check proved
+--> mj-flex_shell_geometry.adb:37:70
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.adb:37:75
+
+ medium: float overflow check might fail
+--> mj-flex_shell_geometry.adb:38:23
+   38 |          else return Acc + Coefficient (S, U, V, Index + 3) * Values (Index + 3);
+      |                      ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-flex_shell_geometry.ads:45 should mention S and U and V and Values
+      --> mj-flex_shell_geometry.ads:45:04
+   45 |       function Advance (Acc : Real; Values : Row; S, U, V : Unit_Value;
+      |       ^
+      + provers reached time and memory limit before completing the proof
+
+ info: range check proved
+--> mj-flex_shell_geometry.adb:38:53
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.adb:38:58
+
+ info: implicit aspect Always_Terminates on "Advance" has been proved, subprogram will terminate
+--> mj-flex_shell_geometry.ads:45:13
+
+ info: data dependencies proved
+--> mj-flex_shell_geometry.ads:47:11
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:48:29
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:48:36
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:48:54
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:48:61
+
+ medium: postcondition might fail, cannot prove Advance'Result in -Real (Index + 1) * 3.0e11 .. Real (Index + 1) * 3.0e11
+--> mj-flex_shell_geometry.ads:49:16
+   49 |           Post => Advance'Result in -Real (Index + 1) * 3.0e11 .. Real (Index + 1) * 3.0e11
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:49:47
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:49:52
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:49:76
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:49:81
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:51:35
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:52:38
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:53:38
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:54:39
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:54:69
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:54:74
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:55:22
+
+ info: range check proved
+--> mj-flex_shell_geometry.ads:55:52
+
+ info: float overflow check proved
+--> mj-flex_shell_geometry.ads:55:57
+Summary logged in /var/tmp/sparkling-recovery-shell-geometry1-20261003/proof/Advance/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 30.5 s, peak group RSS 168 MB

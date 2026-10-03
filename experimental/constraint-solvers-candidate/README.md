@@ -7,6 +7,44 @@ performance parity remain separate, unfinished objectives.
 
 ## Recovery status (2026-10-03)
 
+- The integrated engine now passes its original `Dynamics.Total` and reuses
+  the Ada ancestor LDL factor through optional `Smooth_Force`, `Native_Factor`
+  and `Native_Inverse` inputs. Omitted arguments preserve the assembled API.
+  Factor provenance must match the current mass/free-acceleration pair; its
+  global functional proof is still open. No C-exported factor enters the
+  production runtime, and strict inertia policy retains its previous path.
+- `Native_Inertia` closes 147 proof and 34 flow checks for ordered FP stages,
+  frames, bounds and atomic rejection. Fourteen recursive-model warnings remain
+  visible (`strict_passed=false`); this does not prove the complete
+  factor-to-solution relation or the solver caller. The independent native
+  `mj_solveLD` comparison passes 230/230 bitwise in each profile. The composed
+  production bytes pass 1232/1232 cases in validation and release: rigid106,
+  elliptic254, surface92, forces452, tendons76, assets126 and local assets126.
+  Source identity and scope are preserved in
+  [the LDL evidence index](evidence/recovery-20261003-native-inertia/index.json).
+- A quiet full-step comparison of LDL against the previous original-force
+  build gives a 96-DOF paired ratio of 0.95948, CI95% [0.86991, 0.98327].
+  Median steps are 73.859 vs 78.470 us; normal C takes 15.037 us, leaving a
+  paired Ada/C ratio of 4.945 [4.789, 5.205]. The sphere also improves; the other
+  five intervals include 1. All seven states meet the original 2e-9 tolerances.
+  CPU2, 15 alternating blocks, eight measured 100-step trajectories and an
+  excluded warmup per block are recorded with raw samples and dispersion.
+  The separate r16 comparison is cumulative and is not attributed solely to LDL.
+- R15 adds scalar Newton rank-one Cholesky updates/downdates, the native
+  bracketed-search returns, and the C grouping of compound cost/derivative
+  updates. The new update kernel matches 346/346 official C cases bitwise;
+  ten scalar minima prove 92 checks, and the vector update and individual
+  matrix stores prove 35/12/12 checks. Composed matrix-update proofs and the
+  complete floating algorithm model remain open. Elliptic cone updates still
+  use the existing full-factor path; arbitrary/duplicate CSR rows retain that
+  path until their complete native Hessian traversal is ported.
+- R15 standalone checks pass 428/428 dense, 432/432 native CSR and
+  215/215 published generalized-force cases. An assembled ball/plane regression
+  with forces around 6.6e15 now matches C exactly at nine iteration budgets,
+  including its six-iteration final result. This is one preserved problem,
+  not a claim that every integrated advanced-actuator trajectory is closed.
+  R15 integrated validation/release receipts use their own manifest
+  and `verification-scope.json` in `/var/tmp/sparkling-recovery-dynamics-20261003-15`.
 - The current scalar and sparse arithmetic helper units pass 54 and 72 checks.
   The domain now includes C regularization/inverse weights from 1e-15 to 1e15,
   including equality rows with a zero Jacobian; `Aref` accepts ±1e30.
@@ -31,12 +69,14 @@ performance parity remain separate, unfinished objectives.
   Dense Newton now uses this factor and solve: validation/release have identical
   records on the seven integrated r7 corpora, with 106/106 rigid, 254/254 elliptic,
   92/92 surface, 452/452 force and 76/76 tendon cases. Asset trajectories remain
-  117/126 in each of two corpora. Global final-factor/solution and rank relations,
-  complete integrated compatibility remains open. No proof of real-arithmetic accuracy is inferred from these results.
+  117/126 in each of two corpora. Global final-factor/solution and rank relations
+  and complete integrated compatibility remain open. No proof of real-arithmetic
+  accuracy is inferred from these results.
 - `Sparse_Cholesky` now follows C's symbolic and numeric reverse L'L order,
-  retaining structural zeros and the CSC update order. The first 380 native C
-  cases match structures, factors, ranks and solves exactly (dimensions 1–128,
-  diagonal/chain/tree/random/dense structures, scale and deficient-pivot cases).
+  retaining structural zeros and the CSC update order. The r10 corpus has
+  395/395 native C cases with bitwise matching structures, factors, ranks and
+  solves (dimensions 1–128, diagonal/chain/tree/random/dense structures, scale,
+  deficient pivots, threshold neighbors and signed zero cases).
   `Update`7, `Scale`5 and `Symbolic`91 checks pass locally; the symbolic post
   establishes valid structure, not universal equivalence to C's symbolic
   algorithm. Factor/solve and whole-unit proofs remain open.
@@ -47,12 +87,14 @@ performance parity remain separate, unfinished objectives.
   dense and sparse oracle. R62 and later proof edits have separate manifests.
   The previous universal dense dispatch caused a measured6.00x regression on
   a96-DOF sparse workload relative to r7 with only the old Newton restored.
-  Performance of the new sparse path has not yet been measured in isolation.
+  The frozen r62 integrated sparse path reduces the 96-DOF workload to
+  89.48 us from r7's 400.39 us; C takes 16.00 us. This is still 5.60x C.
+  The later support-list optimization has not yet been measured in isolation.
 - The old Cholesky helper gained preservation lemmas during recovery; the fresh
   whole-unit run reached its watchdog. The 266-check receipt below belongs to
   the earlier frozen source, not the current modified unit.
 
-No new performance acceptance claim has been made during parallel recovery.
+Whole-engine compatibility and performance parity remain open.
 The remaining sections retain the earlier isolated-candidate evidence and
 measurements; they must be read against their source manifests.
 

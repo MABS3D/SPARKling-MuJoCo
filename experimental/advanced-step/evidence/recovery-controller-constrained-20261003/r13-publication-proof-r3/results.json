@@ -1,0 +1,238 @@
+[
+  {
+    "label": "Publish_Forces",
+    "exit": 1,
+    "seconds": 96.87686926599781,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-controller-r13-r3-proof-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-advanced_control.adb",
+      "--prover=cvc5,z3",
+      "--timeout=3",
+      "--steps=0",
+      "--memlimit=700",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-advanced_control.adb:418",
+      "--no-inlining"
+    ],
+    "proof_checks": 12,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 27,
+        "check_file": "mj-data-advanced_control.adb",
+        "check_line": 411,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "Trivial": {
+                "result": "Valid",
+                "steps": 2,
+                "time": 0
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 3
+              },
+              "Z3": {
+                "result": "Out of\nmemory",
+                "steps": 1,
+                "time": 0.851355
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 27,
+        "entity": 1,
+        "file": "mj-data-advanced_control.adb",
+        "how_proved": "prover",
+        "line": 411,
+        "message": {
+          "text": "postcondition might fail, cannot prove Stable_Ready (D)"
+        },
+        "msg_id": 13,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": true,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-actuator_transmissions.ads",
+        "how_proved": "trivial",
+        "line": 30,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 108,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "function contract might not be available on recursive calls [contracts-recursive]"
+        },
+        "rule": "contracts-recursive",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 13,
+        "file": "mj-transmissions.ads",
+        "how_proved": "trivial",
+        "line": 115,
+        "message": {
+          "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+        },
+        "rule": "numeric-variant",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      },
+      {
+        "check_tree": {},
+        "col": 85,
+        "file": "mj-advanced_actuators.ads",
+        "how_proved": "trivial",
+        "line": 85,
+        "message": {
+          "arguments": [
+            "Sin"
+          ],
+          "text": "call to {0} is not handled precisely [imprecise-call]"
+        },
+        "rule": "imprecise-call",
+        "severity": "warning",
+        "suppressed": "",
+        "unproved_status": {
+          "status": "unknown"
+        }
+      }
+    ],
+    "coverage": true,
+    "verified": false
+  }
+]

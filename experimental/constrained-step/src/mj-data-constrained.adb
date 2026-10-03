@@ -11,6 +11,7 @@ with MJ.Heightfield_Contacts;
 with MJ.Joint_Limits;
 with MJ.Joint_Limit_Math;
 with MJ.Constrained_Kernels;
+with MJ.Constraint_Solvers.Native_Inertia;
 with MJ.Data.Constrained.Tendons;
 with MJ.Data.Constrained.Equalities;
 with MJ.Elliptic_Response;
@@ -20,6 +21,7 @@ package body MJ.Data.Constrained with SPARK_Mode is
    package CG renames MJ.Contact_Geometry;
    package CP renames MJ.Contact_Parameters;
    package JL renames MJ.Joint_Limits;
+   package NI renames MJ.Constraint_Solvers.Native_Inertia;
    package CK renames MJ.Constrained_Kernels;
    package Step_Publication renames MJ.Owned_Step_Publication;
    package SV renames MJ.Surface_Velocity;
@@ -70,6 +72,12 @@ package body MJ.Data.Constrained with SPARK_Mode is
    end Parameters;
 
    procedure Create (M : in out MJ.Models.Model; E : in out Engine; Result : out Status) is
+   begin
+      Create_Core (M, E, Result, Dynamics_Only => False);
+   end Create;
+
+   procedure Create_Core (M : in out MJ.Models.Model; E : in out Engine;
+                          Result : out Status; Dynamics_Only : Boolean) is
       Original_Flags : constant Integer := M.Opt.Disableflags;
       Original_Adhesion : constant Boolean := M.Flg_Adhesion;
       Shapes : Scene.Geometry_Array (0 .. Max_G - 1);
@@ -201,7 +209,11 @@ package body MJ.Data.Constrained with SPARK_Mode is
       -- This entry owns the contact-dependent transmission; restore the
       -- exclusively borrowed feature flag on every exit.
       M.Flg_Adhesion := False;
-      MJ.Data.Create (M, E.D, Result);
+      if Dynamics_Only then
+         MJ.Data.Create_Dynamics (M, E.D, Result);
+      else
+         MJ.Data.Create (M, E.D, Result);
+      end if;
       M.Flg_Adhesion := Original_Adhesion;
       E.Has_Adhesion := False;
       if Result = Success then
@@ -223,7 +235,7 @@ package body MJ.Data.Constrained with SPARK_Mode is
          M.Flg_Adhesion := Original_Adhesion;
          M.Opt.Disableflags := Original_Flags;
          MJ.Constrained_Assets.Release (E.Assets); raise;
-   end Create;
+   end Create_Core;
 
    procedure Free (E : in out Engine; Result : out Status) is
    begin
@@ -467,16 +479,28 @@ package body MJ.Data.Constrained with SPARK_Mode is
       end if;
    end Contact_Inverse_Weight;
 
-   procedure Assemble (E : in out Engine; Result : out Status) is
-      S : CA.Result;
+   procedure Begin_Assembly (E : in out Engine; Result : out Status) is
    begin
       CA.Reset (E.Rows, E.D.Nv);
       Result := Success;
       if Disabled (E.Flags, Dsbl_Constraint) then return; end if;
       MJ.Data.Constrained.Tendons.Update (E, Result);
+   end Begin_Assembly;
+
+   procedure Assemble (E : in out Engine; Result : out Status) is
+   begin
+      Begin_Assembly (E, Result);
       if Result /= Success then return; end if;
       MJ.Data.Constrained.Equalities.Assemble (E, Result);
       if Result /= Success then return; end if;
+      Finish_Assembly (E, Result);
+   end Assemble;
+
+   procedure Finish_Assembly (E : in out Engine; Result : out Status) is
+      S : CA.Result;
+   begin
+      Result := Success;
+      if Disabled (E.Flags, Dsbl_Constraint) then return; end if;
       if not Disabled (E.Flags, Dsbl_Frictionloss) then
          for V in 0 .. E.D.Nv - 1 loop
             CA.Add_Dof_Friction (E.Rows, V, E.Dofs (V).Loss, S);
@@ -609,14 +633,21 @@ package body MJ.Data.Constrained with SPARK_Mode is
             end if;
          end;
       end loop;
-   end Assemble;
+   end Finish_Assembly;
 
    procedure Prepare_And_Solve (E : in out Engine; Result : out Status) is
       Nv : constant Natural := E.D.Nv;
       Nr : constant Natural := E.Rows.Rows;
       Mass : CS.Matrix (1 .. Nv, 1 .. Nv);
       J : CS.Matrix (1 .. Nr, 1 .. Nv) := [others => [others => 0.0]];
-      A, A_Free : CS.Vector (1 .. Nv);
+      Ordered_J : CS.Sparse_Jacobian (Nr, E.Rows.Used);
+      A, A_Free, Original_Smooth : CS.Vector (1 .. Nv);
+      Use_Native : constant Boolean := E.D.Solver_Policy = Compatible;
+      Native_Factor : CS.Sparse_Jacobian
+        ((if Use_Native then Nv else 0),
+         (if Use_Native then MJ.Ancestor_Rows.Count (E.D.Ancestors) else 0));
+      Native_Inverse : CS.Vector (1 .. (if Use_Native then Nv else 0));
+      Generalized_Force : CS.Vector (1 .. Nv) := [others => 0.0];
       Aref, Force : CS.Vector (1 .. Nr) := [others => 0.0];
       Hessian_Pattern : CS.Structural_Matrix (1 .. Nv, 1 .. Nv) := [others => [others => False]];
    begin
@@ -636,8 +667,29 @@ package body MJ.Data.Constrained with SPARK_Mode is
          Result := Success;
          return;
       end if;
+      --  Solve_Acceleration has just factored the undamped mass in Ada.
+      --  Reuse that factor, including structural zeros, as C reuses qLD.
+      if Use_Native then
+         for V in 1 .. Nv loop
+            declare
+               First : constant Natural := MJ.Ancestor_Rows.Start (E.D.Ancestors, V-1);
+               Width : constant Positive := MJ.Ancestor_Rows.Length (E.D.Ancestors, V-1);
+               Diagonal : constant Real := E.D.Scratch.Ancestor_Factor (First+Width-1);
+            begin
+               if Diagonal not in 1.0e-15 .. 1.0e60 then return; end if;
+               Native_Factor.Offsets (V) := First;
+               Native_Factor.Widths (V) := Width-1;
+               Native_Inverse (V) := NI.Reciprocal (Diagonal);
+               for K in 0 .. Width-1 loop
+                  Native_Factor.Columns (First+K+1) := MJ.Ancestor_Rows.Column (E.D.Ancestors, V-1, K)+1;
+                  Native_Factor.Values (First+K+1) := E.D.Scratch.Ancestor_Factor (First+K);
+               end loop;
+            end;
+         end loop;
+      end if;
       for V in 1 .. Nv loop
          A_Free (V) := E.D.Dynamics.Acceleration (V - 1);
+         Original_Smooth (V) := E.D.Dynamics.Total (V - 1);
          A (V) := A_Free (V); E.T.A_Free (V) := A_Free (V);
          for W in 1 .. Nv loop Mass (V, W) := E.D.Dynamics.Mass ((V - 1) * Nv + W - 1); end loop;
          if E.Settings.Sparse and then E.Settings.Algorithm = CS.Newton then
@@ -660,8 +712,12 @@ package body MJ.Data.Constrained with SPARK_Mode is
             Impedance_Margin : Real := Row.Param.Margin;
             Velocity : Real := 0.0;
          begin
+            Ordered_J.Offsets (R) := Row.Offset;
+            Ordered_J.Widths (R) := Row.Nonzeros;
             for K in Row.Offset + 1 .. Row.Offset + Row.Nonzeros loop
                J (R, E.Rows.Columns (K) + 1) := E.Rows.Values (K);
+               Ordered_J.Columns (K) := E.Rows.Columns (K)+1;
+               Ordered_J.Values (K) := E.Rows.Values (K);
                if E.Settings.Sparse and then E.Settings.Algorithm = CS.Newton then
                   for Q in K .. Row.Offset + Row.Nonzeros loop
                      Hessian_Pattern (E.Rows.Columns (K)+1, E.Rows.Columns (Q)+1) := True;
@@ -678,6 +734,10 @@ package body MJ.Data.Constrained with SPARK_Mode is
                     * E.D.State.Qvel (E.Rows.Columns (Row.Offset+Index+1))
                   else J (R, Index+1) * E.D.State.Qvel (Index));
             begin
+               if Count >= 4 then
+                  for Lane in 0 .. 3 loop L (Lane) := Term (Lane); end loop;
+                  Offset := 4;
+               end if;
                while Offset + 4 <= Count loop
                   for Lane in 0 .. 3 loop L (Lane) := L (Lane) + Term (Offset+Lane); end loop;
                   Offset := Offset + 4;
@@ -708,11 +768,13 @@ package body MJ.Data.Constrained with SPARK_Mode is
                   Eq : Equality_Description renames E.Equalities (Row.Id);
                begin
                   P := Eq.Params;
-                  Diag := (if Eq.Kind in 2 .. 3 then Eq.Scalar_Weight
+                  Diag := (if Eq.Kind >= 4 then E.Equality_Weights (R)
+                    elsif Eq.Kind in 2 .. 3 then Eq.Scalar_Weight
                     elsif R-Eq.First_Row < 3
                     then E.Bodies (Eq.Body0).Translation + E.Bodies (Eq.Body1).Translation
                     else E.Bodies (Eq.Body0).Rotation + E.Bodies (Eq.Body1).Rotation);
-                  Impedance_Position := Eq.Position_Norm;
+                  Impedance_Position :=
+                    (if Eq.Kind >= 4 then Row.Param.Position else Eq.Position_Norm);
                end;
             elsif Row.Kind = CA.Friction_Tendon then
                P := E.Tendons (Row.Id).Friction_Params; Diag := E.Tendons (Row.Id).Weight;
@@ -767,7 +829,7 @@ package body MJ.Data.Constrained with SPARK_Mode is
                   begin Reg := ((2.0 * Mu) * Mu) * Reg; end;
                end if;
                Aref (R) := (-B * Velocity) - ((K * Imp) * (Row.Param.Position - Row.Param.Margin));
-               if Row.Kind = CA.Equality then
+               if Row.Kind = CA.Equality and then E.Equalities (Row.Id).Kind < 4 then
                   Aref (R) := Aref (R)-E.Equalities (Row.Id).Jdot_V (R-E.Equalities (Row.Id).First_Row+1);
                end if;
                E.Solver_Rows (R) := (Form => (if Row.Kind = CA.Equality then CS.Equality
@@ -824,8 +886,16 @@ package body MJ.Data.Constrained with SPARK_Mode is
          end;
       end loop;
       end if;
-      CS.Solve (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings, A, Force, E.T.Report,
-                Hessian_Pattern);
+      if E.Settings.Sparse then
+         CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                   A, Force, Generalized_Force, E.T.Report,
+                   Hessian_Pattern, Ordered_J, Original_Smooth, Native_Factor, Native_Inverse);
+      else
+         CS.Solve_With_Force (Mass, J, A_Free, Aref, E.Solver_Rows (1 .. Nr), E.Settings,
+                   A, Force, Generalized_Force, E.T.Report,
+                   Hessian_Pattern, Smooth_Force => Original_Smooth,
+                   Native_Factor => Native_Factor, Native_Inverse => Native_Inverse);
+      end if;
       --  C's primal solver publishes its current iterate when alpha=0 (no
       --  improvement), as well as at the iteration budget. The candidate
       --  exposes those exits explicitly; keep that diagnostic without turning
@@ -833,15 +903,8 @@ package body MJ.Data.Constrained with SPARK_Mode is
       if not Step_Publication.Has_Iterate (E.T.Report.Outcome) then return; end if;
       for R in 1 .. Nr loop
          E.T.Force (R) := Force (R);
-         for K in E.Rows.Descriptors (R).Offset + 1 ..
-           E.Rows.Descriptors (R).Offset + E.Rows.Descriptors (R).Nonzeros loop
-            declare
-               V : constant Positive := E.Rows.Columns (K) + 1;
-            begin
-               E.T.Constraint_Force (V) := CK.Accumulate_Force (E.T.Constraint_Force (V), E.Rows.Values (K), Force (R));
-            end;
-         end loop;
       end loop;
+      for V in 1 .. Nv loop E.T.Constraint_Force (V) := Generalized_Force (V); end loop;
       --  Admission before publication: no partial output acceleration/force.
       for V in 1 .. Nv loop
          if A (V) not in Tier0_Real or else

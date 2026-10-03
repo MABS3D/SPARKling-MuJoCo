@@ -327,9 +327,19 @@ package MJ.Equality_Geometry with SPARK_Mode is
        and then J'First (2) = 1 and then J'Length (2) = J0'Length (2)
        and then Pos'First = 1 and then Pos'Length = 6,
      Post => (Static => J'Initialized and then Pos'Initialized
-       and then (for all R in 1 .. 3 => Pos (R) = (P0 (R - 1) - P1 (R - 1), 0.0))
-       and then (for all R in 4 .. 6 => Pos (R) = (Model.Position (A, B, Torque, R - 4), 0.0))
-       and then (for all R in 1 .. 3 => (for all C in J'Range (2) => J (R, C) = J0 (R, C) - J1 (R, C)))
-       and then (for all R in 4 .. 6 => (for all C in J'Range (2) =>
-         J (R, C) = Model.Column_Jacobian (A, B, J0, J1, C, Torque, R - 4))));
+       and then Pos (1) = (P0 (0)-P1 (0), 0.0)
+       and then Pos (2) = (P0 (1)-P1 (1), 0.0)
+       and then Pos (3) = (P0 (2)-P1 (2), 0.0)
+       and then Pos (4) = (Model.Position (A, B, Torque, 0), 0.0)
+       and then Pos (5) = (Model.Position (A, B, Torque, 1), 0.0)
+       and then Pos (6) = (Model.Position (A, B, Torque, 2), 0.0)
+       and then (for all C in J'Range (2) => J (1, C) = J0 (1, C)-J1 (1, C))
+       and then (for all C in J'Range (2) => J (2, C) = J0 (2, C)-J1 (2, C))
+       and then (for all C in J'Range (2) => J (3, C) = J0 (3, C)-J1 (3, C))
+       and then (for all C in J'Range (2) =>
+         J (4, C) = Model.Column_Jacobian (A, B, J0, J1, C, Torque, 0))
+       and then (for all C in J'Range (2) =>
+         J (5, C) = Model.Column_Jacobian (A, B, J0, J1, C, Torque, 1))
+       and then (for all C in J'Range (2) =>
+         J (6, C) = Model.Column_Jacobian (A, B, J0, J1, C, Torque, 2)));
 end MJ.Equality_Geometry;

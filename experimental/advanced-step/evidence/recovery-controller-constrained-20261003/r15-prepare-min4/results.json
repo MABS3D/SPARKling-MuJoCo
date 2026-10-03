@@ -1,0 +1,220 @@
+[
+  {
+    "label": "Prepare",
+    "exit": 1,
+    "seconds": 170.72573161800028,
+    "command": [
+      "gnatprove",
+      "-f",
+      "-P",
+      "/var/tmp/sparkling-services-advanced-components3-r15-20261003/source/experimental/advanced-step/controller_proof.gpr",
+      "-u",
+      "mj-data-controller_dynamics.adb",
+      "--prover=cvc5,z3,altergo",
+      "--timeout=5",
+      "--steps=0",
+      "--memlimit=900",
+      "--proof=per_check",
+      "--level=2",
+      "-j1",
+      "--checks-as-errors=on",
+      "--warnings=continue",
+      "--report=all",
+      "--counterexamples=off",
+      "--limit-subp=mj-data-controller_dynamics.adb:5",
+      "--no-inlining"
+    ],
+    "stack_mb": 64,
+    "proof_checks": 17,
+    "flow_checks": 1,
+    "progress": "PROGRESS_PROOF",
+    "stop_reason": "STOP_REASON_NONE",
+    "expected_stop_reason": "STOP_REASON_NONE",
+    "open": [
+      {
+        "check_col": 32,
+        "check_file": "mj-data-controller_dynamics.adb",
+        "check_line": 36,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-data-controller_dynamics.adb",
+        "how_proved": "prover",
+        "line": 36,
+        "message": {
+          "text": "assertion might fail"
+        },
+        "msg_id": 13,
+        "rule": "VC_ASSERT",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 32,
+        "check_file": "mj-data-controller_dynamics.adb",
+        "check_line": 41,
+        "check_tree": [
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 32,
+        "entity": 1,
+        "file": "mj-data-controller_dynamics.adb",
+        "how_proved": "prover",
+        "line": 41,
+        "message": {
+          "text": "assertion might fail"
+        },
+        "msg_id": 16,
+        "rule": "VC_ASSERT",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      },
+      {
+        "check_col": 36,
+        "check_file": "mj-data-controller_dynamics.ads",
+        "check_line": 6,
+        "check_tree": [
+          {
+            "proof_attempts": {},
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "altergo": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Timeout",
+                "steps": 1,
+                "time": 5
+              },
+              "Z3": {
+                "result": "Valid",
+                "steps": 4907,
+                "time": 0.738255
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 23779,
+                "time": 1.52036
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 23779,
+                "time": 1.51047
+              }
+            },
+            "transformations": {}
+          },
+          {
+            "proof_attempts": {
+              "CVC5": {
+                "result": "Valid",
+                "steps": 19168,
+                "time": 1.35238
+              }
+            },
+            "transformations": {}
+          }
+        ],
+        "col": 36,
+        "entity": 1,
+        "file": "mj-data-controller_dynamics.ads",
+        "how_proved": "prover",
+        "line": 8,
+        "message": {
+          "text": "postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old"
+        },
+        "msg_id": 20,
+        "rule": "VC_POSTCONDITION",
+        "severity": "medium",
+        "unproved_status": {
+          "memory": false,
+          "status": "limit",
+          "steps": false,
+          "time": true
+        }
+      }
+    ],
+    "warnings": [],
+    "coverage": true,
+    "verified": false
+  }
+]

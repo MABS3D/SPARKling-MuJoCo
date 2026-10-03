@@ -1,0 +1,20 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-advanced-controller-compose-r13-r2-modular-20261003/Evaluate/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 88.1 s, peak group RSS 1617 MB
+ info: precondition proved
+--> mj-data-advanced_control.adb:441:10
+
+ info: initialization of "Result" proved
+--> mj-data-advanced_control.ads:47:70
+
+ info: data dependencies proved
+--> mj-data-advanced_control.ads:49:11
+
+ medium: postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old
+--> mj-data-advanced_control.ads:50:27
+   50 |           Post => (Static => State_Values (D) = State_Values (D)'Old
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

@@ -1,0 +1,223 @@
+{
+  "assumptions": [
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Equality_Geometry.Weld",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-equality_geometry.ads",
+          "line": 315
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 7,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "flow",
+      "line": 153,
+      "message": {
+        "text": "initialization of \"Angular\" proved"
+      },
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 6,
+      "entity": 1,
+      "file": "mj-equality_geometry.ads",
+      "how_proved": "flow",
+      "line": 318,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 43,
+      "check_file": "mj-equality_geometry.adb",
+      "check_line": 180,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 12481,
+              "time": 3.22523000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 6.57240000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "prover",
+      "line": 180,
+      "message": {
+        "text": "loop invariant initialization proved"
+      },
+      "msg_id": 0,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 12481,
+          "max_time": 3.22522997856140E-01
+        },
+        "Z3": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 6.57240003347397E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-equality_geometry.adb",
+      "check_line": 180,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 92,
+              "time": 3.79939000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.56470000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 43,
+      "entity": 1,
+      "file": "mj-equality_geometry.adb",
+      "how_proved": "prover",
+      "line": 180,
+      "message": {
+        "text": "loop invariant preservation proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "info",
+      "stats": {
+        "Z3": {
+          "count": 2,
+          "max_steps": 92,
+          "max_time": 3.79938989877701E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 2.84609999507666E-02,
+      "gnatwhy3.init": 6.08744978904724E-01,
+      "gnatwhy3.register_vcs": 5.05027484893799E+00,
+      "gnatwhy3.run_vcs": 4.50999010354280E-04,
+      "gnatwhy3.save_session": 8.83607983589172E-01,
+      "gnatwhy3.schedule_vcs": -8.68470013141632E-01,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.40470003336668E-02,
+      "gnatwhy3.transformations.detect_polymorphism": 6.04199897497892E-03,
+      "gnatwhy3.transformations.discriminate_if_poly": 1.40000001920271E-05,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 2.18809992074966E-02,
+      "gnatwhy3.transformations.eliminate_builtin": 1.99420005083084E-02,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 2.88700009696186E-03,
+      "gnatwhy3.transformations.eliminate_epsilon": 1.23589988797903E-02,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 1.60819981247187E-02,
+      "gnatwhy3.transformations.eliminate_inductive": 5.83299901336432E-03,
+      "gnatwhy3.transformations.eliminate_literal": 1.43550001084805E-02,
+      "gnatwhy3.transformations.eliminate_projections_sums": 4.77400003001094E-03,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 7.00000009601354E-06,
+      "gnatwhy3.transformations.inline_trivial": -8.72599005699158E-01,
+      "gnatwhy3.transformations.introduce_premises": 2.32730004936457E-02,
+      "gnatwhy3.transformations.remove_unused": 3.54119986295700E-02,
+      "gnatwhy3.transformations.simplify_formula": 2.04569995403290E-02,
+      "gnatwhy3.transformations.split_goal_wp_conj": 2.69779896736145E+00
+    },
+    "global": {
+      "flow analysis": 3.05399997159839E-03,
+      "globals (advanced)": 1.01000000722706E-03,
+      "globals (basic)": 3.13599989749491E-03,
+      "init_why_sections": 1.03299994952977E-03,
+      "marking": 1.07300002127886E-03,
+      "properties (advanced)": 1.44000005093403E-04,
+      "translation of standard": 1.09599996358156E-03
+    }
+  },
+  "warn_error": [
+  ]
+}

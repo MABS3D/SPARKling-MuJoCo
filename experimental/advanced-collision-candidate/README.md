@@ -5,6 +5,17 @@ commit `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`. It is isolated from
 the main thread's collision, constraint and dynamics work. Production Ada
 does not link to C; C is used only as the differential-test oracle.
 
+The numerical and timing figures below describe the initial standalone
+2026-10-02 snapshot. Subsequent integrated recovery has its own source closures
+and evidence: see [BVH_PROOF.md](BVH_PROOF.md#recovery-exact-frame-cache-2026-10-03)
+for the exact frame-cache contracts, and
+[the collision recovery journal](../../plans/2026-10-02-recovery-collision.md)
+for scene, SDF and flex integration. The fresh BVH complete-unit renewal closes
+969 proof/flow checks with no open obligations and eight retained warnings.
+The exact cache relation is proved; universal pair enumeration remains outside
+the current contract. Both profiles pass 2,429/2,429 comparisons and 3,969
+containment checks on those same 350 sources, with identical output records.
+
 ## Implemented scope
 
 | Area | Implementation |

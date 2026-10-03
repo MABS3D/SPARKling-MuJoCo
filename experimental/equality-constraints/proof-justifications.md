@@ -30,7 +30,11 @@ The current Weld diagnostic also names its expected angular matrix as a
 `Ghost => Static` constant. This is proof-only data and is not a runtime
 preparation scan. Static ghost entities are always ignored at runtime under
 [SPARK RM11.4](https://docs.adacore.com/spark2014-docs/html/lrm/exceptions.html).
-This witness has not yet closed the preservation obligation and is not proof
-evidence by itself.
+The witness alone did not close preservation. Explicit Static assertions now
+separate preservation of the previous prefix from the value of the new column;
+the row-four diagnostics pass both assertions and the resulting invariant.
+Complete Weld/unit acceptance remains pending. The final contract spells out
+the same six rows separately to reduce quantifier nesting; no component or
+formula has been removed.
 
 Reference: [SPARK User's Guide — pruning the proof context](https://docs.adacore.com/spark2014-docs/html/ug/en/appendix/additional_annotate_pragmas.html#pruning-the-proof-context-on-a-case-by-case-basis).

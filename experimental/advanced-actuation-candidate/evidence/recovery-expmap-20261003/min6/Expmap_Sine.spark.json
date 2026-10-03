@@ -1,0 +1,450 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Actuator_Geometry.Expmap_Sine",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-actuator_geometry.ads",
+          "line": 14
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Actuator_Math.Math.Sin",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "a-ngelfu.ads",
+          "line": 100
+        },
+        {
+          "column": 4,
+          "file": "mj-actuator_math.ads",
+          "line": 4
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "entity": 1,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "flow",
+      "line": 14,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Expmap_Sine\" has been proved, subprogram will terminate"
+      },
+      "msg_id": 0,
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 11,
+      "entity": 1,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "flow",
+      "line": 15,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 1,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 63,
+      "check_file": "mj-actuator_geometry.ads",
+      "check_line": 14,
+      "check_tree": {},
+      "col": 63,
+      "entity": 1,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "text": "float overflow check proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_FP_OVERFLOW_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 16,
+      "check_file": "mj-actuator_geometry.ads",
+      "check_line": 16,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 673,
+              "time": 0.02378
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 670,
+              "time": 0.018986
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 16,
+      "entity": 1,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "prover",
+      "line": 16,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 3,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 673,
+          "max_time": 0.0237799994647503
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [],
+  "skip_proof": [],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 0.00784400012344122,
+      "gnatwhy3.init": 0.195778995752335,
+      "gnatwhy3.register_vcs": 0.00313699897378683,
+      "gnatwhy3.run_vcs": 1.99900000552589e-06,
+      "gnatwhy3.save_session": 0.00033099899883382,
+      "gnatwhy3.schedule_vcs": 0.0127919986844063,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 0.00312500004656613,
+      "gnatwhy3.transformations.detect_polymorphism": 2.70000000455184e-05,
+      "gnatwhy3.transformations.discriminate_if_poly": 9.99000008050643e-07,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 0.000441000011051074,
+      "gnatwhy3.transformations.eliminate_builtin": 0.00198399904184043,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 0.00061500002630055,
+      "gnatwhy3.transformations.eliminate_epsilon": 6.80000011925586e-05,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 6.6000000515487e-05,
+      "gnatwhy3.transformations.eliminate_inductive": 6.80000011925586e-05,
+      "gnatwhy3.transformations.eliminate_literal": 0.000361000013072044,
+      "gnatwhy3.transformations.eliminate_projections_sums": 0.00014000000373926,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643e-07,
+      "gnatwhy3.transformations.inline_trivial": 0.00780199887230992,
+      "gnatwhy3.transformations.remove_unused": 0.00113999901805073,
+      "gnatwhy3.transformations.simplify_formula": 0.000134000001708046,
+      "gnatwhy3.transformations.split_goal_wp_conj": 0.0025220001116395
+    },
+    "global": {
+      "flow analysis": 0.000414999987697229,
+      "globals (advanced)": 0.00262699997983873,
+      "globals (basic)": 0.00377300009131432,
+      "init_why_sections": 0.000592000025790185,
+      "marking": 0.000738999980967492,
+      "properties (advanced)": 8.49999996717088e-05,
+      "translation of standard": 0.000944999977946281
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {},
+      "col": 32,
+      "file": "mj-actuator_geometry.adb",
+      "how_proved": "trivial",
+      "line": 18,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 32,
+      "file": "mj-actuator_geometry.adb",
+      "how_proved": "trivial",
+      "line": 56,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 32,
+      "file": "mj-actuator_geometry.adb",
+      "how_proved": "trivial",
+      "line": 121,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 11,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 11,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 11,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 11,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 56,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 56,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 52,
+      "file": "mj-trigonometry.ads",
+      "how_proved": "trivial",
+      "line": 13,
+      "message": {
+        "arguments": [
+          "Cos"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 52,
+      "file": "mj-trigonometry.ads",
+      "how_proved": "trivial",
+      "line": 13,
+      "message": {
+        "arguments": [
+          "Cos"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 14,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 27,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 14,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 27,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 56,
+      "file": "mj-actuator_geometry.ads",
+      "how_proved": "trivial",
+      "line": 14,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

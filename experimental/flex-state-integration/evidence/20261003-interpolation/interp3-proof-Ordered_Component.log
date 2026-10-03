@@ -1,0 +1,97 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ medium: precondition might fail, cannot prove Acc in -1.0e16 .. 1.0e16
+--> mj-flex_interpolation.adb:103:14
+  103 |          return Add_Node
+      |                 ^~~~~~~~
+      :
+  105 |             Nodes (Indices (Count - 1)) (K), Basis_At (Local, Degree, Count - 1));
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:104:10
+
+ info: subprogram variant proved
+--> mj-flex_interpolation.adb:104:10
+
+ info: range check proved
+--> mj-flex_interpolation.adb:104:66
+
+ info: index check proved
+--> mj-flex_interpolation.adb:105:17
+
+ info: index check proved
+--> mj-flex_interpolation.adb:105:32
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:105:43
+
+ info: range check proved
+--> mj-flex_interpolation.adb:105:74
+
+ info: implicit aspect Always_Terminates on "Ordered_Component" has been proved, subprogram will terminate
+--> mj-flex_interpolation.ads:99:13
+
+ info: data dependencies proved
+--> mj-flex_interpolation.ads:102:28
+
+ info: index check proved
+--> mj-flex_interpolation.ads:107:21
+
+ info: index check proved
+--> mj-flex_interpolation.ads:108:28
+
+ info: index check proved
+--> mj-flex_interpolation.ads:108:37
+
+ medium: postcondition might fail, cannot prove Ordered_Component'Result in -Real (Count) * 7.0e12 .. Real (Count) * 7.0e12
+--> mj-flex_interpolation.ads:109:27
+  109 |           Post => (Static => Ordered_Component'Result in
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+  110 |             -Real (Count) * 7.0e12 .. Real (Count) * 7.0e12
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: range check proved
+--> mj-flex_interpolation.ads:110:17
+
+ info: float overflow check proved
+--> mj-flex_interpolation.ads:110:24
+
+ info: range check proved
+--> mj-flex_interpolation.ads:110:42
+
+ info: float overflow check proved
+--> mj-flex_interpolation.ads:110:49
+
+ info: precondition proved
+--> mj-flex_interpolation.ads:113:14
+
+ info: subprogram variant proved
+--> mj-flex_interpolation.ads:113:14
+
+ info: range check proved
+--> mj-flex_interpolation.ads:113:70
+
+ info: float overflow check proved
+--> mj-flex_interpolation.ads:113:78
+
+ info: index check proved
+--> mj-flex_interpolation.ads:114:21
+
+ info: index check proved
+--> mj-flex_interpolation.ads:114:36
+
+ info: float overflow check proved
+--> mj-flex_interpolation.ads:114:46
+
+ info: precondition proved
+--> mj-flex_interpolation.ads:114:48
+
+ info: range check proved
+--> mj-flex_interpolation.ads:114:79
+Summary logged in /var/tmp/sparkling-recovery-flex-interpolation3-20261003/proof/Ordered_Component/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 53.2 s, peak group RSS 188 MB

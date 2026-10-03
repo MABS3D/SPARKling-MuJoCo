@@ -1,0 +1,32 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-expmap-min-20261003/Norm3/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 13.8 s, peak group RSS 144 MB
+ info: implicit aspect Always_Terminates on "Norm3" has been proved, subprogram will terminate
+--> mj-actuator_geometry.ads:6:16
+
+ info: precondition proved
+--> mj-actuator_geometry.ads:7:14
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:7:27
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:7:33
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:7:39
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:7:46
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:7:52
+
+ medium: postcondition might fail
+--> mj-actuator_geometry.ads:8:49
+    8 |            with Pre => Bounded (V,1.0e10), Post => Norm3'Result in 0.0 .. 2.0e10;
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

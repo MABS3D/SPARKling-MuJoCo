@@ -1,4 +1,5 @@
 with MJ.Data.Flex_Elasticity;
+with MJ.Data.Flex_Elasticity.Equalities;
 with MJ.Flex_State;
 
 -- Shared rigid state, elastic forces and constraint response. Vertex sides
@@ -12,6 +13,11 @@ package MJ.Data.Constrained.Flex with SPARK_Mode is
    function Diagnostics (E : Engine) return Trace with Global => null;
    function Passive (E : Engine) return Real_Array with Global => null;
    function Contacts (E : Engine) return MJ.Flex_State.Contact_Array;
+   function Equality_Count (E : Engine) return Natural with Global => null;
+   function Equality_Active (E : Engine; Index : Natural) return Boolean
+     with Global => null, Pre => Index < Equality_Count (E);
+   procedure Set_Equality_Active
+     (E : in out Engine; Index : Natural; Active : Boolean; Result : out Status);
    procedure Create (M : in out MJ.Models.Model; E : in out Engine; Result : out Status);
    procedure Free (E : in out Engine; Result : out Status);
    procedure Set_State (E : in out Engine; Qpos, Qvel : State_Vector;
@@ -31,6 +37,8 @@ private
    package FS renames MJ.Flex_State;
    type Vertex_Body_Array is array (Natural range 0 .. FE.Max_Vertices - 1) of Natural;
    type Flex_Address_Array is array (Natural range 0 .. FE.Max_Flexes - 1) of Natural;
+   type Geom_Flags is array (Natural range 0 .. Max_G-1) of Boolean;
+   type Flex_Flags is array (Natural range 0 .. FE.Max_Flexes-1) of Boolean;
    type Engine is limited record
       Base : MJ.Data.Constrained.Engine;
       Elastic : FE.Force_Model;
@@ -38,6 +46,10 @@ private
       Pending : FS.Contact_List (Max_C);
       Bodies : Vertex_Body_Array := [others => 0];
       Address, Count : Flex_Address_Array := [others => 0];
+      Sort_Geom : Geom_Flags := [others => False];
+      Sort_Flex : Flex_Flags := [others => False];
+      Equality_Responses : MJ.Data.Flex_Elasticity.Equalities.Response_Array (1 .. Max_R)
+        := [others => <>];
       Nf, Nv : Natural := 0;
    end record;
 end MJ.Data.Constrained.Flex;

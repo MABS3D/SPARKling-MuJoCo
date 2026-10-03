@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     scopes = ['Proxy_Extent', 'Bounded_Index', 'kernels', 'scene-flow', 'step-flow',
-              'scene', 'step']
+              'scene', 'step', 'Contact_Type', 'Generate']
     parser.add_argument('--scope', action='append', choices=scopes)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
@@ -34,7 +34,7 @@ def main():
     project = snapshot / 'experimental/sdf-step/sdf.gpr'
     rows = []
     for scope in args.scope or scopes[:5]:
-        unit = ('mj-sdf_scene.adb' if scope.startswith('scene') else
+        unit = ('mj-sdf_scene.adb' if scope.startswith('scene') or scope in ('Contact_Type','Generate') else
                 'mj-data-constrained-sdf.adb' if scope.startswith('step') else
                 'mj-sdf_kernels.adb')
         env = environment()
@@ -47,11 +47,12 @@ def main():
             command += ['--mode=prove', '--prover=cvc5,z3,altergo', '--timeout=3',
                         '--memlimit=650', '--steps=0', '--proof=per_check',
                         '--counterexamples=off', '--no-inlining']
-        if scope in ['Proxy_Extent', 'Bounded_Index']:
-            filename = 'mj-sdf_kernels.' + ('ads' if scope == 'Bounded_Index' else 'adb')
+        if scope in ['Proxy_Extent', 'Bounded_Index', 'Contact_Type', 'Generate']:
+            filename = ('mj-sdf_scene.adb' if scope in ('Contact_Type','Generate') else
+                        'mj-sdf_kernels.' + ('ads' if scope == 'Bounded_Index' else 'adb'))
             lines = (snapshot / 'experimental/sdf-step/src' / filename).read_text().splitlines()
             line = next(i for i, text in enumerate(lines, 1)
-                        if re.match(r'\s*function ' + scope + r'\b', text))
+                        if re.match(r'\s*(?:function|procedure) ' + scope + r'\b', text))
             command += ['--limit-subp=' + filename + ':' + str(line)]
         guarded = ['python3', str(ROOT / 'tools/guarded.py'), '--cap-mb', '2500',
                    '--timeout', '180', '--', *command]

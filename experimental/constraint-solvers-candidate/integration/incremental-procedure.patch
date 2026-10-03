@@ -1,0 +1,55 @@
+--- a/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
++++ b/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb
+@@ -466,7 +466,7 @@
+          end Residual;
+          pragma Inline_Always (Residual);
+ 
+-         function Incremental_Hessian return Boolean is
++         procedure Incremental_Hessian (Accepted : out Boolean) is
+             X : Vector (1 .. N);
+             Root_D : Real;
+             Plus : Boolean;
+@@ -474,6 +474,7 @@
+             Start : Natural;
+             Status : Updates.Status;
+          begin
++            Accepted := False;
+             for Row in 1 .. K loop
+                if Curvature (Row) /= Previous_Curvature (Row) then
+                   Plus := Curvature (Row) /= 0.0;
+@@ -485,7 +486,7 @@
+                         --  General ordered/duplicate CSR remains admissible for
+                         --  products and retains the full-factorization path.
+                         for Slot in Native.Offsets (Row)+2 .. Native.Offsets (Row)+Native.Widths (Row) loop
+-                           if Native.Columns (Slot) <= Native.Columns (Slot-1) then return False; end if;
++                           if Native.Columns (Slot) <= Native.Columns (Slot-1) then return; end if;
+                         end loop;
+                         Start := Native.Columns (Native.Offsets (Row)+Native.Widths (Row));
+                         for Slot in Native.Offsets (Row)+1 .. Native.Offsets (Row)+Native.Widths (Row) loop
+@@ -501,10 +502,10 @@
+                      Updates.Update_Dense (HL, X, Plus, Rank, Status);
+                      if Status /= Updates.Success then raise Constraint_Error; end if;
+                   end if;
+-                  if Rank < N then return False; end if;
++                  if Rank < N then return; end if;
+                end if;
+             end loop;
+-            return True;
++            Accepted := True;
+          end Incremental_Hessian;
+ 
+          procedure Build_Scalar_Hessian is
+@@ -516,8 +517,11 @@
+                Nonzero_Curvature := Nonzero_Curvature or Curvature (R) /= 0.0;
+             end loop;
+             if not Changed then return; end if;
+-            if Hessian_Valid and then Incremental_Hessian then
+-               Previous_Curvature := Curvature; return;
++            if Hessian_Valid then
++               declare Accepted : Boolean; begin
++                  Incremental_Hessian (Accepted);
++                  if Accepted then Previous_Curvature := Curvature; return; end if;
++               end;
+             end if;
+             if not Nonzero_Curvature then
+                H := M;

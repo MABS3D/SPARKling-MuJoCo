@@ -1,0 +1,125 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: float overflow check proved
+--> mj-flex_node_weights.adb:6:33
+
+ info: float overflow check proved
+--> mj-flex_node_weights.adb:6:52
+
+ medium: float overflow check might fail
+--> mj-flex_node_weights.adb:7:33
+    7 |          if Count >= 2 then R := R + Vertices (1) (K) * abs Weights (1); end if;
+      |                                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-flex_node_weights.ads:29 should mention K and Weights
+      --> mj-flex_node_weights.ads:29:04
+   29 |       function Coordinate (Vertices : Coordinates; Weights : Vertex_Weights;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-flex_node_weights.adb:7:52
+
+ medium: float overflow check might fail
+--> mj-flex_node_weights.adb:8:33
+    8 |          if Count >= 3 then R := R + Vertices (2) (K) * abs Weights (2); end if;
+      |                                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-flex_node_weights.ads:29 should mention K and Weights
+      --> mj-flex_node_weights.ads:29:04
+   29 |       function Coordinate (Vertices : Coordinates; Weights : Vertex_Weights;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-flex_node_weights.adb:8:52
+
+ medium: float overflow check might fail
+--> mj-flex_node_weights.adb:9:33
+    9 |          if Count >= 4 then R := R + Vertices (3) (K) * abs Weights (3); end if;
+      |                                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + possible fix: precondition of subprogram at mj-flex_node_weights.ads:29 should mention K and Weights
+      --> mj-flex_node_weights.ads:29:04
+   29 |       function Coordinate (Vertices : Coordinates; Weights : Vertex_Weights;
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-flex_node_weights.adb:9:52
+
+ info: implicit aspect Always_Terminates on "Coordinate" has been proved, subprogram will terminate
+--> mj-flex_node_weights.ads:29:13
+
+ info: data dependencies proved
+--> mj-flex_node_weights.ads:31:11
+
+ medium: postcondition might fail, cannot prove Coordinate'Result in -16.0 .. 16.0
+--> mj-flex_node_weights.ads:34:16
+   34 |           Post => Coordinate'Result in -16.0 .. 16.0
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:37:36
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:37:55
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:39:18
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:39:37
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:39:56
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:39:75
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:41:19
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:41:38
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:41:57
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:41:76
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:41:95
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:42:31
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:43:23
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:43:42
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:43:61
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:43:80
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:43:99
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:44:31
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:44:50
+
+ info: float overflow check proved
+--> mj-flex_node_weights.ads:44:69
+Summary logged in /var/tmp/sparkling-recovery-node-weights1-20261003/proof/Coordinate/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 58.9 s, peak group RSS 173 MB

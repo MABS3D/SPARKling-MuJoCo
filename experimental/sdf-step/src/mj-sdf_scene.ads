@@ -9,6 +9,7 @@ with MJ.SDF_Fields;
 with MJ.Convex_Contacts;
 with MJ.BVH;
 with MJ.Admitted_SDF;
+with MJ.Flex_Collisions;
 package MJ.SDF_Scene with SPARK_Mode is
    Max_G : constant := 256;
    Max_Octants : constant := 200_000;
@@ -26,6 +27,16 @@ package MJ.SDF_Scene with SPARK_Mode is
      with Pre => Initialized (S),
        Post => Length <= Contacts'Length and then
          (if Result /= Success then Length = 0);
+   --  Reuse the owned octree for flex triangles without copying the sampled
+   --  field or allocating in the simulation step.
+   procedure Collide_Flex (S : in out Scene; G : Natural; Placement : Pose;
+     F : MJ.Flex_Collisions.Flex; Elements : MJ.Flex_Collisions.Element_Array;
+     Vertices : MJ.Contact_Geometry.Vertex_Array; Bodies : MJ.Flex_Collisions.Body_Array;
+     Tree : MJ.BVH.Tree; Midphase : Boolean; Contacts : in out MJ.Flex_Collisions.Batch;
+     Result : out Status)
+     with Pre => Initialized (S),
+       Post => Contacts.Length <= Contacts.Capacity
+         and then (if Result /= Success then Contacts.Length = 0);
 private
    type Octree_Access is access MJ.SDF_Fields.Octree;
    type Vertex_Access is access MJ.Contact_Geometry.Vertex_Array;

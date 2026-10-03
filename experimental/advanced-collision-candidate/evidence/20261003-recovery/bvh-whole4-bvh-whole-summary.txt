@@ -1,0 +1,90 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+------------------------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total        Flow                                           Provers   Justified   Unproved
+------------------------------------------------------------------------------------------------------------------------
+Data Dependencies                35          35                                                 .           .          .
+Flow Dependencies                 .           .                                                 .           .          .
+Initialization                   65          32                                         33 (CVC5)           .          .
+Non-Aliasing                      1           1                                                 .           .          .
+Run-time Checks                 499           .                 499 (CVC5 98%, Trivial 2%, Z3 0%)           .          .
+Assertions                      105           .    104 (CVC5 85%, Trivial 10%, Z3 3%, altergo 3%)           .          1
+Functional Contracts            101           .      99 (CVC5 82%, Trivial 8%, Z3 7%, altergo 3%)           .          2
+LSP Verification                  .           .                                                 .           .          .
+Termination                      28          26                                          2 (CVC5)           .          .
+Concurrency                       .           .                                                 .           .          .
+------------------------------------------------------------------------------------------------------------------------
+Total                           834    94 (11%)                                         737 (88%)           .     3 (0%)
+
+
+max steps used for successful proof: 47860
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.adb:72:17: precondition proved in max 3 seconds
+mj-bvh.adb:506:42: loop invariant after first iteration proved in max 3 seconds
+mj-bvh.adb:421:16: postcondition proved in max 3 seconds
+mj-bvh.adb:85:7: precondition proved in max 3 seconds
+mj-bvh.adb:429:16: postcondition proved in max 3 seconds
+mj-bvh.adb:518:19: use of an uninitialized variable proved in max 3 seconds
+mj-bvh.adb:518:32: use of an uninitialized variable proved in max 3 seconds
+mj-bvh.adb:449:36: loop invariant after first iteration proved in max 2 seconds
+mj-bvh.adb:425:43: fp_overflow check proved in max 2 seconds
+mj-bvh.adb:526:23: fp_overflow check proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 46 subprograms and packages out of 46 analyzed
+  MJ.BVH at mj-bvh.ads:4 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.BVH.Area at mj-bvh.adb:532 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.BVH.Area_Sum at mj-bvh.adb:525 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.BVH.Bounded at mj-bvh.ads:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.BVH.Boxes_Valid at mj-bvh.ads:60 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.BVH.Build at mj-bvh.ads:86 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (77 checks)
+  MJ.BVH.Contains at mj-bvh.ads:31 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.BVH.Enclose at mj-bvh.adb:57 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 55 checks out of 56 proved
+  MJ.BVH.Enclosing at mj-bvh.ads:62 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.BVH.Frame_Cache at mj-bvh.ads:134 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.BVH.Frame_Offset at mj-bvh.adb:424 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.BVH.Frame_Product at mj-bvh.adb:416 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.BVH.Leaf_Item at mj-bvh.ads:77 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.BVH.Leaves_Match at mj-bvh.ads:68 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.BVH.Lemma_Enclosing at mj-bvh.adb:218 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.BVH.Lemma_Lower at mj-bvh.adb:19 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 5 checks out of 6 proved
+  MJ.BVH.Lemma_Monotonic at mj-bvh.adb:37 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (5 checks)
+  MJ.BVH.Lemma_Refitted at mj-bvh.adb:234 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (23 checks)
+  MJ.BVH.Lemma_Transitive at mj-bvh.adb:47 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.BVH.Lemma_Upper at mj-bvh.adb:28 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and not proved, 5 checks out of 6 proved
+  MJ.BVH.Maximum at mj-bvh.adb:10 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.BVH.Minimum at mj-bvh.adb:5 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.BVH.Node_Shaped at mj-bvh.ads:50 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (10 checks)
+  MJ.BVH.Oriented_Overlap at mj-bvh.ads:108 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (24 checks)
+  MJ.BVH.Overlap at mj-bvh.ads:15 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (6 checks)
+  MJ.BVH.Prepare at mj-bvh.ads:104 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (2 checks)
+  MJ.BVH.Prepare_Bounded at mj-bvh.adb:435 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.BVH.Prepared at mj-bvh.ads:103 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.BVH.Projected_Radius at mj-bvh.adb:478 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (11 checks)
+  MJ.BVH.Projection at mj-bvh.adb:469 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (13 checks)
+  MJ.BVH.Refit at mj-bvh.ads:92 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (9 checks)
+  MJ.BVH.Refit_Shaped at mj-bvh.adb:258 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (69 checks)
+  MJ.BVH.Schedule at mj-bvh.adb:328 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (39 checks)
+  MJ.BVH.Set_Bounds at mj-bvh.adb:178 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (61 checks)
+  MJ.BVH.Shaped at mj-bvh.ads:58 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (1 checks)
+  MJ.BVH.Sphere_Overlap at mj-bvh.ads:20 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.BVH.Topology_Valid at mj-bvh.ads:80 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (31 checks)
+  MJ.BVH.Traverse at mj-bvh.ads:115 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (92 checks)
+  MJ.BVH.Traverse.Emit at mj-bvh.adb:571 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (34 checks)
+  MJ.BVH.Traverse.Push at mj-bvh.adb:555 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (20 checks)
+  MJ.BVH.Union_Axis at mj-bvh.adb:91 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (20 checks)
+  MJ.BVH.Union_Box at mj-bvh.ads:36 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.BVH.Unique_Leaves at mj-bvh.ads:72 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (4 checks)
+  MJ.BVH.Valid at mj-bvh.ads:12 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (0 checks)
+  MJ.BVH.Valid at mj-bvh.ads:82 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)
+  MJ.BVH.Work_Fits at mj-bvh.adb:320 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (8 checks)

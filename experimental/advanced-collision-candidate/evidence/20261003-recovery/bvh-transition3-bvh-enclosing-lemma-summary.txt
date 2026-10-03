@@ -1,0 +1,36 @@
+=========================
+Summary of SPARK analysis
+=========================
+
+---------------------------------------------------------------------------------------------------------
+SPARK Analysis results        Total      Flow                              Provers   Justified   Unproved
+---------------------------------------------------------------------------------------------------------
+Data Dependencies                 1         1                                    .           .          .
+Flow Dependencies                 .         .                                    .           .          .
+Initialization                    .         .                                    .           .          .
+Non-Aliasing                      .         .                                    .           .          .
+Run-time Checks                   8         .                             8 (CVC5)           .          .
+Assertions                        .         .                                    .           .          .
+Functional Contracts              4         .    4 (CVC5 44%, Trivial 11%, Z3 44%)           .          .
+LSP Verification                  .         .                                    .           .          .
+Termination                       .         .                                    .           .          .
+Concurrency                       .         .                                    .           .          .
+---------------------------------------------------------------------------------------------------------
+Total                            13    1 (8%)                             12 (92%)           .          .
+
+
+max steps used for successful proof: 8548
+
+============================
+Most difficult proved checks
+============================
+
+mj-bvh.adb:225:14: postcondition proved in max 2 seconds
+
+========================
+Detailed analysis report
+========================
+
+Analyzed 1 unit
+in unit mj-bvh, 1 subprograms and packages out of 1 analyzed
+  MJ.BVH.Lemma_Enclosing at mj-bvh.adb:217 flow analyzed (0 errors, 0 checks, 0 warnings and 0 pragma Assume statements) and proved (12 checks)

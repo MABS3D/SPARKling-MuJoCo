@@ -1,0 +1,10 @@
+--- a/src/mj-trigonometry.ads
++++ b/src/mj-trigonometry.ads
+@@ -8,7 +8,6 @@
+    --  is specified below; universal equivalence to libm is not asserted.
+    Cosine_Tiny_Threshold : constant Real := 2.0**(-26);
+    function Cosine (X : Real) return Real with Global => null, Inline_Always,
+-     Pre => X in -1.0e21 .. 1.0e21,
+      Post => Cosine'Result in -1.0 .. 1.0 and then Cosine'Result =
+        (if abs X < Cosine_Tiny_Threshold then 1.0 - (X*X)/2.0
+         else Ada.Numerics.Long_Elementary_Functions.Cos (X));

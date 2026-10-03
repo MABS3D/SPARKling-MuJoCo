@@ -1,0 +1,280 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_EFFECTS"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.BVH.Same_Offset",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-bvh.adb",
+          "line": 506
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.BVH.Frame_Offset",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-bvh.adb",
+          "line": 437
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 28,
+      "entity": 1,
+      "file": "mj-bvh.adb",
+      "how_proved": "flow",
+      "line": 507,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 0,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 27,
+      "check_file": "mj-bvh.adb",
+      "check_line": 512,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 17954,
+              "time": 2.42297000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 17954,
+              "time": 2.66533000000000E-01
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 2549,
+              "time": 4.65190000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 27,
+      "entity": 1,
+      "file": "mj-bvh.adb",
+      "how_proved": "prover",
+      "line": 512,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 3,
+          "max_steps": 17954,
+          "max_time": 2.66532987356186E-01
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 52,
+      "check_file": "mj-bvh.adb",
+      "check_line": 512,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 268,
+              "time": 1.45010000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 265,
+              "time": 1.45840000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 3.44800000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 52,
+      "entity": 1,
+      "file": "mj-bvh.adb",
+      "how_proved": "prover",
+      "line": 512,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 3,
+          "max_steps": 268,
+          "max_time": 1.45840002223849E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 27,
+      "check_file": "mj-bvh.adb",
+      "check_line": 512,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 10
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 10
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 10
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 27,
+      "entity": 1,
+      "file": "mj-bvh.adb",
+      "how_proved": "prover",
+      "line": 512,
+      "message": {
+        "text": "postcondition might fail"
+      },
+      "msg_id": 3,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 2.91700009256601E-02,
+      "gnatwhy3.init": 2.27476999163628E-01,
+      "gnatwhy3.register_vcs": 7.00900005176663E-03,
+      "gnatwhy3.run_vcs": 1.10000000859145E-05,
+      "gnatwhy3.save_session": 2.81500001437962E-03,
+      "gnatwhy3.schedule_vcs": 2.50020008534193E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 3.48800001665950E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 4.88999008666724E-04,
+      "gnatwhy3.transformations.discriminate_if_poly": 7.99900044512469E-06,
+      "gnatwhy3.transformations.eliminate_algebraic": 4.20199893414974E-03,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 1.10500003211200E-03,
+      "gnatwhy3.transformations.eliminate_builtin": 8.42600036412477E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 5.38000022061169E-04,
+      "gnatwhy3.transformations.eliminate_epsilon": 1.68800004757941E-03,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 6.50000001769513E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 1.36400002520531E-03,
+      "gnatwhy3.transformations.eliminate_literal": 2.45100003667176E-03,
+      "gnatwhy3.transformations.eliminate_projections_sums": 5.86998998187482E-04,
+      "gnatwhy3.transformations.eliminate_recursion": 1.12300005275756E-03,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.inline_trivial": 4.56940010190010E-02,
+      "gnatwhy3.transformations.introduce_premises": 7.30000028852373E-05,
+      "gnatwhy3.transformations.monomorphise_goal": 1.49990000863909E-05,
+      "gnatwhy3.transformations.remove_unused": 1.15750003606081E-02,
+      "gnatwhy3.transformations.simplify_formula": 2.41099903360009E-03,
+      "gnatwhy3.transformations.split_goal_wp_conj": 5.13599906116724E-03,
+      "gnatwhy3.transformations.split_premise_right": 2.01599905267358E-03
+    },
+    "global": {
+      "flow analysis": 3.57299996539950E-03,
+      "globals (advanced)": 1.90499995369464E-03,
+      "globals (basic)": 3.86800011619925E-03,
+      "init_why_sections": 1.68300000950694E-03,
+      "marking": 1.67499994859099E-03,
+      "properties (advanced)": 1.80999995791353E-04,
+      "translation of standard": 8.70999996550381E-04
+    }
+  },
+  "warn_error": [
+  ]
+}

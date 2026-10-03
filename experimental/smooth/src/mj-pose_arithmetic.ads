@@ -1,6 +1,8 @@
 with MJ.Types; use MJ.Types;
 with MJ.Smooth_Math; use MJ.Smooth_Math;
 with MJ.Smooth_Dynamics;
+with MJ.Rotations;
+with MJ.Quaternions;
 --  Proof facade for transient bounds. Arithmetic delegates to the original
 --  kernels, whose exact floating-point contracts remain unchanged.
 --  This facade proves storage/overflow invariants, not full rigid-body physics.
@@ -71,6 +73,13 @@ package MJ.Pose_Arithmetic with SPARK_Mode is
      Pre => Bounded (R, 16.0) and then Bounded (V, Max_Val),
      Post => Bounded (Apply_Config'Result, 1.0e12);
    pragma Postcondition (Static => Apply_Matches (R, V, Apply_Config'Result));
+   function Rotate_Config (Q : Quaternion; V : Vector) return Vector with
+     Global => null, Inline_Always,
+     Pre => Bounded (Q, 2.0) and then Bounded (V, Max_Val),
+     Post => Bounded (Rotate_Config'Result, 1.0e12);
+   pragma Postcondition (Static => (for all I in Axis =>
+     Rotate_Config'Result (I) = MJ.Quaternions.Model.Rotated_Component
+       (MJ.Rotations.Quaternion (Q), MJ.Rotations.Vector_3 (V), I)));
    function Slide_Velocity (V, W, Shift, Direction : Vector; Qd : Real) return Vector is
      (V + Cross (W, Shift) + Qd * Direction)
      with Global => null, Pre => Bounded (V) and then Bounded (W) and then Bounded (Shift, 1.0e24) and then Bounded (Direction, 1.0e12) and then Qd in -Max_Val .. Max_Val,

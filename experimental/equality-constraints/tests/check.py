@@ -13,7 +13,7 @@ import time
 
 HERE = Path(__file__).resolve().parents[1]
 ROOT = HERE.parents[1]
-UNITS = ['mj-equality_geometry', 'mj-equality_scalar']
+UNITS = ['mj-equality_geometry', 'mj-equality_scalar', 'mj-equality_flex', 'mj-equality_flex_rows']
 KERNELS = ROOT/'experimental/constraint-assembly-candidate/src'
 
 def digest(path):
@@ -25,6 +25,7 @@ def sources():
             ROOT/'experimental/constraint-assembly-candidate/src/mj-constraint_assembly.ads',
             ROOT/'experimental/constraint-assembly-candidate/src/mj-constraint_assembly.adb',
             HERE/'tests/equality_probe.adb', HERE/'tests/scalar_probe.adb',
+            HERE/'tests/flex_probe.adb',
             HERE/'tests/check.py', HERE/'equality.gpr']
 
 def environment():
@@ -46,6 +47,8 @@ def main():
     ap.add_argument('--timeout', type=int, default=10)
     ap.add_argument('--proof-mode', choices=['per_check', 'per_path', 'progressive'], default='per_check')
     ap.add_argument('--level', type=int, choices=range(5), default=2)
+    ap.add_argument('--no-inlining', action='store_true', help='use explicit subprogram proof boundaries')
+    ap.add_argument('--save-vcs', action='store_true', help='retain prover inputs for diagnosis')
     args = ap.parse_args()
     if args.only and args.phase != 'small':
         ap.error('--only is allowed only for small-subprogram diagnostics')
@@ -75,11 +78,11 @@ def main():
     def run(command, label):
         command = [sys.executable, str(ROOT/'tools/guarded.py'),
                    '--min-free-mb', '0', '--cap-mb', '2000', '--timeout', str(args.wall_timeout), '--', *command]
-        start = time.time()
+        start = time.monotonic()
         p = subprocess.run(command, env=env, text=True, capture_output=True)
         (out/(label+'.log')).write_text(p.stdout+p.stderr)
         return p, dict(label=label, command=command, code=p.returncode,
-                      seconds=time.time()-start)
+                      seconds=time.monotonic()-start)
     if args.phase == 'build':
         p, rec = run(['gprbuild', '-P', str(out/'equality.gpr'), '-j1'], 'build')
         binary = out/'build'/args.mode/'bin/equality_probe'
@@ -123,6 +126,10 @@ def main():
             '--warnings=continue', '--report=all', '--counterexamples=off']
         if limit:
             command.append('--limit-subp='+limit)
+        if args.no_inlining:
+            command.append('--no-inlining')
+        if args.save_vcs:
+            command.append('--debug-save-vcs')
         if args.limit_line:
             command.append('--limit-line='+args.limit_line)
         label = ('line' if args.limit_line else args.phase)+'-'+label
@@ -135,6 +142,7 @@ def main():
             diagnostics = [x for s in ['proof', 'flow', 'warn_error'] for x in d.get(s, [])]
             rec.update(checks=sum(x.get('severity') == 'info'
                 for s in ['proof', 'flow'] for x in d.get(s, [])),
+                proof_checks=len(d.get('proof', [])),
                 open=[x for x in diagnostics if x.get('severity') not in ['info', 'warning']],
                 warnings=[x for x in diagnostics if x.get('severity') == 'warning'])
             if not limit:
@@ -153,6 +161,9 @@ def main():
                 rec['complete_coverage'] = rec['complete_coverage'] and not rec['missing_entities']
         passed = (p.returncode == 0 and 'open' in rec and not rec['open']
                   and not rec['warnings'] and (limit or rec.get('complete_coverage')))
+        if args.limit_line and not rec.get('proof_checks'):
+            rec['empty_diagnostic'] = True
+            passed = False
         rec['passed'] = bool(passed)
         ok = bool(passed) and ok
         records.append(rec)

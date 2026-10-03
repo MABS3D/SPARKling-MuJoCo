@@ -2,17 +2,20 @@
 --  Apache-2.0; see LICENSE. Modified: Ada/SPARK translation and bounded storage.
 with MJ.Types; use MJ.Types;
 with MJ.Sleep_Kernels;
+with MJ.Sleep_Cycles;
 package MJ.Sleep_Manager with SPARK_Mode is
    package K renames MJ.Sleep_Kernels;
-   Max_Trees : constant := 1024;
+   use type K.Object_State;
+   Max_Trees : constant := MJ.Sleep_Cycles.Max_Trees;
    Max_Bodies : constant := 4096;
    Max_Dofs : constant := 4096;
    subtype Tree_Count is Natural range 0 .. Max_Trees;
    subtype Body_Count is Positive range 1 .. Max_Bodies;
    subtype Dof_Count is Natural range 0 .. Max_Dofs;
-   subtype Tree_Value is Integer range K.Fully_Awake .. Max_Trees - 1;
+   subtype Tree_Value is MJ.Sleep_Cycles.Tree_Value;
    subtype Policy is Integer range 0 .. 5; -- AUTO/AUTO_NEVER/AUTO_ALLOWED/NEVER/ALLOWED/INIT
-   type Tree_Array is array (Integer range <>) of Tree_Value;
+   subtype Tree_Array is MJ.Sleep_Cycles.Tree_Array;
+   use type Tree_Array;
    type Flags is array (Integer range <>) of Boolean;
    type Indices is array (Integer range <>) of Integer;
    type States is array (Integer range <>) of K.Object_State;
@@ -86,10 +89,9 @@ package MJ.Sleep_Manager with SPARK_Mode is
         and then I.First (J) <= Integer (I.Nt) - I.Size (J)
         and then (if J = 0 then I.First (J) = 0
                   else I.First (J) = I.First (J-1) + I.Size (J-1))));
-   --  Failure returns -1; bounded traversal handles malformed/out-of-range cycles.
-   function Sleep_Cycle (T : Tree_Array; Start : Integer) return Integer with
-     Global => null, Pre => T'First = 0 and then T'Last in -1 .. Max_Trees-1,
-     Post => Sleep_Cycle'Result in -1 .. T'Last;
+   --  Exact bounded traversal, shared with the independently proved unit.
+   function Sleep_Cycle (T : Tree_Array; Start : Integer) return Integer
+     renames MJ.Sleep_Cycles.Sleep_Cycle;
    --  Validate before changing a cycle: unlike C's fatal-error path, rejection
    --  preserves the full input. Awake counters retain C's min(old,requested).
    procedure Wake_Island (T : in out Tree_Array; Start : Integer; Value : K.Counter;
@@ -97,12 +99,21 @@ package MJ.Sleep_Manager with SPARK_Mode is
      Pre => T'First = 0 and then T'Last in -1 .. Max_Trees-1,
      Post => Woke <= T'Length
        and then (if Status /= Success then T = T'Old and Woke = 0)
-       and then (if Status = Success then
-         (for all J in T'Range => T (J) = T'Old (J) or T (J) < 0));
+       and then (if Status = Success then Start in T'Range
+         and then (if T'Old (Start) < 0 then Woke = 0
+           and then (for all J in T'Range => T (J) =
+             (if J = Start then K.Wake_Value (T'Old (J), Value) else T'Old (J)))
+         else (for all J in T'Range =>
+           (T (J) = T'Old (J) or T (J) = Value)
+           and then (if T'Old (J) < 0 then T (J) = T'Old (J)))));
    procedure Update (M : Topology; S : in out State; Static_Awake : Boolean := False) with
      Global => null, Pre => Valid (M) and then Same_Shape (M, S),
      Post => S.Tree_Asleep = S.Tree_Asleep'Old
        and then (for all T in S.Tree_Awake'Range => S.Tree_Awake (T) = (S.Tree_Asleep (T) < 0))
+       and then (for all I in M.Bodies'Range =>
+         S.Body_Awake (I) = K.Body_State (M.Bodies (I).Tree,
+           (if M.Bodies (I).Tree >= 0 then S.Tree_Awake (M.Bodies (I).Tree) else False),
+           M.Bodies (I).Mocap_Root, Static_Awake))
        and then S.Trees_Awake <= S.Nt and then S.Bodies_Awake <= S.Nb
        and then S.Parents_Awake <= S.Nb and then S.Dofs_Awake <= S.Nv;
    function Can_Sleep (M : Topology; Tree : Natural; Qvel, Applied, External : K.Samples;

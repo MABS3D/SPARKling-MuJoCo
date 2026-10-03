@@ -1,0 +1,63 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-evaluation-child-min-r19-20261003/Evaluate_Into/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 140.1 s, peak group RSS 749 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control-evaluation.adb:6:75
+
+ medium: postcondition might fail
+--> mj-data-advanced_control-evaluation.adb:8:30
+    8 |         with Post => (Static => Output_Count (E) = Output_Count (E)'Old);
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: you should consider adding a postcondition to function "Output_Count" or turning it into an expression function in its unit spec
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:31:84
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:32:26
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:35:24
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:35:38
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:37:20
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:38:33
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:38:39
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:38:48
+
+ info: length check proved
+--> mj-data-advanced_control-evaluation.adb:38:52
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control-evaluation.adb:38:79
+
+ info: length check proved
+--> mj-data-advanced_control-evaluation.adb:38:79
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:40:52
+   40 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:40:86
+   40 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:40:103
+   40 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                   ~~~~~~~^~~~~~~~~~~~~~~~
+gnatprove: unproved check messages considered as errors

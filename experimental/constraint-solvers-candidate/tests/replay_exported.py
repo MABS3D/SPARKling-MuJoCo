@@ -18,9 +18,17 @@ def main():
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--native-jacobian', action='store_true')
     args = parser.parse_args()
     cases = json.loads(args.input.read_text())
-    results = run(args.binary, [case['problem'] for case in cases])
+    problems = [dict(case['problem']) for case in cases]
+    for p, case in zip(problems, cases):
+        if case.get('native_jacobian', {}).get('layout') == 'sparse':
+            p['method'] = p['method'] % 3 + 3
+    if args.native_jacobian:
+        for p, case in zip(problems, cases):
+            p['native_jacobian'] = case['native_jacobian']
+    results = run(args.binary, problems)
     records = []
     for case, result in zip(cases, results):
         records.append(dict(model=case['model'], sample=case['sample'],
@@ -32,7 +40,7 @@ def main():
             force_error=float(np.max(np.abs(
                 result['f'] - case['expected_force']), initial=0)),
             acceleration=result['a'].tolist(), force=result['f'].tolist()))
-    report = dict(diagnostic_only=True, cases=len(cases),
+    report = dict(diagnostic_only=True, cases=len(cases), native_jacobian=args.native_jacobian,
         input=str(args.input.resolve()),
         input_sha256=hashlib.sha256(args.input.read_bytes()).hexdigest(),
         binary_sha256=hashlib.sha256(args.binary.read_bytes()).hexdigest(),

@@ -1,0 +1,67 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-expmap-min-20261003/Model_Expmap/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 58.6 s, peak group RSS 164 MB
+ info: implicit aspect Always_Terminates on "Expmap" has been proved, subprogram will terminate
+--> mj-actuator_geometry.ads:9:16
+
+ info: precondition proved
+--> mj-actuator_geometry.ads:10:39
+
+ info: precondition proved
+--> mj-actuator_geometry.ads:12:28
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:12:38
+
+ info: division check proved
+--> mj-actuator_geometry.ads:13:19
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:13:19
+
+ medium: float overflow check might fail
+--> mj-actuator_geometry.ads:13:22
+   13 |                (V (0)/N)*Math.Sin (N*0.5),
+      |                ~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:13:34
+
+ info: division check proved
+--> mj-actuator_geometry.ads:14:19
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:14:19
+
+ medium: float overflow check might fail
+--> mj-actuator_geometry.ads:14:22
+   14 |                (V (1)/N)*Math.Sin (N*0.5),
+      |                ~~~~~~~~~^~~~~~~~~~~~~~~~
+      + reason for check: result of floating-point multiplication must be bounded
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:14:34
+
+ info: division check proved
+--> mj-actuator_geometry.ads:15:19
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:15:19
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:15:22
+
+ info: float overflow check proved
+--> mj-actuator_geometry.ads:15:34
+
+ medium: postcondition might fail
+--> mj-actuator_geometry.ads:16:49
+   16 |            with Pre => Bounded (V,1.0e10), Post => Bounded (Expmap'Result,1.0e26);
+      |                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+gnatprove: unproved check messages considered as errors

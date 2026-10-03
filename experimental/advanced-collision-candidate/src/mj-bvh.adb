@@ -76,6 +76,7 @@ package body MJ.BVH with SPARK_Mode is
       Lemma_Lower (Center, Lo, Scale);
       pragma Assert (Center - ((Center - Lo) + Pad) <= Lo);
       Lemma_Upper (Center, Hi, Scale);
+      pragma Assert (Static => Center + ((Hi - Center) + Pad) >= Hi);
       Lemma_Monotonic (Center - Lo, Radius, Pad);
       Lemma_Monotonic (Hi - Center, Radius, Pad);
       pragma Assert (Half >= (Center - Lo) + Pad);
@@ -84,6 +85,7 @@ package body MJ.BVH with SPARK_Mode is
       pragma Assert (Center - Half <= Center - ((Center - Lo) + Pad));
       Lemma_Monotonic ((Hi - Center) + Pad, Half, Center);
       Lemma_Transitive (Center - Half, Center - ((Center - Lo) + Pad), Lo);
+      Lemma_Transitive (Hi, Center + ((Hi - Center) + Pad), Center + Half);
       pragma Assert (Center - Half <= Lo);
       pragma Assert (Center + Half >= Hi);
    end Enclose;
@@ -175,6 +177,17 @@ package body MJ.BVH with SPARK_Mode is
       return True;
    end Valid;
 
+   function Traversable (T : Tree) return Boolean is
+   begin
+      if not Topology_Valid (T) then return False; end if;
+      for I in 0 .. T.Length-1 loop
+         pragma Loop_Invariant (Shaped (T) and then Unique_Leaves (T));
+         pragma Loop_Invariant (for all J in 0 .. I-1 => Valid (T.Nodes (J).Bounds));
+         if not Valid (T.Nodes (I).Bounds) then return False; end if;
+      end loop;
+      return True;
+   end Traversable;
+
    procedure Set_Bounds (T : in out Tree; I : Natural; Value : Box)
      with Global => null, Inline, Pre => I < T.Length and then Shaped (T)
        and then Bounded (Value)
@@ -196,12 +209,61 @@ package body MJ.BVH with SPARK_Mode is
          and then (for all J in I + 1 .. T.Length - 1 => Valid (T.Nodes (J).Bounds))
          and then (for all J in I .. T.Length - 1 =>
            (if T.Nodes (J).Left >= 0 then
-             Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)
-             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)))
+              T.Nodes (T.Nodes (J).Left).Bounds =
+                T.Nodes'Old (T.Nodes'Old (J).Left).Bounds
+              and then T.Nodes (T.Nodes (J).Right).Bounds =
+                T.Nodes'Old (T.Nodes'Old (J).Right).Bounds))
+         and then (if T.Nodes (I).Left >= 0 then
+             Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Left).Bounds))
+         and then (if T.Nodes (I).Right >= 0 then
+             Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Right).Bounds))
+         and then (for all J in I + 1 .. T.Length - 1 =>
+           (if T.Nodes (J).Left >= 0 then
+             Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)))
+         and then (for all J in I + 1 .. T.Length - 1 =>
+           (if T.Nodes (J).Right >= 0 then
+             Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)))
    is
    begin
       T.Nodes (I).Bounds := Value;
    end Set_Bounds;
+
+   procedure Lemma_Enclosing (T : Tree) with Ghost, Global => null,
+     Pre => Shaped (T) and then Boxes_Valid (T)
+       and then (for all I in 0 .. T.Length-1 =>
+         (if T.Nodes (I).Left >= 0 then
+           Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Left).Bounds)))
+       and then (for all I in 0 .. T.Length-1 =>
+         (if T.Nodes (I).Right >= 0 then
+           Contains (T.Nodes (I).Bounds, T.Nodes (T.Nodes (I).Right).Bounds))),
+     Post => Enclosing (T)
+   is
+   begin
+      null;
+   end Lemma_Enclosing;
+
+   --  Convert the completed suffix invariant at a small ghost boundary. The
+   --  input predicates deliberately retain the cursor used by the loop.
+   procedure Lemma_Refitted (B : Box_Array; T : Tree; First : Natural)
+     with Ghost, Global => null,
+       Pre => First = 0 and then Shaped (T)
+         and then (for all J in First .. T.Length - 1 => Valid (T.Nodes (J).Bounds))
+         and then (for all J in First .. T.Length - 1 =>
+           (if T.Nodes (J).Left = -1 then
+             T.Nodes (J).Item in B'Range and then T.Nodes (J).Bounds = B (T.Nodes (J).Item)))
+         and then (for all J in First .. T.Length - 1 =>
+           (if T.Nodes (J).Left >= 0 then
+             Valid (T.Nodes (T.Nodes (J).Left).Bounds)
+             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Left).Bounds)))
+         and then (for all J in First .. T.Length - 1 =>
+           (if T.Nodes (J).Right >= 0 then
+             Valid (T.Nodes (T.Nodes (J).Right).Bounds)
+             and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds))),
+       Post => Boxes_Valid (T) and then Enclosing (T) and then Leaves_Match (B, T)
+   is
+   begin
+      Lemma_Enclosing (T);
+   end Lemma_Refitted;
 
    --  Refit needs forward, in-range children; uniqueness and reachability are
    --  orthogonal to its box updates. Keep the public imported-tree precondition
@@ -224,8 +286,21 @@ package body MJ.BVH with SPARK_Mode is
       Result := Invalid_Input;
       if (for some X of B => not Valid (X)) then T.Length := 0; return; end if;
       while Remaining > 0 loop
-         --  State the frame before the update: early numeric/input failures
-         --  must preserve topology just as a successful refit does.
+         declare
+            I : constant Natural := Remaining - 1;
+         begin
+            if T.Nodes (I).Left < 0 then
+               V := T.Nodes (I).Item;
+               if V not in B'Range then T.Length := 0; return; end if;
+               Set_Bounds (T, I, B (V));
+            else
+               Set_Bounds (T, I, Union_Box
+                 (T.Nodes (T.Nodes (I).Left).Bounds,
+                  T.Nodes (T.Nodes (I).Right).Bounds));
+            end if;
+            if not Valid (T.Nodes (I).Bounds) then T.Length := 0; Result := Numeric_Limit; return; end if;
+         end;
+         Remaining := Remaining - 1;
          pragma Loop_Invariant (T.Length = Initial_Length and then Shaped (T));
          pragma Loop_Invariant (Remaining <= T.Length);
          pragma Loop_Invariant (for all J in 0 .. Initial_Length - 1 =>
@@ -247,24 +322,9 @@ package body MJ.BVH with SPARK_Mode is
            (if T.Nodes (J).Right >= 0 then
              Valid (T.Nodes (T.Nodes (J).Right).Bounds)
              and then Contains (T.Nodes (J).Bounds, T.Nodes (T.Nodes (J).Right).Bounds)));
-         declare
-            I : constant Natural := Remaining - 1;
-         begin
-            if T.Nodes (I).Left < 0 then
-               V := T.Nodes (I).Item;
-               if V not in B'Range then T.Length := 0; return; end if;
-               Set_Bounds (T, I, B (V));
-            else
-               Set_Bounds (T, I, Union_Box
-                 (T.Nodes (T.Nodes (I).Left).Bounds,
-                  T.Nodes (T.Nodes (I).Right).Bounds));
-            end if;
-            if not Valid (T.Nodes (I).Bounds) then T.Length := 0; Result := Numeric_Limit; return; end if;
-         end;
-         Remaining := Remaining - 1;
       end loop;
       pragma Assert (Remaining = 0);
-      pragma Assert (Boxes_Valid (T));
+      Lemma_Refitted (B, T, Remaining);
       Result := Success;
    end Refit_Shaped;
    pragma Inline (Refit_Shaped);
@@ -383,22 +443,161 @@ package body MJ.BVH with SPARK_Mode is
          and then Frame_Offset'Result =
            ((P (0) * R (K) + P (1) * R (3 + K)) + P (2) * R (6 + K));
 
-   procedure Prepare (PA, PB : Pose; Cache : out Frame_Cache) is
+   function Model_Cache (PA, PB : Pose) return Frame_Cache is
+     (Product =>
+       [for I in 0 .. 1 => [for J in 0 .. 1 =>
+         [for K in Axis => [for L in Axis => Frame_Product
+           ((if I = 0 then PA.Rotation else PB.Rotation),
+            (if J = 0 then PA.Rotation else PB.Rotation), K, L)]]]],
+      Offset =>
+       [for I in 0 .. 1 => [for J in 0 .. 1 =>
+         [for K in Axis => Frame_Offset
+           ((if I = 0 then PA.Position else PB.Position),
+            (if J = 0 then PA.Rotation else PB.Rotation), K)]]])
+     with Ghost => Static, Global => null,
+       Pre => (Static =>
+         (for all X of PA.Position => X in Coordinate)
+         and then (for all X of PB.Position => X in Coordinate)
+         and then (for all X of PA.Rotation => X in -4.0 .. 4.0)
+         and then (for all X of PB.Rotation => X in -4.0 .. 4.0)),
+       Post => (Static =>
+         (for all I in 0 .. 1 => (for all J in 0 .. 1 => (for all K in Axis =>
+           Model_Cache'Result.Offset (I, J, K) = Frame_Offset
+             ((if I = 0 then PA.Position else PB.Position),
+              (if J = 0 then PA.Rotation else PB.Rotation), K))))
+         and then
+         (for all I in 0 .. 1 => (for all J in 0 .. 1 => (for all K in Axis =>
+           (for all L in Axis => Model_Cache'Result.Product (I, J, K, L) = Frame_Product
+             ((if I = 0 then PA.Rotation else PB.Rotation),
+              (if J = 0 then PA.Rotation else PB.Rotation), K, L))))));
+
+   function Cache_Matches (PA, PB : Pose; Cache : Frame_Cache) return Boolean is
+     (Cache = Model_Cache (PA, PB));
+
+   procedure Model_Offset (PA, PB : Pose; Expected : Frame_Cache;
+     I, J : Natural; K : Axis)
+     with Ghost => Static, Global => null,
+       Pre => (Static => I <= 1 and then J <= 1
+         and then (for all X of PA.Position => X in Coordinate)
+         and then (for all X of PB.Position => X in Coordinate)
+         and then (for all X of PA.Rotation => X in -4.0 .. 4.0)
+         and then (for all X of PB.Rotation => X in -4.0 .. 4.0)
+         and then Expected = Model_Cache (PA, PB)),
+       Post => (Static => Expected.Offset (I, J, K) = Frame_Offset
+         ((if I = 0 then PA.Position else PB.Position),
+          (if J = 0 then PA.Rotation else PB.Rotation), K))
+   is
+      Known : constant Frame_Cache := Model_Cache (PA, PB);
+   begin
+      pragma Assert (Static => Expected.Offset (I, J, K) = Known.Offset (I, J, K));
+   end Model_Offset;
+
+   --  Prefix equalities keep the arithmetic model outside loop induction.
+   function Rows_Equal (A, B : Frame_Cache; I, J : Natural; K : Axis)
+     return Boolean is
+     (A.Offset (I, J, K) = B.Offset (I, J, K)
+       and then A.Product (I, J, K, 0) = B.Product (I, J, K, 0)
+       and then A.Product (I, J, K, 1) = B.Product (I, J, K, 1)
+       and then A.Product (I, J, K, 2) = B.Product (I, J, K, 2))
+     with Ghost => Static, Global => null, Pre => (Static => I <= 1 and J <= 1);
+
+   function Plane_Equal (A, B : Frame_Cache; I, J : Natural) return Boolean is
+     (Rows_Equal (A, B, I, J, 0) and then Rows_Equal (A, B, I, J, 1)
+       and then Rows_Equal (A, B, I, J, 2))
+     with Ghost => Static, Global => null, Pre => (Static => I <= 1 and J <= 1);
+   function Frame_Equal (A, B : Frame_Cache; I : Natural) return Boolean is
+     (Plane_Equal (A, B, I, 0) and then Plane_Equal (A, B, I, 1))
+     with Ghost => Static, Global => null, Pre => (Static => I <= 1);
+
+   procedure Cache_Equal (A, B : Frame_Cache) with Ghost => Static, Global => null,
+     Pre => (Static => Frame_Equal (A, B, 0) and then Frame_Equal (A, B, 1)),
+     Post => (Static => A = B)
+   is
+   begin
+      pragma Assert (Static => (for all I in 0 .. 1 => (for all J in 0 .. 1 =>
+        (for all K in Axis => A.Offset (I, J, K) = B.Offset (I, J, K)))));
+      pragma Assert (Static => (for all I in 0 .. 1 => (for all J in 0 .. 1 =>
+        (for all K in Axis => (for all L in Axis =>
+          A.Product (I, J, K, L) = B.Product (I, J, K, L))))));
+   end Cache_Equal;
+
+   procedure Same_Offset (P : Vec; A, B : Matrix; K : Axis; Expected : Real)
+     with Ghost => Static, Global => null,
+       Pre => (Static => A = B
+         and then (for all X of P => X in Coordinate)
+         and then (for all X of A => X in -4.0 .. 4.0)
+         and then (for all X of B => X in -4.0 .. 4.0)
+         and then Expected = Frame_Offset (P, B, K)),
+       Post => (Static => Frame_Offset (P, A, K) = Expected)
+   is
+   begin
+      pragma Assert (Static => A (K) = B (K));
+      pragma Assert (Static => A (3 + K) = B (3 + K));
+      pragma Assert (Static => A (6 + K) = B (6 + K));
+   end Same_Offset;
+
+   --  Cache arithmetic needs finite component bounds, not orthogonality.
+   --  Keep that small boundary independent of Valid_Pose's nonlinear facts.
+   procedure Prepare_Bounded (PA, PB : Pose; Cache : in out Frame_Cache)
+     with Inline, Global => null,
+       Pre => (for all X of PA.Position => X in Coordinate)
+         and then (for all X of PB.Position => X in Coordinate)
+         and then (for all X of PA.Rotation => X in -4.0 .. 4.0)
+         and then (for all X of PB.Rotation => X in -4.0 .. 4.0),
+       Post => (Static => Prepared (Cache) and then Cache_Matches (PA, PB, Cache))
+   is
       type Pose_Array is array (Natural range 0 .. 1) of Pose;
       P : constant Pose_Array := [PA, PB];
+      Expected : constant Frame_Cache := Model_Cache (PA, PB) with Ghost => Static;
    begin
       for I in 0 .. 1 loop
+         pragma Loop_Invariant (Prepared (Cache));
+         pragma Loop_Invariant (Static => (if I = 1 then Frame_Equal (Cache, Expected, 0)));
          for J in 0 .. 1 loop
+            pragma Loop_Invariant (Prepared (Cache));
+            pragma Loop_Invariant (Static => (if I = 1 then Frame_Equal (Cache, Expected, 0)));
+            pragma Loop_Invariant (Static => (if J = 1 then Plane_Equal (Cache, Expected, I, 0)));
             for K in Axis loop
+               pragma Loop_Invariant (Prepared (Cache));
+               pragma Loop_Invariant (Static => (if I = 1 then Frame_Equal (Cache, Expected, 0)));
+               pragma Loop_Invariant (Static => (if J = 1 then Plane_Equal (Cache, Expected, I, 0)));
+               pragma Loop_Invariant (Static => (if K > 0 then Rows_Equal (Cache, Expected, I, J, 0)));
+               pragma Loop_Invariant (Static => (if K > 1 then Rows_Equal (Cache, Expected, I, J, 1)));
                for L in Axis loop
+                  pragma Loop_Invariant (Prepared (Cache));
+                  pragma Loop_Invariant (Static => (if I = 1 then Frame_Equal (Cache, Expected, 0)));
+                  pragma Loop_Invariant (Static => (if J = 1 then Plane_Equal (Cache, Expected, I, 0)));
+                  pragma Loop_Invariant (Static => (if K > 0 then Rows_Equal (Cache, Expected, I, J, 0)));
+                  pragma Loop_Invariant (Static => (if K > 1 then Rows_Equal (Cache, Expected, I, J, 1)));
+                  pragma Loop_Invariant (Static =>
+                    (if L > 0 then Cache.Product (I, J, K, 0) = Expected.Product (I, J, K, 0)));
+                  pragma Loop_Invariant (Static =>
+                    (if L > 1 then Cache.Product (I, J, K, 1) = Expected.Product (I, J, K, 1)));
                   Cache.Product (I, J, K, L) := Frame_Product
                     (P (I).Rotation, P (J).Rotation, K, L);
+                  pragma Assert (Static => Cache.Product (I, J, K, L) = Expected.Product (I, J, K, L));
                end loop;
+               Model_Offset (PA, PB, Expected, I, J, K);
+               Same_Offset ((if I = 0 then PA.Position else PB.Position),
+                 P (J).Rotation, (if J = 0 then PA.Rotation else PB.Rotation), K,
+                 Expected.Offset (I, J, K));
                Cache.Offset (I, J, K) := Frame_Offset
                  ((if I = 0 then PA.Position else PB.Position), P (J).Rotation, K);
+               pragma Assert (Static => Cache.Offset (I, J, K) = Expected.Offset (I, J, K));
+               pragma Assert (Static => Rows_Equal (Cache, Expected, I, J, K));
             end loop;
+            pragma Assert (Static => Plane_Equal (Cache, Expected, I, J));
          end loop;
+         pragma Assert (Static => Frame_Equal (Cache, Expected, I));
       end loop;
+      Cache_Equal (Cache, Expected);
+      pragma Assert (Static => Cache.Product = Expected.Product);
+      pragma Assert (Static => Cache.Offset = Expected.Offset);
+   end Prepare_Bounded;
+
+   procedure Prepare (PA, PB : Pose; Cache : in out Frame_Cache) is
+   begin
+      Prepare_Bounded (PA, PB, Cache);
    end Prepare;
 
    function Projection (B : Box; X, Y, Z, Offset : Real) return Real is
@@ -421,7 +620,9 @@ package body MJ.BVH with SPARK_Mode is
 
    function Oriented_Overlap (A, B : Box; Cache : Frame_Cache; Margin : Real) return Boolean is
       Boxes : constant array (Natural range 0 .. 1) of Box := [A, B];
-      Proj, Radius : array (Natural range 0 .. 1) of Real;
+      type Projection_Array is array (Natural range 0 .. 1) of Real
+        with Relaxed_Initialization;
+      Proj, Radius : Projection_Array;
       Inf : array (Natural range 0 .. 1) of Boolean := [others=>False];
    begin
       for I in 0 .. 1 loop
@@ -429,11 +630,17 @@ package body MJ.BVH with SPARK_Mode is
          Inf (I) := (for some X of Boxes (I).Half => X >= Max_Val);
       end loop;
       for J in 0 .. 1 loop
+         --  Cut the finite outer-loop expansion; these arrays are read-only
+         --  and the inner loop establishes each projection/radius bound.
+         pragma Loop_Invariant (Prepared (Cache));
          if not Inf (1 - J) then
             for K in Axis loop
+               pragma Loop_Invariant (Prepared (Cache));
                for I in 0 .. 1 loop
                   pragma Loop_Invariant (for all V in 0 .. I - 1 =>
-                    Proj (V) in -1.0e14 .. 1.0e14 and then Radius (V) in 0.0 .. 1.0e14);
+                    Proj (V)'Initialized and then Radius (V)'Initialized
+                    and then Proj (V) in -1.0e14 .. 1.0e14
+                    and then Radius (V) in 0.0 .. 1.0e14);
                   pragma Assert (Valid (Boxes (I)));
                   pragma Assert (Cache.Offset (I, J, K) in -1.0e12 .. 1.0e12);
                   pragma Assert (for all L in Axis => Cache.Product (I, J, K, L) in -1.0e2 .. 1.0e2);
@@ -536,7 +743,7 @@ package body MJ.BVH with SPARK_Mode is
          pragma Loop_Invariant (Int64 (Count) <= Int64 (Pairs'Length));
          pragma Loop_Invariant (if Count > 0 then Pairs (Pairs'First .. Pairs'First + (Count - 1))'Initialized);
          pragma Loop_Invariant (for all I in Pairs'First .. Pairs'First + (Count - 1) =>
-           Leaf_Item (A, Pairs (I).First)
+           Pairs (I)'Initialized and then Leaf_Item (A, Pairs (I).First)
            and then Leaf_Item (B, Pairs (I).Second)
            and then (if Self then Pairs (I).First /= Pairs (I).Second));
          Top := Top - 1; C := Stack (Top);

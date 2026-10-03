@@ -12,6 +12,7 @@ with MJ.Data.Kinematics;
 with MJ.Data.Flex_Adapter;
 with MJ.Flex_State;
 with MJ.Rigid_Geometry;
+with MJ.Contact_Geometry;
 procedure Flex_State_Probe is
    use type MJ.Flex_State.Status;
    use type MJ.Rigid_Geometry.Vec;
@@ -46,11 +47,36 @@ begin
    if Load.Status /= OK then raise Program_Error with "raw model"; end if;
    if Ada.Command_Line.Argument_Count >= 4 then
       declare Mode : constant String := Ada.Command_Line.Argument (4); begin
-         if Mode="interp" then M.Flexes.Flex_Interp (0) := 1;
+         if Mode="interp" then M.Flexes.Flex_Interp (0) := 3;
          elsif Mode="vertexbody" then M.Flexes.Flex_Vertbodyid (0) := M.S.Nbody;
          elsif Mode="element" then M.Flexes.Flex_Elem (0) := M.Flexes.Flex_Vertnum (0);
          elsif Mode="radius" then M.Flexes.Flex_Radius (0) := -1.0;
          elsif Mode="dimension" then M.Flexes.Flex_Dim (0) := 4;
+         elsif Mode="nodecount" then M.Flexes.Flex_Nodenum (0) := M.Flexes.Flex_Nodenum (0) - 1;
+         elsif Mode="nodeadr" then M.Flexes.Flex_Nodeadr (0) := M.S.Nflexnode;
+         elsif Mode="nodebody" then M.Flexes.Flex_Nodebodyid (0) := M.S.Nbody;
+         elsif Mode="nodeoffset" then M.Flexes.Flex_Node (0) := 1.1e10;
+         elsif Mode="cellzero" then M.Flexes.Flex_Cellnum (0) := 0;
+         elsif Mode="parametric" then M.Flexes.Flex_Vert0 (0) := 5.0;
+         elsif Mode="interpbody" then M.Flexes.Flex_Vertbodyid (0) := 0;
+         elsif Mode="bvhadr" then M.Flexes.Flex_Bvhadr (0) := M.S.Nbvh;
+         elsif Mode="bvhcycle" then M.Bvh.Bvh_Child (2 * M.Flexes.Flex_Bvhadr (0)) := 0;
+         elsif Mode="bvhleaf" or Mode="bvhduplicate" then
+            declare First : constant Integer := M.Flexes.Flex_Bvhadr (0);
+               Previous : Integer := -1;
+            begin
+               for I in First .. First + M.Flexes.Flex_Bvhnum (0) - 1 loop
+                  if M.Bvh.Bvh_Nodeid (I) >= 0 then
+                     if Mode="bvhleaf" then
+                        M.Bvh.Bvh_Nodeid (I) := M.Flexes.Flex_Elemnum (0); exit;
+                     elsif Previous >= 0 then
+                        M.Bvh.Bvh_Nodeid (I) := Previous; exit;
+                     else Previous := M.Bvh.Bvh_Nodeid (I);
+                     end if;
+                  end if;
+               end loop;
+            end;
+         elsif Mode="shell" then M.Flexes.Flex_Interp (0) := -1;
          else raise Program_Error with "unknown rejection mode"; end if;
       end;
    end if;
@@ -80,6 +106,13 @@ begin
          if Result /= F.Success then raise Program_Error with "update " & Result'Image; end if;
          Put_Line ("sample");
          for Flex in 0 .. F.Flex_Count (S.all)-1 loop
+            Put ("meta"); Integer_Value (Flex); Integer_Value (F.Interpolation_Order (S.all,Flex));
+            Integer_Value (F.Node_Count (S.all,Flex)); New_Line;
+            for Node in 0 .. F.Node_Count (S.all,Flex)-1 loop
+               Put ("n"); Integer_Value (Flex); Integer_Value (Node);
+               Integer_Value (F.Node_Body (S.all,Flex,Node));
+               for X of F.Node_Position (S.all,Flex,Node) loop Number (X); end loop; New_Line;
+            end loop;
             for Vertex in 0 .. F.Vertex_Count (S.all,Flex)-1 loop
                Put ("v"); Integer_Value (Flex); Integer_Value (Vertex);
                for X of F.Position (S.all,Flex,Vertex) loop Number (X); end loop; New_Line;
@@ -105,10 +138,17 @@ begin
          declare
             Previous : constant R.Vec := F.Position (S.all,0,0);
             Invalid : R.Pose_Array (1 .. 0);
+            Saved_Nodes : MJ.Contact_Geometry.Vertex_Array (0 .. F.Node_Count (S.all,0)-1);
          begin
+            for N in Saved_Nodes'Range loop Saved_Nodes (N) := F.Node_Position (S.all,0,N); end loop;
             F.Update (S.all,Invalid,Result);
             if Result /= F.Invalid_Input or F.Current (S.all)
               or F.Position (S.all,0,0) /= Previous then raise Program_Error with "update atomicity"; end if;
+            for N in Saved_Nodes'Range loop
+               if F.Node_Position (S.all,0,N) /= Saved_Nodes (N) then
+                  raise Program_Error with "node update atomicity";
+               end if;
+            end loop;
             F.Detect (S.all,Contacts,Result);
             if Result /= F.Stale_State or Contacts.Length /= 0 then raise Program_Error with "stale after reject"; end if;
          end;

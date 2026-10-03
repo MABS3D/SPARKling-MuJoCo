@@ -1,0 +1,163 @@
+{
+  "sources": {
+    "src/mj.ads": "933b1bb2f7226eb6f545557e9279503fd8b9a73ff46fe3f923f5da8504d1ec62",
+    "src/mj-types.ads": "9ead42f81a187031eba472199c9ceb7c2a1b83dcc37f3ffaab6fb05809e5e01a",
+    "experimental/rigid-collision-candidate/src/mj-rigid_geometry.ads": "b4f82ec9bb0edf9b82f780425b2a21848af5093b32af2a03a881271bb7c79446",
+    "experimental/rigid-collision-candidate/src/mj-contact_geometry.ads": "abff99f93210bfcb125e1ca2065a4743b20746b3e78c00b48da97d05e7fbbb2a",
+    "experimental/rigid-collision-candidate/src/mj-contact_geometry.adb": "f9a0fae27ce4e207a396369f90240d4f5ea403baa9b310ffbd54b8a8eace475f",
+    "experimental/flex-state-integration/src/mj-flex_interpolation.ads": "a480f7e3786872946fd4b1b93da8bf138d9f251cf99035123ee001e886a33112",
+    "experimental/flex-state-integration/src/mj-flex_interpolation.adb": "95dbd960736b98f2436d1c4ae3d1957b5d7ef7a4e243ce844b71be1dbdca3de9",
+    "experimental/flex-state-integration/tests/flex_interpolation_probe.adb": "f9eec08180ac7fb4b1ccac5a7af48ca045056af9821af92b3ec3c3a5ec9422ff",
+    "experimental/flex-state-integration/tests/compare_interpolation.py": "ba1f0f6f6247d2a68ad9446a715d15341031cec8fad151bf4247bfd039ef32fc",
+    "interpolation.gpr": "7f351465c4d006f3b0b8f80c5eeb5239fdec76169a896c208c0518eb7264e5c0"
+  },
+  "base": "/var/tmp/sparkling-recovery-flex-sdf7-20261003",
+  "base_manifest_sha256": "85873e16de18233bf9496e31e44f9f0c41680e945373ce8f6e4903717c0bbb11",
+  "steps": [
+    {
+      "name": "build-validation",
+      "exit": 0,
+      "seconds": 2.067573928001366,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/interpolation.gpr",
+        "-j1"
+      ]
+    },
+    {
+      "name": "compare-validation",
+      "exit": 0,
+      "seconds": 4.079118232999463,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/compare_interpolation.py",
+        "--binary",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/build/validation/bin/flex_interpolation_probe",
+        "--out",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/validation"
+      ]
+    },
+    {
+      "name": "build-release",
+      "exit": 0,
+      "seconds": 2.0719299590018636,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/interpolation.gpr",
+        "-j1"
+      ]
+    },
+    {
+      "name": "compare-release",
+      "exit": 0,
+      "seconds": 3.82631822699841,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/compare_interpolation.py",
+        "--binary",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/build/release/bin/flex_interpolation_probe",
+        "--out",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/release"
+      ]
+    },
+    {
+      "name": "proof-Sum_Step",
+      "exit": 1,
+      "seconds": 26.693805205999524,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/interpolation.gpr",
+        "-u",
+        "mj-flex_interpolation.adb",
+        "-j1",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--warnings=continue",
+        "--mode=prove",
+        "--no-inlining",
+        "--prover=cvc5,z3,altergo",
+        "--timeout=5",
+        "--memlimit=650",
+        "--steps=0",
+        "--proof=per_check",
+        "--counterexamples=off",
+        "--limit-subp=mj-flex_interpolation.adb:141"
+      ],
+      "checks": 21,
+      "open": 1,
+      "warnings": 1
+    },
+    {
+      "name": "proof-Interpolate",
+      "exit": 99,
+      "seconds": 180.23461551699802,
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "180",
+        "--",
+        "gnatprove",
+        "-P",
+        "/var/tmp/sparkling-recovery-flex-interpolation6-20261003/source/interpolation.gpr",
+        "-u",
+        "mj-flex_interpolation.adb",
+        "-j1",
+        "--report=all",
+        "--checks-as-errors=on",
+        "--warnings=continue",
+        "--mode=prove",
+        "--no-inlining",
+        "--prover=cvc5,z3,altergo",
+        "--timeout=5",
+        "--memlimit=650",
+        "--steps=0",
+        "--proof=per_check",
+        "--counterexamples=off",
+        "--limit-subp=mj-flex_interpolation.adb:164"
+      ],
+      "report_absent": true
+    }
+  ],
+  "whole_deferred": "Repair the failed minimal scopes before the fresh whole proof."
+}

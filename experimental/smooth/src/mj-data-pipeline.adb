@@ -199,8 +199,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       function "-" (A, B : Vector) return Vector renames MJ.Pose_Arithmetic."-";
       function "*" (S : Real; V : Vector) return Vector renames MJ.Pose_Arithmetic."*";
       function Cross (A, B : Vector) return Vector renames MJ.Pose_Arithmetic.Cross;
-      function Apply_Config (R : Matrix; V : Vector) return Vector
-        renames MJ.Pose_Arithmetic.Apply_Config;
+      function Rotated (Q : Quaternion; V : Vector) return Vector
+        renames MJ.Pose_Arithmetic.Rotate_Config;
       Normal : Boolean;
    begin
       Ok := False;
@@ -215,8 +215,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Angular_Velocity : Vector := S.Angular_Velocity;
          Linear_Bias : Vector := S.Linear_Bias;
          Angular_Bias : Vector := S.Angular_Bias;
-            Direction : constant Vector := Apply_Config (Rotation_Matrix, Joint.Direction);
-            Anchor_Offset : constant Vector := Apply_Config (Rotation_Matrix, Joint.Anchor);
+            Direction : constant Vector := Rotated (Orientation, Joint.Direction);
+            Anchor_Offset : constant Vector := Rotated (Orientation, Joint.Anchor);
             Anchor : constant Vector := Position + Anchor_Offset;
          begin
             pragma Assert (Static => Bounded (Anchor, 1.0e66));
@@ -250,7 +250,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
                   end if;
                   Joint_Orientation (Orientation, Joint.Direction, Q, Rotation_Matrix, Normal);
                   if not Normal then return; end if;
-                  New_Offset := Apply_Config (Rotation_Matrix, Joint.Anchor);
+                  Quaternion_Bounds (Orientation);
+                  New_Offset := Rotated (Orientation, Joint.Anchor);
                   pragma Assert (Static => Bounded (Anchor, 1.0e66));
                   pragma Assert (Static => Bounded (New_Offset, 1.0e12));
                   Position := Anchor - New_Offset;

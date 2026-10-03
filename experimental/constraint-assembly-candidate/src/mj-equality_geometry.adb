@@ -156,9 +156,19 @@ package body MJ.Equality_Geometry with SPARK_Mode is
               (Error (0), 0.0), (Error (1), 0.0), (Error (2), 0.0)];
       for C in J'Range (2) loop
          Angular := Rotation_Column (A, B, J0, J1, C, Torque);
+         pragma Assert (Static => Bounded (Angular, 1.0e37));
          Store_Column (J, C,
            [J0 (1, C)-J1 (1, C), J0 (2, C)-J1 (2, C), J0 (3, C)-J1 (3, C),
             Angular (0), Angular (1), Angular (2)]);
+         pragma Assert (Static => (for all K in J'First (2) .. C-1 =>
+           J (1, K) = J0 (1, K)-J1 (1, K)));
+         pragma Assert (Static => (for all K in J'First (2) .. C-1 =>
+           J (2, K) = J0 (2, K)-J1 (2, K)));
+         pragma Assert (Static => (for all K in J'First (2) .. C-1 =>
+           J (3, K) = J0 (3, K)-J1 (3, K)));
+         pragma Assert (Static => J (1, C) = J0 (1, C)-J1 (1, C)
+           and then J (2, C) = J0 (2, C)-J1 (2, C)
+           and then J (3, C) = J0 (3, C)-J1 (3, C));
          pragma Assert (Static => (for all K in J'First (2) .. C-1 =>
            J (4, K) = Expected (4, K)));
          pragma Assert (Static => (for all K in J'First (2) .. C-1 =>
@@ -167,8 +177,8 @@ package body MJ.Equality_Geometry with SPARK_Mode is
            J (6, K) = Expected (6, K)));
          pragma Assert (Static => J (4, C) = Expected (4, C)
            and then J (5, C) = Expected (5, C) and then J (6, C) = Expected (6, C));
-         pragma Loop_Invariant (Static => (for all K in J'First (2) .. C =>
-           (for all I in 1 .. 6 => J (I, K)'Initialized)));
+         pragma Loop_Invariant (Static => (for all I in 1 .. 6 =>
+           (for all K in J'First (2) .. C => J (I, K)'Initialized)));
          pragma Loop_Invariant (Static => (for all K in J'First (2) .. C =>
            J (1, K)'Initialized and then J (1, K) = J0 (1, K) - J1 (1, K)));
          pragma Loop_Invariant (Static => (for all K in J'First (2) .. C =>
@@ -182,5 +192,8 @@ package body MJ.Equality_Geometry with SPARK_Mode is
          pragma Loop_Invariant (Static => (for all K in J'First (2) .. C =>
            J (6, K)'Initialized and then J (6, K) = Expected (6, K)));
       end loop;
+      pragma Assert (Static => (for all I in 1 .. 6 =>
+        (for all K in J'Range (2) => J (I, K)'Initialized)));
+      pragma Assert (Static => J'Initialized);
    end Weld;
 end MJ.Equality_Geometry;

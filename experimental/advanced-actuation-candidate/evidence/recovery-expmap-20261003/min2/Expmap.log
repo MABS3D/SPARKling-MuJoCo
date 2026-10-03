@@ -1,0 +1,80 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-expmap-min2-20261003/Expmap/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 70.2 s, peak group RSS 170 MB
+ info: range check proved
+--> mj-actuator_geometry.adb:70:32
+
+ info: precondition proved
+--> mj-actuator_geometry.adb:70:32
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:70:45
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:70:51
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:70:57
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:70:64
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:70:70
+
+ info: initialization of "S" proved
+--> mj-actuator_geometry.adb:71:07
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:74:23
+
+ medium: precondition might fail
+--> mj-actuator_geometry.adb:75:30
+   75 |          return (MJ.Trigonometry.Cosine (N*0.5),(V (0)/N)*S,(V (1)/N)*S,(V (2)/N)*S);
+      |                  ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:40
+
+ info: division check proved
+--> mj-actuator_geometry.adb:75:52
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:52
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:55
+
+ info: division check proved
+--> mj-actuator_geometry.adb:75:64
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:64
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:67
+
+ info: division check proved
+--> mj-actuator_geometry.adb:75:76
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:76
+
+ info: float overflow check proved
+--> mj-actuator_geometry.adb:75:79
+
+ info: implicit aspect Always_Terminates on "Expmap" has been proved, subprogram will terminate
+--> mj-actuator_geometry.ads:43:13
+
+ medium: postcondition might fail
+--> mj-actuator_geometry.ads:44:41
+   44 |         Pre => Bounded (V,1.0e10), Post => Bounded (Expmap'Result,1.0e26);
+      |                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-actuator_geometry.ads:45:57
+gnatprove: unproved check messages considered as errors

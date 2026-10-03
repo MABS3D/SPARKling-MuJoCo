@@ -1,0 +1,354 @@
+{
+  "assumptions": [
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Data.Advanced_Control.Evaluate",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-data-advanced_control.ads",
+          "line": 47
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 70,
+      "entity": 1,
+      "file": "mj-data-advanced_control.ads",
+      "how_proved": "flow",
+      "line": 47,
+      "message": {
+        "text": "initialization of \"Result\" proved"
+      },
+      "msg_id": 0,
+      "rule": "UNINITIALIZED",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 11,
+      "entity": 1,
+      "file": "mj-data-advanced_control.ads",
+      "how_proved": "flow",
+      "line": 49,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 1,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 10,
+      "check_file": "mj-data-advanced_control.adb",
+      "check_line": 428,
+      "check_tree": [
+        {
+          "proof_attempts": {
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 28648,
+              "time": 1.60012000000000E+00
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 10,
+      "entity": 1,
+      "file": "mj-data-advanced_control.adb",
+      "how_proved": "prover",
+      "line": 428,
+      "message": {
+        "text": "precondition might fail, cannot prove Saved.No = Output_Count (E)"
+      },
+      "msg_id": 2,
+      "rule": "VC_PRECONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 27,
+      "check_file": "mj-data-advanced_control.ads",
+      "check_line": 50,
+      "check_tree": [
+        {
+          "proof_attempts": {
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 43499,
+              "time": 4.14737000000000E+00
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 5
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 27,
+      "entity": 1,
+      "file": "mj-data-advanced_control.ads",
+      "how_proved": "prover",
+      "line": 50,
+      "message": {
+        "text": "postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old"
+      },
+      "msg_id": 3,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 3.11331105232239E+00,
+      "gnatwhy3.init": 2.00433206558228E+00,
+      "gnatwhy3.register_vcs": 2.94521003961563E-01,
+      "gnatwhy3.run_vcs": 3.60000012733508E-05,
+      "gnatwhy3.save_session": 4.65449988842010E-02,
+      "gnatwhy3.schedule_vcs": 5.84801018238068E-01,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 6.94260001182556E-02,
+      "gnatwhy3.transformations.detect_polymorphism": 8.10199882835150E-03,
+      "gnatwhy3.transformations.discriminate_if_poly": 6.00000021222513E-06,
+      "gnatwhy3.transformations.eliminate_algebraic": 1.48512005805969E-01,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 5.55219985544682E-02,
+      "gnatwhy3.transformations.eliminate_builtin": 2.15247005224228E-01,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 1.95199996232986E-02,
+      "gnatwhy3.transformations.eliminate_epsilon": 6.84010013937950E-02,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 4.08359989523888E-02,
+      "gnatwhy3.transformations.eliminate_inductive": 5.81090003252029E-02,
+      "gnatwhy3.transformations.eliminate_literal": 1.25299006700516E-01,
+      "gnatwhy3.transformations.eliminate_projections_sums": 2.09149997681379E-02,
+      "gnatwhy3.transformations.eliminate_recursion": 2.31129992753267E-02,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 3.99900000047637E-06,
+      "gnatwhy3.transformations.inline_trivial": 4.75107997655869E-01,
+      "gnatwhy3.transformations.introduce_premises": 4.26300009712577E-03,
+      "gnatwhy3.transformations.monomorphise_goal": 2.61000008322299E-04,
+      "gnatwhy3.transformations.remove_unused": 2.60338991880417E-01,
+      "gnatwhy3.transformations.simplify_formula": 1.18835002183914E-01,
+      "gnatwhy3.transformations.split_goal_wp_conj": 1.56905993819237E-01,
+      "gnatwhy3.transformations.split_premise_right": 7.82279968261719E-02
+    },
+    "global": {
+      "flow analysis": 7.51769989728928E-02,
+      "globals (advanced)": 3.56849990785122E-02,
+      "globals (basic)": 1.38879995793104E-02,
+      "init_why_sections": 3.24250012636185E-02,
+      "marking": 1.32910003885627E-02,
+      "properties (advanced)": 7.32100009918213E-03,
+      "translation of standard": 8.15999985206872E-04
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-actuator_transmissions.ads",
+      "how_proved": "trivial",
+      "line": 30,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 108,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 108,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 115,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "file": "mj-transmissions.ads",
+      "how_proved": "trivial",
+      "line": 115,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 85,
+      "file": "mj-advanced_actuators.ads",
+      "how_proved": "trivial",
+      "line": 85,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 85,
+      "file": "mj-advanced_actuators.ads",
+      "how_proved": "trivial",
+      "line": 85,
+      "message": {
+        "arguments": [
+          "Sin"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: index check proved
+--> mj-flex_interpolation.adb:29:18
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:29:24
+
+ info: loop invariant initialization proved
+--> mj-flex_interpolation.adb:30:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Values (K) = (if K <= J then Basis_At (Local, Degree, K) else 0.0)
+--> mj-flex_interpolation.adb:30:62
+   30 |             pragma Loop_Invariant (for all K in Values'Range => Values (K) =
+      |                                                                 ^~~~~~~~~~~~
+   31 |               (if K <= J then Basis_At (Local, Degree, K) else 0.0));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:31:28
+
+ info: initialization of "Values" proved
+--> mj-flex_interpolation.ads:46:50
+
+ info: data dependencies proved
+--> mj-flex_interpolation.ads:47:11
+
+ info: postcondition proved
+--> mj-flex_interpolation.ads:49:16
+
+ info: precondition proved
+--> mj-flex_interpolation.ads:50:47
+Summary logged in /var/tmp/sparkling-recovery-flex-interpolation3-20261003/proof/Basis/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 17.3 s, peak group RSS 162 MB

@@ -1,0 +1,49 @@
+{
+  "unit": "mj-data-pipeline.adb",
+  "subprogram": "Ensure_Jacobians",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-recovery-dynamics-20261003-19/movement14/source/experimental/constrained-step/constrained.gpr",
+    "-u",
+    "mj-data-pipeline.adb",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=5",
+    "--memlimit=800",
+    "--steps=0",
+    "--proof=per_check",
+    "--no-inlining",
+    "-j1",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--report=all",
+    "--counterexamples=off",
+    "--limit-subp=mj-data-pipeline.adb:851"
+  ],
+  "code": 1,
+  "seconds": 70.30358849799813,
+  "complete_unit": false,
+  "passed": false,
+  "runner_sha256": "ac088e6b3b4bb2abb449986d154a56159985a44aeb3ffed5fa3202a07b90c5f4",
+  "checks": 0,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 16,
+      "file": "mj-data-pipeline.adb",
+      "how_proved": "trivial",
+      "line": 455,
+      "message": {
+        "text": "non-scalar object or object with address clause declared before loop-invariant is not yet supported"
+      },
+      "rule": "error",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [],
+  "snapshot_hashes_unchanged": true,
+  "checkout_matches_snapshot": false
+}

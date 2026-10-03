@@ -1,0 +1,56 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: loop invariant initialization proved
+--> mj-flex_shell_node_weights.adb:50:43
+
+ info: loop invariant preservation proved
+--> mj-flex_shell_node_weights.adb:50:43
+
+ info: overflow check proved
+--> mj-flex_shell_node_weights.adb:50:65
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:50:65
+
+ info: loop invariant initialization proved
+--> mj-flex_shell_node_weights.adb:51:43
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-flex_shell_node_weights.adb:51:43
+   51 |             pragma Loop_Invariant (Static => Result = Fold (G, Bodies, Indices, Values, Sgn, J));
+      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:51:52
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:51:91
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.adb:52:20
+
+ info: overflow check proved
+--> mj-flex_shell_node_weights.adb:52:83
+
+ info: range check proved
+--> mj-flex_shell_node_weights.adb:52:83
+
+ info: initialization of "Result" proved
+--> mj-flex_shell_node_weights.ads:57:06
+
+ info: data dependencies proved
+--> mj-flex_shell_node_weights.ads:58:11
+
+ medium: postcondition might fail, cannot prove Result = Fold (G, Bodies, Indices, Values, Sgn, Count)
+--> mj-flex_shell_node_weights.ads:60:19
+   60 |             and then Result = Fold (G, Bodies, Indices, Values, Sgn, Count));
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_shell_node_weights.ads:60:28
+Summary logged in /var/tmp/sparkling-recovery-shell-node-weights1-20261003/proof/Build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 32.3 s, peak group RSS 275 MB

@@ -20,7 +20,7 @@ package body MJ.Data.Constrained.Inverse with SPARK_Mode is
       begin
          MJ.Inverse_Constraints.Evaluate
            (E.Rows, E.Solver_Rows (1 .. E.Rows.Rows), E.T.Aref (1 .. E.Rows.Rows),
-            As_Reals (Qacc), F, Constraint_Force, Ok);
+            As_Reals (Qacc), F, Constraint_Force, Ok, E.Settings.Sparse);
          if not Ok then Result := Numeric_Limit; return; end if;
          MJ.Data.Inverse.Current (E.D, Qacc, Candidate, Result, Constraint_Force);
          if Result /= Success then return; end if;

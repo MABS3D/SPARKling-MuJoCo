@@ -1,0 +1,9 @@
+# Correzione Log quaternion, 3 ottobre 2026
+
+Il sorgente recuperato divideva separatamente le tre componenti dell'asse per la norma e impostava il seno dell'angolo a zero nel fallback tiny. Il C ufficiale 3.14.0 (`9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`) calcola un reciproco, moltiplica le tre componenti e restituisce la norma originale anche nel fallback. Il nuovo corpo Ada segue queste operazioni; il vecchio commento che attribuiva al C divisioni e azzeramento era errato.
+
+Il probe mirato conserva 559 input e risultati completi prima/dopo. Uguaglianza esatta, inclusi bit degli zeri, passa da218 a416 casi. I primi41 casi tiny/bordo sono ora esatti; restano143 differenze, al massimo8,881784197001252e-16. Il sorgente del runtime GNAT mostra che `Arctan(Y,X)` usa `Local_Atan`, con rapporto, `Aux.Atan` e riduzione di quadrante. Non chiama direttamente `atan2`. Il driver Python che ricompone le operazioni con `math.atan2` riproduce i casi C ispezionati. Le differenze restanti non sono dichiarate risolte; non è stato aggiunto un binding o corpo trusted.
+
+Il corpus kernel completo passa4836/4836 con le tolleranze preesistenti; hash dei due binari, libreria C, sorgenti e driver sono nelle ricevute. Il confronto esatto559 resta volutamente non superato e non è sostituito dal differenziale con tolleranze. Prove minime e whole-unit della geometria corrente restano da rinnovare: nessun vecchio esito è attribuito a questo nuovo hash.
+
+La build integrated r14-r2 verifica sullo stesso campione mobile `so3_sites_expmap/4` lunghezze, velocità, forze e forze generalizzate esattamente C dopo il fix. Lo scarto di accelerazione7,2889e-10 persiste nel parent ordinario anche eliminando tutti gli attuatori e portando la forza nell'ingresso applied. Il corpus integrated completo e la release successivi al fix sono ancora pendenti; i risultati r14-r1 appartengono alla versione precedente.

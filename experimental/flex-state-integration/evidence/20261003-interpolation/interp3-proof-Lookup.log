@@ -1,0 +1,106 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-flex_interpolation.adb:79:31
+
+ info: range check proved
+--> mj-flex_interpolation.adb:80:33
+
+ info: loop invariant initialization proved
+--> mj-flex_interpolation.adb:81:33
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cell (L) = Cell_Of (Coord (L), Cells (L))
+--> mj-flex_interpolation.adb:82:12
+   82 |               Cell (L) = Cell_Of (Coord (L), Cells (L))
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-flex_interpolation.adb:82:18
+
+ info: range check proved
+--> mj-flex_interpolation.adb:82:32
+
+ info: index check proved
+--> mj-flex_interpolation.adb:82:39
+
+ info: index check proved
+--> mj-flex_interpolation.adb:82:50
+
+ medium: "Local" might not be initialized
+--> mj-flex_interpolation.adb:83:21
+   83 |               and then Local (L) = Local_Of (Coord (L), Cells (L)));
+      |                        ^~~~~
+
+ info: index check proved
+--> mj-flex_interpolation.adb:83:28
+
+ info: range check proved
+--> mj-flex_interpolation.adb:83:43
+
+ info: index check proved
+--> mj-flex_interpolation.adb:83:50
+
+ info: index check proved
+--> mj-flex_interpolation.adb:83:61
+
+ info: index check proved
+--> mj-flex_interpolation.adb:87:19
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:87:25
+
+ info: loop invariant initialization proved
+--> mj-flex_interpolation.adb:88:33
+
+ info: loop invariant preservation proved
+--> mj-flex_interpolation.adb:88:33
+
+ info: precondition proved
+--> mj-flex_interpolation.adb:89:28
+
+ medium: "Local" might not be initialized in "Lookup"
+--> mj-flex_interpolation.ads:80:22
+   80 |                         Local : out Vec; Indices : out Node_Indices)
+      |                         ^~~~~
+      + reason for check: OUT parameter should be fully initialized on return
+      + possible fix: initialize "Local" on all paths, make "Local" an IN OUT parameter or annotate it with aspect Relaxed_Initialization
+
+ info: initialization of "Indices" proved
+--> mj-flex_interpolation.ads:80:39
+
+ info: data dependencies proved
+--> mj-flex_interpolation.ads:81:11
+
+ medium: "Local" might not be initialized
+--> mj-flex_interpolation.ads:84:38
+   84 |           Post => (for all K in Axis => Local (K) = Local_Of (Coord (K), Cells (K)))
+      |                                         ^~~~~
+
+ info: range check proved
+--> mj-flex_interpolation.ads:84:60
+
+ medium: postcondition might fail, cannot prove Indices (J) = (if J < Nodes_Per_Cell (Degree) then Index_Of (Cells, Degree, [Cell_Of (Coord (0), Cells (0)), Cell_Of (Coord (1), Cells (1)), Cell_Of (Coord (2), Cells (2))], J) else 0)
+--> mj-flex_interpolation.ads:86:12
+   86 |               Indices (J) = (if J < Nodes_Per_Cell (Degree) then
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+   90 |                    Cell_Of (Coord (2), Cells (2))], J) else 0));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-flex_interpolation.ads:87:14
+
+ info: range check proved
+--> mj-flex_interpolation.ads:88:26
+
+ info: range check proved
+--> mj-flex_interpolation.ads:89:26
+
+ info: range check proved
+--> mj-flex_interpolation.ads:90:26
+Summary logged in /var/tmp/sparkling-recovery-flex-interpolation3-20261003/proof/Lookup/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 49.2 s, peak group RSS 210 MB

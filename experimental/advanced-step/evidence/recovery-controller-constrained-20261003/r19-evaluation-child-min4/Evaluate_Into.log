@@ -1,0 +1,83 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+Summary logged in /var/tmp/sparkling-services-evaluation-child-min4-r19-20261003/Evaluate_Into/validation/obj/gnatprove/gnatprove.out
+guarded: elapsed 181.0 s, peak group RSS 795 MB
+ info: initialization of "Result" proved
+--> mj-data-advanced_control-evaluation.adb:6:75
+
+ medium: postcondition might fail, cannot prove State_Values (D) = State_Values (D)'Old
+--> mj-data-advanced_control-evaluation.adb:11:36
+   11 |       pragma Postcondition (Static => State_Values (D) = State_Values (D)'Old);
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:27:41
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:30:32
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:30:46
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:34:84
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:35:26
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:38:32
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:39:32
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:41:24
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:41:38
+
+ info: precondition proved
+--> mj-data-advanced_control-evaluation.adb:43:20
+
+ info: range check proved
+--> mj-data-advanced_control-evaluation.adb:44:33
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:44:39
+
+ info: index check proved
+--> mj-data-advanced_control-evaluation.adb:44:48
+
+ info: length check proved
+--> mj-data-advanced_control-evaluation.adb:44:52
+
+ info: pointer dereference check proved
+--> mj-data-advanced_control-evaluation.adb:44:79
+
+ info: length check proved
+--> mj-data-advanced_control-evaluation.adb:44:79
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:45:32
+
+ info: assertion proved
+--> mj-data-advanced_control-evaluation.adb:46:32
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:48:52
+   48 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                   ~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:48:86
+   48 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+
+ warning: this statement is never reached
+--> mj-data-advanced_control-evaluation.adb:48:103
+   48 |          when Constraint_Error => D.Cache.Force_Valid := False; D.Cache.Actuation_Valid := False; Result := Numeric_Limit;
+      |                                                                                                   ~~~~~~~^~~~~~~~~~~~~~~~
+gnatprove: unproved check messages considered as errors

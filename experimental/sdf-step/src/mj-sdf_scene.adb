@@ -1,8 +1,11 @@
 with Ada.Unchecked_Deallocation;
 with Interfaces;
 with MJ.Models.Validity;
+with MJ.Models.Gen_Clauses;
 with MJ.SDF_Kernels;
 with MJ.Collision_Contacts;
+with MJ.Admitted_Flex;
+with MJ.Heightfield_Contacts;
 package body MJ.SDF_Scene with SPARK_Mode is
    use MJ.Contact_Geometry;
    use MJ.Contact_Parameters;
@@ -15,8 +18,49 @@ package body MJ.SDF_Scene with SPARK_Mode is
    procedure Free_Faces is new Ada.Unchecked_Deallocation (SDF.Triangle_Array, Triangle_Access);
    procedure Free_BVH is new Ada.Unchecked_Deallocation (MJ.BVH.Tree, BVH_Access);
    function Initialized (S : Scene) return Boolean is (S.Ready);
+   function Contact_Type (S : Scene; G : Geom_Id) return Natural is
+     (if S.Is_SDF (G) then 8 elsif S.Is_Mesh (G) then 7
+      elsif S.Solid (G).Rigid.Kind = Plane then 0
+      else Shape_Kind'Pos (S.Solid (G).Rigid.Kind) + 1)
+     with Pre => G < Max_G, Post => Contact_Type'Result <= 8;
    function Disabled (Flags, Flag : Integer) return Boolean is
      (Flags >= 0 and then (Flags / Flag) mod 2 = 1);
+   package V renames MJ.Models.Validity;
+   package GC renames MJ.Models.Gen_Clauses;
+   function Mesh_Polygons_Valid (M : MJ.Models.Model; I : Integer) return Boolean is
+     (GC.Ref_Mesh_Vertadr_At (M, I) and then GC.Ref_Mesh_Polyadr_At (M, I)
+      and then (for all P in M.Meshes.Mesh_Polyadr (I) ..
+        M.Meshes.Mesh_Polyadr (I) + M.Meshes.Mesh_Polynum (I) - 1 =>
+          GC.Ref_Mesh_Polyvertadr_At (M, P)
+          and then (for all K in M.Meshes.Mesh_Polyvertadr (P) ..
+            M.Meshes.Mesh_Polyvertadr (P) + M.Meshes.Mesh_Polyvertnum (P) - 1 =>
+              M.Meshes.Mesh_Polyvert (K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1)))
+     with Global => null, Pre => MJ.Models.Valid_Layout (M) and then I in 0 .. M.S.Nmesh-1;
+   function Body_Geometry_Valid (M : MJ.Models.Model; B : Integer) return Boolean is
+     (M.Bodies.Body_Weldid (B) in 0 .. B
+      and then M.Bodies.Body_Jntnum (B) in 0 .. M.S.Njnt
+      and then M.Bodies.Body_Mocapid (B) in -1 .. M.S.Nmocap-1
+      and then (if B = 0 then M.Bodies.Body_Parentid (B) = 0 and M.Bodies.Body_Weldid (B) = 0
+        else M.Bodies.Body_Parentid (B) in 0 .. B-1
+          and then (if M.Bodies.Body_Jntnum (B) > 0 or M.Bodies.Body_Mocapid (B) >= 0
+            then M.Bodies.Body_Weldid (B) = B
+            else M.Bodies.Body_Weldid (B) = M.Bodies.Body_Weldid (M.Bodies.Body_Parentid (B)))))
+     with Global => null, Pre => MJ.Models.Valid_Layout (M) and then B in 0 .. M.S.Nbody-1;
+   --  Admit the geometry actually copied by this owner, independently of
+   --  dynamics, interpolation, texture normals and unused convex graphs.
+   --  Selected mesh face/BVH and SDF octree ranges are checked at their read.
+   function Geometry_Model_Valid (M : MJ.Models.Model) return Boolean is
+     (M.S.Nbody in 1 .. 65535 and then M.S.Nplugin = 0
+      and then V.Geom_Types_OK (M) and then V.Geom_Datas_OK (M)
+      and then (for all I in 0 .. M.S.Nmesh-1 => Mesh_Polygons_Valid (M, I))
+      and then M.Opt.Disableflags >= 0 and then M.Opt.Ccd_Tolerance in 1.0e-15 .. 1.0e-2
+      and then M.Opt.Ccd_Iterations in 1 .. 1000
+      and then (for all I in 0 .. M.S.Ngeom-1 =>
+        M.Geoms.Geom_Bodyid (I) in 0 .. M.S.Nbody-1
+        and then M.Geoms.Geom_Margin (I) in 0.0 .. 1.0e10
+        and then M.Geoms.Geom_Gap (I) in 0.0 .. 1.0e10)
+      and then (for all B in 0 .. M.S.Nbody-1 => Body_Geometry_Valid (M, B)))
+     with Global => null, Pre => MJ.Models.Valid_Layout (M);
    procedure Release (S : in out Scene) is
    begin
       S.Ready := False; S.N := 0;
@@ -30,7 +74,7 @@ package body MJ.SDF_Scene with SPARK_Mode is
       H : Real;
    begin
       Release (S); Result := Invalid_Input;
-      if not MJ.Models.Validity.Is_Valid (M) then return; end if;
+      if not MJ.Models.Valid_Layout (M) or else not Geometry_Model_Valid (M) then return; end if;
       if M.S.Ngeom > Max_G or M.S.Noct > Max_Octants
         or M.S.Nmeshvert > Max_Vertices or M.S.Nmeshpoly > Max_Facets
       then Result := Capacity_Limit; return; end if;
@@ -123,7 +167,7 @@ package body MJ.SDF_Scene with SPARK_Mode is
                   Proxies (G).Size (K) := H;
                end if;
             end loop;
-            S.Solid (G).Rigid := Proxies (G);
+            S.Solid (G) := (Kind => Primitive, Rigid => Proxies (G), others => <>);
             if Kind = 7 then
                Mesh := M.Geoms.Geom_Dataid (G);
                S.Solid (G).Kind := Hull;
@@ -133,6 +177,11 @@ package body MJ.SDF_Scene with SPARK_Mode is
                S.Solid (G).Facet_Count := M.Meshes.Mesh_Polynum (Mesh);
                if not Valid_Object (S.Solid (G), S.Vertices.all) then Release (S); return; end if;
                First := M.Meshes.Mesh_Faceadr (Mesh); Length := M.Meshes.Mesh_Facenum (Mesh);
+               if not GC.Ref_Mesh_Faceadr_At (M, Mesh)
+                 or else M.Meshes.Mesh_Bvhnum (Mesh) not in 0 .. M.S.Nbvhstatic
+                 or else (M.Meshes.Mesh_Bvhnum (Mesh) > 0 and then
+                   M.Meshes.Mesh_Bvhadr (Mesh) not in 0 .. M.S.Nbvhstatic-M.Meshes.Mesh_Bvhnum (Mesh))
+               then Release (S); return; end if;
                if Length > MJ.BVH.Max_Leaves or M.Meshes.Mesh_Bvhnum (Mesh) > MJ.BVH.Max_Nodes then
                   Release (S); Result := Capacity_Limit; return;
                end if;
@@ -140,8 +189,10 @@ package body MJ.SDF_Scene with SPARK_Mode is
                for I in S.Faces (G)'Range loop
                   S.Faces (G)(I).Id := I;
                   for K in 0 .. 2 loop
-                     S.Faces (G)(I).Corners (K) := S.Vertices
-                       (S.Solid (G).First + M.Meshes.Mesh_Face (3 * (First + I) + K));
+                     declare Vertex : constant Integer := M.Meshes.Mesh_Face (3 * (First + I) + K); begin
+                        if Vertex not in 0 .. S.Solid (G).Length-1 then Release (S); return; end if;
+                        S.Faces (G)(I).Corners (K) := S.Vertices (S.Solid (G).First + Vertex);
+                     end;
                   end loop;
                end loop;
                S.BVHs (G) := new MJ.BVH.Tree;
@@ -156,7 +207,7 @@ package body MJ.SDF_Scene with SPARK_Mode is
                   S.BVHs (G).Nodes (I).Right := M.Bvh.Bvh_Child (2 * (First + I) + 1);
                   S.BVHs (G).Nodes (I).Item := M.Bvh.Bvh_Nodeid (First + I);
                end loop;
-               if not MJ.BVH.Valid (S.BVHs (G).all) or else
+               if not MJ.BVH.Traversable (S.BVHs (G).all) or else
                  not SDF.Fits (S.Faces (G).all, S.BVHs (G).all) then Release (S); return; end if;
             end if;
             if Kind = 8 then
@@ -197,6 +248,24 @@ package body MJ.SDF_Scene with SPARK_Mode is
       when Constraint_Error => Release (S); Result := Invalid_Input;
       when Storage_Error => Release (S); Result := Capacity_Limit;
    end Load;
+   procedure Collide_Flex (S : in out Scene; G : Natural; Placement : Pose;
+     F : MJ.Flex_Collisions.Flex; Elements : MJ.Flex_Collisions.Element_Array;
+     Vertices : MJ.Contact_Geometry.Vertex_Array; Bodies : MJ.Flex_Collisions.Body_Array;
+     Tree : MJ.BVH.Tree; Midphase : Boolean; Contacts : in out MJ.Flex_Collisions.Batch;
+     Result : out Status) is
+      C : MJ.Admitted_Flex.Collider;
+   begin
+      Contacts.Length := 0; Result := Invalid_Input;
+      if G >= S.N or else not S.Is_SDF (G) then return; end if;
+      C.Kind := MJ.Admitted_Flex.SDF_Geom; C.Geometry := S.Solid (G);
+      C.Placement := Placement; C.Field := S.Field (G);
+      MJ.Admitted_Flex.Collide (C, S.Vertices.all,
+        MJ.Heightfield_Contacts.Elevation_Array'(1 .. 0 => 0.0),
+        F, Elements, Vertices, Bodies, Tree, S.Tree.all, Midphase,
+        S.Options, (S.Starts, S.Iterations), S.Convex, Contacts, Result);
+      if Result /= Success then Contacts.Length := 0; end if;
+   end Collide_Flex;
+
    procedure Generate (S : in out Scene; Poses : Pose_Array;
                        Contacts : in out Full_Array;
                        Length : out Natural; Result : out Status) is
@@ -212,6 +281,13 @@ package body MJ.SDF_Scene with SPARK_Mode is
       if Result /= Success then return; end if;
       for I in 0 .. S.Candidates.Pairs.Length - 1 loop
          Geoms := S.Candidates.Pairs.Items (I); A := Geoms.First; B := Geoms.Second;
+         --  Match pushGeomGeom for every pair, including ordinary rigid pairs
+         --  in a scene which happens to contain an SDF. Parameter mixing must
+         --  observe the same endpoint order as narrowphase and Finalize.
+         if Contact_Type (S, A) > Contact_Type (S, B) then
+            declare Temp : constant Geom_Id := A; begin A := B; B := Temp; end;
+            Geoms := (A, B);
+         end if;
          P := Combine (S.Surface (A), S.Surface (B));
          Configure (P, S.Solid (A).Rigid.Margin + S.Solid (B).Rigid.Margin,
            S.Solid (A).Rigid.Gap + S.Solid (B).Rigid.Gap, (others => <>));

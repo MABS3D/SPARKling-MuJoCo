@@ -1,0 +1,1152 @@
+--- a/experimental/constrained-step/constrained.gpr
++++ b/experimental/constrained-step/constrained.gpr
+@@ -8,7 +8,7 @@
+      "../frictionless-contact-candidate/src");
+    for Object_Dir use Build_Root & "/" & Mode & "/obj";
+    for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+-   for Main use ("constrained_probe.adb", "constrained_edges.adb", "constrained_activation_edges.adb", "equality_lifecycle.adb");
++   for Main use ("constrained_probe.adb", "constrained_edges.adb", "constrained_activation_edges.adb", "equality_lifecycle.adb", "movement_diagnostics.adb");
+    for Create_Missing_Dirs use "True";
+    Flags := ("-gnat2022", "-ffp-contract=off");
+    case Mode is
+--- a/experimental/constrained-step/src/mj-data-constrained.adb
++++ b/experimental/constrained-step/src/mj-data-constrained.adb
+@@ -2,6 +2,7 @@
+ with MJ.Data.Constrained.Body_Adhesion;
+ with MJ.Models.Validity;
+ with MJ.Data.Forward;
++with MJ.Data.Movement;
+ with MJ.Data.Pipeline;
+ with MJ.Data.Inertia_Phase;
+ with MJ.Owned_Step_Publication;
+@@ -918,8 +919,8 @@
+       E.T.Valid := True; Result := Success;
+    end Prepare_And_Solve;
+ 
+-   procedure Evaluate (E : in out Engine; Result : out Status;
+-                       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
++   procedure Evaluate_Core (E : in out Engine; Result : out Status;
++                       External : MJ.External_Forces.Wrench_Array; Diagnostics : Boolean) is
+    begin
+       E.T.Valid := False;
+       Result := Not_Allocated;
+@@ -927,7 +928,8 @@
+       if E.Has_Adhesion then
+          E.D.Cache.Actuation_Valid := False; E.D.Cache.Force_Valid := False;
+       end if;
+-      MJ.Data.Forward.Evaluate (E.D, Result, External);
++      if Diagnostics then MJ.Data.Forward.Evaluate (E.D, Result, External);
++      else MJ.Data.Movement.Evaluate_Physical (E.D, Result, External); end if;
+       if Result /= Success then return; end if;
+       Generate_Contacts (E, Result);
+       if Result /= Success then return; end if;
+@@ -944,6 +946,12 @@
+       Prepare_And_Solve (E, Result);
+    exception
+       when Constraint_Error => E.T.Valid := False; Result := Numeric_Limit;
++   end Evaluate_Core;
++
++   procedure Evaluate (E : in out Engine; Result : out Status;
++                       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
++   begin
++      Evaluate_Core (E, Result, External, Diagnostics => True);
+    end Evaluate;
+ 
+    procedure Advance (E : in out Engine; Result : out Status) is
+@@ -997,7 +1005,8 @@
+    procedure Step (E : in out Engine; Result : out Status;
+                    External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
+    begin
+-      Evaluate (E, Result, External);
++      Evaluate_Core (E, Result, External, Diagnostics => False);
+       if Result = Success then Advance (E, Result); end if;
++      MJ.Data.Movement.Complete_On_Failure (E.D, Result);
+    end Step;
+ end MJ.Data.Constrained;
+--- a/experimental/constrained-step/tests/constrained_probe.adb
++++ b/experimental/constrained-step/tests/constrained_probe.adb
+@@ -28,6 +28,8 @@
+      and then Ada.Command_Line.Argument (2) = "benchmark";
+    Export_Problem : constant Boolean := Ada.Command_Line.Argument_Count >= 3
+      and then Ada.Command_Line.Argument (3) = "problem";
++   Export_Bias : constant Boolean := Ada.Command_Line.Argument_Count >= 3
++     and then Ada.Command_Line.Argument (3) = "bias";
+    procedure Check is
+    begin
+       if Result /= Success then raise Program_Error with Result'Image; end if;
+@@ -107,6 +109,7 @@
+             if Export_Problem then
+                C.Test_Export.Write_Problem (E.all, Standard_Error);
+             end if;
++            if Export_Bias then C.Test_Export.Write_Bias (E.all, Standard_Error); end if;
+             D := C.Diagnostics (E.all);
+             Emit ("counts", [Real (D.Ncontact), Real (D.Nrow)]);
+             Emit ("free", Real_Array (D.A_Free (1 .. Nv)));
+--- /dev/null
++++ b/experimental/constrained-step/tests/mj-data-constrained-diagnostic_checks.adb
+@@ -0,0 +1,90 @@
++with Ada.Unchecked_Conversion;
++with Interfaces;
++with MJ.Data.Forward;
++with MJ.Data.Euler;
++with MJ.Data.Movement;
++package body MJ.Data.Constrained.Diagnostic_Checks is
++   function Bits is new Ada.Unchecked_Conversion (Real, Interfaces.Unsigned_64);
++   use type Interfaces.Unsigned_64;
++   procedure Check (Value : Boolean; Message : String) is
++   begin
++      if not Value then raise Program_Error with Message; end if;
++   end Check;
++   function Same (A, B : Real_Array) return Boolean is
++   begin
++      if A'First /= B'First or else A'Last /= B'Last then return False; end if;
++      for I in A'Range loop
++         if Bits (A (I)) /= Bits (B (I)) then return False; end if;
++      end loop;
++      return True;
++   end Same;
++   procedure Run (E : in out Engine) is
++      Q : State_Vector (0 .. E.D.Nq-1);
++      V : State_Vector (0 .. E.D.Nv-1);
++      G, B, P, A : Real_Array (0 .. E.D.Nv-1);
++      G0, B0, P0, A0 : Real_Array (0 .. E.D.Nv-1);
++      Result : Status;
++      Smooth : Boolean := False;
++      procedure Selected_Evaluate is
++      begin
++         if Smooth then MJ.Data.Forward.Evaluate (E.D, Result);
++         else Evaluate (E, Result); end if;
++      end Selected_Evaluate;
++      procedure Selected_Step is
++      begin
++         if Smooth then MJ.Data.Euler.Step (E.D, Result);
++         else Step (E, Result); end if;
++      end Selected_Step;
++      procedure Read_Diagnostics is
++      begin
++         Get_Forces (E.D, G, B, P, A, Result);
++         Check (Result = Success, "diagnostic availability");
++         for I in G'Range loop
++            Check (Bits (G (I)) = Bits (Force_Value (E.D, Gravity_Force, I)), "gravity scalar/bulk");
++            Check (Bits (B (I)) = Bits (Force_Value (E.D, Velocity_Bias, I)), "bias scalar/bulk");
++         end loop;
++      end Read_Diagnostics;
++   begin
++      for I in Q'Range loop Q (I) := E.D.State.Qpos (I); end loop;
++      for I in V'Range loop V (I) := 0.125 * Real ((I mod 5)-2); end loop;
++      for Use_Smooth in Boolean loop
++      Smooth := Use_Smooth;
++      Set_State (E, Q, V, Nonneg_Tier0'Last, Result);
++      Check (Result = Success, "state at clock bound");
++      Selected_Evaluate; Check (Result = Success, "public evaluate");
++      Read_Diagnostics; G0 := G; B0 := B; P0 := P; A0 := A;
++      declare
++         Before : constant Real_Array := Complete_State (E);
++      begin
++         Selected_Step;
++         Check (Result = Numeric_Limit and then Same (Complete_State (E), Before), "step clock failure atomicity");
++         Read_Diagnostics;
++         Check (Same (G,G0) and then Same (B,B0) and then Same (P,P0) and then Same (A,A0), "step failure diagnostics");
++      end;
++      -- Directly exercise cleanup with a caller-added passive contribution.
++      -- This is the frame needed by FE; it must not recompute passive forces.
++      MJ.Data.Movement.Evaluate_Physical (E.D, Result);
++      Check (Result = Success, "physical evaluation");
++      if P'Length > 0 then E.D.Dynamics.Passive (P'First) := E.D.Dynamics.Passive (P'First) + 0.375; end if;
++      P0 := E.D.Dynamics.Passive.all;
++      declare
++         Full : constant Real_Array := E.D.Dynamics.Full_Bias.all;
++         Total : constant Real_Array := E.D.Dynamics.Total.all;
++         Acc : constant Real_Array := E.D.Dynamics.Acceleration.all;
++      begin
++         Result := Capacity_Exceeded;
++         MJ.Data.Movement.Complete_On_Failure (E.D, Result);
++         Check (Result = Capacity_Exceeded, "cleanup preserves original status");
++         Read_Diagnostics;
++         Check (Same (G,G0) and then Same (B,B0) and then Same (P,P0), "cleanup diagnostic/passive frame");
++         Check (Same (E.D.Dynamics.Full_Bias.all,Full) and then Same (E.D.Dynamics.Total.all,Total)
++           and then Same (E.D.Dynamics.Acceleration.all,Acc), "cleanup physical frame");
++      end;
++      Set_State (E,Q,V,0.0,Result); Check (Result = Success, "retry state");
++      Selected_Step; Check (Result = Success and then not Passive_Current (E.D), "successful step invalidates diagnostics");
++      Selected_Evaluate; Check (Result = Success, "evaluate after step"); Read_Diagnostics;
++      MJ.Data.Reset (E.D,Result); Check (Result = Success and then not Passive_Current (E.D), "reset diagnostics");
++      Selected_Evaluate; Check (Result = Success, "reset evaluation"); Read_Diagnostics;
++      end loop;
++   end Run;
++end MJ.Data.Constrained.Diagnostic_Checks;
+--- /dev/null
++++ b/experimental/constrained-step/tests/mj-data-constrained-diagnostic_checks.ads
+@@ -0,0 +1,3 @@
++package MJ.Data.Constrained.Diagnostic_Checks is
++   procedure Run (E : in out Engine);
++end MJ.Data.Constrained.Diagnostic_Checks;
+--- a/experimental/constrained-step/tests/mj-data-constrained-test_export.adb
++++ b/experimental/constrained-step/tests/mj-data-constrained-test_export.adb
+@@ -29,4 +29,26 @@
+       end loop;
+       Ada.Text_IO.New_Line (File);
+    end Write_Problem;
++   procedure Write_Bias (E : Engine; File : Ada.Text_IO.File_Type) is
++      package NIO is new Ada.Text_IO.Float_IO (Real);
++      G, B, P, A : Real_Array (0 .. E.D.Nv-1);
++      Result : Status;
++   begin
++      MJ.Data.Get_Forces (E.D, G, B, P, A, Result);
++      if Result /= Success then raise Program_Error with "legacy diagnostic availability"; end if;
++      for V in G'Range loop
++         if G (V) /= Force_Value (E.D, Gravity_Force, V)
++           or else B (V) /= Force_Value (E.D, Velocity_Bias, V)
++         then raise Program_Error with "legacy bulk/scalar mismatch"; end if;
++      end loop;
++      Ada.Text_IO.Put (File, "gravity");
++      for X of G loop Ada.Text_IO.Put (File, ' '); NIO.Put (File, X, Fore => 1, Aft => 17, Exp => 3); end loop;
++      Ada.Text_IO.New_Line (File);
++      Ada.Text_IO.Put (File, "velocity_bias");
++      for X of B loop Ada.Text_IO.Put (File, ' '); NIO.Put (File, X, Fore => 1, Aft => 17, Exp => 3); end loop;
++      Ada.Text_IO.New_Line (File);
++      Ada.Text_IO.Put (File, "full_bias");
++      for V in G'Range loop Ada.Text_IO.Put (File, ' '); NIO.Put (File, Full_Bias_Value (E.D, V), Fore => 1, Aft => 17, Exp => 3); end loop;
++      Ada.Text_IO.New_Line (File);
++   end Write_Bias;
+ end MJ.Data.Constrained.Test_Export;
+--- a/experimental/constrained-step/tests/mj-data-constrained-test_export.ads
++++ b/experimental/constrained-step/tests/mj-data-constrained-test_export.ads
+@@ -4,4 +4,5 @@
+ --  replay by solvers_probe, without changing the engine's production trace.
+ package MJ.Data.Constrained.Test_Export with SPARK_Mode => Off is
+    procedure Write_Problem (E : Engine; File : Ada.Text_IO.File_Type);
++   procedure Write_Bias (E : Engine; File : Ada.Text_IO.File_Type);
+ end MJ.Data.Constrained.Test_Export;
+--- /dev/null
++++ b/experimental/constrained-step/tests/movement_diagnostics.adb
+@@ -0,0 +1,33 @@
++with Ada.Command_Line;
++with Ada.Text_IO;
++with Ada.Exceptions;
++with MJ.Types; use MJ.Types;
++with MJ.Fields;
++with MJ.Models;
++with MJ.MJB;
++with MJ.Data; use MJ.Data;
++with MJ.Data.Constrained;
++with MJ.Data.Constrained.Diagnostic_Checks;
++procedure Movement_Diagnostics is
++   M : MJ.Models.Model;
++   type Engine_Access is access MJ.Data.Constrained.Engine;
++   E : Engine_Access := new MJ.Data.Constrained.Engine;
++   Loaded : MJ.Fields.Load_Result;
++   Result : Status;
++begin
++   MJ.MJB.Load (Ada.Command_Line.Argument (1), (Contact_Cap => 0), M, Loaded);
++   if Loaded.Status /= OK then raise Program_Error with "load"; end if;
++   MJ.Data.Constrained.Create (M, E.all, Result);
++   if Result /= Success then raise Program_Error with "create " & Result'Image; end if;
++   MJ.Models.Free (M);
++   MJ.Data.Constrained.Diagnostic_Checks.Run (E.all);
++   MJ.Data.Constrained.Free (E.all,Result);
++   if Result /= Success then raise Program_Error with "free"; end if;
++   MJ.Data.Constrained.Free (E.all,Result);
++   if Result /= Success then raise Program_Error with "double free"; end if;
++   Ada.Text_IO.Put_Line ("movement diagnostic lifecycle/frame PASS");
++exception
++   when Error : others =>
++      Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Information (Error));
++      Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
++end Movement_Diagnostics;
+--- a/experimental/smooth/src/mj-data-euler.adb
++++ b/experimental/smooth/src/mj-data-euler.adb
+@@ -1,5 +1,6 @@
+ with MJ.Manifold_Math;
+ with MJ.Data.Pipeline;
++with MJ.Data.Movement;
+ with MJ.Data.Boundary;
+ with MJ.Data.Inertia_Phase;
+ 
+@@ -314,7 +315,7 @@
+            and then Configuration (D) = Initial_Config);
+          return;
+       end if;
+-      Pipeline.Evaluate_Ready (D, Result, External);
++      Pipeline.Evaluate_Ready (D, Result, External, Diagnostics => False);
+       pragma Assert (Static => State_Values (D) = Initial_State);
+       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+       if Result /= Success then
+@@ -400,5 +401,6 @@
+          return;
+       end if;
+       Step_Ready (D, Result, External);
++      MJ.Data.Movement.Complete_On_Failure (D, Result);
+    end Step;
+ end MJ.Data.Euler;
+--- a/experimental/smooth/src/mj-data-fluid_phase.ads
++++ b/experimental/smooth/src/mj-data-fluid_phase.ads
+@@ -43,5 +43,6 @@
+    pragma Postcondition (Static => Step_Size (D) = Step_Size (D)'Old);
+    pragma Postcondition (Static => D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old);
+    pragma Postcondition (Static => D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old);
++   pragma Postcondition (Static => D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old);
+    pragma Postcondition (Static => MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Passive.all));
+ end MJ.Data.Fluid_Phase;
+--- a/experimental/smooth/src/mj-data-forces_phase.adb
++++ b/experimental/smooth/src/mj-data-forces_phase.adb
+@@ -211,7 +211,7 @@
+    procedure Forward_Bodies
+      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
+       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array; Gravity_Vector : Vector;
+-      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean; Velocity : in out Motion_Array)
++      Gravity_Enabled : Boolean; Bias, Gravity : out Motion_Array; Ok : out Boolean; Velocity : in out Motion_Array; Combined : Boolean := False)
+      with Global => null, Relaxed_Initialization => (Bias, Gravity),
+      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
+        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
+@@ -245,7 +245,9 @@
+    begin
+       Ok := False;
+       Velocity (0) := [others => 0.0];
+-      Acceleration (0) := [others => 0.0];
++      Acceleration (0) := (if Combined then MJ.Fused_RNE.World_Acceleration
++        (Gravity_Vector (0), Gravity_Vector (1), Gravity_Vector (2), Gravity_Enabled)
++        else [others => 0.0]);
+       Bias (0) := [others => 0.0];
+       Gravity (0) := [others => 0.0];
+       if Body_Config'Length = 1 then
+@@ -259,14 +261,16 @@
+               (Body_Config (B), Joint_Config, Qvel, Spatial_Motions,
+                MJ.Spatial_Storage.Load_Inertia (Spatial_Inertias, 10 * B),
+                Velocity (Body_Config (B).Parent), Acceleration (Body_Config (B).Parent),
+-               Gravity_Vector, Gravity_Enabled, V, A, F, G, Accepted);
++               Gravity_Vector, Gravity_Enabled and then not Combined, V, A, F, G, Accepted);
+             if not Accepted then return; end if;
+             Store_Motion_Prefix (Velocity, B, V, 1.0e12);
+             Store_Motion_Prefix (Acceleration, B, A, 1.0e12);
+             Store_Motion_Prefix (Bias, B, F, 1.0e54);
+             Store_Motion_Prefix (Gravity, B, G, 1.0e48);
+-         pragma Loop_Invariant (for all K in 0 .. B => Velocity (K)'Initialized
+-           and then SK.Bounded (Velocity (K), 1.0e12));
++         --  Velocity is an ordinary in-out array: initialization is implicit
++         --  at entry and preserved by component writes. Only its bounds need
++         --  a prefix invariant; Initialized is illegal without Relaxed_Initialization.
++         pragma Loop_Invariant (for all K in 0 .. B => SK.Bounded (Velocity (K), 1.0e12));
+          pragma Loop_Invariant (for all K in 0 .. B => Acceleration (K)'Initialized
+            and then SK.Bounded (Acceleration (K), 1.0e12));
+          pragma Loop_Invariant (for all K in 0 .. B => Bias (K)'Initialized
+@@ -386,7 +390,7 @@
+      (Body_Config : Body_Parameter_Array; Joint_Config : Joint_Parameter_Array;
+       Qvel, Spatial_Inertias, Spatial_Motions : Real_Array;
+       Topology : MJ.Smooth_Topology.Cache; Gravity_Vector : Vector;
+-      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
++      Gravity_Enabled : Boolean; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array; Combined : Boolean := False)
+      with Global => null,
+      Pre => Body_Config'First = 0 and then Body_Config'Length in 1 .. Max_Bodies
+        and then Joint_Config'First = 0 and then Joint_Config'Length <= Max_Dofs
+@@ -419,7 +423,7 @@
+       Gravity_Out := [others => 0.0];
+       Bias_Out := [others => 0.0];
+       Forward_Bodies (Body_Config, Joint_Config, Qvel, Spatial_Inertias, Spatial_Motions,
+-                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok, Velocity);
++                      Gravity_Vector, Gravity_Enabled, Bias, Gravity, Ok, Velocity, Combined);
+       if not Ok then return; end if;
+       Backward_Bodies (Body_Config, Bias, Gravity, Ok);
+       if not Ok then return; end if;
+@@ -428,7 +432,7 @@
+    pragma Inline_Always (Recursive_Forces_Buffers);
+ 
+    procedure Try_Recursive
+-     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array)
++     (D : Simulation; Gravity_Out, Bias_Out : out Real_Array; Ok : out Boolean; Velocity : in out Motion_Array; Combined : Boolean := False)
+      with Global => null,
+      Pre => Is_Ready (D) and then D.Cache.Pose_Valid and then D.Cache.Spatial_Valid
+        and then Gravity_Out'First = 0 and then Gravity_Out'Last = D.Nv - 1
+@@ -444,7 +448,7 @@
+       Recursive_Forces_Buffers
+         (D.Body_Config.all, D.Joint_Config.all, D.State.Qvel.all,
+          D.Kinematic.Spatial_Inertias.all, D.Kinematic.Spatial_Motions.all,
+-         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok, Velocity);
++         D.Topology, D.Gravity, D.Gravity_Enabled, Gravity_Out, Bias_Out, Ok, Velocity, Combined);
+    end Try_Recursive;
+ 
+    procedure Manifold_Passive (D : in out Simulation; Result : out Status) is
+@@ -681,6 +685,7 @@
+          and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Passive.all)
+          and then not Passive_Current (D) and then not Forces_Current (D)
+          and then (for all X of D.Dynamics.Gravity.all => X = 0.0)
+@@ -699,6 +704,7 @@
+       D.Cache.Force_Valid := False;
+       D.Dynamics.Gravity.all := [others => 0.0];
+       D.Dynamics.Bias.all := [others => 0.0];
++      D.Dynamics.Full_Bias.all := [others => 0.0];
+       D.Dynamics.Passive.all := [others => 0.0];
+       Prove_Configuration_Equality (Configuration (D), Initial_Config);
+    end Zero_Forces;
+@@ -707,6 +713,7 @@
+    procedure Publish_Passive (D : in out Simulation)
+      with Global => null, Pre => Is_Ready (D) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Passive.all),
+      Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+@@ -720,6 +727,7 @@
+          and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+          and then Passive_Current (D) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)
+          and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Passive.all))
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+@@ -757,7 +765,8 @@
+ 
+    procedure Complete_Passive (D : in out Simulation; Result : out Status; Velocity : Motion_Array; Reuse : Boolean)
+      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D) and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all)
+-         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all);
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all);
+    pragma Postcondition (Static => Is_Ready (D));
+    pragma Postcondition (Static => Stable_Ready (D));
+    pragma Postcondition (Static => Is_Empty (D) = Is_Empty (D)'Old);
+@@ -818,7 +827,8 @@
+          and then Position_Values (D) = Position_Values (D)'Old
+          and then Velocity_Values (D) = Velocity_Values (D)'Old
+          and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+-       and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all))
++       and then not D.Cache.Passive_Valid and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all))
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+@@ -864,7 +874,8 @@
+          and then Position_Values (D) = Position_Values (D)'Old
+          and then Velocity_Values (D) = Velocity_Values (D)'Old
+          and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old and then not D.Cache.Passive_Valid
+-       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all) and then D.Dynamics.Gravity.all = Gravity and then D.Dynamics.Bias.all = Bias)
++       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all) and then D.Dynamics.Gravity.all = Gravity and then D.Dynamics.Bias.all = Bias)
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+@@ -897,7 +908,8 @@
+    pragma Postcondition (Static => Time (D) = Time (D)'Old);
+    pragma Postcondition (Static => Step_Size (D) = Step_Size (D)'Old);
+    pragma Postcondition (Static => not D.Cache.Passive_Valid);
+-   pragma Postcondition (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)));
++   pragma Postcondition (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)));
+ 
+    procedure Recursive_Path (D : in out Simulation; Used : out Boolean; Velocity : in out Motion_Array)
+    is
+@@ -986,7 +998,8 @@
+       pragma Assert (Static => Position_Values (D) = Initial_Pos);
+       pragma Assert (Static => Velocity_Values (D) = Initial_Vel);
+       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+-      pragma Assert (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)));
++      pragma Assert (Static => (if Used then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)));
+    end Recursive_Path;
+    pragma Inline_Always (Recursive_Path);
+ 
+@@ -1003,7 +1016,8 @@
+          and then Position_Values (D) = Position_Values (D)'Old
+          and then Velocity_Values (D) = Velocity_Values (D)'Old
+          and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+-       and then not D.Cache.Passive_Valid and then (if Result = Success then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)))
++       and then not D.Cache.Passive_Valid and then (if Result = Success then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Gravity.all) and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Bias.all)
++         and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)))
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stable_Ready);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
+@@ -1087,6 +1101,85 @@
+       end;
+    end Dense_Path;
+    pragma Inline_Always (Dense_Path);
++
++   --  Correctness reference only: this second traversal preserves the legacy
++   --  diagnostics while publishing a distinct complete bias. It is not the
++   --  proposed final per-step path; the lazy diagnostic alternative is separate.
++   procedure Publish_Full_Bias (D : in out Simulation; Bias : Real_Array)
++     with Global => null,
++     Pre => Is_Ready (D) and then Positions_Current (D) and then not Passive_Current (D)
++       and then Bias'First = 0 and then Bias'Last = D.Nv-1
++       and then MJ.Smooth_Dynamics.Work_Array (Bias),
++     Post => (Static => Is_Ready (D) and then Stable_Ready (D)
++       and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Configuration (D) = Configuration (D)'Old
++       and then Positions_Current (D) = Positions_Current (D)'Old
++       and then not Passive_Current (D)
++       and then D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
++       and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old
++       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all)
++       and then D.Dynamics.Full_Bias.all = Bias)
++   is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
++   begin
++      D.Dynamics.Full_Bias.all := Bias;
++   end Publish_Full_Bias;
++   pragma Inline_Always (Publish_Full_Bias);
++
++   procedure Fill_Full_Bias (D : in out Simulation; Result : out Status)
++     with Global => null,
++     Pre => Is_Ready (D) and then Positions_Current (D) and then not Passive_Current (D)
++       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all),
++     Post => (Static => Is_Ready (D) and then Stable_Ready (D)
++       and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Configuration (D) = Configuration (D)'Old
++       and then Positions_Current (D) = Positions_Current (D)'Old
++       and then not Passive_Current (D)
++       and then D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
++       and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old
++       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Full_Bias.all))
++   is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
++      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
++      Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
++      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
++      Nv : constant Natural := D.Nv;
++      Nb : constant Natural := D.Nb;
++      Prepared : Boolean;
++      Gravity, Bias : Real_Array (0 .. Nv-1);
++      Velocity : Motion_Array (0 .. Nb-1) := [others => [others => 0.0]];
++   begin
++      Result := Numeric_Limit;
++      Spatial.Prepare (D, Prepared);
++      Ready_Properties (D);
++      if not Prepared then return; end if;
++      Try_Recursive (D, Gravity, Bias, Prepared, Velocity, Combined => True);
++      if not Prepared then return; end if;
++      declare
++         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
++         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
++         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
++      begin
++         Publish_Full_Bias (D, Bias);
++         Ready_Properties (D);
++         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
++         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
++         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
++      end;
++      Result := Success;
++   end Fill_Full_Bias;
+ 
+    procedure Compute_Ready (D : in out Simulation; Result : out Status)
+      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D),
+@@ -1183,6 +1276,8 @@
+          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+       begin
++         Fill_Full_Bias (D, Result);
++         if Result /= Success then return; end if;
+          Complete_Passive (D, Result, Velocity, Used);
+          Ready_Properties (D);
+          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+@@ -1193,6 +1288,93 @@
+       end;
+    end Compute_Ready;
+    pragma Inline_Always (Compute_Ready);
++
++   procedure Compute_Physical (D : in out Simulation; Result : out Status) is
++      Nv : constant Natural := D.Nv;
++      Nb : constant Natural := D.Nb;
++      Gravity, Bias : Real_Array (0 .. Nv-1);
++      Velocity : Motion_Array (0 .. Nb-1) := [others => [others => 0.0]];
++      Prepared : Boolean;
++   begin
++      if not D.Cache.Pose_Valid then Result := Stale_Results; return; end if;
++      Zero_Forces (D);
++      Result := Numeric_Limit;
++      Spatial.Prepare (D, Prepared);
++      if not Prepared then return; end if;
++      Try_Recursive (D, Gravity, Bias, Prepared, Velocity, Combined => True);
++      if not Prepared then return; end if;
++      Publish_Full_Bias (D, Bias);
++      Complete_Passive (D, Result, Velocity, Reuse => True);
++   end Compute_Physical;
++
++   procedure Publish_Diagnostics
++     (D : in out Simulation; Gravity, Bias : Real_Array)
++     with Global => null,
++     Pre => Is_Ready (D)
++       and then Gravity'First = 0 and then Gravity'Last = D.Nv-1
++       and then Bias'First = 0 and then Bias'Last = D.Nv-1
++       and then MJ.Smooth_Dynamics.Work_Array (Gravity)
++       and then MJ.Smooth_Dynamics.Work_Array (Bias),
++     Post => (Static => Is_Ready (D) and then Stable_Ready (D)
++       and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Activation_Values (D) = Activation_Values (D)'Old
++       and then Configuration (D) = Configuration (D)'Old
++       and then D.Cache = D.Cache'Old
++       and then D.Dynamics.Gravity.all = Gravity
++       and then D.Dynamics.Bias.all = Bias
++       and then D.Dynamics.Passive.all = D.Dynamics.Passive.all'Old
++       and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
++       and then D.Dynamics.Actuator.all = D.Dynamics.Actuator.all'Old
++       and then D.Dynamics.Total.all = D.Dynamics.Total.all'Old
++       and then D.Dynamics.Acceleration.all = D.Dynamics.Acceleration.all'Old)
++   is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
++   begin
++      D.Dynamics.Gravity.all := Gravity;
++      D.Dynamics.Bias.all := Bias;
++   end Publish_Diagnostics;
++   pragma Inline_Always (Publish_Diagnostics);
++
++   procedure Complete_Diagnostics (D : in out Simulation; Result : out Status) is
++      Nv : constant Natural := D.Nv;
++      Nb : constant Natural := D.Nb;
++      Gravity, Bias : Real_Array (0 .. Nv-1);
++      Velocity : Motion_Array (0 .. Nb-1) := [others => [others => 0.0]];
++      Used, Prepared : Boolean := False;
++   begin
++      Result := Success;
++      if not Passive_Current (D) then return; end if;
++      -- Preserve the existing recursive/dense choice and fallback order,
++      -- while all physical buffers remain read-only through computation.
++      if Nv >= 3 then
++         Spatial.Prepare (D, Prepared);
++         if Prepared then Try_Recursive (D, Gravity, Bias, Used, Velocity); end if;
++      end if;
++      if not Used then
++         Pipeline.Ensure_Cartesian_Motion (D, Result);
++         if Result = Success then Pipeline.Ensure_Jacobians (D, Result); end if;
++         if Result = Success then
++            Dense_Force_Buffers
++              (D.Body_Config.all, D.Kinematic.Bodies.all, D.Kinematic.Linear_Jacobian.all,
++               D.Kinematic.Angular_Jacobian.all, D.Gravity, D.Gravity_Enabled,
++               Gravity, Bias, Result);
++         end if;
++      end if;
++      if Result = Success then
++         Publish_Diagnostics (D, Gravity, Bias);
++      else
++         D.Cache.Passive_Valid := False;
++         D.Cache.Force_Valid := False;
++      end if;
++   end Complete_Diagnostics;
+ 
+    procedure Compute (D : in out Simulation; Result : out Status) is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
+--- a/experimental/smooth/src/mj-data-forces_phase.ads
++++ b/experimental/smooth/src/mj-data-forces_phase.ads
+@@ -17,4 +17,36 @@
+      and then Velocity_Values (D) = Velocity_Values (D)'Old
+      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
+ 
++   procedure Compute_Physical (D : in out Simulation; Result : out Status) with Global => null, Pre => Is_Ready (D),
++     Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Activation_Values (D) = Activation_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Positions_Current (D) = Positions_Current (D)'Old
++       and then (if Result = Success then Is_Ready (D) and then Passive_Current (D));
++   pragma Postcondition (Stable_Ready (D));
++   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
++     and then Position_Values (D) = Position_Values (D)'Old
++     and then Velocity_Values (D) = Velocity_Values (D)'Old
++     and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
++
++   --  Failure cleanup for a private movement evaluation. Preserve all
++   --  physical force buffers, including caller-added flex passive forces.
++   procedure Complete_Diagnostics (D : in out Simulation; Result : out Status)
++     with Global => null,
++     Pre => Is_Ready (D) and then Positions_Current (D),
++     Post => (Static => Is_Ready (D) and then Stable_Ready (D)
++       and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Activation_Values (D) = Activation_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Configuration (D) = Configuration (D)'Old
++       and then Positions_Current (D) = Positions_Current (D)'Old
++       and then D.Dynamics.Passive.all = D.Dynamics.Passive.all'Old
++       and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
++       and then D.Dynamics.Actuator.all = D.Dynamics.Actuator.all'Old
++       and then D.Dynamics.Total.all = D.Dynamics.Total.all'Old
++       and then D.Dynamics.Acceleration.all = D.Dynamics.Acceleration.all'Old
++       and then (if Result = Success then Passive_Current (D) = Passive_Current (D)'Old));
++
+ end MJ.Data.Forces_Phase;
+--- a/experimental/smooth/src/mj-data-inertia_phase.adb
++++ b/experimental/smooth/src/mj-data-inertia_phase.adb
+@@ -1,3 +1,4 @@
++with MJ.Force_Composition;
+ with MJ.Spatial_Tendon_Models;
+ with MJ.Data.External_Loads;
+ with MJ.Data.Mass_Publication;
+@@ -1989,31 +1990,29 @@
+    end Solve;
+ 
+    procedure Total_Forces_Buffers
+-     (Gravity, Bias, Passive, Actuator, Applied : Real_Array;
++     (Full_Bias, Passive, Actuator, Applied : Real_Array;
+       Total : in out Real_Array; Result : out Status)
+      with Global => null,
+      Pre => Total'First = 0 and then Total'Length <= Max_Dofs
+-       and then Gravity'First = 0 and then Gravity'Last = Total'Last
+-       and then Bias'First = 0 and then Bias'Last = Total'Last
++       and then Full_Bias'First = 0 and then Full_Bias'Last = Total'Last
+        and then Passive'First = 0 and then Passive'Last = Total'Last
+        and then Actuator'First = 0 and then Actuator'Last = Total'Last
+        and then Applied'First = 0 and then Applied'Last = Total'Last
+-       and then MJ.Smooth_Dynamics.Work_Array (Gravity)
+-       and then MJ.Smooth_Dynamics.Work_Array (Bias)
++       and then MJ.Smooth_Dynamics.Work_Array (Full_Bias)
+        and then MJ.Smooth_Dynamics.Work_Array (Passive)
+        and then MJ.Smooth_Dynamics.Work_Array (Actuator)
+        and then MJ.Smooth_Kernels.All_Tier0 (Applied),
+      Post => (if Result = Success then MJ.Smooth_Dynamics.Work_Array (Total)
+-       and then (for all I in Total'Range => Total (I) = MJ.Smooth_Dynamics.Total_Force
+-         (Gravity (I), Bias (I), Passive (I), Actuator (I), Applied (I))))
++       and then (for all I in Total'Range => Total (I) = MJ.Force_Composition.Smooth_Total
++         (Passive (I), Full_Bias (I), Applied (I), Actuator (I))))
+    is
+       Value : Real;
+    begin
+       Result := Numeric_Limit;
+       for I in Total'Range loop
+          pragma Loop_Invariant (for all K in 0 .. I - 1 => Total (K) in MJ.Smooth_Dynamics.Work_Real
+-           and then Total (K) = MJ.Smooth_Dynamics.Total_Force (Gravity (K), Bias (K), Passive (K), Actuator (K), Applied (K)));
+-         Value := MJ.Smooth_Dynamics.Total_Force (Gravity (I), Bias (I), Passive (I), Actuator (I), Applied (I));
++           and then Total (K) = MJ.Force_Composition.Smooth_Total (Passive (K), Full_Bias (K), Applied (K), Actuator (K)));
++         Value := MJ.Force_Composition.Smooth_Total (Passive (I), Full_Bias (I), Applied (I), Actuator (I));
+          if not Within_Work (Value) then return; end if;
+          Total (I) := Value;
+       end loop;
+@@ -2065,7 +2064,7 @@
+    begin
+       D.Cache.Force_Valid := False;
+       Total_Forces_Buffers
+-        (D.Dynamics.Gravity.all, D.Dynamics.Bias.all, D.Dynamics.Passive.all,
++        (D.Dynamics.Full_Bias.all, D.Dynamics.Passive.all,
+          D.Dynamics.Actuator.all, D.State.Applied.all, D.Dynamics.Total.all, Result);
+       pragma Assert (Static => (if Result = Success then
+          MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Total.all)));
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-movement.adb
+@@ -0,0 +1,48 @@
++with MJ.Data.Pipeline;
++with MJ.Data.Forces_Phase;
++
++package body MJ.Data.Movement with SPARK_Mode is
++   procedure Evaluate_Physical
++     (D : in out Simulation; Result : out Status;
++      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
++      --  Compose phase contracts without expanding their representation.
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Shape);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Positions_Current);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Forces_Current);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Position_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Velocity_Values);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Time);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Step_Size);
++      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
++   begin
++      if not Is_Ready (D) then
++         Prove_Configuration_Equality (Configuration (D), Initial_Config);
++         Result := Not_Allocated;
++         return;
++      end if;
++      if External'Length /= 0 and then
++        (External'First /= 0 or else Int64 (External'Length) /= Int64 (Body_Count (D)))
++      then
++         Prove_Configuration_Equality (Configuration (D), Initial_Config);
++         Result := Invalid_Size;
++         return;
++      end if;
++      Pipeline.Evaluate_Ready (D, Result, External, Diagnostics => False);
++      Prove_Configuration_Equality (Configuration (D), Initial_Config);
++   end Evaluate_Physical;
++   procedure Complete_On_Failure (D : in out Simulation; Result : in out Status) is
++      Diagnostic_Result : Status;
++   begin
++      if Result /= Success and then Is_Ready (D)
++        and then Positions_Current (D) and then Passive_Current (D)
++      then
++         Forces_Phase.Complete_Diagnostics (D, Diagnostic_Result);
++         if Diagnostic_Result /= Success then Result := Diagnostic_Result; end if;
++      end if;
++   end Complete_On_Failure;
++end MJ.Data.Movement;
+--- /dev/null
++++ b/experimental/smooth/src/mj-data-movement.ads
+@@ -0,0 +1,30 @@
++with MJ.External_Forces;
++--  Review draft. Evaluate unconstrained dynamics at the current state.
++--  Does not advance qpos, qvel, controls, applied forces or time.
++private package MJ.Data.Movement with SPARK_Mode is
++   --  These total value queries are safe to snapshot unconditionally on entry.
++   pragma Unevaluated_Use_Of_Old (Allow);
++   --  External: world-frame force/torque at each body COM for this call.
++   --  Empty means no loads; a nonempty array must cover 0 .. Body_Count - 1.
++   procedure Evaluate_Physical
++     (D : in out Simulation; Result : out Status;
++      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Valid_State (D),
++     Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
++       and then State_Values (D) = State_Values (D)'Old
++       and then Activation_Values (D) = Activation_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then (if Result = Success then Is_Ready (D) and then Positions_Current (D) and then Forces_Current (D));
++   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
++     and then Position_Values (D) = Position_Values (D)'Old
++     and then Velocity_Values (D) = Velocity_Values (D)'Old
++     and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
++
++   procedure Complete_On_Failure (D : in out Simulation; Result : in out Status)
++     with Global => null, Pre => Valid_State (D),
++     Post => (Static => Valid_State (D)
++       and then State_Values (D) = State_Values (D)'Old
++       and then Input_Values (D) = Input_Values (D)'Old
++       and then Activation_Values (D) = Activation_Values (D)'Old
++       and then Configuration (D) = Configuration (D)'Old
++       and then (if Result'Old = Success then Result = Success));
++end MJ.Data.Movement;
+--- a/experimental/smooth/src/mj-data-pipeline.adb
++++ b/experimental/smooth/src/mj-data-pipeline.adb
+@@ -437,6 +437,7 @@
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Bounded);
+       S : Body_State;
++      C : Body_Parameters;
+    begin
+       Initialize_World (Bodies (0));
+       --  This builder leaves Jacobians untouched. Its caller controls cache
+@@ -451,15 +452,12 @@
+             pragma Assert (Static => (for all J in Joint_Config'Range =>
+               (if Joint_Config (J).Body_Id = B then Body_Config (B).Joint_Count > 0
+                 and then J in Body_Config (B).First_Joint .. Body_Config (B).First_Joint + Body_Config (B).Joint_Count - 1)));
+-            declare
+-               C : Body_Parameters := Body_Config (B);
+-            begin
+-               if C.Mocap_Id >= 0 then
+-                  C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
+-                  C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
+-               end if;
+-               Build_One_Body (Bodies (C.Parent), C, Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
+-            end;
++            C := Body_Config (B);
++            if C.Mocap_Id >= 0 then
++               C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
++               C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
++            end if;
++            Build_One_Body (Bodies (C.Parent), C, Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
+             if Result /= Success then return; end if;
+             pragma Assert (Static => (for all J in Joints'Range =>
+               (if Joint_Config (J).Body_Id = B then Joint_Bounded (Joints (J)))));
+@@ -866,7 +864,7 @@
+       pragma Assert (Static => State_Values (D) = Initial_State);
+    end Ensure_Jacobians;
+ 
+-   procedure Evaluate_Inertia_Forces (D : in out Simulation; Result : out Status)
++   procedure Evaluate_Inertia_Forces (D : in out Simulation; Result : out Status; Diagnostics : Boolean)
+      with Global => null, Pre => Is_Ready (D) and then Stable_Ready (D),
+        Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+          and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+@@ -928,7 +926,8 @@
+          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+       begin
+-         Forces_Phase.Compute (D, Result);
++         if Diagnostics then Forces_Phase.Compute (D, Result);
++         else Forces_Phase.Compute_Physical (D, Result); end if;
+          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+@@ -1019,7 +1018,8 @@
+ 
+    procedure Evaluate_Ready
+      (D : in out Simulation; Result : out Status;
+-      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is
++      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads;
++      Diagnostics : Boolean := True) is
+       --  Compose phase contracts without expanding their representation.
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+@@ -1069,7 +1069,7 @@
+          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+       begin
+-         Evaluate_Inertia_Forces (D, Result);
++         Evaluate_Inertia_Forces (D, Result, Diagnostics);
+          MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+--- a/experimental/smooth/src/mj-data-pipeline.ads
++++ b/experimental/smooth/src/mj-data-pipeline.ads
+@@ -39,6 +39,13 @@
+      and then Velocity_Values (D) = Velocity_Values (D)'Old
+      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
+ 
++   pragma Postcondition (Static =>
++     D.Dynamics.Passive.all = D.Dynamics.Passive.all'Old
++     and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
++     and then D.Dynamics.Actuator.all = D.Dynamics.Actuator.all'Old
++     and then D.Dynamics.Total.all = D.Dynamics.Total.all'Old
++     and then D.Dynamics.Acceleration.all = D.Dynamics.Acceleration.all'Old);
++
+    procedure Ensure_Jacobians (D : in out Simulation; Result : out Status)
+      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D),
+      Post => Is_Ready (D) and then Positions_Current (D);
+@@ -66,9 +73,17 @@
+      and then Velocity_Values (D) = Velocity_Values (D)'Old
+      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
+ 
++   pragma Postcondition (Static =>
++     D.Dynamics.Passive.all = D.Dynamics.Passive.all'Old
++     and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
++     and then D.Dynamics.Actuator.all = D.Dynamics.Actuator.all'Old
++     and then D.Dynamics.Total.all = D.Dynamics.Total.all'Old
++     and then D.Dynamics.Acceleration.all = D.Dynamics.Acceleration.all'Old);
++
+    procedure Evaluate_Ready
+      (D : in out Simulation; Result : out Status;
+-      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Is_Ready (D),
++      External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads;
++      Diagnostics : Boolean := True) with Global => null, Pre => Is_Ready (D),
+      Post => Is_Empty (D) = Is_Empty (D)'Old and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
+        and then State_Values (D) = State_Values (D)'Old
+        and then Activation_Values (D) = Activation_Values (D)'Old
+--- a/experimental/smooth/src/mj-data-spatial.ads
++++ b/experimental/smooth/src/mj-data-spatial.ads
+@@ -20,4 +20,10 @@
+      and then Position_Values (D) = Position_Values (D)'Old
+      and then Velocity_Values (D) = Velocity_Values (D)'Old
+      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
++   pragma Postcondition (Static =>
++     D.Dynamics.Passive.all = D.Dynamics.Passive.all'Old
++     and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
++     and then D.Dynamics.Actuator.all = D.Dynamics.Actuator.all'Old
++     and then D.Dynamics.Total.all = D.Dynamics.Total.all'Old
++     and then D.Dynamics.Acceleration.all = D.Dynamics.Acceleration.all'Old);
+ end MJ.Data.Spatial;
+--- a/experimental/smooth/src/mj-data-spatial_tendon_phase.ads
++++ b/experimental/smooth/src/mj-data-spatial_tendon_phase.ads
+@@ -16,6 +16,7 @@
+        and then not D.Cache.Passive_Valid
+        and then D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
+        and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old
++       and then D.Dynamics.Full_Bias.all = D.Dynamics.Full_Bias.all'Old
+        and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+        and then (if Result = Success then Array_Bounded (D.Dynamics.Passive)
+          and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103))));
+--- a/experimental/smooth/src/mj-data.adb
++++ b/experimental/smooth/src/mj-data.adb
+@@ -447,12 +447,13 @@
+ 
+    procedure Allocate_Dynamics (B : in out Force_Buffers; Nv : Natural) with
+      Global => null, Pre => Nv <= Max_Dofs
+-       and then B.Mass = null and then B.Bias = null and then B.Gravity = null and then B.Passive = null and then B.Actuator = null and then B.Acceleration = null and then B.Total = null,
+-     Post => Has_Real_Layout (B.Mass, Nv * Nv) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
++       and then B.Mass = null and then B.Bias = null and then B.Full_Bias = null and then B.Gravity = null and then B.Passive = null and then B.Actuator = null and then B.Acceleration = null and then B.Total = null,
++     Post => Has_Real_Layout (B.Mass, Nv * Nv) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Full_Bias, Nv) and then (for all X of B.Full_Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
+    is
+    begin
+       B.Mass := Zero_Array (Nv * Nv);
+       B.Bias := Zero_Array (Nv);
++      B.Full_Bias := Zero_Array (Nv);
+       B.Gravity := Zero_Array (Nv);
+       B.Passive := Zero_Array (Nv);
+       B.Actuator := Zero_Array (Nv);
+@@ -1271,7 +1272,7 @@
+    end Free_Kinematic;
+    procedure Free_Forces (F : in out Force_Buffers) with
+      Global => null, Post => F.Mass = null
+-       and then F.Bias = null
++       and then F.Bias = null and then F.Full_Bias = null
+        and then F.Gravity = null
+        and then F.Passive = null
+        and then F.Actuator = null
+@@ -1279,7 +1280,7 @@
+        and then F.Total = null
+    is
+    begin
+-      Free_Real (F.Mass); Free_Real (F.Bias); Free_Real (F.Gravity);
++      Free_Real (F.Mass); Free_Real (F.Bias); Free_Real (F.Full_Bias); Free_Real (F.Gravity);
+       Free_Real (F.Passive); Free_Real (F.Actuator); Free_Real (F.Acceleration); Free_Real (F.Total);
+    end Free_Forces;
+    procedure Free_Actuators (A : in out Actuator_Buffers) with
+@@ -1387,13 +1388,16 @@
+       K.Linear_Jacobian.all := [others => 0.0]; K.Angular_Jacobian.all := [others => 0.0];
+    end Clear_Kinematic;
+    procedure Clear_Forces (F : in out Force_Buffers) with
+-     Global => null, Pre => F.Mass /= null and then F.Bias /= null and then F.Gravity /= null and then F.Passive /= null and then F.Actuator /= null and then F.Acceleration /= null and then F.Total /= null,
++     Global => null, Pre => F.Mass /= null and then F.Bias /= null and then F.Full_Bias /= null and then F.Gravity /= null and then F.Passive /= null and then F.Actuator /= null and then F.Acceleration /= null and then F.Total /= null,
+      Post => F.Mass /= null and then F.Mass'First = F.Mass'First'Old
+        and then F.Mass'Last = F.Mass'Last'Old
+        and then (for all X of F.Mass.all => X = 0.0)
+-       and then F.Bias /= null and then F.Bias'First = F.Bias'First'Old
++       and then F.Bias /= null and then F.Full_Bias /= null and then F.Bias'First = F.Bias'First'Old
+        and then F.Bias'Last = F.Bias'Last'Old
+        and then (for all X of F.Bias.all => X = 0.0)
++       and then F.Full_Bias'First = F.Full_Bias'First'Old
++       and then F.Full_Bias'Last = F.Full_Bias'Last'Old
++       and then (for all X of F.Full_Bias.all => X = 0.0)
+        and then F.Gravity /= null and then F.Gravity'First = F.Gravity'First'Old
+        and then F.Gravity'Last = F.Gravity'Last'Old
+        and then (for all X of F.Gravity.all => X = 0.0)
+@@ -1411,7 +1415,7 @@
+        and then (for all X of F.Total.all => X = 0.0)
+    is
+    begin
+-      F.Mass.all := [others => 0.0]; F.Bias.all := [others => 0.0];
++      F.Mass.all := [others => 0.0]; F.Bias.all := [others => 0.0]; F.Full_Bias.all := [others => 0.0];
+       F.Gravity.all := [others => 0.0]; F.Passive.all := [others => 0.0];
+       F.Actuator.all := [others => 0.0]; F.Acceleration.all := [others => 0.0];
+       F.Total.all := [others => 0.0];
+--- a/experimental/smooth/src/mj-data.ads
++++ b/experimental/smooth/src/mj-data.ads
+@@ -255,6 +255,12 @@
+      Global => null, Pre => Is_Ready (D)
+        and then (if Kind = Actuator_Force then Actuation_Current (D) else Passive_Current (D))
+        and then Index < Velocity_Count (D);
++   --  Complete C mj_rne bias, including gravity in the world acceleration.
++   --  Separate Gravity_Force and Velocity_Bias diagnostics retain their meaning.
++   function Full_Bias_Value (D : Simulation; Index : Natural) return Real with
++     Global => null, Pre => Is_Ready (D) and then Passive_Current (D)
++       and then Index < Velocity_Count (D),
++     Post => Full_Bias_Value'Result in -MJ.Smooth_Math.Work_Limit .. MJ.Smooth_Math.Work_Limit;
+    type Actuator_Quantity is (Transmission_Length, Transmission_Velocity, Output_Force);
+    function Actuator_Value (D : Simulation; Kind : Actuator_Quantity; Index : Natural) return Real with
+      Global => null, Pre => Is_Ready (D) and then Actuation_Current (D) and then Index < Control_Count (D);
+@@ -431,7 +437,7 @@
+       Linear_Jacobian, Angular_Jacobian : Real_Array_Access := null;
+    end record;
+    type Force_Buffers is record
+-      Mass, Bias, Gravity, Passive, Actuator, Acceleration, Total : Real_Array_Access := null;
++      Mass, Bias, Full_Bias, Gravity, Passive, Actuator, Acceleration, Total : Real_Array_Access := null;
+    end record;
+    type Actuator_Buffers is record
+       Length, Velocity, Force : Real_Array_Access := null;
+@@ -534,7 +540,7 @@
+       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
+       and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
+       and then D.Kinematic.Linear_Jacobian = null and then D.Kinematic.Angular_Jacobian = null
+-      and then D.Dynamics.Mass = null and then D.Dynamics.Bias = null
++      and then D.Dynamics.Mass = null and then D.Dynamics.Bias = null and then D.Dynamics.Full_Bias = null
+       and then D.Dynamics.Gravity = null and then D.Dynamics.Passive = null
+       and then D.Dynamics.Actuator = null and then D.Dynamics.Acceleration = null
+       and then D.Dynamics.Total = null and then D.Actuators.Length = null
+@@ -719,7 +725,7 @@
+       and then (if D.Cache.Jacobian_Valid then D.Cache.Pose_Valid and then Jacobians_Bounded (D.Kinematic))
+       and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
+       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
+-        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
++        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Full_Bias) and then Array_Bounded (D.Dynamics.Passive)
+         and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
+       and then (if D.Cache.Actuation_Valid then Array_Bounded (D.Dynamics.Actuator, 1.0e50)
+         and then Array_Bounded (D.Actuators.Length, 1.0e20) and then Array_Bounded (D.Actuators.Velocity, 1.0e20)
+@@ -732,7 +738,7 @@
+      ((if D.Cache.Pose_Valid then Kinematic_Bounded (D.Kinematic))
+       and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
+       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
+-        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
++        and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Full_Bias) and then Array_Bounded (D.Dynamics.Passive)
+         and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
+       and then (if D.Cache.Actuation_Valid then Array_Bounded (D.Dynamics.Actuator, 1.0e50)
+         and then Array_Bounded (D.Actuators.Length, 1.0e20) and then Array_Bounded (D.Actuators.Velocity, 1.0e20)
+@@ -830,7 +836,7 @@
+       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
+       and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
+-      and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
++      and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Full_Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Passive, D.Nv) and then Has_Real_Layout (D.Dynamics.Actuator, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Acceleration, D.Nv) and then Has_Real_Layout (D.Dynamics.Total, D.Nv)
+       and then Has_Real_Layout (D.Actuators.Length, D.No) and then Has_Real_Layout (D.Actuators.Velocity, D.No)
+@@ -880,7 +886,7 @@
+       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
+       and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
+-      and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
++      and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Full_Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Passive, D.Nv) and then Has_Real_Layout (D.Dynamics.Actuator, D.Nv)
+       and then Has_Real_Layout (D.Dynamics.Acceleration, D.Nv) and then Has_Real_Layout (D.Dynamics.Total, D.Nv)
+       and then Has_Real_Layout (D.Actuators.Length, D.No) and then Has_Real_Layout (D.Actuators.Velocity, D.No)
+@@ -940,6 +946,8 @@
+         when Velocity_Bias => D.Dynamics.Bias (Index),
+         when Passive_Force => D.Dynamics.Passive (Index),
+         when Actuator_Force => D.Dynamics.Actuator (Index));
++   function Full_Bias_Value (D : Simulation; Index : Natural) return Real is
++     (D.Dynamics.Full_Bias (Index));
+    function Actuator_Value (D : Simulation; Kind : Actuator_Quantity; Index : Natural) return Real is
+      (case Kind is
+         when Transmission_Length => D.Actuators.Length (Index),
+--- /dev/null
++++ b/experimental/smooth/src/mj-force_composition.adb
+@@ -0,0 +1,20 @@
++package body MJ.Force_Composition with SPARK_Mode is
++   function Smooth_Total (Passive, Full_Bias, Applied, Actuator : Real) return Wide_Sum is
++     (((Passive-Full_Bias)+Applied)+Actuator);
++   procedure Compose
++     (Passive, Full_Bias, Applied, Actuator : Real_Array;
++      Total : out Real_Array; Accepted : out Boolean) is
++      Value : Wide_Sum;
++   begin
++      Accepted := False;
++      for I in Total'Range loop
++         Value := Smooth_Total (Passive (I), Full_Bias (I), Applied (I), Actuator (I));
++         if Value not in Component then return; end if;
++         Total (I) := Value;
++         pragma Loop_Invariant (for all K in 0 .. I => Total (K)'Initialized
++           and then Total (K) in Component and then Total (K) =
++             Smooth_Total (Passive (K), Full_Bias (K), Applied (K), Actuator (K)));
++      end loop;
++      Accepted := True;
++   end Compose;
++end MJ.Force_Composition;
+--- /dev/null
++++ b/experimental/smooth/src/mj-force_composition.ads
+@@ -0,0 +1,29 @@
++with MJ.Types; use MJ.Types;
++
++--  mj_fwdAcceleration, MuJoCo 3.14.0: the supplied bias includes gravity
++--  evaluated within RNE. This does not replace the separate diagnostic forces.
++package MJ.Force_Composition with SPARK_Mode is
++   subtype Component is Real range -1.0e60 .. 1.0e60;
++   subtype Wide_Sum is Real range -4.0e60 .. 4.0e60;
++   function Bounded (A : Real_Array) return Boolean is
++     (for all X of A => X in Component) with Global => null;
++   function Smooth_Total (Passive, Full_Bias, Applied, Actuator : Real) return Wide_Sum
++     with Global => null, Inline,
++     Pre => (Static => Passive in Component and then Full_Bias in Component
++       and then Applied in Component and then Actuator in Component),
++     Post => Smooth_Total'Result = ((Passive-Full_Bias)+Applied)+Actuator;
++   procedure Compose
++     (Passive, Full_Bias, Applied, Actuator : Real_Array;
++      Total : out Real_Array; Accepted : out Boolean)
++     with Global => null, Relaxed_Initialization => Total,
++     Pre => (Static => Passive'First = 0 and then Passive'Length <= 256
++       and then Full_Bias'First = 0 and then Full_Bias'Last = Passive'Last
++       and then Applied'First = 0 and then Applied'Last = Passive'Last
++       and then Actuator'First = 0 and then Actuator'Last = Passive'Last
++       and then Total'First = 0 and then Total'Last = Passive'Last
++       and then Bounded (Passive) and then Bounded (Full_Bias)
++       and then Bounded (Applied) and then Bounded (Actuator)),
++     Post => (Static => (if Accepted then Total'Initialized and then Bounded (Total)
++       and then (for all I in Total'Range => Total (I) =
++         Smooth_Total (Passive (I), Full_Bias (I), Applied (I), Actuator (I)))));
++end MJ.Force_Composition;

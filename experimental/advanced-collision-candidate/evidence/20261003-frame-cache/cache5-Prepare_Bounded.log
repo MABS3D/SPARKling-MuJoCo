@@ -1,0 +1,193 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: data dependencies proved
+--> mj-bvh.adb:487:19
+
+ info: postcondition proved
+--> mj-bvh.adb:492:27
+
+ info: precondition proved
+--> mj-bvh.adb:492:53
+
+ info: precondition proved
+--> mj-bvh.adb:496:42
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:499:33
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:499:33
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:500:43
+
+ info: precondition proved
+--> mj-bvh.adb:500:58
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Plane_Equal (A, B, I, 1)
+--> mj-bvh.adb:500:58
+  500 |             pragma Loop_Invariant (Static => (if I = 1 then Frame_Equal (Cache, Expected, 0)));
+      |                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:481
+      + provers reached time and memory limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:502:36
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:502:36
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:503:46
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:503:46
+
+ info: precondition proved
+--> mj-bvh.adb:503:61
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:504:46
+
+ info: precondition proved
+--> mj-bvh.adb:504:61
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Rows_Equal (A, B, I, J, 2)
+--> mj-bvh.adb:504:61
+  504 |                pragma Loop_Invariant (Static => (if J = 1 then Plane_Equal (Cache, Expected, I, 0)));
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-bvh.adb:478
+      + provers reached time and memory limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:506:39
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:506:39
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:507:49
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:507:49
+
+ info: precondition proved
+--> mj-bvh.adb:507:64
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:508:49
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:508:49
+
+ info: precondition proved
+--> mj-bvh.adb:508:64
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:509:49
+
+ info: precondition proved
+--> mj-bvh.adb:509:64
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Rows_Equal (Cache, Expected, I, J, 0)
+--> mj-bvh.adb:509:64
+  509 |                   pragma Loop_Invariant (Static => (if K > 0 then Rows_Equal (Cache, Expected, I, J, 0)));
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:510:49
+
+ info: precondition proved
+--> mj-bvh.adb:510:64
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Rows_Equal (Cache, Expected, I, J, 1)
+--> mj-bvh.adb:510:64
+  510 |                   pragma Loop_Invariant (Static => (if K > 1 then Rows_Equal (Cache, Expected, I, J, 1)));
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:512:42
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:512:42
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:513:52
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:513:52
+
+ info: precondition proved
+--> mj-bvh.adb:513:67
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:514:52
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:514:52
+
+ info: precondition proved
+--> mj-bvh.adb:514:67
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:515:52
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:515:52
+
+ info: precondition proved
+--> mj-bvh.adb:515:67
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:516:52
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:516:52
+
+ info: precondition proved
+--> mj-bvh.adb:516:67
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:518:21
+
+ info: loop invariant preservation proved
+--> mj-bvh.adb:518:21
+
+ info: loop invariant initialization proved
+--> mj-bvh.adb:520:21
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Cache.Product (I, J, K, 1) = Expected.Product (I, J, K, 1)
+--> mj-bvh.adb:520:36
+  520 |                        (if L > 1 then Cache.Product (I, J, K, 1) = Expected.Product (I, J, K, 1)));
+      |                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached memory limit before completing the proof
+
+ info: precondition proved
+--> mj-bvh.adb:521:49
+
+ info: range check proved
+--> mj-bvh.adb:521:49
+
+ info: precondition proved
+--> mj-bvh.adb:524:42
+
+ info: range check proved
+--> mj-bvh.adb:524:42
+
+ medium: assertion might fail
+--> mj-bvh.adb:529:32
+  529 |          pragma Assert (Static => Cache.Product = Expected.Product);
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ medium: assertion might fail
+--> mj-bvh.adb:530:32
+  530 |          pragma Assert (Static => Cache.Offset = Expected.Offset);
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+Summary logged in /var/tmp/sparkling-recovery-bvh-cache5-20261003/Prepare_Bounded/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 85.2 s, peak group RSS 293 MB

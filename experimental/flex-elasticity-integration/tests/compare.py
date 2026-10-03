@@ -53,6 +53,11 @@ def fixtures():
     membrane.find('deformable').extend(list(wire.find('deformable')))
     yield 'continuum_and_edges',ET.tostring(membrane,encoding='unicode')
     yield 'edge_chain',fixture(dim=1,edge=True,pinned=True,shared=True)
+    yield 'edge_no_passive',fixture(dim=1,edge=False,pinned=True,shared=True)
+    rigid = ET.fromstring(fixture(dim=1,edge=False))
+    for body in rigid.findall('.//body'):
+        for joint in list(body.findall('joint')): body.remove(joint)
+    yield 'fully_rigid',ET.tostring(rigid,encoding='unicode')
     yield 'spring_disabled',fixture(flags='spring="disable"',curved=True)
     yield 'damper_disabled',fixture(flags='damper="disable"',curved=True)
     yield 'both_disabled',fixture(flags='spring="disable" damper="disable"')
@@ -63,6 +68,8 @@ def oracle(m,q,v,applied,ctrl,act,steps):
     d=mujoco.MjData(m); d.qpos[:]=q; d.qvel[:]=v; d.qfrc_applied[:]=applied; d.ctrl[:]=ctrl; d.act[:]=act
     mujoco.mj_forward(m,d)
     answer=dict(pos=d.flexvert_xpos.ravel().copy(),length=d.flexedge_length.copy(),velocity=d.flexedge_velocity.copy(),
+                edge_rowadr=m.flexedge_J_rowadr.copy(),edge_rownnz=m.flexedge_J_rownnz.copy(),
+                edge_columns=m.flexedge_J_colind.copy(),edge_J=d.flexedge_J.copy(),
                 spring=d.qfrc_spring.copy(),damper=d.qfrc_damper.copy(),passive=d.qfrc_passive.copy(),acc=d.qacc.copy())
     original = [m.flex_stiffness.copy(),m.flex_bending.copy(),m.flex_edgestiffness.copy(),m.flex_edgedamping.copy()]
     for a in [m.flex_stiffness,m.flex_bending,m.flex_edgestiffness,m.flex_edgedamping]:a[:]=0
@@ -79,7 +86,8 @@ def parse(text):
         if line.startswith('case'):records.append({})
         elif records:
             key,_,data=line.partition(' ')
-            if key in ['pos','length','velocity','spring','damper','passive','acc','state']:
+            if key in ['pos','length','velocity','edge_rowadr','edge_rownnz','edge_columns','edge_J',
+                       'spring','damper','passive','acc','state']:
                 records[-1][key]=np.fromstring(data,sep=' ')
     return records
 def main():

@@ -38,6 +38,33 @@ package MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
        and then H'Length (1) = P.N and then H'Length (2) = P.N,
      Post => (if Result = Success then Valid (P));
 
+   --  Add the mass after the constraint contribution, preserving its
+   --  floating-point order on every entry consumed by sparse Factor.
+   procedure Add_Mass_Row (H : in out Matrix; M : Matrix; P : Pattern; R : Positive)
+     with Global => null, Inline_Always,
+     Pre => (Static => Valid (P) and then Dense.Square (H) and then Dense.Square (M)
+       and then H'Length (1) = P.N and then M'Length (1) = P.N and then R <= P.N
+       and then (for all I in H'Range (1) => (for all J in H'Range (2) =>
+         H (I, J) in -2.0e100 .. 2.0e100 and then M (I, J) in -1.0e100 .. 1.0e100))
+       and then (for all J in H'Range (2) => H (R, J) in -1.0e100 .. 1.0e100)),
+     Post => (Static =>
+       (for all I in H'Range (1) => (for all J in H'Range (2) =>
+         H (I, J) in -2.0e100 .. 2.0e100 and then H (I, J) =
+           (if I = R and then (for some K in 1 .. P.Length (R) => P.Column (R, K) = J)
+            then H'Old (I, J)+M (I, J) else H'Old (I, J)))));
+
+   procedure Add_Mass (H : in out Matrix; M : Matrix; P : Pattern)
+     with Global => null, Inline_Always,
+     Pre => (Static => Valid (P) and then Dense.Square (H) and then Dense.Square (M)
+       and then H'Length (1) = P.N and then M'Length (1) = P.N
+       and then (for all I in H'Range (1) => (for all J in H'Range (2) =>
+         H (I, J) in -1.0e100 .. 1.0e100 and then M (I, J) in -1.0e100 .. 1.0e100))),
+     Post => (Static =>
+       (for all I in H'Range (1) => (for all J in H'Range (2) =>
+         H (I, J) in -2.0e100 .. 2.0e100 and then H (I, J) =
+           (if (for some K in 1 .. P.Length (I) => P.Column (I, K) = J)
+            then H'Old (I, J)+M (I, J) else H'Old (I, J)))));
+
    subtype Residual is Real range -1.0e245 .. 1.0e245;
    function Update (Value : Residual; A, B : Operand) return Real with
      Global => null, Inline_Always,
