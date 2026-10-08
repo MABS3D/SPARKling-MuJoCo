@@ -1,0 +1,55 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1207
+--> mj-constraint_solvers-packed_cholesky.adb:1215:10
+ 1215 |             pragma Loop_Invariant (Static => (for all I in 1 .. F.N =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1216 |               (for all J in 1 .. F.N => M (I, J) in -1.0e100 .. 1.0e100)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1207
+--> mj-constraint_solvers-packed_cholesky.adb:1217:10
+ 1217 |             pragma Loop_Invariant (Static => (for all I in 1 .. F.N =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1218 |               (for all J in 1 .. F.N => Before (I, J) in -2.0e100 .. 2.0e100)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1207
+--> mj-constraint_solvers-packed_cholesky.adb:1219:10
+ 1219 |             pragma Loop_Invariant (Static => (for all J in 1 .. F.N => Before (R, J) in -1.0e100 .. 1.0e100));
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1207
+--> mj-constraint_solvers-packed_cholesky.adb:1220:10
+ 1220 |             pragma Loop_Invariant (Static =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+ 1224 |                    then Before (I, J)+M (I, J) else Before (I, J)))));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1296
+--> mj-constraint_solvers-packed_cholesky.adb:1303:10
+ 1303 |             pragma Loop_Invariant (Static => (for all I in 1 .. F.N =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1304 |               (for all J in 1 .. F.N => M (I, J) in -1.0e100 .. 1.0e100)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1296
+--> mj-constraint_solvers-packed_cholesky.adb:1305:10
+ 1305 |             pragma Loop_Invariant (Static => (for all I in 1 .. F.N =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1306 |               (for all J in 1 .. F.N => Before (I, J) in -1.0e100 .. 1.0e100)));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ error: pragma "LOOP_INVARIANT" must appear next to pragma at line 1296
+--> mj-constraint_solvers-packed_cholesky.adb:1307:10
+ 1307 |             pragma Loop_Invariant (Static =>
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      :
+ 1311 |                    then Before (I, J)+M (I, J) else Before (I, J)))));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gnatprove: error during generation of Global contracts
+guarded: elapsed 2.1 s, peak group RSS 69 MB

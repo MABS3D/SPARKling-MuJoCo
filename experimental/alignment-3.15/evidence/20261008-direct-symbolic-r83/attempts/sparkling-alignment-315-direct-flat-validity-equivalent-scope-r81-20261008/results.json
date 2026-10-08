@@ -1,0 +1,325 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Flat_Validity_Equivalent",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r81-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:941"
+  ],
+  "exit": 1,
+  "seconds": 41.72835174500506,
+  "manifest_sha256": "8841a21421183b5330fec47a1f7ff002a1f8c1c71851cbf016153f530f836de4",
+  "runner_sha256": "272f4c819e6ce199098163511680d529668ebd16077c51937033f3b184049583",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "d35c30057f236196394b41382e4e7c3b51d5584824bbfa251c975e356bf172ee",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 39,
+  "proof_checks": 40,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 28,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 949,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 140,
+              "time": 0.044845
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 1.31864
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.023055
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 119816,
+              "time": 1.27428
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.016537
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.019832
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.015731
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 13149,
+              "time": 0.147932
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.017757
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.007102
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 16452,
+              "time": 0.38518
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.015813
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 14568,
+              "time": 0.166442
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 28,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 949,
+      "message": {
+        "text": "assertion might fail, cannot prove F.Column (F.Address (R)+F.Length (R)) = R"
+      },
+      "msg_id": 2,
+      "rule": "VC_ASSERT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 944,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 427,
+              "time": 0.068981
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.956242
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 944,
+      "message": {
+        "text": "postcondition might fail, cannot prove F.Column (F.Address (R)+F.Length (R)) = R"
+      },
+      "msg_id": 40,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Validity_Equivalent"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

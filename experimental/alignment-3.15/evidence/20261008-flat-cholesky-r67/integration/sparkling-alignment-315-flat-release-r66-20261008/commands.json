@@ -1,0 +1,132 @@
+[
+  {
+    "label": "build-state",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-state-integration/flex_state.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 53.48135883899886,
+    "log_sha256": "cdb548a00292f9ded3cec1574ef893e276d2790f1b1dcb7ff1ac5f94a8335683"
+  },
+  {
+    "label": "build-forces",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-elasticity-integration/flex.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 44.71018729299976,
+    "log_sha256": "0c48350514f34e7a851b799dd73af5ed8239e9215f093e9d30797740dd03bd7d"
+  },
+  {
+    "label": "build-constrained",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 28.805479664002632,
+    "log_sha256": "c8661dc5edb2bf319a5a15ea1708e7701cc12401b9ea354f1470f0a5488bce5a"
+  },
+  {
+    "label": "state",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/state-build/release/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/state",
+      "--samples",
+      "2"
+    ],
+    "exit": 0,
+    "seconds": 0.5711259969975799,
+    "log_sha256": "3f968aba49cb3b6a9b9abb3ff99dda68ac114ba489a286d52671d5a1239eae53"
+  },
+  {
+    "label": "forces",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-elasticity-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/force-build/release/bin/flex_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/forces",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 0.5814273319992935,
+    "log_sha256": "8ed44a2f9fa4cf0e7c80fd2fe62b663e2e109b59dc5b8cee96a3d299e27365fb"
+  },
+  {
+    "label": "constrained",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/force-build/release/bin/flex_constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-flat-release-r66-20261008/constrained",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 3.622707326001546,
+    "log_sha256": "5f57d93beec7d68b29846f420687306d3b06bc07ee0fa456500ffc8f690f815f"
+  }
+]

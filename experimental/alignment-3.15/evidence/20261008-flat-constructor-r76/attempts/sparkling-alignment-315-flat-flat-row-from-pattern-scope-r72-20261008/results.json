@@ -1,0 +1,162 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Flat_Row_From_Pattern",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r72-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:539"
+  ],
+  "exit": 1,
+  "seconds": 67.77223008000146,
+  "manifest_sha256": "ede99517e27985c902616d9757a45369219d3eb3acbf4af437bf66b4e7cf0d67",
+  "runner_sha256": "250a4f5dd6dd7c9f806e1c2ea7cc52b2b3485de60b2d77732c0a3c1bc673a54f",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "50e91828678adb04814ec34fa67af96aaa1f5f9941c93031fc5ae2a21b52fd86",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 112,
+  "proof_checks": 113,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 33,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 570,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 26190,
+              "time": 2.53818
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 12,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 571,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove F.Transpose_Row (F.Transpose_Address (R)+J) in R+1 .. F.N"
+      },
+      "msg_id": 63,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 547,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 773,
+              "time": 0.115723
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 547,
+      "message": {
+        "text": "postcondition might fail, cannot prove Flat_Row_Valid (F, R)"
+      },
+      "msg_id": 113,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Row_From_Pattern"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

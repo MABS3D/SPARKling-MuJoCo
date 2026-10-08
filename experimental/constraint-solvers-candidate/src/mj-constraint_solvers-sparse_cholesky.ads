@@ -27,7 +27,7 @@ package MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
           and then (if I > 1 then P.Column (R, I-1) < P.Column (R, I)))
         and then (for all K in 2 .. P.Transpose_Length (R) =>
           P.Transpose_Row (R, K) in R+1 .. P.N
-          and then P.Transpose_Position (R, K) in 1 .. P.Length (P.Transpose_Row (R, K))
+          and then P.Transpose_Position (R, K) in 1 .. Natural'Min (P.N, P.Length (P.Transpose_Row (R, K)))
           and then P.Column (P.Transpose_Row (R, K), P.Transpose_Position (R, K)) = R)));
 
    --  Read the upper triangle. The two symbolic traversals retain C's CSC
@@ -66,12 +66,41 @@ package MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
             then H'Old (I, J)+M (I, J) else H'Old (I, J)))));
 
    subtype Residual is Real range -1.0e245 .. 1.0e245;
-   function Update (Value : Residual; A, B : Operand) return Real with
+   function Update (Value, A, B : Real) return Real is (Value - A * B) with
      Global => null, Inline_Always,
+     Pre => (Static => Value in Residual and then A in Operand and then B in Operand),
      Post => Update'Result = Value - A * B and then abs Update'Result <= 2.0e245;
-   function Scale (Value : Residual; Inverse : Real) return Real with
-     Global => null, Inline_Always, Pre => Inverse in 0.0 .. 1.0e15,
+   function Scale (Value, Inverse : Real) return Real is (Value * Inverse) with
+     Global => null, Inline_Always,
+     Pre => (Static => Value in Residual and then Inverse in 0.0 .. 1.0e15),
      Post => Scale'Result = Value * Inverse and then abs Scale'Result <= 1.0e260;
+
+   --  A power-of-two envelope has exact scaling for these small integer
+   --  counts. It budgets every possible CSC row update, including patterns
+   --  whose fill closure has not yet been proved; public inputs stay unchanged.
+   Max_Updates : constant Natural := Max_Dofs*Max_Dofs+1;
+   Update_Step : constant Real := 2.0**799;
+   function Scratch_Bound (Count : Natural) return Real is (Real (Count)*Update_Step)
+     with Ghost => Static, Global => null,
+     Pre => Count <= Max_Updates,
+     Post => Scratch_Bound'Result = Real (Count)*Update_Step
+       and then Scratch_Bound'Result in 0.0 .. Residual'Last;
+   function Headroom_Term (Value, Term : Real; Count : Natural) return Real is
+     (Value-Term)
+     with Ghost => Static, Global => null,
+     Pre => Count < Max_Updates and then abs Value <= Scratch_Bound (Count)
+       and then abs Term <= 2.0e240,
+     Post => Headroom_Term'Result in Residual
+       and then Headroom_Term'Result = Value-Term
+       and then abs Headroom_Term'Result <= Scratch_Bound (Count+1);
+   function Headroom_Update (Value, A, B : Real; Count : Natural) return Real is
+     (Headroom_Term (Value, A*B, Count))
+     with Ghost => Static, Global => null,
+     Pre => Count < Max_Updates and then abs Value <= Scratch_Bound (Count)
+       and then A in Operand and then B in Operand,
+     Post => Headroom_Update'Result in Residual
+       and then Headroom_Update'Result = Update (Value, A, B)
+       and then abs Headroom_Update'Result <= Scratch_Bound (Count+1);
 
    procedure Factor (H : Matrix; P : Pattern; L : out Matrix;
                      Rank : out Natural; Result : out Status; Floor : Pivot := 1.0e-15) with

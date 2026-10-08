@@ -1,0 +1,144 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:195:16
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:195:20
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:195:48
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:195:52
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:196:16
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:196:19
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:196:19
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:196:30
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:197:23
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:197:26
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:197:26
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:197:37
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:198:28
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:198:31
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:198:31
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:198:42
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:199:25
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:200:34
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:200:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:201:23
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:201:26
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:201:53
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:201:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:201:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:203:44
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:203:47
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:205:62
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:205:64
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:205:64
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:206:58
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:208:33
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:208:36
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:209:38
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:209:41
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:209:65
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:209:67
+
+ medium: range check might fail, cannot prove lower bound for F.Transpose_Slot (T)-F.Address (C)
+--> mj-constraint_solvers-packed_cholesky.adb:209:67
+  209 |                   P.Transpose_Position (R, K) := F.Transpose_Slot (T)-F.Address (C);
+      |                                                  ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+      + reason for check: result of subtraction must fit in the target type of the assignment
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-constraint_solvers-packed_cholesky.adb:209:79
+  209 |                   P.Transpose_Position (R, K) := F.Transpose_Slot (T)-F.Address (C);
+      |                                                                                  ^
+      + reason for check: value must be a valid index into the array
+      + provers reached time limit before completing the proof
+
+ info: initialization of "P" proved
+--> mj-constraint_solvers-packed_cholesky.ads:136:48
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:137:06
+
+ medium: postcondition might fail, cannot prove P.Column (R, P.Length (R)) = R
+--> mj-constraint_solvers-packed_cholesky.ads:139:25
+  139 |         Post => (Static => Sparse.Valid (P) and then Matches_Flat (P, F));
+      |                            ^~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_solvers-sparse_cholesky.ads:22
+      + possible fix: loop at mj-constraint_solvers-packed_cholesky.adb:199 should mention P in a loop invariant
+      --> mj-constraint_solvers-packed_cholesky.adb:199:25
+  199 |          for R in 1 .. F.N loop
+      |                            ^
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-alignment-315-direct-legacy-pattern-scope-r80-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 37.3 s, peak group RSS 290 MB

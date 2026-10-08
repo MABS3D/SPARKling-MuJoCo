@@ -1,0 +1,120 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Flat_Validity",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r74-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:575"
+  ],
+  "exit": 1,
+  "seconds": 59.29943999800162,
+  "manifest_sha256": "16c7cf4e5ae9b1d6c09e202de2db9be367e0dee8d6608d2acad7f0989a6d7868",
+  "runner_sha256": "0ecaede8ed42c98d1bdf689eab1e31a674b5858bf70619f6ec6b1cbaac4ac496",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "1b78d7bc0230c4e846a8df30b3f397c0f1cf93866e6a8a5bd4eb8e8b3b4da9c8",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 65,
+  "proof_checks": 65,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 33,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 597,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 56,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 597,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove F.Column (F.Address (R)+F.Length (R)) = R"
+      },
+      "msg_id": 50,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Validity"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

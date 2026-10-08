@@ -1,0 +1,62 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Expand",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-packed-engine-proof-r53-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:104"
+  ],
+  "exit": 0,
+  "seconds": 61.51696684199851,
+  "manifest_sha256": "e64673c22d9498c33f33e3abf728fbf9272c1691ff85fe27beafdaffe9aee131",
+  "runner_sha256": "f1ba1ce0b5e6d68d9138c21acbdda4e7f8bd354a9cd412103f25975353fa017f",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "1b862ea34423edf21f7ef21a08468bf26e9ae4726a0ffa6bd4c35cb144223e34",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 57,
+  "proof_checks": 55,
+  "flow_checks": 2,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 110,
+      "message": {
+        "text": "initialization of a multi-dimensional array in nested FOR loops is handled imprecisely [multidimensional-array-init]"
+      },
+      "rule": "multidimensional-array-init",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Expand"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": true
+}

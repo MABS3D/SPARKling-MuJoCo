@@ -2318,6 +2318,19 @@ package MJ.Models with SPARK_Mode is
       and then Name_All_Null (M.Names)
       and then Sparse_All_Null (M.Sparse));
 
+   --  Clear FLEX sizes and preserve every other scalar component.
+   function Without_Flex (S : Sizes) return Sizes is
+     (S'Update (Nflex => 0, Nflexnode => 0, Nflexvert => 0, Nflexedge => 0, Nflexelem => 0, Nflexelemdata => 0, Nflexstiffness => 0, Nflexbending => 0, Nefm0dof => 0, Nefm0L => 0, Nflexelemedge => 0, Nflexshelldata => 0, Nflexevpair => 0, Nflextexcoord => 0, NJfe => 0, NJfv => 0))
+     with Global => null;
+   pragma Postcondition (Static => Without_Flex'Result = S'Update (Nflex => 0, Nflexnode => 0, Nflexvert => 0, Nflexedge => 0, Nflexelem => 0, Nflexelemdata => 0, Nflexstiffness => 0, Nflexbending => 0, Nefm0dof => 0, Nefm0L => 0, Nflexelemedge => 0, Nflexshelldata => 0, Nflexevpair => 0, Nflextexcoord => 0, NJfe => 0, NJfv => 0));
+
+   --  Compiled packed elasticity block: 3.15 adds three 3D SNH slots.
+   Flex_Stiffness_3D_Stride : constant := 21;
+   function Flex_Stiffness_Stride (Dimension : Integer) return Positive is
+     (if Dimension = 3 then Flex_Stiffness_3D_Stride else 21)
+     with Global => null, Post => Flex_Stiffness_Stride'Result =
+       (if Dimension = 3 then Flex_Stiffness_3D_Stride else 21);
+
    --  Allocates every array zero-filled with the lengths dictated by S.
    procedure Allocate (S : Sizes; M : in out Model) with
      Pre  => Sizes_In_Range (S) and then All_Null (M),

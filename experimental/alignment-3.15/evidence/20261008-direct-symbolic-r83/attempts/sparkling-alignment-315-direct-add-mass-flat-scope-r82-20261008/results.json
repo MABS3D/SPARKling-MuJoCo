@@ -1,0 +1,59 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Add_Mass_Flat",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r82-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:1152"
+  ],
+  "exit": 1,
+  "seconds": 12.107806956999411,
+  "manifest_sha256": "b68c560cb51b0e22a141ea420e1779f0793b062ab844d87c48b6ea76c81f185c",
+  "runner_sha256": "cebcb1fcd4eb9698f8ccb38c751c04e50accff41a5b6b26e370cca90d178be60",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "401ca2a12888d7b150a8784253c4d18080ad9e741545dfae5b3c1f4a36149039",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 0,
+  "proof_checks": 0,
+  "flow_checks": 0,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 1157,
+      "message": {
+        "text": "non-scalar object or object with address clause declared before loop-invariant is not yet supported"
+      },
+      "rule": "error",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [],
+  "report_scope_matches": false,
+  "scope_coverage_complete": false,
+  "obligations_closed": false
+}

@@ -1,0 +1,69 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: implicit aspect Always_Terminates on "Valid_Transpose_Offsets" has been proved, subprogram will terminate
+--> mj-constraint_solvers-packed_cholesky.adb:221:13
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:222:67
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:223:26
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:225:19
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:225:30
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:225:33
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:225:39
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.adb:225:42
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:28
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:30
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:51
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:60
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:65
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.adb:226:68
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:227:43
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:227:58
+
+ medium: overflow check might fail, cannot prove upper bound for Address (R-1)+P.Transpose_Length (R-1)
+--> mj-constraint_solvers-packed_cholesky.adb:227:61
+  227 |             and then (if R > 1 then Address (R) = Address (R-1)+P.Transpose_Length (R-1))))
+      |                                                   ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 221 should mention Address and P in a precondition
+  221 |       function Valid_Transpose_Offsets (P : Pattern; Address : Offsets) return Boolean is
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:227:83
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.adb:228:28
+Summary logged in /var/tmp/sparkling-alignment-315-flat-valid-transpose-offsets-scope-r75-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 19.3 s, peak group RSS 280 MB

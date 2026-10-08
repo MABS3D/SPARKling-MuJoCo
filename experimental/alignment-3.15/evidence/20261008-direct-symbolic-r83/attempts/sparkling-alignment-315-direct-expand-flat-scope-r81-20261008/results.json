@@ -1,0 +1,246 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Expand_Flat",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r81-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:986"
+  ],
+  "exit": 1,
+  "seconds": 72.20566784100083,
+  "manifest_sha256": "8841a21421183b5330fec47a1f7ff002a1f8c1c71851cbf016153f530f836de4",
+  "runner_sha256": "272f4c819e6ce199098163511680d529668ebd16077c51937033f3b184049583",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "81963cc922401249727d1f5d8f9ba6b8ecd12147776333fcd80cf97efe4e85d8",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 70,
+  "proof_checks": 70,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 13,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 991,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 2910,
+              "time": 0.192321
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 1.05909
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 754,
+              "time": 0.051193
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 752,
+              "time": 0.050959
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1869,
+              "time": 0.08392
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.015268
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.011226
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 247,
+              "time": 0.033065
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.022904
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 13,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 991,
+      "message": {
+        "text": "precondition might fail, cannot prove Ordered_Flat (Columns, First, Last, N)"
+      },
+      "msg_id": 14,
+      "rule": "VC_PRECONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 46,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 995,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 21494,
+              "time": 1.80011
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 1.64712
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3801,
+              "time": 0.144482
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 15,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 996,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove L (R, F.Column (F.Address (R)+Q)) = Values (F.Address (R)+Q)"
+      },
+      "msg_id": 42,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 993,
+      "message": {
+        "text": "initialization of a multi-dimensional array in nested FOR loops is handled imprecisely [multidimensional-array-init]"
+      },
+      "rule": "multidimensional-array-init",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Expand_Flat"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

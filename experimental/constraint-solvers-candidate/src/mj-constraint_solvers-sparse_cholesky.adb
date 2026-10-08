@@ -61,12 +61,6 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       Result := Success;
    end Symbolic;
 
-   function Update (Value : Residual; A, B : Operand) return Real is
-   begin return Value - A * B; end Update;
-
-   function Scale (Value : Residual; Inverse : Real) return Real is
-   begin return Value * Inverse; end Scale;
-
    procedure Columns_Ordered (P : Pattern; R, First, Last : Positive)
      with Ghost => Static, Global => null,
      Pre => Valid (P) and then R <= P.N
@@ -95,18 +89,70 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       end loop;
    end Separate_Column;
 
+   procedure Bound_Monotone (Smaller, Larger : Natural)
+     with Ghost => Static, Global => null,
+     Pre => Smaller <= Larger and then Larger <= Max_Updates,
+     Post => Scratch_Bound (Smaller) <= Scratch_Bound (Larger)
+   is
+   begin
+      pragma Assert (Real (Smaller) <= Real (Larger));
+   end Bound_Monotone;
+
+   procedure Row_Headroom
+     (Before, After : Vector; L : Matrix; P : Pattern;
+      C, Position : Positive; Budget : Natural)
+     with Ghost => Static, Global => null,
+     Pre => Valid (P) and then Dense.Square (L) and then Dense.Bounded (L)
+       and then L'Length (1) = P.N and then C <= P.N
+       and then Position <= P.Length (C) and then Budget < Max_Updates
+       and then Before'First = 1 and then Before'Length = P.N
+       and then After'First = 1 and then After'Length = P.N
+       and then (for all V of Before => abs V <= Scratch_Bound (Budget))
+       and then (for all K in 1 .. Position => After (P.Column (C, K)) =
+         Update (Before (P.Column (C, K)),
+           L (C, P.Column (C, Position)), L (C, P.Column (C, K))))
+       and then (for all J in After'Range =>
+         (if (for all K in 1 .. Position => P.Column (C, K) /= J)
+          then After (J) = Before (J))),
+     Post => (for all V of After => abs V <= Scratch_Bound (Budget+1))
+   is
+   begin
+      Bound_Monotone (Budget, Budget+1);
+      for J in After'Range loop
+         for K in 1 .. Position loop
+            if P.Column (C, K) = J then
+               pragma Assert (After (J) = Headroom_Update
+                 (Before (J), L (C, P.Column (C, Position)), L (C, J), Budget));
+               pragma Assert (abs After (J) <= Scratch_Bound (Budget+1));
+            end if;
+            pragma Loop_Invariant
+              (if (for some Q in 1 .. K => P.Column (C, Q) = J)
+               then abs After (J) <= Scratch_Bound (Budget+1));
+         end loop;
+         pragma Assert (abs After (J) <= Scratch_Bound (Budget+1));
+         pragma Loop_Invariant (for all I in After'First .. J =>
+           abs After (I) <= Scratch_Bound (Budget+1));
+      end loop;
+   end Row_Headroom;
+
    --  One CSC contribution, with a component relation and a frame property.
    --  The strictly ordered row indices ensure each target is visited once.
    procedure Update_Row
      (L : Matrix; P : Pattern; C, Position : Positive;
-      Scratch : in out Vector; Result : out Status)
+      Scratch : in out Vector; Result : out Status; Step : Positive)
      with Global => null, Inline_Always,
-     Pre => Valid (P) and then Dense.Square (L) and then Dense.Bounded (L)
+     Pre => (Static => Valid (P) and then Dense.Square (L) and then Dense.Bounded (L)
        and then L'Length (1) = P.N and then C <= P.N
        and then Position <= P.Length (C)
        and then Scratch'First = 1 and then Scratch'Length = P.N
-       and then (for all V of Scratch => V in Residual),
+       and then (for all V of Scratch => V in Residual)
+       and then Step in 2 .. Max_Dofs+1
+       and then (for all V of Scratch => abs V <=
+         Scratch_Bound ((P.N-P.Column (C, Position))*Max_Dofs+Step-1))),
      Post => (Static => (for all V of Scratch => V in Residual)
+       and then Result = Success
+       and then (for all V of Scratch => abs V <=
+         Scratch_Bound ((P.N-P.Column (C, Position))*Max_Dofs+Step))
        and then (if Result = Success then
          (for all K in 1 .. Position => Scratch (P.Column (C, K)) =
            Update (Scratch'Old (P.Column (C, K)),
@@ -117,6 +163,8 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
    is
       Before : constant Vector := Scratch with Ghost => Static;
       R : constant Positive := P.Column (C, Position);
+      Multiplier : constant Real := L (C, R);
+      Budget : constant Natural := (P.N-R)*Max_Dofs+Step-1 with Ghost => Static;
       J : Natural;
       Value : Real;
    begin
@@ -124,8 +172,10 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       for Q in 1 .. Position loop
          Separate_Column (P, C, Q);
          J := P.Column (C, Q);
-         Value := Update (Scratch (J), L (C, R), L (C, J));
-         if Value not in Residual then return; end if;
+         Value := Update (Scratch (J), Multiplier, L (C, J));
+         pragma Assert (Static => Value =
+           Headroom_Update (Before (J), Multiplier, L (C, J), Budget));
+         pragma Assert (Static => Value in Residual);
          Scratch (J) := Value;
          pragma Loop_Invariant (for all V of Scratch => V in Residual);
          pragma Loop_Invariant (Static => (for all K in 1 .. Q =>
@@ -137,6 +187,7 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
            (if (for all K in 1 .. Q => P.Column (C, K) /= I)
             then Scratch (I) = Before (I))));
       end loop;
+      Row_Headroom (Before, Scratch, L, P, C, Position, Budget);
       Result := Success;
    end Update_Row;
 
@@ -146,26 +197,36 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
      (H, L : Matrix; P : Pattern; R : Positive;
       Scratch : in out Vector; Result : out Status)
      with Global => null, Inline_Always,
-     Pre => Valid (P) and then R <= P.N
+     Pre => (Static => Valid (P) and then R <= P.N
        and then Dense.Square (H) and then Dense.Bounded (H)
        and then Dense.Square (L) and then Dense.Bounded (L)
        and then H'Length (1) = P.N and then L'Length (1) = P.N
        and then Scratch'First = 1 and then Scratch'Length = P.N
-       and then (for all V of Scratch => V in Residual),
-     Post => (for all V of Scratch => V in Residual)
+       and then (for all V of Scratch => V in Residual)
+       and then (for all V of Scratch =>
+         abs V <= Scratch_Bound ((P.N-R)*Max_Dofs+1))),
+     Post => (Static => (for all V of Scratch => V in Residual)
+       and then (for all V of Scratch =>
+         abs V <= Scratch_Bound ((P.N-R+1)*Max_Dofs+1)))
    is
       J, C, Pos : Natural;
    begin
       for K in 1 .. P.Length (R) loop
          J := P.Column (R, K); Scratch (J) := H (R, J);
          pragma Loop_Invariant (for all V of Scratch => V in Residual);
+         pragma Loop_Invariant (Static => (for all V of Scratch =>
+           abs V <= Scratch_Bound ((P.N-R)*Max_Dofs+1)));
       end loop;
       for K in 2 .. P.Transpose_Length (R) loop
          C := P.Transpose_Row (R, K); Pos := P.Transpose_Position (R, K);
-         Update_Row (L, P, C, Pos, Scratch, Result);
+         Update_Row (L, P, C, Pos, Scratch, Result, K);
          if Result /= Success then return; end if;
          pragma Loop_Invariant (for all V of Scratch => V in Residual);
+         pragma Loop_Invariant (Static => (for all V of Scratch =>
+           abs V <= Scratch_Bound ((P.N-R)*Max_Dofs+K)));
       end loop;
+      Bound_Monotone ((P.N-R)*Max_Dofs+P.Transpose_Length (R),
+                      (P.N-R+1)*Max_Dofs+1);
       Result := Success;
    end Prepare_Row;
 
@@ -182,6 +243,33 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
    begin
       L (R, C) := Value;
    end Store_Element;
+
+   procedure Row_Frame_Transitive (Original, Before, After : Matrix; R : Positive)
+     with Ghost => Static, Global => null,
+     Pre => Dense.Square (Original) and then Dense.Square (Before)
+       and then Dense.Square (After)
+       and then Original'Length (1) = Before'Length (1)
+       and then Original'Length (1) = After'Length (1) and then R <= Original'Length (1)
+       and then (for all I in Before'Range (1) =>
+         (if I /= R then (for all J in Before'Range (2) => Before (I, J) = Original (I, J))))
+       and then (for all I in After'Range (1) =>
+         (if I /= R then (for all J in After'Range (2) => After (I, J) = Before (I, J)))),
+     Post => (for all I in After'Range (1) =>
+       (if I /= R then (for all J in After'Range (2) => After (I, J) = Original (I, J))))
+   is
+   begin
+      for I in After'Range (1) loop
+         if I /= R then
+            for J in After'Range (2) loop
+               pragma Assert (After (I, J) = Original (I, J));
+               pragma Loop_Invariant (for all C in After'First (2) .. J =>
+                 After (I, C) = Original (I, C));
+            end loop;
+         end if;
+         pragma Loop_Invariant (for all Q in After'First (1) .. I =>
+           (if Q /= R then (for all J in After'Range (2) => After (Q, J) = Original (Q, J))));
+      end loop;
+   end Row_Frame_Transitive;
 
    procedure Add_Mass_Row (H : in out Matrix; M : Matrix; P : Pattern; R : Positive) is
       Before : constant Matrix := H with Ghost => Static;
@@ -212,6 +300,52 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       end loop;
    end Add_Mass;
 
+   --  Scale and publish only the off-diagonal row. Its multiplier is an
+   --  input, keeping root/division expressions outside this loop minimum.
+   procedure Store_Offdiagonal
+     (Scratch : Vector; P : Pattern; R : Positive; Inverse : Real;
+      Deficient : Boolean; L : in out Matrix; Result : out Status)
+     with Global => null, Inline_Always,
+     Pre => (Static => Valid (P) and then R <= P.N
+       and then Dense.Square (L) and then Dense.Bounded (L)
+       and then L'Length (1) = P.N
+       and then Scratch'First = 1 and then Scratch'Length = P.N
+       and then (for all V of Scratch => V in Residual)
+       and then Inverse in 0.0 .. 1.0e15),
+     Post => (Static => Dense.Bounded (L)
+       and then (for all I in L'Range (1) =>
+         (if I /= R then (for all J in L'Range (2) => L (I, J) = L'Old (I, J))))
+       and then (if Result = Success then
+         (for all K in 1 .. P.Length (R)-1 =>
+           L (R, P.Column (R, K)) = (if Deficient then 0.0 else
+             Scale (Scratch (P.Column (R, K)), Inverse)))))
+   is
+      Before : constant Matrix := L with Ghost => Static;
+      Prior : Matrix := L with Ghost => Static;
+      Value : Real;
+      J : Natural;
+   begin
+      Result := Numeric_Limit;
+      if P.Length (R) > 1 then
+         for K in 1 .. P.Length (R)-1 loop
+            Separate_Column (P, R, K);
+            J := P.Column (R, K);
+            Value := (if Deficient then 0.0 else Scale (Scratch (J), Inverse));
+            if Value not in Operand then return; end if;
+            Prior := L;
+            Store_Element (L, R, J, Value);
+            Row_Frame_Transitive (Before, Prior, L, R);
+            pragma Loop_Invariant (Dense.Bounded (L));
+            pragma Loop_Invariant (Static => (for all Q in 1 .. K =>
+              L (R, P.Column (R, Q)) = (if Deficient then 0.0 else
+                Scale (Scratch (P.Column (R, Q)), Inverse))));
+            pragma Loop_Invariant (Static => (for all I in L'Range (1) =>
+              (if I /= R then (for all C in L'Range (2) => L (I, C) = Before (I, C)))));
+         end loop;
+      end if;
+      Result := Success;
+   end Store_Offdiagonal;
+
    procedure Store_Row
      (Scratch : Vector; P : Pattern; R : Positive; Floor : Pivot;
       L : in out Matrix; Deficient : out Boolean; Result : out Status)
@@ -223,8 +357,8 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
        and then (for all V of Scratch => V in Residual),
      Post => (Static => Dense.Bounded (L)
        and then Deficient = (Scratch (R) < Floor)
-       and then (for all I in L'Range (1) => (for all J in L'Range (2) =>
-         (if I /= R then L (I, J) = L'Old (I, J))))
+       and then (for all I in L'Range (1) =>
+         (if I /= R then (for all J in L'Range (2) => L (I, J) = L'Old (I, J))))
        and then (if Result = Success then L (R, R) in Pivot
          and then L (R, R) = MJ.Quaternion_Math.Sqrt
            (if Deficient then Floor else Scratch (R))
@@ -234,8 +368,8 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
    is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dense.Bounded);
       Before : constant Matrix := L with Ghost => Static;
+      Prior : Matrix := L with Ghost => Static;
       Value, Root, Inverse : Real;
-      J : Natural;
    begin
       Result := Numeric_Limit;
       Deficient := Scratch (R) < Floor;
@@ -243,40 +377,37 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       Root := MJ.Quaternion_Math.Sqrt (Value);
       if Root not in Pivot then return; end if;
       Inverse := Dense.Inverse_Pivot (Root);
-      for K in 1 .. P.Length (R)-1 loop
-         Separate_Column (P, R, K);
-         J := P.Column (R, K);
-         Value := (if Deficient then 0.0 else Scale (Scratch (J), Inverse));
-         if Value not in Operand then return; end if;
-         Store_Element (L, R, J, Value);
-         pragma Loop_Invariant (Dense.Bounded (L));
-         pragma Loop_Invariant (Static => (for all Q in 1 .. K =>
-           L (R, P.Column (R, Q)) = (if Deficient then 0.0 else
-             Scale (Scratch (P.Column (R, Q)), Inverse))));
-         pragma Loop_Invariant (Static => (for all I in L'Range (1) =>
-           (for all C in L'Range (2) =>
-             (if I /= R then L (I, C) = Before (I, C)))));
-      end loop;
+      Store_Offdiagonal (Scratch, P, R, Inverse, Deficient, L, Result);
+      if Result /= Success then return; end if;
       Separate_Column (P, R, P.Length (R));
+      Prior := L;
       Store_Element (L, R, R, Root);
+      Row_Frame_Transitive (Before, Prior, L, R);
       Result := Success;
    end Store_Row;
 
    procedure Clear_Row (P : Pattern; R : Positive; Scratch : in out Vector)
      with Global => null, Inline_Always,
-     Pre => Valid (P) and then R <= P.N
+     Pre => (Static => Valid (P) and then R <= P.N
        and then Scratch'First = 1 and then Scratch'Length = P.N
-       and then (for all V of Scratch => V in Residual),
+       and then (for all V of Scratch => V in Residual)
+       and then (for all V of Scratch =>
+         abs V <= Scratch_Bound ((P.N-R+1)*Max_Dofs+1))),
      Post => (Static => (for all V of Scratch => V in Residual)
+       and then (for all V of Scratch =>
+         abs V <= Scratch_Bound ((P.N-R+1)*Max_Dofs+1))
        and then (for all K in 1 .. P.Length (R) => Scratch (P.Column (R, K)) = 0.0)
        and then (for all I in Scratch'Range =>
          (if (for all K in 1 .. P.Length (R) => P.Column (R, K) /= I)
           then Scratch (I) = Scratch'Old (I))))
    is
+      Budget : constant Natural := (P.N-R+1)*Max_Dofs+1 with Ghost => Static;
    begin
       for K in 1 .. P.Length (R) loop
          Scratch (P.Column (R, K)) := 0.0;
          pragma Loop_Invariant (for all V of Scratch => V in Residual);
+         pragma Loop_Invariant (Static =>
+           (for all V of Scratch => abs V <= Scratch_Bound (Budget)));
          pragma Loop_Invariant (Static => (for all Q in 1 .. K =>
            Scratch (P.Column (R, Q)) = 0.0));
          pragma Loop_Invariant (Static => (for all I in Scratch'Range =>
@@ -285,9 +416,27 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       end loop;
    end Clear_Row;
 
+   procedure Diagonal_Progress (Before, After : Matrix; R : Positive)
+     with Ghost => Static, Global => null,
+     Pre => Dense.Square (Before) and then Dense.Square (After)
+       and then Before'Length (1) = After'Length (1) and then R <= After'Length (1)
+       and then After (R, R) in Pivot
+       and then (for all I in R+1 .. Before'Last (1) => Before (I, I) in Pivot)
+       and then (for all I in R+1 .. After'Last (1) => After (I, I) = Before (I, I)),
+     Post => (for all I in R .. After'Last (1) => After (I, I) in Pivot)
+   is
+   begin
+      for I in R .. After'Last (1) loop
+         if I > R then pragma Assert (After (I, I) = Before (I, I)); end if;
+         pragma Assert (After (I, I) in Pivot);
+         pragma Loop_Invariant (for all Q in R .. I => After (Q, Q) in Pivot);
+      end loop;
+   end Diagonal_Progress;
+
    procedure Factor (H : Matrix; P : Pattern; L : out Matrix;
                      Rank : out Natural; Result : out Status; Floor : Pivot := 1.0e-15) is
       Scratch : Vector (1 .. P.N) := (others => 0.0);
+      Before : Matrix (L'Range (1), L'Range (2)) with Ghost => Static;
       Deficient : Boolean;
       Row_Status : Status;
    begin
@@ -296,37 +445,110 @@ package body MJ.Constraint_Solvers.Sparse_Cholesky with SPARK_Mode is
       for R in reverse 1 .. P.N loop
          Prepare_Row (H, L, P, R, Scratch, Row_Status);
          if Row_Status /= Success then return; end if;
+         Before := L;
          Store_Row (Scratch, P, R, Floor, L, Deficient, Row_Status);
          --  Keep the original rank accounting even when the numeric row fails.
          if Deficient then Rank := Rank-1; end if;
          if Row_Status /= Success then return; end if;
+         Diagonal_Progress (Before, L, R);
          Clear_Row (P, R, Scratch);
          pragma Loop_Invariant (Dense.Bounded (L));
          pragma Loop_Invariant (for all V of Scratch => V in Residual);
+         pragma Loop_Invariant (Static => (for all V of Scratch =>
+           abs V <= Scratch_Bound ((P.N-R+1)*Max_Dofs+1)));
          pragma Loop_Invariant (for all I in R .. P.N => L (I, I) in Pivot);
          pragma Loop_Invariant (Rank in R-1 .. P.N);
       end loop;
       Result := Success;
    end Factor;
 
+   --  The ordered off-diagonal prefix takes an already normalized scalar.
+   --  Keeping division outside this minimum avoids coupling its loop proof
+   --  to the diagonal's nonlinear expression.
+   procedure Scatter_Prefix (L : Matrix; P : Pattern; X : in out Vector;
+                             I : Positive; Multiplier : Real; Result : out Status)
+     with Global => null, Inline_Always,
+     Pre => (Static => Valid (P) and then Dense.Square (L) and then Dense.Bounded (L)
+       and then L'Length (1) = P.N and then I <= P.N
+       and then X'First = 1 and then X'Length = P.N
+       and then (for all V of X => V in Operand) and then Multiplier in Operand),
+     Post => (Static => (for all V of X => V in Operand)
+       and then (for all J in X'Range =>
+         (if (for all K in 1 .. P.Length (I)-1 => P.Column (I, K) /= J)
+          then X (J) = X'Old (J)))
+       and then (if Result = Success then
+         (for all K in 1 .. P.Length (I)-1 =>
+           X (P.Column (I, K)) = Update
+             (X'Old (P.Column (I, K)), L (I, P.Column (I, K)), Multiplier))))
+   is
+      Before : constant Vector := X with Ghost => Static;
+      Value : Real;
+      J : Natural;
+   begin
+      Result := Numeric_Limit;
+      for K in 1 .. P.Length (I)-1 loop
+         Separate_Column (P, I, K);
+         J := P.Column (I, K);
+         Value := Update (X (J), L (I, J), Multiplier);
+         if Value not in Operand then return; end if;
+         X (J) := Value;
+         pragma Loop_Invariant (for all V of X => V in Operand);
+         pragma Loop_Invariant (Static => (for all V of Before => V in Operand));
+         pragma Loop_Invariant (Static => (for all Q in 1 .. K =>
+           X (P.Column (I, Q)) = Update
+             (Before (P.Column (I, Q)), L (I, P.Column (I, Q)), Multiplier)));
+         pragma Loop_Invariant (Static => (for all Q in K+1 .. P.Length (I)-1 =>
+           X (P.Column (I, Q)) = Before (P.Column (I, Q))));
+         pragma Loop_Invariant (Static => (for all J in X'Range =>
+           (if (for all Q in 1 .. K => P.Column (I, Q) /= J)
+            then X (J) = Before (J))));
+      end loop;
+      Result := Success;
+   end Scatter_Prefix;
+
+   --  One ordered L^-T scatter from mju_cholSolveSparse. Bounds on the
+   --  stored factors and RHS justify the static Update precondition.
+   procedure Scatter_Row (L : Matrix; P : Pattern; X : in out Vector;
+                          I : Positive; Result : out Status)
+     with Global => null, Inline_Always,
+     Pre => Valid (P) and then Dense.Square (L) and then Dense.Bounded (L)
+       and then Dense.Positive_Diagonal (L) and then L'Length (1) = P.N
+       and then X'First = 1 and then X'Length = P.N and then I <= P.N
+       and then (for all V of X => V in Operand),
+     Post => (Static => (for all V of X => V in Operand)
+       and then (for all J in X'Range =>
+         (if J /= I and then (for all K in 1 .. P.Length (I)-1 => P.Column (I, K) /= J)
+          then X (J) = X'Old (J)))
+       and then (if Result = Success then
+         (if X'Old (I) = 0.0 then X = X'Old else
+           X (I) = X'Old (I) / L (I, I)
+           and then (for all K in 1 .. P.Length (I)-1 =>
+             X (P.Column (I, K)) = Update
+               (X'Old (P.Column (I, K)), L (I, P.Column (I, K)), X (I))))))
+   is
+      Value : Real;
+   begin
+      Result := Success;
+      if X (I) = 0.0 then return; end if;
+      Result := Numeric_Limit;
+      Value := X (I) / L (I, I);
+      if Value not in Operand then return; end if;
+      Separate_Column (P, I, P.Length (I));
+      X (I) := Value;
+      Scatter_Prefix (L, P, X, I, Value, Result);
+   end Scatter_Row;
+
    procedure Backsolve (L : Matrix; P : Pattern; B : Vector; X : out Vector;
                         Result : out Status) is
       Value, S, S0, S1, S2, S3 : Real;
       J, Offset, Count : Natural;
+      Row_Status : Status;
    begin
       X := B; Result := Numeric_Limit;
       for I in reverse 1 .. P.N loop
-         if X (I) /= 0.0 then
-            Value := X (I) / L (I, I);
-            if Value not in Operand then return; end if;
-            X (I) := Value;
-            for K in 1 .. P.Length (I)-1 loop
-               J := P.Column (I, K);
-               Value := Update (X (J), L (I, J), X (I));
-               if Value not in Operand then return; end if;
-               X (J) := Value;
-            end loop;
-         end if;
+         Scatter_Row (L, P, X, I, Row_Status);
+         if Row_Status /= Success then return; end if;
+         pragma Loop_Invariant (for all V of X => V in Operand);
       end loop;
       for I in 1 .. P.N loop
          Count := P.Length (I)-1;

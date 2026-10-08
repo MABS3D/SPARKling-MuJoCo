@@ -1,4 +1,4 @@
-"""Exact C 3.14 symbolic, numeric reverse factor and normal AVX sparse solve."""
+"""Exact stable-C symbolic, numeric reverse factor and normal AVX sparse solve."""
 import argparse
 import ctypes as ct
 import hashlib
@@ -14,11 +14,12 @@ def main():
     ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--reference', type=Path, default=Path('/var/tmp/sparkling-movement-c/source'))
+    ap.add_argument('--reference-version', choices=('3.14.0', '3.15.0'), default='3.14.0')
     a = ap.parse_args()
-    assert mujoco.__version__ == '3.14.0'
+    assert mujoco.__version__ == a.reference_version
     a.out.mkdir(parents=True, exist_ok=False)
     package = Path(mujoco.__file__).parent
-    libpath = package/'libmujoco.so.3.14.0'
+    libpath = package/('libmujoco.so.' + a.reference_version)
     lib = ct.CDLL(str(libpath))
     ip = ct.POINTER(ct.c_int)
     dp = ct.POINTER(ct.c_double)
@@ -72,6 +73,17 @@ def main():
                 h = raw.copy()*scale
                 if kind == 'mixed': h[np.arange(0, n, 3), np.arange(0, n, 3)] = -1
                 cases.append((pattern+'-'+kind, mask, h, rng.uniform(-1, 1, n)))
+    # Symbolic input is the upper triangle, even for an asymmetric mask.
+    # The diagonal is implicit, including when it is absent from the input.
+    for n in [2, 5, 17, 128]:
+        for kind in ['upper-only', 'lower-only', 'missing-diagonal']:
+            upper = np.triu(rng.random((n, n)) < .2, 1)
+            lower = np.tril(rng.random((n, n)) < .2, -1)
+            mask = upper if kind == 'upper-only' else lower if kind == 'lower-only' else upper | lower
+            if kind != 'missing-diagonal': np.fill_diagonal(mask, True)
+            h = np.zeros((n, n))
+            if kind != 'missing-diagonal': np.fill_diagonal(h, 1.)
+            cases.append((kind, mask, h, np.zeros(n)))
     for value in [-1., 0., np.nextafter(1e-15, 0.), 1e-15, np.nextafter(1e-15, np.inf)]:
         cases.append(('pivot-neighbor', np.ones((1, 1), bool), np.array([[value]]), np.zeros(1)))
     for n in [5, 6, 7, 8, 9]:
@@ -104,6 +116,18 @@ def main():
             expected_symbolic += [str(tn[r])]
             for k in range(ta[r], ta[r]+tn[r]):
                 expected_symbolic += [str(ti[k]+1), str(tm[k]-la[ti[k]]+1)]
+        # Check the independent clique-elimination specification as well as
+        # exact C order. This is finite model validation, not a SPARK proof.
+        model = np.tril(mask.T, -1) | np.eye(n, dtype=bool)
+        for r in range(n-1, -1, -1):
+            neighbours = np.flatnonzero(model[r, :r])
+            model[np.ix_(neighbours, neighbours)] |= np.tril(
+                np.ones((len(neighbours), len(neighbours)), dtype=bool))
+        c_support = np.zeros((n, n), dtype=bool)
+        for r in range(n): c_support[r, li[la[r]:la[r]+ln[r]]] = True
+        model_ok = bool(np.array_equal(c_support, model) and
+                        np.array_equal(ln, model.sum(axis=1)) and
+                        np.array_equal(tn, model.sum(axis=0)))
         hv, hn, ha, hi = csr(np.tril(mask), h)
         lv = np.zeros(count)
         scratch = np.zeros(n)
@@ -119,11 +143,11 @@ def main():
         got = np.asarray(cols[2:end], float).reshape(n, n)
         answer = np.asarray(cols[end+1:], float)
         symbolic_ok = lines[2*index].split() == expected_symbolic
-        passed = symbolic_ok and cols[0] == 'SUCCESS' and int(cols[1]) == rank
+        passed = symbolic_ok and model_ok and cols[0] == 'SUCCESS' and int(cols[1]) == rank
         passed = passed and np.array_equal(got.view(np.uint64), dense.view(np.uint64))
         passed = bool(passed and cols[end] == 'SUCCESS' and
                       np.array_equal(answer.view(np.uint64), x.view(np.uint64)))
-        records.append(dict(name=name, n=n, passed=passed, symbolic=symbolic_ok,
+        records.append(dict(name=name, n=n, passed=passed, symbolic=symbolic_ok, symbolic_model=model_ok,
                             rank=rank, ada_rank=int(cols[1]),
                             factor_error=float(np.max(np.abs(got-dense))),
                             solve_error=float(np.max(np.abs(answer-x)))))

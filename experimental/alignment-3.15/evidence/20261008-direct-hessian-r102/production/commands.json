@@ -1,0 +1,132 @@
+[
+  {
+    "label": "build-state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-state-integration/flex_state.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 54.66582544799894,
+    "log_sha256": "4f2bcc68131e2aa1218f555893d33f80ed1617439539e717baa89fa2b489af65"
+  },
+  {
+    "label": "build-forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-elasticity-integration/flex.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 46.07847310100624,
+    "log_sha256": "ff8747ad05c187c09403ec627e9e839b90b99c40fa3436ad7eee46d67ba27123"
+  },
+  {
+    "label": "build-constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 30.89770748600131,
+    "log_sha256": "1f6704bd52e52795f0aaa56f1454d79aa58a2145cabcf85e218f30cde798a6cf"
+  },
+  {
+    "label": "state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/state-build/release/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/state",
+      "--samples",
+      "2"
+    ],
+    "exit": 0,
+    "seconds": 0.8215213799994672,
+    "log_sha256": "1375ec4a7a42d881fdc0e96f1e9474a87aac5dff17440580ee0c5be988191d04"
+  },
+  {
+    "label": "forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-elasticity-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/force-build/release/bin/flex_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/forces",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 0.5683896999980789,
+    "log_sha256": "aeaad2cc49ebb9986e004ec3da5b6fec3642b464d880cccc429e7d26f8a85d30"
+  },
+  {
+    "label": "constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/force-build/release/bin/flex_constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-hessian-regression-r102-20261008/constrained",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 3.5928566729999147,
+    "log_sha256": "38dd112f45b2bee71ec1075f2f626ea86b949a11d26b80f856aa151ec4877867"
+  }
+]

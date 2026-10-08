@@ -1,0 +1,227 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Gram_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-gram-engine-proof-r43-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-cone_kernels.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-cone_kernels.adb:342"
+  ],
+  "exit": 1,
+  "seconds": 84.88033229899884,
+  "manifest_sha256": "ed8a8a28a28af86b9a2c812ed85a4e2447e157c3f9ca7486845dfa9b67491303",
+  "runner_sha256": "870645f9beca979b4e5d823dbd227119e2ca222d7662d47ddf8fd12c18d7895a",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "acaeb5606832eedc0dbc4094cd7152db58f6d47170f8f7582624aeef5701f031",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 115,
+  "proof_checks": 113,
+  "flow_checks": 5,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-constraint_solvers-cone_kernels.adb",
+      "check_line": 362,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 19011,
+              "time": 0.437095
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.656155
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 20,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "prover",
+      "line": 366,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (R, C) = Before (R, C)"
+      },
+      "msg_id": 50,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 33,
+      "check_file": "mj-constraint_solvers-cone_kernels.adb",
+      "check_line": 353,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 18608,
+              "time": 0.477565
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.658771
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "prover",
+      "line": 353,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove L (I, K) in Operand"
+      },
+      "msg_id": 82,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-cone_kernels.ads",
+      "check_line": 130,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 37175,
+              "time": 0.809614
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 2299,
+              "time": 0.112543
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.650461
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 10,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.ads",
+      "how_proved": "prover",
+      "line": 132,
+      "message": {
+        "text": "postcondition might fail, cannot prove H (Columns (Index_Row, I), Columns (Index_Row, J)) = Gram_Scaled (H'Old (Columns (Index_Row, I), Columns (Index_Row, J)), Gram_Scale (Gram_Source (Values, Columns, Source_Row, Index_Row, I, Packed), Weight), Gram_Source (Values, Columns, Source_Row, Index_..."
+      },
+      "msg_id": 117,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Cone_Kernels.Gram_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

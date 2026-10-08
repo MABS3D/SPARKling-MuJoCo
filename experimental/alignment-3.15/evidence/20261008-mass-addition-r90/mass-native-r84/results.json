@@ -1,0 +1,54 @@
+{
+  "complete": true,
+  "reference": "3.15.0",
+  "source_hashes_unchanged": true,
+  "manifest_sha256": "f612ed10b6c96e0fb9fe0eda477034124f5b2167d720c1cca8c87000de9abfd0",
+  "runner_sha256": "ae68d874c5088f99688fdfb90b4673ee7cf580a05ab7b43b7849a90d17e40109",
+  "commands": [
+    {
+      "label": "build",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-315-mass-native-r84-20261008/source/experimental/constraint-solvers-candidate/solvers.gpr",
+        "mass_addition_probe.adb",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 7.777497310999024,
+      "log_sha256": "6ab51424bac322aba582e2152b0b3a393b9232be31554b92398649a4f8dfb7f7"
+    },
+    {
+      "label": "native",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "240",
+        "--",
+        "/var/tmp/sparkling-movement315-env/bin/python",
+        "/var/tmp/sparkling-alignment-315-mass-native-r84-20261008/source/experimental/constraint-solvers-candidate/tests/test_mass_addition.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-315-mass-native-r84-20261008/build/release/bin/mass_addition_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-315-mass-native-r84-20261008/cases",
+        "--reference",
+        "/var/tmp/sparkling-alignment-315-foundation-r6-20261007/source/mujoco"
+      ],
+      "exit": 0,
+      "seconds": 1.3572950419984409,
+      "log_sha256": "87029f58fe215310beb0b9f49faf15a5b74fb0af85c238096979e29522acbe45"
+    }
+  ],
+  "binary_sha256": "2b959e1677a8ebff8551284e0ee4f22e7bf538f003330f96ea0258ad629f1abc",
+  "scope": "Flat mass addition on fixed factor support; no global assembly or timing claim"
+}

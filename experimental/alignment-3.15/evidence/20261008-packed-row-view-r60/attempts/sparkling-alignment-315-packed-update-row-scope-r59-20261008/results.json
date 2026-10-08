@@ -1,0 +1,164 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Update_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-packed-engine-proof-r59-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:175"
+  ],
+  "exit": 1,
+  "seconds": 91.34602704999998,
+  "manifest_sha256": "31a0062237a1b67640623809b665f09a39c2f9228bd972f43bbf4546276a0985",
+  "runner_sha256": "cfdd8b8f4ae5f79204460405b68df3188a2ea08d04c11293bbc9d6c3b4d2c9ba",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "264c907a63f608ec3c8c2a52992367df147ba2d6ef2fc30799d4536148ba019e",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 92,
+  "proof_checks": 90,
+  "flow_checks": 4,
+  "open": [
+    {
+      "check_col": 38,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 213,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 38,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 213,
+      "message": {
+        "text": "assertion might fail"
+      },
+      "msg_id": 30,
+      "rule": "VC_ASSERT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 182,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 18482,
+              "time": 0.411808
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 15082,
+              "time": 0.351545
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 72,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 186,
+      "message": {
+        "text": "postcondition might fail, cannot prove Scratch (J) = Scratch'Old (J)"
+      },
+      "msg_id": 93,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Update_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

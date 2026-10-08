@@ -1,0 +1,65 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Scratch_Bound",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-sparse-headroom-proof-r24-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-sparse_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-sparse_cholesky.ads:83"
+  ],
+  "exit": 0,
+  "seconds": 8.986188097000195,
+  "manifest_sha256": "c50d5077535928b4025d6b18b694ca8a0457df52e5671ee22aa81a8059e89cdd",
+  "runner_sha256": "540a8cf3f2450e56d09fe7ea3b6b5d2dfbdd2b77729f02f02bb58f4804084539",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "615d065dcf096213b31990d27a982f3d0808ce0015ab6d39612cbd8339ea8583",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 7,
+  "proof_checks": 5,
+  "flow_checks": 2,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 48,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 363,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Sparse_Cholesky.Scratch_Bound"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": true
+}

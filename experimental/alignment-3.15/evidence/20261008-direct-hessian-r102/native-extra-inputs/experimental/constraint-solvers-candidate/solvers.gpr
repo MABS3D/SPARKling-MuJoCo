@@ -1,0 +1,34 @@
+project Solvers is
+   Build_Root := external ("SOLVERS_BUILD_ROOT", "/var/tmp/sparkling-constraint-solvers-20261001/build");
+   Mode := external ("SOLVERS_MODE", "validation");
+   for Source_Dirs use ("src", "../../src", "tests");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-quaternion_math.ads", "mj-constraint_scalar.ads",
+     "mj-constraint_scalar.adb", "mj-constraint_order.ads",
+     "mj-constraint_order.adb", "mj-constraint_solvers.ads",
+     "mj-constraint_solvers-native_inertia.ads", "mj-constraint_solvers-native_inertia.adb",
+     "mj-constraint_solvers.adb", "mj-constraint_solvers-cholesky.ads",
+     "mj-constraint_solvers-sparse_kernels.ads", "mj-constraint_solvers-sparse_kernels.adb",
+     "mj-constraint_solvers-cone_kernels.ads", "mj-constraint_solvers-cone_kernels.adb",
+     "mj-constraint_solvers-jacobians.ads", "mj-constraint_solvers-jacobians.adb",
+     "mj-constraint_solvers-jacobian_transpose.ads", "mj-constraint_solvers-jacobian_transpose.adb",
+     "mj-constraint_solvers-cholesky_updates.ads", "mj-constraint_solvers-cholesky_updates.adb",
+     "mj-constraint_solvers-reduction_models.ads", "mj-constraint_solvers-reduction_models.adb",
+     "mj-constraint_solvers-dense_cholesky.ads", "mj-constraint_solvers-dense_cholesky.adb",
+     "mj-constraint_solvers-sparse_cholesky.ads", "mj-constraint_solvers-sparse_cholesky.adb",
+     "mj-constraint_solvers-packed_cholesky.ads", "mj-constraint_solvers-packed_cholesky.adb",
+     "mj-constraint_solvers-reductions.ads", "mj-constraint_solvers-reductions.adb",
+     "mj-constraint_solvers-cholesky.adb", "solvers_probe.adb", "cholesky_edges.adb",
+     "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "packed_cholesky_probe.adb", "mass_addition_probe.adb", "gram_probe.adb", "flat_gram_probe.adb", "mass_values_probe.adb", "factor_values_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb", "native_inertia_probe.adb");
+   for Object_Dir use Build_Root & "/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/" & Mode & "/bin";
+   for Main use ("solvers_probe.adb", "cholesky_edges.adb", "reductions_probe.adb", "dense_cholesky_probe.adb", "sparse_cholesky_probe.adb", "packed_cholesky_probe.adb", "mass_addition_probe.adb", "gram_probe.adb", "flat_gram_probe.adb", "mass_values_probe.adb", "factor_values_probe.adb", "jacobians_probe.adb", "transpose_probe.adb", "cholesky_updates_probe.adb", "native_inertia_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn", "-march=native");
+      when others => Flags := Flags & ("-O2", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+end Solvers;

@@ -1,0 +1,90 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Pack",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-packed-engine-proof-r50-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:44"
+  ],
+  "exit": 1,
+  "seconds": 24.63945327300098,
+  "manifest_sha256": "9f14d1fa60249027c79319e26570fa7ce3c15798f4ac58fbbbc7aa897e6b6dad",
+  "runner_sha256": "79c4c3c44a13e2719f8ef3aa6a0127db4e995c48212f038a64d305dacb54e6a3",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "c9a0567226f3ee03edbb70780fc46f80e768fabd99f99e20a7e9ce30650d9281",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 27,
+  "proof_checks": 26,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 50,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 47,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 51,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove Values (Slot (P, Address, I, K)) = L (I, P.Column (I, K))"
+      },
+      "msg_id": 12,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Pack"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

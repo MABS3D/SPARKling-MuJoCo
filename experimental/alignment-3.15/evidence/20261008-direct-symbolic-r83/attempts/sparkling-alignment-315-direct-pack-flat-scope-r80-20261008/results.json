@@ -1,0 +1,162 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Pack_Flat",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r80-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:966"
+  ],
+  "exit": 1,
+  "seconds": 26.992565998996724,
+  "manifest_sha256": "f382b653e6ac13b3315609ad50d14e438d71a090ef77a243d4b6d0a68ba103a9",
+  "runner_sha256": "2548ea23101926c93cf8bfa8d230cc743ac88917797b17ee287dd80d1b4a1dac",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "594c2d8119aaf302d304d0a48232e266f82ccf679eb60f2515cbbb251a628cd9",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 28,
+  "proof_checks": 28,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 48,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 975,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 217,
+              "time": 0.044442
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 128,
+              "time": 0.038898
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 48,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 975,
+      "message": {
+        "text": "array index check might fail"
+      },
+      "msg_id": 13,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 77,
+      "check_file": "mj-constraint_solvers-packed_cholesky.ads",
+      "check_line": 182,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 408,
+              "time": 0.063905
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 184,
+              "time": 0.042082
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 77,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.ads",
+      "how_proved": "prover",
+      "line": 182,
+      "message": {
+        "text": "array index check might fail"
+      },
+      "msg_id": 26,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Pack_Flat"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

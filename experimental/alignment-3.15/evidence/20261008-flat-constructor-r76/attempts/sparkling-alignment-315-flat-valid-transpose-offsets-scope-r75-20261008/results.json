@@ -1,0 +1,100 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Valid_Transpose_Offsets",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r75-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:221"
+  ],
+  "exit": 1,
+  "seconds": 19.394350110000232,
+  "manifest_sha256": "b7b7353deccb614d62a013ef590540c670647e4e06bd1796463145622d53952e",
+  "runner_sha256": "0ecaede8ed42c98d1bdf689eab1e31a674b5858bf70619f6ec6b1cbaac4ac496",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "2d4c49f46a0e0932b8acf3e85b58d0e2643a08df9b36d0dc43d3fd3e582df177",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 18,
+  "proof_checks": 17,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 61,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 227,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 10,
+              "time": 0.028725
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 61,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 227,
+      "message": {
+        "text": "overflow check might fail, cannot prove upper bound for Address (R-1)+P.Transpose_Length (R-1)"
+      },
+      "msg_id": 18,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Valid_Transpose_Offsets"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

@@ -1,0 +1,26 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: operator for type "Counts" defined at mj-constraint_solvers-sparse_cholesky.ads:11 is not directly visible
+--> mj-constraint_solvers-packed_cholesky.adb:366:52
+  366 |             pragma Loop_Invariant (Static => F.Length = P.Length and then F.Transpose_Length = P.Transpose_Length);
+      |                                              ~~~~~~~~~^~~~~~~~~~
+
+ error: add with_clause and use_clause for "Packed_Cholesky"
+--> mj-constraint_solvers-packed_cholesky.adb:366:52
+  366 |             pragma Loop_Invariant (Static => F.Length = P.Length and then F.Transpose_Length = P.Transpose_Length);
+      |                                              ~~~~~~~~~^~~~~~~~~~
+
+ error: operator for type "Counts" defined at mj-constraint_solvers-sparse_cholesky.ads:11 is not directly visible
+--> mj-constraint_solvers-packed_cholesky.adb:366:91
+  366 |             pragma Loop_Invariant (Static => F.Length = P.Length and then F.Transpose_Length = P.Transpose_Length);
+      |                                                                           ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+
+ error: add with_clause and use_clause for "Packed_Cholesky"
+--> mj-constraint_solvers-packed_cholesky.adb:366:91
+  366 |             pragma Loop_Invariant (Static => F.Length = P.Length and then F.Transpose_Length = P.Transpose_Length);
+      |                                                                           ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+gnatprove: error during generation of Global contracts
+guarded: elapsed 2.1 s, peak group RSS 48 MB

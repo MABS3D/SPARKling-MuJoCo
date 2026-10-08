@@ -1,0 +1,45 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: implicit aspect Always_Terminates on "Valid_Offsets" has been proved, subprogram will terminate
+--> mj-constraint_solvers-packed_cholesky.ads:100:13
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:101:67
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:102:26
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:104:19
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:104:26
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.ads:104:32
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:105:43
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:105:58
+
+ medium: overflow check might fail, cannot prove upper bound for Address (R-1)+P.Length (R-1)
+--> mj-constraint_solvers-packed_cholesky.ads:105:61
+  105 |             and then (if R > 1 then Address (R) = Address (R-1)+P.Length (R-1))))
+      |                                                   ~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 100 should mention Address and P in a precondition
+  100 |       function Valid_Offsets (P : Pattern; Address : Offsets) return Boolean is
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:105:73
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:106:28
+Summary logged in /var/tmp/sparkling-alignment-315-flat-valid-offsets-scope-r75-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 16.0 s, peak group RSS 286 MB

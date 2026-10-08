@@ -1,0 +1,75 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Compact",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flex-proof-r6-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+    "-u",
+    "mj-flex_collisions-selection.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-flex_collisions-selection.adb:2"
+  ],
+  "exit": 0,
+  "seconds": 25.906629674002033,
+  "manifest_sha256": "45cc07b3d8d78efa4cc6097103a891b00cbe35a2b7c720677bef0f66959a3a81",
+  "runner_sha256": "653a01597d6b6b07bb532c34964651fef0990b093046964f85b54555cd224de6",
+  "log_sha256": "54c57543eca7b26d61c67ddf183dc6a90414ab5a0f9e256ae853a159dddbdfbd",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 45,
+  "proof_checks": 44,
+  "flow_checks": 1,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 5,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 5,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Flex_Collisions.Selection.Compact"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": true
+}

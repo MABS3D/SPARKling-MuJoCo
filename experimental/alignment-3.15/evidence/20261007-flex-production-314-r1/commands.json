@@ -1,0 +1,132 @@
+[
+  {
+    "label": "build-state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 84.10262822400182,
+    "log_sha256": "5ffdb3fff99c105536958631d1ca7c6ac879e0d00a3581f2201cf6d5d7d6102b"
+  },
+  {
+    "label": "build-forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-elasticity-integration/flex.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 68.12475704700046,
+    "log_sha256": "ffe35efad6d621fe05d27b4b1b05c8ad7b8337a89645e0cd9cf4ee79e81a7da3"
+  },
+  {
+    "label": "build-constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 35.69168403000003,
+    "log_sha256": "eb492783725d47eb45c926d7216c1270fa4c353c7d3e931aaea8eae6a4500629"
+  },
+  {
+    "label": "state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/state-build/validation/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/state",
+      "--samples",
+      "2"
+    ],
+    "exit": 0,
+    "seconds": 1.0620035430001735,
+    "log_sha256": "c3f0159e7d67eb16d33e69e5a6d7f81a83ea83730e964d80edf952da8e841443"
+  },
+  {
+    "label": "forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-elasticity-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/force-build/validation/bin/flex_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/forces",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 8.3405272279997,
+    "log_sha256": "e1bd6f120517ecdf7504ae4fc3f315ab02971e06d2fed40e8cb93b5eb8ceba9f"
+  },
+  {
+    "label": "constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/force-build/validation/bin/flex_constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-flex-r1-20261007/constrained",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 191.59979115399983,
+    "log_sha256": "d8592db69d86d2146a8fedc4be6f01bc9b15ab2b4f61699172f72caccd382093"
+  }
+]

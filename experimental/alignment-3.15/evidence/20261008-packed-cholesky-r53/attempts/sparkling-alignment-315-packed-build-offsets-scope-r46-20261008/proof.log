@@ -1,0 +1,32 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: reserved word "separate" cannot be used as identifier
+--> mj-constraint_solvers-packed_cholesky.adb:74:14
+   74 |       procedure Separate (P : Pattern; R, Position : Positive)
+      |                 ^
+
+ error: "end Separate;" expected
+--> mj-constraint_solvers-packed_cholesky.adb:87:04
+   87 |       end Separate;
+      |       ^
+
+ error: no "begin" for this "end"
+--> mj-constraint_solvers-packed_cholesky.adb:87:04
+   87 |       end Separate;
+      |       ^
+
+ error: declarations mixed with statements is a GNAT-specific extension
+--> mj-constraint_solvers-packed_cholesky.adb:89:04
+   89 |       procedure Bound_Monotone (Budget : Natural)
+      |       ^
+      + unit must be compiled with -gnatX [or -gnatX0] or use pragma Extensions_Allowed (On) [or All_Extensions]
+
+ error: statement expected
+--> mj-constraint_solvers-packed_cholesky.adb:119:09
+  119 |             Separate (P, C, Q);
+      |            ^
+gnatprove: error during generation of Global contracts
+guarded: elapsed 2.0 s, peak group RSS 48 MB

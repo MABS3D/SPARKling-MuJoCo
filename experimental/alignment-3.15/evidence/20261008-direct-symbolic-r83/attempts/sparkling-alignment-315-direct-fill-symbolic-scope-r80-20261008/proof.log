@@ -1,0 +1,320 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:142:07
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:142:69
+
+ info: initialization of "I" proved
+--> mj-constraint_solvers-packed_cholesky.adb:143:07
+
+ info: initialization of "L_Slot" proved
+--> mj-constraint_solvers-packed_cholesky.adb:144:07
+
+ info: initialization of "T_Slot" proved
+--> mj-constraint_solvers-packed_cholesky.adb:144:15
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:146:16
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:146:20
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:146:48
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:146:52
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:147:17
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:147:21
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:147:51
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:147:55
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:148:16
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:148:19
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:148:50
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:148:53
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:149:24
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:149:27
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:150:25
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:151:18
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:151:35
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:151:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:151:48
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:151:50
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:152:27
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:152:54
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:152:56
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:154:33
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:155:18
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:155:33
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:156:31
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:156:33
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:156:33
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:156:44
+
+ medium: range check might fail, cannot prove lower bound for Transpose_Write (R)
+--> mj-constraint_solvers-packed_cholesky.adb:157:20
+  157 |             T_Slot := Transpose_Write (R);
+      |                       ^~~~~~~~~~~~~~~~~~
+      + reason for check: value must fit in the target type of the assignment
+      + possible fix: loop at line 154 should mention Transpose_Write in a loop invariant
+  154 |          for R in reverse 1 .. P.N loop
+      |                                    ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:157:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:158:20
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:158:31
+
+ medium: array index check might fail
+--> mj-constraint_solvers-packed_cholesky.adb:159:27
+  159 |             F.Transpose_Row (T_Slot) := R;
+      |                              ^~~~~~
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 154 should mention T_Slot in a loop invariant
+  154 |          for R in reverse 1 .. P.N loop
+      |                                    ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:159:38
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:160:28
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:161:27
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:161:39
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:162:20
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:162:30
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:163:19
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:163:22
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:164:21
+
+ medium: array index check might fail
+--> mj-constraint_solvers-packed_cholesky.adb:165:28
+  165 |                   while Flag (I) /= R loop
+      |                               ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 162 should mention I in a loop invariant
+  162 |             for C in R+1 .. P.N loop
+      |                                 ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:166:30
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:166:50
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:30
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:51
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:53
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:70
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:72
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:167:83
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:168:46
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:169:44
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:169:46
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:169:73
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:169:75
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:169:96
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:171:29
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:171:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:171:49
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:172:29
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:172:46
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:172:67
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:172:79
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:173:29
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:173:40
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:174:36
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:174:47
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:175:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:176:25
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:177:30
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:178:24
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:178:32
+
+ info: loop variant proved
+--> mj-constraint_solvers-packed_cholesky.adb:179:40
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:186:25
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:187:21
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:187:38
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:187:66
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:188:33
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:188:35
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:188:56
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:188:58
+
+ info: initialization of "F" proved
+--> mj-constraint_solvers-packed_cholesky.ads:114:29
+
+ info: initialization of "Result" proved
+--> mj-constraint_solvers-packed_cholesky.ads:114:51
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:115:06
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:118:18
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:118:46
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.ads:119:17
+
+ medium: postcondition might fail, cannot prove Result = Sparse.Success
+--> mj-constraint_solvers-packed_cholesky.ads:120:25
+  120 |         Post => (Static => Result = Sparse.Success and then Valid_Flat (F) and then Symbolic_Support (H, F));
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.ads:120:82
+Summary logged in /var/tmp/sparkling-alignment-315-direct-fill-symbolic-scope-r80-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 71.8 s, peak group RSS 511 MB

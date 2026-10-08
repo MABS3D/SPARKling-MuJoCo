@@ -225,7 +225,14 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
          Next_Vertex := VA + N; Next_Edge := EA + G.Flex_Edgenum (F);
          Next_Element := TA + G.Flex_Elemnum (F);
          if KA < -1 or else BA < -1 then return; end if;
-         if KA >= 0 and then (Dim = 1 or else KA > M.S.Nflexstiffness - 21 * G.Flex_Elemnum (F)) then return; end if;
+         if KA >= 0 and then (Dim = 1 or else KA > M.S.Nflexstiffness
+           - MJ.Models.Flex_Stiffness_Stride (Dim) * G.Flex_Elemnum (F)) then return; end if;
+         --  SNH has a different cubic/volume energy and PSD tangent. Never
+         --  evaluate its leading metric as if it were the default StVK model.
+         if Dim = 3 and then MJ.Models.Flex_Stiffness_3D_Stride = 24
+           and then KA >= 0 and then G.Flex_Elemnum (F) > 0
+           and then G.Flex_Stiffness (KA + 21) /= 0.0
+         then Result := Unsupported_Feature; return; end if;
          if BA >= 0 and then (Dim /= 2 or else BA > M.S.Nflexbending - 17 * G.Flex_Edgenum (F)) then return; end if;
          S.Flexes (F) := (Dim => Dim, First_Vertex => VA, Nvert => N,
            First_Edge => EA, Nedge => G.Flex_Edgenum (F), First_Element => TA, Nelem => G.Flex_Elemnum (F),
@@ -313,7 +320,8 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
                      P := 0;
                      for R in 0 .. EdA - 1 loop
                         for C2 in R .. EdA - 1 loop
-                           C.M (R, C2) := G.Flex_Stiffness (KA + 21 * (I - TA) + P);
+                           C.M (R, C2) := G.Flex_Stiffness
+                             (KA + MJ.Models.Flex_Stiffness_Stride (Dim) * (I - TA) + P);
                            C.M (C2, R) := C.M (R, C2); P := P + 1;
                         end loop;
                      end loop;
@@ -378,11 +386,7 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
       M.Flexes := Empty; M.Names.Name_Flexadr := Empty_Names;
       Empty := (others => <>); Empty_Names := null;
       Detached := True;
-      M.S.Nflex := 0; M.S.Nflexnode := 0; M.S.Nflexvert := 0; M.S.Nflexedge := 0;
-      M.S.Nflexelem := 0; M.S.Nflexelemdata := 0; M.S.Nflexstiffness := 0;
-      M.S.Nflexbending := 0; M.S.Nflexelemedge := 0; M.S.Nflexshelldata := 0;
-      M.S.Nflexevpair := 0; M.S.Nflextexcoord := 0; M.S.NJfe := 0; M.S.NJfv := 0;
-      M.S.Nefm0dof := 0; M.S.Nefm0L := 0;
+      M.S := MJ.Models.Without_Flex (M.S);
       declare
          VR : MJ.Fields.Load_Result;
          use type MJ.Types.Load_Status;

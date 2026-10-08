@@ -1,0 +1,381 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_POST"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_EFFECTS"
+      }
+    },
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_POST"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Constraint_Solvers.Sparse_Cholesky.Bound_Monotone",
+      "sloc": [
+        {
+          "column": 14,
+          "file": "mj-constraint_solvers-sparse_cholesky.adb",
+          "line": 92
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Constraint_Solvers.Sparse_Cholesky.Scratch_Bound",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-constraint_solvers-sparse_cholesky.ads",
+          "line": 83
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 28,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "flow",
+      "line": 93,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 0,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 28,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 98,
+      "check_tree": {
+      },
+      "col": 28,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 98,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 1,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 46,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 98,
+      "check_tree": {
+      },
+      "col": 46,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 98,
+      "message": {
+        "text": "range check proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 22,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 98,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Unknown\n(sat)",
+              "steps": 1,
+              "time": 1.00000000000000E-06
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 1755,
+              "time": 8.27580000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 22,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 98,
+      "message": {
+        "text": "assertion proved"
+      },
+      "msg_id": 3,
+      "rule": "VC_ASSERT",
+      "severity": "info",
+      "stats": {
+        "altergo": {
+          "count": 1,
+          "max_steps": 1755,
+          "max_time": 8.27580019831657E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 95,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 951,
+              "time": 2.86990000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 95,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 4,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 951,
+          "max_time": 2.86989994347095E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 41,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 95,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 7.07000000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 41,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 95,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 5,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 1,
+          "max_time": 7.06999981775880E-03
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 95,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3795,
+              "time": 8.17100000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 95,
+      "message": {
+        "text": "postcondition proved"
+      },
+      "msg_id": 6,
+      "rule": "VC_POSTCONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 1,
+          "max_steps": 3795,
+          "max_time": 8.17100033164024E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 3.67240011692047E-02,
+      "gnatwhy3.init": 1.98101997375488E-01,
+      "gnatwhy3.register_vcs": 3.98499891161919E-03,
+      "gnatwhy3.run_vcs": 3.00000010611257E-06,
+      "gnatwhy3.save_session": 6.29000016488135E-04,
+      "gnatwhy3.schedule_vcs": 2.75079999119043E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.97600007615983E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 8.39990025269799E-05,
+      "gnatwhy3.transformations.discriminate_if_poly": 3.00000010611257E-06,
+      "gnatwhy3.transformations.eliminate_algebraic": 2.00799899175763E-03,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 2.65000009676442E-04,
+      "gnatwhy3.transformations.eliminate_builtin": 3.91699885949492E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 8.12000012956560E-04,
+      "gnatwhy3.transformations.eliminate_epsilon": 1.01200002245605E-03,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 1.95000000530854E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 7.45000026654452E-04,
+      "gnatwhy3.transformations.eliminate_literal": 1.27600005362183E-03,
+      "gnatwhy3.transformations.eliminate_projections_sums": 3.30000009853393E-04,
+      "gnatwhy3.transformations.eliminate_recursion": 7.67000019550323E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.inline_trivial": 2.02079992741346E-02,
+      "gnatwhy3.transformations.introduce_premises": 2.70000000455184E-05,
+      "gnatwhy3.transformations.monomorphise_goal": 3.99900000047637E-06,
+      "gnatwhy3.transformations.remove_unused": 5.42199891060591E-03,
+      "gnatwhy3.transformations.simplify_formula": 1.60800002049655E-03,
+      "gnatwhy3.transformations.split_goal_wp_conj": 3.03200003691018E-03,
+      "gnatwhy3.transformations.split_premise_right": 8.78999009728432E-04
+    },
+    "global": {
+      "flow analysis": 2.92099989019334E-03,
+      "globals (advanced)": 6.15199981257319E-03,
+      "globals (basic)": 4.44300007075071E-03,
+      "init_why_sections": 9.91999986581504E-04,
+      "marking": 1.73100002575666E-03,
+      "properties (advanced)": 1.30000000353903E-04,
+      "translation of standard": 8.39999993331730E-04
+    }
+  },
+  "warn_error": [
+    {
+      "check_tree": {
+      },
+      "col": 48,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 322,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ]
+}

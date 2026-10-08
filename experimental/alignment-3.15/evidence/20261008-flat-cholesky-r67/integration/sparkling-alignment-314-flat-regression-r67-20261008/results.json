@@ -1,0 +1,140 @@
+{
+  "reference": "3.14.0",
+  "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "commands": [
+    {
+      "label": "build-state",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-state-integration/flex_state.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 86.71386831999916,
+      "log_sha256": "47aa193fb1875d4d68ea86611eefeef7b0e1cb8b0d0784a10c6adda778ae4c89"
+    },
+    {
+      "label": "build-forces",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-elasticity-integration/flex.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 71.38734529799694,
+      "log_sha256": "bc92475f16ea7029d2012a5bec421565a117c8372ebfe11abb826b0196c928bc"
+    },
+    {
+      "label": "build-constrained",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 39.24719366499994,
+      "log_sha256": "f230c363e1e53e9911a4d41620f40be37688843fef4882925cf6722f7cf8ba06"
+    },
+    {
+      "label": "state",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-state-integration/tests/compare.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/state-build/validation/bin/flex_state_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/state",
+        "--samples",
+        "2"
+      ],
+      "exit": 0,
+      "seconds": 1.0722660989995347,
+      "log_sha256": "101a552d620f0054b5e6fe9cdc944eede8808f6f7b1fa35a7df346f496c4cf34"
+    },
+    {
+      "label": "forces",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-elasticity-integration/tests/compare.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/force-build/validation/bin/flex_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/forces",
+        "--samples",
+        "2",
+        "--steps",
+        "100"
+      ],
+      "exit": 0,
+      "seconds": 8.873588970000128,
+      "log_sha256": "c1a4e028779ae46868c54b89c425c6bfde5414a2f57a00c5718c02bef8547e25"
+    },
+    {
+      "label": "constrained",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/force-build/validation/bin/flex_constrained_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-flat-regression-r67-20261008/constrained",
+        "--samples",
+        "2",
+        "--steps",
+        "100"
+      ],
+      "exit": 0,
+      "seconds": 147.17427285499798,
+      "log_sha256": "87762301b489b46f539493ed4ad2e1dd4edc75ade45464408380d663bb97bef4"
+    }
+  ],
+  "manifest_sha256": "257a07f41613a0dba25b2e91f04b68dec704fa7ee0eec4cb3e286ce5dd0de41b",
+  "source_hashes_unchanged": true,
+  "complete": true,
+  "scope": "Owned FLEX metadata/state, geometric contacts and force/constraint trajectories; no global Gold or timing claim."
+}

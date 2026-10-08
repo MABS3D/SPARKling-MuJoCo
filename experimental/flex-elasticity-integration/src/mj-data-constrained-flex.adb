@@ -136,11 +136,7 @@ package body MJ.Data.Constrained.Flex with SPARK_Mode is
       M.Equalities := Empty_Equalities; M.Names.Name_Eqadr := Empty_Eq_Names;
       Empty := (others => <>); Empty_Names := null; Detached := True;
       Empty_Equalities := (others => <>); Empty_Eq_Names := null; M.S.Neq := 0;
-      M.S.Nflex := 0; M.S.Nflexnode := 0; M.S.Nflexvert := 0; M.S.Nflexedge := 0;
-      M.S.Nflexelem := 0; M.S.Nflexelemdata := 0; M.S.Nflexstiffness := 0;
-      M.S.Nflexbending := 0; M.S.Nflexelemedge := 0; M.S.Nflexshelldata := 0;
-      M.S.Nflexevpair := 0; M.S.Nflextexcoord := 0; M.S.NJfe := 0; M.S.NJfv := 0;
-      M.S.Nefm0dof := 0; M.S.Nefm0L := 0;
+      M.S := MJ.Models.Without_Flex (M.S);
       declare VR : MJ.Fields.Load_Result; begin
          MJ.Validation.Validate (M, (Contact_Cap => Max_C), VR);
          if VR.Status = OK then Constrained.Create (M, E.Base, Result);

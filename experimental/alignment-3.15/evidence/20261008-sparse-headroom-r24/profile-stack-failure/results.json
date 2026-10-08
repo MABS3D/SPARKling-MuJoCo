@@ -1,0 +1,31 @@
+{
+  "reference": "3.15.0",
+  "manifest_sha256": "77100cd293aadf03b2abc4fc278df73cea94b309655115f5c6157a03fd09ec03",
+  "runner_sha256": "7a34640e7368f823b0b1d7bf3d2a2847ffef95b8bcc8d15e62f03d3a1a67caea",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "project_flags": "project Flex_Constrained is\n   Build_Root := external (\"FLEX_BUILD_ROOT\", \"/var/tmp/sparkling-flex-constrained\");\n   Mode := external (\"FLEX_MODE\", \"validation\");\n   for Source_Dirs use (\"src\", \"tests\", \"../../src\", \"../../src/gen\",\n     \"../smooth/src\", \"../spatial-tendon-candidate/src\", \"../muscle-candidate/src\",\n     \"../rigid-collision-candidate/src\", \"../constraint-assembly-candidate/src\",\n     \"../constraint-solvers-candidate/src\", \"../joint-limit-candidate/src\",\n     \"../frictionless-contact-candidate/src\", \"../constrained-step/src\",\n     \"../advanced-collision-candidate/src\", \"../flex-state-integration/src\", \"../sdf-step/src\");\n   for Object_Dir use Build_Root & \"/\" & Mode & \"/obj\";\n   for Exec_Dir use Build_Root & \"/\" & Mode & \"/bin\";\n   for Main use (\"flex_constrained_probe.adb\");\n   for Create_Missing_Dirs use \"True\";\n   Flags := (\"-gnat2022\", \"-ffp-contract=off\");\n   case Mode is\n      when \"release\" => Flags := Flags & (\"-O3\", \"-gnatn\", \"-march=native\");\n      when others => Flags := Flags & (\"-O1\", \"-g\", \"-gnata\", \"-gnato\", \"-gnatVa\");\n   end case;\n   package Compiler is\n      for Default_Switches (\"Ada\") use Flags;\n   end Compiler;\n   package Binder is\n      for Switches (\"Ada\") use (\"-Es\");\n   end Binder;\n   package Linker is\n      for Default_Switches (\"Ada\") use (\"-lm\");\n   end Linker;\nend Flex_Constrained;\n",
+  "command": [
+    "gprbuild",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-sparse-args-release-r15-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-j1",
+    "-cargs:Ada",
+    "-pg",
+    "-g",
+    "-largs",
+    "-pg"
+  ],
+  "cpu": 0,
+  "model": "element_elastic_cross_elliptic_6",
+  "batches": 1000,
+  "complete": false,
+  "scope": "Instrumented full-process cost attribution; no release timing or proof claim",
+  "build_exit": 0,
+  "build_seconds": 84.95088677100011,
+  "build_log_sha256": "ae79110daa25509f1d682712686b66532a17b53160fe7a19d75be31522caabce",
+  "run_command": [
+    "/var/tmp/sparkling-alignment-315-sparse-profile-r15-20261007/build/release/bin/flex_constrained_probe",
+    "/var/tmp/sparkling-alignment-315-sparse-profile-r15-20261007/element_elastic_cross_elliptic_6.mjb",
+    "benchmark"
+  ]
+}

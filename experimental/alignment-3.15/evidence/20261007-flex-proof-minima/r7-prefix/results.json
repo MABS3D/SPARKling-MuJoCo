@@ -1,0 +1,75 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Prefix_Count",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flex-proof-r7-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+    "-u",
+    "mj-flex_collisions-selection.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-flex_collisions-selection.ads:5"
+  ],
+  "exit": 0,
+  "seconds": 10.09530461399845,
+  "manifest_sha256": "b8b5ee61978e336cec34cdfceead1c1299ee46cfb9588458dd6c66bd5790568c",
+  "runner_sha256": "653a01597d6b6b07bb532c34964651fef0990b093046964f85b54555cd224de6",
+  "log_sha256": "84dbb9b5539f1d18894092aa0f983c3f491023961b0aea013026e5cd66ab81d6",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 13,
+  "proof_checks": 11,
+  "flow_checks": 2,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 5,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 5,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Flex_Collisions.Selection.Prefix_Count"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": true
+}

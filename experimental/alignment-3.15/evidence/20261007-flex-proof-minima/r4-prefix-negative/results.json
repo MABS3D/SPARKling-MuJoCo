@@ -1,0 +1,130 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Prefix_Count",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flex-r4-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+    "-u",
+    "mj-flex_collisions-selection.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-flex_collisions-selection.ads:3"
+  ],
+  "exit": 1,
+  "seconds": 12.861051583000517,
+  "manifest_sha256": "6aefc35356c0e457073bec6cba6075e7c41e69eeda579bee3ee073e60fab3a5a",
+  "runner_sha256": "653a01597d6b6b07bb532c34964651fef0990b093046964f85b54555cd224de6",
+  "log_sha256": "5742df2993aa8d5cf753ffa29379660ddb336042f45298d174d7a6f99e3f7768",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 13,
+  "proof_checks": 12,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 51,
+      "check_file": "mj-flex_collisions-selection.ads",
+      "check_line": 6,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 1,
+              "time": 0.003994
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Unknown\n(unknown)",
+              "steps": 206,
+              "time": 0.014664
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.004077
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 51,
+      "entity": 1,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "prover",
+      "line": 6,
+      "message": {
+        "text": "range check might fail, cannot prove upper bound for Selected'Length"
+      },
+      "msg_id": 11,
+      "rule": "VC_RANGE_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 3,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-flex_collisions-selection.ads",
+      "how_proved": "trivial",
+      "line": 3,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Flex_Collisions.Selection.Prefix_Count"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

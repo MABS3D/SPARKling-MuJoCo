@@ -1,0 +1,36 @@
+Phase 1 of 3: generation of data representation information ...
+generation of data representation information failed
+continuing analysis with partial data representation
+for details, see log file gnatprove/data_representation_generation.log
+Phase 2 of 3: generation of Global contracts ...
+ error: incompatible ghost policies in effect
+--> mj-constraint_solvers-cone_kernels.adb:16:42
+   16 |                pragma Loop_Invariant (Acc = Fold_Value (L, J, C, K - 1));
+      |                                             ^~~~~~~~~~
+      + "Fold_Value" declared at mj-constraint_solvers-cone_kernels.ads:18 with ghost policy "Ignore"
+      --> mj-constraint_solvers-cone_kernels.ads:18:13
+   18 |       function Fold_Value (L : Local_Matrix; J : Local_Vector;
+      |                ^
+      + "Fold_Value" used at line 16 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-constraint_solvers-cone_kernels.adb:22:37
+   22 |                   pragma Assert (Acc = Fold_Value (L, J, C, K));
+      |                                        ^~~~~~~~~~
+      + "Fold_Value" declared at mj-constraint_solvers-cone_kernels.ads:18 with ghost policy "Ignore"
+      --> mj-constraint_solvers-cone_kernels.ads:18:13
+   18 |       function Fold_Value (L : Local_Matrix; J : Local_Vector;
+      |                ^
+      + "Fold_Value" used at line 22 with ghost policy "Check"
+
+ error: incompatible ghost policies in effect
+--> mj-constraint_solvers-cone_kernels.adb:27:25
+   27 |               Output (P) = Fold_Value (L, J, P, Dim - P + 1));
+      |                            ^~~~~~~~~~
+      + "Fold_Value" declared at mj-constraint_solvers-cone_kernels.ads:18 with ghost policy "Ignore"
+      --> mj-constraint_solvers-cone_kernels.ads:18:13
+   18 |       function Fold_Value (L : Local_Matrix; J : Local_Vector;
+      |                ^
+      + "Fold_Value" used at line 27 with ghost policy "Check"
+gnatprove: error during generation of Global contracts
+guarded: elapsed 2.0 s, peak group RSS 49 MB

@@ -1,0 +1,75 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Fold_Value",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-cone-fold-proof-r3-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-cone_kernels.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-cone_kernels.ads:18"
+  ],
+  "exit": 0,
+  "seconds": 9.11231542999667,
+  "manifest_sha256": "37dac1a3066157928e36c9288baaf829a0c9cc57db71ad8e2a47426efa6f7331",
+  "runner_sha256": "f167d46a79a86a65c9dc121e207cb5ec93f40a5822ba0f085cc81384e69a7e59",
+  "log_sha256": "210f71cbca1c2fd268dfa45e5bc7ef35f8f84b009241690b07d2475f5b1a0c12",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 16,
+  "proof_checks": 14,
+  "flow_checks": 2,
+  "open": [],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-constraint_solvers-cone_kernels.ads",
+      "how_proved": "trivial",
+      "line": 18,
+      "message": {
+        "text": "function contract might not be available on recursive calls [contracts-recursive]"
+      },
+      "rule": "contracts-recursive",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 13,
+      "file": "mj-constraint_solvers-cone_kernels.ads",
+      "how_proved": "trivial",
+      "line": 18,
+      "message": {
+        "text": "expression function body of subprograms with a numeric variant might not be available on recursive calls [numeric-variant]"
+      },
+      "rule": "numeric-variant",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Cone_Kernels.Fold_Value"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": true
+}

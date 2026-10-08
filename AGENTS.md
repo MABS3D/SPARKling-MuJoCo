@@ -7,8 +7,11 @@ project priority. Prioritize this alignment when planning and implementing work;
 do not extend the translation against an outdated baseline without checking the
 corresponding upstream changes.
 
-- Last verified on 2026-09-23: [MuJoCo 3.14.0](https://github.com/google-deepmind/mujoco/releases/tag/3.14.0),
-  commit `9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`.
+- Last verified on 2026-10-08: [MuJoCo 3.15.0](https://github.com/google-deepmind/mujoco/releases/tag/3.15.0),
+  commit `9ea3cdfcae93bf2cc4dc0e1a1627c5a39a1e06e5`.
+  The production pin remains 3.14.0 (`9ecbb9d7b5ee623f54745638d36799ff90e6f7cd`)
+  while the coordinated 3.15 migration is verified in
+  [the alignment candidate](experimental/alignment-3.15/README.md).
 - The baseline found during that review was MuJoCo 3.12.0, commit
   `13827e9ee56f097f57acf69ae52b078f9839682d`. Recheck the latest stable release
   before migration; do not treat the development branch as a stable release.

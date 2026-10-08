@@ -1,0 +1,100 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: implicit aspect Always_Terminates on "Flat_Bounds" has been proved, subprogram will terminate
+--> mj-constraint_solvers-packed_cholesky.ads:23:13
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:24:54
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:24:59
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.ads:24:62
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:25:28
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:25:65
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:27:20
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:27:62
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:27:78
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:28:30
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:28:37
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.ads:28:43
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:29:30
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:29:44
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:29:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:30:40
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:30:54
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:30:75
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:31:45
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:31:62
+
+ medium: overflow check might fail, cannot prove upper bound for F.Address (R-1)+F.Length (R-1)
+--> mj-constraint_solvers-packed_cholesky.ads:31:65
+   31 |             and then (if R > 1 then F.Address (R) = F.Address (R-1)+F.Length (R-1)
+      |                                                     ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 23 should mention F in a precondition
+   23 |       function Flat_Bounds (F : Flat_Pattern) return Boolean is
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:31:77
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:32:42
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:32:69
+
+ medium: overflow check might fail, cannot prove upper bound for F.Transpose_Address (R-1)+F.Transpose_Length (R-1)
+--> mj-constraint_solvers-packed_cholesky.ads:32:72
+   32 |               and then F.Transpose_Address (R) = F.Transpose_Address (R-1)+F.Transpose_Length (R-1))))
+      |                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: result of addition must fit in a 32-bits machine integer
+      + possible fix: subprogram at line 23 should mention F in a precondition
+   23 |       function Flat_Bounds (F : Flat_Pattern) return Boolean is
+      |       ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:32:94
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:33:28
+Summary logged in /var/tmp/sparkling-alignment-315-flat-flat-bounds-scope-r69-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 22.9 s, peak group RSS 289 MB

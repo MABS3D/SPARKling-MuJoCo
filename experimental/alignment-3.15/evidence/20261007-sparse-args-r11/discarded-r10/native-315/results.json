@@ -1,0 +1,55 @@
+{
+  "complete": true,
+  "reference": "3.15.0",
+  "source_hashes_unchanged": true,
+  "manifest_sha256": "3cab7c9608c27344f5374f87bf2b5debbb013e7d1d94d508edc39b0cb03dab0d",
+  "runner_sha256": "b2f550dcbca8d8f4bb9ddf0422e011e13c3c88ef1248601daefb461a7efe7d85",
+  "commands": [
+    {
+      "label": "build",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-315-sparse-native-r10-20261007/source/experimental/constraint-solvers-candidate/solvers.gpr",
+        "sparse_cholesky_probe.adb",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 10.621731017999991,
+      "log_sha256": "6471824639e131da945496da9eadb29c2c461b158d6c20c91a8e35d3c2bbb149"
+    },
+    {
+      "label": "native",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "240",
+        "--",
+        "/var/tmp/sparkling-movement315-env/bin/python",
+        "/var/tmp/sparkling-alignment-315-sparse-native-r10-20261007/source/experimental/constraint-solvers-candidate/tests/test_sparse_cholesky.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-315-sparse-native-r10-20261007/build/release/bin/sparse_cholesky_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-315-sparse-native-r10-20261007/cases",
+        "--reference",
+        "/var/tmp/sparkling-alignment-315-foundation-r6-20261007/source/mujoco",
+        "--reference-version",
+        "3.15.0"
+      ],
+      "exit": 0,
+      "seconds": 2.6066419220005628,
+      "log_sha256": "795233ab2b6a23f77ac666017e30c84baf667dd0c8b48161602b30b22e1739a8"
+    }
+  ],
+  "binary_sha256": "b9290be2bc16dfc513964d562e47723d024ad63221811bceb089c6de89794db1"
+}

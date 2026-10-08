@@ -1,0 +1,132 @@
+[
+  {
+    "label": "build-state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 86.14447998499963,
+    "log_sha256": "b9e1451d280258261445121886df2e84ab95bd61849bf9ed2655a31c5f1c4757"
+  },
+  {
+    "label": "build-forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-elasticity-integration/flex.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 68.66981264900096,
+    "log_sha256": "9355a8e9f1703a6c37dc64d9f636a4a2529b6d0852c6832e3664fde6a795a40d"
+  },
+  {
+    "label": "build-constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 37.00379784799952,
+    "log_sha256": "3f73fa9385f3db0e72a4580c71c64efbda0a4a40948beebc6881c7971417f2b5"
+  },
+  {
+    "label": "state",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-state-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/state-build/validation/bin/flex_state_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/state",
+      "--samples",
+      "2"
+    ],
+    "exit": 0,
+    "seconds": 1.0639577500005544,
+    "log_sha256": "6bdc0c4a607eeb4c229d37c5693a3a7babc7903ec78b2f6a2c61ee9f506b0e3b"
+  },
+  {
+    "label": "forces",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-elasticity-integration/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/force-build/validation/bin/flex_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/forces",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 8.58243899900117,
+    "log_sha256": "541f65e1322664dbce75862c3cca2a9af1a87578c478dc91d4416e076be68fb0"
+  },
+  {
+    "label": "constrained",
+    "command": [
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement-env/bin/python",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/force-build/validation/bin/flex_constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-314-cone-fold-regression-r8-20261007/constrained",
+      "--samples",
+      "2",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 180.80931202099964,
+    "log_sha256": "13c6c354af61a1aa294ea712cbe69a9e645d95c16fce605f543ec1141f196afb"
+  }
+]

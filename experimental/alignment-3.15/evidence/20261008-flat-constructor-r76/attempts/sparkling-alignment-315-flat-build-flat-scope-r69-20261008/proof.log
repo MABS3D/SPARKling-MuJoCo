@@ -1,0 +1,277 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:510:16
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:510:20
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:511:26
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:511:30
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:512:16
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:512:19
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:513:23
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:513:26
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:514:24
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:514:27
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:515:07
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:515:26
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:516:07
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:516:36
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:518:47
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:519:57
+
+ info: initialization of "Before_Columns" proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:10
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:10
+
+ info: initialization of "Before_Rows" proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:26
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:58
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:63
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.adb:520:66
+
+ info: initialization of "Before_Slots" proved
+--> mj-constraint_solvers-packed_cholesky.adb:521:10
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:521:10
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:521:42
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:521:47
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.adb:521:50
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:524:10
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:524:26
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:525:10
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:525:36
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:526:25
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:526:29
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:527:22
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:527:26
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:528:23
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:528:27
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:529:10
+
+ info: non-aliasing of formal parameters "Address" and "Columns" proved
+--> mj-constraint_solvers-packed_cholesky.adb:529:33
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:529:33
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:530:10
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:530:39
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:10
+
+ info: non-aliasing of formal parameters "Address" and "Rows" proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:35
+
+ info: non-aliasing of formal parameters "Address" and "Slots" proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:35
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:35
+
+ info: non-aliasing of formal parameters "Transpose_Address" and "Rows" proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:46
+
+ info: non-aliasing of formal parameters "Transpose_Address" and "Slots" proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:46
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:46
+
+ info: non-aliasing of formal parameters "Rows" and "Slots" proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:70
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:531:87
+
+ medium: precondition might fail, cannot prove Rows (Transpose_Address (R)+K) = P.Transpose_Row (R, K)
+--> mj-constraint_solvers-packed_cholesky.adb:532:10
+  532 |             Transpose_Prefix_Progress (P, F.Address, F.Transpose_Address,
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  533 |               Before_Rows, F.Transpose_Row, Before_Slots, F.Transpose_Slot, R);
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_solvers-packed_cholesky.adb:393
+      + possible fix: loop invariant at line 534 should mention Before_Rows and Before_Slots
+  534 |             pragma Loop_Invariant (Static => F.Address = Saved_Address and then F.Transpose_Address = Saved_Transpose_Address);
+      |             ^
+      + provers reached time limit before completing the proof
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:532:41
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:532:52
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:533:42
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:533:57
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:534:43
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:534:43
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:535:43
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:535:43
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:536:43
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:536:43
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:536:62
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:537:43
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:537:43
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:537:72
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:538:43
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:538:43
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:538:43
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:538:63
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:539:43
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove Rows (Transpose_Address (R)+K) = P.Transpose_Row (R, K)
+--> mj-constraint_solvers-packed_cholesky.adb:539:43
+  539 |             pragma Loop_Invariant (Static => Transpose_Prefix
+      |                                              ^~~~~~~~~~~~~~~~
+  540 |               (P, F.Address, F.Transpose_Address, F.Transpose_Row, F.Transpose_Slot, R));
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_solvers-packed_cholesky.adb:393
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:539:43
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:540:17
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:540:28
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:540:66
+
+ medium: precondition might fail, cannot prove Rows (Transpose_Address (R)+K) = P.Transpose_Row (R, K)
+--> mj-constraint_solvers-packed_cholesky.adb:543:07
+  543 |          Flat_Validity (P, F);
+      |          ^~~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_solvers-packed_cholesky.adb:393
+      + provers reached time limit before completing the proof
+
+ info: initialization of "F" proved
+--> mj-constraint_solvers-packed_cholesky.ads:67:39
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:68:06
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:69:83
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:69:88
+
+ info: division check proved
+--> mj-constraint_solvers-packed_cholesky.ads:69:91
+
+ medium: postcondition might fail, cannot prove F.Column (F.Address (R)+K) = P.Column (R, K)
+--> mj-constraint_solvers-packed_cholesky.ads:70:25
+   70 |         Post => (Static => Matches_Flat (P, F));
+      |                            ^~~~~~~~~~~~~~~~~~
+      + in inlined expression function body at mj-constraint_solvers-packed_cholesky.ads:60
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-alignment-315-flat-build-flat-scope-r69-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 140.1 s, peak group RSS 663 MB

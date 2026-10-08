@@ -1,0 +1,71 @@
+{
+  "reference": "3.15.0",
+  "source_count": 445,
+  "minimum_checks": 228,
+  "minimum_scopes": 12,
+  "minimum_stage": 108,
+  "final_stage": 109,
+  "gram_passed": 237,
+  "gram_actual_c_bitwise": 233,
+  "transpose_actual_c_cases": 237,
+  "mass_passed": 180,
+  "factor_passed": 407,
+  "release_passed": 390,
+  "production_passed": 366,
+  "numerical_comparisons": 1580,
+  "actual_c_numerical_comparisons": 1576,
+  "whole_gram_gold_closed": false,
+  "whole_transpose_gold_closed": false,
+  "whole_factor_gold_closed": false,
+  "whole_solver_gold_closed": false,
+  "whole_dynamics_gold_closed": false,
+  "production_315_migrated": false,
+  "goal_complete": false,
+  "pending": [
+    {
+      "stage": 109,
+      "scope": "Build_Gram",
+      "receipt": "attempts/sparkling-alignment-315-rowgram-gram-scope-r109-20261008/results.json",
+      "checks": null,
+      "passed": false,
+      "report_rejected": "Expected exactly one fresh scoped report",
+      "open": []
+    },
+    {
+      "stage": 109,
+      "scope": "Build_Transpose",
+      "receipt": "attempts/sparkling-alignment-315-rowgram-transpose-scope-r109-20261008/results.json",
+      "checks": 75,
+      "passed": false,
+      "report_rejected": null,
+      "open": [
+        {
+          "file": "mj-constraint_solvers-hessian_assembly.adb",
+          "line": 25,
+          "message": "range check might fail, cannot prove upper bound for P.T_Width (C)+1"
+        },
+        {
+          "file": "mj-constraint_solvers-hessian_assembly.adb",
+          "line": 28,
+          "message": "range check might fail, cannot prove upper bound for P.T_Address (C-1)+P.T_Width (C-1)"
+        },
+        {
+          "file": "mj-constraint_solvers-hessian_assembly.adb",
+          "line": 33,
+          "message": "range check might fail, cannot prove upper bound for Cursor (C)+1"
+        },
+        {
+          "file": "mj-constraint_solvers-hessian_assembly.adb",
+          "line": 34,
+          "message": "array index check might fail"
+        },
+        {
+          "file": "mj-constraint_solvers-hessian_assembly.ads",
+          "line": 50,
+          "message": "postcondition might fail, cannot prove P.T_Address (C) <= P.Stored"
+        }
+      ]
+    }
+  ],
+  "scope": "Single-row C sparse Gram accumulation and flat scatter, across scalar and folded elliptic paths. C supernode batching, native slot-wise Hessian, general sparse mass union and legacy dense rank-update bridge remain pending."
+}

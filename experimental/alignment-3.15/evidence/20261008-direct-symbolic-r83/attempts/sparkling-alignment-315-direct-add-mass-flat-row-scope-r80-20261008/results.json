@@ -1,0 +1,320 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Add_Mass_Flat_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r80-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:979"
+  ],
+  "exit": 1,
+  "seconds": 51.79757090399653,
+  "manifest_sha256": "f382b653e6ac13b3315609ad50d14e438d71a090ef77a243d4b6d0a68ba103a9",
+  "runner_sha256": "2548ea23101926c93cf8bfa8d230cc743ac88917797b17ee287dd80d1b4a1dac",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "51172da806ccce382185447296d0d7d8798712164928ac6b2a247df41a3179b0",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 57,
+  "proof_checks": 60,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 10,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 995,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 364,
+              "time": 0.056652
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 10,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 995,
+      "message": {
+        "text": "precondition might fail, cannot prove Ordered_Flat (Columns, First, Last, N)"
+      },
+      "msg_id": 10,
+      "rule": "VC_PRECONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 40,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 998,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 370,
+              "time": 0.046088
+            },
+            "Z3": {
+              "result": "Unknown\n(unknown)",
+              "steps": 56807,
+              "time": 0.809752
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 120,
+              "time": 0.027859
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 40,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 998,
+      "message": {
+        "text": "array index check might fail"
+      },
+      "msg_id": 14,
+      "rule": "VC_INDEX_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 12,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1001,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 11794,
+              "time": 0.702388
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 8569,
+              "time": 0.560326
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 29977,
+              "time": 2.72135
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 8570,
+              "time": 0.577178
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 22977,
+              "time": 2.15393
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 55,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1002,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (I, J) = (if I = R and then (for some Q in 1 .. K => F.Column (F.Address (R)+Q) = J) then Before (I, J)+M (I, J) else Before (I, J))"
+      },
+      "msg_id": 35,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 987,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 6337,
+              "time": 0.182151
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 3500,
+              "time": 0.130087
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.036806
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 3492,
+              "time": 0.116751
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.050541
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 49,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 988,
+      "message": {
+        "text": "postcondition might fail, cannot prove H (I, J) = (if I = R and then (for some K in 1 .. F.Length (R) => F.Column (F.Address (R)+K) = J) then H'Old (I, J)+M (I, J) else H'Old (I, J))"
+      },
+      "msg_id": 60,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Add_Mass_Flat_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

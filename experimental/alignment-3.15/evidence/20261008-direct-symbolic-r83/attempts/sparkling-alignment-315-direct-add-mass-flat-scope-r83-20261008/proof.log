@@ -1,0 +1,174 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1154:07
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1154:49
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1157:19
+
+ info: length check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1157:22
+
+ medium: precondition might fail, cannot prove H (I, J) in -2.0e100 .. 2.0e100
+--> mj-constraint_solvers-packed_cholesky.adb:1158:10
+ 1158 |             Add_Mass_Flat_Row (H, M, F, R);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: precondition might fail, cannot prove After (I, J) = (if I = R and then (for some K in 1 .. F.Length (R) => F.Column (F.Address (R)+K) = J) then Previous (I, J)+M (I, J) else Previous (I, J))
+--> mj-constraint_solvers-packed_cholesky.adb:1159:10
+ 1159 |             Flat_Mass_Progress (Before, Previous, H, M, F, R);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop invariant at line 1160 should mention Previous
+ 1160 |             pragma Loop_Invariant (Static =>
+      |             ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1162:17
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1162:20
+
+ medium: loop invariant might fail in first iteration, cannot prove H (I, J) = (if I <= R and then (for some Q in 1 .. F.Length (I) => F.Column (F.Address (I)+Q) = J) then Before (I, J)+M (I, J) else Before (I, J))
+--> mj-constraint_solvers-packed_cholesky.adb:1162:55
+ 1162 |                 H (I, J) in -2.0e100 .. 2.0e100 and then H (I, J) =
+      |                                                          ^~~~~~~~~~
+      :
+ 1164 |                    then Before (I, J)+M (I, J) else Before (I, J)))));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration, cannot prove H (I, J) = (if I <= R and then (for some Q in 1 .. F.Length (I) => F.Column (F.Address (I)+Q) = J) then Before (I, J)+M (I, J) else Before (I, J))
+--> mj-constraint_solvers-packed_cholesky.adb:1162:55
+ 1162 |                 H (I, J) in -2.0e100 .. 2.0e100 and then H (I, J) =
+      |                                                          ^~~~~~~~~~
+      :
+ 1164 |                    then Before (I, J)+M (I, J) else Before (I, J)))));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1162:58
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1162:61
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1163:66
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1163:93
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1163:95
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1163:95
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:30
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:33
+
+ medium: float overflow check might fail
+--> mj-constraint_solvers-packed_cholesky.adb:1164:35
+ 1164 |                    then Before (I, J)+M (I, J) else Before (I, J)))));
+      |                         ~~~~~~~~~~~~~^~~~~~~~
+      + reason for check: result of floating-point addition must be bounded
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:39
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:42
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:58
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1164:61
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:190:06
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:192:18
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:192:46
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:194:13
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:194:16
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:194:54
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:194:57
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:196:11
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:196:14
+
+ medium: postcondition might fail, cannot prove H (I, J) = (if (for some K in 1 .. F.Length (I) => F.Column (F.Address (I)+K) = J) then H'Old (I, J)+M (I, J) else H'Old (I, J))
+--> mj-constraint_solvers-packed_cholesky.ads:196:49
+  196 |           H (I, J) in -2.0e100 .. 2.0e100 and then H (I, J) =
+      |                                                    ^~~~~~~~~~
+      :
+  198 |              then H'Old (I, J)+M (I, J) else H'Old (I, J)))));
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + provers reached time and memory limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:196:52
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:196:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:197:44
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:197:71
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:197:73
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:197:73
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:23
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:26
+
+ info: float overflow check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:28
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:32
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:35
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:50
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.ads:198:53
+Summary logged in /var/tmp/sparkling-alignment-315-direct-add-mass-flat-scope-r83-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 124.8 s, peak group RSS 350 MB

@@ -1,0 +1,327 @@
+{
+  "reference": "3.14.0",
+  "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "ada_tests": 10,
+  "commands": [
+    {
+      "label": "xmacro_dump-build",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "gcc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-I",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/mujoco/include",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/xmacro_dump.c",
+        "-o",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/xmacro_dump"
+      ],
+      "exit": 0,
+      "seconds": 0.5240970960003324,
+      "log_sha256": "be82d8536efd26882197d83a9e5c068f7786de5001feef4edd845289d5d7997e"
+    },
+    {
+      "label": "xmacro_dump-run",
+      "command": [
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/xmacro_dump",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/fields.txt"
+      ],
+      "exit": 0,
+      "seconds": 0.0014639210021414328,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "layout_dump-build",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "gcc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-I",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/mujoco/include",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/layout_dump.c",
+        "-o",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/layout_dump"
+      ],
+      "exit": 0,
+      "seconds": 0.5248140829971817,
+      "log_sha256": "c004ab897fc62f17577c201c369ad74cf4ef4a141b28b36e92e3bf6ac6354612"
+    },
+    {
+      "label": "layout_dump-run",
+      "command": [
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/layout_dump",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/layout.txt"
+      ],
+      "exit": 0,
+      "seconds": 0.001080941001418978,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "generate",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/gen.py"
+      ],
+      "exit": 0,
+      "seconds": 0.03688580599919078,
+      "log_sha256": "fe81e4cbd8d445179179b8026af247a90764946e6f658434adb2233190ae436f"
+    },
+    {
+      "label": "compile-corpus",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/oracle.py",
+        "corpus"
+      ],
+      "exit": 0,
+      "seconds": 4.5386574500007555,
+      "log_sha256": "46f71e7dd692cafc27e66cb5bfe10764372cb2bec2d7367c49a8d6b58521a802"
+    },
+    {
+      "label": "build-validation",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "tests/tests.gpr",
+        "-XSPARKLING_BUILD_MODE=validation",
+        "-j1",
+        "-p"
+      ],
+      "exit": 0,
+      "seconds": 39.16341217399895,
+      "log_sha256": "65ee39ef3444161d3775cf05bf06cfcd5de900c0af9fdbb63dafeca089f18541"
+    },
+    {
+      "label": "test_types",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_types"
+      ],
+      "exit": 0,
+      "seconds": 0.27443827300157864,
+      "log_sha256": "4f5b0a9b5df0528b130f6598e23c5776e5c4a32b36d9135688995985f232e8ae"
+    },
+    {
+      "label": "test_model_alloc",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_model_alloc"
+      ],
+      "exit": 0,
+      "seconds": 0.2731247070005338,
+      "log_sha256": "4f9493303a89bee195d60a0abbd48e6deb66d2ad369b469e9de57cf9e97b1a36"
+    },
+    {
+      "label": "test_bytes",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_bytes"
+      ],
+      "exit": 0,
+      "seconds": 0.2727799589993083,
+      "log_sha256": "c4b2970df6d9de6e0705103303b28dc5351f1d410de2d3154be6303d87a49950"
+    },
+    {
+      "label": "test_parse_raw",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_parse_raw"
+      ],
+      "exit": 0,
+      "seconds": 0.2721887429979688,
+      "log_sha256": "cf3f9bf8c2e16512b839bf1ade05afb1cc6fa6f04d8f7c79504c718cbf4df649"
+    },
+    {
+      "label": "test_corpus_raw",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_corpus_raw"
+      ],
+      "exit": 0,
+      "seconds": 1.2778575960001035,
+      "log_sha256": "cddd659818c62e0d91449e353b2adbfb8ab3b861cc2ebddda8744b119b95dcb7"
+    },
+    {
+      "label": "test_validate",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_validate"
+      ],
+      "exit": 0,
+      "seconds": 0.27360141100143665,
+      "log_sha256": "35b78a1e62ecffad8a5834aa20a1154972f78d9c520427db5ef8de2d5a74aa88"
+    },
+    {
+      "label": "test_validity",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_validity"
+      ],
+      "exit": 0,
+      "seconds": 0.2731993130000774,
+      "log_sha256": "d2d189854359d452803716480378297fb519a1f81c9ddb02a7b1639576a9758c"
+    },
+    {
+      "label": "test_corpus",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_corpus"
+      ],
+      "exit": 0,
+      "seconds": 1.0261925019985938,
+      "log_sha256": "08518c43ba7d98d7325142c166a81ebb62a3c63bab9840d9288450f8b6e829f5"
+    },
+    {
+      "label": "test_vectors",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_vectors"
+      ],
+      "exit": 0,
+      "seconds": 0.27623248400050215,
+      "log_sha256": "a2741dd97fff5ff1afeb5f5f531e2f2eb080d437ad547de8f7b08afea644a29f"
+    },
+    {
+      "label": "test_matrices",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/build/bin/test_matrices"
+      ],
+      "exit": 0,
+      "seconds": 0.2760930100012047,
+      "log_sha256": "2464118b0a83d8f718f555cec945496611e0acd07e954a0155fd63520a6cad7a"
+    },
+    {
+      "label": "check-generation",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/check_gen.py"
+      ],
+      "exit": 0,
+      "seconds": 1.2790034809986537,
+      "log_sha256": "4cb052bce5d00a182b359456d156660fd4315962149ae9e9f15dbe7faa7c4c9a"
+    },
+    {
+      "label": "python-tests",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-foundation-r1-20261007/source/tools/guarded.py",
+        "--cap-mb",
+        "4000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "seconds": 1.0253492289994028,
+      "log_sha256": "166f363bb6732f2039a3af3923217f84c333d293e45eeeec6cee35ec6534f8e7"
+    }
+  ],
+  "source_hashes_unchanged": true,
+  "complete": true,
+  "scope": "Foundation validation and regenerated ABI; no engine, global Gold or timing claim."
+}

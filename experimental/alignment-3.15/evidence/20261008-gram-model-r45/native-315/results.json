@@ -1,0 +1,54 @@
+{
+  "complete": true,
+  "reference": "3.15.0",
+  "source_hashes_unchanged": true,
+  "manifest_sha256": "f9aba08eb4bdfa739f9b2c138a411be4842da89905681cb10cf91dc1d9ff0121",
+  "runner_sha256": "0d6a7f0fc427415797a8ef869b3e6ff7565cd97f99bf5d308141cc0e763d80dc",
+  "commands": [
+    {
+      "label": "build",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-315-gram-native-r45-20261008/source/experimental/constraint-solvers-candidate/solvers.gpr",
+        "gram_probe.adb",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 7.114639291001367,
+      "log_sha256": "f89514813633363f2c2ec6d277f363b95f5e72ca0f3fcd153956a679107fd926"
+    },
+    {
+      "label": "native",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "240",
+        "--",
+        "/var/tmp/sparkling-movement315-env/bin/python",
+        "/var/tmp/sparkling-alignment-315-gram-native-r45-20261008/source/experimental/constraint-solvers-candidate/tests/test_gram.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-315-gram-native-r45-20261008/build/release/bin/gram_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-315-gram-native-r45-20261008/cases",
+        "--reference",
+        "/var/tmp/sparkling-alignment-315-foundation-r6-20261007/source/mujoco"
+      ],
+      "exit": 0,
+      "seconds": 1.335223946000042,
+      "log_sha256": "b83ebc28779c62f1fbc8777dc4e48f7c95227be6c7d9362f455a08980cc54dd3"
+    }
+  ],
+  "binary_sha256": "e852868619f818aaa18b6da448a1e703305c5f79bf2f53e50bd35e73c601c9e5",
+  "scope": "Ordered Gram rows; no global assembly or timing claim"
+}

@@ -1,0 +1,268 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Add_Mass_Flat",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r81-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:1075"
+  ],
+  "exit": 1,
+  "seconds": 61.740031305998855,
+  "manifest_sha256": "8841a21421183b5330fec47a1f7ff002a1f8c1c71851cbf016153f530f836de4",
+  "runner_sha256": "272f4c819e6ce199098163511680d529668ebd16077c51937033f3b184049583",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "64b4a41b63d5228840bf6f1ee1e2a3697fd38d63fed284b00193ebafd5a92b92",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 38,
+  "proof_checks": 40,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 12,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1081,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 3180,
+              "time": 0.120655
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.081202
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.088734
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 55,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1082,
+      "message": {
+        "text": "loop invariant might fail in first iteration, cannot prove H (I, J) = (if I <= R and then (for some Q in 1 .. F.Length (I) => F.Column (F.Address (I)+Q) = J) then Before (I, J)+M (I, J) else Before (I, J))"
+      },
+      "msg_id": 17,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 12,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1081,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 3392,
+              "time": 0.16567
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.145056
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.168922
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 55,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1082,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (I, J) = (if I <= R and then (for some Q in 1 .. F.Length (I) => F.Column (F.Address (I)+Q) = J) then Before (I, J)+M (I, J) else Before (I, J))"
+      },
+      "msg_id": 18,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-packed_cholesky.ads",
+      "check_line": 195,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 3152,
+              "time": 0.118464
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 709,
+              "time": 0.054595
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.030458
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 710,
+              "time": 0.053134
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.032568
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 49,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.ads",
+      "how_proved": "prover",
+      "line": 196,
+      "message": {
+        "text": "postcondition might fail, cannot prove H (I, J) = (if (for some K in 1 .. F.Length (I) => F.Column (F.Address (I)+K) = J) then H'Old (I, J)+M (I, J) else H'Old (I, J))"
+      },
+      "msg_id": 40,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Add_Mass_Flat"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

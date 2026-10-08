@@ -1,0 +1,100 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Update_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-packed-engine-proof-r48-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:98"
+  ],
+  "exit": 1,
+  "seconds": 103.87022093000269,
+  "manifest_sha256": "ce44503fd92aee3fc44bc983ad02c62bc77beaf3c8d0455b6c81eb58cf8b0109",
+  "runner_sha256": "00af496a15d4d630df9e048b629683685196c855488f40131687e7c45afa55e2",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "7ea8c90a77c754235c8df71315f43c4d32a57cc75590903e460082ea5ae56f05",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 75,
+  "proof_checks": 73,
+  "flow_checks": 3,
+  "open": [
+    {
+      "check_col": 35,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 122,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 14479,
+              "time": 0.357897
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 35,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 122,
+      "message": {
+        "text": "assertion might fail"
+      },
+      "msg_id": 19,
+      "rule": "VC_ASSERT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Update_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

@@ -33,8 +33,8 @@ def expected_status(m: mujoco.MjModel) -> str:
     """The Load_Status the SPARK validator must report for this model (spec 5.1, 5.6)."""
     if m.nplugin > 0:
         return "Unsupported_Plugins"
-    if any(int(m.geom_type[g]) == int(mujoco.mjtGeom.mjGEOM_SDF) for g in range(m.ngeom)):
-        return "Unsupported_Plugins"
+    # A mesh-backed native SDF is not a plugin.  The model validator checks
+    # its mesh/octree references; actual plugin models still reject above.
     if m.nflex > 0:
         return "Unsupported_Flex"
     return "OK"

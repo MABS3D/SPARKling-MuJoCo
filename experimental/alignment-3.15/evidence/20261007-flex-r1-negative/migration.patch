@@ -1,0 +1,83 @@
+--- a/experimental/flex-state-integration/src/mj-flex_state.ads
++++ b/experimental/flex-state-integration/src/mj-flex_state.ads
+@@ -88,7 +88,7 @@
+       Description : FC.Flex;
+       Material : CP.Material;
+       Centered : Boolean := False;
+-      Nv, Ne, Ni : Natural := 0;
++      Nv, Ne : Natural := 0;
+       Interp : Natural range 0 .. 2 := 0;
+       Nn : Natural range 0 .. Max_Vertices := 0;
+       Cells : MJ.Flex_Interpolation.Grid := [others => 1];
+@@ -97,7 +97,6 @@
+       Node_Local, Node_World, Node_Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
+       Node_Bodies : FC.Body_Array (0 .. Max_Vertices-1);
+       Elements : FC.Element_Array (0 .. Max_Elements-1);
+-      Internal : FC.Internal_Array (0 .. Max_Elements-1);
+       Tree : MJ.BVH.Tree;
+    end record;
+    type Flex_Array is array (Natural range 0 .. Max_Flex-1) of Flex_Block;
+--- a/experimental/flex-state-integration/src/mj-flex_state.adb
++++ b/experimental/flex-state-integration/src/mj-flex_state.adb
+@@ -65,7 +65,6 @@
+             Vadr : constant Integer := M.Flexes.Flex_Vertadr (F);
+             Eadr : constant Integer := M.Flexes.Flex_Elemadr (F);
+             Data : constant Integer := M.Flexes.Flex_Elemdataadr (F);
+-            Iadr : constant Integer := M.Flexes.Flex_Evpairadr (F);
+             Dim : constant Integer := M.Flexes.Flex_Dim (F);
+             Nadr : constant Integer := M.Flexes.Flex_Nodeadr (F);
+          begin
+@@ -76,21 +75,18 @@
+             B.Interp := M.Flexes.Flex_Interp (F); B.Nn := 0;
+             if Dim not in 1 .. 3 or M.Flexes.Flex_Vertnum (F) not in 1 .. Max_Vertices
+               or M.Flexes.Flex_Elemnum (F) not in 0 .. Max_Elements
+-              or M.Flexes.Flex_Evpairnum (F) not in 0 .. Max_Elements
+               or M.Flexes.Flex_Condim (F) not in 1 | 3 | 4 | 6
+               or M.Flexes.Flex_Selfcollide (F) not in 0 .. 4
+               or M.Flexes.Flex_Activelayers (F) < 0
+               or M.Flexes.Flex_Centered (F) > 1 or M.Flexes.Flex_Rigid (F) > 1
+-              or M.Flexes.Flex_Internal (F) > 1
+               or M.Flexes.Flex_Radius (F) not in 0.0 .. 1.0e10
+               or M.Flexes.Flex_Margin (F) not in 0.0 .. 1.0e10
+               or M.Flexes.Flex_Gap (F) not in 0.0 .. 1.0e10 then Free (S); return; end if;
+             B.Nv := M.Flexes.Flex_Vertnum (F); B.Ne := M.Flexes.Flex_Elemnum (F);
+-            B.Ni := M.Flexes.Flex_Evpairnum (F); B.Tree.Length := 0;
++            B.Tree.Length := 0;
+             if Vadr not in 0 .. M.S.Nflexvert-B.Nv
+               or Eadr not in 0 .. M.S.Nflexelem-B.Ne
+-              or (B.Ne > 0 and then Data not in 0 .. M.S.Nflexelemdata-B.Ne*(Dim+1))
+-              or (B.Ni > 0 and then Iadr not in 0 .. M.S.Nflexevpair-B.Ni) then Free (S); return; end if;
++              or (B.Ne > 0 and then Data not in 0 .. M.S.Nflexelemdata-B.Ne*(Dim+1)) then Free (S); return; end if;
+             B.Centered := M.Flexes.Flex_Centered (F) /= 0;
+             if B.Interp > 0 then
+                if M.Flexes.Flex_Nodenum (F) not in 1 .. Max_Vertices then
+@@ -118,7 +114,7 @@
+               Conaffinity=>Interfaces.Unsigned_32'Mod (M.Flexes.Flex_Conaffinity (F)),
+               Active_Layers=>M.Flexes.Flex_Activelayers (F),
+               Self_Collision=>FC.Self_Mode'Val (M.Flexes.Flex_Selfcollide (F)),
+-              Rigid=>M.Flexes.Flex_Rigid (F) /= 0, Internal=>M.Flexes.Flex_Internal (F) /= 0);
++              Rigid=>M.Flexes.Flex_Rigid (F) /= 0, Internal=>False);
+             B.Material := Material_At (M.Flexes.Flex_Priority.all,M.Flexes.Flex_Condim.all,
+               M.Flexes.Flex_Solmix.all,M.Flexes.Flex_Solref.all,M.Flexes.Flex_Solimp.all,
+               M.Flexes.Flex_Friction.all,F);
+@@ -174,11 +170,6 @@
+                  FC.Active (B.Description, B.Elements (E)) and then not Seen (E))
+                then Free (S); return; end if;
+             end;
+-            for I in 0 .. B.Ni-1 loop
+-               if M.Flexes.Flex_Evpair (2*(Iadr+I)) not in 0 .. B.Ne-1
+-                 or M.Flexes.Flex_Evpair (2*(Iadr+I)+1) not in 0 .. B.Nv-1 then Free (S); return; end if;
+-               B.Internal (I) := (M.Flexes.Flex_Evpair (2*(Iadr+I)),M.Flexes.Flex_Evpair (2*(Iadr+I)+1));
+-            end loop;
+          end;
+       end loop;
+       CA.Load (M, S.Assets, Asset_Result);
+@@ -400,7 +391,7 @@
+          declare B : Flex_Block renames S.Flexes (F); begin
+             if (B.Description.Contype and B.Description.Conaffinity) /= 0 then
+                FC.Self_Contacts (B.Description,B.Elements (0 .. B.Ne-1),B.World (0 .. B.Nv-1),
+-                 B.Bodies (0 .. B.Nv-1),B.Tree,B.Internal (0 .. B.Ni-1),S.Midphase,
++                 B.Bodies (0 .. B.Nv-1),B.Tree,[1 .. 0 => <>],S.Midphase,
+                  S.Options,S.Work,S.Group,R);
+                if R /= RG.Success then Result := Failure (R); return; end if;
+                Append (-1,F,F,CP.Combine (B.Material,B.Material),0.0,0.0);

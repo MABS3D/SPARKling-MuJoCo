@@ -1,0 +1,96 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Count_Symbolic",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-direct-engine-r80-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:82"
+  ],
+  "exit": 1,
+  "seconds": 9.356175647000782,
+  "manifest_sha256": "f382b653e6ac13b3315609ad50d14e438d71a090ef77a243d4b6d0a68ba103a9",
+  "runner_sha256": "2548ea23101926c93cf8bfa8d230cc743ac88917797b17ee287dd80d1b4a1dac",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "45071798527852c86d63ba837e39ce1189a0ca5e2ef23d537e3bc228f13971b1",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 1,
+  "proof_checks": 0,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 37,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "flow",
+      "line": 83,
+      "message": {
+        "text": "subtype constraint cannot depend on variable input \"P\""
+      },
+      "msg_id": 0,
+      "rule": "EMPTY_TAG",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 11,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 114,
+      "message": {
+        "text": "initialization of an array in FOR loop is handled imprecisely [array-initialization]"
+      },
+      "rule": "array-initialization",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 35,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 114,
+      "message": {
+        "text": "initialization of an array in FOR loop is handled imprecisely [array-initialization]"
+      },
+      "rule": "array-initialization",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Count_Symbolic"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": false,
+  "obligations_closed": false
+}

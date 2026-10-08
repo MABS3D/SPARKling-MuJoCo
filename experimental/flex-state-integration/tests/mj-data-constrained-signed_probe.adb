@@ -48,11 +48,7 @@ procedure MJ.Data.Constrained.Signed_Probe is
       if M.S.Neq /= 0 then raise Program_Error with "probe requires no equality"; end if;
       MJ.Models.Allocate_Flex (Empty_Sizes, Empty);
       M.Flexes := Empty; M.Names.Name_Flexadr := new Int_Array'(0 .. -1 => 0);
-      M.S.Nflex := 0; M.S.Nflexnode := 0; M.S.Nflexvert := 0; M.S.Nflexedge := 0;
-      M.S.Nflexelem := 0; M.S.Nflexelemdata := 0; M.S.Nflexstiffness := 0;
-      M.S.Nflexbending := 0; M.S.Nflexelemedge := 0; M.S.Nflexshelldata := 0;
-      M.S.Nflexevpair := 0; M.S.Nflextexcoord := 0; M.S.NJfe := 0; M.S.NJfv := 0;
-      M.S.Nefm0dof := 0; M.S.Nefm0L := 0;
+      M.S := MJ.Models.Without_Flex (M.S);
       MJ.Validation.Validate (M, (Contact_Cap=>Max_C), Loaded);
       if Loaded.Status /= MJ.Types.OK then raise Program_Error with "proxy validation"; end if;
       Constrained.Create (M, E.all, Result);

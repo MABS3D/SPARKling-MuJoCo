@@ -1,0 +1,232 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ info: initialization of "C" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1434:07
+
+ info: initialization of "Last" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1434:10
+
+ info: initialization of "J" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1434:16
+
+ info: initialization of "First" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1434:19
+
+ info: initialization of "Value" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1435:07
+
+ info: initialization of "Root" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1435:14
+
+ info: initialization of "Inverse" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1435:20
+
+ info: initialization of "Deficient" proved
+--> mj-constraint_solvers-packed_cholesky.adb:1436:07
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1440:30
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1440:32
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1441:39
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1441:41
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1441:52
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:1441:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1442:28
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1442:41
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1442:50
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1444:44
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:1444:47
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1445:56
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1445:58
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1445:58
+
+ medium: range check might fail, cannot prove lower bound for F.Transpose_Slot (F.Transpose_Address (R)+K)
+--> mj-constraint_solvers-packed_cholesky.adb:1446:22
+ 1446 |                Last := F.Transpose_Slot (F.Transpose_Address (R)+K);
+      |                        ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + reason for check: value must fit in the target type of the assignment
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1446:60
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1446:62
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1446:62
+
+ medium: precondition might fail, cannot prove Ordered_Flat (Columns, First, Last, Scratch'Length)
+--> mj-constraint_solvers-packed_cholesky.adb:1447:13
+ 1447 |                Flat_Update_Row (L, F.Column, F.Address (C)+1, Last, Scratch, (F.N-R)*Max_Dofs+K-1);
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 1444 should mention Last and Scratch in a loop invariant
+ 1444 |             for K in 2 .. F.Transpose_Length (R) loop
+      |                                                  ^
+      + provers reached time limit before completing the proof
+
+ medium: array index check might fail
+--> mj-constraint_solvers-packed_cholesky.adb:1447:54
+ 1447 |                Flat_Update_Row (L, F.Column, F.Address (C)+1, Last, Scratch, (F.N-R)*Max_Dofs+K-1);
+      |                                                         ^
+      + reason for check: value must be a valid index into the array
+      + possible fix: loop at line 1444 should mention C in a loop invariant
+ 1444 |             for K in 2 .. F.Transpose_Length (R) loop
+      |                                                  ^
+      + provers reached time limit before completing the proof
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1447:56
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1447:82
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1447:91
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1447:93
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1449:28
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1450:56
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.adb:1451:36
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1453:42
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1454:39
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1454:41
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1454:52
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:1454:57
+
+ medium: precondition might fail, cannot prove Value in Residual
+--> mj-constraint_solvers-packed_cholesky.adb:1455:56
+ 1455 |                Value := (if Deficient then 0.0 else Sparse.Scale (Scratch (F.Column (S)), Inverse));
+      |                                                     ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      + possible fix: loop at line 1444 should mention Scratch in a loop invariant
+ 1444 |             for K in 2 .. F.Transpose_Length (R) loop
+      |                                                  ^
+      + provers reached time limit before completing the proof
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1455:83
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1457:16
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1459:24
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1459:26
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1459:26
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1459:37
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1460:39
+
+ info: overflow check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1460:41
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1460:52
+
+ info: cannot unroll loop (too many loop iterations) [info-unrolling-inlining]
+--> mj-constraint_solvers-packed_cholesky.adb:1460:55
+
+ info: index check proved
+--> mj-constraint_solvers-packed_cholesky.adb:1460:79
+
+ medium: loop invariant might fail in first iteration
+--> mj-constraint_solvers-packed_cholesky.adb:1461:43
+ 1461 |             pragma Loop_Invariant (Static => Bounded (L));
+      |                                              ^~~~~~~~~~
+      + possible fix: loop at line 1454 should mention L in a loop invariant
+ 1454 |             for S in First .. F.Address (R)+F.Length (R)-1 loop
+      |                                                            ^
+      + provers reached time limit before completing the proof
+
+ medium: loop invariant might not be preserved by an arbitrary iteration
+--> mj-constraint_solvers-packed_cholesky.adb:1461:43
+ 1461 |             pragma Loop_Invariant (Static => Bounded (L));
+      |                                              ^~~~~~~~~~
+      + possible fix: loop at line 1454 should mention L in a loop invariant
+ 1454 |             for S in First .. F.Address (R)+F.Length (R)-1 loop
+      |                                                            ^
+      + provers reached time limit before completing the proof
+
+ info: loop invariant initialization proved
+--> mj-constraint_solvers-packed_cholesky.adb:1462:33
+
+ info: loop invariant preservation proved
+--> mj-constraint_solvers-packed_cholesky.adb:1462:33
+
+ info: initialization of "Rank" proved
+--> mj-constraint_solvers-packed_cholesky.ads:175:29
+
+ info: initialization of "Result" proved
+--> mj-constraint_solvers-packed_cholesky.ads:175:49
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:176:06
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:177:70
+
+ info: range check proved
+--> mj-constraint_solvers-packed_cholesky.ads:178:60
+
+ info: precondition proved
+--> mj-constraint_solvers-packed_cholesky.ads:180:29
+
+ medium: postcondition might fail, cannot prove Flat_Diagonal (L, F)
+--> mj-constraint_solvers-packed_cholesky.ads:180:29
+  180 |           Bounded (L) and then Flat_Diagonal (L, F)));
+      |                                ^~~~~~~~~~~~~~~~~~~
+      + provers reached time limit before completing the proof
+Summary logged in /var/tmp/sparkling-alignment-315-hessian-packed-factor-values-scope-r101-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: unproved check messages considered as errors
+guarded: elapsed 123.0 s, peak group RSS 400 MB

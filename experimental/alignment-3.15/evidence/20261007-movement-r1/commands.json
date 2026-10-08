@@ -1,0 +1,95 @@
+[
+  {
+    "label": "build",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/source/experimental/constrained-step/constrained.gpr",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 84.61033313699954,
+    "log_sha256": "6ae68ff7b15aa980960b8b77f6e6dde491d31abbbd63fad91014aa75ae895a68"
+  },
+  {
+    "label": "comparison",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/source/experimental/constrained-step/tests/compare.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/build/validation/bin/constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/comparison",
+      "--samples",
+      "2",
+      "--steps",
+      "100",
+      "--loads"
+    ],
+    "exit": 0,
+    "seconds": 6.590256882998801,
+    "log_sha256": "b06d1618514f2bab4b94fff2971c7e1c4354e0239a102ff18c2632de90022696"
+  },
+  {
+    "label": "activation",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/source/experimental/constrained-step/tests/activation_edges.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/build/validation/bin/constrained_activation_edges",
+      "--capacity-binary",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/build/validation/bin/constrained_edges",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/activation"
+    ],
+    "exit": 0,
+    "seconds": 0.3187170419987524,
+    "log_sha256": "9c49d1724b19701220f745a8df6aa1da78baefd1eb3b627dc9d3f525c7dba141"
+  },
+  {
+    "label": "forces",
+    "command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/source/experimental/constrained-step/tests/compare_forces.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/build/validation/bin/constrained_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-movement-r1-20261007/forces",
+      "--samples",
+      "1",
+      "--steps",
+      "100"
+    ],
+    "exit": 0,
+    "seconds": 25.175817415001802,
+    "log_sha256": "5256daaf08c042f8dd49d7d79ff5dc3e3d44f38ec14171cb2d7a8616efa8a917"
+  }
+]

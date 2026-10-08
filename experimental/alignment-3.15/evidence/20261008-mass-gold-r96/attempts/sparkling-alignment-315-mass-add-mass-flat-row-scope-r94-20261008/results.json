@@ -1,0 +1,120 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Add_Mass_Flat_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-mass-engine-r94-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:1194"
+  ],
+  "exit": 1,
+  "seconds": 127.86112680299993,
+  "manifest_sha256": "3d38047b7746322bde806d389a7a494c25e3ee3a137905ba0f959573b497e910",
+  "runner_sha256": "beca55a5ad55748f7715da62561024083681375d40c4f19442e60a929f7fe8e2",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "2d501d0bf8225e32dedff996e1324a60a1fcdfcaa0c2490abd1dc8e3bf9f5b8d",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 109,
+  "proof_checks": 109,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1202,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 10847,
+              "time": 0.597119
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.673088
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 6403,
+              "time": 0.255638
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 3,
+              "time": 0.449092
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 6404,
+              "time": 0.287978
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0.445168
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 69,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1204,
+      "message": {
+        "text": "postcondition might fail, cannot prove H (I, J) = (if I = R and then Row_Selected (F, R, J, F.Length (R)) then H'Old (I, J)+M (I, J) else H'Old (I, J))"
+      },
+      "msg_id": 109,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Add_Mass_Flat_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

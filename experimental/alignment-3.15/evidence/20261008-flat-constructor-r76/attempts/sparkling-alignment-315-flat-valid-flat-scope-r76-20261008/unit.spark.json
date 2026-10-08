@@ -1,0 +1,198 @@
+{
+  "assumptions": [
+    {
+      "assumptions": [
+        {
+          "arg": 2,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_EFFECTS"
+        },
+        {
+          "arg": 2,
+          "predicate": "CLAIM_AORTE"
+        },
+        {
+          "arg": 3,
+          "predicate": "CLAIM_AORTE"
+        }
+      ],
+      "claim": {
+        "arg": 1,
+        "predicate": "CLAIM_AORTE"
+      }
+    }
+  ],
+  "entities": {
+    " 1": {
+      "name": "MJ.Constraint_Solvers.Packed_Cholesky.Valid_Flat",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-constraint_solvers-packed_cholesky.ads",
+          "line": 56
+        }
+      ]
+    },
+    " 2": {
+      "name": "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Bounds",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-constraint_solvers-packed_cholesky.ads",
+          "line": 23
+        }
+      ]
+    },
+    " 3": {
+      "name": "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Row_Valid",
+      "sloc": [
+        {
+          "column": 13,
+          "file": "mj-constraint_solvers-packed_cholesky.ads",
+          "line": 46
+        }
+      ]
+    }
+  },
+  "flow": [
+    {
+      "check_tree": {
+      },
+      "col": 13,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.ads",
+      "how_proved": "flow",
+      "line": 56,
+      "message": {
+        "text": "implicit aspect Always_Terminates on \"Valid_Flat\" has been proved, subprogram will terminate"
+      },
+      "msg_id": 0,
+      "rule": "SUBPROGRAM_TERMINATION",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {
+      },
+      "col": 28,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.ads",
+      "how_proved": "flow",
+      "line": 58,
+      "message": {
+        "text": "data dependencies proved"
+      },
+      "msg_id": 1,
+      "rule": "GLOBAL_WRONG",
+      "severity": "info",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "pragma_assume": [
+  ],
+  "progress": "PROGRESS_PROOF",
+  "proof": [
+    {
+      "check_col": 58,
+      "check_file": "mj-constraint_solvers-packed_cholesky.ads",
+      "check_line": 57,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 1.06580000000000E-02
+            }
+          },
+          "transformations": {
+          }
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 8.10400000000000E-03
+            }
+          },
+          "transformations": {
+          }
+        }
+      ],
+      "col": 58,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.ads",
+      "how_proved": "prover",
+      "line": 57,
+      "message": {
+        "text": "precondition proved"
+      },
+      "msg_id": 2,
+      "rule": "VC_PRECONDITION",
+      "severity": "info",
+      "stats": {
+        "CVC5": {
+          "count": 2,
+          "max_steps": 1,
+          "max_time": 1.06579996645451E-02
+        }
+      },
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "skip_flow_proof": [
+  ],
+  "skip_proof": [
+  ],
+  "spark": {
+    " 1": "all"
+  },
+  "stop_reason": "STOP_REASON_NONE",
+  "timings": {
+    " 1": {
+      "gnat2why.vc_generation": 9.16170030832291E-02,
+      "gnatwhy3.init": 2.33532994985580E-01,
+      "gnatwhy3.register_vcs": 3.33500001579523E-03,
+      "gnatwhy3.run_vcs": 1.99900000552589E-06,
+      "gnatwhy3.save_session": 6.14000018686056E-04,
+      "gnatwhy3.schedule_vcs": 1.17859989404678E-02,
+      "gnatwhy3.transformations.counterexamples_dependent_intros": 2.16399901546538E-03,
+      "gnatwhy3.transformations.detect_polymorphism": 1.69000006280839E-04,
+      "gnatwhy3.transformations.discriminate_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.eliminate_algebraic_if_poly": 4.86000004457310E-04,
+      "gnatwhy3.transformations.eliminate_builtin": 1.48199894465506E-03,
+      "gnatwhy3.transformations.eliminate_definition_conditionally": 4.22000011894852E-04,
+      "gnatwhy3.transformations.eliminate_epsilon": 4.60998999187723E-04,
+      "gnatwhy3.transformations.eliminate_gnatprove_guard_epsilon": 5.38000022061169E-04,
+      "gnatwhy3.transformations.eliminate_inductive": 2.70999007625505E-04,
+      "gnatwhy3.transformations.eliminate_literal": 4.37998998677358E-04,
+      "gnatwhy3.transformations.eliminate_projections_sums": 6.01998995989561E-04,
+      "gnatwhy3.transformations.encoding_smt_if_poly": 9.99000008050643E-07,
+      "gnatwhy3.transformations.inline_trivial": 5.36999898031354E-03,
+      "gnatwhy3.transformations.remove_unused": 2.08700005896389E-03,
+      "gnatwhy3.transformations.simplify_formula": 5.36000006832182E-04,
+      "gnatwhy3.transformations.split_goal_wp_conj": 2.43599899113178E-03
+    },
+    "global": {
+      "flow analysis": 1.16469999775290E-02,
+      "globals (advanced)": 7.72899994626641E-03,
+      "globals (basic)": 5.07300021126866E-03,
+      "init_why_sections": 2.38299998454750E-03,
+      "marking": 3.00300004892051E-03,
+      "properties (advanced)": 2.62999994447455E-04,
+      "translation of standard": 8.68999981321394E-04
+    }
+  },
+  "warn_error": [
+  ]
+}

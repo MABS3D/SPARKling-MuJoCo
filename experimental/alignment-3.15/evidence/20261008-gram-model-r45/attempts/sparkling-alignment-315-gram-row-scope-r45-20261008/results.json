@@ -1,0 +1,119 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Gram_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-gram-engine-proof-r45-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-cone_kernels.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-cone_kernels.adb:334"
+  ],
+  "exit": 1,
+  "seconds": 87.01753589800137,
+  "manifest_sha256": "f80f455bb3efda02f7e8512ab4f870ffee76503c62034d8a0555021511e985ff",
+  "runner_sha256": "827142b4d2891ce84ec4e4c7b4caaee0baea0e5292971db1daee9ef08e700879",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "489df225928c983d865ad6e0dd8bab127bb284b54ffcd7a6606a9be0b643121e",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 61,
+  "proof_checks": 58,
+  "flow_checks": 4,
+  "open": [
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-cone_kernels.ads",
+      "check_line": 161,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.690574
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 10719,
+              "time": 0.265906
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.777667
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 17,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.ads",
+      "how_proved": "prover",
+      "line": 162,
+      "message": {
+        "text": "postcondition might fail, cannot prove After (Columns (Index_Row, I), Columns (Index_Row, J)) = Gram_Scaled (Original (Columns (Index_Row, I), Columns (Index_Row, J)), Gram_Scale (Gram_Source (Values, Columns, Source_Row, Index_Row, I, Packed), Weight), Gram_Source (Values, Columns, Source_Row,..."
+      },
+      "msg_id": 61,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Cone_Kernels.Gram_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

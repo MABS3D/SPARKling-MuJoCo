@@ -1,0 +1,140 @@
+{
+  "reference": "3.14.0",
+  "commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "commands": [
+    {
+      "label": "build-state",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-state-integration/flex_state.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 89.81912342000032,
+      "log_sha256": "76e8b1f54dc2ba61f385eb6771c131878bce8108229dccba16864fe1f735b172"
+    },
+    {
+      "label": "build-forces",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-elasticity-integration/flex.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 71.56222769799933,
+      "log_sha256": "62de716861ca49acad00c29c500eee0f1f8f3cb2cb8975398ebae8f22cf17dbc"
+    },
+    {
+      "label": "build-constrained",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 37.89006041799985,
+      "log_sha256": "85d9dab0a10d09dad8052748f16ff81bc349602fb18254aa7a411e31917db96a"
+    },
+    {
+      "label": "state",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-state-integration/tests/compare.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/state-build/validation/bin/flex_state_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/state",
+        "--samples",
+        "2"
+      ],
+      "exit": 0,
+      "seconds": 1.0714484600002834,
+      "log_sha256": "fba366385ef57ba0c748eb49198846dee1f8cf87406f3ee9403ce76cbbc55e43"
+    },
+    {
+      "label": "forces",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-elasticity-integration/tests/compare.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/force-build/validation/bin/flex_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/forces",
+        "--samples",
+        "2",
+        "--steps",
+        "100"
+      ],
+      "exit": 0,
+      "seconds": 8.6346074460007,
+      "log_sha256": "dfcb20b940f482538094ecfb0d7bcb2135bd3e877ca6e4907d425a9b3335ed46"
+    },
+    {
+      "label": "constrained",
+      "command": [
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "/var/tmp/sparkling-movement-env/bin/python",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/source/experimental/flex-elasticity-integration/tests/compare_constrained.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/force-build/validation/bin/flex_constrained_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-314-sparse-headroom-regression-r24-20261007/constrained",
+        "--samples",
+        "2",
+        "--steps",
+        "100"
+      ],
+      "exit": 0,
+      "seconds": 144.59087078300036,
+      "log_sha256": "6e4f7af25a3c859220c40b521a19f9f43ddcf660893f60383e475fae84baa33e"
+    }
+  ],
+  "manifest_sha256": "c6c93b5ceaf47be8e3566e8b5c7948bf84e158dff946750825ee24d139f19e6d",
+  "source_hashes_unchanged": true,
+  "complete": true,
+  "scope": "Owned FLEX metadata/state, geometric contacts and force/constraint trajectories; no global Gold or timing claim."
+}

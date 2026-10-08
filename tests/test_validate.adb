@@ -152,7 +152,7 @@ begin
 
    --  geoms
    M.Geoms.Geom_Type (0) := 8;
-   Expect (Unsupported_Plugins, Geom_Type, 0, "sdf geom");
+   Expect (Invalid_Reference, Geom_Dataid, 0, "sdf geom without a mesh/octree reference");
    M.Geoms.Geom_Type (0) := 9;
    Expect (Invalid_Enum, Geom_Type, 0, "geom type 9");
    M.Geoms.Geom_Condim (0) := 2;

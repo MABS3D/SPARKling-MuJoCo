@@ -1,0 +1,22 @@
+Phase 1 of 3: generation of data representation information ...
+Phase 2 of 3: generation of Global contracts ...
+Phase 3 of 3: flow analysis and proof ...
+ error: subtype constraint cannot depend on variable input "F" [E0007]
+--> mj-constraint_solvers-packed_cholesky.adb:452:58
+  452 |             Before_Columns, Before_Rows : Dof_List (F.Column'Range) with Ghost => Static;
+      |                                                     ~~~~~~~~^~~~~~
+      + use instead a constant initialized to the expression with variable input
+      + launch "gnatprove --explain=E0007" for more information
+
+ error: subtype constraint cannot depend on variable input "F" [E0007]
+--> mj-constraint_solvers-packed_cholesky.adb:453:50
+  453 |             Before_Slots : Offsets (F.Transpose_Slot'Range) with Ghost => Static;
+      |                                     ~~~~~~~~~~~~~~~~^~~~~~
+      + use instead a constant initialized to the expression with variable input
+      + launch "gnatprove --explain=E0007" for more information
+
+ info: data dependencies proved
+--> mj-constraint_solvers-packed_cholesky.ads:59:06
+Summary logged in /var/tmp/sparkling-alignment-315-flat-build-flat-scope-r68-20261008/build/validation/obj/gnatprove/gnatprove.out
+gnatprove: error during flow analysis and proof
+guarded: elapsed 9.3 s, peak group RSS 285 MB

@@ -1,0 +1,154 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Set_Transpose_Offset",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r65-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:241"
+  ],
+  "exit": 1,
+  "seconds": 27.87844612399931,
+  "manifest_sha256": "88ea4a9c8451ce4897787e26b2b8c7bdc1959f325f60574cbed6ac93d85c1cb2",
+  "runner_sha256": "f17545dc415981f2a03ece2c75ac1645ea8a77eb0fe7d606c8c1df8c1ec00176",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "0777259815af6314290d477b391fa694c886258e094cdaf23cd35e2ea23d62bb",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 47,
+  "proof_checks": 48,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 53,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 246,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 700,
+              "time": 0.067735
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 17,
+              "time": 0.027197
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 53,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 246,
+      "message": {
+        "text": "overflow check might fail, cannot prove upper bound for Address (R-1)+P.Transpose_Length (R-1)"
+      },
+      "msg_id": 32,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 61,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 249,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 161,
+              "time": 0.033627
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 61,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 249,
+      "message": {
+        "text": "overflow check might fail, cannot prove upper bound for Address (I-1)+P.Transpose_Length (I-1)"
+      },
+      "msg_id": 47,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Set_Transpose_Offset"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

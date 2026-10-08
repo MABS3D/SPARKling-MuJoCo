@@ -1,0 +1,161 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Flat_Mass_Progress",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-mass-engine-r88-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:1252"
+  ],
+  "exit": 1,
+  "seconds": 164.07325345599384,
+  "manifest_sha256": "a2f03153a5b11f6f078431765269bef72aeff980fc88437ea3130452dc6c7fec",
+  "runner_sha256": "20ff9591bf41a8740d2ae73d65eeedfdf4571a83f07c5ac9b42e7cbdb3ff8946",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "4e6a083ebd7af54acd524e5548a5685596c01eecf88fd6284b2133aa1f7e977b",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 76,
+  "proof_checks": 77,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 33,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1282,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 21740,
+              "time": 2.42081
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 12,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1283,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove After (P, Q) in -2.0e100 .. 2.0e100"
+      },
+      "msg_id": 30,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1268,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 6880,
+              "time": 0.204697
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 8,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1269,
+      "message": {
+        "text": "postcondition might fail, cannot prove After (I, J) in -2.0e100 .. 2.0e100"
+      },
+      "msg_id": 77,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Flat_Mass_Progress"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

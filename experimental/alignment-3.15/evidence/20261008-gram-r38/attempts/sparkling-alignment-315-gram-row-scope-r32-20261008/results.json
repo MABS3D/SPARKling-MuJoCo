@@ -1,0 +1,280 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Gram_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-gram-engine-proof-r32-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-cone_kernels.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-cone_kernels.adb:251"
+  ],
+  "exit": 1,
+  "seconds": 99.15642127199862,
+  "manifest_sha256": "760d4a30a6015f169038c29dd83b2916d1b589138e46f68c8a1ad09697cfe537",
+  "runner_sha256": "c23d9c9c35bacdba4025dc2b02eb109fb76bba6e00198c1b8c7cbf618d17aa42",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "11a84c49c8a4402d504a0c3859ec7f121f1e2c9b4ed0b83c234d76c98524247a",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 68,
+  "proof_checks": 68,
+  "flow_checks": 3,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-constraint_solvers-cone_kernels.adb",
+      "check_line": 271,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 52853,
+              "time": 1.08892
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 20,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "prover",
+      "line": 275,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (R, C) = Before (R, C)"
+      },
+      "msg_id": 19,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 14,
+      "check_file": "mj-constraint_solvers-cone_kernels.adb",
+      "check_line": 268,
+      "check_tree": [
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 59754,
+              "time": 1.36807
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.617464
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 59766,
+              "time": 1.35496
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.594636
+            },
+            "altergo": {
+              "result": "Valid",
+              "steps": 114157,
+              "time": 2.60435
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 3213,
+              "time": 0.089084
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.018709
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.012429
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.124711
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Valid",
+              "steps": 1,
+              "time": 0.100221
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 14,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "prover",
+      "line": 268,
+      "message": {
+        "text": "precondition might fail, cannot prove Previous in -1.0e120 .. 1.0e120"
+      },
+      "msg_id": 36,
+      "rule": "VC_PRECONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 43,
+      "check_file": "mj-constraint_solvers-cone_kernels.adb",
+      "check_line": 266,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 54455,
+              "time": 1.20328
+            },
+            "Z3": {
+              "result": "Out of\nmemory",
+              "steps": 1,
+              "time": 0.623185
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 36,
+      "entity": 1,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "prover",
+      "line": 267,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (Columns (Index_Row, I), Columns (Index_Row, J)) = Gram_Scaled (Before (Columns (Index_Row, I), Columns (Index_Row, J)), Gram_Scale (Gram_Source (Values, Columns, Source_Row, Index_Row, I, Packed), Weight), Gram_Source (Values, Columns, Source_Row, Index..."
+      },
+      "msg_id": 37,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": true,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Cone_Kernels.Gram_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

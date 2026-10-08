@@ -8,9 +8,12 @@ with MJ.Constraint_Solvers.Cholesky;
 with MJ.Constraint_Solvers.Dense_Cholesky;
 with MJ.Constraint_Solvers.Cholesky_Updates;
 with MJ.Constraint_Solvers.Sparse_Cholesky;
+with MJ.Constraint_Solvers.Packed_Cholesky;
 with MJ.Constraint_Solvers.Sparse_Kernels;
 with MJ.Constraint_Solvers.Jacobians;
 with MJ.Constraint_Solvers.Jacobian_Transpose;
+with MJ.Constraint_Solvers.Cone_Kernels;
+with MJ.Constraint_Solvers.Hessian_Assembly;
 package body MJ.Constraint_Solvers with SPARK_Mode is
    package Math renames Ada.Numerics.Long_Elementary_Functions;
    package Scalar renames MJ.Constraint_Scalar;
@@ -19,7 +22,10 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
    package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
    package Updates renames MJ.Constraint_Solvers.Cholesky_Updates;
    package Sparse renames MJ.Constraint_Solvers.Sparse_Cholesky;
+   package Packed renames MJ.Constraint_Solvers.Packed_Cholesky;
    package Sparse_Arithmetic renames MJ.Constraint_Solvers.Sparse_Kernels;
+   package Cone_Arithmetic renames MJ.Constraint_Solvers.Cone_Kernels;
+   package Assembly renames MJ.Constraint_Solvers.Hessian_Assembly;
    use type Linear.Status;
    use type Dense.Status;
    use type Updates.Status;
@@ -320,8 +326,11 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             end loop;
             return Sum;
          end Slot_Count;
-         L, HL : Matrix (1 .. N, 1 .. N);
-         H : Matrix (1 .. N, 1 .. N) := M;
+         L : Matrix (1 .. N, 1 .. N);
+         HL : Matrix (1 .. (if Settings.Sparse then 0 else N),
+                      1 .. (if Settings.Sparse then 0 else N));
+         H : Matrix (1 .. (if Settings.Sparse then 0 else N),
+                     1 .. (if Settings.Sparse then 0 else N)) := (others => (others => 0.0));
          Acc : Vector (1 .. N) := A;
          F : Vector (1 .. K) := Force;
          Jar, Jv : Vector (1 .. K);
@@ -331,10 +340,12 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          type Block_List is array (Positive range <>) of Positive;
          Blocks : Block_List (1 .. K);
          Count : Natural := 0;
-         type Column_Lists is array (Positive range <>, Positive range <>) of Positive;
+         subtype Column_Lists is Cone_Arithmetic.Column_Matrix;
          type Lengths is array (Positive range <>) of Natural;
          Columns : Column_Lists (1 .. K, 1 .. N);
          Nonzeros : Lengths (1 .. K) := (others => 0);
+         Cone_Columns : Column_Lists (1 .. K, 1 .. N);
+         Cone_Widths : Lengths (1 .. K) := (others => 0);
          --  Keep native slots separate from the coalesced support used by
          --  the current Hessian/dual paths. They carry reduction order.
          Native : Sparse_Jacobian ((if Settings.Sparse then K else 0),
@@ -353,736 +364,13 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          --  This only bounds linear algebra: stopping tests and line searches
          --  remain global, including when independent bodies are present.
          Factor_End : Block_List (1 .. N);
-         Hessian_Structure : Sparse.Pattern (N);
+         Use_Sparse_Hessian : constant Boolean :=
+           Settings.Sparse and then Settings.Algorithm = Newton and then K > 0;
+         Hessian_Mask : Structural_Matrix
+           (1 .. (if Use_Sparse_Hessian then N else 0),
+            1 .. (if Use_Sparse_Hessian then N else 0));
+         Hessian_Plan : Packed.Symbolic_Plan (N);
 
-         procedure Multiply_Metric (X : Vector; Y : out Vector) is
-            S : Work;
-         begin
-            for P in 1 .. N loop
-               S := 0.0;
-               for Qi in 1 .. Mass_Nonzeros (P) loop
-                  declare Q : constant Positive := Mass_Columns (P, Qi); begin
-                     S := S + M (P, Q) * X (Q);
-                  end;
-               end loop;
-               Y (P) := S;
-            end loop;
-         end Multiply_Metric;
-         pragma Inline_Always (Multiply_Metric);
-
-         procedure Multiply_Jacobian (X : Vector; Y : out Vector) is
-         begin
-            for R in 1 .. K loop
-               Y (R) := (if Settings.Sparse then Jacobians.Sparse_Row (Native, X, R)
-                         else Jacobians.Dense_Row (J, X, R));
-            end loop;
-         end Multiply_Jacobian;
-         pragma Inline_Always (Multiply_Jacobian);
-
-         procedure Factor_Metric (Input : Matrix; Output : out Matrix;
-                                  Accepted : out Boolean) is
-            First : Positive := 1;
-         begin
-            if Factor_End (1) = N then
-               Factor (Input, Output, Accepted);
-               return;
-            end if;
-            Output := (others => (others => 0.0));
-            while First <= N loop
-               declare
-                  Last : constant Positive := Factor_End (First);
-                  Size : constant Positive := Last - First + 1;
-                  Part, Cholesky_Part : Matrix (1 .. Size, 1 .. Size);
-               begin
-                  Sparse_Arithmetic.Copy_Block (Input, First, Part);
-                  Factor (Part, Cholesky_Part, Accepted);
-                  if not Accepted then return; end if;
-                  for P in 1 .. Size loop
-                     for Q in 1 .. P loop
-                        Output (First + P - 1, First + Q - 1) := Cholesky_Part (P, Q);
-                     end loop;
-                  end loop;
-                  First := Last + 1;
-               end;
-            end loop;
-            Accepted := True;
-         end Factor_Metric;
-         pragma Inline_Always (Factor_Metric);
-
-         procedure Solve_Metric (Input : Matrix; RHS : Vector; Output : out Vector) is
-            First : Positive := 1;
-         begin
-            if Factor_End (1) = N then
-               Backsolve (Input, RHS, Output);
-               return;
-            end if;
-            while First <= N loop
-               declare
-                  Last : constant Positive := Factor_End (First);
-                  Size : constant Positive := Last - First + 1;
-                  Part : Matrix (1 .. Size, 1 .. Size);
-                  B_Part, X_Part : Vector (1 .. Size);
-               begin
-                  for P in 1 .. Size loop
-                     B_Part (P) := RHS (First + P - 1);
-                  end loop;
-                  Sparse_Arithmetic.Copy_Block (Input, First, Part);
-                  Backsolve (Part, B_Part, X_Part);
-                  for P in 1 .. Size loop Output (First + P - 1) := X_Part (P); end loop;
-                  First := Last + 1;
-               end;
-            end loop;
-         end Solve_Metric;
-         pragma Inline_Always (Solve_Metric);
-
-         --  The dense Newton Hessian follows mju_cholFactor/mju_cholSolve.
-         --  Keep the full dimension: cutting independent blocks changes the
-         --  four-lane dot grouping even when the omitted entries are zero.
-         procedure Factor_Hessian is
-            Status : Dense.Status;
-            Sparse_Status : Sparse.Status;
-            Rank : Natural;
-         begin
-            if Settings.Sparse then
-               Sparse.Factor (H, Hessian_Structure, HL, Rank, Sparse_Status, Tiny);
-               if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
-            else
-               Dense.Factor (H, HL, Rank, Status, Tiny);
-               if Status /= Dense.Success then raise Constraint_Error; end if;
-            end if;
-         end Factor_Hessian;
-         pragma Inline_Always (Factor_Hessian);
-
-         procedure Solve_Hessian is
-            Status : Dense.Status;
-            Sparse_Status : Sparse.Status;
-         begin
-            if Settings.Sparse then
-               Sparse.Backsolve (HL, Hessian_Structure, Grad, Mgrad, Sparse_Status);
-               if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
-            else
-               Dense.Backsolve (HL, Grad, Mgrad, Status);
-               if Status /= Dense.Success then raise Constraint_Error; end if;
-            end if;
-         end Solve_Hessian;
-         pragma Inline_Always (Solve_Hessian);
-
-         procedure Residual is
-         begin
-            Multiply_Metric (Acc, Ma);
-            Multiply_Jacobian (Acc, Jar);
-            for R in Jar'Range loop Jar (R) := Jar (R) - Aref (R); end loop;
-         end Residual;
-         pragma Inline_Always (Residual);
-
-         procedure Incremental_Hessian (Accepted : out Boolean) is
-            X : Vector (1 .. N);
-            Root_D : Real;
-            Plus : Boolean;
-            Rank : Natural;
-            Start : Natural;
-            Status : Updates.Status;
-         begin
-            Accepted := False;
-            for Row in 1 .. K loop
-               if Curvature (Row) /= Previous_Curvature (Row) then
-                  Plus := Curvature (Row) /= 0.0;
-                  Root_D := Math.Sqrt (Constraints (Row).D);
-                  X := (others => 0.0); Rank := N;
-                  if Settings.Sparse then
-                     if Native.Widths (Row) > 0 then
-                        --  C's update consumes canonical increasing columns.
-                        --  General ordered/duplicate CSR remains admissible for
-                        --  products and retains the full-factorization path.
-                        for Slot in Native.Offsets (Row)+2 .. Native.Offsets (Row)+Native.Widths (Row) loop
-                           if Native.Columns (Slot) <= Native.Columns (Slot-1) then return; end if;
-                        end loop;
-                        Start := Native.Columns (Native.Offsets (Row)+Native.Widths (Row));
-                        for Slot in Native.Offsets (Row)+1 .. Native.Offsets (Row)+Native.Widths (Row) loop
-                           X (Native.Columns (Slot)) := Native.Values (Slot)*Root_D;
-                        end loop;
-                        if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
-                        Updates.Update_Sparse (HL, Hessian_Structure, X, Start, Plus, Rank, Status);
-                        if Status /= Updates.Success then raise Constraint_Error; end if;
-                     end if;
-                  else
-                     for P in 1 .. N loop X (P) := J (Row, P)*Root_D; end loop;
-                     if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
-                     Updates.Update_Dense (HL, X, Plus, Rank, Status);
-                     if Status /= Updates.Success then raise Constraint_Error; end if;
-                  end if;
-                  if Rank < N then return; end if;
-               end if;
-            end loop;
-            Accepted := True;
-         end Incremental_Hessian;
-
-         procedure Build_Scalar_Hessian is
-            Changed : Boolean := not Hessian_Valid;
-            Nonzero_Curvature : Boolean := False;
-         begin
-            for R in 1 .. K loop
-               Changed := Changed or Curvature (R) /= Previous_Curvature (R);
-               Nonzero_Curvature := Nonzero_Curvature or Curvature (R) /= 0.0;
-            end loop;
-            if not Changed then return; end if;
-            if Hessian_Valid then
-               declare Accepted : Boolean; begin
-                  Incremental_Hessian (Accepted);
-                  if Accepted then Previous_Curvature := Curvature; return; end if;
-               end;
-            end if;
-            if not Nonzero_Curvature then
-               H := M;
-               Factor_Hessian;
-            else
-               H := (others => (others => 0.0));
-               for Bi in 1 .. Count loop
-                  declare R : constant Positive := Blocks (Bi); begin
-                     if Curvature (R) /= 0.0 then
-                        for Pi in 1 .. Nonzeros (R) loop
-                           declare P : constant Positive := Columns (R, Pi); begin
-                              --  Factor consumes only the lower triangle,
-                              --  as C's sparse/dense Hessian construction does.
-                              for Qi in 1 .. Pi loop
-                                 declare Q : constant Positive := Columns (R, Qi); begin
-                                    H (P, Q) := Sparse_Arithmetic.Outer_Update
-                                      (H (P, Q), J (R, P), Curvature (R), J (R, Q));
-                                 end;
-                              end loop;
-                           end;
-                        end loop;
-                     end if;
-                  end;
-               end loop;
-               if Settings.Sparse then
-                  --  The reverse sparse factor reads precisely these columns,
-                  --  including symbolic fill and compiled structural zeros.
-                  Sparse.Add_Mass (H, M, Hessian_Structure);
-               else
-                  for P in 1 .. N loop
-                     for Q in 1 .. P loop H (P, Q) := H (P, Q)+M (P, Q); end loop;
-                  end loop;
-               end if;
-               Factor_Hessian;
-            end if;
-            Previous_Curvature := Curvature;
-            Hessian_Valid := True;
-         end Build_Scalar_Hessian;
-         pragma Inline_Always (Build_Scalar_Hessian);
-
-         procedure Update_Generalized_Force (Primal : Boolean) is
-         begin
-            if Settings.Sparse and Primal then
-               for P in 1 .. N loop Qfrc (P) := Jacobians.Sparse_Row (Native_T, F, P); end loop;
-            else
-               Qfrc := (others => 0.0);
-               for R in 1 .. K loop
-                  if F (R) /= 0.0 then
-                     if Settings.Sparse then
-                        for Slot in Native.Offsets (R)+1 .. Native.Offsets (R)+Native.Widths (R) loop
-                           declare P : constant Positive := Native.Columns (Slot); begin
-                              Qfrc (P) := Qfrc (P)+Native.Values (Slot)*F (R);
-                           end;
-                        end loop;
-                     else
-                        for P in 1 .. N loop Qfrc (P) := Qfrc (P)+J (R, P)*F (R); end loop;
-                     end if;
-                  end if;
-               end loop;
-            end if;
-         end Update_Generalized_Force;
-         pragma Inline_Always (Update_Generalized_Force);
-
-         procedure Update (Build_H : Boolean) is
-            B : Block_Value;
-            R, Dim : Natural;
-            V : Work;
-         begin
-            Cost := 0.0;
-            Grad := Ma;
-            for P in 1 .. N loop
-               Grad (P) := Grad (P) - Smooth (P);
-               Cost := Cost + 0.5 * Grad (P) * (Acc (P) - A_Free (P));
-            end loop;
-            if Build_H and not Scalar_Rows then H := M; end if;
-            for Bi in 1 .. Count loop
-               R := Blocks (Bi); Dim := Constraints (R).Dimension;
-               if Scalar_Rows then
-                  declare S : Scalar.Response; begin
-                  if Jar (R) not in -1.0e30 .. 1.0e30 then raise Constraint_Error; end if;
-                  S := Scalar.Evaluate (Scalar_Kind (Constraints (R).Form),
-                    Jar (R), Constraints (R).R, Constraints (R).D, Constraints (R).Bound);
-                  Cost := Cost + S.Cost;
-                  F (R) := S.Force;
-                  Curvature (R) := S.Curvature;
-                  --  The scalar Hessian is M + sum_r J_r' D_r J_r.  Visit
-                  --  only the columns present in the row, retaining row and
-                  --  floating-point product order.  C uses the same sparse
-                  --  row support in mju_sqrMatTDSparseNumeric.
-                  end;
-               else
-               Evaluate_Block (Constraints, R, Jar, Build_H, B);
-               Cost := Cost + B.Cost;
-               for T in 1 .. Dim loop F (R + T - 1) := B.F (T); end loop;
-               for P in 1 .. N loop
-                  if Build_H then
-                     for Q in 1 .. N loop
-                        V := 0.0;
-                        for S in 1 .. Dim loop
-                           for T in 1 .. Dim loop
-                              V := V + J (R + S - 1, P) * B.H (S, T) * J (R + T - 1, Q);
-                           end loop;
-                        end loop;
-                        H (P, Q) := H (P, Q) + V;
-                     end loop;
-                  end if;
-               end loop;
-               end if;
-            end loop;
-            Update_Generalized_Force (True);
-            for P in 1 .. N loop Grad (P) := Grad (P)-Qfrc (P); end loop;
-            if Build_H and Scalar_Rows then
-               Build_Scalar_Hessian;
-            elsif Build_H then
-               Factor_Hessian;
-               Hessian_Valid := True;
-            end if;
-         end Update;
-         pragma Inline_Always (Update);
-
-         --  A diagonal LDL solve is one reciprocal multiply in C. Reusing
-         --  the Cholesky root here adds two rounding steps and changes CG's
-         --  stopping iteration on strongly scaled elliptic contacts.
-         procedure Apply_Mass_Inverse (RHS : Vector; Output : out Vector) is
-            Accepted : Boolean;
-         begin
-            if Native_Factor.Row_Count /= 0 then
-               if not NI.Bounded (RHS) then raise Constraint_Error; end if;
-               NI.Apply (Native_Factor, Native_Inverse, RHS, Output, Accepted);
-               if not Accepted then raise Constraint_Error; end if;
-            elsif Mass_Is_Diagonal then
-               for P in 1 .. N loop
-                  Output (P) := Sparse_Arithmetic.Diagonal_Scale
-                    (RHS (P), Inverse_Mass_Diagonal (P));
-               end loop;
-            else
-               Solve_Metric (L, RHS, Output);
-            end if;
-         end Apply_Mass_Inverse;
-         pragma Inline_Always (Apply_Mass_Inverse);
-
-         procedure Precondition is
-         begin
-            if Settings.Algorithm = Newton then Solve_Hessian;
-            else Apply_Mass_Inverse (Grad, Mgrad); end if;
-         end Precondition;
-         pragma Inline_Always (Precondition);
-
-         procedure Project_Forces is
-            R, Dim : Natural;
-            V, S : Work;
-         begin
-            for Bi in 1 .. Count loop
-               R := Blocks (Bi); Dim := Constraints (R).Dimension;
-               if Constraints (R).Form /= Elliptic then
-                  F (R) := Project_Row (Constraints (R).Form, F (R), Constraints (R).Bound);
-               elsif F (R) < 0.0 then
-                  for T in R .. R + Dim - 1 loop F (T) := 0.0; end loop;
-               else
-                  V := 0.0;
-                  for T in 1 .. Dim - 1 loop V := V + (F (R + T) / Constraints (R).Friction (T))**2; end loop;
-                  if V > F (R)**2 then
-                     S := Math.Sqrt (F (R)**2 / Real'Max (Tiny, V));
-                     for T in 1 .. Dim - 1 loop F (R + T) := F (R + T) * S; end loop;
-                  end if;
-               end if;
-            end loop;
-         end Project_Forces;
-
-         procedure Run_PGS is
-            use type Interfaces.Unsigned_32;
-            AR : Matrix (1 .. K, 1 .. K);
-            Inv_J : Matrix (1 .. N, 1 .. K);
-            B, Previous, Momentum : Vector (1 .. K);
-            Col, Sol : Vector (1 .. N);
-            Old, Res, Change : Small_Vector := (others => 0.0);
-            Ac : Matrix (1 .. 5, 1 .. 5);
-            Bc, Dc, Xc : Vector (1 .. 5);
-            Seed : Interfaces.Unsigned_64 := 0;
-            Random : Interfaces.Unsigned_32;
-            Nk : Natural := 0;
-            R, Dim, Pick, Swap : Natural;
-            Beta, Save, V, Den, Step, Delta_C, Restart : Work;
-         begin
-            for Rj in 1 .. K loop
-               for P in 1 .. N loop Col (P) := J (Rj, P); end loop;
-               Apply_Mass_Inverse (Col, Sol);
-               for P in 1 .. N loop Inv_J (P, Rj) := Sol (P); end loop;
-               for Ri in 1 .. K loop
-                  V := 0.0;
-                  for Pi in 1 .. Nonzeros (Ri) loop
-                     declare P : constant Positive := Columns (Ri, Pi); begin
-                        V := V + J (Ri, P) * Sol (P);
-                     end;
-                  end loop;
-                  AR (Ri, Rj) := V;
-               end loop;
-               AR (Rj, Rj) := AR (Rj, Rj) + Constraints (Rj).R;
-               if AR (Rj, Rj) < Tiny then raise Constraint_Error; end if;
-            end loop;
-            Multiply_Jacobian (A_Free, B);
-            for Ri in 1 .. K loop B (Ri) := B (Ri) - Aref (Ri); end loop;
-            Project_Forces;
-            Previous := F;
-            MJ.Constraint_Order.Next (Seed, Random);
-            Result.Outcome := Iteration_Limit;
-            for Iter in 1 .. Settings.Iterations loop
-               Beta := 0.0;
-               if Iter > 1 then Beta := (Real (Nk) - 1.0) / (Real (Nk) + 2.0); end if;
-               if Beta > 0.0 then
-                  for Ri in F'Range loop
-                     Save := F (Ri); F (Ri) := F (Ri) + Beta * (F (Ri) - Previous (Ri)); Previous (Ri) := Save;
-                  end loop;
-                  Project_Forces;
-               else Previous := F; end if;
-               Momentum := F;
-               for Bi in reverse 2 .. Count loop
-                  MJ.Constraint_Order.Next (Seed, Random);
-                  Pick := Natural (Random mod Interfaces.Unsigned_32 (Bi)) + 1;
-                  Swap := Blocks (Pick); Blocks (Pick) := Blocks (Bi); Blocks (Bi) := Swap;
-               end loop;
-               Result.Improvement := 0.0;
-               for Bi in 1 .. Count loop
-                  R := Blocks (Bi); Dim := Constraints (R).Dimension;
-                  for T in 1 .. Dim loop
-                     V := B (R + T - 1);
-                     for Ri in F'Range loop V := V + AR (R + T - 1, Ri) * F (Ri); end loop;
-                     Res (T) := V; Old (T) := F (R + T - 1);
-                  end loop;
-                  if Dim = 1 then
-                     F (R) := Project_Row (Constraints (R).Form,
-                       F (R) - Res (1) * (1.0 / AR (R, R)), Constraints (R).Bound);
-                  else
-                     if F (R) < Tiny then
-                        F (R) := Real'Max (0.0, F (R) - Res (1) * (1.0 / AR (R, R)));
-                        for T in 1 .. Dim - 1 loop F (R + T) := 0.0; end loop;
-                     else
-                        Den := 0.0;
-                        for S in 1 .. Dim loop
-                           V := 0.0;
-                           for T in 1 .. Dim loop V := V + AR (R + S - 1, R + T - 1) * Old (T); end loop;
-                           Den := Den + Old (S) * V;
-                        end loop;
-                        if Den >= Tiny then
-                           Step := -Dot (Old (1 .. Dim), Res (1 .. Dim)) / Den;
-                           if F (R) + Step * Old (1) < 0.0 then Step := -Old (1) / F (R); end if;
-                           for T in 1 .. Dim loop F (R + T - 1) := F (R + T - 1) + Step * Old (T); end loop;
-                        end if;
-                     end if;
-                     for S in 1 .. Dim - 1 loop
-                        V := 0.0;
-                        for T in 1 .. Dim - 1 loop
-                           Ac (S, T) := AR (R + S, R + T);
-                           V := V + Ac (S, T) * Old (T + 1);
-                        end loop;
-                        Bc (S) := Res (S + 1) - V + AR (R + S, R) * (F (R) - Old (1));
-                        Dc (S) := Constraints (R).Friction (S);
-                     end loop;
-                     if F (R) < Tiny then
-                        for T in 1 .. Dim - 1 loop F (R + T) := 0.0; end loop;
-                     else
-                        declare
-                           Tangents : constant Natural := Dim - 1;
-                           A_T : Matrix (1 .. Tangents, 1 .. Tangents);
-                        begin
-                           for S in A_T'Range (1) loop for T in A_T'Range (2) loop A_T (S, T) := Ac (S, T); end loop; end loop;
-                           QCQP (A_T, Bc (1 .. Dim - 1), Dc (1 .. Dim - 1), F (R), Xc (1 .. Dim - 1));
-                        end;
-                        for T in 1 .. Dim - 1 loop F (R + T) := Xc (T); end loop;
-                     end if;
-                  end if;
-                  for T in 1 .. Dim loop Change (T) := F (R + T - 1) - Old (T); end loop;
-                  Delta_C := Dot (Change (1 .. Dim), Res (1 .. Dim));
-                  for S in 1 .. Dim loop
-                     V := 0.0;
-                     for T in 1 .. Dim loop V := V + AR (R + S - 1, R + T - 1) * Change (T); end loop;
-                     Delta_C := Delta_C + 0.5 * Change (S) * V;
-                  end loop;
-                  if Delta_C > 1.0e-10 then
-                     for T in 1 .. Dim loop F (R + T - 1) := Old (T); end loop;
-                     Delta_C := 0.0;
-                  end if;
-                  Result.Improvement := Result.Improvement - Delta_C;
-               end loop;
-               Result.Improvement := Result.Improvement * Settings.Scale;
-               Restart := 0.0;
-               if Iter > 1 then
-                  for Ri in F'Range loop Restart := Restart + (F (Ri) - Momentum (Ri)) * (Momentum (Ri) - Previous (Ri)); end loop;
-               end if;
-               if Restart < 0.0 then Nk := 0; Result.Restarts := Result.Restarts + 1;
-               else Nk := Nk + 1; end if;
-               Result.Iterations := Iter;
-               if Result.Improvement < Settings.Tolerance then Result.Outcome := Converged; exit; end if;
-            end loop;
-            Acc := A_Free;
-            for P in 1 .. N loop
-               V := 0.0;
-               for Ri in F'Range loop V := V + Inv_J (P, Ri) * F (Ri); end loop;
-               Acc (P) := Acc (P) + V;
-            end loop;
-         end Run_PGS;
-
-         type Point is record
-            Alpha, Cost, First, Second : Work := 0.0;
-         end record;
-         LS_Count : Natural := 0;
-         G1, G2 : Work;
-
-         type Polynomial is array (Natural range 0 .. 8) of Real;
-         type Polynomials is array (Positive range <>) of Polynomial;
-         Quad : Polynomials (1 .. K);
-
-         procedure Prepare_Line is
-            R, Dim : Natural;
-            DJ, U, V : Work;
-         begin
-            Multiply_Metric (Search, Mv); Multiply_Jacobian (Search, Jv);
-            G1 := Dot (Search, Ma) - Dot (Smooth, Search); G2 := 0.5 * Dot (Search, Mv);
-            for Bi in 1 .. Count loop
-               R := Blocks (Bi); Dim := Constraints (R).Dimension;
-               Quad (Bi) := (others => 0.0);
-               for T in R .. R + Dim - 1 loop
-                  DJ := Constraints (T).D * Jar (T);
-                  Quad (Bi) (0) := Quad (Bi) (0) + Jar (T) * DJ;
-                  Quad (Bi) (1) := Quad (Bi) (1) + Jv (T) * DJ;
-                  Quad (Bi) (2) := Quad (Bi) (2) + Jv (T) * Constraints (T).D * Jv (T);
-               end loop;
-               Quad (Bi) (0) := 0.5 * Quad (Bi) (0);
-               Quad (Bi) (2) := 0.5 * Quad (Bi) (2);
-               if Constraints (R).Form = Elliptic then
-                  Quad (Bi) (3) := Jar (R) * Constraints (R).Mu;
-                  Quad (Bi) (4) := Jv (R) * Constraints (R).Mu;
-                  for T in 1 .. Dim - 1 loop
-                     U := Jar (R + T) * Constraints (R).Friction (T);
-                     V := Jv (R + T) * Constraints (R).Friction (T);
-                     Quad (Bi) (5) := Quad (Bi) (5) + U * U;
-                     Quad (Bi) (6) := Quad (Bi) (6) + U * V;
-                     Quad (Bi) (7) := Quad (Bi) (7) + V * V;
-                  end loop;
-                  Quad (Bi) (8) := Constraints (R).D /
-                    (Constraints (R).Mu**2 * (1.0 + Constraints (R).Mu**2));
-               end if;
-            end loop;
-         end Prepare_Line;
-
-         function Cone_Zone (N, T, Mu : Real) return State is
-         begin
-            if N not in -1.0e100 .. 1.0e100 or T not in 0.0 .. 1.0e100 then
-               raise Constraint_Error;
-            end if;
-            return State'Val (Scalar.Row_State'Pos (Scalar.Cone_Zone (N, T, Mu)));
-         end Cone_Zone;
-
-         function Cone_Difference (Q : Polynomial; Alpha, Mu : Real) return Real is
-            T0 : constant Real := Math.Sqrt (Real'Max (0.0, Q (5)));
-            N1 : constant Real := Q (3) + Alpha * Q (4);
-            T1 : constant Real := Math.Sqrt (Real'Max (0.0, Q (5) + Alpha * (2.0 * Q (6) + Alpha * Q (7))));
-            Z0 : constant State := Cone_Zone (Q (3), T0, Mu);
-            Z1 : constant State := Cone_Zone (N1, T1, Mu);
-            TD, RD, R0, DQ, Boundary : Work;
-         begin
-            if Z0 = Satisfied and Z1 = Satisfied then return 0.0;
-            elsif Z0 = Quadratic and Z1 = Quadratic then return Alpha * Alpha * Q (2) + Alpha * Q (1);
-            elsif Z0 = Cone and Z1 = Cone then
-               TD := Alpha * (2.0 * Q (6) + Alpha * Q (7)) / (T0 + T1);
-               RD := Alpha * Q (4) - Mu * TD; R0 := Q (3) - Mu * T0;
-               return 0.5 * Q (8) * RD * (2.0 * R0 + RD);
-            elsif Z0 = Cone and Z1 = Quadratic then
-               DQ := Alpha * (Alpha * Q (2) + Q (1)); Boundary := Mu * Q (3) + T0;
-               return DQ + 0.5 * Q (8) * Boundary * Boundary;
-            elsif Z0 = Quadratic and Z1 = Cone then
-               DQ := Alpha * (Alpha * Q (2) + Q (1)); Boundary := Mu * N1 + T1;
-               return DQ - 0.5 * Q (8) * Boundary * Boundary;
-            elsif Z0 = Satisfied and Z1 = Quadratic then return Alpha * Alpha * Q (2) + Alpha * Q (1) + Q (0);
-            elsif Z0 = Satisfied and Z1 = Cone then return 0.5 * Q (8) * (N1 - Mu * T1)**2;
-            elsif Z0 = Cone and Z1 = Satisfied then return -0.5 * Q (8) * (Q (3) - Mu * T0)**2;
-            else return -Q (0);
-            end if;
-         end Cone_Difference;
-
-         procedure Evaluate_Line (P : in out Point) is
-            Total : Polynomial := (0 => 0.0, 1 => G1, 2 => G2, others => 0.0);
-            Q : Polynomial;
-            R : Natural;
-            X, Start, Dir, Rf, Bound, D, C0, Mu, Normal, T, T1, T2 : Work;
-            Z : State;
-            S0, S1 : Scalar.Response;
-         begin
-            LS_Count := LS_Count + 1;
-            P.Cost := 0.0; P.First := 0.0; P.Second := 0.0;
-            for Bi in 1 .. Count loop
-               R := Blocks (Bi); Q := Quad (Bi);
-               case Constraints (R).Form is
-                  when Equality =>
-                     Total (1) := Total (1) + Q (1); Total (2) := Total (2) + Q (2);
-                  when Friction =>
-                     Start := Jar (R); Dir := Jv (R); X := Start + P.Alpha * Dir;
-                     Bound := Constraints (R).Bound; D := Constraints (R).D;
-                     Rf := Constraints (R).R * Bound;
-                     if abs Start > 1.0e30 or abs X > 1.0e30 then raise Constraint_Error; end if;
-                     S0 := Scalar.Evaluate (Scalar.Friction, Start, Constraints (R).R, D, Bound);
-                     S1 := Scalar.Evaluate (Scalar.Friction, X, Constraints (R).R, D, Bound);
-                     if S0.State = Scalar.Quadratic and S1.State = Scalar.Quadratic then
-                        P.Cost := P.Cost + 0.5 * D * (X - Start) * (X + Start);
-                     elsif S0.State = Scalar.Linear_Negative and S1.State = Scalar.Linear_Negative then
-                        P.Cost := P.Cost + Bound * (Start - X);
-                     elsif S0.State = Scalar.Linear_Positive and S1.State = Scalar.Linear_Positive then
-                        P.Cost := P.Cost + Bound * (X - Start);
-                     else P.Cost := P.Cost + (S1.Cost - S0.Cost); end if;
-                     if -Rf < X and X < Rf then P.First := P.First + D * X * Dir; P.Second := P.Second + D * Dir * Dir;
-                     elsif X <= -Rf then P.First := P.First - Bound * Dir;
-                     else P.First := P.First + Bound * Dir; end if;
-                  when Unilateral =>
-                     X := Jar (R) + P.Alpha * Jv (R);
-                     C0 := (if Jar (R) < 0.0 then Q (0) else 0.0);
-                     if X < 0.0 then
-                        Total (0) := Total (0) + (Q (0) - C0);
-                        Total (1) := Total (1) + Q (1); Total (2) := Total (2) + Q (2);
-                     else P.Cost := P.Cost - C0; end if;
-                  when Elliptic =>
-                     Mu := Constraints (R).Mu;
-                     P.Cost := P.Cost + Cone_Difference (Q, P.Alpha, Mu);
-                     Normal := Q (3) + P.Alpha * Q (4);
-                     T := Math.Sqrt (Real'Max (0.0, Q (5) + P.Alpha * (2.0 * Q (6) + P.Alpha * Q (7))));
-                     Z := Cone_Zone (Normal, T, Mu);
-                     if Z = Quadratic then
-                        P.First := P.First + (2.0 * P.Alpha * Q (2) + Q (1)); P.Second := P.Second + 2.0 * Q (2);
-                     elsif Z = Cone then
-                        T1 := (Q (6) + P.Alpha * Q (7)) / T;
-                        T2 := Q (7) / T - (Q (6) + P.Alpha * Q (7)) * T1 / (T * T);
-                        P.First := P.First + Q (8) * (Normal - Mu * T) * (Q (4) - Mu * T1);
-                        P.Second := P.Second + Q (8) * ((Q (4) - Mu * T1)**2 + (Normal - Mu * T) * (-Mu * T2));
-                     end if;
-               end case;
-            end loop;
-            P.Cost := P.Cost + ((P.Alpha * P.Alpha * Total (2) + P.Alpha * Total (1)) + Total (0));
-            P.First := P.First + (2.0 * P.Alpha * Total (2) + Total (1));
-            P.Second := P.Second + 2.0 * Total (2);
-            if P.Second <= 0.0 then
-               P.Second := Tiny;
-               Result.Curvature_Repairs := Result.Curvature_Repairs + 1;
-            end if;
-         end Evaluate_Line;
-
-         procedure Line_Search (Alpha, Improvement : out Real; Hit_Limit : out Boolean) is
-            P0, P1, P2, N1, N2, Mid : Point;
-            Snorm : constant Real := Norm (Search);
-            Gtol, Direction : Work;
-            Changed_1, Changed_2 : Boolean;
-            type Candidates is array (1 .. 3) of Point;
-            Choices : Candidates;
-            Best : Natural;
-            procedure Bracket (P : in out Point; Next : in out Point; Changed : out Boolean) is
-            begin
-               Changed := False;
-               for V of Choices loop
-                  if (P.First < 0.0 and V.First < 0.0 and P.First < V.First)
-                    or else (P.First > 0.0 and V.First > 0.0 and P.First > V.First)
-                  then P := V; Changed := True; end if;
-               end loop;
-               if Changed then Next.Alpha := P.Alpha - P.First / P.Second; Evaluate_Line (Next); end if;
-            end Bracket;
-         begin
-            Alpha := 0.0; Improvement := 0.0; Hit_Limit := False; LS_Count := 0;
-            if Snorm < Tiny then return; end if;
-            Prepare_Line;
-            Gtol := Settings.Tolerance * Settings.LS_Tolerance * Snorm / Settings.Scale;
-            Evaluate_Line (P0);
-            P1.Alpha := -P0.First / P0.Second; Evaluate_Line (P1);
-            if abs P1.First < Gtol and (P1.Alpha = 0.0 or P1.Cost < 0.0) then
-               Alpha := P1.Alpha; Improvement := -P1.Cost; return;
-            end if;
-            Direction := (if P1.First < 0.0 then 1.0 else -1.0); P2 := P0;
-            while P1.First * Direction <= -Gtol and LS_Count < Settings.LS_Iterations loop
-               P2 := P1; P1.Alpha := P1.Alpha - P1.First / P1.Second; Evaluate_Line (P1);
-               if abs P1.First < Gtol and P1.Cost < 0.0 then Alpha := P1.Alpha; Improvement := -P1.Cost; return; end if;
-            end loop;
-            if LS_Count >= Settings.LS_Iterations then
-               Hit_Limit := True;
-               Alpha := P1.Alpha; Improvement := -P1.Cost;
-               return;
-            end if;
-            N2 := P1; N1.Alpha := P1.Alpha - P1.First / P1.Second; Evaluate_Line (N1);
-            while LS_Count < Settings.LS_Iterations loop
-               Mid.Alpha := 0.5 * (P1.Alpha + P2.Alpha); Evaluate_Line (Mid);
-               Choices := (N1, N2, Mid); Best := 0;
-               for T in Choices'Range loop
-                  if abs Choices (T).First < Gtol
-                    and then (Best = 0 or else Choices (T).Cost < Choices (Best).Cost)
-                  then Best := T; end if;
-               end loop;
-               if Best /= 0 then Alpha := Choices (Best).Alpha; Improvement := -Choices (Best).Cost; return; end if;
-               Bracket (P1, N1, Changed_1); Bracket (P2, N2, Changed_2);
-               if not Changed_1 and not Changed_2 then
-                  Alpha := Mid.Alpha; Improvement := -Mid.Cost;
-                  return;
-               end if;
-            end loop;
-            Hit_Limit := True;
-            if P1.Cost <= P2.Cost and P1.Cost < 0.0 then Alpha := P1.Alpha; Improvement := -P1.Cost;
-            elsif P2.Cost < P1.Cost and P2.Cost < 0.0 then Alpha := P2.Alpha; Improvement := -P2.Cost; end if;
-         end Line_Search;
-
-         procedure Run_Primal is
-            Y, MY : Vector (1 .. N);
-            Gap, Decrement, Alpha, Improvement, Beta, DY, HZ, Eta : Work;
-            Hit_Limit : Boolean;
-         begin
-            Residual; Update (False); Apply_Mass_Inverse (Grad, Mgrad);
-            Gap := Real'Max (0.0, 0.5 * Settings.Scale * Dot (Grad, Mgrad));
-            Result.Gradient := Settings.Scale * Norm (Grad);
-            if Gap < Settings.Tolerance and (Settings.Algorithm = CG or Result.Gradient < Settings.Tolerance) then
-               Result.Outcome := Converged; return;
-            end if;
-            if Settings.Algorithm = Newton then
-               if Scalar_Rows then Build_Scalar_Hessian; else Update (True); end if;
-               Precondition;
-            end if;
-            for P in 1 .. N loop Search (P) := -Mgrad (P); end loop;
-            Result.Outcome := Iteration_Limit;
-            for Iter in 1 .. Settings.Iterations loop
-               Line_Search (Alpha, Improvement, Hit_Limit);
-               Result.Evaluations := Result.Evaluations + LS_Count;
-               if Alpha = 0.0 then
-                  Result.Outcome := (if Hit_Limit then Line_Search_Limit else Stalled); exit;
-               end if;
-               for P in 1 .. N loop Acc (P) := Acc (P) + Alpha * Search (P); Ma (P) := Ma (P) + Alpha * Mv (P); end loop;
-               for R in 1 .. K loop Jar (R) := Jar (R) + Alpha * Jv (R); end loop;
-               Oldgrad := Grad; Oldmg := Mgrad;
-               Update (Settings.Algorithm = Newton); Precondition;
-               Result.Iterations := Iter;
-               Result.Improvement := Improvement * Settings.Scale;
-               Result.Gradient := Settings.Scale * Norm (Grad);
-               Decrement := Real'Max (0.0, 0.5 * Settings.Scale * Dot (Grad, Mgrad));
-               if Hit_Limit then Result.Line_Search_Limits := Result.Line_Search_Limits + 1; end if;
-               if (Result.Improvement > 0.0 and Result.Improvement < Settings.Tolerance)
-                 or Result.Gradient < Settings.Tolerance
-                 or (Settings.Algorithm = Newton and Decrement < Settings.Tolerance)
-               then Result.Outcome := Converged; exit; end if;
-               Beta := 0.0;
-               if Settings.Algorithm = CG then
-                  for P in 1 .. N loop Y (P) := Grad (P) - Oldgrad (P); MY (P) := Mgrad (P) - Oldmg (P); end loop;
-                  DY := Dot (Search, Y);
-                  if DY >= Tiny then
-                     HZ := (Dot (Y, Mgrad) - 2.0 * (Dot (Y, MY) / DY) * Dot (Search, Grad)) / DY;
-                     Eta := -1.0 / Real'Max (Tiny, Norm (Search) * Real'Min (0.01, Norm (Grad)));
-                     Beta := Real'Max (Eta, HZ);
-                  else Result.Restarts := Result.Restarts + 1; end if;
-               end if;
-               for P in 1 .. N loop Search (P) := -Mgrad (P) + Beta * Search (P); end loop;
-            end loop;
-         end Run_Primal;
       begin
          I := 1;
          while I <= K loop Count := Count + 1; Blocks (Count) := I; I := I + Constraints (I).Dimension; end loop;
@@ -1128,36 +416,47 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                First : Positive := N;
                Last : Natural := 0;
                R : constant Positive := Blocks (Bi);
+               Present : array (1 .. N) of Boolean := (others => False);
             begin
                for T in R .. R + Constraints (R).Dimension - 1 loop
+                  if Settings.Sparse and not Scalar_Rows then
+                     for Pi in 1 .. Nonzeros (T) loop Present (Columns (T, Pi)) := True; end loop;
+                  end if;
                   if Nonzeros (T) > 0 then
                      First := Positive'Min (First, Columns (T, 1));
                      Last := Natural'Max (Last, Columns (T, Nonzeros (T)));
                   end if;
                end loop;
+               if Settings.Sparse and not Scalar_Rows then
+               for P in 1 .. N loop
+                  if Present (P) then
+                     Cone_Widths (Bi) := Cone_Widths (Bi) + 1;
+                     Cone_Columns (Bi, Cone_Widths (Bi)) := P;
+                  end if;
+               end loop;
+               end if;
                if Last > 0 then Factor_End (First) := Positive'Max (Factor_End (First), Last); end if;
             end;
          end loop;
-         if Settings.Sparse and then Settings.Algorithm = Newton and then K > 0 then
+         if Use_Sparse_Hessian then
             declare
-               Pattern : Structural_Matrix (1 .. N, 1 .. N);
                Status : Sparse.Status;
             begin
                if Hessian_Pattern'Length (1) /= 0 then
                   if Hessian_Pattern'First (1) /= 1 or else Hessian_Pattern'First (2) /= 1
                     or else Hessian_Pattern'Length (1) /= N or else Hessian_Pattern'Length (2) /= N
                   then Result.Outcome := Invalid_Input; return; end if;
-                  Pattern := Hessian_Pattern;
+                  Hessian_Mask := Hessian_Pattern;
                else
-                  Pattern := (others => (others => False));
+                  Hessian_Mask := (others => (others => False));
                end if;
                --  Always include numerical support; an optional symbolic
                --  pattern augments it with compiled structural zero entries.
                for P in 1 .. N loop
-                  Pattern (P, P) := True;
+                  Hessian_Mask (P, P) := True;
                   for Qi in 1 .. Mass_Nonzeros (P) loop
                      declare Q : constant Positive := Mass_Columns (P, Qi); begin
-                        if Q > P then Pattern (P, Q) := True; end if;
+                        if Q > P then Hessian_Mask (P, Q) := True; end if;
                      end;
                   end loop;
                end loop;
@@ -1181,55 +480,911 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                         declare P : constant Positive := Support (Pi); begin
                            for Qi in Pi .. Width loop
                               declare Q : constant Positive := Support (Qi); begin
-                                 Pattern (Positive'Min (P, Q), Positive'Max (P, Q)) := True;
+                                 Hessian_Mask (Positive'Min (P, Q), Positive'Max (P, Q)) := True;
                               end;
                            end loop;
                         end;
                      end loop;
                   end;
                end loop;
-               Sparse.Symbolic (Pattern, Hessian_Structure, Status);
+               Packed.Count_Symbolic (Hessian_Mask, Hessian_Plan, Status);
                if Status /= Sparse.Success then Result.Outcome := Invalid_Input; return; end if;
             end;
          end if;
-         I := 1;
-         while I <= N loop
-            declare
-               Last : Positive := Factor_End (I);
-               Cursor : Positive := I;
+         declare
+            Stored : constant Positive := Positive'Max (N, Hessian_Plan.Stored);
+            Hessian_Flat : Packed.Flat_Pattern (N, Stored);
+            Packed_HL : Vector (1 .. Stored) := (others => 0.0);
+            Hessian_Values : Vector (1 .. (if Use_Sparse_Hessian then Stored else 0)) := (others => 0.0);
+            function Hessian_Slot_Count return Natural is
+               Total : Natural := 0;
             begin
-               while Cursor <= Last loop
-                  Last := Positive'Max (Last, Factor_End (Cursor));
-                  Cursor := Cursor + 1;
+               if not Use_Sparse_Hessian then return 0; end if;
+               for Bi in 1 .. Count loop
+                  declare R : constant Positive := Blocks (Bi); begin
+                     Total := Total + (if Constraints (R).Form = Elliptic
+                       then Constraints (R).Dimension*Cone_Widths (Bi) else Nonzeros (R));
+                  end;
                end loop;
-               for P in I .. Last loop Factor_End (P) := Last; end loop;
-               I := Last + 1;
-            end;
-         end loop;
-         if Native_Factor.Row_Count = 0 then
-            Factor_Metric (M, L, OK);
-            if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
-            if Mass_Is_Diagonal then
+               return Total;
+            end Hessian_Slot_Count;
+            Gram_Layout : Assembly.Pattern (N, (if Use_Sparse_Hessian then K else 0), Hessian_Slot_Count);
+            Gram_Raw, Gram_Modified : Vector (1 .. Gram_Layout.Stored) := (others => 0.0);
+
+            procedure Prepare_Gram_Layout is
+               Next : Natural := 0;
+            begin
+               for Bi in 1 .. Count loop
+                  declare R : constant Positive := Blocks (Bi); begin
+                     for T in R .. R+Constraints (R).Dimension-1 loop
+                        Gram_Layout.Address (T) := Next;
+                        Gram_Layout.Width (T) := (if Constraints (R).Form = Elliptic then Cone_Widths (Bi) else Nonzeros (T));
+                        for Pi in 1 .. Gram_Layout.Width (T) loop
+                           declare P : constant Positive :=
+                             (if Constraints (R).Form = Elliptic then Cone_Columns (Bi, Pi) else Columns (T, Pi));
+                           begin
+                              Gram_Layout.Column (Next+Pi) := P;
+                              Gram_Raw (Next+Pi) := J (T, P);
+                           end;
+                        end loop;
+                        Next := Next+Gram_Layout.Width (T);
+                     end loop;
+                  end;
+               end loop;
+               Assembly.Build_Transpose (Gram_Layout);
+               Gram_Modified := Gram_Raw;
+            end Prepare_Gram_Layout;
+
+            procedure Assemble_Gram is
+               Accepted : Boolean;
+            begin
+               Assembly.Build_Gram (Gram_Layout, Gram_Modified, Curvature,
+                 Hessian_Flat, Hessian_Values, Accepted);
+               if not Accepted then raise Constraint_Error; end if;
+            end Assemble_Gram;
+            pragma Inline_Always (Assemble_Gram);
+            procedure Multiply_Metric (X : Vector; Y : out Vector) is
+               S : Work;
+            begin
                for P in 1 .. N loop
-                  Inverse_Mass_Diagonal (P) :=
-                    Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+                  S := 0.0;
+                  for Qi in 1 .. Mass_Nonzeros (P) loop
+                     declare Q : constant Positive := Mass_Columns (P, Qi); begin
+                        S := S + M (P, Q) * X (Q);
+                     end;
+                  end loop;
+                  Y (P) := S;
                end loop;
+            end Multiply_Metric;
+            pragma Inline_Always (Multiply_Metric);
+
+            procedure Multiply_Jacobian (X : Vector; Y : out Vector) is
+            begin
+               for R in 1 .. K loop
+                  Y (R) := (if Settings.Sparse then Jacobians.Sparse_Row (Native, X, R)
+                            else Jacobians.Dense_Row (J, X, R));
+               end loop;
+            end Multiply_Jacobian;
+            pragma Inline_Always (Multiply_Jacobian);
+
+            procedure Factor_Metric (Input : Matrix; Output : out Matrix;
+                                     Accepted : out Boolean) is
+               First : Positive := 1;
+            begin
+               if Factor_End (1) = N then
+                  Factor (Input, Output, Accepted);
+                  return;
+               end if;
+               Output := (others => (others => 0.0));
+               while First <= N loop
+                  declare
+                     Last : constant Positive := Factor_End (First);
+                     Size : constant Positive := Last - First + 1;
+                     Part, Cholesky_Part : Matrix (1 .. Size, 1 .. Size);
+                  begin
+                     Sparse_Arithmetic.Copy_Block (Input, First, Part);
+                     Factor (Part, Cholesky_Part, Accepted);
+                     if not Accepted then return; end if;
+                     for P in 1 .. Size loop
+                        for Q in 1 .. P loop
+                           Output (First + P - 1, First + Q - 1) := Cholesky_Part (P, Q);
+                        end loop;
+                     end loop;
+                     First := Last + 1;
+                  end;
+               end loop;
+               Accepted := True;
+            end Factor_Metric;
+            pragma Inline_Always (Factor_Metric);
+
+            procedure Solve_Metric (Input : Matrix; RHS : Vector; Output : out Vector) is
+               First : Positive := 1;
+            begin
+               if Factor_End (1) = N then
+                  Backsolve (Input, RHS, Output);
+                  return;
+               end if;
+               while First <= N loop
+                  declare
+                     Last : constant Positive := Factor_End (First);
+                     Size : constant Positive := Last - First + 1;
+                     Part : Matrix (1 .. Size, 1 .. Size);
+                     B_Part, X_Part : Vector (1 .. Size);
+                  begin
+                     for P in 1 .. Size loop
+                        B_Part (P) := RHS (First + P - 1);
+                     end loop;
+                     Sparse_Arithmetic.Copy_Block (Input, First, Part);
+                     Backsolve (Part, B_Part, X_Part);
+                     for P in 1 .. Size loop Output (First + P - 1) := X_Part (P); end loop;
+                     First := Last + 1;
+                  end;
+               end loop;
+            end Solve_Metric;
+            pragma Inline_Always (Solve_Metric);
+
+            --  The dense Newton Hessian follows mju_cholFactor/mju_cholSolve.
+            --  Keep the full dimension: cutting independent blocks changes the
+            --  four-lane dot grouping even when the omitted entries are zero.
+            procedure Factor_Hessian is
+               Status : Dense.Status;
+               Sparse_Status : Sparse.Status;
+               Rank : Natural;
+            begin
+               if Settings.Sparse then
+                  Packed.Factor_Values (Hessian_Values, Hessian_Flat, Packed_HL, Rank, Sparse_Status, Tiny);
+                  if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
+               else
+                  Dense.Factor (H, HL, Rank, Status, Tiny);
+                  if Status /= Dense.Success then raise Constraint_Error; end if;
+               end if;
+            end Factor_Hessian;
+            pragma Inline_Always (Factor_Hessian);
+
+            procedure Solve_Hessian is
+               Status : Dense.Status;
+               Sparse_Status : Sparse.Status;
+            begin
+               if Settings.Sparse then
+                  Packed.Backsolve_Flat (Packed_HL, Hessian_Flat, Grad, Mgrad, Sparse_Status);
+                  if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
+               else
+                  Dense.Backsolve (HL, Grad, Mgrad, Status);
+                  if Status /= Dense.Success then raise Constraint_Error; end if;
+               end if;
+            end Solve_Hessian;
+            pragma Inline_Always (Solve_Hessian);
+
+            procedure Residual is
+            begin
+               Multiply_Metric (Acc, Ma);
+               Multiply_Jacobian (Acc, Jar);
+               for R in Jar'Range loop Jar (R) := Jar (R) - Aref (R); end loop;
+            end Residual;
+            pragma Inline_Always (Residual);
+
+            procedure Incremental_Hessian (Accepted : out Boolean) is
+               X : Vector (1 .. N);
+               --  The legacy pattern is materialized only for rank updates.
+               Hessian_Structure : Sparse.Pattern ((if Settings.Sparse then N else 1));
+               Sparse_HL : Matrix (1 .. (if Settings.Sparse then N else 0),
+                                   1 .. (if Settings.Sparse then N else 0));
+               Root_D : Real;
+               Plus : Boolean;
+               Rank : Natural;
+               Start : Natural;
+               Status : Updates.Status;
+            begin
+               Accepted := False;
+               if Settings.Sparse then
+                  Packed.Legacy_Pattern (Hessian_Flat, Hessian_Structure);
+                  Packed.Expand_Flat (Packed_HL, Hessian_Flat, Sparse_HL);
+               end if;
+               for Row in 1 .. K loop
+                  if Curvature (Row) /= Previous_Curvature (Row) then
+                     Plus := Curvature (Row) /= 0.0;
+                     Root_D := Math.Sqrt (Constraints (Row).D);
+                     X := (others => 0.0); Rank := N;
+                     if Settings.Sparse then
+                        if Native.Widths (Row) > 0 then
+                           --  C's update consumes canonical increasing columns.
+                           --  General ordered/duplicate CSR remains admissible for
+                           --  products and retains the full-factorization path.
+                           for Slot in Native.Offsets (Row)+2 .. Native.Offsets (Row)+Native.Widths (Row) loop
+                              if Native.Columns (Slot) <= Native.Columns (Slot-1) then return; end if;
+                           end loop;
+                           Start := Native.Columns (Native.Offsets (Row)+Native.Widths (Row));
+                           for Slot in Native.Offsets (Row)+1 .. Native.Offsets (Row)+Native.Widths (Row) loop
+                              X (Native.Columns (Slot)) := Native.Values (Slot)*Root_D;
+                           end loop;
+                           if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
+                           Updates.Update_Sparse (Sparse_HL, Hessian_Structure, X, Start, Plus, Rank, Status);
+                           if Status /= Updates.Success then raise Constraint_Error; end if;
+                        end if;
+                     else
+                        for P in 1 .. N loop X (P) := J (Row, P)*Root_D; end loop;
+                        if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
+                        Updates.Update_Dense (HL, X, Plus, Rank, Status);
+                        if Status /= Updates.Success then raise Constraint_Error; end if;
+                     end if;
+                     if Rank < N then return; end if;
+                  end if;
+               end loop;
+               if Settings.Sparse then
+                  Packed.Pack_Flat (Sparse_HL, Hessian_Flat, Packed_HL);
+               end if;
+               Accepted := True;
+            end Incremental_Hessian;
+
+            procedure Build_Scalar_Hessian is
+               Changed : Boolean := not Hessian_Valid;
+               Nonzero_Curvature : Boolean := False;
+            begin
+               for R in 1 .. K loop
+                  Changed := Changed or Curvature (R) /= Previous_Curvature (R);
+                  Nonzero_Curvature := Nonzero_Curvature or Curvature (R) /= 0.0;
+               end loop;
+               if not Changed then return; end if;
+               if Hessian_Valid then
+                  declare Accepted : Boolean; begin
+                     Incremental_Hessian (Accepted);
+                     if Accepted then Previous_Curvature := Curvature; return; end if;
+                  end;
+               end if;
+               if not Nonzero_Curvature then
+                  if Settings.Sparse then Packed.Load_Mass_Values (M, Hessian_Flat, Hessian_Values);
+                  else H := M;
+                  end if;
+                  Factor_Hessian;
+               else
+                  if Settings.Sparse then
+                     Assemble_Gram;
+                     Packed.Add_Mass_Values (M, Hessian_Flat, Hessian_Values);
+                  else
+                     H := (others => (others => 0.0));
+                     for Bi in 1 .. Count loop
+                        declare R : constant Positive := Blocks (Bi); begin
+                           if Curvature (R) /= 0.0 then
+                              for Pi in 1 .. Nonzeros (R) loop
+                                 declare P : constant Positive := Columns (R, Pi); begin
+                                    for Qi in 1 .. Pi loop
+                                       declare Q : constant Positive := Columns (R, Qi); begin
+                                          H (P, Q) := Sparse_Arithmetic.Outer_Update
+                                            (H (P, Q), J (R, P), Curvature (R), J (R, Q));
+                                       end;
+                                    end loop;
+                                 end;
+                              end loop;
+                           end if;
+                        end;
+                     end loop;
+                     for P in 1 .. N loop
+                        for Q in 1 .. P loop H (P, Q) := H (P, Q)+M (P, Q); end loop;
+                     end loop;
+                  end if;
+                  Factor_Hessian;
+               end if;
+               Previous_Curvature := Curvature;
+               Hessian_Valid := True;
+            end Build_Scalar_Hessian;
+            pragma Inline_Always (Build_Scalar_Hessian);
+
+            procedure Update_Generalized_Force (Primal : Boolean) is
+            begin
+               if Settings.Sparse and Primal then
+                  for P in 1 .. N loop Qfrc (P) := Jacobians.Sparse_Row (Native_T, F, P); end loop;
+               else
+                  Qfrc := (others => 0.0);
+                  for R in 1 .. K loop
+                     if F (R) /= 0.0 then
+                        if Settings.Sparse then
+                           for Slot in Native.Offsets (R)+1 .. Native.Offsets (R)+Native.Widths (R) loop
+                              declare P : constant Positive := Native.Columns (Slot); begin
+                                 Qfrc (P) := Qfrc (P)+Native.Values (Slot)*F (R);
+                              end;
+                           end loop;
+                        else
+                           for P in 1 .. N loop Qfrc (P) := Qfrc (P)+J (R, P)*F (R); end loop;
+                        end if;
+                     end if;
+                  end loop;
+               end if;
+            end Update_Generalized_Force;
+            pragma Inline_Always (Update_Generalized_Force);
+
+            procedure Fold_Cone (B : Block_Value; Start, Dim, Bi : Positive) is
+               Local_Input, Local_Factor : Matrix (1 .. Dim, 1 .. Dim);
+               Local : Cone_Arithmetic.Local_Matrix := (others => (others => 0.0));
+               Column, Folded : Cone_Arithmetic.Local_Vector;
+               Rank : Natural;
+               Status : Dense.Status;
+            begin
+               if Cone_Widths (Bi) = 0 then return; end if;
+               for S in 1 .. Dim loop
+                  for T in 1 .. Dim loop Local_Input (S, T) := B.H (S, T); end loop;
+               end loop;
+               --  C 3.15 HessianConeFolded first clamps/factors the local
+               --  cone Hessian, then replaces Jc by Lc' * Jc. It never forms
+               --  the full N-by-N-by-dim-by-dim bilinear product.
+               Dense.Factor (Local_Input, Local_Factor, Rank, Status, Tiny);
+               if Status /= Dense.Success then raise Constraint_Error; end if;
+               for S in 1 .. Dim loop
+                  for T in 1 .. S loop Local (S, T) := Local_Factor (S, T); end loop;
+               end loop;
+               for Pi in 1 .. Cone_Widths (Bi) loop
+                  Column := (others => 0.0);
+                  for S in 1 .. Dim loop
+                     Column (S) := J (Start + S - 1, Cone_Columns (Bi, Pi));
+                  end loop;
+                  Cone_Arithmetic.Fold_Column (Local, Column, Dim, Folded);
+                  for S in 1 .. Dim loop
+                     Gram_Modified (Gram_Layout.Address (Start+S-1)+Pi) := Folded (S);
+                  end loop;
+               end loop;
+               for S in 1 .. Dim loop Curvature (Start+S-1) := 1.0; end loop;
+            end Fold_Cone;
+            pragma Inline_Always (Fold_Cone);
+
+            procedure Fold_Quadratic (B : Block_Value; Start, Dim : Positive) is
+            begin
+               for S in 1 .. Dim loop Curvature (Start+S-1) := B.H (S, S); end loop;
+            end Fold_Quadratic;
+            pragma Inline_Always (Fold_Quadratic);
+
+            procedure Update (Build_H : Boolean) is
+               B : Block_Value;
+               R, Dim : Natural;
+               V : Work;
+            begin
+               Cost := 0.0;
+               Grad := Ma;
+               for P in 1 .. N loop
+                  Grad (P) := Grad (P) - Smooth (P);
+                  Cost := Cost + 0.5 * Grad (P) * (Acc (P) - A_Free (P));
+               end loop;
+               if Build_H and not Scalar_Rows then
+                  if Settings.Sparse then
+                     Gram_Modified := Gram_Raw;
+                     Curvature := (others => 0.0);
+                  else H := M;
+                  end if;
+               end if;
+               for Bi in 1 .. Count loop
+                  R := Blocks (Bi); Dim := Constraints (R).Dimension;
+                  if Scalar_Rows then
+                     declare S : Scalar.Response; begin
+                     if Jar (R) not in -1.0e30 .. 1.0e30 then raise Constraint_Error; end if;
+                     S := Scalar.Evaluate (Scalar_Kind (Constraints (R).Form),
+                       Jar (R), Constraints (R).R, Constraints (R).D, Constraints (R).Bound);
+                     Cost := Cost + S.Cost;
+                     F (R) := S.Force;
+                     Curvature (R) := S.Curvature;
+                     --  The scalar Hessian is M + sum_r J_r' D_r J_r.  Visit
+                     --  only the columns present in the row, retaining row and
+                     --  floating-point product order.  C uses the same sparse
+                     --  row support in mju_sqrMatTDSparseNumeric.
+                     end;
+                  else
+                  Evaluate_Block (Constraints, R, Jar, Build_H, B);
+                  Cost := Cost + B.Cost;
+                  for T in 1 .. Dim loop F (R + T - 1) := B.F (T); end loop;
+                  if Build_H and Settings.Sparse then
+                     case B.Zone is
+                        when Cone => Fold_Cone (B, R, Dim, Bi);
+                        when Quadratic => Fold_Quadratic (B, R, Dim);
+                        when others => null;
+                     end case;
+                  elsif not Settings.Sparse then
+                  for P in 1 .. N loop
+                     if Build_H then
+                        for Q in 1 .. N loop
+                           V := 0.0;
+                           for S in 1 .. Dim loop
+                              for T in 1 .. Dim loop
+                                 V := V + J (R + S - 1, P) * B.H (S, T) * J (R + T - 1, Q);
+                              end loop;
+                           end loop;
+                           H (P, Q) := H (P, Q) + V;
+                        end loop;
+                     end if;
+                  end loop;
+                  end if;
+                  end if;
+               end loop;
+               Update_Generalized_Force (True);
+               for P in 1 .. N loop Grad (P) := Grad (P)-Qfrc (P); end loop;
+               if Build_H and Scalar_Rows then
+                  Build_Scalar_Hessian;
+               elsif Build_H then
+                  if Settings.Sparse then
+                     Assemble_Gram;
+                     Packed.Add_Mass_Values (M, Hessian_Flat, Hessian_Values);
+                  end if;
+                  Factor_Hessian;
+                  Hessian_Valid := True;
+               end if;
+            end Update;
+            pragma Inline_Always (Update);
+
+            --  A diagonal LDL solve is one reciprocal multiply in C. Reusing
+            --  the Cholesky root here adds two rounding steps and changes CG's
+            --  stopping iteration on strongly scaled elliptic contacts.
+            procedure Apply_Mass_Inverse (RHS : Vector; Output : out Vector) is
+               Accepted : Boolean;
+            begin
+               if Native_Factor.Row_Count /= 0 then
+                  if not NI.Bounded (RHS) then raise Constraint_Error; end if;
+                  NI.Apply (Native_Factor, Native_Inverse, RHS, Output, Accepted);
+                  if not Accepted then raise Constraint_Error; end if;
+               elsif Mass_Is_Diagonal then
+                  for P in 1 .. N loop
+                     Output (P) := Sparse_Arithmetic.Diagonal_Scale
+                       (RHS (P), Inverse_Mass_Diagonal (P));
+                  end loop;
+               else
+                  Solve_Metric (L, RHS, Output);
+               end if;
+            end Apply_Mass_Inverse;
+            pragma Inline_Always (Apply_Mass_Inverse);
+
+            procedure Precondition is
+            begin
+               if Settings.Algorithm = Newton then Solve_Hessian;
+               else Apply_Mass_Inverse (Grad, Mgrad); end if;
+            end Precondition;
+            pragma Inline_Always (Precondition);
+
+            procedure Project_Forces is
+               R, Dim : Natural;
+               V, S : Work;
+            begin
+               for Bi in 1 .. Count loop
+                  R := Blocks (Bi); Dim := Constraints (R).Dimension;
+                  if Constraints (R).Form /= Elliptic then
+                     F (R) := Project_Row (Constraints (R).Form, F (R), Constraints (R).Bound);
+                  elsif F (R) < 0.0 then
+                     for T in R .. R + Dim - 1 loop F (T) := 0.0; end loop;
+                  else
+                     V := 0.0;
+                     for T in 1 .. Dim - 1 loop V := V + (F (R + T) / Constraints (R).Friction (T))**2; end loop;
+                     if V > F (R)**2 then
+                        S := Math.Sqrt (F (R)**2 / Real'Max (Tiny, V));
+                        for T in 1 .. Dim - 1 loop F (R + T) := F (R + T) * S; end loop;
+                     end if;
+                  end if;
+               end loop;
+            end Project_Forces;
+
+            procedure Run_PGS is
+               use type Interfaces.Unsigned_32;
+               AR : Matrix (1 .. K, 1 .. K);
+               Inv_J : Matrix (1 .. N, 1 .. K);
+               B, Previous, Momentum : Vector (1 .. K);
+               Col, Sol : Vector (1 .. N);
+               Old, Res, Change : Small_Vector := (others => 0.0);
+               Ac : Matrix (1 .. 5, 1 .. 5);
+               Bc, Dc, Xc : Vector (1 .. 5);
+               Seed : Interfaces.Unsigned_64 := 0;
+               Random : Interfaces.Unsigned_32;
+               Nk : Natural := 0;
+               R, Dim, Pick, Swap : Natural;
+               Beta, Save, V, Den, Step, Delta_C, Restart : Work;
+            begin
+               for Rj in 1 .. K loop
+                  for P in 1 .. N loop Col (P) := J (Rj, P); end loop;
+                  Apply_Mass_Inverse (Col, Sol);
+                  for P in 1 .. N loop Inv_J (P, Rj) := Sol (P); end loop;
+                  for Ri in 1 .. K loop
+                     V := 0.0;
+                     for Pi in 1 .. Nonzeros (Ri) loop
+                        declare P : constant Positive := Columns (Ri, Pi); begin
+                           V := V + J (Ri, P) * Sol (P);
+                        end;
+                     end loop;
+                     AR (Ri, Rj) := V;
+                  end loop;
+                  AR (Rj, Rj) := AR (Rj, Rj) + Constraints (Rj).R;
+                  if AR (Rj, Rj) < Tiny then raise Constraint_Error; end if;
+               end loop;
+               Multiply_Jacobian (A_Free, B);
+               for Ri in 1 .. K loop B (Ri) := B (Ri) - Aref (Ri); end loop;
+               Project_Forces;
+               Previous := F;
+               MJ.Constraint_Order.Next (Seed, Random);
+               Result.Outcome := Iteration_Limit;
+               for Iter in 1 .. Settings.Iterations loop
+                  Beta := 0.0;
+                  if Iter > 1 then Beta := (Real (Nk) - 1.0) / (Real (Nk) + 2.0); end if;
+                  if Beta > 0.0 then
+                     for Ri in F'Range loop
+                        Save := F (Ri); F (Ri) := F (Ri) + Beta * (F (Ri) - Previous (Ri)); Previous (Ri) := Save;
+                     end loop;
+                     Project_Forces;
+                  else Previous := F; end if;
+                  Momentum := F;
+                  for Bi in reverse 2 .. Count loop
+                     MJ.Constraint_Order.Next (Seed, Random);
+                     Pick := Natural (Random mod Interfaces.Unsigned_32 (Bi)) + 1;
+                     Swap := Blocks (Pick); Blocks (Pick) := Blocks (Bi); Blocks (Bi) := Swap;
+                  end loop;
+                  Result.Improvement := 0.0;
+                  for Bi in 1 .. Count loop
+                     R := Blocks (Bi); Dim := Constraints (R).Dimension;
+                     for T in 1 .. Dim loop
+                        V := B (R + T - 1);
+                        for Ri in F'Range loop V := V + AR (R + T - 1, Ri) * F (Ri); end loop;
+                        Res (T) := V; Old (T) := F (R + T - 1);
+                     end loop;
+                     if Dim = 1 then
+                        F (R) := Project_Row (Constraints (R).Form,
+                          F (R) - Res (1) * (1.0 / AR (R, R)), Constraints (R).Bound);
+                     else
+                        if F (R) < Tiny then
+                           F (R) := Real'Max (0.0, F (R) - Res (1) * (1.0 / AR (R, R)));
+                           for T in 1 .. Dim - 1 loop F (R + T) := 0.0; end loop;
+                        else
+                           Den := 0.0;
+                           for S in 1 .. Dim loop
+                              V := 0.0;
+                              for T in 1 .. Dim loop V := V + AR (R + S - 1, R + T - 1) * Old (T); end loop;
+                              Den := Den + Old (S) * V;
+                           end loop;
+                           if Den >= Tiny then
+                              Step := -Dot (Old (1 .. Dim), Res (1 .. Dim)) / Den;
+                              if F (R) + Step * Old (1) < 0.0 then Step := -Old (1) / F (R); end if;
+                              for T in 1 .. Dim loop F (R + T - 1) := F (R + T - 1) + Step * Old (T); end loop;
+                           end if;
+                        end if;
+                        for S in 1 .. Dim - 1 loop
+                           V := 0.0;
+                           for T in 1 .. Dim - 1 loop
+                              Ac (S, T) := AR (R + S, R + T);
+                              V := V + Ac (S, T) * Old (T + 1);
+                           end loop;
+                           Bc (S) := Res (S + 1) - V + AR (R + S, R) * (F (R) - Old (1));
+                           Dc (S) := Constraints (R).Friction (S);
+                        end loop;
+                        if F (R) < Tiny then
+                           for T in 1 .. Dim - 1 loop F (R + T) := 0.0; end loop;
+                        else
+                           declare
+                              Tangents : constant Natural := Dim - 1;
+                              A_T : Matrix (1 .. Tangents, 1 .. Tangents);
+                           begin
+                              for S in A_T'Range (1) loop for T in A_T'Range (2) loop A_T (S, T) := Ac (S, T); end loop; end loop;
+                              QCQP (A_T, Bc (1 .. Dim - 1), Dc (1 .. Dim - 1), F (R), Xc (1 .. Dim - 1));
+                           end;
+                           for T in 1 .. Dim - 1 loop F (R + T) := Xc (T); end loop;
+                        end if;
+                     end if;
+                     for T in 1 .. Dim loop Change (T) := F (R + T - 1) - Old (T); end loop;
+                     Delta_C := Dot (Change (1 .. Dim), Res (1 .. Dim));
+                     for S in 1 .. Dim loop
+                        V := 0.0;
+                        for T in 1 .. Dim loop V := V + AR (R + S - 1, R + T - 1) * Change (T); end loop;
+                        Delta_C := Delta_C + 0.5 * Change (S) * V;
+                     end loop;
+                     if Delta_C > 1.0e-10 then
+                        for T in 1 .. Dim loop F (R + T - 1) := Old (T); end loop;
+                        Delta_C := 0.0;
+                     end if;
+                     Result.Improvement := Result.Improvement - Delta_C;
+                  end loop;
+                  Result.Improvement := Result.Improvement * Settings.Scale;
+                  Restart := 0.0;
+                  if Iter > 1 then
+                     for Ri in F'Range loop Restart := Restart + (F (Ri) - Momentum (Ri)) * (Momentum (Ri) - Previous (Ri)); end loop;
+                  end if;
+                  if Restart < 0.0 then Nk := 0; Result.Restarts := Result.Restarts + 1;
+                  else Nk := Nk + 1; end if;
+                  Result.Iterations := Iter;
+                  if Result.Improvement < Settings.Tolerance then Result.Outcome := Converged; exit; end if;
+               end loop;
+               Acc := A_Free;
+               for P in 1 .. N loop
+                  V := 0.0;
+                  for Ri in F'Range loop V := V + Inv_J (P, Ri) * F (Ri); end loop;
+                  Acc (P) := Acc (P) + V;
+               end loop;
+            end Run_PGS;
+
+            type Point is record
+               Alpha, Cost, First, Second : Work := 0.0;
+            end record;
+            LS_Count : Natural := 0;
+            G1, G2 : Work;
+
+            type Polynomial is array (Natural range 0 .. 8) of Real;
+            type Polynomials is array (Positive range <>) of Polynomial;
+            Quad : Polynomials (1 .. K);
+
+            procedure Prepare_Line is
+               R, Dim : Natural;
+               DJ, U, V : Work;
+            begin
+               Multiply_Metric (Search, Mv); Multiply_Jacobian (Search, Jv);
+               G1 := Dot (Search, Ma) - Dot (Smooth, Search); G2 := 0.5 * Dot (Search, Mv);
+               for Bi in 1 .. Count loop
+                  R := Blocks (Bi); Dim := Constraints (R).Dimension;
+                  Quad (Bi) := (others => 0.0);
+                  for T in R .. R + Dim - 1 loop
+                     DJ := Constraints (T).D * Jar (T);
+                     Quad (Bi) (0) := Quad (Bi) (0) + Jar (T) * DJ;
+                     Quad (Bi) (1) := Quad (Bi) (1) + Jv (T) * DJ;
+                     Quad (Bi) (2) := Quad (Bi) (2) + Jv (T) * Constraints (T).D * Jv (T);
+                  end loop;
+                  Quad (Bi) (0) := 0.5 * Quad (Bi) (0);
+                  Quad (Bi) (2) := 0.5 * Quad (Bi) (2);
+                  if Constraints (R).Form = Elliptic then
+                     Quad (Bi) (3) := Jar (R) * Constraints (R).Mu;
+                     Quad (Bi) (4) := Jv (R) * Constraints (R).Mu;
+                     for T in 1 .. Dim - 1 loop
+                        U := Jar (R + T) * Constraints (R).Friction (T);
+                        V := Jv (R + T) * Constraints (R).Friction (T);
+                        Quad (Bi) (5) := Quad (Bi) (5) + U * U;
+                        Quad (Bi) (6) := Quad (Bi) (6) + U * V;
+                        Quad (Bi) (7) := Quad (Bi) (7) + V * V;
+                     end loop;
+                     Quad (Bi) (8) := Constraints (R).D /
+                       (Constraints (R).Mu**2 * (1.0 + Constraints (R).Mu**2));
+                  end if;
+               end loop;
+            end Prepare_Line;
+
+            function Cone_Zone (N, T, Mu : Real) return State is
+            begin
+               if N not in -1.0e100 .. 1.0e100 or T not in 0.0 .. 1.0e100 then
+                  raise Constraint_Error;
+               end if;
+               return State'Val (Scalar.Row_State'Pos (Scalar.Cone_Zone (N, T, Mu)));
+            end Cone_Zone;
+
+            function Cone_Difference (Q : Polynomial; Alpha, Mu : Real) return Real is
+               T0 : constant Real := Math.Sqrt (Real'Max (0.0, Q (5)));
+               N1 : constant Real := Q (3) + Alpha * Q (4);
+               T1 : constant Real := Math.Sqrt (Real'Max (0.0, Q (5) + Alpha * (2.0 * Q (6) + Alpha * Q (7))));
+               Z0 : constant State := Cone_Zone (Q (3), T0, Mu);
+               Z1 : constant State := Cone_Zone (N1, T1, Mu);
+               TD, RD, R0, DQ, Boundary : Work;
+            begin
+               if Z0 = Satisfied and Z1 = Satisfied then return 0.0;
+               elsif Z0 = Quadratic and Z1 = Quadratic then return Alpha * Alpha * Q (2) + Alpha * Q (1);
+               elsif Z0 = Cone and Z1 = Cone then
+                  TD := Alpha * (2.0 * Q (6) + Alpha * Q (7)) / (T0 + T1);
+                  RD := Alpha * Q (4) - Mu * TD; R0 := Q (3) - Mu * T0;
+                  return 0.5 * Q (8) * RD * (2.0 * R0 + RD);
+               elsif Z0 = Cone and Z1 = Quadratic then
+                  DQ := Alpha * (Alpha * Q (2) + Q (1)); Boundary := Mu * Q (3) + T0;
+                  return DQ + 0.5 * Q (8) * Boundary * Boundary;
+               elsif Z0 = Quadratic and Z1 = Cone then
+                  DQ := Alpha * (Alpha * Q (2) + Q (1)); Boundary := Mu * N1 + T1;
+                  return DQ - 0.5 * Q (8) * Boundary * Boundary;
+               elsif Z0 = Satisfied and Z1 = Quadratic then return Alpha * Alpha * Q (2) + Alpha * Q (1) + Q (0);
+               elsif Z0 = Satisfied and Z1 = Cone then return 0.5 * Q (8) * (N1 - Mu * T1)**2;
+               elsif Z0 = Cone and Z1 = Satisfied then return -0.5 * Q (8) * (Q (3) - Mu * T0)**2;
+               else return -Q (0);
+               end if;
+            end Cone_Difference;
+
+            procedure Evaluate_Line (P : in out Point) is
+               Total : Polynomial := (0 => 0.0, 1 => G1, 2 => G2, others => 0.0);
+               Q : Polynomial;
+               R : Natural;
+               X, Start, Dir, Rf, Bound, D, C0, Mu, Normal, T, T1, T2 : Work;
+               Z : State;
+               S0, S1 : Scalar.Response;
+            begin
+               LS_Count := LS_Count + 1;
+               P.Cost := 0.0; P.First := 0.0; P.Second := 0.0;
+               for Bi in 1 .. Count loop
+                  R := Blocks (Bi); Q := Quad (Bi);
+                  case Constraints (R).Form is
+                     when Equality =>
+                        Total (1) := Total (1) + Q (1); Total (2) := Total (2) + Q (2);
+                     when Friction =>
+                        Start := Jar (R); Dir := Jv (R); X := Start + P.Alpha * Dir;
+                        Bound := Constraints (R).Bound; D := Constraints (R).D;
+                        Rf := Constraints (R).R * Bound;
+                        if abs Start > 1.0e30 or abs X > 1.0e30 then raise Constraint_Error; end if;
+                        S0 := Scalar.Evaluate (Scalar.Friction, Start, Constraints (R).R, D, Bound);
+                        S1 := Scalar.Evaluate (Scalar.Friction, X, Constraints (R).R, D, Bound);
+                        if S0.State = Scalar.Quadratic and S1.State = Scalar.Quadratic then
+                           P.Cost := P.Cost + 0.5 * D * (X - Start) * (X + Start);
+                        elsif S0.State = Scalar.Linear_Negative and S1.State = Scalar.Linear_Negative then
+                           P.Cost := P.Cost + Bound * (Start - X);
+                        elsif S0.State = Scalar.Linear_Positive and S1.State = Scalar.Linear_Positive then
+                           P.Cost := P.Cost + Bound * (X - Start);
+                        else P.Cost := P.Cost + (S1.Cost - S0.Cost); end if;
+                        if -Rf < X and X < Rf then P.First := P.First + D * X * Dir; P.Second := P.Second + D * Dir * Dir;
+                        elsif X <= -Rf then P.First := P.First - Bound * Dir;
+                        else P.First := P.First + Bound * Dir; end if;
+                     when Unilateral =>
+                        X := Jar (R) + P.Alpha * Jv (R);
+                        C0 := (if Jar (R) < 0.0 then Q (0) else 0.0);
+                        if X < 0.0 then
+                           Total (0) := Total (0) + (Q (0) - C0);
+                           Total (1) := Total (1) + Q (1); Total (2) := Total (2) + Q (2);
+                        else P.Cost := P.Cost - C0; end if;
+                     when Elliptic =>
+                        Mu := Constraints (R).Mu;
+                        P.Cost := P.Cost + Cone_Difference (Q, P.Alpha, Mu);
+                        Normal := Q (3) + P.Alpha * Q (4);
+                        T := Math.Sqrt (Real'Max (0.0, Q (5) + P.Alpha * (2.0 * Q (6) + P.Alpha * Q (7))));
+                        Z := Cone_Zone (Normal, T, Mu);
+                        if Z = Quadratic then
+                           P.First := P.First + (2.0 * P.Alpha * Q (2) + Q (1)); P.Second := P.Second + 2.0 * Q (2);
+                        elsif Z = Cone then
+                           T1 := (Q (6) + P.Alpha * Q (7)) / T;
+                           T2 := Q (7) / T - (Q (6) + P.Alpha * Q (7)) * T1 / (T * T);
+                           P.First := P.First + Q (8) * (Normal - Mu * T) * (Q (4) - Mu * T1);
+                           P.Second := P.Second + Q (8) * ((Q (4) - Mu * T1)**2 + (Normal - Mu * T) * (-Mu * T2));
+                        end if;
+                  end case;
+               end loop;
+               P.Cost := P.Cost + ((P.Alpha * P.Alpha * Total (2) + P.Alpha * Total (1)) + Total (0));
+               P.First := P.First + (2.0 * P.Alpha * Total (2) + Total (1));
+               P.Second := P.Second + 2.0 * Total (2);
+               if P.Second <= 0.0 then
+                  P.Second := Tiny;
+                  Result.Curvature_Repairs := Result.Curvature_Repairs + 1;
+               end if;
+            end Evaluate_Line;
+
+            procedure Line_Search (Alpha, Improvement : out Real; Hit_Limit : out Boolean) is
+               P0, P1, P2, N1, N2, Mid : Point;
+               Snorm : constant Real := Norm (Search);
+               Gtol, Direction : Work;
+               Changed_1, Changed_2 : Boolean;
+               type Candidates is array (1 .. 3) of Point;
+               Choices : Candidates;
+               Best : Natural;
+               procedure Bracket (P : in out Point; Next : in out Point; Changed : out Boolean) is
+               begin
+                  Changed := False;
+                  for V of Choices loop
+                     if (P.First < 0.0 and V.First < 0.0 and P.First < V.First)
+                       or else (P.First > 0.0 and V.First > 0.0 and P.First > V.First)
+                     then P := V; Changed := True; end if;
+                  end loop;
+                  if Changed then Next.Alpha := P.Alpha - P.First / P.Second; Evaluate_Line (Next); end if;
+               end Bracket;
+            begin
+               Alpha := 0.0; Improvement := 0.0; Hit_Limit := False; LS_Count := 0;
+               if Snorm < Tiny then return; end if;
+               Prepare_Line;
+               Gtol := Settings.Tolerance * Settings.LS_Tolerance * Snorm / Settings.Scale;
+               Evaluate_Line (P0);
+               P1.Alpha := -P0.First / P0.Second; Evaluate_Line (P1);
+               if abs P1.First < Gtol and (P1.Alpha = 0.0 or P1.Cost < 0.0) then
+                  Alpha := P1.Alpha; Improvement := -P1.Cost; return;
+               end if;
+               Direction := (if P1.First < 0.0 then 1.0 else -1.0); P2 := P0;
+               while P1.First * Direction <= -Gtol and LS_Count < Settings.LS_Iterations loop
+                  P2 := P1; P1.Alpha := P1.Alpha - P1.First / P1.Second; Evaluate_Line (P1);
+                  if abs P1.First < Gtol and P1.Cost < 0.0 then Alpha := P1.Alpha; Improvement := -P1.Cost; return; end if;
+               end loop;
+               if LS_Count >= Settings.LS_Iterations then
+                  Hit_Limit := True;
+                  Alpha := P1.Alpha; Improvement := -P1.Cost;
+                  return;
+               end if;
+               N2 := P1; N1.Alpha := P1.Alpha - P1.First / P1.Second; Evaluate_Line (N1);
+               while LS_Count < Settings.LS_Iterations loop
+                  Mid.Alpha := 0.5 * (P1.Alpha + P2.Alpha); Evaluate_Line (Mid);
+                  Choices := (N1, N2, Mid); Best := 0;
+                  for T in Choices'Range loop
+                     if abs Choices (T).First < Gtol
+                       and then (Best = 0 or else Choices (T).Cost < Choices (Best).Cost)
+                     then Best := T; end if;
+                  end loop;
+                  if Best /= 0 then Alpha := Choices (Best).Alpha; Improvement := -Choices (Best).Cost; return; end if;
+                  Bracket (P1, N1, Changed_1); Bracket (P2, N2, Changed_2);
+                  if not Changed_1 and not Changed_2 then
+                     Alpha := Mid.Alpha; Improvement := -Mid.Cost;
+                     return;
+                  end if;
+               end loop;
+               Hit_Limit := True;
+               if P1.Cost <= P2.Cost and P1.Cost < 0.0 then Alpha := P1.Alpha; Improvement := -P1.Cost;
+               elsif P2.Cost < P1.Cost and P2.Cost < 0.0 then Alpha := P2.Alpha; Improvement := -P2.Cost; end if;
+            end Line_Search;
+
+            procedure Run_Primal is
+               Y, MY : Vector (1 .. N);
+               Gap, Decrement, Alpha, Improvement, Beta, DY, HZ, Eta : Work;
+               Hit_Limit : Boolean;
+            begin
+               Residual; Update (False); Apply_Mass_Inverse (Grad, Mgrad);
+               Gap := Real'Max (0.0, 0.5 * Settings.Scale * Dot (Grad, Mgrad));
+               Result.Gradient := Settings.Scale * Norm (Grad);
+               if Gap < Settings.Tolerance and (Settings.Algorithm = CG or Result.Gradient < Settings.Tolerance) then
+                  Result.Outcome := Converged; return;
+               end if;
+               if Settings.Algorithm = Newton then
+                  if Scalar_Rows then Build_Scalar_Hessian; else Update (True); end if;
+                  Precondition;
+               end if;
+               for P in 1 .. N loop Search (P) := -Mgrad (P); end loop;
+               Result.Outcome := Iteration_Limit;
+               for Iter in 1 .. Settings.Iterations loop
+                  Line_Search (Alpha, Improvement, Hit_Limit);
+                  Result.Evaluations := Result.Evaluations + LS_Count;
+                  if Alpha = 0.0 then
+                     Result.Outcome := (if Hit_Limit then Line_Search_Limit else Stalled); exit;
+                  end if;
+                  for P in 1 .. N loop Acc (P) := Acc (P) + Alpha * Search (P); Ma (P) := Ma (P) + Alpha * Mv (P); end loop;
+                  for R in 1 .. K loop Jar (R) := Jar (R) + Alpha * Jv (R); end loop;
+                  Oldgrad := Grad; Oldmg := Mgrad;
+                  Update (Settings.Algorithm = Newton); Precondition;
+                  Result.Iterations := Iter;
+                  Result.Improvement := Improvement * Settings.Scale;
+                  Result.Gradient := Settings.Scale * Norm (Grad);
+                  Decrement := Real'Max (0.0, 0.5 * Settings.Scale * Dot (Grad, Mgrad));
+                  if Hit_Limit then Result.Line_Search_Limits := Result.Line_Search_Limits + 1; end if;
+                  if (Result.Improvement > 0.0 and Result.Improvement < Settings.Tolerance)
+                    or Result.Gradient < Settings.Tolerance
+                    or (Settings.Algorithm = Newton and Decrement < Settings.Tolerance)
+                  then Result.Outcome := Converged; exit; end if;
+                  Beta := 0.0;
+                  if Settings.Algorithm = CG then
+                     for P in 1 .. N loop Y (P) := Grad (P) - Oldgrad (P); MY (P) := Mgrad (P) - Oldmg (P); end loop;
+                     DY := Dot (Search, Y);
+                     if DY >= Tiny then
+                        HZ := (Dot (Y, Mgrad) - 2.0 * (Dot (Y, MY) / DY) * Dot (Search, Grad)) / DY;
+                        Eta := -1.0 / Real'Max (Tiny, Norm (Search) * Real'Min (0.01, Norm (Grad)));
+                        Beta := Real'Max (Eta, HZ);
+                     else Result.Restarts := Result.Restarts + 1; end if;
+                  end if;
+                  for P in 1 .. N loop Search (P) := -Mgrad (P) + Beta * Search (P); end loop;
+               end loop;
+            end Run_Primal;
+         begin
+            if Use_Sparse_Hessian then
+               declare Status : Sparse.Status; begin
+                  Packed.Fill_Symbolic (Hessian_Mask, Hessian_Plan, Hessian_Flat, Status);
+                  if Status /= Sparse.Success then Result.Outcome := Invalid_Input; return; end if;
+               end;
+               Prepare_Gram_Layout;
             end if;
-         end if;
-         if Smooth_Force'Length = 0 then Multiply_Metric (A_Free, Smooth);
-         else Smooth := Smooth_Force;
-         end if;
-         if K = 0 then Acc := A_Free; Result.Outcome := Converged; Grad := (others => 0.0);
-         elsif Settings.Algorithm = PGS then
-            Run_PGS;
-            --  Compute primal diagnostic cost without replacing PGS's dual force.
-            declare Saved : constant Vector := F; begin Residual; Update (False); F := Saved; end;
-            Update_Generalized_Force (False);
-         else Run_Primal; end if;
-         Result.Cost := Cost; Result.Gradient := Settings.Scale * Norm (Grad);
-         for X of Acc loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
-         for X of F loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
-         A := Acc; Force := F; Generalized_Force := Qfrc;
+            I := 1;
+            while I <= N loop
+               declare
+                  Last : Positive := Factor_End (I);
+                  Cursor : Positive := I;
+               begin
+                  while Cursor <= Last loop
+                     Last := Positive'Max (Last, Factor_End (Cursor));
+                     Cursor := Cursor + 1;
+                  end loop;
+                  for P in I .. Last loop Factor_End (P) := Last; end loop;
+                  I := Last + 1;
+               end;
+            end loop;
+            if Native_Factor.Row_Count = 0 then
+               Factor_Metric (M, L, OK);
+               if not OK then Result.Outcome := Not_Positive_Definite; return; end if;
+               if Mass_Is_Diagonal then
+                  for P in 1 .. N loop
+                     Inverse_Mass_Diagonal (P) :=
+                       Sparse_Arithmetic.Inverse_Diagonal (M (P, P));
+                  end loop;
+               end if;
+            end if;
+            if Smooth_Force'Length = 0 then Multiply_Metric (A_Free, Smooth);
+            else Smooth := Smooth_Force;
+            end if;
+            if K = 0 then Acc := A_Free; Result.Outcome := Converged; Grad := (others => 0.0);
+            elsif Settings.Algorithm = PGS then
+               Run_PGS;
+               --  Compute primal diagnostic cost without replacing PGS's dual force.
+               declare Saved : constant Vector := F; begin Residual; Update (False); F := Saved; end;
+               Update_Generalized_Force (False);
+            else Run_Primal; end if;
+            Result.Cost := Cost; Result.Gradient := Settings.Scale * Norm (Grad);
+            for X of Acc loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
+            for X of F loop if X not in -1.0e100 .. 1.0e100 then raise Constraint_Error; end if; end loop;
+            A := Acc; Force := F; Generalized_Force := Qfrc;
+         end;
       exception
          when Constraint_Error => Result.Outcome := Numeric_Limit;
       end;

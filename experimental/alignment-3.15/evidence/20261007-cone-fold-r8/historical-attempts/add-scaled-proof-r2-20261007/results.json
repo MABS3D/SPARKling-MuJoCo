@@ -1,0 +1,58 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Add_Scaled",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-cone-fold-proof-r2-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-cone_kernels.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-cone_kernels.adb:2"
+  ],
+  "exit": 1,
+  "seconds": 8.618987942001695,
+  "manifest_sha256": "a9c6de8c3186d47e6dcecbc703e298dcb97546cdb3c7244406b023bed6da37d1",
+  "runner_sha256": "f167d46a79a86a65c9dc121e207cb5ec93f40a5822ba0f085cc81384e69a7e59",
+  "log_sha256": "b3e030f04b35618614998b3973eeeed4d185ba644e5b38eee25992d192d16fcd",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 0,
+  "proof_checks": 0,
+  "flow_checks": 0,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 16,
+      "file": "mj-constraint_solvers-cone_kernels.adb",
+      "how_proved": "trivial",
+      "line": 20,
+      "message": {
+        "text": "pragma Annotate Unhide_Info must appear at the beginning of a subprogram, entry, or package body, or just after a subprogram, entry, or package body or declaration"
+      },
+      "rule": "error",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Cone_Kernels.Add_Scaled"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": false,
+  "obligations_closed": false
+}

@@ -82,7 +82,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_F32_Array;
 
    procedure Read_Sizes_1 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nq) = Get_I64 (B, P + 0)
+       and then Int64 (S.Nv) = Get_I64 (B, P + 8)
+       and then Int64 (S.Nu) = Get_I64 (B, P + 16)
+       and then Int64 (S.Nactuator) = Get_I64 (B, P + 24)
+       and then Int64 (S.Nout) = Get_I64 (B, P + 32)
+       and then Int64 (S.Na) = Get_I64 (B, P + 40)
+       and then Int64 (S.Nbody) = Get_I64 (B, P + 48)
+       and then Int64 (S.Nbvh) = Get_I64 (B, P + 56))
+       and then S = S'Old'Update (Nq => S.Nq, Nv => S.Nv, Nu => S.Nu, Nactuator => S.Nactuator, Nout => S.Nout, Na => S.Na, Nbody => S.Nbody, Nbvh => S.Nbvh))
    is
       V : Int64;
    begin
@@ -138,7 +147,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_1;
 
    procedure Read_Sizes_2 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nbvhstatic) = Get_I64 (B, P + 64)
+       and then Int64 (S.Nbvhdynamic) = Get_I64 (B, P + 72)
+       and then Int64 (S.Noct) = Get_I64 (B, P + 80)
+       and then Int64 (S.Njnt) = Get_I64 (B, P + 88)
+       and then Int64 (S.Ntree) = Get_I64 (B, P + 96)
+       and then Int64 (S.NM) = Get_I64 (B, P + 104)
+       and then Int64 (S.NB) = Get_I64 (B, P + 112)
+       and then Int64 (S.NC) = Get_I64 (B, P + 120))
+       and then S = S'Old'Update (Nbvhstatic => S.Nbvhstatic, Nbvhdynamic => S.Nbvhdynamic, Noct => S.Noct, Njnt => S.Njnt, Ntree => S.Ntree, NM => S.NM, NB => S.NB, NC => S.NC))
    is
       V : Int64;
    begin
@@ -194,7 +212,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_2;
 
    procedure Read_Sizes_3 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.ND) = Get_I64 (B, P + 128)
+       and then Int64 (S.Ngeom) = Get_I64 (B, P + 136)
+       and then Int64 (S.Nsite) = Get_I64 (B, P + 144)
+       and then Int64 (S.Ncam) = Get_I64 (B, P + 152)
+       and then Int64 (S.Nlight) = Get_I64 (B, P + 160)
+       and then Int64 (S.Nflex) = Get_I64 (B, P + 168)
+       and then Int64 (S.Nflexnode) = Get_I64 (B, P + 176)
+       and then Int64 (S.Nflexvert) = Get_I64 (B, P + 184))
+       and then S = S'Old'Update (ND => S.ND, Ngeom => S.Ngeom, Nsite => S.Nsite, Ncam => S.Ncam, Nlight => S.Nlight, Nflex => S.Nflex, Nflexnode => S.Nflexnode, Nflexvert => S.Nflexvert))
    is
       V : Int64;
    begin
@@ -250,7 +277,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_3;
 
    procedure Read_Sizes_4 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nflexedge) = Get_I64 (B, P + 192)
+       and then Int64 (S.Nflexelem) = Get_I64 (B, P + 200)
+       and then Int64 (S.Nflexelemdata) = Get_I64 (B, P + 208)
+       and then Int64 (S.Nflexstiffness) = Get_I64 (B, P + 216)
+       and then Int64 (S.Nflexbending) = Get_I64 (B, P + 224)
+       and then Int64 (S.Nefm0dof) = Get_I64 (B, P + 232)
+       and then Int64 (S.Nefm0L) = Get_I64 (B, P + 240)
+       and then Int64 (S.Nflexelemedge) = Get_I64 (B, P + 248))
+       and then S = S'Old'Update (Nflexedge => S.Nflexedge, Nflexelem => S.Nflexelem, Nflexelemdata => S.Nflexelemdata, Nflexstiffness => S.Nflexstiffness, Nflexbending => S.Nflexbending, Nefm0dof => S.Nefm0dof, Nefm0L => S.Nefm0L, Nflexelemedge => S.Nflexelemedge))
    is
       V : Int64;
    begin
@@ -306,7 +342,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_4;
 
    procedure Read_Sizes_5 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nflexshelldata) = Get_I64 (B, P + 256)
+       and then Int64 (S.Nflexevpair) = Get_I64 (B, P + 264)
+       and then Int64 (S.Nflextexcoord) = Get_I64 (B, P + 272)
+       and then Int64 (S.NJfe) = Get_I64 (B, P + 280)
+       and then Int64 (S.NJfv) = Get_I64 (B, P + 288)
+       and then Int64 (S.Nmesh) = Get_I64 (B, P + 296)
+       and then Int64 (S.Nmeshvert) = Get_I64 (B, P + 304)
+       and then Int64 (S.Nmeshnormal) = Get_I64 (B, P + 312))
+       and then S = S'Old'Update (Nflexshelldata => S.Nflexshelldata, Nflexevpair => S.Nflexevpair, Nflextexcoord => S.Nflextexcoord, NJfe => S.NJfe, NJfv => S.NJfv, Nmesh => S.Nmesh, Nmeshvert => S.Nmeshvert, Nmeshnormal => S.Nmeshnormal))
    is
       V : Int64;
    begin
@@ -362,7 +407,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_5;
 
    procedure Read_Sizes_6 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nmeshtexcoord) = Get_I64 (B, P + 320)
+       and then Int64 (S.Nmeshface) = Get_I64 (B, P + 328)
+       and then Int64 (S.Nmeshgraph) = Get_I64 (B, P + 336)
+       and then Int64 (S.Nmeshpoly) = Get_I64 (B, P + 344)
+       and then Int64 (S.Nmeshpolyvert) = Get_I64 (B, P + 352)
+       and then Int64 (S.Nmeshpolymap) = Get_I64 (B, P + 360)
+       and then Int64 (S.Nskin) = Get_I64 (B, P + 368)
+       and then Int64 (S.Nskinvert) = Get_I64 (B, P + 376))
+       and then S = S'Old'Update (Nmeshtexcoord => S.Nmeshtexcoord, Nmeshface => S.Nmeshface, Nmeshgraph => S.Nmeshgraph, Nmeshpoly => S.Nmeshpoly, Nmeshpolyvert => S.Nmeshpolyvert, Nmeshpolymap => S.Nmeshpolymap, Nskin => S.Nskin, Nskinvert => S.Nskinvert))
    is
       V : Int64;
    begin
@@ -418,7 +472,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_6;
 
    procedure Read_Sizes_7 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nskintexvert) = Get_I64 (B, P + 384)
+       and then Int64 (S.Nskinface) = Get_I64 (B, P + 392)
+       and then Int64 (S.Nskinbone) = Get_I64 (B, P + 400)
+       and then Int64 (S.Nskinbonevert) = Get_I64 (B, P + 408)
+       and then Int64 (S.Nhfield) = Get_I64 (B, P + 416)
+       and then Int64 (S.Nhfielddata) = Get_I64 (B, P + 424)
+       and then Int64 (S.Ntex) = Get_I64 (B, P + 432)
+       and then Int64 (S.Ntexdata) = Get_I64 (B, P + 440))
+       and then S = S'Old'Update (Nskintexvert => S.Nskintexvert, Nskinface => S.Nskinface, Nskinbone => S.Nskinbone, Nskinbonevert => S.Nskinbonevert, Nhfield => S.Nhfield, Nhfielddata => S.Nhfielddata, Ntex => S.Ntex, Ntexdata => S.Ntexdata))
    is
       V : Int64;
    begin
@@ -474,7 +537,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_7;
 
    procedure Read_Sizes_8 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nmat) = Get_I64 (B, P + 448)
+       and then Int64 (S.Npair) = Get_I64 (B, P + 456)
+       and then Int64 (S.Nexclude) = Get_I64 (B, P + 464)
+       and then Int64 (S.Neq) = Get_I64 (B, P + 472)
+       and then Int64 (S.Ntendon) = Get_I64 (B, P + 480)
+       and then Int64 (S.NJten) = Get_I64 (B, P + 488)
+       and then Int64 (S.Nwrap) = Get_I64 (B, P + 496)
+       and then Int64 (S.Nsensor) = Get_I64 (B, P + 504))
+       and then S = S'Old'Update (Nmat => S.Nmat, Npair => S.Npair, Nexclude => S.Nexclude, Neq => S.Neq, Ntendon => S.Ntendon, NJten => S.NJten, Nwrap => S.Nwrap, Nsensor => S.Nsensor))
    is
       V : Int64;
    begin
@@ -530,7 +602,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_8;
 
    procedure Read_Sizes_9 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nnumeric) = Get_I64 (B, P + 512)
+       and then Int64 (S.Nnumericdata) = Get_I64 (B, P + 520)
+       and then Int64 (S.Ntext) = Get_I64 (B, P + 528)
+       and then Int64 (S.Ntextdata) = Get_I64 (B, P + 536)
+       and then Int64 (S.Ntuple) = Get_I64 (B, P + 544)
+       and then Int64 (S.Ntupledata) = Get_I64 (B, P + 552)
+       and then Int64 (S.Nkey) = Get_I64 (B, P + 560)
+       and then Int64 (S.Nmocap) = Get_I64 (B, P + 568))
+       and then S = S'Old'Update (Nnumeric => S.Nnumeric, Nnumericdata => S.Nnumericdata, Ntext => S.Ntext, Ntextdata => S.Ntextdata, Ntuple => S.Ntuple, Ntupledata => S.Ntupledata, Nkey => S.Nkey, Nmocap => S.Nmocap))
    is
       V : Int64;
    begin
@@ -586,7 +667,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_9;
 
    procedure Read_Sizes_10 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nplugin) = Get_I64 (B, P + 576)
+       and then Int64 (S.Npluginattr) = Get_I64 (B, P + 584)
+       and then Int64 (S.Nuser_Body) = Get_I64 (B, P + 592)
+       and then Int64 (S.Nuser_Jnt) = Get_I64 (B, P + 600)
+       and then Int64 (S.Nuser_Geom) = Get_I64 (B, P + 608)
+       and then Int64 (S.Nuser_Site) = Get_I64 (B, P + 616)
+       and then Int64 (S.Nuser_Cam) = Get_I64 (B, P + 624)
+       and then Int64 (S.Nuser_Tendon) = Get_I64 (B, P + 632))
+       and then S = S'Old'Update (Nplugin => S.Nplugin, Npluginattr => S.Npluginattr, Nuser_Body => S.Nuser_Body, Nuser_Jnt => S.Nuser_Jnt, Nuser_Geom => S.Nuser_Geom, Nuser_Site => S.Nuser_Site, Nuser_Cam => S.Nuser_Cam, Nuser_Tendon => S.Nuser_Tendon))
    is
       V : Int64;
    begin
@@ -642,7 +732,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_10;
 
    procedure Read_Sizes_11 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Nuser_Actuator) = Get_I64 (B, P + 640)
+       and then Int64 (S.Nuser_Sensor) = Get_I64 (B, P + 648)
+       and then Int64 (S.Nnames) = Get_I64 (B, P + 656)
+       and then Int64 (S.Npaths) = Get_I64 (B, P + 664)
+       and then Int64 (S.Nnames_Map) = Get_I64 (B, P + 672)
+       and then Int64 (S.NJmom) = Get_I64 (B, P + 680)
+       and then Int64 (S.Ngravcomp) = Get_I64 (B, P + 688)
+       and then Int64 (S.Nemax) = Get_I64 (B, P + 696))
+       and then S = S'Old'Update (Nuser_Actuator => S.Nuser_Actuator, Nuser_Sensor => S.Nuser_Sensor, Nnames => S.Nnames, Npaths => S.Npaths, Nnames_Map => S.Nnames_Map, NJmom => S.NJmom, Ngravcomp => S.Ngravcomp, Nemax => S.Nemax))
    is
       V : Int64;
    begin
@@ -698,7 +797,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_11;
 
    procedure Read_Sizes_12 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Njmax) = Get_I64 (B, P + 704)
+       and then Int64 (S.Nconmax) = Get_I64 (B, P + 712)
+       and then Int64 (S.Npolygonmax) = Get_I64 (B, P + 720)
+       and then Int64 (S.Nmeshdegmax) = Get_I64 (B, P + 728)
+       and then Int64 (S.Nuserdata) = Get_I64 (B, P + 736)
+       and then Int64 (S.Nsensordata) = Get_I64 (B, P + 744)
+       and then Int64 (S.Npluginstate) = Get_I64 (B, P + 752)
+       and then Int64 (S.Nhistory) = Get_I64 (B, P + 760))
+       and then S = S'Old'Update (Njmax => S.Njmax, Nconmax => S.Nconmax, Npolygonmax => S.Npolygonmax, Nmeshdegmax => S.Nmeshdegmax, Nuserdata => S.Nuserdata, Nsensordata => S.Nsensordata, Npluginstate => S.Npluginstate, Nhistory => S.Nhistory))
    is
       V : Int64;
    begin
@@ -754,7 +862,10 @@ package body MJ.MJB.Readers with SPARK_Mode is
    end Read_Sizes_12;
 
    procedure Read_Sizes_13 (B : Byte_Array; P : Natural; S : in out Sizes; Result : out Load_Result) with
-     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count
+     Pre => B'First = 0 and then Int64 (B'Length) <= Int64 (Natural'Last) and then P <= B'Length and then Int64 (B'Length) - Int64 (P) >= 8 * Size_Count,
+     Post => (Static => (if Result.Status = OK then Int64 (S.Narena) = Get_I64 (B, P + 768)
+       and then Int64 (S.Nbuffer) = Get_I64 (B, P + 776))
+       and then S = S'Old'Update (Narena => S.Narena, Nbuffer => S.Nbuffer))
    is
       V : Int64;
    begin

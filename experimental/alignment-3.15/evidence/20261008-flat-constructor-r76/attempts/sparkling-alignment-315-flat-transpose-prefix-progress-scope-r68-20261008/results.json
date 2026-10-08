@@ -1,0 +1,144 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Transpose_Prefix_Progress",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r68-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:401"
+  ],
+  "exit": 1,
+  "seconds": 78.49296615699859,
+  "manifest_sha256": "c9fe4d2c4637b6b50d76503f7eda4a20897ad6135f2314289185541b6a3805d0",
+  "runner_sha256": "62e0a2b10fbd71cdfc7639d52bbafda98625f80852c51aab84084b1fc95a314c",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "76f7699f667c7c87399d5d40fbd94d30ca1c7a0bfd366037ff6c3825c45e6302",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 71,
+  "proof_checks": 72,
+  "flow_checks": 1,
+  "open": [
+    {
+      "check_col": 33,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 435,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 33,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 435,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration"
+      },
+      "msg_id": 38,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 44,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 416,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Valid",
+              "steps": 220,
+              "time": 0.042372
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 44,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 416,
+      "message": {
+        "text": "overflow check might fail, cannot prove upper bound for Address (P.Transpose_Row (R, K))+P.Transpose_Position (R, K)"
+      },
+      "msg_id": 63,
+      "rule": "VC_OVERFLOW_CHECK",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Transpose_Prefix_Progress"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

@@ -1,0 +1,190 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Scatter_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-sparse-args-proof-r10-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-sparse_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-sparse_cholesky.adb:362"
+  ],
+  "exit": 1,
+  "seconds": 138.05607446700014,
+  "manifest_sha256": "07c97b24bbd82d4b3de1ff126613436c45142f29e938b73abcb58c33f007b98e",
+  "runner_sha256": "f08af3e43c9862fc3a4e714a8143c50133722ebb1d26ba04a74ac870d60ad186",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "7ed29414e97dfa0a1cb238b23db68407c45d6d1e9a6a7a565edf07fa7391b11a",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 94,
+  "proof_checks": 91,
+  "flow_checks": 5,
+  "open": [
+    {
+      "check_col": 46,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 404,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 15,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 405,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove X (P.Column (I, Q)) = Update (Before (P.Column (I, Q)), L (I, P.Column (I, Q)), Multiplier)"
+      },
+      "msg_id": 49,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    },
+    {
+      "check_col": 25,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 369,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "Trivial": {
+              "result": "Valid",
+              "steps": 2,
+              "time": 0
+            }
+          },
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {},
+          "transformations": {}
+        },
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 44,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 369,
+      "message": {
+        "text": "postcondition might fail, cannot prove V in Operand"
+      },
+      "msg_id": 95,
+      "rule": "VC_POSTCONDITION",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 48,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 251,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Sparse_Cholesky.Scatter_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

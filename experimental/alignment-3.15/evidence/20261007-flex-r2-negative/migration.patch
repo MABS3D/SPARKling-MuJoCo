@@ -1,0 +1,233 @@
+--- a/experimental/flex-state-integration/src/mj-flex_state.ads
++++ b/experimental/flex-state-integration/src/mj-flex_state.ads
+@@ -88,7 +88,8 @@
+       Description : FC.Flex;
+       Material : CP.Material;
+       Centered : Boolean := False;
+-      Nv, Ne, Ni : Natural := 0;
++      Movable : Boolean := False;
++      Nv, Ne : Natural := 0;
+       Interp : Natural range 0 .. 2 := 0;
+       Nn : Natural range 0 .. Max_Vertices := 0;
+       Cells : MJ.Flex_Interpolation.Grid := [others => 1];
+@@ -97,7 +98,6 @@
+       Node_Local, Node_World, Node_Candidate : CG.Vertex_Array (0 .. Max_Vertices-1);
+       Node_Bodies : FC.Body_Array (0 .. Max_Vertices-1);
+       Elements : FC.Element_Array (0 .. Max_Elements-1);
+-      Internal : FC.Internal_Array (0 .. Max_Elements-1);
+       Tree : MJ.BVH.Tree;
+    end record;
+    type Flex_Array is array (Natural range 0 .. Max_Flex-1) of Flex_Block;
+@@ -105,6 +105,7 @@
+       Collider : MJ.Builtin_Flex.Collider;
+       Local : RG.Pose;
+       Body_Id : Natural := 0;
++      Movable : Boolean := False;
+       Material : CP.Material;
+       Elevation_First, Elevation_Length : Natural := 0;
+    end record;
+--- a/experimental/flex-state-integration/src/mj-flex_state.adb
++++ b/experimental/flex-state-integration/src/mj-flex_state.adb
+@@ -65,7 +65,6 @@
+             Vadr : constant Integer := M.Flexes.Flex_Vertadr (F);
+             Eadr : constant Integer := M.Flexes.Flex_Elemadr (F);
+             Data : constant Integer := M.Flexes.Flex_Elemdataadr (F);
+-            Iadr : constant Integer := M.Flexes.Flex_Evpairadr (F);
+             Dim : constant Integer := M.Flexes.Flex_Dim (F);
+             Nadr : constant Integer := M.Flexes.Flex_Nodeadr (F);
+          begin
+@@ -76,21 +75,18 @@
+             B.Interp := M.Flexes.Flex_Interp (F); B.Nn := 0;
+             if Dim not in 1 .. 3 or M.Flexes.Flex_Vertnum (F) not in 1 .. Max_Vertices
+               or M.Flexes.Flex_Elemnum (F) not in 0 .. Max_Elements
+-              or M.Flexes.Flex_Evpairnum (F) not in 0 .. Max_Elements
+               or M.Flexes.Flex_Condim (F) not in 1 | 3 | 4 | 6
+               or M.Flexes.Flex_Selfcollide (F) not in 0 .. 4
+               or M.Flexes.Flex_Activelayers (F) < 0
+               or M.Flexes.Flex_Centered (F) > 1 or M.Flexes.Flex_Rigid (F) > 1
+-              or M.Flexes.Flex_Internal (F) > 1
+               or M.Flexes.Flex_Radius (F) not in 0.0 .. 1.0e10
+               or M.Flexes.Flex_Margin (F) not in 0.0 .. 1.0e10
+               or M.Flexes.Flex_Gap (F) not in 0.0 .. 1.0e10 then Free (S); return; end if;
+             B.Nv := M.Flexes.Flex_Vertnum (F); B.Ne := M.Flexes.Flex_Elemnum (F);
+-            B.Ni := M.Flexes.Flex_Evpairnum (F); B.Tree.Length := 0;
++            B.Tree.Length := 0; B.Movable := False;
+             if Vadr not in 0 .. M.S.Nflexvert-B.Nv
+               or Eadr not in 0 .. M.S.Nflexelem-B.Ne
+-              or (B.Ne > 0 and then Data not in 0 .. M.S.Nflexelemdata-B.Ne*(Dim+1))
+-              or (B.Ni > 0 and then Iadr not in 0 .. M.S.Nflexevpair-B.Ni) then Free (S); return; end if;
++              or (B.Ne > 0 and then Data not in 0 .. M.S.Nflexelemdata-B.Ne*(Dim+1)) then Free (S); return; end if;
+             B.Centered := M.Flexes.Flex_Centered (F) /= 0;
+             if B.Interp > 0 then
+                if M.Flexes.Flex_Nodenum (F) not in 1 .. Max_Vertices then
+@@ -110,6 +106,7 @@
+                   if B.Node_Bodies (N) not in 0 .. S.Nb - 1
+                     or (for some X of B.Node_Local (N) => X not in RG.Coordinate)
+                   then Free (S); return; end if;
++                  B.Movable := B.Movable or M.Bodies.Body_Treeid (B.Node_Bodies (N)) >= 0;
+                end loop;
+             end if;
+             B.Description := (Id=>F, Dimension=>Dim, Radius=>M.Flexes.Flex_Radius (F),
+@@ -118,7 +115,7 @@
+               Conaffinity=>Interfaces.Unsigned_32'Mod (M.Flexes.Flex_Conaffinity (F)),
+               Active_Layers=>M.Flexes.Flex_Activelayers (F),
+               Self_Collision=>FC.Self_Mode'Val (M.Flexes.Flex_Selfcollide (F)),
+-              Rigid=>M.Flexes.Flex_Rigid (F) /= 0, Internal=>M.Flexes.Flex_Internal (F) /= 0);
++              Rigid=>M.Flexes.Flex_Rigid (F) /= 0, Internal=>False);
+             B.Material := Material_At (M.Flexes.Flex_Priority.all,M.Flexes.Flex_Condim.all,
+               M.Flexes.Flex_Solmix.all,M.Flexes.Flex_Solref.all,M.Flexes.Flex_Solimp.all,
+               M.Flexes.Flex_Friction.all,F);
+@@ -131,6 +128,7 @@
+                   if B.Bodies (V) not in 0 .. S.Nb - 1
+                     or (for some X of B.Local (V) => X not in RG.Coordinate)
+                   then Free (S); return; end if;
++                  B.Movable := B.Movable or M.Bodies.Body_Treeid (B.Bodies (V)) >= 0;
+                else
+                   B.Local (V) := Vector_At (M.Flexes.Flex_Vert0.all, Vadr + V);
+                   --  Compiled interpolated vertices have no single body. The
+@@ -174,11 +172,6 @@
+                  FC.Active (B.Description, B.Elements (E)) and then not Seen (E))
+                then Free (S); return; end if;
+             end;
+-            for I in 0 .. B.Ni-1 loop
+-               if M.Flexes.Flex_Evpair (2*(Iadr+I)) not in 0 .. B.Ne-1
+-                 or M.Flexes.Flex_Evpair (2*(Iadr+I)+1) not in 0 .. B.Nv-1 then Free (S); return; end if;
+-               B.Internal (I) := (M.Flexes.Flex_Evpair (2*(Iadr+I)),M.Flexes.Flex_Evpair (2*(Iadr+I)+1));
+-            end loop;
+          end;
+       end loop;
+       CA.Load (M, S.Assets, Asset_Result);
+@@ -203,6 +196,7 @@
+               or M.Geoms.Geom_Gap (G) not in 0.0 .. 1.0e10
+               or not SM.Unit_Quaternion (Q) then Free (S); return; end if;
+             B.Body_Id := M.Geoms.Geom_Bodyid (G);
++            B.Movable := M.Bodies.Body_Treeid (B.Body_Id) >= 0;
+             B.Local.Position := Vector_At (M.Geoms.Geom_Pos.all,G);
+             R := SM.Rotation (Q);
+             for I in RG.Axis loop
+@@ -398,16 +392,18 @@
+       Result := Success; if not S.Options.Enabled then return; end if;
+       for F in 0 .. S.Nf-1 loop
+          declare B : Flex_Block renames S.Flexes (F); begin
+-            if (B.Description.Contype and B.Description.Conaffinity) /= 0 then
++            if B.Movable and then (B.Description.Contype and B.Description.Conaffinity) /= 0 then
+                FC.Self_Contacts (B.Description,B.Elements (0 .. B.Ne-1),B.World (0 .. B.Nv-1),
+-                 B.Bodies (0 .. B.Nv-1),B.Tree,B.Internal (0 .. B.Ni-1),S.Midphase,
++                 B.Bodies (0 .. B.Nv-1),B.Tree,[1 .. 0 => <>],S.Midphase,
+                  S.Options,S.Work,S.Group,R);
+                if R /= RG.Success then Result := Failure (R); return; end if;
+                Append (-1,F,F,CP.Combine (B.Material,B.Material),0.0,0.0);
+                if Result /= Success then return; end if;
+             end if;
+             for G in 0 .. S.Ng-1 loop
+-               if S.Geoms (G).Collider.Kind = MJ.Builtin_Flex.SDF_Geom then
++               if not B.Movable and not S.Geoms (G).Movable then
++                  S.Group.Length := 0; R := RG.Success;
++               elsif S.Geoms (G).Collider.Kind = MJ.Builtin_Flex.SDF_Geom then
+                   MJ.SDF_Scene.Collide_Flex (S.SDF,G,S.Geoms (G).Collider.Placement,
+                     B.Description,B.Elements (0 .. B.Ne-1),B.World (0 .. B.Nv-1),
+                     B.Bodies (0 .. B.Nv-1),B.Tree,S.Midphase,S.Group,R);
+@@ -427,7 +423,8 @@
+             end loop;
+             for Q in F+1 .. S.Nf-1 loop
+                declare A : Flex_Block renames S.Flexes (Q); begin
+-                  Cross (F,Q,R);
++                  if B.Movable or A.Movable then Cross (F,Q,R);
++                  else S.Group.Length := 0; R := RG.Success; end if;
+                   if R /= RG.Success then Result := Failure (R); return; end if;
+                   Append (-1,F,Q,CP.Combine (B.Material,A.Material),B.Description.Margin+A.Description.Margin,
+                     B.Description.Gap+A.Description.Gap);
+--- /dev/null
++++ b/experimental/advanced-collision-candidate/src/mj-flex_collisions-selection.adb
+@@ -0,0 +1,20 @@
++package body MJ.Flex_Collisions.Selection with SPARK_Mode is
++   procedure Compact (C : in out Batch; Start : Natural; Selected : Mask) is
++      Kept : Natural := 0;
++   begin
++      for I in Selected'Range loop
++         pragma Loop_Invariant (Static => Kept = Prefix_Count (Selected, I));
++         pragma Loop_Invariant (Static =>
++           (for all J in 0 .. Integer (Start)-1 => C.Items (J) = C.Items'Loop_Entry (J)));
++         pragma Loop_Invariant (Static =>
++           (for all J in 0 .. Integer (I)-1 =>
++             (if Selected (J) then C.Items (Start+Prefix_Count (Selected, J)) = C.Items'Loop_Entry (Start+J))));
++         pragma Loop_Invariant (Static =>
++           (for all J in Start+Kept .. C.Items'Last => C.Items (J) = C.Items'Loop_Entry (J)));
++         if Selected (I) then
++            C.Items (Start+Kept) := C.Items (Start+I); Kept := Kept+1;
++         end if;
++      end loop;
++      C.Length := Start+Kept;
++   end Compact;
++end MJ.Flex_Collisions.Selection;
+--- /dev/null
++++ b/experimental/advanced-collision-candidate/src/mj-flex_collisions-selection.ads
+@@ -0,0 +1,20 @@
++package MJ.Flex_Collisions.Selection with SPARK_Mode is
++   type Mask is array (Natural range <>) of Boolean;
++   function Prefix_Count (Selected : Mask; N : Natural) return Natural is
++     (if N = 0 then 0 else Prefix_Count (Selected, N-1) + (if Selected (N-1) then 1 else 0))
++     with Ghost => Static, Global => null,
++       Pre => Selected'First = 0 and then N <= Selected'Length,
++       Post => Prefix_Count'Result <= N and then
++         (for all I in 0 .. Integer (N)-1 =>
++           (if Selected (I) then Prefix_Count (Selected, I) < Prefix_Count'Result)),
++       Subprogram_Variant => (Decreases => N);
++   procedure Compact (C : in out Batch; Start : Natural; Selected : Mask) with
++     Global => null,
++     Pre => Start <= C.Length and then C.Length <= C.Capacity
++       and then Selected'First = 0 and then Selected'Length = C.Length-Start,
++     Post => (Static => C.Length = Start + Prefix_Count (Selected, Selected'Length)
++       and then (for all I in 0 .. Integer (Start)-1 => C.Items (I) = C.Items'Old (I))
++       and then (for all I in Selected'Range =>
++         (if Selected (I) then C.Items (Start + Prefix_Count (Selected, I)) = C.Items'Old (Start+I)))
++       and then (for all I in C.Length .. C.Items'Last => C.Items (I) = C.Items'Old (I)));
++end MJ.Flex_Collisions.Selection;
+--- a/experimental/advanced-collision-candidate/src/mj-flex_collisions.adb
++++ b/experimental/advanced-collision-candidate/src/mj-flex_collisions.adb
+@@ -1,3 +1,4 @@
++with MJ.Flex_Collisions.Selection;
+ with MJ.Rigid_Math; use MJ.Rigid_Math;
+ with MJ.Flex_Kernels;
+ with MJ.Flex_Normals;
+@@ -209,13 +210,12 @@
+    end Plane;
+    procedure Filter (C : in out Batch; Start : Natural := 0) is
+       N : constant Natural := C.Length-Start;
+-      Selected : array (Natural range 0 .. N-1) of Boolean := [others=>False];
++      Selected : Selection.Mask (0 .. N-1) := [others=>False];
+       Min_Dist : array (Natural range 0 .. N-1) of Real := [others=>Max_Val];
+       Count : Natural := 0;
+       Best, Next : Integer := 0;
+       Best_Dist, Next_Dist, D2 : Real;
+       Point : Vec;
+-      Temp : Flex_Contact;
+    begin
+       if N<=Max_Manifold then return; end if;
+       Best_Dist:=-C.Items (Start).Geometry.Distance;
+@@ -232,13 +232,9 @@
+                if Min_Dist (I)>Next_Dist then Next_Dist:=Min_Dist (I); Next:=I; end if;
+             end if;
+          end loop;
+-         if Count<Max_Manifold-1 then
+-            Temp:=C.Items (Start+Count); C.Items (Start+Count):=C.Items (Start+Best); C.Items (Start+Best):=Temp;
+-            if Next=Count then Next:=Best; end if;
+-         end if;
+          Count:=Count+1; Best:=Next;
+       end loop;
+-      C.Length:=Start+Count;
++      Selection.Compact (C, Start, Selected);
+    end Filter;
+    procedure Self_Contacts (F : Flex; E : Element_Array; V : Vertex_Array; Bodies : Body_Array;
+                             T : MJ.BVH.Tree; Internal_Pairs : Internal_Array;
+--- a/experimental/advanced-collision-candidate/src/mj-flex_collisions.ads
++++ b/experimental/advanced-collision-candidate/src/mj-flex_collisions.ads
+@@ -83,7 +83,7 @@
+                     C : in out Batch; Result : out Status)
+      with Global => null,
+        Post => C.Length <= C.Capacity and (if Result /= Success then C.Length = 0);
+-   --  Same >50 selection/order as C's filterFlexContacts, including its swaps.
++   --  C 3.15 greedy selection followed by stable compaction; prefix preserved.
+    procedure Filter (C : in out Batch; Start : Natural := 0)
+      with Global => null, Pre => Start <= C.Length and C.Length <= C.Capacity,
+        Post => C.Length <= C.Length'Old and C.Length <= Start + Max_Manifold;

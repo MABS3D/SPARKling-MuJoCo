@@ -1,0 +1,45 @@
+[
+  {
+    "label": "build",
+    "command": [
+      "python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "3000",
+      "--timeout",
+      "600",
+      "--",
+      "gprbuild",
+      "-P",
+      "/var/tmp/sparkling-alignment-315-mass-native-r90-20261008/source/experimental/constraint-solvers-candidate/solvers.gpr",
+      "mass_addition_probe.adb",
+      "-j1"
+    ],
+    "exit": 0,
+    "seconds": 7.610238002002006,
+    "log_sha256": "783a0a496c1292a9b5b609cef7fb0b1cf1d1acc7ed0f61e31792a31a00f1eeef"
+  },
+  {
+    "label": "native",
+    "command": [
+      "python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "240",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-alignment-315-mass-native-r90-20261008/source/experimental/constraint-solvers-candidate/tests/test_mass_addition.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-mass-native-r90-20261008/build/release/bin/mass_addition_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-mass-native-r90-20261008/cases",
+      "--reference",
+      "/var/tmp/sparkling-alignment-315-foundation-r6-20261007/source/mujoco"
+    ],
+    "exit": 0,
+    "seconds": 1.3557638959973701,
+    "log_sha256": "dd83dc37b81d642a37006eb1bb59b6ac8cf09aaa8b8cda3aa25aed2c0bd90106"
+  }
+]

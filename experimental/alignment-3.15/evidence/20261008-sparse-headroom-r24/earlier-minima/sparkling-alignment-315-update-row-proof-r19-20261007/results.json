@@ -1,0 +1,110 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Update_Row",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-sparse-headroom-proof-r19-20261007/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-sparse_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-sparse_cholesky.adb:94"
+  ],
+  "exit": 1,
+  "seconds": 110.9029064489996,
+  "manifest_sha256": "8305ba6bf9a6668ee02d23d0d7fe9f6da0bcc177a9524b0a01c15b98b3b6b6e2",
+  "runner_sha256": "791911b2c66178776b520133aea05aa3fe4fc51c91b1a004345637ec17f3ae78",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "0c82065f69b2983479055a7c80e44e7c6e37d1c53238e81d8d45fe3d56a5d5ee",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 83,
+  "proof_checks": 80,
+  "flow_checks": 4,
+  "open": [
+    {
+      "check_col": 12,
+      "check_file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "check_line": 132,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 37,
+      "entity": 1,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "prover",
+      "line": 132,
+      "message": {
+        "text": "loop invariant might fail in first iteration, cannot prove abs V <= Scratch_Bound (Budget+1)"
+      },
+      "msg_id": 55,
+      "rule": "VC_LOOP_INVARIANT_INIT",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "check_tree": {},
+      "col": 48,
+      "file": "mj-constraint_solvers-sparse_cholesky.adb",
+      "how_proved": "trivial",
+      "line": 312,
+      "message": {
+        "arguments": [
+          "Sqrt"
+        ],
+        "text": "call to {0} is not handled precisely [imprecise-call]"
+      },
+      "rule": "imprecise-call",
+      "severity": "warning",
+      "suppressed": "",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "entities": [
+    "MJ.Constraint_Solvers.Sparse_Cholesky.Update_Row"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

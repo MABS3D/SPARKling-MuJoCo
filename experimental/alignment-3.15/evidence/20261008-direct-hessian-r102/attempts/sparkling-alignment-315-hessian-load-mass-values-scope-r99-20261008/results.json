@@ -1,0 +1,90 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Load_Mass_Values",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-hessian-engine-r99-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:1481"
+  ],
+  "exit": 1,
+  "seconds": 27.36991537400172,
+  "manifest_sha256": "2346f3ff020a2b685e1d402f5bf31cdf751c1aa07b6d4b148721ed46098d3e0d",
+  "runner_sha256": "2aa0dbabbe5feae22773583dcc946154fa34b744cb545c250ac210c5762d93df",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "57adee10ecdb08c96eee28c86b6d9b40abb8ebeed44cb51e94c43265ba3b5a40",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 30,
+  "proof_checks": 29,
+  "flow_checks": 2,
+  "open": [
+    {
+      "check_col": 43,
+      "check_file": "mj-constraint_solvers-packed_cholesky.adb",
+      "check_line": 1488,
+      "check_tree": [
+        {
+          "proof_attempts": {
+            "CVC5": {
+              "result": "Unknown\n(unknown + incomplete)",
+              "steps": 4271,
+              "time": 0.189491
+            },
+            "Z3": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            },
+            "altergo": {
+              "result": "Timeout",
+              "steps": 1,
+              "time": 3
+            }
+          },
+          "transformations": {}
+        }
+      ],
+      "col": 47,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "prover",
+      "line": 1489,
+      "message": {
+        "text": "loop invariant might not be preserved by an arbitrary iteration, cannot prove H (F.Address (I)+K) = M (I, F.Column (F.Address (I)+K))"
+      },
+      "msg_id": 14,
+      "rule": "VC_LOOP_INVARIANT_PRESERV",
+      "severity": "medium",
+      "unproved_status": {
+        "memory": false,
+        "status": "limit",
+        "steps": false,
+        "time": true
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Load_Mass_Values"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": true,
+  "obligations_closed": false
+}

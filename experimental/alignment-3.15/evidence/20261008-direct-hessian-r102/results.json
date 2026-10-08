@@ -1,0 +1,86 @@
+{
+  "reference": "3.15.0",
+  "source_count": 443,
+  "mass_gold_closed": true,
+  "mass_gold_checks": 394,
+  "element_gold_checks": 13,
+  "minimum_checks": 414,
+  "minimum_scopes": 11,
+  "gram_passed": 700,
+  "gram_actual_c_bitwise": 434,
+  "mass_passed": 180,
+  "factor_passed": 407,
+  "release_passed": 390,
+  "production_passed": 366,
+  "numerical_comparisons": 2043,
+  "actual_c_comparisons": 1777,
+  "whole_gram_gold_closed": false,
+  "whole_factor_gold_closed": false,
+  "whole_solver_gold_closed": false,
+  "whole_dynamics_gold_closed": false,
+  "production_315_migrated": false,
+  "goal_complete": false,
+  "pending": [
+    {
+      "stage": 102,
+      "scope": "Gram_Row_Flat",
+      "receipt": "attempts/sparkling-alignment-315-hessian-gram-row-flat-scope-r102-20261008/results.json",
+      "checks": 74,
+      "passed": false,
+      "compiler_or_report_rejected": null,
+      "open": [
+        {
+          "file": "mj-constraint_solvers-cone_kernels.ads",
+          "line": 198,
+          "message": "postcondition might fail, cannot prove H (S) = Gram_Scaled (H'Old (S), Gram_Scale (Gram_Source (Values, Columns, Source_Row, Index_Row, I, Packed), Weight), Gram_Source (Values, Columns, Source_Row, Index_Row, J, Packed))"
+        }
+      ]
+    },
+    {
+      "stage": 102,
+      "scope": "Packed_Factor_Values",
+      "receipt": "attempts/sparkling-alignment-315-hessian-packed-factor-values-scope-r102-20261008/results.json",
+      "checks": 56,
+      "passed": false,
+      "compiler_or_report_rejected": null,
+      "open": [
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1446,
+          "message": "range check might fail, cannot prove lower bound for F.Transpose_Slot (F.Transpose_Address (R)+K)"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1447,
+          "message": "array index check might fail"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1447,
+          "message": "precondition might fail, cannot prove Ordered_Flat (Columns, First, Last, Scratch'Length)"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1455,
+          "message": "precondition might fail, cannot prove Value in Residual"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1461,
+          "message": "loop invariant might fail in first iteration"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.adb",
+          "line": 1461,
+          "message": "loop invariant might not be preserved by an arbitrary iteration"
+        },
+        {
+          "file": "mj-constraint_solvers-packed_cholesky.ads",
+          "line": 180,
+          "message": "postcondition might fail, cannot prove Flat_Diagonal (L, F)"
+        }
+      ]
+    }
+  ],
+  "scope": "Direct flat numeric Hessian across scalar and folded elliptic paths; dense H allocation removed on sparse path. Fixed-support mass semantics, coalesced Jacobian support and legacy dense rank-update bridge remain explicit limitations."
+}

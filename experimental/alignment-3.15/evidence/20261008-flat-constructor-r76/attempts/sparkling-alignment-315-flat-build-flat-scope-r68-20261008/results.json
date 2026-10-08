@@ -1,0 +1,80 @@
+{
+  "reference": "3.15.0",
+  "subprogram": "Packed_Build_Flat",
+  "command": [
+    "gnatprove",
+    "-P",
+    "/var/tmp/sparkling-alignment-315-flat-engine-proof-r68-20261008/source/experimental/flex-elasticity-integration/flex_constrained.gpr",
+    "-u",
+    "mj-constraint_solvers-packed_cholesky.adb",
+    "-j1",
+    "--report=all",
+    "--checks-as-errors=on",
+    "--warnings=continue",
+    "--no-inlining",
+    "--mode=prove",
+    "--prover=cvc5,z3,altergo",
+    "--timeout=3",
+    "--memlimit=650",
+    "--steps=0",
+    "--proof=per_check",
+    "--counterexamples=off",
+    "--limit-subp=mj-constraint_solvers-packed_cholesky.adb:440"
+  ],
+  "exit": 1,
+  "seconds": 9.32346585200139,
+  "manifest_sha256": "c9fe4d2c4637b6b50d76503f7eda4a20897ad6135f2314289185541b6a3805d0",
+  "runner_sha256": "62e0a2b10fbd71cdfc7639d52bbafda98625f80852c51aab84084b1fc95a314c",
+  "guard_sha256": "c46591c1e47ea5ebe19857ee883bd2e1d464e30fac32b54057751975524e6cb6",
+  "runner_source_unchanged": true,
+  "guard_source_unchanged": true,
+  "log_sha256": "ab882a82830a933beb6108acbb77c4ce38c7ceca1bcf7f0817dd68569c23088f",
+  "source_hashes_unchanged": true,
+  "passed": false,
+  "checks": 1,
+  "proof_checks": 0,
+  "flow_checks": 3,
+  "open": [
+    {
+      "check_tree": {},
+      "col": 58,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "flow",
+      "line": 452,
+      "message": {
+        "text": "subtype constraint cannot depend on variable input \"F\""
+      },
+      "msg_id": 0,
+      "rule": "EMPTY_TAG",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    {
+      "check_tree": {},
+      "col": 50,
+      "entity": 1,
+      "file": "mj-constraint_solvers-packed_cholesky.adb",
+      "how_proved": "flow",
+      "line": 453,
+      "message": {
+        "text": "subtype constraint cannot depend on variable input \"F\""
+      },
+      "msg_id": 1,
+      "rule": "EMPTY_TAG",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    }
+  ],
+  "warnings": [],
+  "entities": [
+    "MJ.Constraint_Solvers.Packed_Cholesky.Build_Flat"
+  ],
+  "report_scope_matches": true,
+  "scope_coverage_complete": false,
+  "obligations_closed": false
+}

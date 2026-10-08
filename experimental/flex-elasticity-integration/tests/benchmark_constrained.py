@@ -38,10 +38,12 @@ def main():
     p.add_argument('--cpu', type=int)
     p.add_argument('--quiet-window', action='store_true',
                    help='Record that other agents/jobs were coordinated to be idle')
+    p.add_argument('--reference', choices=('3.14.0', '3.15.0'), default='3.14.0')
+    p.add_argument('--models', nargs='+', help='Explicit completed-corpus workloads')
     a = p.parse_args()
     if min(a.blocks, a.batches, a.steps) < 1 or a.sample < 0:
         p.error('Positive block/batch/step counts and nonnegative sample required')
-    if mujoco.__version__ != '3.14.0':
+    if mujoco.__version__ != a.reference:
         raise RuntimeError('Unexpected C reference')
     a.out.mkdir(parents=True, exist_ok=False)
     resource.setrlimit(resource.RLIMIT_STACK,
@@ -49,7 +51,7 @@ def main():
     if a.cpu is not None:
         os.sched_setaffinity(0, {a.cpu})
     wheel = Path(mujoco.__file__).parent
-    library = wheel/'libmujoco.so.3.14.0'
+    library = wheel/('libmujoco.so.' + a.reference)
     helper = Path(__file__).with_name('benchmark.c')
     shutil.copyfile(helper, a.out/'benchmark.c')
     shutil.copyfile(__file__, a.out/'benchmark_constrained.py')
@@ -77,10 +79,22 @@ def main():
                   quiet_window=a.quiet_window, complete=False,
                   blocks=a.blocks, batches=a.batches, steps=a.steps,
                   warmup_trajectories_per_block=1, results=[])
+    gnat_bins = list(Path('/var/tmp/sparkling-matrix-recovery/toolchains/gnat').glob('*/bin/gnat'))
+    report['gnat_version'] = (subprocess.check_output([str(gnat_bins[0]), '--version'], text=True).splitlines()[0]
+                              if len(gnat_bins) == 1 else None)
+    report['ada_project_flags'] = {}
+    for key, binary in [('ada', a.binary), ('baseline', a.baseline)]:
+        project = binary.resolve().parents[3]/'source/experimental/flex-elasticity-integration/flex_constrained.gpr'
+        if project.exists():
+            report['ada_project_flags'][key] = project.read_text()
+    report['identical_baseline_binary'] = sha(a.binary) == sha(a.baseline)
+    report['baseline_claim'] = ('Repeated same-binary calibration; no optimization-gain claim'
+                                if report['identical_baseline_binary'] else
+                                'Paired independent baseline/current comparison')
     def save():
         (a.out/'results.json').write_text(json.dumps(report, indent=2)+'\n')
     save()
-    names = ['membrane_Newton_3', 'free', 'element_2_sphere',
+    names = a.models or ['membrane_Newton_3', 'free', 'element_2_sphere',
              'element_mixed_pyramidal_3', 'element_elastic_cross_elliptic_6',
              'element_elastic_self_bvh_pyramidal_3']
     orders = list(itertools.permutations(('baseline', 'ada', 'c')))

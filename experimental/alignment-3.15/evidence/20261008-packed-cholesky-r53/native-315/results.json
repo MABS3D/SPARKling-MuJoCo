@@ -1,0 +1,56 @@
+{
+  "complete": true,
+  "reference": "3.15.0",
+  "source_hashes_unchanged": true,
+  "manifest_sha256": "2c46234b7a83d1a8154fed6ea03335ec72e24f5684d553005acd9edf50fe9d8c",
+  "runner_sha256": "57e5e19f8c658b549595208933363c159fa29a1f4f94ffb9d93fe7497e58fb3d",
+  "commands": [
+    {
+      "label": "build",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-alignment-315-packed-native-r53-20261008/source/experimental/constraint-solvers-candidate/solvers.gpr",
+        "packed_cholesky_probe.adb",
+        "-j1"
+      ],
+      "exit": 0,
+      "seconds": 6.9728147630012245,
+      "log_sha256": "425a30509e7680c5c04cc71937525a5532591af7d530b69ce54e7778750bc360"
+    },
+    {
+      "label": "native",
+      "command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "2500",
+        "--timeout",
+        "240",
+        "--",
+        "/var/tmp/sparkling-movement315-env/bin/python",
+        "/var/tmp/sparkling-alignment-315-packed-native-r53-20261008/source/experimental/constraint-solvers-candidate/tests/test_sparse_cholesky.py",
+        "--binary",
+        "/var/tmp/sparkling-alignment-315-packed-native-r53-20261008/build/release/bin/packed_cholesky_probe",
+        "--out",
+        "/var/tmp/sparkling-alignment-315-packed-native-r53-20261008/cases",
+        "--reference",
+        "/var/tmp/sparkling-alignment-315-foundation-r6-20261007/source/mujoco",
+        "--reference-version",
+        "3.15.0"
+      ],
+      "exit": 0,
+      "seconds": 2.1205424210020283,
+      "log_sha256": "94e98f597459399959f6a76b20023d3cf064fda8a308db09e9666c8fda7ace64"
+    }
+  ],
+  "binary_sha256": "52e1eb95662a836af49563ac5830d62368831b5071e8c2e03e2d06f72e61e884",
+  "scope": "Packed sparse Cholesky rows; no global assembly or timing claim"
+}
