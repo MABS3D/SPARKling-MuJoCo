@@ -1,0 +1,31 @@
+{
+  "scope": "Read-only static assembly audit of native probes, no timing or new numerical run",
+  "binary_sha256": "0f143714f5b7d1e90c3f2f913ad56b31d0f27454c12a906f5b31f304f1da97bf",
+  "comparison_binary_sha256": "b1da81e67e187d36516277308f11f9689de78da9f6986cc306d0d06dab24d36c",
+  "symbol": "mj__constraint_solvers__packed_cholesky__factor_values",
+  "new_symbol_address": "0x1dce0",
+  "new_size_bytes": 3271,
+  "old_size_bytes": 3466,
+  "verdict": "Cached row offsets reduce code size, but the normal per-element scaling loop still reloads F.N and recomputes F.Column layout after each L store. Columns renaming does not remove the target alias/layout reload.",
+  "new_normal_scale_loop": {
+    "L_store": "0x1e7d9: vmovsd [r9+rcx*8],xmm1",
+    "F_N_reload": "0x1e7ea: movsxd rax,DWORD PTR [r14]",
+    "layout_recompute": "0x1e7ed shl rax,4;0x1e7f1 shr rax,2;0x1e7f5 lea rax,[rcx+rax+1]",
+    "column_load": "0x1e7fa: movsxd rax,DWORD PTR [r14+rax*4]",
+    "multiply": "0x1e7fe: vmulsd xmm1,xmm2,[rbp+rax*8-0x438]",
+    "alternate_checked_loop_reload": "0x1e74f"
+  },
+  "old_normal_scale_loop": {
+    "L_store": "0x1e833",
+    "F_N_reload": "0x1e844",
+    "column_load": "0x1e855",
+    "multiply": "0x1e85a"
+  },
+  "source": "source/experimental/constraint-solvers-candidate/src/mj-constraint_solvers-packed_cholesky.adb:1422",
+  "source_changes_reviewed": "Size/Columns at1425-1426;row First/Diagonal/Transpose_First/Transpose_Count at1437-1440;scaling at1455-1459",
+  "conclusion": "Do not claim all layout reloads removed or infer gain from3271 versus3466 bytes. Preserve validated change for actual measurement. Next structural priority is repeated Gram/factor work versus measured C one-per-step; no further microchange proposed now.",
+  "assembly_files": [
+    "factor_values-codegen.txt",
+    "factor_values-codegen-r109.txt"
+  ]
+}

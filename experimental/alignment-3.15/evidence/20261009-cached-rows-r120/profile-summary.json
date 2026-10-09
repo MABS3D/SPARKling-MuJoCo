@@ -1,0 +1,127 @@
+{
+  "scope": "r111 instrumented full-process profile for element_elastic_cross_elliptic_6, sample 1, 2000 identical 100-step trajectories. This identifies current Ada cost locations; it is not C overhead attribution, release timing, guaranteed optimization gain, or coverage of other samples/models.",
+  "binary_sha256": "347c23475d4868057b3ce53a1ca0a0e5fd1924e74d7bd391189eb395e4508067",
+  "gmon_sha256": "ef7fe628b09d3b51959a5c1b7fca4f7ced457dfe68174d5981ac7fc880c44dde",
+  "trajectory_matches_c": true,
+  "trajectory_max_abs": 2.7755575615628914e-17,
+  "histogram": {
+    "samples": 2468,
+    "sample_period_seconds": 0.01,
+    "bucket_bytes": 4,
+    "unmapped_or_boundary_samples": 15
+  },
+  "evaluations": {
+    "integration_steps": 200000,
+    "endpoint_evaluations": 4000,
+    "solve_with_force_calls": 204000
+  },
+  "ranked_costs": [
+    {
+      "routine": "Factor_Values",
+      "samples": 609,
+      "process_percent": 24.675850891410047,
+      "calls": 778000
+    },
+    {
+      "routine": "Build_Gram",
+      "samples": 415,
+      "process_percent": 16.815235008103727,
+      "calls": 778000
+    },
+    {
+      "routine": "Backsolve_Flat",
+      "samples": 150,
+      "process_percent": 6.077795786061588,
+      "calls": 778000
+    },
+    {
+      "routine": "Solve_With_Force exclusive",
+      "samples": 131,
+      "process_percent": 5.307941653160453,
+      "calls": 204000
+    },
+    {
+      "routine": "Add_Mass_Values",
+      "samples": 72,
+      "process_percent": 2.9173419773095626,
+      "calls": 778000
+    },
+    {
+      "routine": "Fill_Symbolic",
+      "samples": 70,
+      "process_percent": 2.8363047001620743,
+      "calls": 204000
+    },
+    {
+      "routine": "Run_Primal exclusive",
+      "samples": 64,
+      "process_percent": 2.593192868719611,
+      "calls": null
+    },
+    {
+      "routine": "Count_Symbolic",
+      "samples": 38,
+      "process_percent": 1.539708265802269,
+      "calls": 204000
+    },
+    {
+      "routine": "Prepare_Gram_Layout exclusive",
+      "samples": 29,
+      "process_percent": 1.1750405186385737,
+      "calls": null
+    },
+    {
+      "routine": "Build_Transpose",
+      "samples": 18,
+      "process_percent": 0.7293354943273906,
+      "calls": 204000
+    }
+  ],
+  "combined": {
+    "gram_and_factor_samples": 1024,
+    "gram_and_factor_percent": 41.49108589951378,
+    "gram_factor_backsolve_mass_samples": 1246,
+    "gram_factor_backsolve_mass_percent": 50.48622366288493,
+    "count_fill_prepare_transpose_samples": 155,
+    "count_fill_prepare_transpose_percent": 6.280388978930309,
+    "gram_or_factor_calls_per_solve": 3.8137254901960786
+  },
+  "gprof_correction": "Flat gprof attributes 108 samples (4.38%) to Evaluate_Block. Sized ELF ranges attribute only 26 (1.05%) there, 64 (2.59%) to Run_Primal and 18 (0.73%) to Line_Search. Raw mcount arcs have no direct incoming Run_Primal or Prepare_Gram_Layout record: their call counts are unavailable, not zero. Calls to Build_Gram and Factor_Values map to Run_Primal.",
+  "source_comparisons": [
+    {
+      "ada": "experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb:840-906",
+      "c": "src/engine/engine_solver.c:2544-2784",
+      "finding": "Mixed/elliptic Update rebuilds the combined Gram and numerical factor whenever Build_H is true. C retains the base factor and applies quadratic-state rank updates, then selects folded-cone rebuilding versus cone rank updates with a cached structural cost gate."
+    },
+    {
+      "ada": "experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb:441-494,1298-1302,1342-1347",
+      "c": "src/engine/engine_solver.c:2857-2871",
+      "finding": "Ada prepares Count/Fill/Gram before the convergence certificate; C calls MakeHessian only if the certificate fails. This profile has no zero-iteration counter, so the avoidable fraction of setup is unknown."
+    },
+    {
+      "ada": "experimental/constraint-solvers-candidate/src/mj-constraint_solvers-hessian_assembly.adb:181-205",
+      "c": "src/engine/engine_util_sparse.c:910-1030",
+      "finding": "Ada retains the single-row Gram traversal. C batches matching transpose sparsity rows into supernodes, sharing source-row/index visits."
+    },
+    {
+      "ada": "experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb:514-536,840-843",
+      "c": "src/engine/engine_solver.c:2568-2605",
+      "finding": "C also copies Jmod per fold and rebuilds its numeric transpose. The cached Ada source-slot transpose already avoids rebuilding that mapping within the solve; the J copy itself is not a unique Ada defect."
+    }
+  ],
+  "next_priority": "Complete and measure the current Factor_Values dataflow/cache experiment. Next prioritize repeated Gram/factor work: implement native compact rank updates, retained base/cone factors and the actual C fold/update gate, and/or C Gram supernode batching. First collect C gate/active-state counts for this trajectory: the profile does not prove how many full factorizations are avoidable. Deferred setup remains a smaller secondary target (6.28% inclusive identified setup; warm-start skip fraction unknown).",
+  "limits": [
+    "One deterministic sample and one model; no cross-model ranking established.",
+    "Instrumented binaries and full-process input/output/initialization alter costs.",
+    "Histogram PCs/DWARF locations include inlining and sampling uncertainty.",
+    "No C profile or ablation measured individual excess-cost fractions.",
+    "The 3.8137 Gram/factor calls per solve do not prove that C uses fewer calls.",
+    "No suppression, removed numerical guards, changed floating-point order or narrower public domain is authorized by this evidence."
+  ],
+  "supporting_files": [
+    "results.json",
+    "gprof.txt",
+    "sized-profile.json",
+    "sized-lines.json"
+  ]
+}

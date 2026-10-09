@@ -11,6 +11,17 @@ import time
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOPES = {
+    "Hessian_Cursor_Separation": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Offset_Ordered": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count_Columns_Step": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Offset_Transpose": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Count_Transpose": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Prefixes": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count": ("mj-constraint_solvers-hessian_assembly", ".ads", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count_Step": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count_Split": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count_Bounds": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Hessian_Slot_Count_Monotone": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Trace_Step": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Term_Value": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Row_Value": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),

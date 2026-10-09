@@ -1,0 +1,122 @@
+{
+  "verdict": "One exported full numeric Gram and one full numeric Cholesky call on every measured step of all six sample-1 trajectories, with no observed interception bypass. This is not a count of rank updates or a timing attribution.",
+  "scope": {
+    "wheel_sha256": "d3a1476dd52e220031aca40b2b00f69d1febce2ee85c57d5015f68b0cc72afa9",
+    "models": 6,
+    "sample": 1,
+    "steps_per_trajectory": 100,
+    "measured_trajectories_per_model_endpoint": 16,
+    "warmup_trajectories_excluded": 1,
+    "endpoint_variants": [
+      0,
+      2
+    ],
+    "state_bitwise_equal_and_stats_equal_all_rows": true
+  },
+  "counts": {
+    "primary_endpoint0_per_model": {
+      "steps": 1600,
+      "Gram": 1600,
+      "Factor": 1600
+    },
+    "supplemental_endpoint2_per_model": {
+      "steps": 1600,
+      "Gram_step_calls": 1600,
+      "Factor_step_calls": 1600,
+      "Gram_preparation_calls": 32,
+      "Factor_preparation_calls": 32,
+      "Gram_total": 1632,
+      "Factor_total": 1632
+    },
+    "each_individual_step_pair": [
+      1,
+      1
+    ],
+    "endpoint2_each_trajectory_preparation_pair": [
+      2,
+      2
+    ],
+    "all_six_both_variants": {
+      "measured_steps": 19200,
+      "Gram_step_calls": 19200,
+      "Factor_step_calls": 19200,
+      "Gram_preparation_calls": 192,
+      "Factor_preparation_calls": 192
+    }
+  },
+  "interception": {
+    "all_known_C315_source_calls_accounted_for_by_PLT_sites": [
+      [
+        "0x1cbddc",
+        "Gram",
+        "mj_makeARNumeric",
+        "engine_core_constraint.c",
+        3271
+      ],
+      [
+        "0x2ba977",
+        "Factor",
+        "mj_setConst",
+        "engine_setconst.c",
+        1514
+      ],
+      [
+        "0x2c8f9b",
+        "Gram",
+        "mj_solPrimal (MakeHessian inlined)",
+        "engine_solver.c",
+        2386
+      ],
+      [
+        "0x2cdad3",
+        "Gram",
+        "FactorizeHessian",
+        "engine_solver.c",
+        2488
+      ],
+      [
+        "0x2cdbdd",
+        "Factor",
+        "FactorizeHessian",
+        "engine_solver.c",
+        2506
+      ],
+      [
+        "0x2ce686",
+        "Gram",
+        "HessianCone (HessianConeFolded inlined)",
+        "engine_solver.c",
+        2595
+      ],
+      [
+        "0x2ce7be",
+        "Factor",
+        "HessianCone (HessianConeFolded inlined)",
+        "engine_solver.c",
+        2605
+      ]
+    ],
+    "all_direct_call_jump_into_numeric_bodies": [],
+    "relative_relocations_into_numeric_bodies": [],
+    "only_GOT_references_are_two_PLT_jumps": true,
+    "named_numeric_clones_or_aliases_beyond_two_original_functions": false,
+    "LTO_present_in_other_symbols": true,
+    "limitation": "Static audit reconciles every source call with a PLT site and finds no direct-entry bypass or named numeric clone. It is not a formal proof against arbitrary anonymous inlined equivalent arithmetic. No such missing path was observed; do not claim one exists."
+  },
+  "Ada_contrast": {
+    "profile": "r111 actual instrumented sample1 full process",
+    "factor_calls_measured": 778000,
+    "gram_calls_measured": 778000,
+    "solves_measured": 204000,
+    "step_calls": 200000,
+    "preparation_evaluations": 4000,
+    "factor_and_gram_per_solve_fullprocess": 3.8137254901960786,
+    "C_204000_evaluation_total": 204000,
+    "C_total_is_extrapolation": true,
+    "C_extrapolation_basis": "16 identical observed repetitions of sample1, each with 100 steps plus 2 pre-loop forwards, 102 calls each utility; extrapolate to 2000 identical repetitions, not measured at 2000. Ada probe lines112/117 also performs both evaluations before the step loop.",
+    "conditional_count_difference": 574000,
+    "count_difference_is_not_guaranteed_avoidable_work_or_speedup": true,
+    "limitation": "C rank updates, folded/update selection and all dense/other factorization routines are outside these two counters. Ada numerator includes pre-loop evaluations; it is not a measured 3.81 calls per timed step."
+  },
+  "next_priority": "Instrument/private-path diagnose cached base Hessian and incremental/cone updates before optimizing smaller setup work. C full numeric rebuild count is one here; determine which Ada repeated rebuilds can share or update a factor while preserving exact semantics and numerical failure behavior."
+}

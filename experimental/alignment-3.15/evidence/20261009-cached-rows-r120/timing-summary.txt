@@ -1,0 +1,15 @@
+r120 vs r109:24 alternating blocks ×16 trajectories ×100 steps;1 warmup trajectory excluded per block. Six sample1 models; all final states pass versusC. WSL quiet monitor passed; does not exclude all native Windows background work.
+
+Duration changes: negative is faster. Mean=ratio of arithmetic means;95%CI=paired block bootstrap(5000 resamples). p95 is100-step trajectory tail. Pointwise intervals, no multiplicity correction.
+
+model | mean_us r120/r109/C | mean duration change[95%CI] | p95 change[95%CI] | mean r120/C
+membrane_Newton_3 | 11.399/11.404/4.406 | -0.04%[-5.33,+6.12](unresolved) | +1.11%[-12.61,+12.78](unresolved) | 2.587x
+free | 19.604/19.059/5.769 | +2.86%[-1.90,+7.93](unresolved) | +4.83%[-5.40,+22.80](unresolved) | 3.398x
+element_2_sphere | 11.665/12.398/4.725 | -5.91%[-10.34,-1.79](faster) | -9.84%[-18.11,-5.73](faster) | 2.469x
+element_mixed_pyramidal_3 | 32.116/32.516/11.488 | -1.23%[-5.20,+3.00](unresolved) | -1.55%[-8.91,+4.64](unresolved) | 2.796x
+element_elastic_cross_elliptic_6 | 99.436/103.973/29.176 | -4.36%[-7.86,-0.41](faster) | -3.45%[-20.39,+5.13](unresolved) | 3.408x
+element_elastic_self_bvh_pyramidal_3 | 47.250/47.614/16.690 | -0.76%[-3.38,+1.72](unresolved) | +12.10%[-4.14,+20.52](unresolved) | 2.831x
+
+Estimator sensitivity: all six original driver median-ratio intervals include parity (elliptic upper bound1.000021). The mean-ratio intervals resolve sphere and elliptic, so label the estimator explicitly; this is not estimator-independent evidence.
+
+Cautions: no overall acceptance from averaging models; no claim that every model/tail improves; crossing zero is inconclusive rather than equivalence. Effects concern the combined r120 binary, not the isolated factor/transpose/scatter changes. The separate codegen audit still finds per-element layout reloads inFactor_Values.

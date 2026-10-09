@@ -28,9 +28,11 @@ def main():
     parser.add_argument("--build-root", type=Path, help="Reuse only the instrumented object cache")
     parser.add_argument("--model", default="element_elastic_cross_elliptic_6")
     parser.add_argument("--batches", type=int, default=1000)
+    parser.add_argument("--sample", type=int, default=0,
+                        help="Corpus sample to profile; match the release benchmark when attributing its cost")
     parser.add_argument("--cpu", type=int, default=0)
     args = parser.parse_args()
-    assert args.batches > 0 and args.cpu in os.sched_getaffinity(0)
+    assert args.batches > 0 and args.sample >= 0 and args.cpu in os.sched_getaffinity(0)
     engine = args.engine.resolve()
     source = engine / "source"
     manifest_path = engine / "manifest.json"
@@ -57,7 +59,7 @@ def main():
     receipt = dict(reference=mujoco.__version__, manifest_sha256=digest(manifest_path),
                    runner_sha256=digest(Path(__file__)), guard_sha256=digest(ROOT / "tools/guarded.py"),
                    project_flags=project.read_text(), command=command, build_root=str(build), cpu=args.cpu,
-                   model=args.model, batches=args.batches, complete=False,
+                   model=args.model, batches=args.batches, sample=args.sample, complete=False,
                    scope="Instrumented full-process cost attribution; no release timing or proof claim")
 
     def save():
@@ -82,8 +84,8 @@ def main():
     m = mujoco.MjModel.from_binary_path(str(model_path))
     stride = 1 + m.nq + 2*m.nv + m.nu + m.na
     values = np.fromstring(body, sep=" ")
-    assert count > 0 and steps > 0 and values.size == count*stride
-    sample = values[:stride]
+    assert args.sample < count and steps > 0 and values.size == count*stride
+    sample = values[args.sample*stride:(args.sample+1)*stride]
     assert sample[0] == 0
     line = " ".join(format(value, ".17g") for value in sample) + "\n"
     input_path = out / "trajectory.input"

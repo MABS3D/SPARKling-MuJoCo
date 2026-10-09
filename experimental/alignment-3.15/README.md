@@ -434,7 +434,7 @@ preserving all **2265** prior entries. The complete port and representative C pa
 | Articulated FLEX attachments | Standard force/reaction path tested; discrete CG assembly and optimized motion-axis path remain. |
 | FLEX bending coupling and Hessian cache | World-space passive bending tested and ordered row proved; discrete cross-coordinate Hessian/cache integration remains. |
 | Experimental 3D SNH elasticity | Port the discrete-integrator path and PSD Hessian projection; preserve default StVK. |
-| Actuator world orientation | Audit both transmission paths against body-quaternion times site-quaternion; test noncommuting rotations. |
+| Actuator world orientation | SO3 site/refsite candidate now composes body-quaternion times site-quaternion, with noncommuting trajectory tests; ordinary scalar-site integration and caller Gold remain. |
 | Actuator dampratio | Match operational-space inertia in model compilation; test multi-DOF tendon/site actuators. |
 | Capsule multicontact | Port the new single-shot capsule collision branches and contact ordering. |
 | insidesite enclosed sensor | Implement directed clearance/protrusion behavior and corresponding compiler attribute. |
@@ -1105,6 +1105,127 @@ and [paired r102 timing](evidence/20261008-row-buffer-hessian-r109/paired-time-v
 preserve final sources, exact runners, compiler failures, warning-bearing
 attempts, proof timeouts and raw numerical/timing inputs and outputs. Earlier
 indexed evidence remains unchanged.
+
+## SO3 world site quaternion composition, r110 (2026-10-09)
+
+C 3.15 composes both site and reference-site world quaternions as `body * local`.
+The production 3.14 adapter preserves that version's `local * body` order.
+The new version-specific overlay changes the two quaternion products in the
+owned SO3 transmission, keeping its Jacobians and moment frames unchanged.
+
+The checked 3.15 build passes **34/34 trajectories** across 17 SO3 models.
+Twelve trajectories are new: shared ancestors and separate body trees, each
+with quaternion, expmap and velocity controls. Their initial body/local rotations
+do not commute. An independent check against actual C confirms each fixture
+detects reversing the site product alone, the reference product alone, or both
+(initial length errors 0.33–0.95 radians). The unchanged production 3.14 path
+passes **22/22 trajectories** across its eleven existing SO3 models. Each model
+has one 100-step trajectory and one single-step trajectory, with applied loads.
+Both builds retain runtime checks; all frozen source hashes remain unchanged.
+
+These results cover the owned SO3 path. Ordinary scalar-site transmission still
+has only a lower-level kernel accepting caller-provided world poses; its engine
+integration remains incomplete. No complete transmission/caller Gold, full
+3.15 production adoption or performance claim follows from these comparisons.
+The [receipts](evidence/20261009-site-world-quaternion-r110/results.json) and
+[complete archive](evidence/20261009-site-world-quaternion-r110/complete.zip)
+retain both source closures, commands, warnings, raw MJB/input/output files and
+the three independent order checks. All 585 ZIP members were hash-verified;
+the [archive manifest](evidence/20261009-site-world-quaternion-r110/archive-manifest.json)
+records their hashes.
+
+Reproduce the narrow checked comparison:
+
+```sh
+/var/tmp/sparkling-movement315-env/bin/python experimental/alignment-3.15/tests/build_advanced.py \
+  --foundation /var/tmp/sparkling-alignment-315-foundation-r6-20261007 \
+  --out /var/tmp/sparkling-advanced-315-new \
+  --python /var/tmp/sparkling-movement315-env/bin/python --only so3_ --samples 2 --steps 100
+```
+
+For production regression, pass the verified 3.14 foundation and Python wheel
+with `--production-regression`, using a fresh output directory.
+
+## Cached Hessian rows and transpose minima, r120 (2026-10-09)
+
+`Scatter_Row` retains its slot and column across the copy/reset operations;
+`Factor_Values` retains row bounds and transpose offsets. Floating-point order,
+pivot clamping, rejection checks and public input domains are unchanged. The
+native code shrinks from 1,879 to 1,729 bytes for `Build_Gram` and from 3,466 to
+3,271 bytes for `Factor_Values`. The codegen audit still finds per-element
+`F.N`/column-base reloads after writes to `L`; the column renaming did not remove
+them. Smaller code alone is not performance evidence.
+
+The transpose proof now uses an iterative ghost prefix model, partition/frame
+lemmas and private count/offset helpers. **13 minimum scopes close 284 checks
+without warnings**, including 67 for the updated scatter. Twelve unchanged
+scopes use r114 evidence; the changed offset helper closes 24 checks on r115,
+whose engine manifest exactly matches r120. Both complete `Build_Transpose`
+attempts reach the 240-second watchdog without a complete scoped report.
+`Factor_Values` closes 46 checks with **8 still open and 2 warnings** at the
+recorded effort. Global `Build_Gram`, transpose, factor and caller proofs remain
+unfinished. Partially initialized caller patterns need their own flow proof;
+the public procedure's initialized-record proof boundary does not establish it.
+No assumptions, suppressions or narrower public preconditions were added.
+
+Fresh final-source checks pass **824 native cases** (237 Gram, 180 fixed-support
+mass, 407 factor/SIMD solve), **390 integrated C 3.15 cases** and **366 production
+C 3.14 cases**. Total: **1,580 numerical cases**, including 1,576 actual-C numeric
+comparisons and four ordered partial-result rejection checks. Transpose checks
+reuse the 237 Gram cases and are not additional cases. The separate SO3 results
+above cover a different adapter. Production remains pinned to 3.14.
+
+The earlier r111 instrumented profile now selects corpus sample 1, matching the
+release workload: factorization accounts for 24.68% of samples and Gram for
+16.82%; symbolic setup accounts for 6.28%. Sized ELF symbols correct ambiguous
+raw gprof labels. There are 778,000 Gram/factor calls across 204,000 solves,
+including preparatory calls; this is full-process attribution, not release
+timing or an exact timed-step ratio. Independent interception of the unchanged
+C 3.15 wheel observes exactly **one full Gram and one full factorization per
+step**, in every measured step of all six models, with bitwise-equal states and
+identical solver statistics. All seven source call sites map to intercepted
+PLT sites. Private rank-update routines are not counted by this experiment.
+This supports investigating Hessian/factor reuse and incremental updates; it
+does not predict a 3.8-fold speedup. A separate recompiled-C counter experiment
+is archived as prepared only, not executed evidence.
+
+The quiet release comparison uses CPU 0, 24 alternating blocks, 16 trajectories
+per block, 100 full steps and one excluded warm-up trajectory per block. All
+states pass against normal C 3.15 SIMD. Runtime checks and the previous release
+flags remain enabled. The table reports **ratios of arithmetic means**, with
+pointwise 95% paired block-bootstrap intervals (5,000 resamples); this differs
+from the median-of-paired-ratios estimator in the preceding r109 table.
+
+| Full movement | Mean duration change r120/r109 [95%] | Mean r120/C |
+|---|---:|---:|
+| membrane_Newton_3 | -0.04% [-5.33%, +6.12%] | 2.587 |
+| free | +2.86% [-1.90%, +7.93%] | 3.398 |
+| element_2_sphere | -5.91% [-10.34%, -1.79%] | 2.469 |
+| element_mixed_pyramidal_3 | -1.23% [-5.20%, +3.00%] | 2.796 |
+| element_elastic_cross_elliptic_6 | -4.36% [-7.86%, -0.41%] | 3.408 |
+| element_elastic_self_bvh_pyramidal_3 | -0.76% [-3.38%, +1.72%] | 2.831 |
+
+The two favorable mean estimates are method-specific signals: **all six
+median-of-paired-ratios intervals still include parity**. Only sphere's p95
+trajectory tail resolves an improvement (-9.84%, interval -18.11% to -5.73%).
+Self-BVH's p95 estimate is +12.10%, with interval -4.14% to +20.52%; it does not
+establish either regression or equivalence. No multiplicity correction is
+applied. Own jobs were idle and observed WSL processes stayed quiet; this does
+not exclude all native Windows background activity. No new r96 comparison was
+run. C parity, aggregate acceptance and attribution to individual edits remain
+open.
+
+[Receipts and scope](evidence/20261009-cached-rows-r120/results.json),
+[proof closure](evidence/20261009-cached-rows-r120/proof-summary.json),
+[timing summary](evidence/20261009-cached-rows-r120/timing-summary.json), and
+the verified archives for
+[runtime](evidence/20261009-cached-rows-r120/runtime.zip),
+[diagnostics](evidence/20261009-cached-rows-r120/diagnostics.zip),
+[proof attempts](evidence/20261009-cached-rows-r120/proofs.zip), and
+[timing](evidence/20261009-cached-rows-r120/timing.zip)
+retain exact source closures, commands, reports, inputs/outputs, instrumented
+binary/profile data, failed attempts and the statistical analysis scripts.
+Build objects and proof caches are excluded; prior indexed evidence is preserved.
 
 ## Reproduction
 

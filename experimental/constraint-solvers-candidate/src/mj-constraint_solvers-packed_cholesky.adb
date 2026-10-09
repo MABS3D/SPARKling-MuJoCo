@@ -1422,33 +1422,44 @@ package body MJ.Constraint_Solvers.Packed_Cholesky with SPARK_Mode is
    procedure Factor_Values (H : Vector; F : Flat_Pattern; L : in out Vector;
                           Rank : out Natural; Result : out Status; Floor : Pivot := 1.0e-15) is
       Scratch : Vector (1 .. Max_Dofs) := (others => 0.0);
-      C, Last, J, First : Positive;
+      Size : constant Positive := F.N;
+      Columns : Dof_List renames F.Column;
+      C, Last, J : Positive;
       Value, Root, Inverse : Real;
       Deficient : Boolean;
    begin
-      Rank := F.N; Result := Sparse.Numeric_Limit;
-      for R in reverse 1 .. F.N loop
-         First := F.Address (R)+1;
-         for S in First .. F.Address (R)+F.Length (R) loop
-            J := F.Column (S); Scratch (J) := H (S);
-         end loop;
-         for K in 2 .. F.Transpose_Length (R) loop
-            C := F.Transpose_Row (F.Transpose_Address (R)+K);
-            Last := F.Transpose_Slot (F.Transpose_Address (R)+K);
-            Flat_Update_Row (L, F.Column, F.Address (C)+1, Last, Scratch, (F.N-R)*Max_Dofs+K-1);
-         end loop;
-         Value := Scratch (R); Deficient := Value < Floor;
-         if Deficient then Value := Floor; Rank := Rank-1; end if;
-         Root := MJ.Quaternion_Math.Sqrt (Value);
-         if Root not in Pivot then return; end if;
-         Inverse := Dense.Inverse_Pivot (Root);
-         for S in First .. F.Address (R)+F.Length (R)-1 loop
-            Value := (if Deficient then 0.0 else Sparse.Scale (Scratch (F.Column (S)), Inverse));
-            if Value not in Operand then return; end if;
-            L (S) := Value;
-         end loop;
-         L (F.Address (R)+F.Length (R)) := Root;
-         for S in First .. F.Address (R)+F.Length (R) loop Scratch (F.Column (S)) := 0.0; end loop;
+      Rank := Size; Result := Sparse.Numeric_Limit;
+      for R in reverse 1 .. Size loop
+         declare
+            --  Keep row metadata across writes to L. In C these are local
+            --  offsets/pointers; re-reading the discriminated pattern here
+            --  otherwise prevents the compiler from retaining its layout.
+            First : constant Positive := F.Address (R)+1;
+            Diagonal : constant Positive := F.Address (R)+F.Length (R);
+            Transpose_First : constant Natural := F.Transpose_Address (R);
+            Transpose_Count : constant Natural := F.Transpose_Length (R);
+         begin
+            for S in First .. Diagonal loop
+               J := Columns (S); Scratch (J) := H (S);
+            end loop;
+            for K in 2 .. Transpose_Count loop
+               C := F.Transpose_Row (Transpose_First+K);
+               Last := F.Transpose_Slot (Transpose_First+K);
+               Flat_Update_Row (L, Columns, F.Address (C)+1, Last, Scratch, (Size-R)*Max_Dofs+K-1);
+            end loop;
+            Value := Scratch (R); Deficient := Value < Floor;
+            if Deficient then Value := Floor; Rank := Rank-1; end if;
+            Root := MJ.Quaternion_Math.Sqrt (Value);
+            if Root not in Pivot then return; end if;
+            Inverse := Dense.Inverse_Pivot (Root);
+            for S in First .. Diagonal-1 loop
+               Value := (if Deficient then 0.0 else Sparse.Scale (Scratch (Columns (S)), Inverse));
+               if Value not in Operand then return; end if;
+               L (S) := Value;
+            end loop;
+            L (Diagonal) := Root;
+            for S in First .. Diagonal loop Scratch (Columns (S)) := 0.0; end loop;
+         end;
          pragma Loop_Invariant (Static => Bounded (L));
          pragma Loop_Invariant (Rank in R-1 .. F.N);
       end loop;

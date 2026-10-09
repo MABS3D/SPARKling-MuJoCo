@@ -1,0 +1,18 @@
+diff --git a/experimental/advanced-step/src/mj-data-advanced_control-computation.adb b/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
+--- a/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
++++ b/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
+@@ -34,10 +34,10 @@
+       if C.Site_SO3 then
+          World_Q := D.Kinematic.Bodies (C.Site_Body).Orientation;
+          World_Ref := D.Kinematic.Bodies (C.Reference_Body).Orientation;
+-         --  Match C's local*body quaternion order for expmap lengths, and
+-         --  body*local site_xmat for the output moment frame.
+-         Site_Q := Multiply (Quaternion (C.Site_Quat), World_Q);
+-         Ref_Q := Multiply (Quaternion (C.Reference_Quat), World_Ref);
++         --  C 3.15 composes each world site orientation as body*local,
++         --  consistently with the site_xmat used for the moment frame.
++         Site_Q := Multiply (World_Q, Quaternion (C.Site_Quat));
++         Ref_Q := Multiply (World_Ref, Quaternion (C.Reference_Quat));
+          R := Rotation (Multiply (World_Q, Quaternion (C.Site_Quat)));
+          Ref_R := Rotation (Multiply (World_Ref, Quaternion (C.Reference_Quat)));
+          for V in 0 .. D.Nv-1 loop

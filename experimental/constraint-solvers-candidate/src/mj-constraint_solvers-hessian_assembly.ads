@@ -40,10 +40,30 @@ package MJ.Constraint_Solvers.Hessian_Assembly with SPARK_Mode is
              P.Address (P.T_Row (S))+P.Width (P.T_Row (S))
            and then P.Column (P.T_Source (S)) = C))) with Ghost => Static, Global => null;
 
+   --  Counts slots, including duplicates, in a prefix of the original CSR.
+   --  Integer-only ghost model: no runtime scans or allocations are introduced.
+   function Slot_Prefixes (Columns : Column_Indices; Low, High : Natural)
+     return Entry_Counts with Ghost => Static, Global => null,
+     Pre => Columns'First = 1 and then Columns'Length <= Max_Jacobian_Entries,
+     Post => Slot_Prefixes'Result'First = 1
+       and then Slot_Prefixes'Result'Length = Columns'Length+1
+       and then Slot_Prefixes'Result (1) = 0
+       and then (for all S in Slot_Prefixes'Result'Range => Slot_Prefixes'Result (S) <= S-1)
+       and then (for all S in Columns'Range => Slot_Prefixes'Result (S+1) =
+         Slot_Prefixes'Result (S)+(if Columns (S) in Low .. High then 1 else 0));
+
+   function Slot_Count (Columns : Column_Indices; Low, High, Count : Natural)
+     return Natural is (Slot_Prefixes (Columns, Low, High) (Count+1)) with
+     Ghost => Static, Global => null,
+     Pre => Columns'First = 1 and then Columns'Length <= Max_Jacobian_Entries
+       and then Count <= Columns'Length,
+     Post => Slot_Count'Result <= Count;
+
    function Before (P : Pattern; C, R : Positive; Count : Natural) return Natural with
      Ghost => Static, Global => null,
      Pre => CSR_Valid (P) and then C <= P.N and then R <= P.Rows and then Count <= P.Width (R),
-     Post => Before'Result <= P.Address (R)+Count;
+     Post => Before'Result <= P.Address (R)+Count
+       and then Before'Result = Slot_Count (P.Column, C, C, P.Address (R)+Count);
 
    procedure Build_Transpose (P : in out Pattern) with Global => null,
      Pre => (Static => CSR_Valid (P)),
