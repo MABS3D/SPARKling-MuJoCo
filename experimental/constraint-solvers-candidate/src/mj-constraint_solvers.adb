@@ -495,6 +495,19 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             Stored : constant Positive := Positive'Max (N, Hessian_Plan.Stored);
             Hessian_Flat : Packed.Flat_Pattern (N, Stored);
             Packed_HL : Vector (1 .. Stored) := (others => 0.0);
+            --  C keeps the quadratic base factor separate from cone curvature.
+            Packed_Cone : Vector (1 .. (if Use_Sparse_Hessian and not Scalar_Rows then Stored else 0)) :=
+              (others => 0.0);
+            type Zone_List is array (Positive range <>) of State;
+            type Cone_Hessian_List is array (Positive range <>) of Small_Matrix;
+            Zones : Zone_List (1 .. (if Use_Sparse_Hessian and not Scalar_Rows then Count else 0)) :=
+              (others => Satisfied);
+            Cone_Hessians : Cone_Hessian_List (Zones'Range);
+            Cone_Count : Natural := 0;
+            Cone_Fold_Known, Cone_Fold : Boolean := False;
+            Path_Cost : Lengths (1 .. (if Use_Sparse_Hessian and not Scalar_Rows then N else 0)) :=
+              (others => 0);
+            Factor_Flops : Natural := 0;
             Hessian_Values : Vector (1 .. (if Use_Sparse_Hessian then Stored else 0)) := (others => 0.0);
             function Hessian_Slot_Count return Natural is
                Total : Natural := 0;
@@ -532,13 +545,12 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   end;
                end loop;
                Assembly.Build_Transpose (Gram_Layout);
-               Gram_Modified := Gram_Raw;
             end Prepare_Gram_Layout;
 
-            procedure Assemble_Gram is
+            procedure Assemble_Gram (Values, Weight : Vector) is
                Accepted : Boolean;
             begin
-               Assembly.Build_Gram (Gram_Layout, Gram_Modified, Curvature,
+               Assembly.Build_Gram (Gram_Layout, Values, Weight,
                  Hessian_Flat, Hessian_Values, Accepted);
                if not Accepted then raise Constraint_Error; end if;
             end Assemble_Gram;
@@ -646,7 +658,11 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                Sparse_Status : Sparse.Status;
             begin
                if Settings.Sparse then
-                  Packed.Backsolve_Flat (Packed_HL, Hessian_Flat, Grad, Mgrad, Sparse_Status);
+                  if Cone_Count > 0 then
+                     Packed.Backsolve_Flat (Packed_Cone, Hessian_Flat, Grad, Mgrad, Sparse_Status);
+                  else
+                     Packed.Backsolve_Flat (Packed_HL, Hessian_Flat, Grad, Mgrad, Sparse_Status);
+                  end if;
                   if Sparse_Status /= Sparse.Success then raise Constraint_Error; end if;
                else
                   Dense.Backsolve (HL, Grad, Mgrad, Status);
@@ -665,10 +681,6 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
 
             procedure Incremental_Hessian (Accepted : out Boolean) is
                X : Vector (1 .. N);
-               --  The legacy pattern is materialized only for rank updates.
-               Hessian_Structure : Sparse.Pattern ((if Settings.Sparse then N else 1));
-               Sparse_HL : Matrix (1 .. (if Settings.Sparse then N else 0),
-                                   1 .. (if Settings.Sparse then N else 0));
                Root_D : Real;
                Plus : Boolean;
                Rank : Natural;
@@ -676,10 +688,6 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                Status : Updates.Status;
             begin
                Accepted := False;
-               if Settings.Sparse then
-                  Packed.Legacy_Pattern (Hessian_Flat, Hessian_Structure);
-                  Packed.Expand_Flat (Packed_HL, Hessian_Flat, Sparse_HL);
-               end if;
                for Row in 1 .. K loop
                   if Curvature (Row) /= Previous_Curvature (Row) then
                      Plus := Curvature (Row) /= 0.0;
@@ -697,26 +705,23 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                            for Slot in Native.Offsets (Row)+1 .. Native.Offsets (Row)+Native.Widths (Row) loop
                               X (Native.Columns (Slot)) := Native.Values (Slot)*Root_D;
                            end loop;
-                           if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
-                           Updates.Update_Sparse (Sparse_HL, Hessian_Structure, X, Start, Plus, Rank, Status);
-                           if Status /= Updates.Success then raise Constraint_Error; end if;
+                           if (for some V of X => V not in Updates.Operand) then return; end if;
+                           Updates.Update_Flat (Packed_HL, Hessian_Flat, X, Start, Plus, Rank, Status);
+                           if Status /= Updates.Success then return; end if;
                         end if;
                      else
                         for P in 1 .. N loop X (P) := J (Row, P)*Root_D; end loop;
-                        if (for some V of X => V not in Updates.Operand) then raise Constraint_Error; end if;
+                        if (for some V of X => V not in Updates.Operand) then return; end if;
                         Updates.Update_Dense (HL, X, Plus, Rank, Status);
-                        if Status /= Updates.Success then raise Constraint_Error; end if;
+                        if Status /= Updates.Success then return; end if;
                      end if;
                      if Rank < N then return; end if;
                   end if;
                end loop;
-               if Settings.Sparse then
-                  Packed.Pack_Flat (Sparse_HL, Hessian_Flat, Packed_HL);
-               end if;
                Accepted := True;
             end Incremental_Hessian;
 
-            procedure Build_Scalar_Hessian is
+            procedure Build_Base_Hessian is
                Changed : Boolean := not Hessian_Valid;
                Nonzero_Curvature : Boolean := False;
             begin
@@ -738,7 +743,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   Factor_Hessian;
                else
                   if Settings.Sparse then
-                     Assemble_Gram;
+                     Assemble_Gram (Gram_Raw, Curvature);
                      Packed.Add_Mass_Values (M, Hessian_Flat, Hessian_Values);
                   else
                      H := (others => (others => 0.0));
@@ -766,8 +771,9 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                end if;
                Previous_Curvature := Curvature;
                Hessian_Valid := True;
-            end Build_Scalar_Hessian;
-            pragma Inline_Always (Build_Scalar_Hessian);
+               Cone_Fold_Known := False;
+            end Build_Base_Hessian;
+            pragma Inline_Always (Build_Base_Hessian);
 
             procedure Update_Generalized_Force (Primal : Boolean) is
             begin
@@ -792,44 +798,125 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             end Update_Generalized_Force;
             pragma Inline_Always (Update_Generalized_Force);
 
-            procedure Fold_Cone (B : Block_Value; Start, Dim, Bi : Positive) is
-               Local_Input, Local_Factor : Matrix (1 .. Dim, 1 .. Dim);
-               Local : Cone_Arithmetic.Local_Matrix := (others => (others => 0.0));
-               Column, Folded : Cone_Arithmetic.Local_Vector;
+            procedure Cone_Basis (Bi, Dim : Positive; Local : out Cone_Arithmetic.Local_Matrix) is
+               Input, Factor : Matrix (1 .. Dim, 1 .. Dim);
                Rank : Natural;
                Status : Dense.Status;
             begin
-               if Cone_Widths (Bi) = 0 then return; end if;
                for S in 1 .. Dim loop
-                  for T in 1 .. Dim loop Local_Input (S, T) := B.H (S, T); end loop;
+                  for T in 1 .. Dim loop Input (S, T) := Cone_Hessians (Bi) (S, T); end loop;
                end loop;
-               --  C 3.15 HessianConeFolded first clamps/factors the local
-               --  cone Hessian, then replaces Jc by Lc' * Jc. It never forms
-               --  the full N-by-N-by-dim-by-dim bilinear product.
-               Dense.Factor (Local_Input, Local_Factor, Rank, Status, Tiny);
+               Dense.Factor (Input, Factor, Rank, Status, Tiny);
                if Status /= Dense.Success then raise Constraint_Error; end if;
+               Local := (others => (others => 0.0));
                for S in 1 .. Dim loop
-                  for T in 1 .. S loop Local (S, T) := Local_Factor (S, T); end loop;
+                  for T in 1 .. S loop Local (S, T) := Factor (S, T); end loop;
                end loop;
+            end Cone_Basis;
+
+            procedure Fold_Cone (Start, Dim, Bi : Positive) is
+               Local : Cone_Arithmetic.Local_Matrix;
+               Column, Folded : Cone_Arithmetic.Local_Vector;
+            begin
+               if Cone_Widths (Bi) = 0 then return; end if;
+               Cone_Basis (Bi, Dim, Local);
                for Pi in 1 .. Cone_Widths (Bi) loop
                   Column := (others => 0.0);
                   for S in 1 .. Dim loop
-                     Column (S) := J (Start + S - 1, Cone_Columns (Bi, Pi));
+                     Column (S) := J (Start+S-1, Cone_Columns (Bi, Pi));
                   end loop;
                   Cone_Arithmetic.Fold_Column (Local, Column, Dim, Folded);
                   for S in 1 .. Dim loop
                      Gram_Modified (Gram_Layout.Address (Start+S-1)+Pi) := Folded (S);
                   end loop;
                end loop;
-               for S in 1 .. Dim loop Curvature (Start+S-1) := 1.0; end loop;
             end Fold_Cone;
             pragma Inline_Always (Fold_Cone);
 
-            procedure Fold_Quadratic (B : Block_Value; Start, Dim : Positive) is
+            function Fold_Faster return Boolean is
+               U, S : Natural := 0;
             begin
-               for S in 1 .. Dim loop Curvature (Start+S-1) := B.H (S, S); end loop;
-            end Fold_Quadratic;
-            pragma Inline_Always (Fold_Quadratic);
+               --  C 3.15 HessianConeFoldFaster. Costs are integer operation
+               --  counts; a changed zone invalidates this cached decision.
+               for Bi in 1 .. Count loop
+                  declare
+                     R : constant Positive := Blocks (Bi);
+                     Dim : constant Positive := Constraints (R).Dimension;
+                     Width : constant Natural := Gram_Layout.Width (R);
+                  begin
+                     if Zones (Bi) = Quadratic then
+                        S := S+Dim*Width*Width;
+                     elsif Zones (Bi) = Cone and then Width > 0 then
+                        U := U+Dim*Path_Cost (Gram_Layout.Column (Gram_Layout.Address (R)+Width));
+                        S := S+Dim*Width*Width;
+                     end if;
+                  end;
+               end loop;
+               return 10*U > 3*(Factor_Flops+2*S);
+            end Fold_Faster;
+
+            procedure Rebuild_Cone_Factor is
+               Weight : Vector (1 .. K) := Curvature;
+               Rank : Natural;
+               Status : Sparse.Status;
+            begin
+               Gram_Modified := Gram_Raw;
+               for Bi in 1 .. Count loop
+                  if Zones (Bi) = Cone then
+                     declare
+                        R : constant Positive := Blocks (Bi);
+                        Dim : constant Positive := Constraints (R).Dimension;
+                     begin
+                        Fold_Cone (R, Dim, Bi);
+                        for S in R .. R+Dim-1 loop Weight (S) := 1.0; end loop;
+                     end;
+                  end if;
+               end loop;
+               Assemble_Gram (Gram_Modified, Weight);
+               Packed.Add_Mass_Values (M, Hessian_Flat, Hessian_Values);
+               Packed.Factor_Values (Hessian_Values, Hessian_Flat, Packed_Cone, Rank, Status, Tiny);
+               if Status /= Sparse.Success then raise Constraint_Error; end if;
+            end Rebuild_Cone_Factor;
+
+            procedure Build_Cone_Hessian is
+               X : Vector (1 .. N);
+               Rank : Natural;
+               Status : Updates.Status;
+            begin
+               if Cone_Count = 0 then return; end if;
+               if not Cone_Fold_Known then
+                  Cone_Fold := Fold_Faster;
+                  Cone_Fold_Known := True;
+               end if;
+               if Cone_Fold then Rebuild_Cone_Factor; return; end if;
+               --  Always start from the base L: con.H changes with residual
+               --  direction even when the constraint remains in cone state.
+               Packed_Cone := Packed_HL;
+               for Bi in 1 .. Count loop
+                  if Zones (Bi) = Cone and then Cone_Widths (Bi) > 0 then
+                     declare
+                        R : constant Positive := Blocks (Bi);
+                        Dim : constant Positive := Constraints (R).Dimension;
+                        Start : constant Positive := Cone_Columns (Bi, Cone_Widths (Bi));
+                     begin
+                        Fold_Cone (R, Dim, Bi);
+                        for S in R .. R+Dim-1 loop
+                           X := (others => 0.0);
+                           for Pi in 1 .. Cone_Widths (Bi) loop
+                              X (Cone_Columns (Bi, Pi)) := Gram_Modified (Gram_Layout.Address (S)+Pi);
+                           end loop;
+                           --  Keep the full assembly as fallback if a bounded
+                           --  incremental kernel cannot represent this update.
+                           if (for some V of X => V not in Updates.Operand) then
+                              Rebuild_Cone_Factor; return;
+                           end if;
+                           Updates.Update_Flat (Packed_Cone, Hessian_Flat, X, Start, True, Rank, Status);
+                           if Status /= Updates.Success then Rebuild_Cone_Factor; return; end if;
+                        end loop;
+                     end;
+                  end if;
+               end loop;
+            end Build_Cone_Hessian;
 
             procedure Update (Build_H : Boolean) is
                B : Block_Value;
@@ -844,8 +931,8 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                end loop;
                if Build_H and not Scalar_Rows then
                   if Settings.Sparse then
-                     Gram_Modified := Gram_Raw;
                      Curvature := (others => 0.0);
+                     Cone_Count := 0;
                   else H := M;
                   end if;
                end if;
@@ -869,9 +956,14 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   Cost := Cost + B.Cost;
                   for T in 1 .. Dim loop F (R + T - 1) := B.F (T); end loop;
                   if Build_H and Settings.Sparse then
+                     if Zones (Bi) /= B.Zone then Cone_Fold_Known := False; end if;
+                     Zones (Bi) := B.Zone;
                      case B.Zone is
-                        when Cone => Fold_Cone (B, R, Dim, Bi);
-                        when Quadratic => Fold_Quadratic (B, R, Dim);
+                        when Cone =>
+                           Cone_Hessians (Bi) := B.H;
+                           Cone_Count := Cone_Count+1;
+                        when Quadratic =>
+                           for S in R .. R+Dim-1 loop Curvature (S) := Constraints (S).D; end loop;
                         when others => null;
                      end case;
                   elsif not Settings.Sparse then
@@ -893,15 +985,16 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                end loop;
                Update_Generalized_Force (True);
                for P in 1 .. N loop Grad (P) := Grad (P)-Qfrc (P); end loop;
-               if Build_H and Scalar_Rows then
-                  Build_Scalar_Hessian;
-               elsif Build_H then
-                  if Settings.Sparse then
-                     Assemble_Gram;
-                     Packed.Add_Mass_Values (M, Hessian_Flat, Hessian_Values);
+               if Build_H then
+                  if Scalar_Rows then
+                     Build_Base_Hessian;
+                  elsif Settings.Sparse then
+                     Build_Base_Hessian;
+                     Build_Cone_Hessian;
+                  else
+                     Factor_Hessian;
+                     Hessian_Valid := True;
                   end if;
-                  Factor_Hessian;
-                  Hessian_Valid := True;
                end if;
             end Update;
             pragma Inline_Always (Update);
@@ -1301,7 +1394,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   Result.Outcome := Converged; return;
                end if;
                if Settings.Algorithm = Newton then
-                  if Scalar_Rows then Build_Scalar_Hessian; else Update (True); end if;
+                  if Scalar_Rows then Build_Base_Hessian; else Update (True); end if;
                   Precondition;
                end if;
                for P in 1 .. N loop Search (P) := -Mgrad (P); end loop;
@@ -1314,7 +1407,9 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   end if;
                   for P in 1 .. N loop Acc (P) := Acc (P) + Alpha * Search (P); Ma (P) := Ma (P) + Alpha * Mv (P); end loop;
                   for R in 1 .. K loop Jar (R) := Jar (R) + Alpha * Jv (R); end loop;
-                  Oldgrad := Grad; Oldmg := Mgrad;
+                  if Settings.Algorithm = CG then
+                     Oldgrad := Grad; Oldmg := Mgrad;
+                  end if;
                   Update (Settings.Algorithm = Newton); Precondition;
                   Result.Iterations := Iter;
                   Result.Improvement := Improvement * Settings.Scale;
@@ -1345,6 +1440,20 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
                   if Status /= Sparse.Success then Result.Outcome := Invalid_Input; return; end if;
                end;
                Prepare_Gram_Layout;
+               if not Scalar_Rows then
+                  for R in 1 .. N loop
+                     declare
+                        Width : constant Positive := Hessian_Flat.Length (R);
+                     begin
+                        Path_Cost (R) := Width;
+                        if Width >= 2 then
+                           Path_Cost (R) := Path_Cost (R)+Path_Cost
+                             (Hessian_Flat.Column (Hessian_Flat.Address (R)+Width-1));
+                        end if;
+                        Factor_Flops := Factor_Flops+Width*Width;
+                     end;
+                  end loop;
+               end if;
             end if;
             I := 1;
             while I <= N loop

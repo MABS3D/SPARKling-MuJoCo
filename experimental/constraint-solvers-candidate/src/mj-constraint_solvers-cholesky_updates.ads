@@ -1,12 +1,14 @@
 with MJ.Constraint_Solvers.Dense_Cholesky;
 with MJ.Constraint_Solvers.Sparse_Cholesky;
+with MJ.Constraint_Solvers.Packed_Cholesky;
 with MJ.Quaternion_Math;
 
---  Ordered rank-one Cholesky updates/downdates from MuJoCo 3.14.
+--  Ordered rank-one Cholesky updates/downdates from MuJoCo 3.14/3.15.
 --  Scalar relations are separate from the pending composed factor model.
 package MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
    package Dense renames MJ.Constraint_Solvers.Dense_Cholesky;
    package Sparse renames MJ.Constraint_Solvers.Sparse_Cholesky;
+   package Packed renames MJ.Constraint_Solvers.Packed_Cholesky;
    subtype Operand is Dense.Operand;
    subtype Pivot is Dense.Pivot;
    subtype Coefficient is Real range -2.0e135 .. 2.0e135;
@@ -139,4 +141,44 @@ package MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
        and then (for all V of X => V in Operand) and then Rank <= X'Length
        and then (for all I in L'Range (1) => (for all J in L'Range (2) =>
          (if J > I or else I > Start then L (I, J) = L'Old (I, J))));
+   --  Direct CSR-factor update, matching mju_cholUpdateSparse 3.15.0.
+   --  X is the caller's dense scratch; no dense factor bridge is allocated.
+   --  The row contract specifies both rounded outputs from their old values,
+   --  and leaves the diagonal and every unselected slot/column untouched.
+   procedure Flat_Row (L : in out Vector; F : Packed.Flat_Pattern; X : in out Vector;
+                       Row : Positive; C : Positive_Coefficient; S, Signed_S : Coefficient;
+                       Result : out Status) with
+     Global => null, Inline_Always,
+     Pre => (Static => Packed.Valid_Flat (F) and then L'First = 1 and then L'Length = F.Stored
+       and then Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F)
+       and then X'First = 1 and then X'Length = F.N and then Row <= F.N
+       and then Packed.Bounded (X)),
+     Post => (Static => Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F)
+       and then Packed.Bounded (X)
+       and then (for all Slot in L'Range =>
+         (if Slot <= F.Address (Row) or else Slot >= F.Address (Row)+F.Length (Row)
+          then L (Slot) = L'Old (Slot)))
+       and then (for all J in X'Range =>
+         (if not Packed.Row_Selected (F, Row, J, F.Length (Row)-1) then X (J) = X'Old (J)))
+       and then (if Result = Success then (for all I in 1 .. F.Length (Row)-1 =>
+         L (F.Address (Row)+I) = Sparse_Combine
+           (C, Signed_S, L'Old (F.Address (Row)+I), X'Old (F.Column (F.Address (Row)+I)))
+         and then X (F.Column (F.Address (Row)+I)) = Sparse_Combine
+           (S, C, L'Old (F.Address (Row)+I), X'Old (F.Column (F.Address (Row)+I))))));
+
+   procedure Update_Flat (L : in out Vector; F : Packed.Flat_Pattern;
+                          X : in out Vector; Start : Natural; Plus : Boolean;
+                          Rank : out Natural; Result : out Status) with
+     Global => null,
+     Pre => (Static => Packed.Valid_Flat (F) and then L'First = 1 and then L'Length = F.Stored
+       and then Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F)
+       and then X'First = 1 and then X'Length = F.N and then Start <= F.N
+       and then Packed.Bounded (X)),
+     Post => (Static => Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F)
+       and then Packed.Bounded (X) and then Rank <= F.N
+       and then (if Start = 0 then L = L'Old and then X = X'Old and then Rank = F.N
+                   and then Result = Success
+         else (for all Slot in F.Address (Start)+F.Length (Start)+1 .. L'Last =>
+           L (Slot) = L'Old (Slot)))
+       and then (for all J in X'Range => (if J >= Start then X (J) = X'Old (J))));
 end MJ.Constraint_Solvers.Cholesky_Updates;

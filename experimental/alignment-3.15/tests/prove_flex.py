@@ -11,6 +11,11 @@ import time
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOPES = {
+    "Flat_Lower_Separate": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Update_Flat": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Flat_Row": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Flat_Selection_Frame": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Flat_Row_Limits": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Hessian_Cursor_Separation": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Hessian_Offset_Ordered": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Hessian_Slot_Count_Columns_Step": ("mj-constraint_solvers-hessian_assembly", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),

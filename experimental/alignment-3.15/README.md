@@ -1227,6 +1227,88 @@ retain exact source closures, commands, reports, inputs/outputs, instrumented
 binary/profile data, failed attempts and the statistical analysis scripts.
 Build objects and proof caches are excluded; prior indexed evidence is preserved.
 
+## Persistent quadratic factor and compact updates, 2026-10-09
+
+The sparse Newton candidate now keeps the quadratic base factor across solver
+iterations and updates changed rows directly in its compact representation.
+It no longer expands that factor into an N-by-N matrix for rank updates.
+Elliptic curvature is refreshed separately on every relevant iteration, including
+when a cone keeps its state but changes direction. The choice between cone
+updates and folded assembly follows C 3.15's operation-count test and is cached
+until its inputs change. A bounded incremental failure falls back to full
+assembly; the public input domain was not narrowed. Newton also stops copying
+the previous gradients used only by CG. Dense mixed/elliptic factor reuse and
+the composed cache/factor-history proof remain pending.
+
+Fresh r122 validation retains runtime checks and passes:
+
+| Scope | Result |
+|---|---:|
+| Integrated C 3.15 state / forces / constrained trajectories | 78 / 66 / 246 |
+| Production C 3.14 state / forces / constrained trajectories | 78 / 54 / 234 |
+| Assembled solver, each C version, dense / sparse | 428 / 432 |
+| Solver robustness: stress / replay / capacity | 240 / 240 / 5 |
+| Independent one-coordinate cone oracle | 18 / 18 |
+
+The independent oracle covers both predicted sides of C's fold/update cost
+threshold. It checks the convex optimum, not an instrumented branch count or
+universal equivalence. Frozen sources, commands, inputs/outputs and binary hashes
+are retained in the [runtime archive](evidence/20261009-hessian-reuse-r122/runtime.zip)
+and [runtime stages](evidence/20261009-hessian-reuse-r122/runtime-stages.json).
+
+The previously prepared recompiled-C counter experiment has now run. All twelve
+runs (six models, with zero or two preparatory forwards) preserve the unchanged
+wheel's states bitwise and its solver statistics. Every measured step performs
+one full Gram assembly and one full factorization. In the elliptic fixture, C
+averages 29.46 cone rank updates and 7.68 quadratic downdates per step, with no
+folded rebuilds; the mixed pyramidal fixture averages 4.27 quadratic updates and
+7.64 downdates. These are exact invocation counts, not execution-time shares or
+a predicted speedup. The [counter archive](evidence/20261009-hessian-reuse-r122/c-counters.zip)
+includes the pinned-source instrumentation and its checks. Final r122 Ada call
+counts and quiet release timings have not been run. The r120 timing table above
+remains historical and cannot establish acceptance of these changes.
+
+The rank-update probe passes **593 cases**: 588 bitwise comparisons with actual
+C 3.15 finite outputs and five guarded rejection checks, including 198 direct
+packed cases. That frozen native run precedes the final ghost-only refinement;
+the final r122 source also compiles and passes the integrated and assembled
+solver suites above. The r121 minimum proofs close 24 row-boundary and 16
+selection-frame checks, while retaining the existing imprecise-Sqrt warnings.
+Their strict warning-free result remains false. The first `Flat_Row` attempt
+has two open obligations; `Update_Flat` hits its 240-second watchdog without a
+complete scoped report. The final ghost refinement and new separation lemma
+have not been reproved. They remain engineering work, not a Silver exception
+or a global Gold claim. The [packed-update evidence](evidence/20261009-hessian-reuse-r122/packed-updates.zip)
+retains the native run, successful minima and failed proof attempts.
+
+## Scalar site transmissions in the 3.15 candidate, 2026-10-09
+
+The optional scalar-site overlay now connects ordinary site/refsite transmissions
+to the shared smooth/constrained controller. It reconstructs world poses,
+translates the body-COM Jacobians to the site points, handles welded ancestors,
+and applies C's servo/PID rotational wrapping rules. The world-reference guard
+matches C; its initially failing regression is preserved in the evidence.
+Mixed translation/rotation gears do not receive pure-rotation wrapping.
+
+Validation passes 66/66 smooth trajectories across 33 models and 64/64
+constrained trajectories across 32 admitted models. The remaining static-world
+model is explicitly checked for the constrained engine's pre-existing
+`Nv >= 1` admission limit and returns `CAPACITY_EXCEEDED`; it passes in the
+smooth adapter. The raw constrained comparison retains exit 1, and the wrapper
+recognizes only that exact expected rejection, separately from successful
+trajectories. SO3 regressions pass 34/34 on C 3.15 and 22/22 on production C 3.14.
+
+The two geometry minima prove their ordered floating-point expressions and
+bounds: `World_Coordinate` closes 15 checks and `Point_Column` closes 11, with
+no open obligations or warnings. Their source/dependency identity is checked
+across the proof and runtime snapshots. These are local functional proofs;
+complete transmission/controller proofs and performance acceptance remain open.
+The production pin stays 3.14, and the new overlay is opt-in through
+`build_advanced.py --scalar-site`, adding `--constrained` for the contact adapter.
+[Results and scope](evidence/20261009-scalar-site-r124/summary.json) and the
+[verified archive](evidence/20261009-scalar-site-r124/scalar-site-r124.zip)
+retain both positive and negative runs, exact sources, commands and manifests.
+
 ## Reproduction
 
 With the project's GNAT/GNATprove toolchain and a Python environment containing

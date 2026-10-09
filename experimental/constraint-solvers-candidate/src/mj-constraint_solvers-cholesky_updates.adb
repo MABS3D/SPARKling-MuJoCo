@@ -185,4 +185,143 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
       end loop;
       Result := Success;
    end Update_Sparse;
+   procedure Flat_Row_Limits (F : Packed.Flat_Pattern; Row : Positive) with
+     Ghost => Static, Global => null,
+     Pre => Packed.Valid_Flat (F) and then Row <= F.N,
+     Post => (for all R in 1 .. F.N =>
+       (if R < Row then F.Address (R)+F.Length (R) <= F.Address (Row)
+        elsif R > Row then F.Address (Row)+F.Length (Row) <= F.Address (R)))
+   is
+   begin
+      for R in reverse 1 .. Row-1 loop
+         pragma Loop_Invariant (for all Q in R .. Row-1 =>
+           F.Address (Q)+F.Length (Q) <= F.Address (Row));
+      end loop;
+      for R in Row+1 .. F.N loop
+         pragma Loop_Invariant (for all Q in Row+1 .. R =>
+           F.Address (Row)+F.Length (Row) <= F.Address (Q));
+      end loop;
+   end Flat_Row_Limits;
+
+   procedure Flat_Lower_Separate (F : Packed.Flat_Pattern; Row, Position : Positive) with
+     Ghost => Static, Global => null,
+     Pre => Packed.Valid_Flat (F) and then Row <= F.N and then Position < F.Length (Row),
+     Post => F.Column (F.Address (Row)+Position) < Row
+       and then (for all R in 1 .. F.N =>
+         F.Address (Row)+Position /= F.Address (R)+F.Length (R))
+   is
+   begin
+      Flat_Row_Limits (F, Row);
+      Packed.Flat_Column_Separate (F, Row, Position);
+      for R in 1 .. F.N loop
+         pragma Assert (F.Address (Row)+Position /= F.Address (R)+F.Length (R));
+         pragma Loop_Invariant (for all Q in 1 .. R =>
+           F.Address (Row)+Position /= F.Address (Q)+F.Length (Q));
+      end loop;
+   end Flat_Lower_Separate;
+
+   procedure Flat_Selection_Frame (F : Packed.Flat_Pattern; Row, Position : Positive) with
+     Ghost => Static, Global => null,
+     Pre => Packed.Valid_Flat (F) and then Row <= F.N and then Position <= F.Length (Row),
+     Post => (for all J in 1 .. F.N =>
+       (if not Packed.Row_Selected (F, Row, J, Position) then
+         not Packed.Row_Selected (F, Row, J, Position-1)
+         and then F.Column (F.Address (Row)+Position) /= J))
+   is
+   begin
+      for J in 1 .. F.N loop
+         Packed.Selected_Step (F, Row, J, Position);
+         pragma Loop_Invariant (for all Q in 1 .. J =>
+           (if not Packed.Row_Selected (F, Row, Q, Position) then
+             not Packed.Row_Selected (F, Row, Q, Position-1)
+             and then F.Column (F.Address (Row)+Position) /= Q));
+      end loop;
+   end Flat_Selection_Frame;
+
+   procedure Flat_Row (L : in out Vector; F : Packed.Flat_Pattern; X : in out Vector;
+                       Row : Positive; C : Positive_Coefficient; S, Signed_S : Coefficient;
+                       Result : out Status) is
+      First : constant Natural := F.Address (Row);
+      Count : constant Natural := F.Length (Row)-1;
+      Columns : Packed.Dof_List renames F.Column;
+      Original_L : constant Vector := L with Ghost => Static;
+      Original_X : constant Vector := X with Ghost => Static;
+      Old_L, Old_X : Operand;
+      Value, Residual : Wide;
+   begin
+      Result := Numeric_Limit;
+      Flat_Row_Limits (F, Row);
+      for I in 1 .. Count loop
+         pragma Loop_Invariant (Static => Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F));
+         pragma Loop_Invariant (Static => Packed.Bounded (X));
+         pragma Loop_Invariant (Static => (for all R in 1 .. F.N =>
+           L (F.Address (R)+F.Length (R)) = Original_L (F.Address (R)+F.Length (R))));
+         pragma Loop_Invariant (Static => (for all Slot in L'Range =>
+           (if Slot <= First or else Slot >= First+I then L (Slot) = Original_L (Slot))));
+         pragma Loop_Invariant (Static => (for all J in X'Range =>
+           (if not Packed.Row_Selected (F, Row, J, I-1) then X (J) = Original_X (J))));
+         pragma Loop_Invariant (Static => (for all K in 1 .. I-1 =>
+           L (First+K) = Sparse_Combine
+             (C, Signed_S, Original_L (First+K), Original_X (Columns (First+K)))
+           and then X (Columns (First+K)) = Sparse_Combine
+             (S, C, Original_L (First+K), Original_X (Columns (First+K)))));
+         Packed.Flat_Column_Separate (F, Row, I);
+         Flat_Lower_Separate (F, Row, I);
+         Flat_Selection_Frame (F, Row, I);
+         declare
+            Slot : constant Positive := First+I;
+            J : constant Positive := Columns (Slot);
+         begin
+            Packed.Selected_Step (F, Row, J, I);
+            pragma Assert (Static => not Packed.Row_Selected (F, Row, J, I-1));
+            pragma Assert (Static => L (Slot) = Original_L (Slot) and then X (J) = Original_X (J));
+            Old_L := L (Slot); Old_X := X (J);
+            Value := Sparse_Combine (C, Signed_S, Old_L, Old_X);
+            Residual := Sparse_Combine (S, C, Old_L, Old_X);
+            pragma Assert (Static => Value = Sparse_Combine (C, Signed_S, Original_L (Slot), Original_X (J))
+              and then Residual = Sparse_Combine (S, C, Original_L (Slot), Original_X (J)));
+            if Value not in Operand or else Residual not in Operand then return; end if;
+            L (Slot) := Value; X (J) := Residual;
+            pragma Assert (Static => (for all R in 1 .. F.N =>
+              L (F.Address (R)+F.Length (R)) = Original_L (F.Address (R)+F.Length (R))));
+            pragma Assert (Static => Packed.Flat_Diagonal (L, F));
+         end;
+      end loop;
+      Result := Success;
+   end Flat_Row;
+
+   procedure Update_Flat (L : in out Vector; F : Packed.Flat_Pattern;
+                          X : in out Vector; Start : Natural; Plus : Boolean;
+                          Rank : out Natural; Result : out Status) is
+      D, R, Change : Real;
+      C : Positive_Coefficient;
+      S, Signed_S : Coefficient;
+   begin
+      Result := Numeric_Limit; Rank := X'Length;
+      for Row in reverse 1 .. Start loop
+         Result := Numeric_Limit;
+         if X (Row) /= 0.0 then
+            declare Diagonal : constant Positive := F.Address (Row)+F.Length (Row); begin
+               D := L (Diagonal); Change := Pivot_Change (D, X (Row), Plus);
+               if Change < 1.0e-15 then Rank := Rank-1; end if;
+               R := Root (Change);
+               if R not in Pivot then return; end if;
+               Flat_Row_Limits (F, Row);
+               L (Diagonal) := R;
+            end;
+            C := Positive_Ratio (D, R); S := Signed_Ratio (-X (Row), R);
+            Signed_S := (if Plus then -S else S);
+            Flat_Row (L, F, X, Row, C, S, Signed_S, Result);
+            if Result /= Success then return; end if;
+         end if;
+         pragma Loop_Invariant (Static => Packed.Bounded (L) and then Packed.Flat_Diagonal (L, F));
+         pragma Loop_Invariant (Static => Packed.Bounded (X));
+         pragma Loop_Invariant (Rank in X'Length-(Start-Row+1) .. X'Length);
+         pragma Loop_Invariant (Static => (for all Slot in F.Address (Start)+F.Length (Start)+1 .. L'Last =>
+           L (Slot) = L'Loop_Entry (Slot)));
+         pragma Loop_Invariant (Static => (for all J in X'Range =>
+           (if J >= Start then X (J) = X'Loop_Entry (J))));
+      end loop;
+      Result := Success;
+   end Update_Flat;
 end MJ.Constraint_Solvers.Cholesky_Updates;

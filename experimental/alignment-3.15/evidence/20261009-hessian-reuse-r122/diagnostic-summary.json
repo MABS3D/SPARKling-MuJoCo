@@ -1,0 +1,154 @@
+{
+  "scope": "Publication handoff only: reads existing results, no new builds, tests or profiles; no runtime/repository changes.",
+  "archive": {
+    "zip_path": "/var/tmp/sparkling-c315-private-counters-r121-evidence-20261009.zip",
+    "zip_sha256": "2041a4fb3bedc9a37115a4d30e2746205ea06a63b4d372266462f05e2773e55f",
+    "size_bytes": 37910150,
+    "entry_count": 210,
+    "crc_verified": true,
+    "all_entry_hashes_verified": true,
+    "source_commit": "9ea3cdfcae93bf2cc4dc0e1a1627c5a39a1e06e5"
+  },
+  "counters": {
+    "sample": 1,
+    "steps_per_trajectory": 100,
+    "trajectories": 16,
+    "endpoint_forwards": [
+      0,
+      2
+    ],
+    "models": 6,
+    "variants": 12,
+    "per_step_GramNumeric": 1,
+    "per_step_cholFactorNumeric": 1,
+    "step_calls_each_utility_per_variant": 1600,
+    "ep2_separate_prep_calls_each_utility": 32,
+    "source_state_max_abs_vs_untouched_wheel": 0,
+    "stats_match": true,
+    "exact_wheel_hook_state_bitwise": true,
+    "elliptic_means_per_step": {
+      "MakeHessian": 1,
+      "FactorizeHessian": 1,
+      "FactorizeRecompute": 0,
+      "HessianIncremental": 2.85,
+      "HessianConeUpdate": 2.53,
+      "ConeRankUpdate": 29.46,
+      "QuadraticRankDowndate": 7.68,
+      "cholUpdateSparse": 37.14
+    },
+    "notes": [
+      "Source build uses normal AVX, diagnostic LTO off; no timing claim.",
+      "All known source calls to the two exported numeric functions mapped to PLT; no bypass found. This is not a formal proof against arbitrary anonymous inlined arithmetic.",
+      "Full-process old Ada r111 count 778000/204000 includes preparation calls; avoid treating it as exact timed-loop ratio.",
+      "The new r122 Ada profile is prepared only, not executed."
+    ]
+  },
+  "review": {
+    "result": "Two findings fixed: failed incremental updates fall back to full rebuild; first Packed_Cone factor input initialized once. No further invalidation issue found by inspection.",
+    "source_sha256": "3fbfd1287126af48c6cf4ea912ef2b86a6d8f76d2a05bdc3eadb9aef98a9ae23",
+    "frozen_solver_sha256": "0fc4bdafe702723bc10f5685c854514c73fed0bebddcb59fab197d8339995854",
+    "scope": "Review of recorded snapshot, not global formal proof or runtime validation."
+  },
+  "oracle": {
+    "results": "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/synthetic-fold/results.json",
+    "executed": true,
+    "passed": 18,
+    "cases": 18,
+    "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be",
+    "driver_sha256": "f939878e17e545aec4a1a4554c42a21893399fe8c0f077fa2e38184da2ad2a08",
+    "differential_driver_sha256": "306df382a7c74ac3719d4bc4899ca4b661419c23337a7c8557d0905c90054fad",
+    "input_sha256": "9107dce0d4eac363be8d9847ae54d13c825a35ecc72a97cf1003ecc5bb9985c8",
+    "max_acceleration_error": 8.881784197001252e-16,
+    "max_force_error": 2.220446049250313e-16,
+    "max_balance_residual": 1.7486012637846216e-15,
+    "scope": "Independent convex one-coordinate oracle, not a C simulator output. C3.15 gate structure/formula copied analytically; actual branch execution not instrumented.",
+    "recorded_command": [
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "2500",
+      "--timeout",
+      "240",
+      "--",
+      "/var/tmp/sparkling-movement315-env/bin/python",
+      "/var/tmp/sparkling-fold-oracle-r121-20261009/synthetic_fold_oracle.py",
+      "--binary",
+      "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/build/validation/bin/solvers_probe",
+      "--out",
+      "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/synthetic-fold"
+    ],
+    "reproduction_note": "Pass --test-dir pointing to the archived/frozen tests directory with matching differential.py hash; select a new output directory. Build a solvers_probe from the validated runtime source snapshot first. No binary is included in the proposed evidence selection."
+  },
+  "evidence_selection": [
+    {
+      "path": "/var/tmp/sparkling-c315-private-counters-r121-evidence-20261009.zip",
+      "sha256": "2041a4fb3bedc9a37115a4d30e2746205ea06a63b4d372266462f05e2773e55f",
+      "purpose": "Complete verified C diagnostic evidence archive; includes raw results, pinned source patch, drivers, inputs and build receipts; excludes build objects."
+    },
+    {
+      "path": "/var/tmp/sparkling-c315-private-counters-r121-evidence-20261009.zip.json",
+      "sha256": "5a5c4b77792f7c406ccb552f58f77dda56427e14ba4c3ba9031d88179562ebf4",
+      "bytes": 344
+    },
+    {
+      "path": "/var/tmp/sparkling-c315-source-count-callsite-r121-20261009/counts-summary.json",
+      "sha256": "432448d9dc4f08888b3c15b51883b1781e8753f7dbcf3c6d455b193bd3d52454",
+      "bytes": 52119
+    },
+    {
+      "path": "/var/tmp/sparkling-c315-source-count-callsite-r121-20261009/counts-summary.txt",
+      "sha256": "ac2bc1ff93c5cf2b830a2e3ec0f4cf2121ffc00495851028e078a25d43013600",
+      "bytes": 1547
+    },
+    {
+      "path": "/var/tmp/sparkling-c315-source-count-callsite-r121-20261009/results.json",
+      "sha256": "503711a48de00bba2585dd9f91fcc0d044767b4e5ce5562c6366586abc8a6a0b",
+      "bytes": 25646
+    },
+    {
+      "path": "/var/tmp/sparkling-c315-wheel-count-results-20261009/interception-audit.json",
+      "sha256": "bebf74c56c934b42f0e1eea013c48284954e8516e5acf43bb0bd2bdaaf18aecf",
+      "bytes": 4263
+    },
+    {
+      "path": "/var/tmp/sparkling-fold-oracle-r121-20261009/review.json",
+      "sha256": "80315ebaccb74b11497fb17e6b79c6253e68a954b8426cb650a15d7704cd6780",
+      "bytes": 3262
+    },
+    {
+      "path": "/var/tmp/sparkling-fold-oracle-r121-20261009/solver-reviewed.adb",
+      "sha256": "3fbfd1287126af48c6cf4ea912ef2b86a6d8f76d2a05bdc3eadb9aef98a9ae23",
+      "bytes": 75948
+    },
+    {
+      "path": "/var/tmp/sparkling-fold-oracle-r121-20261009/synthetic_fold_oracle.py",
+      "sha256": "f939878e17e545aec4a1a4554c42a21893399fe8c0f077fa2e38184da2ad2a08",
+      "bytes": 5214
+    },
+    {
+      "path": "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/synthetic-fold/results.json",
+      "sha256": "18f09b1fdc585dd52bf63c7a57ce2c93ca8d41e2179aac53abd0ee7160de7362",
+      "bytes": 22830
+    },
+    {
+      "path": "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/synthetic-fold/problems.input",
+      "sha256": "9107dce0d4eac363be8d9847ae54d13c825a35ecc72a97cf1003ecc5bb9985c8",
+      "bytes": 16509
+    },
+    {
+      "path": "/var/tmp/sparkling-alignment-315-reuse-solver-r122-20261009/source/experimental/constraint-solvers-candidate/tests/differential.py",
+      "sha256": "306df382a7c74ac3719d4bc4899ca4b661419c23337a7c8557d0905c90054fad",
+      "bytes": 18307
+    },
+    {
+      "path": "/var/tmp/sparkling-reuse-r122-synthetic-fold.log",
+      "sha256": "efdc65059cf05fb01bed9204c3b389ee6d73c1ab25d2e0d29524dbbb9dd52c44",
+      "bytes": 132
+    }
+  ],
+  "exclude": [
+    "No new r122 profile results exist; do not describe prepared collector as completed validation.",
+    "Do not duplicate full C build trees, object files, or compiled libraries in the commit.",
+    "C evidence ZIP excludes runtime review and oracle; include those separately or preserve them in the existing runtime evidence package."
+  ]
+}

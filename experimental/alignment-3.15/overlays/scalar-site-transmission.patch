@@ -1,0 +1,178 @@
+--- a/experimental/advanced-step/src/mj-data-advanced_control.ads
++++ b/experimental/advanced-step/src/mj-data-advanced_control.ads
+@@ -89,7 +89,8 @@
+       Length_Lo, Length_Hi, Acc0 : Tier0_Real := 0.0;
+       Site_Body, Reference_Body : Natural := 0;
+       Site_Quat, Reference_Quat : AM.Quaternion := AM.Identity;
+-      Site_SO3 : Boolean := False;
++      Site_Position, Reference_Position : AM.Vector := AM.Zero;
++      Site_SO3, Has_Reference : Boolean := False;
+       Common : MJ.Transmissions.Mask (0 .. Max_Dofs - 1) := [others => False];
+    end record;
+    type Config_Array is array (Natural range <>) of Configuration;
+--- a/experimental/advanced-step/src/mj-data-advanced_control.adb
++++ b/experimental/advanced-step/src/mj-data-advanced_control.adb
+@@ -135,21 +135,37 @@
+                  (C.Gain_Kind = 0 and then C.Bias_Kind = 1 and then C.Bias (1) < 0.0)) then
+                   C.Period := (2.0*Ada_Pi)*AM.Math.Sqrt ((C.Gear (0)*C.Gear (0)+C.Gear (1)*C.Gear (1))+C.Gear (2)*C.Gear (2));
+                end if;
+-            elsif C.Trn = 6 and then Ref >= 0 then
++            elsif C.Trn = 4 or else (C.Trn = 6 and then Ref >= 0) then
+                if not MJ.Models.Site_Layout_OK (M.S, M.Sites)
+-                 or else Id not in 0 .. M.S.Nsite-1 or else Ref not in 0 .. M.S.Nsite-1 then return; end if;
+-               C.Site_SO3 := True; E.Source.Has_Sites := True;
+-               C.Site_Body := M.Sites.Site_Bodyid (Id); C.Reference_Body := M.Sites.Site_Bodyid (Ref);
++                 or else Id not in 0 .. M.S.Nsite-1 or else Ref not in -1 .. M.S.Nsite-1 then return; end if;
++               C.Site_SO3 := C.Trn = 6; C.Has_Reference := Ref >= 0; E.Source.Has_Sites := True;
++               --  C wrapPeriod: only pure rotational refsite servos/PIDs wrap.
++               if C.Trn = 4 and then C.Has_Reference
++                 and then C.Gear (0) = 0.0 and then C.Gear (1) = 0.0 and then C.Gear (2) = 0.0
++                 and then (C.Gain_Kind = 5 or else (C.Gain_Kind = 0 and then C.Bias_Kind = 1
++                   and then C.Gain (0) = -C.Bias (1) and then C.Dyn_Kind in 0 .. 1)) then
++                  C.Period := (2.0*Ada_Pi)*AM.Math.Sqrt
++                    ((C.Gear (3)*C.Gear (3)+C.Gear (4)*C.Gear (4))+C.Gear (5)*C.Gear (5));
++               end if;
++               C.Site_Body := M.Sites.Site_Bodyid (Id);
+                C.Site_Quat := AM.Quaternion (Read_Quaternion (M.Sites.Site_Quat.all, 4*Id));
+-               C.Reference_Quat := AM.Quaternion (Read_Quaternion (M.Sites.Site_Quat.all, 4*Ref));
+-               declare
+-                  B1 : constant Natural := M.Bodies.Body_Weldid (C.Site_Body);
+-                  B2 : constant Natural := M.Bodies.Body_Weldid (C.Reference_Body);
+-               begin
+-                  First := M.Bodies.Body_Dofadr (B1)+M.Bodies.Body_Dofnum (B1)-1;
+-                  Second := M.Bodies.Body_Dofadr (B2)+M.Bodies.Body_Dofnum (B2)-1;
+-               end;
+-               C.Common (0 .. M.S.Nv-1) := TX.Common_Ancestors (Parents (0 .. M.S.Nv-1), First, Second);
++               for K in Axis loop C.Site_Position (K) := M.Sites.Site_Pos (3*Id+K); end loop;
++               if C.Has_Reference then
++                  C.Reference_Body := M.Sites.Site_Bodyid (Ref);
++                  C.Reference_Quat := AM.Quaternion (Read_Quaternion (M.Sites.Site_Quat.all, 4*Ref));
++                  for K in Axis loop C.Reference_Position (K) := M.Sites.Site_Pos (3*Ref+K); end loop;
++                  declare
++                     B1 : constant Natural := M.Bodies.Body_Weldid (C.Site_Body);
++                     B2 : constant Natural := M.Bodies.Body_Weldid (C.Reference_Body);
++                  begin
++                     First := M.Bodies.Body_Dofadr (B1)+M.Bodies.Body_Dofnum (B1)-1;
++                     Second := M.Bodies.Body_Dofadr (B2)+M.Bodies.Body_Dofnum (B2)-1;
++                  end;
++                  --  C skips world/welded-static endpoints with no DOFs.
++                  if First >= 0 and then Second >= 0 then
++                  C.Common (0 .. M.S.Nv-1) := TX.Common_Ancestors (Parents (0 .. M.S.Nv-1), First, Second);
++                  end if;
++               end if;
+             else return; end if;
+             if C.Gain_Kind = 5 and then C.Dyn_Kind in 0 | 6 and then C.Bias_Kind = 1 and then C.No = 1 then
+                Expected := MJ.Advanced_State.PID_Count (C.Dyn (1), C.Gain (0));
+@@ -167,7 +183,7 @@
+                if (C.Spec = 2 and then (C.Nu /= 4 or else C.Na /= 0))
+                  or else (C.Spec = 1 and then C.Nu /= 3) or else C.Spec not in 1 .. 2 then return; end if;
+             elsif C.Gain_Kind in 0 .. 2 and then C.Dyn_Kind in 0 .. 4 and then C.Bias_Kind in 0 .. 2
+-              and then C.Trn in 0 .. 1 and then C.No = 1 and then C.Nu = 1 then
++              and then C.Trn in 0 .. 1 | 4 and then C.No = 1 and then C.Nu = 1 then
+                Expected := (if C.Dyn_Kind = 0 then 0 else 1);
+             else return; end if;
+             if C.Na /= Expected then return; end if;
+--- a/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
++++ b/experimental/advanced-step/src/mj-data-advanced_control-computation.adb
+@@ -3,6 +3,7 @@
+ with MJ.Advanced_Actuators;
+ with MJ.Actuator_Curves;
+ with MJ.Actuator_Geometry;
++with MJ.Site_Kinematics;
+ package body MJ.Data.Advanced_Control.Computation with SPARK_Mode is
+    package AA renames MJ.Advanced_Actuators;
+    package AC renames MJ.Actuator_Curves;
+@@ -27,11 +28,13 @@
+    procedure Transmission (D : Simulation; Rows : in out TX.Result; C : Configuration) is
+       Q : AM.Quaternion := AM.Identity;
+       Nv : constant Natural := D.Nv;
+-      JR, RR, Empty : TX.Jacobian (0 .. 2, 0 .. Nv-1) := [others => [others => 0.0]];
++      JP, JR, RP, RR : TX.Jacobian (0 .. 2, 0 .. Nv-1) := [others => [others => 0.0]];
++      Site_P, Ref_P : AM.Vector := AM.Zero;
++      Site_Offset, Ref_Offset : Vector := Zero;
+       Site_Q, Ref_Q, World_Q, World_Ref : Quaternion;
+       R, Ref_R : Matrix;
+    begin
+-      if C.Site_SO3 then
++      if C.Site_SO3 or else C.Trn = 4 then
+          World_Q := D.Kinematic.Bodies (C.Site_Body).Orientation;
+          World_Ref := D.Kinematic.Bodies (C.Reference_Body).Orientation;
+          --  C 3.15 composes each world site orientation as body*local,
+@@ -40,11 +43,52 @@
+          Ref_Q := Multiply (World_Ref, Quaternion (C.Reference_Quat));
+          R := Rotation (Multiply (World_Q, Quaternion (C.Site_Quat)));
+          Ref_R := Rotation (Multiply (World_Ref, Quaternion (C.Reference_Quat)));
++         if not C.Site_SO3 then
++            for K in Axis loop
++               Site_P (K) := MJ.Site_Kinematics.World_Coordinate
++                 (D.Kinematic.Bodies (C.Site_Body).Position (K),
++                  D.Kinematic.Bodies (C.Site_Body).Rotation (K,0),
++                  D.Kinematic.Bodies (C.Site_Body).Rotation (K,1),
++                  D.Kinematic.Bodies (C.Site_Body).Rotation (K,2),
++                  C.Site_Position (0), C.Site_Position (1), C.Site_Position (2));
++               if C.Has_Reference then
++                  Ref_P (K) := MJ.Site_Kinematics.World_Coordinate
++                    (D.Kinematic.Bodies (C.Reference_Body).Position (K),
++                     D.Kinematic.Bodies (C.Reference_Body).Rotation (K,0),
++                     D.Kinematic.Bodies (C.Reference_Body).Rotation (K,1),
++                     D.Kinematic.Bodies (C.Reference_Body).Rotation (K,2),
++                     C.Reference_Position (0), C.Reference_Position (1), C.Reference_Position (2));
++               end if;
++            end loop;
++            if not AM.Bounded (Site_P, 1.0e10) or else not AM.Bounded (Ref_P, 1.0e10) then
++               TX.Reset (Rows); return;
++            end if;
++            Site_Offset := Vector (Site_P) - D.Kinematic.Bodies (C.Site_Body).Center;
++            if C.Has_Reference then
++               Ref_Offset := Vector (Ref_P) - D.Kinematic.Bodies (C.Reference_Body).Center;
++            end if;
++         end if;
+          for V in 0 .. D.Nv-1 loop
+             for K in Axis loop
+                JR (K,V) := D.Kinematic.Angular_Jacobian (3*(C.Site_Body*D.Nv+V)+K);
+-               RR (K,V) := D.Kinematic.Angular_Jacobian (3*(C.Reference_Body*D.Nv+V)+K);
+-            end loop;
++               if C.Has_Reference then
++                  RR (K,V) := D.Kinematic.Angular_Jacobian (3*(C.Reference_Body*D.Nv+V)+K);
++               end if;
++            end loop;
++            if not C.Site_SO3 then
++               for K in Axis loop
++                  JP (K,V) := MJ.Site_Kinematics.Point_Column
++                    (D.Kinematic.Linear_Jacobian (3*(C.Site_Body*D.Nv+V)+K),
++                     JR ((K+1) mod 3,V), JR ((K+2) mod 3,V),
++                     Site_Offset ((K+1) mod 3), Site_Offset ((K+2) mod 3));
++                  if C.Has_Reference then
++                     RP (K,V) := MJ.Site_Kinematics.Point_Column
++                       (D.Kinematic.Linear_Jacobian (3*(C.Reference_Body*D.Nv+V)+K),
++                        RR ((K+1) mod 3,V), RR ((K+2) mod 3,V),
++                        Ref_Offset ((K+1) mod 3), Ref_Offset ((K+2) mod 3));
++                  end if;
++               end loop;
++            end if;
+          end loop;
+          declare
+             RM, RRM : AM.Matrix;
+@@ -52,9 +96,9 @@
+          for I in Axis loop
+             for J in Axis loop RM (I,J) := R (I,J); RRM (I,J) := Ref_R (I,J); end loop;
+          end loop;
+-         TX.Site (Rows, AM.Zero, AM.Zero, RM, RRM,
+-           AM.Quaternion (Site_Q), AM.Quaternion (Ref_Q), Empty, JR, Empty, RR,
+-           C.Common (0 .. D.Nv-1), C.Gear, Has_Reference => True, SO3 => True);
++         TX.Site (Rows, Site_P, Ref_P, RM, RRM,
++           AM.Quaternion (Site_Q), AM.Quaternion (Ref_Q), JP, JR, RP, RR,
++           C.Common (0 .. D.Nv-1), C.Gear, Has_Reference => C.Has_Reference, SO3 => C.Site_SO3);
+          end;
+       else
+          if C.Joint_Kind in 0 .. 1 then
+@@ -183,6 +227,9 @@
+                        else MJ.Advanced_State.Next_Value (E.Act (C.Aadr), Raw, D.Timestep));
+                      Stage (Work.Next_Act, Work.Can_Advance, C,0,X);
+                      Drive := (if C.Early then Work.Next_Act (C.Aadr) else E.Act (C.Aadr));
++                     if C.Trn = 4 and then C.Period > 0.0 then
++                        Drive := Drive-C.Period*Real'Rounding ((Drive-Work.L (C.Oadr))/C.Period);
++                     end if;
+                   elsif C.Period > 0.0 then Drive := Drive-C.Period*Real'Rounding ((Drive-Work.L (C.Oadr))/C.Period); end if;
+                   G := (if C.Gain_Kind = 0 then C.Gain (0) elsif C.Gain_Kind = 1 then AC.Affine (C.Gain,Work.L (C.Oadr),Work.V (C.Oadr))
+                     else AC.Muscle_Gain (Work.L (C.Oadr),Work.V (C.Oadr),C.Length_Lo,C.Length_Hi,C.Acc0,C.Gain));

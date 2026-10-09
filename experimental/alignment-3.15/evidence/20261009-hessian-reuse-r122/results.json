@@ -1,0 +1,126 @@
+{
+  "revision": "r122",
+  "date": "2026-10-09",
+  "scope": "Experimental persistent quadratic Hessian, direct packed rank updates, independent C counters; not global Gold, performance acceptance, or production 3.15 migration.",
+  "integrated": {
+    "3.15.0": {
+      "manifest_sha256": "cdc29de6b5b5076568a99f5e196c8861d6d162dab687f7f9d0e605cae2b4cdc4",
+      "state": {
+        "cases": 78,
+        "passed": 78
+      },
+      "forces": {
+        "cases": 66,
+        "passed": 66
+      },
+      "constrained": {
+        "cases": 246,
+        "passed": 246
+      }
+    },
+    "3.14.0": {
+      "manifest_sha256": "3cb0b35bed95a755df285e492f6414a663e1d677c1a35b3228783bc3f0f3d705",
+      "state": {
+        "cases": 78,
+        "passed": 78
+      },
+      "forces": {
+        "cases": 54,
+        "passed": 54
+      },
+      "constrained": {
+        "cases": 234,
+        "passed": 234
+      }
+    }
+  },
+  "assembled": {
+    "3.15.0-dense": {
+      "total": 428,
+      "passed": 428,
+      "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be"
+    },
+    "3.15.0-sparse": {
+      "total": 432,
+      "passed": 432,
+      "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be"
+    },
+    "3.14.0-dense": {
+      "total": 428,
+      "passed": 428,
+      "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be"
+    },
+    "3.14.0-sparse": {
+      "total": 432,
+      "passed": 432,
+      "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be"
+    }
+  },
+  "robustness": {
+    "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be",
+    "stress_cases": 240,
+    "replay_cases": 240,
+    "capacity_cases": 5,
+    "outcomes": {
+      "CONVERGED": 113,
+      "ITERATION_LIMIT": 98,
+      "STALLED": 9,
+      "LINE_SEARCH_LIMIT": 19,
+      "NUMERIC_LIMIT": 1
+    },
+    "failures": [],
+    "passed": true
+  },
+  "independent_cone_oracle": {
+    "cases": 18,
+    "passed": 18,
+    "scope": "Independent convex one-coordinate oracle, not a C simulator output. C3.15 gate structure/formula copied analytically; actual branch execution not instrumented.",
+    "driver_sha256": "f939878e17e545aec4a1a4554c42a21893399fe8c0f077fa2e38184da2ad2a08",
+    "binary_sha256": "a44c717c413ba332302f7614ab28e28140f44b305232a469e9002407d3a063be"
+  },
+  "performance": {
+    "r122_measured": false,
+    "reason": "User requested grouping and publication of existing changes; new profiling/timing was not started."
+  },
+  "pending": [
+    "whole Update_Flat proof",
+    "ordered factor-history model",
+    "global sparse-Newton and cache-caller proofs",
+    "dense mixed/elliptic factor reuse",
+    "r122 integrated timing and C parity"
+  ],
+  "archives": {
+    "runtime.zip": {
+      "sha256": "d9f39a6664c905288d6d1fb306242c2000d33e0fe964c3cc15354564d5761dc7",
+      "bytes": 21415168
+    },
+    "c-counters.zip": {
+      "sha256": "2041a4fb3bedc9a37115a4d30e2746205ea06a63b4d372266462f05e2773e55f",
+      "bytes": 37910150
+    },
+    "packed-updates.zip": {
+      "sha256": "0bfdb1cb644ad3ecfd0ad3d052c8de7dc1159757fa70b8733b67237dca236ee7",
+      "bytes": 20897997
+    }
+  },
+  "native_rank_updates": {
+    "cases": 593,
+    "passed": 593,
+    "bitwise_actual_c_comparisons": 588,
+    "bounded_partial_rejection_checks": 5,
+    "packed_cases": 198,
+    "scope": "Frozen native run before final ghost-only refinement; final r122 independently compiled and passed integrated/assembled suites."
+  },
+  "proof": {
+    "historical_r121": {
+      "flat_row_limits_closed_checks": 24,
+      "flat_selection_frame_closed_checks": 16,
+      "existing_sqrt_warnings_retained": true,
+      "strict_warning_free_pass": false,
+      "flat_row_open_checks": 2,
+      "update_flat": "240-second watchdog; no complete scoped report"
+    },
+    "final_r122": "Ghost refinement and new separation lemma compiled/tested, not reproved; no further proof run started for publication.",
+    "global_gold": false
+  }
+}

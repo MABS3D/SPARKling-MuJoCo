@@ -1,0 +1,10 @@
+Private C3.15 diagnostics; counts per measured step; no timing claim.
+Columns: MakeHessian, FactorizeHessian, FactorizeRecompute, HessianIncremental, HessianConeFolded, HessianConeUpdate, cholUpdateSparse, ConeRankUpdate, QuadraticRankUpdate, QuadraticRankDowndate, GateFold, GateUpdate, NewtonCertificate
+membrane_Newton_3: 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0; state maxabs=0; exact-wheel utility counts match=True
+free: 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0; state maxabs=0; exact-wheel utility counts match=True
+element_2_sphere: 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0; state maxabs=0; exact-wheel utility counts match=True
+element_mixed_pyramidal_3: 1, 1, 0, 3.31, 0, 0, 11.91, 0, 4.27, 7.64, 0, 0, 0; state maxabs=0; exact-wheel utility counts match=True
+element_elastic_cross_elliptic_6: 1, 1, 0, 2.85, 0, 2.53, 37.14, 29.46, 0, 7.68, 0, 0.68, 0; state maxabs=0; exact-wheel utility counts match=True
+element_elastic_self_bvh_pyramidal_3: 1, 1, 0, 1.01, 0, 0, 0.01, 0, 0.01, 0, 0, 0, 0; state maxabs=0; exact-wheel utility counts match=True
+All12 model/endpoint variants are preserved in JSON with per-step histograms and separate preparation counts.
+Hessian helpers count entries; gate counters count decisions, not all uses of cached decision; cholUpdateSparse includes all utility callers; three additional callsite counters separate cone rank updates and quadratic row updates/downdates. Their per-step sum is asserted equal to the utility total on these trajectories. GramSingleRows/GramBatchedRows count rows handled, not Gram calls.

@@ -1,0 +1,2203 @@
+{
+  "complete": true,
+  "source_commit": "9ea3cdfcae93bf2cc4dc0e1a1627c5a39a1e06e5",
+  "scope": "Source-instrumented C3.15 diagnostics, normal AVX; no timings. Compare all per-step states/solver stats with untouched wheel and both exported numeric counts with earlier exact-wheel hook run. Neither implies identical machine code.",
+  "results_sha256": "503711a48de00bba2585dd9f91fcc0d044767b4e5ce5562c6366586abc8a6a0b",
+  "source_manifest_sha256": "1d8ea0b1bf265623dff9859506f4962f729bb27daa0992344df884452e32839b",
+  "summarizer_sha256": "6622f331cd443d8ac65c72018d0b8878a6ac6b3208262c16301f0caffea99d7d",
+  "counter_scope": "Hessian helpers count entries; gate counters count decisions, not all uses of cached decision; cholUpdateSparse includes all utility callers; three additional callsite counters separate cone rank updates and quadratic row updates/downdates. Their per-step sum is asserted equal to the utility total on these trajectories. GramSingleRows/GramBatchedRows count rows handled, not Gram calls.",
+  "rows": [
+    {
+      "model": "membrane_Newton_3",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 19200,
+          "mean_per_step": 12.0,
+          "histogram": {
+            "12": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "membrane_Newton_3",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 19200,
+          "mean_per_step": 12.0,
+          "histogram": {
+            "12": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 32,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 384,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "free",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 38400,
+          "mean_per_step": 24.0,
+          "histogram": {
+            "24": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "free",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 38400,
+          "mean_per_step": 24.0,
+          "histogram": {
+            "24": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 32,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 768,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_2_sphere",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 17600,
+          "mean_per_step": 11.0,
+          "histogram": {
+            "11": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_2_sphere",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 17600,
+          "mean_per_step": 11.0,
+          "histogram": {
+            "11": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 32,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 32,
+        "GramBatchedRows": 352,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_mixed_pyramidal_3",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 5296,
+          "mean_per_step": 3.31,
+          "histogram": {
+            "2": 448,
+            "3": 352,
+            "4": 656,
+            "5": 144
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 28800,
+          "mean_per_step": 18.0,
+          "histogram": {
+            "18": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 19056,
+          "mean_per_step": 11.91,
+          "histogram": {
+            "2": 400,
+            "3": 48,
+            "4": 16,
+            "5": 32,
+            "7": 16,
+            "8": 32,
+            "12": 80,
+            "13": 32,
+            "14": 256,
+            "15": 96,
+            "16": 240,
+            "18": 160,
+            "19": 16,
+            "21": 96,
+            "26": 80
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 6832,
+          "mean_per_step": 4.27,
+          "histogram": {
+            "0": 448,
+            "1": 48,
+            "2": 16,
+            "3": 32,
+            "4": 176,
+            "5": 80,
+            "6": 384,
+            "7": 320,
+            "8": 16,
+            "11": 80
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 12224,
+          "mean_per_step": 7.64,
+          "histogram": {
+            "2": 400,
+            "3": 64,
+            "4": 32,
+            "5": 48,
+            "7": 16,
+            "8": 288,
+            "9": 304,
+            "11": 192,
+            "12": 80,
+            "15": 176
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_mixed_pyramidal_3",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 5296,
+          "mean_per_step": 3.31,
+          "histogram": {
+            "2": 448,
+            "3": 352,
+            "4": 656,
+            "5": 144
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 28800,
+          "mean_per_step": 18.0,
+          "histogram": {
+            "18": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 19056,
+          "mean_per_step": 11.91,
+          "histogram": {
+            "2": 400,
+            "3": 48,
+            "4": 16,
+            "5": 32,
+            "7": 16,
+            "8": 32,
+            "12": 80,
+            "13": 32,
+            "14": 256,
+            "15": 96,
+            "16": 240,
+            "18": 160,
+            "19": 16,
+            "21": 96,
+            "26": 80
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 6832,
+          "mean_per_step": 4.27,
+          "histogram": {
+            "0": 448,
+            "1": 48,
+            "2": 16,
+            "3": 32,
+            "4": 176,
+            "5": 80,
+            "6": 384,
+            "7": 320,
+            "8": 16,
+            "11": 80
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 12224,
+          "mean_per_step": 7.64,
+          "histogram": {
+            "2": 400,
+            "3": 64,
+            "4": 32,
+            "5": 48,
+            "7": 16,
+            "8": 288,
+            "9": 304,
+            "11": 192,
+            "12": 80,
+            "15": 176
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 128,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 576,
+        "cholUpdateSparse": 672,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 192,
+        "QuadraticRankDowndate": 480
+      }
+    },
+    {
+      "model": "element_elastic_cross_elliptic_6",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 4560,
+          "mean_per_step": 2.85,
+          "histogram": {
+            "1": 528,
+            "2": 16,
+            "3": 224,
+            "4": 832
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 4048,
+          "mean_per_step": 2.53,
+          "histogram": {
+            "0": 528,
+            "2": 16,
+            "3": 224,
+            "4": 816,
+            "5": 16
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 1088,
+          "mean_per_step": 0.68,
+          "histogram": {
+            "0": 528,
+            "1": 1056,
+            "2": 16
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 57600,
+          "mean_per_step": 36.0,
+          "histogram": {
+            "36": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 59424,
+          "mean_per_step": 37.14,
+          "histogram": {
+            "0": 528,
+            "18": 16,
+            "24": 64,
+            "48": 160,
+            "60": 832
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 47136,
+          "mean_per_step": 29.46,
+          "histogram": {
+            "0": 528,
+            "12": 16,
+            "18": 64,
+            "36": 160,
+            "48": 816,
+            "54": 16
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 12288,
+          "mean_per_step": 7.68,
+          "histogram": {
+            "0": 528,
+            "6": 96,
+            "12": 976
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_elastic_cross_elliptic_6",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 4560,
+          "mean_per_step": 2.85,
+          "histogram": {
+            "1": 528,
+            "2": 16,
+            "3": 224,
+            "4": 832
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 4048,
+          "mean_per_step": 2.53,
+          "histogram": {
+            "0": 528,
+            "2": 16,
+            "3": 224,
+            "4": 816,
+            "5": 16
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 1088,
+          "mean_per_step": 0.68,
+          "histogram": {
+            "0": 528,
+            "1": 1056,
+            "2": 16
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 57600,
+          "mean_per_step": 36.0,
+          "histogram": {
+            "36": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 59424,
+          "mean_per_step": 37.14,
+          "histogram": {
+            "0": 528,
+            "18": 16,
+            "24": 64,
+            "48": 160,
+            "60": 832
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 47136,
+          "mean_per_step": 29.46,
+          "histogram": {
+            "0": 528,
+            "12": 16,
+            "18": 64,
+            "36": 160,
+            "48": 816,
+            "54": 16
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 12288,
+          "mean_per_step": 7.68,
+          "histogram": {
+            "0": 528,
+            "6": 96,
+            "12": 976
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 32,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 1152,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_elastic_self_bvh_pyramidal_3",
+      "endpoint_forwards": 0,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1616,
+          "mean_per_step": 1.01,
+          "histogram": {
+            "1": 1584,
+            "2": 16
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 57600,
+          "mean_per_step": 36.0,
+          "histogram": {
+            "36": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 16,
+          "mean_per_step": 0.01,
+          "histogram": {
+            "0": 1584,
+            "1": 16
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 16,
+          "mean_per_step": 0.01,
+          "histogram": {
+            "0": 1584,
+            "1": 16
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 0,
+        "HessianIncremental": 0,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 0,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 0,
+        "sqrMatTDSparseNumeric": 0,
+        "NewtonEntry": 0,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 0,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    },
+    {
+      "model": "element_elastic_self_bvh_pyramidal_3",
+      "endpoint_forwards": 2,
+      "state_max_abs": 0.0,
+      "states_and_stats_match": true,
+      "utility_counts_match_unchanged_wheel_every_step_and_endpoint": true,
+      "repeated_counts_identical": true,
+      "steps": 1600,
+      "counts": {
+        "MakeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "HessianIncremental": {
+          "total": 1616,
+          "mean_per_step": 1.01,
+          "histogram": {
+            "1": 1584,
+            "2": 16
+          }
+        },
+        "HessianConeFolded": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "HessianConeUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "FactorizeHessian": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "FactorizeRecompute": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "cholFactorNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "sqrMatTDSparseNumeric": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "NewtonEntry": {
+          "total": 1600,
+          "mean_per_step": 1.0,
+          "histogram": {
+            "1": 1600
+          }
+        },
+        "CGEntry": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "NewtonCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "CGCertificate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateFold": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GateUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramSingleRows": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "GramBatchedRows": {
+          "total": 57600,
+          "mean_per_step": 36.0,
+          "histogram": {
+            "36": 1600
+          }
+        },
+        "cholUpdateSparse": {
+          "total": 16,
+          "mean_per_step": 0.01,
+          "histogram": {
+            "0": 1584,
+            "1": 16
+          }
+        },
+        "ConeRankUpdate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        },
+        "QuadraticRankUpdate": {
+          "total": 16,
+          "mean_per_step": 0.01,
+          "histogram": {
+            "0": 1584,
+            "1": 16
+          }
+        },
+        "QuadraticRankDowndate": {
+          "total": 0,
+          "mean_per_step": 0.0,
+          "histogram": {
+            "0": 1600
+          }
+        }
+      },
+      "preparation_counts": {
+        "MakeHessian": 32,
+        "HessianIncremental": 32,
+        "HessianConeFolded": 0,
+        "HessianConeUpdate": 0,
+        "FactorizeHessian": 32,
+        "FactorizeRecompute": 0,
+        "cholFactorNumeric": 32,
+        "sqrMatTDSparseNumeric": 32,
+        "NewtonEntry": 32,
+        "CGEntry": 0,
+        "NewtonCertificate": 0,
+        "CGCertificate": 0,
+        "GateFold": 0,
+        "GateUpdate": 0,
+        "GramSingleRows": 0,
+        "GramBatchedRows": 1152,
+        "cholUpdateSparse": 0,
+        "ConeRankUpdate": 0,
+        "QuadraticRankUpdate": 0,
+        "QuadraticRankDowndate": 0
+      }
+    }
+  ]
+}

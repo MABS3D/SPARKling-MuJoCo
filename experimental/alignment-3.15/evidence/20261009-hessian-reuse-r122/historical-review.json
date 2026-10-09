@@ -1,0 +1,71 @@
+{
+  "source": "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/experimental/constraint-solvers-candidate/src/mj-constraint_solvers.adb",
+  "source_sha256": "3fbfd1287126af48c6cf4ea912ef2b86a6d8f76d2a05bdc3eadb9aef98a9ae23",
+  "scope": "Independent read-only review of parent cached quadratic base / packed cone implementation against pinned C3.15. No build/proof/solver execution by reviewer.",
+  "reference_commit": "9ea3cdfcae93bf2cc4dc0e1a1627c5a39a1e06e5",
+  "reviewed": [
+    "Initial certificate before numerical Hessian",
+    "Base cache validity and previous curvature",
+    "Quadratic entry/exit and all zone invalidations",
+    "Cone disappearance and re-entry",
+    "Cone curvature refreshed despite unchanged zone",
+    "No stale Gram_Modified values read by base assembly",
+    "Fold gate path cost/operation count mapping",
+    "Failed rank-update fallback overwrites partially mutated factor",
+    "PGS/CG avoid zero-length cone state arrays",
+    "First folded factor initialization contract"
+  ],
+  "findings": [
+    {
+      "issue": "Numeric admission on newly incremental mixed/elliptic path",
+      "detail": "Initial diff raised Constraint_Error for bounded update failure instead of rebuilding; parent fixed this to leave Accepted=False and return. Confirmed in current source.",
+      "status": "fixed"
+    },
+    {
+      "issue": "Initial fold passes uninitialized Packed_Cone to Factor_Values",
+      "detail": "Factor_Values requires Bounded(L); initially Packed_Cone had no initializer and the fold branch preceded copying Packed_HL. Reported to parent for one-time initialization or valid copy.",
+      "status": "fixed by parent; reviewed",
+      "fix": "Packed_Cone initialized to zero once per solve before either fold or update path.",
+      "fixed_line": 499,
+      "fixed_source_sha256": "3fbfd1287126af48c6cf4ea912ef2b86a6d8f76d2a05bdc3eadb9aef98a9ae23",
+      "fixed_source_text": "            Packed_Cone : Vector (1 .. (if Use_Sparse_Hessian and not Scalar_Rows then Stored else 0)) :=\n              (others => 0.0);\n            type Zone_List is array (Positive range <>) of State;"
+    }
+  ],
+  "other_review_result": "No additional cache invalidation or entry/exit defect found by inspection. This is not a global proof or runtime validation.",
+  "gate_integer_bounds": {
+    "N_max": 128,
+    "K_max": 256,
+    "max_path_cost": 8256,
+    "max_factor_flops": 707264,
+    "max_U": 2113536,
+    "max_S": 4194304,
+    "max_10U": 21135360,
+    "max_3Lplus2S": 27287616
+  },
+  "prepared_test": {
+    "path": "/var/tmp/sparkling-fold-oracle-r121-20261009/synthetic_fold_oracle.py",
+    "cases": 18,
+    "executed": false,
+    "oracle": "Independent one-coordinate convex reduction, not measured C solver output",
+    "fold_gate_last_dof": [
+      930,
+      201
+    ],
+    "update_gate_first_dof": [
+      30,
+      201
+    ],
+    "initial_states": [
+      "satisfied",
+      "cone",
+      "quadratic"
+    ],
+    "final_states": [
+      "satisfied",
+      "cone",
+      "quadratic"
+    ],
+    "parent_runner_status": "Parent will run the18-case oracle after assembled differential tests; reviewer has not executed it."
+  },
+  "previous_review_source_sha256": "3fbfd1287126af48c6cf4ea912ef2b86a6d8f76d2a05bdc3eadb9aef98a9ae23"
+}

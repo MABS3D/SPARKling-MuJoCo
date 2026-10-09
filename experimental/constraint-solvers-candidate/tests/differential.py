@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare assembled candidate solves with the official native MuJoCo solver.
 
-Run with the MuJoCo 3.14.0 Python environment. Cold-start, dense Jacobians,
+Run with the selected MuJoCo 3.14.0 or 3.15.0 Python environment. Cold-start,
 Euler damping disabled, no islands/IPC/noslip: M is exactly the effective metric.
 This is a correctness test, not a performance comparison of whole pipelines.
 """
@@ -235,8 +235,9 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--binary', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--jacobian', choices=['dense', 'sparse'], default='dense')
+    ap.add_argument('--reference-version', choices=['3.14.0', '3.15.0'], default='3.14.0')
     ap.add_argument('--native-jacobian', action='store_true'); args = ap.parse_args()
-    assert mujoco.__version__ == '3.14.0', mujoco.__version__
+    assert mujoco.__version__ == args.reference_version, mujoco.__version__
     refs = [native_problem(name, xml, method, jacobian=args.jacobian) for name, xml in fixtures() for method in range(3)]
     # Fixed-work PGS exercises shuffle and momentum, independent of stopping.
     refs += [native_problem(name, xml, 0, iterations=7, tolerance=0, jacobian=args.jacobian)
