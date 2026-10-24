@@ -10,7 +10,7 @@ package MJ.Model_Structures with SPARK_Mode is
    end record;
 
    function Shape (Values : Int_Array) return Boolean is
-     (Values'First = 0 and then Values'Length <= Integer'Last);
+     (Values'First = 0 and then Int64 (Values'Length) <= Int64 (Integer'Last));
    function Span (Values : Int_Array; Address, Width : Integer) return Boolean is
      (Width >= 0 and then Width <= Values'Length and then Address >= 0
       and then Int64 (Address) <= Int64 (Values'Length)-Int64 (Width))

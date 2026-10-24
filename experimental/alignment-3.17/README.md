@@ -144,3 +144,20 @@ The [foundation r5 public evidence](evidence/20261024-foundation-r5/README.md)
 retains deduplicated source snapshots, commands, logs, reports, XML and small MJBs,
 with verified hashes. Its manifest explicitly lists omitted large generated MJBs
 and executable payloads; the complete original archive is preserved locally.
+
+## Structural kernel checkpoint, 24 October 2026
+
+The isolated `MJ.Model_Structures` unit closes 315 complete-unit checks after
+29 minimal scopes; four recursive-model warnings remain explicit. Functional
+contracts cover CSR rejection/first bad row, ordered subsets, row equality and
+ancestor/mass-row relations. Validation and release each pass 1230 cases: 1222
+against the exact C3.17 sparse-validation helper, seven owned-shape cases and
+one documented duplicate-tendon correction.
+
+Proof diagnosis corrected a wide-length comparison in Shape without narrowing
+its public domain. All final proof and runtime kernel sources are identical.
+[Evidence and retained negative attempts](evidence/20261024-structural-kernels-r150/README.md)
+identify the scope precisely. The complete Model_Admission/validator overlay,
+malformed-model mutations and FLEX/engine migration remain open; this kernel
+closure does not promote the production pin. See
+[the remaining composition work](VALIDATION-STRUCTURES.md).

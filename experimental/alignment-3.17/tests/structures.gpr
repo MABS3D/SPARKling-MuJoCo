@@ -1,0 +1,12 @@
+--  Isolated integer admission kernels; check_structures.py supplies frozen types.
+project Structures is
+   Build_Root := external ("STRUCTURES_BUILD_ROOT", "/var/tmp/sparkling-structures");
+   for Source_Dirs use ("../src", "../../../src");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-model_structures.ads", "mj-model_structures.adb");
+   for Object_Dir use Build_Root & "/obj";
+   for Create_Missing_Dirs use "True";
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-O2", "-gnata", "-gnato", "-gnatVa", "-ffp-contract=off");
+   end Compiler;
+end Structures;

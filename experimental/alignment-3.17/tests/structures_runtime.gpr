@@ -1,0 +1,18 @@
+project Structures_Runtime extends "structures.gpr" is
+   Mode := external ("STRUCTURES_MODE", "validation");
+   for Source_Dirs use (".", "../src", "../../../src");
+   for Source_Files use ("mj.ads", "mj-types.ads", "mj-model_structures.ads",
+                         "mj-model_structures.adb", "structures_probe.adb");
+   for Object_Dir use Build_Root & "/runtime/" & Mode & "/obj";
+   for Exec_Dir use Build_Root & "/runtime/" & Mode & "/bin";
+   for Main use ("structures_probe.adb");
+   for Create_Missing_Dirs use "True";
+   Flags := ("-gnat2022", "-ffp-contract=off");
+   case Mode is
+      when "release" => Flags := Flags & ("-O3", "-gnatn");
+      when others => Flags := Flags & ("-O2", "-gnata", "-gnato", "-gnatVa");
+   end case;
+   package Compiler is
+      for Default_Switches ("Ada") use Flags;
+   end Compiler;
+end Structures_Runtime;
