@@ -6,6 +6,16 @@ The production pin is still 3.14.0 until all engine consumers migrate together.
 The generator recognizes exact 3.14 and 3.15 schemas; each generated reader
 accepts only its own dumped ABI. Old MJB images are not relabelled.
 
+## Support fusion integrated checkpoint, 24 October 2026
+
+The published solver fusion passes the complete FLEX gates: 456 cases in both
+3.15 profiles and 420 in production 3.14 validation. A quiet, paired six-model
+comparison with r140 gives mean duration changes from −0.37% to −2.89%; every
+95% interval includes zero. No speedup or equivalence is established. Ada still
+takes about 2.38–3.12 times historical C3.15 on these workloads. The current
+C3.17 migration and global solver Gold remain separate, unfinished work.
+[Raw timing, uncertainty, runtime receipts and frozen inputs](evidence/20261024-support-fusion-timing-r145/README.md).
+
 ## Verified foundation, frozen r3
 
 The real 3.15 headers have 97 size entries and 483 pointer fields. Regeneration

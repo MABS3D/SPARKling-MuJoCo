@@ -12,8 +12,11 @@ transpose sizing reuses row widths. The integer counter has 36 closed scoped
 checks, with recursive-model warnings retained. Validation passes 428 dense,
 428 sparse fallback and 432 native CSR comparisons against C 3.15.0, plus
 240 stress cases, 240 replays, five capacity boundaries and Cholesky edges.
-Global solver proofs, integrated renewal and performance measurement remain
-pending. See [receipts and frozen sources](evidence/20261024-support-fusion-r143/README.md).
+Global solver proofs remain open. Integrated renewal passes 456 cases in both
+3.15 profiles and 420 in production 3.14 validation. A quiet comparison with
+r140 does not resolve the small apparent gain: all six confidence intervals
+include zero. See [counter proofs and frozen sources](evidence/20261024-support-fusion-r143/README.md)
+and [integrated timing and uncertainty](../alignment-3.15/evidence/20261024-support-fusion-timing-r145/README.md).
 
 ## Recovery status (2026-10-03)
 
