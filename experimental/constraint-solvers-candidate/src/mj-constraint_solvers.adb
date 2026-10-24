@@ -14,6 +14,7 @@ with MJ.Constraint_Solvers.Jacobians;
 with MJ.Constraint_Solvers.Jacobian_Transpose;
 with MJ.Constraint_Solvers.Cone_Kernels;
 with MJ.Constraint_Solvers.Hessian_Assembly;
+with MJ.Constraint_Solvers.Support_Counts;
 package body MJ.Constraint_Solvers with SPARK_Mode is
    package Math renames Ada.Numerics.Long_Elementary_Functions;
    package Scalar renames MJ.Constraint_Scalar;
@@ -26,6 +27,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
    package Sparse_Arithmetic renames MJ.Constraint_Solvers.Sparse_Kernels;
    package Cone_Arithmetic renames MJ.Constraint_Solvers.Cone_Kernels;
    package Assembly renames MJ.Constraint_Solvers.Hessian_Assembly;
+   package Supports renames MJ.Constraint_Solvers.Support_Counts;
    use type Linear.Status;
    use type Dense.Status;
    use type Updates.Status;
@@ -276,13 +278,44 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          end loop;
       elsif Ordered_Jacobian.Stored /= 0 then return;
       end if;
+      --  Gather numerical support while validating the same values. This
+      --  retains all public input checks and the ascending column order.
+      declare
+         type Block_List is array (Positive range <>) of Positive;
+         subtype Column_Lists is Cone_Arithmetic.Column_Matrix;
+         subtype Lengths is Supports.Lengths;
+         Columns : Column_Lists (1 .. K, 1 .. N);
+         Nonzeros : Lengths (1 .. K) := (others => 0);
+         Mass_Columns : Column_Lists (1 .. N, 1 .. N);
+         Mass_Nonzeros : Lengths (1 .. N) := (others => 0);
+         Mass_Is_Diagonal : Boolean := True;
+         Factor_End : Block_List (1 .. N);
+         Scalar_Rows : Boolean := True;
+         function Slot_Count return Natural is
+         begin
+            if not Settings.Sparse then return 0;
+            elsif Ordered_Jacobian.Row_Count /= 0 then
+               return Jacobian_Transpose.Total_Width (Ordered_Jacobian);
+            end if;
+            return Supports.Support_Total (Nonzeros, N);
+         end Slot_Count;
+      begin
       for P in 1 .. N loop
          --  Published iterates use Work; admit that same domain when the
          --  caller supplies a previously solved warm start.
          if not Finite (A_Free (P)) or A (P) not in Work then return; end if;
+         Factor_End (P) := P;
          for Q in 1 .. N loop
             if not Finite (M (P, Q)) or M (P, Q) /= M (Q, P) then return; end if;
+            if M (P, Q) /= 0.0 then
+               if P /= Q then Mass_Is_Diagonal := False; end if;
+               Mass_Nonzeros (P) := Mass_Nonzeros (P)+1;
+               Mass_Columns (P, Mass_Nonzeros (P)) := Q;
+               if Q > P then Factor_End (P) := Q; end if;
+            end if;
+            pragma Loop_Invariant (Static => Mass_Nonzeros (P) <= Q);
          end loop;
+         pragma Loop_Invariant (Static => (for all R in 1 .. P => Mass_Nonzeros (R) <= N));
       end loop;
       for P in 1 .. K loop
          --  Constraint references can exceed the state admission range for
@@ -294,7 +327,16 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
            or Constraints (P).D not in 1.0e-15 .. 1.0e15
            or abs (Constraints (P).R * Constraints (P).D - 1.0) > 1.0e-12
            or Constraints (P).Bound not in 0.0 .. 1.0e10 then return; end if;
-         for Q in 1 .. N loop if not Finite (J (P, Q)) then return; end if; end loop;
+         Scalar_Rows := Scalar_Rows and Constraints (P).Form /= Elliptic;
+         for Q in 1 .. N loop
+            if not Finite (J (P, Q)) then return; end if;
+            if J (P, Q) /= 0.0 then
+               Nonzeros (P) := Nonzeros (P)+1;
+               Columns (P, Nonzeros (P)) := Q;
+            end if;
+            pragma Loop_Invariant (Static => Nonzeros (P) <= Q);
+         end loop;
+         pragma Loop_Invariant (Static => (for all R in 1 .. P => Nonzeros (R) <= N));
       end loop;
       while I <= K loop
          if Constraints (I).Form = Elliptic then
@@ -314,18 +356,6 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          I := I + Constraints (I).Dimension;
       end loop;
       declare
-         function Slot_Count return Natural is
-            Sum : Natural := 0;
-         begin
-            if not Settings.Sparse then return 0;
-            elsif Ordered_Jacobian.Row_Count /= 0 then
-               return Jacobian_Transpose.Total_Width (Ordered_Jacobian);
-            end if;
-            for R in 1 .. K loop
-               for P in 1 .. N loop if J (R, P) /= 0.0 then Sum := Sum+1; end if; end loop;
-            end loop;
-            return Sum;
-         end Slot_Count;
          L : Matrix (1 .. N, 1 .. N);
          HL : Matrix (1 .. (if Settings.Sparse then 0 else N),
                       1 .. (if Settings.Sparse then 0 else N));
@@ -337,13 +367,8 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          Grad, Mgrad, Oldgrad, Oldmg, Search, Ma, Smooth, Mv : Vector (1 .. N);
          Cost : Work := 0.0;
          OK : Boolean;
-         type Block_List is array (Positive range <>) of Positive;
          Blocks : Block_List (1 .. K);
          Count : Natural := 0;
-         subtype Column_Lists is Cone_Arithmetic.Column_Matrix;
-         type Lengths is array (Positive range <>) of Natural;
-         Columns : Column_Lists (1 .. K, 1 .. N);
-         Nonzeros : Lengths (1 .. K) := (others => 0);
          Cone_Columns : Column_Lists (1 .. K, 1 .. N);
          Cone_Widths : Lengths (1 .. K) := (others => 0);
          --  Keep native slots separate from the coalesced support used by
@@ -353,17 +378,12 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
             elsif Ordered_Jacobian.Row_Count /= 0 then Ordered_Jacobian.Stored else K*N));
          Native_T : Sparse_Jacobian ((if Settings.Sparse then N else 0), Slot_Count);
          Qfrc : Vector (1 .. N) := (others => 0.0);
-         Mass_Columns : Column_Lists (1 .. N, 1 .. N);
-         Mass_Nonzeros : Lengths (1 .. N) := (others => 0);
-         Mass_Is_Diagonal : Boolean := True;
          Inverse_Mass_Diagonal : Vector (1 .. N) := (others => 0.0);
          Curvature, Previous_Curvature : Vector (1 .. K) := (others => 0.0);
-         Scalar_Rows : Boolean := True;
          Hessian_Valid : Boolean := False;
          --  Contiguous structural blocks of M and every constraint block.
          --  This only bounds linear algebra: stopping tests and line searches
          --  remain global, including when independent bodies are present.
-         Factor_End : Block_List (1 .. N);
          Use_Sparse_Hessian : constant Boolean :=
            Settings.Sparse and then Settings.Algorithm = Newton and then K > 0;
          Hessian_Mask : Structural_Matrix
@@ -374,26 +394,6 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
       begin
          I := 1;
          while I <= K loop Count := Count + 1; Blocks (Count) := I; I := I + Constraints (I).Dimension; end loop;
-         for P in 1 .. N loop
-            Factor_End (P) := P;
-            for Q in 1 .. N loop
-               if M (P, Q) /= 0.0 then
-                  if P /= Q then Mass_Is_Diagonal := False; end if;
-                  Mass_Nonzeros (P) := Mass_Nonzeros (P) + 1;
-                  Mass_Columns (P, Mass_Nonzeros (P)) := Q;
-                  if Q > P then Factor_End (P) := Q; end if;
-               end if;
-            end loop;
-         end loop;
-         for R in 1 .. K loop
-            Scalar_Rows := Scalar_Rows and Constraints (R).Form /= Elliptic;
-            for P in 1 .. N loop
-               if J (R, P) /= 0.0 then
-                  Nonzeros (R) := Nonzeros (R) + 1;
-                  Columns (R, Nonzeros (R)) := P;
-               end if;
-            end loop;
-         end loop;
          if not Settings.Sparse then
             null;
          elsif Ordered_Jacobian.Row_Count /= 0 then
@@ -1496,6 +1496,7 @@ package body MJ.Constraint_Solvers with SPARK_Mode is
          end;
       exception
          when Constraint_Error => Result.Outcome := Numeric_Limit;
+      end;
       end;
    end Solve_With_Force;
 

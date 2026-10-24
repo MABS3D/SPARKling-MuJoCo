@@ -11,6 +11,10 @@ import time
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOPES = {
+    'Support_Prefix': ("mj-constraint_solvers-support_counts", '.ads', "flex-elasticity-integration", "flex_constrained.gpr"),
+    'Support_Unfold': ("mj-constraint_solvers-support_counts", '.adb', "flex-elasticity-integration", "flex_constrained.gpr"),
+    'Support_Total': ("mj-constraint_solvers-support_counts", '.adb', "flex-elasticity-integration", "flex_constrained.gpr"),
+
     "Flat_Prefix_Store": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Flat_Column_Limit": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Flat_Lower_Separate": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
