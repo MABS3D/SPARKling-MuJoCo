@@ -10,6 +10,7 @@ with MJ.MJB;
 with MJ.File_IO;
 with MJ.Data; use MJ.Data;
 with MJ.Data.Flex_Elasticity;
+with MJ.External_Forces;
 procedure Flex_Probe is
    package F renames MJ.Data.Flex_Elasticity;
    package IO is new Ada.Text_IO.Float_IO (Real);
@@ -22,6 +23,8 @@ procedure Flex_Probe is
    Cases, Steps : Integer;
    X, T : Real;
    Benchmark : constant Boolean := Ada.Command_Line.Argument_Count > 1 and then Ada.Command_Line.Argument (2) = "benchmark";
+   With_Loads : constant Boolean := Ada.Command_Line.Argument_Count > 1
+     and then Ada.Command_Line.Argument (2) = "world-wrench";
    Bytes : Byte_Array_Access;
    Read_OK : Boolean;
    procedure Check is
@@ -47,6 +50,8 @@ begin
       V : State_Vector (0 .. M.S.Nv - 1);
       A : State_Vector (0 .. M.S.Na - 1);
       Nu : constant Natural := M.S.Nu;
+      Loads : MJ.External_Forces.Wrench_Array
+        (0 .. (if With_Loads then Integer (M.S.Nbody)-1 else -1));
       Begin_Time, End_Time : Ada.Real_Time.Time;
    begin
       F.Create (M, E, Result);
@@ -69,13 +74,40 @@ begin
          for I in 0 .. Nu - 1 loop IO.Get (X); F.Set_Control (E, I, X, Result); Check; end loop;
          for I in A'Range loop IO.Get (X); A (I) := X; end loop;
          if A'Length > 0 then F.Set_Activation (E, A, Result); Check; end if;
-         F.Evaluate (E, Result); Check;
+         for L of Loads loop
+            for I in 0 .. 2 loop IO.Get (X); L.Force (I) := X; end loop;
+            for I in 0 .. 2 loop IO.Get (X); L.Torque (I) := X; end loop;
+         end loop;
+         F.Evaluate (E, Result, Loads); Check;
+         if With_Loads then
+            declare
+               Before : constant Real_Array := F.Complete_State (E);
+               Expected : constant Real_Array := F.Acceleration (E);
+               Bad_Loads : MJ.External_Forces.Wrench_Array (1 .. 1);
+            begin
+               --  Populate qacc with another RHS at the same pose. The next
+               --  loaded evaluation must replace it rather than reuse it.
+               F.Evaluate (E, Result); Check;
+               F.Evaluate (E, Result, Loads); Check;
+               if F.Acceleration (E) /= Expected or else F.Complete_State (E) /= Before then
+                  raise Program_Error with "stale acceleration or retained world loads";
+               end if;
+               F.Evaluate (E, Result, Bad_Loads);
+               if Result /= Invalid_Size or else F.Complete_State (E) /= Before then
+                  raise Program_Error with "invalid external load state frame";
+               end if;
+               F.Evaluate (E, Result, Loads); Check;
+               if F.Acceleration (E) /= Expected then
+                  raise Program_Error with "external load recovery";
+               end if;
+            end;
+         end if;
          declare
             Before : constant Real_Array := F.Passive (E);
             D : constant F.Trace := F.Diagnostics (E);
             J : constant F.Edge_Jacobian_Trace := F.Edge_Jacobians (E);
          begin
-            F.Evaluate (E, Result); Check;
+            F.Evaluate (E, Result, Loads); Check;
             if F.Passive (E) /= Before then raise Program_Error with "duplicate elastic forces"; end if;
             if not Benchmark then
                Put_Line ("case" & Sample'Image);
@@ -89,7 +121,7 @@ begin
             end if;
          end;
          Begin_Time := Clock;
-         for I in 1 .. Steps loop F.Step (E, Result); Check; end loop;
+         for I in 1 .. Steps loop F.Step (E, Result, Loads); Check; end loop;
          End_Time := Clock;
          if Benchmark then Emit ("seconds", [Real (To_Duration (End_Time - Begin_Time))]); end if;
          Emit ("state", F.Complete_State (E));

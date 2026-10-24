@@ -437,6 +437,9 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Bounded);
       S : Body_State;
+      --  Keep the work record outside the loop so GNATprove can translate
+      --  the invariants; assign the same body configuration each iteration.
+      C : Body_Parameters;
    begin
       Initialize_World (Bodies (0));
       --  This builder leaves Jacobians untouched. Its caller controls cache
@@ -451,15 +454,12 @@ package body MJ.Data.Pipeline with SPARK_Mode is
             pragma Assert (Static => (for all J in Joint_Config'Range =>
               (if Joint_Config (J).Body_Id = B then Body_Config (B).Joint_Count > 0
                 and then J in Body_Config (B).First_Joint .. Body_Config (B).First_Joint + Body_Config (B).Joint_Count - 1)));
-            declare
-               C : Body_Parameters := Body_Config (B);
-            begin
-               if C.Mocap_Id >= 0 then
-                  C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
-                  C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
-               end if;
-               Build_One_Body (Bodies (C.Parent), C, Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
-            end;
+            C := Body_Config (B);
+            if C.Mocap_Id >= 0 then
+               C.Position := Read_Vector (Mocap_Pos, 3 * C.Mocap_Id);
+               C.Orientation := MJ.Manifold_Math.Normalized (Read_Quaternion (Mocap_Quat, 4 * C.Mocap_Id));
+            end if;
+            Build_One_Body (Bodies (C.Parent), C, Joint_Config, Qpos, Qvel, With_Motion, S, Joints, Result);
             if Result /= Success then return; end if;
             pragma Assert (Static => (for all J in Joints'Range =>
               (if Joint_Config (J).Body_Id = B then Joint_Bounded (Joints (J)))));
@@ -1017,6 +1017,25 @@ package body MJ.Data.Pipeline with SPARK_Mode is
    end Evaluate_Actuation_Acceleration;
    pragma Inline_Always (Evaluate_Actuation_Acceleration);
 
+   --  Unfold readiness only in this proof minimum. Callers can keep the
+   --  expensive readiness predicate abstract and still use its allocation fact.
+   procedure Ready_Allocation (D : Simulation) with
+     Ghost => Static, Global => null, Pre => Is_Ready (D), Post => D.Allocated
+   is
+   begin
+      null;
+   end Ready_Allocation;
+
+   --  A false publication flag makes Forces_Current false even when other
+   --  readiness facts stay abstract in the composed force-preparation proof.
+   procedure Unpublished_Forces (D : Simulation) with
+     Ghost => Static, Global => null,
+     Pre => not D.Cache.Force_Valid, Post => not Forces_Current (D)
+   is
+   begin
+      null;
+   end Unpublished_Forces;
+
    procedure Prepare_Forces_Ready
      (D : in out Simulation; Result : out Status) is
       --  Compose phase contracts without expanding their representation.
@@ -1024,6 +1043,8 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stable_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Activation_Values);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
@@ -1040,6 +1061,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
       Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
       Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+      Initial_Activation : constant Real_Array := Activation_Values (D) with Ghost => Static;
    begin
       pragma Assert (Static => State_Values (D) = Initial_State);
       declare
@@ -1047,6 +1069,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Activation : constant Real_Array := Activation_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
          Update_Poses (D, Result);
@@ -1054,10 +1077,12 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         MJ.Smooth_Kernels.Equal_Transitive (Activation_Values (D), Before_Activation, Initial_Activation);
          Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
       end;
       pragma Assert (Static => State_Values (D) = Initial_State);
       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      pragma Assert (Static => Activation_Values (D) = Initial_Activation);
       if Result /= Success then
          return;
       end if;
@@ -1066,6 +1091,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Activation : constant Real_Array := Activation_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
          Evaluate_Inertia_Forces (D, Result);
@@ -1073,10 +1099,12 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         MJ.Smooth_Kernels.Equal_Transitive (Activation_Values (D), Before_Activation, Initial_Activation);
          Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
       end;
       pragma Assert (Static => State_Values (D) = Initial_State);
       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      pragma Assert (Static => Activation_Values (D) = Initial_Activation);
       if Result /= Success then
          return;
       end if;
@@ -1085,6 +1113,7 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
          Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Activation : constant Real_Array := Activation_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
          Actuation_Phase.Compute (D, Result);
@@ -1092,10 +1121,16 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         MJ.Smooth_Kernels.Equal_Transitive (Activation_Values (D), Before_Activation, Initial_Activation);
          Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
       end;
       pragma Assert (Static => State_Values (D) = Initial_State);
       pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      pragma Assert (Static => Activation_Values (D) = Initial_Activation);
+      if Result /= Success then
+         return;
+      end if;
+      Ready_Allocation (D);
       --  This is the same stage-readiness gate Solve_Acceleration applies
       --  before using the smooth RHS. It does not scan numerical buffers.
       --  No stage in this path may publish qacc before FLEX adds its forces.
@@ -1105,6 +1140,9 @@ package body MJ.Data.Pipeline with SPARK_Mode is
          and then not D.Cache.Force_Valid)
       then
          Result := Stale_Results;
+      end if;
+      if Result = Success then
+         Unpublished_Forces (D);
       end if;
    end Prepare_Forces_Ready;
 

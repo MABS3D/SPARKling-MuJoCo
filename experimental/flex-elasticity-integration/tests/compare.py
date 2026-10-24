@@ -64,8 +64,9 @@ def fixtures():
     yield 'muscle',fixture(mode='both',muscle=True)
 
 def full_state(m,d): return np.r_[d.qpos,d.qvel,d.time,d.act]
-def oracle(m,q,v,applied,ctrl,act,steps):
+def oracle(m,q,v,applied,ctrl,act,steps,loads=None):
     d=mujoco.MjData(m); d.qpos[:]=q; d.qvel[:]=v; d.qfrc_applied[:]=applied; d.ctrl[:]=ctrl; d.act[:]=act
+    if loads is not None: d.xfrc_applied[:]=loads
     mujoco.mj_forward(m,d)
     answer=dict(pos=d.flexvert_xpos.ravel().copy(),length=d.flexedge_length.copy(),velocity=d.flexedge_velocity.copy(),
                 edge_rowadr=m.flexedge_J_rowadr.copy(),edge_rownnz=m.flexedge_J_rownnz.copy(),
@@ -93,6 +94,7 @@ def parse(text):
 def main():
     p=argparse.ArgumentParser();p.add_argument('--binary',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--samples',type=int,default=8);p.add_argument('--steps',type=int,default=100);p.add_argument('--only')
+    p.add_argument('--world-wrench',action='store_true',help='Exercise world-space body forces, cache replacement and invalid-load recovery')
     a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
     assert mujoco.__version__=='3.14.0'
     rng=np.random.default_rng(2026100215);records=[];failures=[]
@@ -104,10 +106,13 @@ def main():
             q=m.qpos0.copy();mujoco.mj_integratePos(m,q,rng.uniform(-.07,.07,m.nv),.4 if i else 0.)
             v=rng.uniform(-.04,.04,m.nv) if i else np.zeros(m.nv)
             applied=rng.uniform(-.02,.02,m.nv);ctrl=rng.uniform(.05,.15,m.nu);act=rng.uniform(.05,.15,m.na)
-            inputs.extend([0.,*q,*v,*applied,*ctrl,*act]);expected.append(oracle(m,q,v,applied,ctrl,act,a.steps))
+            loads=rng.uniform(-.02,.02,(m.nbody,6)) if a.world_wrench else None
+            inputs.extend([0.,*q,*v,*applied,*ctrl,*act])
+            if loads is not None: inputs.extend(loads.ravel())
+            expected.append(oracle(m,q,v,applied,ctrl,act,a.steps,loads))
         data=f'{a.samples} {a.steps}\n'+numbers(inputs)+'\n'
         (a.out/(name+'.input')).write_text(data)
-        run=subprocess.run([str(a.binary),str(file)],input=data,text=True,capture_output=True,timeout=180)
+        run=subprocess.run([str(a.binary),str(file)]+(['world-wrench'] if a.world_wrench else []),input=data,text=True,capture_output=True,timeout=180)
         (a.out/(name+'.output')).write_text(run.stdout+run.stderr)
         actual=parse(run.stdout)
         if run.returncode or len(actual)!=len(expected):
@@ -122,7 +127,7 @@ def main():
             row=dict(model=name,sample=i,errors=errors,passed=all(e['passed'] for e in errors.values()));records.append(row)
             if not row['passed']:failures.append(row);print('FAIL',name,i,{k:v for k,v in errors.items() if not v['passed']},flush=True)
         print(name,'checked',flush=True)
-    result=dict(reference=mujoco.__version__,steps=a.steps,cases=len(records),passed=sum(r['passed'] for r in records),failures=failures,
+    result=dict(reference=mujoco.__version__,world_wrench=a.world_wrench,steps=a.steps,cases=len(records),passed=sum(r['passed'] for r in records),failures=failures,
                 binary_sha256=hashlib.sha256(a.binary.read_bytes()).hexdigest(),records=records)
     (a.out/'results.json').write_text(json.dumps(result,indent=2)+'\n')
     print('RESULT',result['passed'],result['cases'],'failures',len(failures));raise SystemExit(bool(failures))

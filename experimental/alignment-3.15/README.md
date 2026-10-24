@@ -1374,6 +1374,76 @@ and [sources, counters and profiles](evidence/20261024-r122-profiles/profiles.zi
 preserve both attempts. This diagnosis identifies a separate duplicate FLEX
 acceleration solve; its removal requires fresh numerical and timing acceptance.
 
+## Measured single-solve follow-up, 2026-10-24
+
+The r140 candidate accumulates all FLEX passives before one acceleration solve,
+while retaining the separate damped Euler solve. It passes all renewed C 3.15
+runtime gates in validation and release (78 state, 66 ordinary-force, 66 new
+world-wrench and 246 constrained cases). The complete C 3.14 regression also
+passes 78/54/54/234. World-wrench cases include changed loads at fixed pose,
+repeated evaluation and invalid-shape recovery, with existing tolerances.
+The final proof-only r142 refinement closes the private preparation contract
+with its two minima; the [FLEX checkpoint](../flex-elasticity-integration/README.md#renewed-force-preparation-acceptance-2026-10-24)
+states the exact scope, retained warnings and remaining dynamics obligations.
+
+Fresh timing uses the same verified protocol and byte-identical MJB/input files:
+24 alternating blocks, 16 trajectories of 100 full steps, CPU0, normal C SIMD,
+excluded warm-up and paired 20,000-draw complete-block bootstrap. Both binaries
+retain language runtime checks. The watch, integrity checks and final-state
+comparisons all pass. No other own build/proof/profile/compression was active.
+Native Windows activity is not fully observable, as in the earlier measurement.
+
+| Workload | r140 mean us/step | Duration change vs r122 [95%] | Mean r140/C 3.15 |
+| --- | ---: | ---: | ---: |
+| membrane_Newton_3 | 11.326 | -4.33% [-7.47%, -0.96%] | 2.429 |
+| free | 19.403 | -5.18% [-7.78%, -2.39%] | 3.094 |
+| element_2_sphere | 12.849 | -0.81% [-4.33%, +3.15%] | 2.471 |
+| element_mixed_pyramidal_3 | 31.206 | -3.44% [-6.66%, -0.13%] | 2.584 |
+| element_elastic_cross_elliptic_6 | 79.737 | +0.23% [-3.08%, +4.49%] | 2.519 |
+| element_elastic_self_bvh_pyramidal_3 | 53.007 | +0.37% [-3.00%, +4.63%] | 2.661 |
+
+`free` improves in both mean and paired-median estimators and the Bonferroni
+six-model mean interval. Membrane has pointwise favorable evidence, but its
+corrected interval includes parity. Mixed's median and corrected interval also
+include parity. Sphere's mean interval is unresolved despite its favorable
+paired-median estimate. Elliptic and self-BVH remain unresolved: their small
+positive point estimates do not establish regressions. No mean percentage is
+combined across different models. Complete dispersion, trajectory-tail estimates
+and intervals are in the [summary](evidence/20261024-single-solve-timing-r140/summary.json).
+[Watch receipt](evidence/20261024-single-solve-timing-r140/watch.json) and the
+[self-contained archive](evidence/20261024-single-solve-timing-r140/timing.zip)
+retain source closures, binaries, C library, inputs/outputs, wrapper and analysis.
+This isolates a historical C 3.15 control; it does not establish latest C 3.17
+or full-port parity. The remaining mean gap is still 2.43--3.09 times C.
+
+## Post-change diagnostic counts, 2026-10-24
+
+One separately built and frozen `-pg` r140 binary passes six short count runs and
+the two longer `free`/elliptic profiles, with unchanged source and binary hashes
+and numerical endpoint checks. The old collector's relink failure is avoided:
+this run builds exactly once and reuses that ELF for all eight processes.
+Across all six short cases, Gram assembly, Hessian numeric factorization and
+rank-update counts still match the validated C 3.15 endpoint-two counter runs.
+The long comparisons derive C totals by exact repetition of the recorded
+per-trajectory totals; they are not new 2000-trajectory C executions.
+
+For each long model, the full process includes 200,000 steps plus 4,000
+preparatory evaluations. Smooth `Solve_Compatible_Buffers` entries fall from
+r122's 408,000 to **204,000**. The separate damped-Euler branch remains present;
+these two models have zero joint damping. Constraint-solver entries, Gram calls
+and Hessian factors remain 204,000, and elliptic rank updates remain 7,428,000.
+The [results](evidence/20261024-single-solve-profiles-r140/results.json) and
+[archive](evidence/20261024-single-solve-profiles-r140/profiles.zip) retain the
+instrumented ELF, lineage, C receipts, inputs, collectors, gmon and output.
+The full source closure is also in the paired release-timing archive above.
+
+Remaining sampled main-image work includes solver entry/validation and buffer
+preparation, point Jacobians, sparse Gram/factor/backsolve/update kernels and
+symbolic filling. The free profile contains only 434 samples, elliptic 1,670;
+shared-library time can be absent. Instrumentation and full-process preparation
+change these shares. They identify diagnostic targets and do not allocate
+percentages of release wall time or of the gap to C.
+
 ## Reproduction
 
 With the project's GNAT/GNATprove toolchain and a Python environment containing

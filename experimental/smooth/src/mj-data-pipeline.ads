@@ -73,13 +73,15 @@ private package MJ.Data.Pipeline with SPARK_Mode is
      (D : in out Simulation; Result : out Status) with Global => null,
      Pre => Is_Ready (D) and then not Forces_Current (D),
      Post => Is_Empty (D) = Is_Empty (D)'Old
-       and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
-       and then State_Values (D) = State_Values (D)'Old
-       and then Activation_Values (D) = Activation_Values (D)'Old
-       and then Input_Values (D) = Input_Values (D)'Old
-       and then (if Result = Success then Is_Ready (D) and then Positions_Current (D)
-         and then Mass_Current (D) and then Passive_Current (D)
-         and then Actuation_Current (D) and then not Forces_Current (D));
+       and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old;
+   --  Preserve the same frames in independent obligations, as in the other
+   --  pipeline stages. This keeps the state-array equality proof local.
+   pragma Postcondition (State_Values (D) = State_Values (D)'Old);
+   pragma Postcondition (Activation_Values (D) = Activation_Values (D)'Old);
+   pragma Postcondition (Input_Values (D) = Input_Values (D)'Old);
+   pragma Postcondition (if Result = Success then Is_Ready (D) and then Positions_Current (D)
+     and then Mass_Current (D) and then Passive_Current (D)
+     and then Actuation_Current (D) and then not Forces_Current (D));
    pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
      and then Position_Values (D) = Position_Values (D)'Old
      and then Velocity_Values (D) = Velocity_Values (D)'Old

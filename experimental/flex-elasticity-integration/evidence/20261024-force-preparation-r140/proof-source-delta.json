@@ -1,0 +1,16 @@
+{
+  "runtime_manifest_sha256": "8d31d7d0ac664cf060d602a79183631924915a4d2c637c3fa682a2b13587c76a",
+  "proof_manifest_sha256": "98a2ae56e919c500d988ec3fd09c35cf162ac382b362c7084e399c1493817aa0",
+  "source_files": 445,
+  "changed_files": [
+    "experimental/smooth/src/mj-data-pipeline.adb"
+  ],
+  "identified_ghost_additions": {
+    "Ready_Allocation": "   --  Unfold readiness only in this proof minimum. Callers can keep the\n   --  expensive readiness predicate abstract and still use its allocation fact.\n   procedure Ready_Allocation (D : Simulation) with\n     Ghost => Static, Global => null, Pre => Is_Ready (D), Post => D.Allocated\n   is\n   begin\n      null;\n   end Ready_Allocation;\n\n",
+    "Unpublished_Forces": "   --  A false publication flag makes Forces_Current false even when other\n   --  readiness facts stay abstract in the composed force-preparation proof.\n   procedure Unpublished_Forces (D : Simulation) with\n     Ghost => Static, Global => null,\n     Pre => not D.Cache.Force_Valid, Post => not Forces_Current (D)\n   is\n   begin\n      null;\n   end Unpublished_Forces;\n\n",
+    "allocation_call": "      Ready_Allocation (D);\n",
+    "publication_call": "      if Result = Success then\n         Unpublished_Forces (D);\n      end if;\n"
+  },
+  "removing_identified_ghost_additions_recovers_runtime_source_bytewise": true,
+  "scope": "Source-delta audit for proof-only refinements; no claim that the two compiled ELF files or their timing are identical. r140 is the measured executable; r142 is the proof snapshot."
+}

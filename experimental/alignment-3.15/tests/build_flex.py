@@ -172,6 +172,9 @@ def _migrate_xml_315(xml):
     results.append(run([str(args.python), str(force_tests / "compare.py"), "--binary",
                         str(binary / "flex_probe"), "--out", str(args.out / "forces"),
                         "--samples", "2", "--steps", "100"], "forces"))
+    results.append(run([str(args.python), str(force_tests / "compare.py"), "--binary",
+                        str(binary / "flex_probe"), "--out", str(args.out / "world-wrench"),
+                        "--samples", "2", "--steps", "100", "--world-wrench"], "world-wrench"))
     results.append(run([str(args.python), str(force_tests / "compare_constrained.py"), "--binary",
                         str(binary / "flex_constrained_probe"), "--out", str(args.out / "constrained"),
                         "--samples", "2", "--steps", "100"], "constrained"))
@@ -180,7 +183,7 @@ def _migrate_xml_315(xml):
     receipt = dict(reference=reference, commit=prior["commit"], commands=commands,
                    manifest_sha256=digest(args.out / "manifest.json"), source_hashes_unchanged=True,
                    complete=all(code == 0 for code in results),
-                   scope="Owned FLEX metadata/state, geometric contacts and force/constraint trajectories; no global Gold or timing claim.")
+                   scope="Owned FLEX metadata/state, geometric contacts and force/constraint trajectories, including world-wrench cache replacement and invalid-load recovery; no global Gold or timing claim.")
     (args.out / "results.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps({key: receipt[key] for key in ("reference", "complete", "scope")}))
     raise SystemExit(not receipt["complete"])

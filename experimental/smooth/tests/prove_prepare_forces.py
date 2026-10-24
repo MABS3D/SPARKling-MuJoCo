@@ -14,7 +14,11 @@ import subprocess
 import time
 
 ROOT = Path(__file__).resolve().parents[3]
-SCOPES = {"Prepare_Forces_Ready":
+SCOPES = {"Unpublished_Forces":
+          ("mj-data-pipeline", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+          "Ready_Allocation":
+          ("mj-data-pipeline", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+          "Prepare_Forces_Ready":
           ("mj-data-pipeline", ".adb", "flex-elasticity-integration", "flex_constrained.gpr")}
 
 def digest(path):
@@ -25,9 +29,13 @@ def main():
     parser.add_argument("--engine", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--subprogram", choices=SCOPES, required=True)
+    parser.add_argument("--analysis", type=Path, help="Share analysis only between minima on this exact frozen manifest")
+    parser.add_argument("--resume", type=Path,
+                        help="Reuse analysis only from a receipt for this exact immutable engine and scope; require a new scoped report")
     parser.add_argument("--proof-timeout", type=int, default=3)
     args = parser.parse_args()
     assert args.proof_timeout in range(1, 31)
+    assert not (args.analysis and args.resume), "Choose shared analysis or a resume receipt"
     runner_hash = digest(Path(__file__))
     guard_hash = digest(ROOT / "tools/guarded.py")
     args.out.mkdir(parents=True, exist_ok=False)
@@ -48,7 +56,33 @@ def main():
                  if re.match(r"\s*(?:procedure|function) " + subprogram + r"\b", line)]
     assert len(positions) == 1
     line = positions[0]
-    build = args.out.resolve() / "build"
+    build = args.analysis.resolve() if args.analysis else args.out.resolve() / "build"
+    resume_record = None
+    if args.resume:
+        prior_path = args.resume.resolve() / "results.json"
+        prior = json.loads(prior_path.read_text())
+        assert prior["manifest_sha256"] == digest(manifest_path), "Resume engine differs"
+        assert prior["reference"] == manifest["reference"] and prior["subprogram"] == args.subprogram
+        assert prior["source_hashes_unchanged"] and prior["guard_source_unchanged"] and prior["runner_source_unchanged"]
+        assert prior["guard_sha256"] == guard_hash, "Resume guard differs"
+        assert "--timeout=" + str(args.proof_timeout) in prior["command"], "Resume prover timeout differs"
+        build = Path(prior.get("analysis_root", args.resume.resolve() / "build")).resolve()
+        assert build == (args.resume.resolve() / "build").resolve(), "Resume the original analysis receipt"
+        assert build.is_dir(), "Resume analysis missing"
+        resume_record = dict(receipt=str(prior_path), receipt_sha256=digest(prior_path),
+                             previous_exit=prior["exit"])
+    if not args.resume:
+        build.mkdir(parents=True, exist_ok=True)
+        stamp = build / "engine-manifest.sha256"
+        if stamp.exists():
+            assert stamp.read_text().strip() == digest(manifest_path), "Shared analysis source mismatch"
+        else:
+            assert not any(build.iterdir()), "Unknown existing analysis"
+            stamp.write_text(digest(manifest_path) + "\n")
+    # No earlier report may stand in for this invocation. GNATprove validates
+    # proof-cache task identities, and must emit a fresh complete scoped report.
+    for report in build.rglob(unit + ".spark"):
+        report.unlink()
     env = os.environ.copy()
     toolchain = Path("/var/tmp/sparkling-matrix-recovery/toolchains")
     env["PATH"] = ":".join(str(path) for name in ("gnat", "gprbuild", "gnatprove")
@@ -61,6 +95,8 @@ def main():
                "--prover=cvc5,z3,altergo", "--timeout=" + str(args.proof_timeout), "--memlimit=650",
                "--steps=0", "--proof=per_check", "--counterexamples=off",
                "--limit-subp=" + unit + suffix + ":" + str(line)]
+    if args.resume:
+        assert command == prior["command"], "Resume proof command differs"
     log = args.out / "proof.log"
     start = time.monotonic()
     with log.open("w") as stream:
@@ -68,6 +104,7 @@ def main():
                               "--timeout", "240", "--", *command], cwd=source, env=env,
                              stdout=stream, stderr=subprocess.STDOUT)
     result = dict(reference=manifest["reference"], subprogram=args.subprogram,
+                  analysis_root=str(build), resumed_from=resume_record,
                   command=command, exit=run.returncode, seconds=time.monotonic()-start,
                   manifest_sha256=digest(manifest_path), runner_sha256=runner_hash,
                   guard_sha256=guard_hash,

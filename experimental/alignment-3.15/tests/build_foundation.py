@@ -76,7 +76,7 @@ def main():
     def run(command, label, guarded=False):
         if guarded:
             command = [str(args.python), str(source / "tools/guarded.py"),
-                       "--cap-mb", "4000", "--timeout", "600", "--", *command]
+                       "--cap-mb", "3000", "--timeout", "600", "--", *command]
         start = time.monotonic()
         log = args.out / (label + ".log")
         with log.open("w") as stream:

@@ -93,7 +93,7 @@ Receipts: `evidence/20261003-ancestors/acceptance-r196-r198.json`,
 `r197-results.json` and the recorded source manifests. Earlier receipts retain
 their original scopes and are not attributed to these newer sources.
 
-## Single acceleration solve, 2026-10-24
+## Initial single acceleration solve checkpoint, 2026-10-24
 
 The FLEX path now prepares poses, rigid/passive forces and actuation, adds all
 FLEX forces, then solves acceleration once. This follows C's force ordering and
@@ -121,3 +121,60 @@ the newly required `Flg_Adhesion` field. C 3.17 integrated acceptance and quiet
 release timing of this patch are also pending. No measured performance gain is
 claimed. Receipts and frozen inputs are in
 [`evidence/20261024-single-solve/`](evidence/20261024-single-solve/).
+
+## Renewed force-preparation acceptance, 2026-10-24
+
+The lexical work record that GNATprove rejected is now outside its loop, with
+the same per-body assignment and arithmetic. Frame guarantees are separated
+without removal. Explicit ghost equality composition preserves activation
+state; two small proved lemmas expose allocation and the unpublished-force flag
+while the expensive readiness predicates stay abstract.
+
+The final immutable C 3.15 r142 snapshot closes `Ready_Allocation` (one proof
+plus one flow check), `Unpublished_Forces` (one plus one), and
+`Prepare_Forces_Ready` (34 plus two): **40 checks, zero open obligations**.
+All nine existing context warnings remain visible in each receipt, including
+imprecise elementary functions and the recursive-contract warning; the stricter
+warning-free `passed` remains false. This proves preservation of state,
+activation, inputs, configuration and time, and successful stage readiness
+without publishing acceleration, **under the called phase contracts**. It does
+not close those phase bodies, force-model mathematics or complete dynamics.
+[Proof receipts and retained failed attempts](evidence/20261024-force-frame-proofs-r142/results.json)
+and [exact sources/logs/commands](evidence/20261024-force-frame-proofs-r142/proofs.zip)
+retain the frontend failure's follow-ups, the state/activation/flag obligations
+and watchdogs. These remain engineering history, not mathematical Silver exceptions.
+
+The runtime gates now always include a separate world-wrench comparison. It
+applies world-frame forces and torques to bodies, alternates loaded/unloaded
+acceleration at fixed pose, checks repeated evaluation and invalid-array
+recovery, and compares 100-step movement against the actual C wheel with the
+existing tolerances. The original corpus and RNG sequence are unchanged when
+this mode is disabled.
+
+| Frozen runtime | State | Ordinary forces | World-wrench / stale-cache | Constrained |
+| --- | ---: | ---: | ---: | ---: |
+| r136 C 3.14 validation | 78/78 | 54/54 | 54/54 | 234/234 |
+| r139 C 3.15 validation | 78/78 | 66/66 | 66/66 | 246/246 |
+| r140 C 3.15 release | 78/78 | 66/66 | 66/66 | 246/246 |
+
+Counts include metadata/state samples; they are not all complete simulation
+trajectories. The force and constrained comparisons use 100 steps and retain
+zero/nonzero damping, generalized applied forces and contact cases. The renewed
+3.15 foundation is generated against its genuine pinned ABI, with two serialized
+flags and the default internal adhesion field; no compatibility bridge or
+version spoof was used. It passes ten Ada suites, Python tests and deterministic
+regeneration. [Runtime evidence](evidence/20261024-force-preparation-r140/results.json)
+and [archive](evidence/20261024-force-preparation-r140/runtime.zip) retain source
+closures, inputs/outputs, logs and exact receipts. The historical foundation
+runner now also enforces the agreed 3000 MiB build cap.
+
+The measured r140 executable precedes the final r142 ghost-only refinement.
+A [bytewise source-delta audit](evidence/20261024-force-preparation-r140/proof-source-delta.json)
+finds all 439 other files identical; removing only the two named static ghost
+lemmas and their calls recovers the r140 pipeline source. This is a source audit,
+not a claim that two separately built executables have identical timing.
+[Quiet release timing](../alignment-3.15/evidence/20261024-single-solve-timing-r140/summary.json)
+confirms a 5.18% mean-duration improvement on `free`; the six-model corrected
+interval resolves only that workload. Ada's mean duration remains 2.43--3.09 times C's in these
+comparisons. C 3.17 runtime migration, broader workload timing,
+whole-loader/physics Gold and full-port C parity remain open.
