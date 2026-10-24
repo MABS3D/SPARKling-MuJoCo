@@ -1708,8 +1708,16 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Stat.Center (2) := Bits_To_Real (U64);
    end Read_Statistic_1;
 
+   procedure Read_Flags (B : Byte_Array; Base : Natural;
+                         Gravcomp, Surfacevel, Adhesion : out Boolean) is
+   begin
+      Gravcomp := Get_U8 (B, Base) /= 0;
+      Surfacevel := Get_U8 (B, Base + Bool_Size) /= 0;
+      Adhesion := False;
+   end Read_Flags;
+
    procedure Read_Fixed (B : Byte_Array; Pos : in out Natural; Opt : out Option; Vis : out Visual;
-                         Stat : out Statistic; Gravcomp, Surfacevel : out Boolean; Result : out Load_Result) is
+                         Stat : out Statistic; Gravcomp, Surfacevel, Adhesion : out Boolean; Result : out Load_Result) is
       Base : Natural := Pos;
    begin
       Opt := (others => <>);
@@ -1717,6 +1725,7 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Stat := (others => <>);
       Gravcomp := False;
       Surfacevel := False;
+      Adhesion := False;
       --  Option
       Read_Option_1 (B, Base, Opt, Result);
       if Result.Status /= OK then return; end if;
@@ -1779,9 +1788,8 @@ package body MJ.MJB.Readers with SPARK_Mode is
       Read_Statistic_1 (B, Base, Stat, Result);
       if Result.Status /= OK then return; end if;
       Base := Base + Statistic_Size;
-      Gravcomp := Get_U8 (B, Base) /= 0;
-      Surfacevel := Get_U8 (B, Base + Bool_Size) /= 0;
-      Pos := Base + 2 * Bool_Size;
+      Read_Flags (B, Base, Gravcomp, Surfacevel, Adhesion);
+      Pos := Base + Fixed_Flag_Count * Bool_Size;
    end Read_Fixed;
 
    procedure Read_Body_1 (B : Byte_Array; Pos : in out Natural; S : Sizes; G : in out Body_Arrays; Result : out Load_Result)

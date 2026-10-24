@@ -1,0 +1,87 @@
+--- a/src/mj-models-validity.ads
++++ b/src/mj-models-validity.ads
+@@ -547,12 +547,19 @@
+    with Global => null;
+ 
+    function Texture_At (M : Model; T : Integer) return Boolean is
+-     (Texture_Block_OK (M.Textures.Tex_Adr (T), M.Textures.Tex_Nchannel (T),
+-                        M.Textures.Tex_Height (T), M.Textures.Tex_Width (T), M.S.Ntexdata))
++     (if M.Textures.Tex_Adr (T) = -1 then M.Textures.Tex_Pathadr (T) >= 0
++      else Texture_Block_OK (M.Textures.Tex_Adr (T), M.Textures.Tex_Nchannel (T),
++                             M.Textures.Tex_Height (T), M.Textures.Tex_Width (T), M.S.Ntexdata))
+    with Pre => Valid_Layout (M) and then T in 0 .. M.S.Ntex - 1;
+ 
+    function Textures_OK (M : Model) return Boolean is
+      (for all T in 0 .. M.S.Ntex - 1 => Texture_At (M, T))
++   with Pre => Valid_Layout (M);
++
++   --  C 3.17 engine_io.c validates sparse flex metric ordering independently
++   --  of the generic reference table. -1 marks an inactive vertex dof.
++   function EfmC_Permutation_OK (M : Model) return Boolean is
++     (for all K in 0 .. M.S.NefmCvert - 1 => M.Flexes.EfmC_Perm (K) in -1 .. M.S.Nv - 1)
+    with Pre => Valid_Layout (M);
+ 
+    --  Texture references not covered by the C reference table.
+@@ -1080,7 +1087,7 @@
+       and then D_Diags_OK (M) and then Maps_OK (M)
+       and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Site_Datas_OK (M) and then Sameframes_OK (M)
+       and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M) and then Texids_OK (M)
+-      and then Bvhs_OK (M) and then Octs_OK (M)
++      and then Bvhs_OK (M) and then Octs_OK (M) and then EfmC_Permutation_OK (M)
+       and then Pairs_OK (M) and then Excludes_OK (M) and then Eq_Types_OK (M) and then Eq_Objs_OK (M)
+       and then Wraps_OK (M) and then Tendons_OK (M)
+       and then Actuator_Types_OK (M) and then Actuator_Trnids_OK (M) and then Actuator_Acts_OK (M)
+@@ -1131,6 +1138,7 @@
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Meshes_OK);
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Hfields_OK);
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Textures_OK);
++   pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", EfmC_Permutation_OK);
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Texids_OK);
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bvhs_OK);
+    pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Octs_OK);
+@@ -1172,7 +1180,7 @@
+                      Dof_Parent_Ranges_OK, Madr_Range_OK, Madrs_OK, Simplenums_OK,
+                      CSR_OK, Sparse_M_OK, Sparse_B_OK, Sparse_D_OK, Sparse_Ten_J_OK, M_Rownnz_OK,
+                      M_Rows_OK, D_Diags_OK, Maps_OK, Geom_Types_OK, Geom_Datas_OK, Site_Datas_OK, Sameframes_OK,
+-                     Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK,
++                     Meshes_OK, Hfields_OK, Textures_OK, Texids_OK, Bvhs_OK, Octs_OK, EfmC_Permutation_OK,
+                      Pairs_OK, Excludes_OK, Eq_Types_OK, Eq_Objs_OK, Wraps_OK, Tendons_OK,
+                      Actuator_Types_OK, Actuator_Trnids_OK, Actuator_Acts_OK, Actuator_Ranges_OK,
+                      Sensor_Types_OK, Sensor_Objs_OK, Sensor_Dims_OK, Sensor_Adrs_OK,
+--- a/src/mj-validation.adb
++++ b/src/mj-validation.adb
+@@ -640,7 +640,8 @@
+      Post => (if Result.Status = OK then
+                 Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Site_Datas_OK (M) and then Sameframes_OK (M)
+                 and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M)
+-                and then Texids_OK (M) and then Bvhs_OK (M) and then Octs_OK (M))
++                and then Texids_OK (M) and then Bvhs_OK (M) and then Octs_OK (M)
++                and then EfmC_Permutation_OK (M))
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Types_OK);
+@@ -650,6 +651,7 @@
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Meshes_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Hfields_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Textures_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", EfmC_Permutation_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Texids_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bvhs_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Type_At);
+@@ -753,6 +755,16 @@
+             end if;
+          end loop;
+          Result := (Invalid_Parameter, Tex_Adr, -1);
++         return;
++      end if;
++      if not EfmC_Permutation_OK (M) then
++         for K in 0 .. M.S.NefmCvert - 1 loop
++            if M.Flexes.EfmC_Perm (K) not in -1 .. M.S.Nv - 1 then
++               Result := (Invalid_Reference, EfmC_Perm, K);
++               return;
++            end if;
++         end loop;
++         Result := (Invalid_Reference, EfmC_Perm, -1);
+          return;
+       end if;
+       if not Texids_OK (M) then

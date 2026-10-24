@@ -679,7 +679,16 @@ package body MJ.Data.Flex_Elasticity with SPARK_Mode is
       -- Rebuild the base passive contribution so repeated Evaluate never
       -- adds elastic forces twice; positions/mass/transmissions remain cached.
       D.Cache.Passive_Valid := False; D.Cache.Force_Valid := False;
-      MJ.Data.Forward.Evaluate (D, Result, External);
+      --  Preserve the public forward boundary checks before entering the
+      --  private preparation path. External loads join the final smooth RHS.
+      if not Is_Ready (D) then Result := Not_Allocated; return; end if;
+      if External'Length /= 0 and then
+        (External'First /= 0 or else Int64 (External'Length) /= Int64 (Body_Count (D)))
+      then
+         Result := Invalid_Size;
+         return;
+      end if;
+      Pipeline.Prepare_Forces_Ready (D, Result);
       if Result /= Success then return; end if;
       Pipeline.Ensure_Jacobians (D, Result);
       if Result /= Success then return; end if;

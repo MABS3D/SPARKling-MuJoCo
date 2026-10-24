@@ -860,7 +860,7 @@ package body MJB_Serialize is
       Put_U64 (B, Base + Statistic_Off_Center + 16, Real_Bits (M.Stat.Center (2)));
       Pos := Pos + Statistic_Size;
       Put_U8 (B, Pos, (if M.Flg_Gravcomp then 1 else 0));
-      Put_U8 (B, Pos + Bool_Size, (if M.Flg_Surfacevel then 1 else 0));
+      Put_U8 (B, Pos + 1 * Bool_Size, (if M.Flg_Surfacevel then 1 else 0));
       Pos := Pos + 2 * Bool_Size;
       Count := Int64 (S.Nq) * (1);
       for I in 0 .. Integer (Count) - 1 loop

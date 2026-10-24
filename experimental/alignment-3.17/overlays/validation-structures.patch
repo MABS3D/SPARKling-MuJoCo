@@ -1,0 +1,567 @@
+--- a/src/mj-models-validity.ads
++++ b/src/mj-models-validity.ads
+@@ -13,11 +13,13 @@
+ --  out of line for the same reason.
+ pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore,
+                          Loop_Variant => Ignore, Assert => Check);
++with MJ.Model_Structures;
+ with Interfaces;            use type Interfaces.Unsigned_8;
+ with MJ.Models.Gen_Clauses; use MJ.Models.Gen_Clauses;
+ --  MJ.Types is use-visible through the parent MJ.Models.
+ 
+ package MJ.Models.Validity with SPARK_Mode is
++   package Structure renames MJ.Model_Structures;
+ 
+    ----------------------------------------------------------------------------
+    --  5.1 Sizes
+@@ -393,14 +395,74 @@
+      (for all I in 0 .. M.S.Nv - 1 => M_Row_At (M, I))
+    with Pre => Valid_Layout (M);
+ 
++
++   --  Per-row C CSR domain: padding, gaps and unused storage are admissible.
++   --  The older M/B/D compact CSR clauses above remain a separate policy.
++   function Sparse_Flexedge_J_OK (M : Model) return Boolean is
++     (Structure.Matrix_Valid (M.Flexes.Flexedge_J_Rownnz.all, M.Flexes.Flexedge_J_Rowadr.all,
++       M.Flexes.Flexedge_J_Colind.all, M.S.Nflexedge, M.S.Nv, M.S.NJfe))
++     with Pre => Valid_Layout (M);
++   function Sparse_Flexvert_J_OK (M : Model) return Boolean is
++     (Structure.Matrix_Valid (M.Flexes.Flexvert_J_Rownnz.all, M.Flexes.Flexvert_J_Rowadr.all,
++       M.Flexes.Flexvert_J_Colind.all, 2*M.S.Nflexvert, M.S.Nv, 2*M.S.NJfv))
++     with Pre => Valid_Layout (M);
++   function Sparse_Efm0_L_OK (M : Model) return Boolean is
++     (Structure.Matrix_Valid (M.Flexes.Efm0_L_Rownnz.all, M.Flexes.Efm0_L_Rowadr.all,
++       M.Flexes.Efm0_L_Colind.all, M.S.Nefm0dof, M.S.Nefm0dof, M.S.Nefm0L))
++     with Pre => Valid_Layout (M);
++   function Efm0_Dofs_OK (M : Model) return Boolean is
++     (for all K in 0 .. M.S.Nefm0dof-1 => M.Flexes.Efm0_Dofid (K) in 0 .. M.S.Nv-1)
++     with Pre => Valid_Layout (M);
++   function Flex_Structures_OK (M : Model) return Boolean is
++     (Sparse_Flexedge_J_OK (M) and then Sparse_Flexvert_J_OK (M)
++      and then Sparse_Efm0_L_OK (M) and then Efm0_Dofs_OK (M))
++     with Pre => Valid_Layout (M);
++   function B_Inputs_OK (M : Model) return Boolean is
++     (Structure.Body_Links (M.Bodies.Body_Parentid.all, M.Bodies.Body_Weldid.all,
++       M.Bodies.Body_Dofnum.all, M.S.Nv)) with Pre => Valid_Layout (M);
++   function B_Root_OK (M : Model) return Boolean is
++     (M.Sparse.B_Rownnz (0) = M.S.Nv and then (M.S.Nv = 0 or else M.Sparse.B_Rowadr (0) = 0))
++     with Pre => Valid_Layout (M) and then M.S.Nbody >= 1;
++   function B_Parent_Subset_At (M : Model; B : Integer) return Boolean is
++     (declare P : constant Integer := M.Bodies.Body_Parentid (B); begin
++       Structure.Row_Valid (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B), M.S.Nv)
++       and then Structure.Row_Valid (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (P), M.Sparse.B_Rownnz (P), M.S.Nv)
++       and then Structure.Sorted_Subset (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B),
++         M.Sparse.B_Rowadr (P), M.Sparse.B_Rownnz (P), M.S.Nv))
++     with Pre => Valid_Layout (M) and then B_Inputs_OK (M) and then Sparse_B_OK (M)
++       and then B in 1 .. M.S.Nbody-1;
++   function B_Ancestor_At (M : Model; B : Integer) return Boolean is
++     (declare P : constant Integer := M.Bodies.Body_Parentid (B);
++       Count : constant Int64 := Structure.Ancestor_Count (M.Bodies.Body_Parentid.all,
++         M.Bodies.Body_Weldid.all, M.Bodies.Body_Dofnum.all, M.S.Nv, M.Bodies.Body_Weldid (P)); begin
++       Count <= Int64 (M.Sparse.B_Rownnz (B)) and then Count <= Int64 (M.Sparse.B_Rownnz (P)))
++     with Pre => Valid_Layout (M) and then B_Inputs_OK (M) and then Sparse_B_OK (M)
++       and then B in 1 .. M.S.Nbody-1;
++   function B_Structure_OK (M : Model) return Boolean is
++     (B_Inputs_OK (M) and then B_Root_OK (M)
++      and then (for all B in 1 .. M.S.Nbody-1 => B_Parent_Subset_At (M, B) and then B_Ancestor_At (M, B)))
++     with Pre => Valid_Layout (M) and then M.S.Nbody >= 1 and then Sparse_B_OK (M);
++   function D_B_Row_At (M : Model; D : Integer) return Boolean is
++     (M.Dofs.Dof_Bodyid (D) in 0 .. M.S.Nbody-1 and then
++       (declare B : constant Integer := M.Dofs.Dof_Bodyid (D); begin
++         Structure.Span (M.Sparse.D_Colind.all, M.Sparse.D_Rowadr (D), M.Sparse.D_Rownnz (D))
++         and then Structure.Span (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B))
++         and then Structure.Rows_Equal (M.Sparse.D_Colind.all, M.Sparse.D_Rowadr (D), M.Sparse.D_Rownnz (D),
++           M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B))))
++     with Pre => Valid_Layout (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M) and then D in 0 .. M.S.Nv-1;
++   function D_B_Rows_OK (M : Model) return Boolean is
++     (for all D in 0 .. M.S.Nv-1 => D_B_Row_At (M, D))
++     with Pre => Valid_Layout (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M);
++
+    function D_Diag_At (M : Model; I : Integer) return Boolean is
+-     (M.Sparse.D_Diag (I) in 0 .. M.Sparse.D_Rownnz (I) - 1
++     (M.Sparse.D_Diag (I) = Row_Len (M, I)-1
++      and then M.Sparse.D_Diag (I) in 0 .. M.Sparse.D_Rownnz (I) - 1
+       and then M.Sparse.D_Colind (M.Sparse.D_Rowadr (I) + M.Sparse.D_Diag (I)) = I)
+-   with Pre => Valid_Layout (M) and then Sparse_D_OK (M) and then I in 0 .. M.S.Nv - 1;
++   with Pre => Valid_Layout (M) and then Sparse_D_OK (M) and then Madr_Range_OK (M) and then I in 0 .. M.S.Nv - 1;
+ 
+    function D_Diags_OK (M : Model) return Boolean is
+      (for all I in 0 .. M.S.Nv - 1 => D_Diag_At (M, I))
+-   with Pre => Valid_Layout (M) and then Sparse_D_OK (M);
++   with Pre => Valid_Layout (M) and then Sparse_D_OK (M) and then Madr_Range_OK (M);
+ 
+    --  mapM2M: CSR entry (nC) -> legacy qM index; mapM2D: symmetric D entry (nD) ->
+    --  CSR entry or -1; mapD2M: CSR entry (nC) -> D entry, inverse of mapM2D.
+@@ -464,9 +526,8 @@
+       and then (for all F in M.Meshes.Mesh_Faceadr (I) .. (M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I)) - 1 =>
+         (for all K in 0 .. 2 =>
+            M.Meshes.Mesh_Face (3 * F + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1
+-           and then (if M.Meshes.Mesh_Normalnum (I) > 0 then
+-                       M.Meshes.Mesh_Facenormal (3 * F + K) in 0 .. M.Meshes.Mesh_Normalnum (I) - 1)
+-           and then (if M.Meshes.Mesh_Texcoordadr (I) >= 0 and then M.Meshes.Mesh_Texcoordnum (I) > 0 then
++           and then M.Meshes.Mesh_Facenormal (3 * F + K) in 0 .. M.Meshes.Mesh_Normalnum (I) - 1
++           and then (if M.Meshes.Mesh_Texcoordadr (I) >= 0 then
+                        M.Meshes.Mesh_Facetexcoord (3 * F + K) in 0 .. M.Meshes.Mesh_Texcoordnum (I) - 1))))
+    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
+ 
+@@ -1085,6 +1146,7 @@
+       and then Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
+       and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
+       and then D_Diags_OK (M) and then Maps_OK (M)
++      and then Flex_Structures_OK (M) and then B_Structure_OK (M) and then D_B_Rows_OK (M)
+       and then Geom_Types_OK (M) and then Geom_Datas_OK (M) and then Site_Datas_OK (M) and then Sameframes_OK (M)
+       and then Meshes_OK (M) and then Hfields_OK (M) and then Textures_OK (M) and then Texids_OK (M)
+       and then Bvhs_OK (M) and then Octs_OK (M) and then EfmC_Permutation_OK (M)
+--- a/src/mj-validation.adb
++++ b/src/mj-validation.adb
+@@ -2,6 +2,7 @@
+ --  not evaluated at run time (see MJ.Models.Validity for why).
+ pragma Assertion_Policy (Pre => Ignore, Post => Ignore, Loop_Invariant => Ignore,
+                          Loop_Variant => Ignore, Assert_And_Cut => Ignore, Assert => Check);
++with MJ.Model_Admission;
+ with Interfaces;            use type Interfaces.Unsigned_8;
+ with MJ.Models.Gen_Clauses; use MJ.Models.Gen_Clauses;
+ 
+@@ -515,11 +516,12 @@
+    end Diagnose_CSR;
+ 
+    procedure Diagnose_Sparse (M : Model; Result : out Load_Result) with
+-     Pre  => Valid_Layout (M) and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M) and then Madrs_OK (M),
++     Pre  => Valid_Layout (M) and then M.S.Nbody >= 1 and then Madr_Range_OK (M) and then Dof_Parent_Ranges_OK (M) and then Madrs_OK (M),
+      Post => (if Result.Status = OK then
+                 Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
+                 and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
+-                and then D_Diags_OK (M) and then Maps_OK (M))
++                and then D_Diags_OK (M) and then Maps_OK (M)
++                and then Flex_Structures_OK (M) and then B_Structure_OK (M) and then D_B_Rows_OK (M))
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_M_OK);
+@@ -632,7 +634,11 @@
+          Result := (Invalid_CSR, MapD2M, -1);
+          return;
+       end if;
+-      Result := OK_Result;
++      MJ.Model_Admission.Check_Flex (M, Result);
++      if Result.Status /= OK then return; end if;
++      MJ.Model_Admission.Check_Bodies (M, Result);
++      if Result.Status /= OK then return; end if;
++      MJ.Model_Admission.Check_Dofs (M, Result);
+    end Diagnose_Sparse;
+ 
+    procedure Diagnose_Assets (M : Model; Result : out Load_Result) with
+--- /dev/null
++++ b/src/mj-model_admission.adb
+@@ -0,0 +1,61 @@
++with MJ.Model_Structures;
++package body MJ.Model_Admission with SPARK_Mode is
++   package S renames MJ.Model_Structures;
++   use type S.CSR_Code;
++   procedure Check_Flex (M : Model; Result : out Load_Result) is
++      Item : S.CSR_Result;
++   begin
++      Item := S.Check_CSR (M.Flexes.Flexedge_J_Rownnz.all, M.Flexes.Flexedge_J_Rowadr.all,
++        M.Flexes.Flexedge_J_Colind.all, M.S.Nflexedge, M.S.Nv, M.S.NJfe);
++      Result := CSR_Error (Item, Flexedge_J_Rownnz, Flexedge_J_Rowadr, Flexedge_J_Colind);
++      if Result.Status /= OK then return; end if;
++      Item := S.Check_CSR (M.Flexes.Flexvert_J_Rownnz.all, M.Flexes.Flexvert_J_Rowadr.all,
++        M.Flexes.Flexvert_J_Colind.all, 2*M.S.Nflexvert, M.S.Nv, 2*M.S.NJfv);
++      Result := CSR_Error (Item, Flexvert_J_Rownnz, Flexvert_J_Rowadr, Flexvert_J_Colind);
++      if Result.Status /= OK then return; end if;
++      Item := S.Check_CSR (M.Flexes.Efm0_L_Rownnz.all, M.Flexes.Efm0_L_Rowadr.all,
++        M.Flexes.Efm0_L_Colind.all, M.S.Nefm0dof, M.S.Nefm0dof, M.S.Nefm0L);
++      Result := CSR_Error (Item, Efm0_L_Rownnz, Efm0_L_Rowadr, Efm0_L_Colind);
++      if Result.Status /= OK then return; end if;
++      for K in 0 .. M.S.Nefm0dof-1 loop
++         if M.Flexes.Efm0_Dofid (K) not in 0 .. M.S.Nv-1 then
++            Result := (Invalid_Reference, Efm0_Dofid, K); return;
++         end if;
++         pragma Loop_Invariant (for all J in 0 .. K => M.Flexes.Efm0_Dofid (J) in 0 .. M.S.Nv-1);
++      end loop;
++      Result := OK_Result;
++   end Check_Flex;
++   procedure Check_Bodies (M : Model; Result : out Load_Result) is
++      Parent : Integer;
++      Count : Int64;
++   begin
++      if not B_Inputs_OK (M) then Result := (Invalid_Tree, Body_Parentid, -1); return; end if;
++      if not B_Root_OK (M) then Result := (Invalid_CSR, B_Rownnz, 0); return; end if;
++      for B in 1 .. M.S.Nbody-1 loop
++         Parent := M.Bodies.Body_Parentid (B);
++         if not B_Parent_Subset_At (M, B) then Result := (Invalid_CSR, B_Colind, B); return; end if;
++         Count := S.Ancestor_Count (M.Bodies.Body_Parentid.all, M.Bodies.Body_Weldid.all,
++           M.Bodies.Body_Dofnum.all, M.S.Nv, M.Bodies.Body_Weldid (Parent));
++         if Count > Int64 (M.Sparse.B_Rownnz (B)) or else Count > Int64 (M.Sparse.B_Rownnz (Parent)) then
++            Result := (Invalid_CSR, B_Rownnz, B); return;
++         end if;
++         pragma Loop_Invariant (for all I in 1 .. B => B_Parent_Subset_At (M, I) and then B_Ancestor_At (M, I));
++      end loop;
++      Result := OK_Result;
++   end Check_Bodies;
++   procedure Check_Dofs (M : Model; Result : out Load_Result) is
++      Body_Id : Integer;
++   begin
++      for D in 0 .. M.S.Nv-1 loop
++         if not D_Diag_At (M, D) then Result := (Invalid_CSR, D_Diag, D); return; end if;
++         Body_Id := M.Dofs.Dof_Bodyid (D);
++         if Body_Id not in 0 .. M.S.Nbody-1 then Result := (Invalid_Reference, Dof_Bodyid, D); return; end if;
++         if M.Sparse.D_Rownnz (D) /= M.Sparse.B_Rownnz (Body_Id) then
++            Result := (Invalid_CSR, D_Rownnz, D); return;
++         end if;
++         if not D_B_Row_At (M, D) then Result := (Invalid_CSR, D_Colind, D); return; end if;
++         pragma Loop_Invariant (for all I in 0 .. D => D_Diag_At (M, I) and then D_B_Row_At (M, I));
++      end loop;
++      Result := OK_Result;
++   end Check_Dofs;
++end MJ.Model_Admission;
+--- /dev/null
++++ b/src/mj-model_admission.ads
+@@ -0,0 +1,30 @@
++with MJ.Types; use MJ.Types;
++with MJ.Fields; use MJ.Fields;
++with MJ.Models; use MJ.Models;
++with MJ.Models.Validity; use MJ.Models.Validity;
++with MJ.Model_Structures;
++
++--  Typed diagnostics for the new 3.17 clauses. Contracts are implementation
++--  objectives until the minimum and composed proof receipts close.
++package MJ.Model_Admission with SPARK_Mode is
++   use type MJ.Model_Structures.CSR_Code;
++   function CSR_Error (Item : MJ.Model_Structures.CSR_Result;
++                       Width_Field, Address_Field, Column_Field : Field_Id) return Load_Result is
++     (if Item.Code = MJ.Model_Structures.Valid then OK_Result else
++       (Invalid_CSR,
++        (case Item.Code is when MJ.Model_Structures.Width_Error => Width_Field,
++         when MJ.Model_Structures.Column_Error => Column_Field, when others => Address_Field), Item.Row))
++     with Global => null;
++   procedure Check_Flex (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Flex_Structures_OK (M);
++   procedure Check_Bodies (M : Model; Result : out Load_Result) with
++     Global => null,
++     Pre => Valid_Layout (M) and then M.S.Nbody >= 1 and then Sparse_B_OK (M),
++     Post => (Result.Status = OK) = B_Structure_OK (M);
++   procedure Check_Dofs (M : Model; Result : out Load_Result) with
++     Global => null,
++     Pre => Valid_Layout (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
++       and then Madr_Range_OK (M),
++     Post => (Result.Status = OK) = (D_Diags_OK (M) and then D_B_Rows_OK (M));
++end MJ.Model_Admission;
+--- /dev/null
++++ b/src/mj-model_structures.adb
+@@ -0,0 +1,127 @@
++package body MJ.Model_Structures with SPARK_Mode is
++   function Check_Row (Values : Int_Array; Address, Width : Integer;
++                       Ncols : Natural; Strict : Boolean := True) return CSR_Code is
++   begin
++      if not Width_OK (Width, Ncols, Strict) then return Width_Error; end if;
++      if not Span (Values, Address, Width) then return Address_Error; end if;
++      for K in 0 .. Width-1 loop
++         if not Column_OK (Values, Address, Width, Ncols, Strict, K) then return Column_Error; end if;
++         pragma Loop_Invariant (for all J in 0 .. K => Column_OK (Values, Address, Width, Ncols, Strict, J));
++      end loop;
++      return Valid;
++   end Check_Row;
++   function Check_CSR (Widths, Addresses, Columns : Int_Array;
++                       Nrows, Ncols, Nnz : Natural; Strict : Boolean := True) return CSR_Result is
++      Code : CSR_Code;
++   begin
++      if not Matrix_Shape (Widths, Addresses, Columns, Nrows, Nnz) then return (Shape_Error, -1); end if;
++      for R in 0 .. Nrows-1 loop
++         Code := Check_Row (Columns, Addresses (R), Widths (R), Ncols, Strict);
++         if Code /= Valid then return (Code, R); end if;
++         pragma Loop_Invariant (for all I in 0 .. R => Row_Valid (Columns, Addresses (I), Widths (I), Ncols, Strict));
++      end loop;
++      return (Valid, -1);
++   end Check_CSR;
++   procedure Row_Entry (Columns : Int_Array; Address, Width : Integer; Ncols, Position : Natural) is
++   begin null; end Row_Entry;
++   procedure Ordered_Positions (Columns : Int_Array; Address, Width : Integer;
++                                Ncols, First, Last : Natural) is
++   begin
++      if First < Last then
++         if First+1 < Last then Ordered_Positions (Columns, Address, Width, Ncols, First, Last-1); end if;
++         Row_Entry (Columns, Address, Width, Ncols, Last);
++      end if;
++   end Ordered_Positions;
++   procedure Reject_Column (Columns : Int_Array; Address, Width : Integer;
++                            Ncols, Cursor : Natural; Value : Integer) is
++   begin
++      for K in Cursor .. Width-1 loop
++         Ordered_Positions (Columns, Address, Width, Ncols, Cursor, K);
++         pragma Loop_Invariant (for all J in Cursor .. K => Columns (Address+J) /= Value);
++      end loop;
++   end Reject_Column;
++   procedure Find_Column (Columns : Int_Array; Address, Width : Integer; Ncols : Natural;
++                          Value : Integer; Cursor : in out Natural; Found : out Boolean) is
++      Initial : constant Natural := Cursor with Ghost => Static;
++   begin
++      while Cursor < Width and then Columns (Address+Cursor) < Value loop
++         Cursor := Cursor+1;
++         pragma Loop_Invariant (Static => Cursor in Initial .. Width);
++         pragma Loop_Invariant (for all K in 0 .. Cursor-1 => Columns (Address+K) < Value);
++         pragma Loop_Variant (Increases => Cursor);
++      end loop;
++      Found := Cursor < Width and then Columns (Address+Cursor) = Value;
++      if not Found then Reject_Column (Columns, Address, Width, Ncols, Cursor, Value); end if;
++   end Find_Column;
++   function Sorted_Subset (Columns : Int_Array; Child_Address, Child_Width, Parent_Address, Parent_Width : Integer;
++                           Ncols : Natural) return Boolean is
++      Cursor : Natural := 0;
++      Found : Boolean;
++      Last_Value : Integer := Integer'First with Ghost => Static;
++   begin
++      for K in 0 .. Child_Width-1 loop
++         Row_Entry (Columns, Child_Address, Child_Width, Ncols, K);
++         if K > 0 then pragma Assert (Static => Last_Value < Columns (Child_Address+K)); end if;
++         Find_Column (Columns, Parent_Address, Parent_Width, Ncols, Columns (Child_Address+K), Cursor, Found);
++         if not Found then return False; end if;
++         Last_Value := Columns (Child_Address+K);
++         pragma Loop_Invariant (Cursor < Parent_Width);
++         pragma Loop_Invariant (Static => (for all J in 0 .. Cursor-1 => Columns (Parent_Address+J) < Last_Value));
++         pragma Loop_Invariant (Static => Last_Value = Columns (Child_Address+K));
++         pragma Loop_Invariant (for all I in 0 .. K =>
++           (for some J in 0 .. Parent_Width-1 => Columns (Child_Address+I) = Columns (Parent_Address+J)));
++      end loop;
++      return True;
++   end Sorted_Subset;
++   procedure Unfold_Body_Count (Parent, Weld, Width : Int_Array; Nv, Node : Natural) is
++   begin null; end Unfold_Body_Count;
++   function Ancestor_Count (Parent, Weld, Width : Int_Array; Nv, Node : Natural) return Int64 is
++      Cursor : Natural := Node;
++      Total : Int64 := 0;
++   begin
++      while Cursor > 0 loop
++         Unfold_Body_Count (Parent, Weld, Width, Nv, Cursor);
++         Total := Total+Int64 (Width (Cursor));
++         Cursor := Weld (Parent (Cursor));
++         pragma Loop_Invariant (Cursor <= Node);
++         pragma Loop_Invariant (Total in 0 .. Int64 (Node)*Int64 (Nv));
++         pragma Loop_Invariant (Static => Total+Body_Count_Model (Parent, Weld, Width, Nv, Cursor) =
++           Body_Count_Model (Parent, Weld, Width, Nv, Node));
++         pragma Loop_Variant (Decreases => Cursor);
++      end loop;
++      Unfold_Body_Count (Parent, Weld, Width, Nv, Cursor);
++      return Total;
++   end Ancestor_Count;
++   procedure Unfold_Dof_Count (Parent : Int_Array; Dof : Integer) is
++   begin null; end Unfold_Dof_Count;
++   function Dof_Count (Parent : Int_Array; Dof : Integer) return Natural is
++      Cursor : Integer := Dof;
++      Count : Natural := 0;
++   begin
++      while Cursor >= 0 loop
++         Unfold_Dof_Count (Parent, Cursor);
++         Count := Count+1;
++         Cursor := Parent (Cursor);
++         pragma Loop_Invariant (Cursor in -1 .. Dof);
++         pragma Loop_Invariant (Static => Count+Dof_Count_Model (Parent, Cursor) = Dof_Count_Model (Parent, Dof));
++         pragma Loop_Variant (Decreases => Cursor);
++      end loop;
++      Unfold_Dof_Count (Parent, Cursor);
++      return Count;
++   end Dof_Count;
++   procedure Mass_Ancestor_Equal (Parent, Address : Int_Array; Nm, Dof : Natural) is
++   begin
++      if Parent (Dof) >= 0 then Mass_Ancestor_Equal (Parent, Address, Nm, Parent (Dof)); end if;
++      Unfold_Dof_Count (Parent, Dof);
++   end Mass_Ancestor_Equal;
++   function Rows_Equal (Left : Int_Array; Left_Address, Left_Width : Integer;
++                        Right : Int_Array; Right_Address, Right_Width : Integer) return Boolean is
++   begin
++      if Left_Width /= Right_Width then return False; end if;
++      for K in 0 .. Left_Width-1 loop
++         if Left (Left_Address+K) /= Right (Right_Address+K) then return False; end if;
++         pragma Loop_Invariant (for all J in 0 .. K => Left (Left_Address+J) = Right (Right_Address+J));
++      end loop;
++      return True;
++   end Rows_Equal;
++end MJ.Model_Structures;
+--- /dev/null
++++ b/src/mj-model_structures.ads
+@@ -0,0 +1,185 @@
++with MJ.Types; use MJ.Types;
++
++--  Admission kernels for the C 3.17 structural checks. Models describe the
++--  actual integer/ordered scans. These new contracts are pending proof.
++package MJ.Model_Structures with SPARK_Mode is
++   type CSR_Code is (Valid, Shape_Error, Width_Error, Address_Error, Column_Error);
++   type CSR_Result is record
++      Code : CSR_Code := Valid;
++      Row : Integer := -1;
++   end record;
++
++   function Shape (Values : Int_Array) return Boolean is
++     (Values'First = 0 and then Values'Length <= Integer'Last);
++   function Span (Values : Int_Array; Address, Width : Integer) return Boolean is
++     (Width >= 0 and then Width <= Values'Length and then Address >= 0
++      and then Int64 (Address) <= Int64 (Values'Length)-Int64 (Width))
++     with Pre => Shape (Values);
++   function Width_OK (Width : Integer; Ncols : Natural; Strict : Boolean) return Boolean is
++     (Width >= 0 and then (not Strict or else Width <= Ncols));
++   --  Nonstrict rows retain repeated fixed-tendon columns. The unconditional
++   --  C3.17 width<=ncols check rejects compiler-produced Nv=1 duplicate rows;
++   --  this deliberate correction is documented by the private regression.
++   function Column_OK (Values : Int_Array; Address, Width : Integer;
++                       Ncols : Natural; Strict : Boolean; Position : Natural) return Boolean is
++     (Values (Address+Position) in 0 .. Ncols-1
++      and then (Position = 0 or else
++        (if Strict then Values (Address+Position-1) < Values (Address+Position)
++         else Values (Address+Position-1) <= Values (Address+Position))))
++     with Pre => Shape (Values) and then Span (Values, Address, Width) and then Position < Width;
++   function Columns_OK (Values : Int_Array; Address, Width : Integer;
++                        Ncols : Natural; Strict : Boolean) return Boolean is
++     (for all K in 0 .. Width-1 => Column_OK (Values, Address, Width, Ncols, Strict, K))
++     with Pre => Shape (Values) and then Span (Values, Address, Width);
++   function Row_Valid (Values : Int_Array; Address, Width : Integer;
++                       Ncols : Natural; Strict : Boolean := True) return Boolean is
++     (Width_OK (Width, Ncols, Strict) and then Span (Values, Address, Width)
++      and then Columns_OK (Values, Address, Width, Ncols, Strict))
++     with Pre => Shape (Values);
++   function Check_Row (Values : Int_Array; Address, Width : Integer;
++                       Ncols : Natural; Strict : Boolean := True) return CSR_Code with
++     Global => null, Pre => Shape (Values),
++     Post => Check_Row'Result =
++       (if not Width_OK (Width, Ncols, Strict) then Width_Error
++        elsif not Span (Values, Address, Width) then Address_Error
++        elsif not Columns_OK (Values, Address, Width, Ncols, Strict) then Column_Error
++        else Valid);
++
++   --  C's CSR domain allows unused storage, gaps, and shared row spans. The
++   --  old compact CSR policy is kept separate in MJ.Models.Validity.CSR_OK.
++   function Matrix_Shape (Widths, Addresses, Columns : Int_Array; Nrows, Nnz : Natural) return Boolean is
++     (Shape (Widths) and then Shape (Addresses) and then Shape (Columns)
++      and then Widths'Length = Nrows and then Addresses'Length = Nrows
++      and then Columns'Length = Nnz);
++   function Matrix_Valid (Widths, Addresses, Columns : Int_Array;
++                          Nrows, Ncols, Nnz : Natural; Strict : Boolean := True) return Boolean is
++     (Matrix_Shape (Widths, Addresses, Columns, Nrows, Nnz)
++      and then (for all R in 0 .. Nrows-1 => Row_Valid (Columns, Addresses (R), Widths (R), Ncols, Strict)));
++   function Check_CSR (Widths, Addresses, Columns : Int_Array;
++                       Nrows, Ncols, Nnz : Natural; Strict : Boolean := True) return CSR_Result with
++     Global => null,
++     Post => (Check_CSR'Result.Code = Valid) = Matrix_Valid (Widths, Addresses, Columns, Nrows, Ncols, Nnz, Strict)
++       and then (if Matrix_Shape (Widths, Addresses, Columns, Nrows, Nnz) then
++         (if Check_CSR'Result.Code /= Valid then Check_CSR'Result.Row in 0 .. Nrows-1
++          and then Check_CSR'Result.Code = Check_Row (Columns, Addresses (Check_CSR'Result.Row),
++            Widths (Check_CSR'Result.Row), Ncols, Strict)
++          and then (for all R in 0 .. Check_CSR'Result.Row-1 =>
++            Row_Valid (Columns, Addresses (R), Widths (R), Ncols, Strict)))
++         else Check_CSR'Result.Code = Shape_Error and then Check_CSR'Result.Row = -1);
++
++   procedure Row_Entry (Columns : Int_Array; Address, Width : Integer; Ncols, Position : Natural) with
++     Ghost => Static, Global => null,
++     Pre => Shape (Columns) and then Row_Valid (Columns, Address, Width, Ncols)
++       and then Position < Width,
++     Post => Column_OK (Columns, Address, Width, Ncols, True, Position);
++   procedure Ordered_Positions (Columns : Int_Array; Address, Width : Integer;
++                                Ncols, First, Last : Natural) with
++     Ghost => Static, Global => null,
++     Pre => Shape (Columns) and then Row_Valid (Columns, Address, Width, Ncols)
++       and then First <= Last and then Last < Width,
++     Post => Columns (Address+First) <= Columns (Address+Last)
++       and then (if First < Last then Columns (Address+First) < Columns (Address+Last)),
++     Subprogram_Variant => (Decreases => Last);
++   procedure Reject_Column (Columns : Int_Array; Address, Width : Integer;
++                            Ncols, Cursor : Natural; Value : Integer) with
++     Ghost => Static, Global => null,
++     Pre => Shape (Columns) and then Row_Valid (Columns, Address, Width, Ncols)
++       and then Cursor <= Width
++       and then (for all K in 0 .. Cursor-1 => Columns (Address+K) < Value)
++       and then (Cursor = Width or else Value < Columns (Address+Cursor)),
++     Post => (for all K in 0 .. Width-1 => Columns (Address+K) /= Value);
++   procedure Find_Column (Columns : Int_Array; Address, Width : Integer; Ncols : Natural;
++                          Value : Integer; Cursor : in out Natural; Found : out Boolean) with
++     Global => null,
++     Pre => Shape (Columns) and then Row_Valid (Columns, Address, Width, Ncols)
++       and then Cursor <= Width
++       and then (for all K in 0 .. Cursor-1 => Columns (Address+K) < Value),
++     Post => Cursor in Cursor'Old .. Width
++       and then Found = (for some K in 0 .. Width-1 => Columns (Address+K) = Value)
++       and then (for all K in 0 .. Cursor-1 => Columns (Address+K) < Value)
++       and then (if Found then Cursor < Width and then Columns (Address+Cursor) = Value
++         else Cursor = Width or else Value < Columns (Address+Cursor));
++   function Subset_Model (Columns : Int_Array; Child_Address, Child_Width, Parent_Address, Parent_Width : Integer)
++                          return Boolean is
++     (for all K in 0 .. Child_Width-1 =>
++       (for some J in 0 .. Parent_Width-1 => Columns (Child_Address+K) = Columns (Parent_Address+J)))
++     with Ghost => Static,
++     Pre => Shape (Columns) and then Span (Columns, Child_Address, Child_Width)
++       and then Span (Columns, Parent_Address, Parent_Width);
++   function Sorted_Subset (Columns : Int_Array; Child_Address, Child_Width, Parent_Address, Parent_Width : Integer;
++                           Ncols : Natural) return Boolean with
++     Global => null,
++     Pre => Shape (Columns) and then Row_Valid (Columns, Child_Address, Child_Width, Ncols)
++       and then Row_Valid (Columns, Parent_Address, Parent_Width, Ncols),
++     Post => (Static => Sorted_Subset'Result = Subset_Model (Columns, Child_Address, Child_Width, Parent_Address, Parent_Width));
++
++   function Body_Links (Parent, Weld, Width : Int_Array; Nv : Natural) return Boolean is
++     (Shape (Parent) and then Shape (Weld) and then Shape (Width)
++      and then Parent'Length in 1 .. Max_Size and then Weld'Length = Parent'Length
++      and then Width'Length = Parent'Length and then Nv <= Max_Size
++      and then Parent (0) = 0 and then Weld (0) = 0
++      and then (for all B in Parent'Range => Width (B) in 0 .. Nv and then Weld (B) in 0 .. B
++        and then (if B > 0 then Parent (B) in 0 .. B-1)));
++   function Body_Count_Model (Parent, Weld, Width : Int_Array; Nv, Node : Natural) return Int64 is
++     (if Node = 0 then 0 else Int64 (Width (Node)) +
++       Body_Count_Model (Parent, Weld, Width, Nv, Weld (Parent (Node)))) with
++     Ghost => Static, Global => null,
++     Pre => Body_Links (Parent, Weld, Width, Nv) and then Node < Parent'Length,
++     Post => Body_Count_Model'Result in 0 .. Int64 (Node)*Int64 (Nv),
++     Subprogram_Variant => (Decreases => Node);
++   procedure Unfold_Body_Count (Parent, Weld, Width : Int_Array; Nv, Node : Natural) with
++     Ghost => Static, Global => null,
++     Pre => Body_Links (Parent, Weld, Width, Nv) and then Node < Parent'Length,
++     Post => Body_Count_Model (Parent, Weld, Width, Nv, Node) =
++       (if Node = 0 then 0 else Int64 (Width (Node))+
++         Body_Count_Model (Parent, Weld, Width, Nv, Weld (Parent (Node))));
++   function Ancestor_Count (Parent, Weld, Width : Int_Array; Nv, Node : Natural) return Int64 with
++     Global => null,
++     Pre => Body_Links (Parent, Weld, Width, Nv) and then Node < Parent'Length,
++     Post => (Static => Ancestor_Count'Result = Body_Count_Model (Parent, Weld, Width, Nv, Node));
++
++   function Dof_Links (Parent : Int_Array) return Boolean is
++     (Shape (Parent) and then Parent'Length <= Max_Size
++      and then (for all D in Parent'Range => Parent (D) in -1 .. D-1));
++   function Dof_Count_Model (Parent : Int_Array; Dof : Integer) return Natural is
++     (if Dof < 0 then 0 else 1+Dof_Count_Model (Parent, Parent (Dof))) with
++     Ghost => Static, Global => null,
++     Pre => Dof_Links (Parent) and then Dof in -1 .. Parent'Length-1,
++     Post => Dof_Count_Model'Result <= Dof+1,
++     Subprogram_Variant => (Decreases => Dof);
++   procedure Unfold_Dof_Count (Parent : Int_Array; Dof : Integer) with
++     Ghost => Static, Global => null,
++     Pre => Dof_Links (Parent) and then Dof in -1 .. Parent'Length-1,
++     Post => Dof_Count_Model (Parent, Dof) =
++       (if Dof < 0 then 0 else 1+Dof_Count_Model (Parent, Parent (Dof)));
++   function Dof_Count (Parent : Int_Array; Dof : Integer) return Natural with
++     Global => null, Pre => Dof_Links (Parent) and then Dof in -1 .. Parent'Length-1,
++     Post => (Static => Dof_Count'Result = Dof_Count_Model (Parent, Dof));
++   function Row_Length (Address : Int_Array; Nm : Natural; Dof : Natural) return Integer is
++     ((if Dof = Address'Length-1 then Nm else Address (Dof+1))-Address (Dof)) with
++     Pre => Shape (Address) and then Address'Length <= Max_Size and then Nm <= Max_Size
++       and then Dof < Address'Length and then (for all A of Address => A in 0 .. Nm);
++   function Mass_Links (Parent, Address : Int_Array; Nm : Natural) return Boolean is
++     (Dof_Links (Parent) and then Shape (Address) and then Address'Length = Parent'Length and then Nm <= Max_Size
++      and then (for all A of Address => A in 0 .. Nm)
++      and then (if Address'Length = 0 then Nm = 0 else Address (0) = 0)
++      and then (for all D in Address'Range => Row_Length (Address, Nm, D) >= 1
++        and then Row_Length (Address, Nm, D) =
++          (if Parent (D) = -1 then 1 else Row_Length (Address, Nm, Parent (D))+1)));
++   procedure Mass_Ancestor_Equal (Parent, Address : Int_Array; Nm, Dof : Natural) with
++     Ghost => Static, Global => null,
++     Pre => Mass_Links (Parent, Address, Nm) and then Dof < Parent'Length,
++     Post => Row_Length (Address, Nm, Dof) = Dof_Count_Model (Parent, Dof),
++     Subprogram_Variant => (Decreases => Dof);
++   function Diagonal_Valid (Columns : Int_Array; Address, Width, Position, Dof, Count : Integer) return Boolean is
++     (Count >= 1 and then Position = Count-1 and then Span (Columns, Address, Width)
++      and then Position in 0 .. Width-1 and then Columns (Address+Position) = Dof)
++     with Pre => Shape (Columns);
++   function Rows_Equal (Left : Int_Array; Left_Address, Left_Width : Integer;
++                        Right : Int_Array; Right_Address, Right_Width : Integer) return Boolean with
++     Global => null,
++     Pre => Shape (Left) and then Shape (Right) and then Span (Left, Left_Address, Left_Width)
++       and then Span (Right, Right_Address, Right_Width),
++     Post => Rows_Equal'Result = (Left_Width = Right_Width and then
++       (for all K in 0 .. Left_Width-1 => Left (Left_Address+K) = Right (Right_Address+K)));
++end MJ.Model_Structures;

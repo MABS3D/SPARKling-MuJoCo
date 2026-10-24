@@ -12,6 +12,7 @@ package body MJ.MJB with SPARK_Mode is
       Stat       : MJ.Fixed.Statistic;
       Gravcomp   : Boolean;
       Surfacevel : Boolean;
+      Adhesion   : Boolean;
    begin
       --  A zero-based array can have Natural'Last + 1 elements, but the
       --  cursor must also represent the position just past the final byte.
@@ -63,7 +64,7 @@ package body MJ.MJB with SPARK_Mode is
          Result := (Truncated, Option_Block, -1);
          return;
       end if;
-      Read_Fixed (B, Pos, Opt, Vis, Stat, Gravcomp, Surfacevel, Result);
+      Read_Fixed (B, Pos, Opt, Vis, Stat, Gravcomp, Surfacevel, Adhesion, Result);
       if Result.Status /= OK then
          return;
       end if;
@@ -72,6 +73,11 @@ package body MJ.MJB with SPARK_Mode is
       M.Stat := Stat;
       M.Flg_Gravcomp := Gravcomp;
       M.Flg_Surfacevel := Surfacevel;
+      --  Older images have no adhesion byte. Preserve their existing raw-load
+      --  behavior; Validate derives this flag from the model's geom fields.
+      if Has_Serialized_Adhesion then
+         M.Flg_Adhesion := Adhesion;
+      end if;
 
       M.S := S;
       Read_Arrays (B, Pos, M, Result);

@@ -1264,8 +1264,9 @@ averages 29.46 cone rank updates and 7.68 quadratic downdates per step, with no
 folded rebuilds; the mixed pyramidal fixture averages 4.27 quadratic updates and
 7.64 downdates. These are exact invocation counts, not execution-time shares or
 a predicted speedup. The [counter archive](evidence/20261009-hessian-reuse-r122/c-counters.zip)
-includes the pinned-source instrumentation and its checks. Final r122 Ada call
-counts and quiet release timings have not been run. The r120 timing table above
+includes the pinned-source instrumentation and its checks. At the 2026-10-09 publication, final r122 Ada call
+counts and quiet release timings had not been run; see the 2026-10-24 timing
+section below for the new measurement. The r120 timing table above
 remains historical and cannot establish acceptance of these changes.
 
 The rank-update probe passes **593 cases**: 588 bitwise comparisons with actual
@@ -1308,6 +1309,70 @@ The production pin stays 3.14, and the new overlay is opt-in through
 [Results and scope](evidence/20261009-scalar-site-r124/summary.json) and the
 [verified archive](evidence/20261009-scalar-site-r124/scalar-site-r124.zip)
 retain both positive and negative runs, exact sources, commands and manifests.
+
+## Measured persistent-factor improvement, 2026-10-24
+
+A fresh quiet comparison now measures the frozen r122 combined Hessian/packed
+update changes against r120 and actual C 3.15, with the same six sample-1 models.
+All final-state checks and before/after source, binary and reference hashes pass.
+There are 24 alternating blocks, 16 trajectories of 100 full steps per block,
+CPU 0, normal C SIMD and one excluded warm-up trajectory per block. Runtime
+checks remain enabled in both measured Ada binaries. These binaries precede the
+new 3.17 migration and subsequent ghost refinements.
+
+| Full movement | r122 mean us/step | Mean duration change r122/r120 [95%] | Mean r122/C 3.15 |
+|---|---:|---:|---:|
+| membrane_Newton_3 | 12.419 | -0.64% [-3.71%, +2.69%] | 2.535 |
+| free | 20.673 | -3.16% [-6.89%, +0.66%] | 3.266 |
+| element_2_sphere | 13.784 | +2.84% [-0.70%, +6.63%] | 2.551 |
+| element_mixed_pyramidal_3 | 30.916 | -6.87% [-8.63%, -5.04%] | 2.596 |
+| element_elastic_cross_elliptic_6 | 72.025 | -24.10% [-25.61%, -22.38%] | 2.550 |
+| element_elastic_self_bvh_pyramidal_3 | 59.503 | -3.16% [-6.47%, -0.27%] | 2.565 |
+
+Mixed and elliptic improve in both mean and paired-median estimators, including
+intervals corrected for the six mean comparisons. Elliptic also improves its
+trajectory p95 by 21.59% [95%: 9.79%, 29.91%]. Membrane, free and sphere remain
+unresolved. Self-BVH's pointwise mean interval is favorable, but its paired
+median and multiple-comparison interval include parity: no robust improvement
+is claimed there. The analysis resamples paired blocks 20,000 times, keeping
+the 16 trajectories inside each block together; it does not average percentages
+across different models. Complete mean, median, dispersion and tail estimates
+are in the [statistical summary](evidence/20261024-hessian-reuse-timing-r122/summary.json).
+
+Own jobs were idle and the observed WSL process window stayed quiet; arbitrary
+native Windows background activity is not fully observable. The gap remains
+2.54--3.27 times C's mean duration across these workloads. This is historical
+C 3.15 evidence, not a timing result for the latest 3.17 reference, nor acceptance
+of full-port parity. [Watch/integrity receipt](evidence/20261024-hessian-reuse-timing-r122/watch.json)
+and [verified evidence archive](evidence/20261024-hessian-reuse-timing-r122/timing.zip)
+retain exact sources, executables, input/output, driver and analysis.
+
+## Packed proof minima and runtime diagnosis, 2026-10-24
+
+The new proof decomposition closes 12 checks for `Flat_Column_Limit`, 37 for
+`Flat_Lower_Separate`, and 137 for `Flat_Prefix_Store` (136 proof plus one flow).
+The prefix lemma extends the exact ordered floating-point model after the two
+actual cell stores, requiring their frames explicitly. These are ghost changes;
+public preconditions and runtime arithmetic remain unchanged. Existing
+imprecise-Sqrt warnings remain, so the strict warning-free gate is false.
+The r131 caller composition has not been reproved; `Flat_Row`, whole
+`Update_Flat` and the cache/factor-history model remain open engineering work.
+[Results](evidence/20261024-packed-minima-r131/summary.json) and the
+[complete archive](evidence/20261024-packed-minima-r131/proofs.zip) retain the
+successful minima, rejected attempts, watchdogs and final unproved composition.
+The earlier [r129 evidence](evidence/20261024-packed-minima-r129/proofs.zip)
+is preserved separately.
+
+Fresh instrumented r122 runs match C 3.15's exact Gram, Hessian-factor and rank
+update invocation counts for all six fixtures. The two long profiles include
+204,000 evaluations each; elliptic executes 7,428,000 rank updates. Counts
+include preparatory forwards. Sampling concerns only the instrumented main
+image, may exclude shared-library work, and is not a release wall-time split.
+The first collector correctly rejected a relink that changed the ELF hash;
+the renewed collector freezes one binary. [Diagnostic results](evidence/20261024-r122-profiles/results.json)
+and [sources, counters and profiles](evidence/20261024-r122-profiles/profiles.zip)
+preserve both attempts. This diagnosis identifies a separate duplicate FLEX
+acceleration solve; its removal requires fresh numerical and timing acceptance.
 
 ## Reproduction
 

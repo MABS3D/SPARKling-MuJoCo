@@ -11,6 +11,8 @@ import time
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOPES = {
+    "Flat_Prefix_Store": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
+    "Flat_Column_Limit": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Flat_Lower_Separate": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Update_Flat": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),
     "Flat_Row": ("mj-constraint_solvers-cholesky_updates", ".adb", "flex-elasticity-integration", "flex_constrained.gpr"),

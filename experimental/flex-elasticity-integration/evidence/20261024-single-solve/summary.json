@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-24",
+  "context_head": "570128a07e176eeefc27a161ffe7cc659d0d1221",
+  "reference": "3.14.0",
+  "reference_commit": "9ecbb9d7b5ee623f54745638d36799ff90e6f7cd",
+  "snapshot_manifest_sha256": "07b4f424270dfc69c6aaf393e5ead7a9ca1dc34f46c57db792532eb590e84fa5",
+  "runtime_source_sha256": {
+    "experimental/smooth/src/mj-data-pipeline.ads": "45bfb5b6ed83484647d84c4fa3574a48bf865f44d3ac8cfec036f261736f0966",
+    "experimental/smooth/src/mj-data-pipeline.adb": "1e9026e0676341ea46accf31eefaa7296c65cdf9f07d2f9255426952382ae00d",
+    "experimental/flex-elasticity-integration/src/mj-data-flex_elasticity.adb": "9758f75c56dc359caecc62b32842e597e91d9cde0758c5b81a259c13784db4fe"
+  },
+  "numerical_validation": {
+    "state": {
+      "cases": 78,
+      "passed": 78,
+      "binary_sha256": "59790bd8d256a15c1ac3854090b5bf1dead027d071d50d0cb32fdafef0950287"
+    },
+    "forces": {
+      "cases": 54,
+      "passed": 54,
+      "binary_sha256": "84c3951e00733bd2808718eb2742abba7a9a828c483616f2cf078720a52da6ab",
+      "steps": 100
+    },
+    "constrained": {
+      "cases": 234,
+      "passed": 234,
+      "binary_sha256": "11ad8ecfdd14c4391a125b3426997bfc4d8840518d2a878ebdafbb885a497334",
+      "steps": 100
+    }
+  },
+  "total_passed": 366,
+  "source_hashes_unchanged": true,
+  "prepare_forces_proof": {
+    "passed": false,
+    "exit": 1,
+    "checks": 0,
+    "status": "GNATprove front-end rejection before verification conditions",
+    "diagnostic": {
+      "check_tree": {},
+      "col": 16,
+      "file": "mj-data-pipeline.adb",
+      "how_proved": "trivial",
+      "line": 455,
+      "message": {
+        "text": "non-scalar object or object with address clause declared before loop-invariant is not yet supported"
+      },
+      "rule": "error",
+      "severity": "error",
+      "unproved_status": {
+        "status": "unknown"
+      }
+    },
+    "results_sha256": "159d3b0241bc439713d4a512a71cc384c0255cb5c90f16b521a7529425ce2e6f"
+  },
+  "pending": [
+    "C 3.15 full 390-case runtime rerun: historical foundation lacks the newly required Flg_Adhesion field; no compatibility bridge was introduced for this checkpoint.",
+    "C 3.17 integrated FLEX validation for this runtime patch.",
+    "Dedicated external world-wrench and stale-acceleration poisoning tests (not rerun in this checkpoint).",
+    "Functional proof of Prepare_Forces_Ready and complete dynamics.",
+    "Quiet release timing of the single-solve patch: no speedup has yet been measured."
+  ],
+  "scope": "Validation regression against C 3.14, including existing nonzero damping, generalized applied forces and contact corpus. Metadata/state samples are not time trajectories. No global Gold or timing claim."
+}

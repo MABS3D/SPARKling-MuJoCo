@@ -1,0 +1,23 @@
+{
+  "scope": "Diagnostic frozen-r122 -pg call counts and CPU-image sampling; separate from release timing.",
+  "reference": "C3.15; not3.17",
+  "all_six_short_count_sets_match_C": true,
+  "long_counts": {
+    "free": {
+      "solves": 204000,
+      "Gram": 204000,
+      "factor": 204000,
+      "rank_updates": 0
+    },
+    "elliptic": {
+      "solves": 204000,
+      "Gram": 204000,
+      "factor": 204000,
+      "rank_updates": 7428000
+    }
+  },
+  "long_scope": "2000 trajectories, 100 steps plus2 preparatory calls each; whole-process call counts, not just timed region.",
+  "sampling_limits": "Shared-library CPU samples may be excluded; free424 samples has low precision. Not global wall time shares.",
+  "next_action": "Remove duplicated FLEX acceleration solve before passive elasticity is added; retain separate damped Euler factorization.",
+  "negative_attempt": "v1 numerical cases passed; collector rejected a GPRbuild relink changing instrumented binary SHA. v2 freezes one ELF."
+}

@@ -66,6 +66,25 @@ private package MJ.Data.Pipeline with SPARK_Mode is
      and then Velocity_Values (D) = Velocity_Values (D)'Old
      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
 
+   --  FLEX adds its passive contribution after these smooth phases. Keep
+   --  acceleration unpublished until that contribution has been accumulated.
+   --  This private child is entered only after the caller invalidates qacc.
+   procedure Prepare_Forces_Ready
+     (D : in out Simulation; Result : out Status) with Global => null,
+     Pre => Is_Ready (D) and then not Forces_Current (D),
+     Post => Is_Empty (D) = Is_Empty (D)'Old
+       and then Is_Ready (D) = Is_Ready (D)'Old and then Shape (D) = Shape (D)'Old
+       and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
+       and then Input_Values (D) = Input_Values (D)'Old
+       and then (if Result = Success then Is_Ready (D) and then Positions_Current (D)
+         and then Mass_Current (D) and then Passive_Current (D)
+         and then Actuation_Current (D) and then not Forces_Current (D));
+   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
+     and then Position_Values (D) = Position_Values (D)'Old
+     and then Velocity_Values (D) = Velocity_Values (D)'Old
+     and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
+
    procedure Evaluate_Ready
      (D : in out Simulation; Result : out Status;
       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) with Global => null, Pre => Is_Ready (D),

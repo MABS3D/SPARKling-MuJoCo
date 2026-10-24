@@ -1017,6 +1017,97 @@ package body MJ.Data.Pipeline with SPARK_Mode is
    end Evaluate_Actuation_Acceleration;
    pragma Inline_Always (Evaluate_Actuation_Acceleration);
 
+   procedure Prepare_Forces_Ready
+     (D : in out Simulation; Result : out Status) is
+      --  Compose phase contracts without expanding their representation.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Kernels.All_Tier0);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Shape);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Positions_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Forces_Current);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Position_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Velocity_Values);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Time);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Step_Size);
+      Initial_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+      Initial_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      Initial_State : constant Real_Array := State_Values (D) with Ghost => Static;
+      Initial_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+   begin
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      declare
+         Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+         Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         Update_Poses (D, Result);
+         MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+         MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+      end;
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      if Result /= Success then
+         return;
+      end if;
+      declare
+         Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+         Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         Evaluate_Inertia_Forces (D, Result);
+         MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+         MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+      end;
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      if Result /= Success then
+         return;
+      end if;
+      declare
+         Before_Pos : constant Real_Array := Position_Values (D) with Ghost => Static;
+         Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
+         Before_State : constant Real_Array := State_Values (D) with Ghost => Static;
+         Before_Inputs : constant Real_Array := Input_Values (D) with Ghost => Static;
+         Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+      begin
+         Actuation_Phase.Compute (D, Result);
+         MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+         MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+         MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+         MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+         Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+      end;
+      pragma Assert (Static => State_Values (D) = Initial_State);
+      pragma Assert (Static => Input_Values (D) = Initial_Inputs);
+      --  This is the same stage-readiness gate Solve_Acceleration applies
+      --  before using the smooth RHS. It does not scan numerical buffers.
+      --  No stage in this path may publish qacc before FLEX adds its forces.
+      if Result = Success and then not
+        (D.Cache.Pose_Valid and then D.Cache.Mass_Valid
+         and then D.Cache.Passive_Valid and then D.Cache.Actuation_Valid
+         and then not D.Cache.Force_Valid)
+      then
+         Result := Stale_Results;
+      end if;
+   end Prepare_Forces_Ready;
+
    procedure Evaluate_Ready
      (D : in out Simulation; Result : out Status;
       External : MJ.External_Forces.Wrench_Array := MJ.External_Forces.No_Loads) is

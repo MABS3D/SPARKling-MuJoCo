@@ -92,3 +92,32 @@ ancestry change concerns admission; integrated timing needs its own measurement.
 Receipts: `evidence/20261003-ancestors/acceptance-r196-r198.json`,
 `r197-results.json` and the recorded source manifests. Earlier receipts retain
 their original scopes and are not attributed to these newer sources.
+
+## Single acceleration solve, 2026-10-24
+
+The FLEX path now prepares poses, rigid/passive forces and actuation, adds all
+FLEX forces, then solves acceleration once. This follows C's force ordering and
+removes the earlier acceleration solve before FLEX accumulation. Public
+`MJ.Data.Forward.Evaluate` keeps its full behavior. Readiness, external-force
+shape checks and result-publication guards remain; the damped Euler solve is
+unchanged. The FLEX force routines were audited for acceleration reads and do
+not consume the old acceleration.
+
+A fresh validation snapshot passes the complete C 3.14 regression: **78/78**
+metadata/state cases, **54/54** force cases and **234/234** constrained cases.
+The force and constrained comparisons run **100 steps**, including the existing
+damping, generalized applied forces and contact corpus. Dedicated world-wrench
+and stale-acceleration poisoning tests were not rerun in this checkpoint.
+
+The smallest proof scope, `Prepare_Forces_Ready`, remains **open**: GNATprove
+rejected a composite local declaration before a loop invariant in
+`mj-data-pipeline.adb:455`, before generating verification conditions (**0
+checks**). The failed log and exact source closure are preserved; this is not a
+Gold claim for the new stage or complete dynamics. The repeatable minimum runner
+is `experimental/smooth/tests/prove_prepare_forces.py`.
+
+The C 3.15 runtime rerun is pending: its historical generated foundation lacks
+the newly required `Flg_Adhesion` field. C 3.17 integrated acceptance and quiet
+release timing of this patch are also pending. No measured performance gain is
+claimed. Receipts and frozen inputs are in
+[`evidence/20261024-single-solve/`](evidence/20261024-single-solve/).

@@ -203,6 +203,17 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
       end loop;
    end Flat_Row_Limits;
 
+   procedure Flat_Column_Limit (F : Packed.Flat_Pattern; Row, Position : Positive) with
+     Ghost => Static, Global => null,
+     Pre => Packed.Valid_Flat (F) and then Row <= F.N and then Position <= F.Length (Row),
+     Post => F.Column (F.Address (Row)+Position) <= Row
+       and then (if Position > 1 then F.Column (F.Address (Row)+Position-1) <
+         F.Column (F.Address (Row)+Position))
+   is
+   begin
+      null;
+   end Flat_Column_Limit;
+
    procedure Flat_Lower_Separate (F : Packed.Flat_Pattern; Row, Position : Positive) with
      Ghost => Static, Global => null,
      Pre => Packed.Valid_Flat (F) and then Row <= F.N and then Position < F.Length (Row),
@@ -213,8 +224,11 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
    begin
       Flat_Row_Limits (F, Row);
       Packed.Flat_Column_Separate (F, Row, Position);
+      Flat_Column_Limit (F, Row, Position+1);
+      pragma Assert (F.Column (F.Address (Row)+Position) < Row);
       for R in 1 .. F.N loop
          pragma Assert (F.Address (Row)+Position /= F.Address (R)+F.Length (R));
+         pragma Loop_Invariant (F.Column (F.Address (Row)+Position) < Row);
          pragma Loop_Invariant (for all Q in 1 .. R =>
            F.Address (Row)+Position /= F.Address (Q)+F.Length (Q));
       end loop;
@@ -237,6 +251,61 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
              and then F.Column (F.Address (Row)+Position) /= Q));
       end loop;
    end Flat_Selection_Frame;
+
+   --  A proof-only store step. The caller must establish both actual stores
+   --  and their frames; this lemma only extends the already correct prefix.
+   procedure Flat_Prefix_Store
+     (Before_L, Before_X, After_L, After_X, Original_L, Original_X : Vector;
+      F : Packed.Flat_Pattern; Row, Position : Positive;
+      C : Positive_Coefficient; S, Signed_S : Coefficient) with
+     Ghost => Static, Global => null,
+     Pre => Packed.Valid_Flat (F) and then Row <= F.N and then Position < F.Length (Row)
+       and then Before_L'First = 1 and then Before_L'Length = F.Stored
+       and then After_L'First = 1 and then After_L'Length = F.Stored
+       and then Original_L'First = 1 and then Original_L'Length = F.Stored
+       and then Before_X'First = 1 and then Before_X'Length = F.N
+       and then After_X'First = 1 and then After_X'Length = F.N
+       and then Original_X'First = 1 and then Original_X'Length = F.N
+       and then Packed.Bounded (Original_L) and then Packed.Bounded (Original_X)
+       and then (for all K in 1 .. Position-1 =>
+         Before_L (F.Address (Row)+K) = Sparse_Combine
+           (C, Signed_S, Original_L (F.Address (Row)+K), Original_X (F.Column (F.Address (Row)+K)))
+         and then Before_X (F.Column (F.Address (Row)+K)) = Sparse_Combine
+           (S, C, Original_L (F.Address (Row)+K), Original_X (F.Column (F.Address (Row)+K))))
+       and then After_L (F.Address (Row)+Position) = Sparse_Combine
+         (C, Signed_S, Original_L (F.Address (Row)+Position),
+          Original_X (F.Column (F.Address (Row)+Position)))
+       and then After_X (F.Column (F.Address (Row)+Position)) = Sparse_Combine
+         (S, C, Original_L (F.Address (Row)+Position),
+          Original_X (F.Column (F.Address (Row)+Position)))
+       and then (for all Slot in Before_L'Range =>
+         (if Slot /= F.Address (Row)+Position then After_L (Slot) = Before_L (Slot)))
+       and then (for all J in Before_X'Range =>
+         (if J /= F.Column (F.Address (Row)+Position) then After_X (J) = Before_X (J))),
+     Post => (for all K in 1 .. Position =>
+       After_L (F.Address (Row)+K) = Sparse_Combine
+         (C, Signed_S, Original_L (F.Address (Row)+K), Original_X (F.Column (F.Address (Row)+K)))
+       and then After_X (F.Column (F.Address (Row)+K)) = Sparse_Combine
+         (S, C, Original_L (F.Address (Row)+K), Original_X (F.Column (F.Address (Row)+K))))
+   is
+      First : constant Natural := F.Address (Row);
+   begin
+      Packed.Flat_Column_Separate (F, Row, Position);
+      for K in 1 .. Position loop
+         Flat_Column_Limit (F, Row, K);
+         if K < Position then
+            pragma Assert (First+K /= First+Position);
+            pragma Assert (F.Column (First+K) /= F.Column (First+Position));
+            pragma Assert (After_L (First+K) = Before_L (First+K));
+            pragma Assert (After_X (F.Column (First+K)) = Before_X (F.Column (First+K)));
+         end if;
+         pragma Loop_Invariant (for all Q in 1 .. K =>
+           After_L (First+Q) = Sparse_Combine
+             (C, Signed_S, Original_L (First+Q), Original_X (F.Column (First+Q)))
+           and then After_X (F.Column (First+Q)) = Sparse_Combine
+             (S, C, Original_L (First+Q), Original_X (F.Column (First+Q))));
+      end loop;
+   end Flat_Prefix_Store;
 
    procedure Flat_Row (L : in out Vector; F : Packed.Flat_Pattern; X : in out Vector;
                        Row : Positive; C : Positive_Coefficient; S, Signed_S : Coefficient;
@@ -271,6 +340,8 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
          declare
             Slot : constant Positive := First+I;
             J : constant Positive := Columns (Slot);
+            Before_L : constant Vector := L with Ghost => Static;
+            Before_X : constant Vector := X with Ghost => Static;
          begin
             Packed.Selected_Step (F, Row, J, I);
             pragma Assert (Static => not Packed.Row_Selected (F, Row, J, I-1));
@@ -282,6 +353,8 @@ package body MJ.Constraint_Solvers.Cholesky_Updates with SPARK_Mode is
               and then Residual = Sparse_Combine (S, C, Original_L (Slot), Original_X (J)));
             if Value not in Operand or else Residual not in Operand then return; end if;
             L (Slot) := Value; X (J) := Residual;
+            Flat_Prefix_Store (Before_L, Before_X, L, X, Original_L, Original_X,
+              F, Row, I, C, S, Signed_S);
             pragma Assert (Static => (for all R in 1 .. F.N =>
               L (F.Address (R)+F.Length (R)) = Original_L (F.Address (R)+F.Length (R))));
             pragma Assert (Static => Packed.Flat_Diagonal (L, F));
