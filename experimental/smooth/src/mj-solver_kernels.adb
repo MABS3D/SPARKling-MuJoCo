@@ -33,26 +33,6 @@ package body MJ.Solver_Kernels with SPARK_Mode is
       Ok := Rejected = 0;
    end Add_Row;
 
-   procedure Scale_Row
-     (Target : in out Real_Array; Inverse : Inverse_Real; Ok : out Boolean)
-   is
-      Rejected : Int64 := 0;
-   begin
-      for I in Target'Range loop
-         Target (I) := Scale (Target (I), Inverse);
-         Rejected := Rejected + Boolean'Pos (Target (I) not in Work_Real);
-         pragma Loop_Invariant
-           (Static => Rejected in 0 .. Int64 (I) - Int64 (Target'First) + 1);
-         pragma Loop_Invariant
-           (Static => (Rejected = 0) = (for all J in Target'First .. I => Target (J) in Work_Real));
-         pragma Loop_Invariant
-           (Static => (for all J in Target'Range =>
-             Target (J) = (if J <= I then Scale (Target'Loop_Entry (J), Inverse)
-               else Target'Loop_Entry (J))));
-      end loop;
-      Ok := Rejected = 0;
-   end Scale_Row;
-
    type Rejection_Flags is mod 2 ** 64;
 
    procedure Flag_Rejection (Flags : in out Rejection_Flags; Reject_Entry : Boolean)
@@ -65,6 +45,25 @@ package body MJ.Solver_Kernels with SPARK_Mode is
       Flags := Flags or Rejection_Flags (Boolean'Pos (Reject_Entry));
    end Flag_Rejection;
    pragma Inline_Always (Flag_Rejection);
+
+   procedure Scale_Row
+     (Target : in out Real_Array; Inverse : Inverse_Real; Ok : out Boolean)
+   is
+      Rejected : Rejection_Flags := 0;
+   begin
+      for I in Target'Range loop
+         Target (I) := Target (I) * Inverse;
+         Flag_Rejection (Rejected, Target (I) not in Work_Real);
+         pragma Loop_Invariant (Static => Rejected in 0 .. 1);
+         pragma Loop_Invariant
+           (Static => (Rejected = 0) = (for all J in Target'First .. I => Target (J) in Work_Real));
+         pragma Loop_Invariant
+           (Static => (for all J in Target'Range =>
+             Target (J) = (if J <= I then Scale (Target'Loop_Entry (J), Inverse)
+               else Target'Loop_Entry (J))));
+      end loop;
+      Ok := Rejected = 0;
+   end Scale_Row;
 
    procedure Add_Long_Row
      (Buffer : in out Real_Array;

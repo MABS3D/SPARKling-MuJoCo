@@ -472,3 +472,42 @@ time. Their scoped proof results and pending dynamics/performance limitations
 are unchanged by packaging. No remote push accompanies this local commit.
 
 [Storage audit, exact verification/restoration and append workflow](../../docs/storage-and-evidence.md).
+
+## Generic row diagnostics after the published checkpoint
+
+Three private row variants close their scoped functional proof obligations and
+pass numerical checks, but integrated movement measurements show regressions.
+None is adopted; the active kernel remains r455. A new dedicated corpus covers
+Add_Row and Scale_Row directly, including every rejected SIMD lane, signed-zero
+bits and maximum origins: 137,754 cases per profile on the retained baseline
+and each private variant. The prior disjoint-row corpus remains separate.
+
+[Proof scope, rejected variants, raw measurements and regression corpus](evidence/20261025-row-reductions-r480/README.md).
+The complete port, dynamics proofs and C performance parity remain pending.
+
+## Vector Scale_Row and replica uncertainty
+
+Scale_Row now uses a separate 256-bit SIMD multiplication routine and integer
+rejection flags, preserving its full domain and exact functional contracts.
+The minimum/unit scopes close 19/156 checks; C3.17/C3.14 and boundary suites pass.
+The normal shared-builder binaries match the private experiment exactly.
+
+Replication contradicts the initial 8% single-joint gain: exact-SHA copies show
+substantial timing differences. A new multiple-copy comparison with randomized
+creation and replica/block uncertainty confirms about 1.9–2.1% less chain24 time.
+Many other cases remain inconclusive; observed regressions are preserved too.
+The chain still takes about 2.3 times C's time. Dummy inverse filling remains.
+
+[Proofs, numerical checks, timing qualification and complete data](evidence/20261025-vector-scale-r503/README.md).
+No complete-port, whole dynamics Gold or overall performance-parity claim.
+
+## Direct reduction work in progress
+
+The local-accumulator-only prototype closes its 173-check minimum but leaves the
+successful-path machine code unchanged. A direct-product/addition prototype
+produces a four-lane YMM block and passes an extended 36,079-case corpus in both
+profiles, including exact rejection counts. Its changed-loop proof is still
+unfinished; it is not adopted and has no integrated performance claim.
+
+[Source, proof/timeout scope, assembly and retained regression corpus](evidence/20261025-direct-dot-r525/README.md).
+The verified r503 vector Scale_Row remains the working implementation.

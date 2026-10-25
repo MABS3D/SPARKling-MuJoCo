@@ -62,5 +62,6 @@ package MJ.Solver_Kernels with SPARK_Mode is
    --  Keep the specified arithmetic and rejection reduction unchanged while
    --  exposing short packed rows to the caller's optimizer.
    pragma Inline_Always
-     (Clamp_Pivot, Reciprocal, Scale, Add_Product, Add_Row, Scale_Row, Add_Row_Disjoint);
+     (Clamp_Pivot, Reciprocal, Scale, Add_Product, Add_Row, Add_Row_Disjoint);
+   pragma No_Inline (Scale_Row);
 end MJ.Solver_Kernels;

@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "driver_sha256": "fe5b27c90901760df067d56e6703542e14eeeac5e3bd5e3000a68263c3decb3b",
+  "probe_sha256": "06ff493684b4156ad91efab0924096aa24be4ef3926d79128fee4fd00226c200",
+  "baseline_original_runner_sha256": "c1c71bf202fce9af87d5479da9e3ce8a594a8c3f7cd40b2db635c83bbbf459f0",
+  "change": "Remove unused vector-width override option/branch copied from the old disjoint driver. Actual tested default flag lists and the entire Ada test corpus are identical. Complete final baseline validation/release rerun passes.",
+  "mechanical_driver_bridge_verified": true,
+  "identical_probe_and_default_flags": true,
+  "actual_final_results": {
+    "passed": true,
+    "sources_unchanged": true,
+    "sources_sha256": "9e1e0d1be93b90f5721665bc58eab7f2cee7dcedfd0a8e359c4a66ee40548274",
+    "records": [
+      {
+        "mode": "validation",
+        "flags": [
+          "-gnat2022",
+          "-ffp-contract=off",
+          "-O1",
+          "-g",
+          "-gnata",
+          "-gnato",
+          "-gnatVa"
+        ],
+        "passed": true,
+        "output": "passed 137754 generic row cases",
+        "binary_sha256": "02da773a3c44ba190229d54ec7a7958d971e8934ffbd97e815d944013b0161b6",
+        "build_command": [
+          "python3",
+          "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+          "--cap-mb",
+          "3000",
+          "--timeout",
+          "600",
+          "--",
+          "gprbuild",
+          "-P",
+          "/var/tmp/sparkling-generic-final-r484-20261025/validation/rows.gpr",
+          "-j1"
+        ]
+      },
+      {
+        "mode": "release",
+        "flags": [
+          "-gnat2022",
+          "-ffp-contract=off",
+          "-O3",
+          "-gnatn",
+          "-march=native",
+          "-flto=1"
+        ],
+        "passed": true,
+        "output": "passed 137754 generic row cases",
+        "binary_sha256": "4452c869199e4d7bf4bef98fc96934677d25ae3e09196bf0bd70f218f21c1a61",
+        "build_command": [
+          "python3",
+          "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+          "--cap-mb",
+          "3000",
+          "--timeout",
+          "600",
+          "--",
+          "gprbuild",
+          "-P",
+          "/var/tmp/sparkling-generic-final-r484-20261025/release/rows.gpr",
+          "-j1"
+        ]
+      }
+    ],
+    "scope": "Bit-exact Add_Row/Scale_Row ordered arithmetic and rejection corpus, all lengths 0..256, each rejected lane/sign, constrained numeric limits, signed zero and nonzero/maximum origins. Separate from universal language proof, real accuracy, C equivalence and full movement performance."
+  }
+}
