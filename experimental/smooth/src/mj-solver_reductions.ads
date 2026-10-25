@@ -59,11 +59,20 @@ package MJ.Solver_Reductions with SPARK_Mode is
      Pre => Count < AR.Max_Dofs and then abs Acc <= Real (Count) * Step_Bound,
      Post => abs Model_Add'Result <= Real (Count + 1) * Step_Bound;
 
+   Tail_Step_Bound : constant Real := 2.0 ** 412;
+   function Model_Tail_Add (Acc : Reduction_Real; Term : Product_Real; Count : Lane_Number)
+     return Reduction_Real with Ghost => Static, Global => null,
+     Pre => Count <= 2
+       and then abs Acc <= Merged_Real'Last + Real (Count) * Tail_Step_Bound,
+     Post => Model_Tail_Add'Result = Acc + Term
+       and then abs Model_Tail_Add'Result
+         <= Merged_Real'Last + Real (Count + 1) * Tail_Step_Bound;
+
    function Lane_Sum (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array;
                       Blocks : Block_Count; Lane : Lane_Number) return Lane_Real is
      (if Blocks = 0 then 0.0
       elsif Blocks = 1 then Product (P, Row, Lane, Factor, Values)
-      else Model_Add (Lane_Sum (P, Row, Factor, Values, Blocks - 1, Lane),
+      else Accumulate (Lane_Sum (P, Row, Factor, Values, Blocks - 1, Lane),
         Product (P, Row, 4 * (Blocks - 1) + Lane, Factor, Values), Blocks - 1)) with
      Ghost => Static, Global => null,
      Pre => Valid (P, Row, Factor, Values) and then Blocks <= (AR.Length (P, Row) - 1) / 4,
@@ -114,18 +123,23 @@ package MJ.Solver_Reductions with SPARK_Mode is
                       Tail : Lane_Number) return Reduction_Real is
      (case Tail is
       when 0 => Merged_Sum (P, Row, Factor, Values),
-      when 1 => Merged_Sum (P, Row, Factor, Values)
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values),
-      when 2 => (Merged_Sum (P, Row, Factor, Values)
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values))
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 1, Factor, Values),
-      when 3 => ((Merged_Sum (P, Row, Factor, Values)
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values))
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 1, Factor, Values))
-        + Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 2, Factor, Values)) with
+      when 1 => Model_Tail_Add
+        (Merged_Sum (P, Row, Factor, Values),
+         Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values), 0),
+      when 2 => Model_Tail_Add
+        (Model_Tail_Add (Merged_Sum (P, Row, Factor, Values),
+           Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values), 0),
+         Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 1, Factor, Values), 1),
+      when 3 => Model_Tail_Add
+        (Model_Tail_Add
+           (Model_Tail_Add (Merged_Sum (P, Row, Factor, Values),
+              Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4), Factor, Values), 0),
+            Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 1, Factor, Values), 1),
+         Product (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + 2, Factor, Values), 2)) with
      Ghost => Static, Global => null,
      Pre => Valid (P, Row, Factor, Values) and then Tail <= (AR.Length (P, Row) - 1) mod 4,
-     Post => abs Tail_Sum'Result <= 5.0e125;
+     Post => abs Tail_Sum'Result <= 5.0e125
+       and then abs Tail_Sum'Result <= Merged_Real'Last + Real (Tail) * Tail_Step_Bound;
 
    function Four_Sum (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array)
      return Reduction_Real is (Tail_Sum (P, Row, Factor, Values, (AR.Length (P, Row) - 1) mod 4)) with

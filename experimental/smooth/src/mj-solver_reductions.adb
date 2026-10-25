@@ -12,6 +12,24 @@ package body MJ.Solver_Reductions with SPARK_Mode is
    function Add_Tail (Acc : Reduction_Real; Term : Product_Real; Count : Lane_Number)
      return Reduction_Real is (Acc + Term);
 
+   function Model_Tail_Add (Acc : Reduction_Real; Term : Product_Real; Count : Lane_Number)
+     return Reduction_Real is
+   begin
+      return Acc + Term;
+   end Model_Tail_Add;
+
+   procedure Initialize_Empty_Block
+     (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array)
+     with Ghost => Static, Global => null,
+     Pre => Valid (P, Row, Factor, Values),
+     Post => (for all Lane in Lane_Number =>
+       Lane_Sum (P, Row, Factor, Values, 0, Lane) = 0.0)
+       and then Rejections (P, Row, Factor, Values, 0) = 0
+   is
+   begin
+      null;
+   end Initialize_Empty_Block;
+
    procedure Dot_Blocks
      (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array;
       R0, R1, R2, R3 : out Lane_Real; Rejected : out Natural)
@@ -105,6 +123,12 @@ package body MJ.Solver_Reductions with SPARK_Mode is
       pragma Assert (Static => abs Sum <= 5.0e125);
       pragma Assert (Static => Sum = Merged_Sum (P, Row, Factor, Values));
       Tail_Base (P, Row, Factor, Values);
+      pragma Assert_And_Cut (Static => Valid (P, Row, Factor, Values)
+        and then N = AR.Length (P, Row) - 1 and then Blocks = N / 4
+        and then Sum = Tail_Sum (P, Row, Factor, Values, 0)
+        and then abs Sum <= 5.0e125
+        and then Rejected <= 4 * Blocks
+        and then Rejected = Rejections (P, Row, Factor, Values, 4 * Blocks));
       if N mod 4 >= 1 then
          Unfold_Tail (P, Row, Factor, Values, 0);
          Unfold_Rejection_One (P, Row, Factor, Values, 4 * Blocks);
@@ -180,9 +204,23 @@ package body MJ.Solver_Reductions with SPARK_Mode is
    end Prove_Initial_Rejections;
 
    procedure Unfold_Tail (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array;
-                          Count : Lane_Number) is
+                          Count : Lane_Number)
+   is
+      Acc : constant Reduction_Real := Tail_Sum (P, Row, Factor, Values, Count);
+      Term : constant Product_Real := Product
+        (P, Row, 4 * ((AR.Length (P, Row) - 1) / 4) + Count, Factor, Values);
+      Next : constant Reduction_Real := Model_Tail_Add (Acc, Term, Count);
    begin
-      null;
+      case Count is
+         when 0 =>
+            pragma Assert (Next = Tail_Sum (P, Row, Factor, Values, 1));
+         when 1 =>
+            pragma Assert (Next = Tail_Sum (P, Row, Factor, Values, 2));
+         when 2 =>
+            pragma Assert (Next = Tail_Sum (P, Row, Factor, Values, 3));
+         when others =>
+            null;
+      end case;
    end Unfold_Tail;
 
    procedure Tail_Base (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array) is
@@ -288,63 +326,91 @@ package body MJ.Solver_Reductions with SPARK_Mode is
       pragma Assert (Previous - Prefix in Work_Real);
    end Prove_Fast_Domain;
 
-   procedure Prove_Two_Terms (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array) is
+   procedure Initialize_Small_Models
+     (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array)
+     with Ghost => Static, Global => null,
+     Pre => Valid (P, Row, Factor, Values) and then AR.Length (P, Row) <= 4,
+     Post => Merged_Sum (P, Row, Factor, Values) = 0.0
+       and then Ordered_Sum (P, Row, Factor, Values, 0) = 0.0
+       and then Tail_Sum (P, Row, Factor, Values, 0) = 0.0
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tail_Sum);
    begin
-      pragma Assert (Merged_Sum (P, Row, Factor, Values) = 0.0);
-      pragma Assert (Four_Sum (P, Row, Factor, Values) = Tail_Sum (P, Row, Factor, Values, 2));
-      pragma Assert (Tail_Sum (P, Row, Factor, Values, 2)
-        = (Merged_Sum (P, Row, Factor, Values) + Product (P, Row, 0, Factor, Values))
-          + Product (P, Row, 1, Factor, Values));
+      Initialize_Empty_Block (P, Row, Factor, Values);
+      Tail_Base (P, Row, Factor, Values);
+   end Initialize_Small_Models;
+
+   procedure Prove_Two_Terms (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tail_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Merged_Sum);
+   begin
+      Initialize_Small_Models (P, Row, Factor, Values);
+      Unfold_Tail (P, Row, Factor, Values, 0);
+      Unfold_Tail (P, Row, Factor, Values, 1);
    end Prove_Two_Terms;
 
    procedure Prove_Small_Row
      (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array; Previous : Work_Real)
    is
-      N : constant Natural := AR.Length (P, Row) - 1;
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Merged_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tail_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ordered_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Work_Array);
+      N : constant Term_Count := AR.Length (P, Row) - 1;
    begin
-      pragma Assert (N in 0 .. 3);
-      pragma Assert (N / 4 = 0);
-      pragma Assert (Lane_Sum (P, Row, Factor, Values, 0, 0) = 0.0);
-      pragma Assert (Lane_Sum (P, Row, Factor, Values, 0, 1) = 0.0);
-      pragma Assert (Lane_Sum (P, Row, Factor, Values, 0, 2) = 0.0);
-      pragma Assert (Lane_Sum (P, Row, Factor, Values, 0, 3) = 0.0);
-      pragma Assert (Merged_Sum (P, Row, Factor, Values) = 0.0);
-      if N >= 1 then Unfold_Ordered (P, Row, Factor, Values, 0); end if;
-      if N >= 2 then Unfold_Ordered (P, Row, Factor, Values, 1); end if;
-      if N >= 3 then Unfold_Ordered (P, Row, Factor, Values, 2); end if;
-      case N is
-         when 0 =>
-            pragma Assert (Four_Sum (P, Row, Factor, Values) = 0.0);
-            pragma Assert (Ordered_Sum (P, Row, Factor, Values, N) = 0.0);
-         when 1 =>
-            pragma Assert (Four_Sum (P, Row, Factor, Values)
-              = 0.0 + Product (P, Row, 0, Factor, Values));
-            pragma Assert (Ordered_Sum (P, Row, Factor, Values, N)
-              = 0.0 + Product (P, Row, 0, Factor, Values));
-         when 2 =>
-            Prove_Two_Terms (P, Row, Factor, Values);
-            pragma Assert (Four_Sum (P, Row, Factor, Values)
-              = (0.0 + Product (P, Row, 0, Factor, Values)) + Product (P, Row, 1, Factor, Values));
-            pragma Assert (Ordered_Sum (P, Row, Factor, Values, N)
-              = (0.0 + Product (P, Row, 0, Factor, Values)) + Product (P, Row, 1, Factor, Values));
-         when others =>
-            pragma Assert (Four_Sum (P, Row, Factor, Values)
-              = ((0.0 + Product (P, Row, 0, Factor, Values)) + Product (P, Row, 1, Factor, Values))
-                + Product (P, Row, 2, Factor, Values));
-            pragma Assert (Ordered_Sum (P, Row, Factor, Values, N)
-              = ((0.0 + Product (P, Row, 0, Factor, Values)) + Product (P, Row, 1, Factor, Values))
-                + Product (P, Row, 2, Factor, Values));
-      end case;
-      pragma Assert (Four_Sum (P, Row, Factor, Values) = Ordered_Sum (P, Row, Factor, Values, N));
+      Initialize_Small_Models (P, Row, Factor, Values);
+      for K in 0 .. N - 1 loop
+         Unfold_Tail (P, Row, Factor, Values, K);
+         Unfold_Ordered (P, Row, Factor, Values, K);
+         pragma Loop_Invariant (Static => Valid (P, Row, Factor, Values));
+         pragma Loop_Invariant (Static => N = AR.Length (P, Row) - 1 and then N <= 3);
+         pragma Loop_Invariant (Static => Tail_Sum (P, Row, Factor, Values, K + 1)
+           = Ordered_Sum (P, Row, Factor, Values, K + 1));
+      end loop;
+      pragma Assert (Static => N mod 4 = N);
+      pragma Assert (Static => Tail_Sum (P, Row, Factor, Values, N)
+        = Ordered_Sum (P, Row, Factor, Values, N));
+      pragma Assert_And_Cut (Static => Valid (P, Row, Factor, Values)
+        and then Row < AR.Size (P) and then N = AR.Length (P, Row) - 1
+        and then N <= 3 and then N mod 4 = N
+        and then Tail_Sum (P, Row, Factor, Values, N)
+          = Ordered_Sum (P, Row, Factor, Values, N));
+      pragma Assert (Static => Four_Sum (P, Row, Factor, Values)
+        = Tail_Sum (P, Row, Factor, Values, N));
+      pragma Assert (Static => Four_Sum (P, Row, Factor, Values)
+        = Ordered_Sum (P, Row, Factor, Values, N));
       if abs Previous <= Fast_Previous_Limit and then Fast_Products (P, Row, Factor, Values) then
          Prove_Fast_Domain (P, Row, Factor, Values, Previous);
       end if;
    end Prove_Small_Row;
 
+   procedure Prove_Empty_Row
+     (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array)
+     with Ghost => Static, Global => null,
+     Pre => Valid (P, Row, Factor, Values) and then AR.Length (P, Row) = 1,
+     Post => Ordered_Accepted (P, Row, Factor, Values)
+       and then Ordered_Sum (P, Row, Factor, Values, 0) = 0.0
+       and then Four_Sum (P, Row, Factor, Values) = 0.0
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ordered_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tail_Sum);
+   begin
+      Initialize_Small_Models (P, Row, Factor, Values);
+   end Prove_Empty_Row;
+
    procedure Forward_Value
      (P : AR.Pattern; Row : Natural; Factor, Values : Real_Array;
       Previous : Work_Real; Value : out Work_Real; Ok : out Boolean)
    is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Lane_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Four_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ordered_Sum);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Fast_Products);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ordered_Accepted);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Work_Array);
       Wide : Reduction_Real;
       Ordered : Work_Real;
       Fast, Accepted : Boolean;
@@ -356,6 +422,7 @@ package body MJ.Solver_Reductions with SPARK_Mode is
          --  preparing four lanes or checking a SIMD domain for short rows.
          Prove_Small_Row (P, Row, Factor, Values, Previous);
          if AR.Length (P, Row) = 1 then
+            Prove_Empty_Row (P, Row, Factor, Values);
             Value := Previous;
             Ok := True;
             pragma Assert (Static => Four_Sum (P, Row, Factor, Values) = 0.0);

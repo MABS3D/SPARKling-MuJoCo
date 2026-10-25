@@ -511,3 +511,41 @@ unfinished; it is not adopted and has no integrated performance claim.
 
 [Source, proof/timeout scope, assembly and retained regression corpus](evidence/20261025-direct-dot-r525/README.md).
 The verified r503 vector Scale_Row remains the working implementation.
+
+
+## Closed direct-block minimum and integrated timing qualification
+
+The direct-block minimum now closes 197 checks and the refactored ghost
+small-row lemma closes 53. Seven inherited model diagnostics remain separate.
+The first whole-unit attempt reaches its watchdog without a completed report;
+full dynamics Gold remains pending. All 13 two-reference numerical groups and
+the 36,079-case reduction corpus per profile pass.
+
+Thirty three-copy and fifteen six-copy movement scenarios do not confirm a
+multi-DOF improvement. The repeated chain still takes about 2.35-2.40 times C's
+time. Hinge gains and workload-specific uncertainty/regressions are retained;
+the direct runtime is not adopted. A further fused compiler-boundary trial is
+private and its immutable inputs are preserved separately from active jobs.
+
+[Closed scopes, unresolved whole proof, exact raw measurements and sources](evidence/20261025-direct-dot-contracts-r556/README.md).
+The active runtime remains the published vector Scale_Row implementation.
+
+
+## Adopted reduction proof closure and qualified native sampling
+
+The actual reduction unit closes all 837 checks (748 proof, 89 flow) separately
+on the exact production C3.14 and candidate C3.17 closures, with 20 existing
+warnings separate. The full original runtime contracts/domains are preserved;
+the tail model additionally proves its per-tail bound. Four exact reduction
+corpora and all 30 actual movement endpoints pass. The normal compiled program
+changes only eight exception source-line immediates, with unchanged data and
+successful-path instructions. This is proof progress, not a runtime speedup.
+
+A calibrated independent CPU-timer sampler replaces invalid gprofng measurements.
+On chain24 state0, the largest flat Ada sample shares are compatible factor/solve
+(about 26%), acceleration preparation (16%) and compact mass construction (10%);
+the dot product is about 5%. Raw instruction PCs identify scalar short-row
+updates in the factorization. A fresh threshold-eight trial is private.
+
+[Completed proof/code/numeric bindings, qualified profiles and scope](evidence/20261025-reduction-closure-r605/README.md).
+Whole dynamics Gold, full port and overall C parity remain pending; no new push.
