@@ -53,6 +53,8 @@ private package MJ.Data.Pipeline with SPARK_Mode is
    pragma Postcondition ((if Result = Success then D.Cache.Jacobian_Valid));
    pragma Postcondition (Stable_Ready (D));
    pragma Postcondition (Static => D.Dynamics.Mass.all = D.Dynamics.Mass.all'Old);
+   pragma Postcondition (Static =>
+     D.Dynamics.Compact_Mass.all = D.Dynamics.Compact_Mass.all'Old);
    --  Tendon Jacobians may be built after the recursive gravity/bias pass.
    pragma Postcondition (Static => D.Dynamics.Gravity.all = D.Dynamics.Gravity.all'Old
      and then D.Dynamics.Bias.all = D.Dynamics.Bias.all'Old);

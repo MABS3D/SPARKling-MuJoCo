@@ -44,6 +44,10 @@ def prepare(args):
     for folder in ("src", "tests/support", "tests/gen", "tests/fixtures", "experimental/alignment-3.17"):
         for path in (ROOT / folder).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts:
+                # Prior proof archives are durable evidence, not build inputs.
+                # Keep them in the checkout instead of recursively freezing them.
+                if folder == "experimental/alignment-3.17" and "evidence" in path.relative_to(ROOT / folder).parts:
+                    continue
                 target = source / path.relative_to(ROOT)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(path, target)
@@ -81,7 +85,9 @@ def prepare(args):
     archive.unlink()
     manifest = dict(reference=REFERENCE, commit=COMMIT, phase="prepared", original_sources=originals,
         candidate_sources=source_map(source), transformations=transformations, production_applied=False,
-        runner_sha256=digest(Path(__file__)), scope="Frozen foundation sources; generation/build/proof not yet executed")
+        runner_sha256=digest(Path(__file__)), reference_checkout=str(upstream),
+        omitted_nonbuild_inputs="Prior experimental/alignment-3.17/evidence archives remain in the checkout; no library/test inputs omitted.",
+        scope="Frozen foundation sources; generation/build/proof not yet executed")
     write_json(args.out / "manifest.json", manifest)
     print(json.dumps(dict(phase="prepared", reference=REFERENCE, files=len(manifest["candidate_sources"]))))
 
@@ -149,6 +155,20 @@ def main():
         run(["patch", "--batch", "--fuzz=0", "-p1", "-i", overlay], "validation-overlay", 30)
         manifest["transformations"].append(dict(file=str(overlay.relative_to(source)), sha256=digest(overlay),
             change="3.17 texture/reference/CSR validation semantics; production 3.14 files retained"))
+        structures = source / "experimental/alignment-3.17/overlays/validation-structures.patch"
+        assert structures.is_file(), "The coordinated 3.17 structural overlay is required"
+        run(["patch", "--batch", "--fuzz=0", "-p1", "-i", structures], "structures-overlay", 30)
+        helpers = {}
+        for helper in sorted((source / "experimental/alignment-3.17/src").glob("*.ad?")):
+            installed = source / "src" / helper.name
+            assert installed.read_bytes() == helper.read_bytes(), helper.name
+            helpers[helper.name] = digest(installed)
+        assert set(helpers) == {"mj-model_admission.ads", "mj-model_admission.adb",
+                                "mj-model_structures.ads", "mj-model_structures.adb", "mj-models-validity.adb"}
+        manifest["structural_overlay"] = dict(sha256=digest(structures), helpers=helpers,
+            scope="Compiled/runtime verification follows; caller proofs and complete FLEX admission remain separate.")
+        manifest["transformations"].append(dict(file=str(structures.relative_to(source)), sha256=digest(structures),
+            change="3.17 FLEX/B/D/mesh structural validation and typed model diagnostics; production remains unchanged"))
         oracle = source / "tools/oracle.py"
         before = oracle.read_text()
         assert 'mujoco.__version__ == "3.14.0"' in before
@@ -185,13 +205,22 @@ def main():
     run([args.python, source / "experimental/alignment-3.17/tests/check_abi.py",
          "--binary", binaries / "abi_probe", "--fixtures", args.out / "abi-fixtures",
          "--out", logroot / "abi"], "abi-compare")
+    if manifest.get("structural_overlay"):
+        reference_source = args.reference_root or Path(manifest["reference_checkout"])
+        run([args.python, source / "experimental/alignment-3.17/tests/test_admission.py",
+             "--engine", args.out, "--out", logroot / "admission", "--mode", args.mode,
+             "--reference-source", reference_source], "admission-compare")
+        admission = json.loads((logroot / "admission/results.json").read_text())
+        assert admission["passed"] and admission["complete"] and admission["source_hashes_unchanged"]
+        assert set(admission["profiles"]) == {args.mode}
     run([args.python, source / "tools/check_gen.py"], "check-generation")
     run([args.python, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"], "python-tests")
     unchanged = source_map(source) == frozen
     result = dict(reference=REFERENCE, commit=COMMIT, mode=args.mode, complete=True,
         passed=unchanged, source_hashes_unchanged=unchanged, manifest_sha256=digest(manifest_path),
         runner_sha256=digest(Path(__file__)), commands=commands,
-        scope="Foundation ABI/corpus/negative tests; engine migration, complete Gold and integrated performance remain pending")
+        structural_overlay=manifest.get("structural_overlay"),
+        scope="Foundation ABI/corpus/negative and structural admission tests; full FLEX admission, engine migration, complete Gold and integrated performance remain pending")
     write_json(logroot / "results.json", result)
     assert unchanged, "Frozen sources changed during verification"
     print(json.dumps(dict(complete=True, passed=True, mode=args.mode)))

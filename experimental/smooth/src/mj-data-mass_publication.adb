@@ -78,6 +78,7 @@ package body MJ.Data.Mass_Publication with SPARK_Mode is
    begin
       Prove_Dense_Symmetry (Mass, D.Nv);
       D.Dynamics.Mass.all := Mass;
+      D.Cache.Mass_Compact := False;
       D.Cache.Mass_Valid := True;
       D.Cache.Force_Valid := False;
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
@@ -94,9 +95,58 @@ package body MJ.Data.Mass_Publication with SPARK_Mode is
       Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
    begin
       Prove_Dense_Symmetry (D.Dynamics.Mass.all, D.Nv);
+      D.Cache.Mass_Compact := False;
       D.Cache.Mass_Valid := True;
       D.Cache.Force_Valid := False;
       Prove_Configuration_Equality (Configuration (D), Initial_Config);
    end Mark_Ready;
 
+   procedure Prove_Compact_Symmetry (Rows : MJ.Ancestor_Rows.Pattern; Mass : Real_Array)
+     with Ghost => Static, Global => null,
+     Pre => Mass'First = 0 and then Mass'Last = MJ.Ancestor_Rows.Count (Rows) - 1,
+     Post => (for all I in 0 .. MJ.Ancestor_Rows.Size (Rows) - 1 =>
+       (for all J in 0 .. MJ.Ancestor_Rows.Size (Rows) - 1 =>
+         MJ.Compact_Inertia.Value_At (Rows, Mass, I, J) =
+           MJ.Compact_Inertia.Value_At (Rows, Mass, J, I)))
+   is
+   begin
+      null;
+   end Prove_Compact_Symmetry;
+
+   procedure Reveal_Compact_Size (D : Simulation)
+     with Ghost => Static, Global => null, Pre => Is_Ready (D),
+     Post => MJ.Ancestor_Rows.Size (D.Ancestors) = D.Nv
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Inputs_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Caches_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+   begin
+      null;
+   end Reveal_Compact_Size;
+
+   procedure Mark_Compact_Ready (D : in out Simulation) is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Ancestor_Pattern_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Topology_Layout_Ready);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Quaternion);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Input_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", State_Image);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Joint_Bounded);
+      Initial_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
+   begin
+      pragma Assert (Static => Array_Bounded (D.Dynamics.Compact_Mass));
+      D.Cache.Mass_Compact := True;
+      D.Cache.Mass_Valid := True;
+      D.Cache.Force_Valid := False;
+      pragma Assert (Static => Storage_Ready (D));
+      pragma Assert (Static => Inputs_Bounded (D));
+      pragma Assert (Static => Caches_Bounded (D));
+      pragma Assert (Static => Is_Ready (D));
+      Reveal_Compact_Size (D);
+      Prove_Compact_Symmetry (D.Ancestors, D.Dynamics.Compact_Mass.all);
+      pragma Assert (Static => Symmetric_Mass (D));
+      Prove_Configuration_Equality (Configuration (D), Initial_Config);
+   end Mark_Compact_Ready;
 end MJ.Data.Mass_Publication;

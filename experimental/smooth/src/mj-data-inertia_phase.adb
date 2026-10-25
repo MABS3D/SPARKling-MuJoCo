@@ -1,3 +1,7 @@
+with MJ.Data.Compact_Assembly;
+with MJ.Compact_Tendon_Mass;
+with MJ.Compact_Inertia;
+with MJ.Data.Composite_Assembly;
 with MJ.Spatial_Tendon_Models;
 with MJ.Data.External_Loads;
 with MJ.Data.Mass_Publication;
@@ -17,438 +21,15 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    function Inertia_Times (R : Matrix; Diagonal, V : Vector) return Vector
      renames MJ.Smooth_Kernels.Inertia_Times;
 
-   type Composite_Array is array (Natural range <>) of MJ.Spatial_Kernels.Inertia;
+   package CA renames MJ.Data.Composite_Assembly;
+   subtype Composite_Array is CA.Composite_Array;
    package SK renames MJ.Spatial_Kernels;
    use type SK.Inertia;
-   package CB renames MJ.Composite_Bounds;
-   package CW renames MJ.Composite_Weights;
-   type Composite_State (Last : Natural) is record
-      Values : Composite_Array (0 .. Last);
-      Ok : Boolean;
-   end record with Ghost => Static;
-   function Composite_Layout (Bodies : Body_Parameter_Array; Values : Composite_Array) return Boolean is
-     (Bodies'First = 0 and then Bodies'Length in 1 .. Max_Bodies
-       and then Values'First = 0 and then Values'Last = Bodies'Last
-       and then (for all B in 1 .. Bodies'Last => Bodies (B).Parent < B));
-   function Model_Step (Previous : Composite_State; B, P : Natural) return Composite_State is
-     (if not Previous.Ok or else P = 0 then Previous
-      elsif SK.Bounded (SK.Add (Previous.Values (P), Previous.Values (B)), 1.0e40)
-      then (Previous with delta Values =>
-        (Previous.Values with delta P => SK.Add (Previous.Values (P), Previous.Values (B))))
-      else (Previous with delta Ok => False))
-     with Ghost => Static, Global => null,
-       Pre => B <= Previous.Last and then P < B
-         and then (for all X of Previous.Values => SK.Bounded (X, 1.0e40)),
-       Post => Model_Step'Result.Last = Previous.Last
-         and then (for all X of Model_Step'Result.Values => SK.Bounded (X, 1.0e40));
-   function Accumulation_Model
-     (Bodies : Body_Parameter_Array; Initial : Composite_Array; Steps : Natural) return Composite_State is
-     (if Steps = 0 then (Last => Initial'Last, Values => Initial, Ok => True)
-      else Model_Step (Accumulation_Model (Bodies, Initial, Steps - 1),
-        Initial'Last - Steps + 1, Bodies (Initial'Last - Steps + 1).Parent))
-     with Ghost => Static, Global => null,
-       Pre => Composite_Layout (Bodies, Initial) and then Steps <= Initial'Last
-         and then (for all X of Initial => SK.Bounded (X, 1.0e40)),
-       Post => Accumulation_Model'Result.Last = Initial'Last
-         and then (for all X of Accumulation_Model'Result.Values => SK.Bounded (X, 1.0e40)),
-       Subprogram_Variant => (Decreases => Steps);
-
-   procedure Reveal_Accumulation_Model
-     (Bodies : Body_Parameter_Array; Initial : Composite_Array; Steps : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Composite_Layout (Bodies, Initial) and then Steps <= Initial'Last
-         and then (for all X of Initial => SK.Bounded (X, 1.0e40)),
-       Post => (if Steps = 0 then Accumulation_Model (Bodies, Initial, Steps) =
-         Composite_State'(Last => Initial'Last, Values => Initial, Ok => True)
-         else Accumulation_Model (Bodies, Initial, Steps) =
-           Model_Step (Accumulation_Model (Bodies, Initial, Steps - 1),
-             Initial'Last - Steps + 1, Bodies (Initial'Last - Steps + 1).Parent))
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-   begin
-      null;
-   end Reveal_Accumulation_Model;
-
-   procedure Initialize_Accumulation_Model
-     (Bodies : Body_Parameter_Array; Initial : Composite_Array)
-     with Ghost => Static, Global => null,
-       Pre => Composite_Layout (Bodies, Initial)
-         and then (for all X of Initial => SK.Bounded (X, 1.0e40)),
-       Post => Accumulation_Model (Bodies, Initial, 0).Ok
-         and then Accumulation_Model (Bodies, Initial, 0).Values = Initial
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-   begin
-      null;
-   end Initialize_Accumulation_Model;
-
-   procedure Prove_Model_Step_Component
-     (Before : Composite_State; B, P, K : Natural; J : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Before.Ok and then B <= Before.Last and then P < B
-         and then K <= Before.Last and then J in SK.Inertia'Range
-         and then (for all X of Before.Values => SK.Bounded (X, 1.0e40))
-         and then (if P > 0 then SK.Bounded
-           (SK.Add (Before.Values (P), Before.Values (B)), 1.0e40)),
-       Post => Model_Step (Before, B, P).Ok
-         and then Model_Step (Before, B, P).Values (K) (J) =
-         (if P > 0 and then K = P
-          then SK.Add (Before.Values (P), Before.Values (B)) (J)
-          else Before.Values (K) (J))
-   is
-   begin
-      null;
-   end Prove_Model_Step_Component;
-
-   procedure Equal_Composites (Left, Right : Composite_Array)
-     with Ghost => Static, Global => null,
-       Pre => Left'First = Right'First and then Left'Last = Right'Last
-         and then (for all K in Left'Range =>
-           (for all J in SK.Inertia'Range => Left (K) (J) = Right (K) (J))),
-       Post => Left = Right
-   is
-   begin
-      null;
-   end Equal_Composites;
-
-   procedure Extend_Composite_Equality
-     (Left, Right : Composite_Array; Last : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Left'First = Right'First and then Left'Last = Right'Last
-         and then Last in Left'Range
-         and then (for all I in Left'First .. Last - 1 =>
-           (for all J in SK.Inertia'Range => Left (I) (J) = Right (I) (J)))
-         and then (for all J in SK.Inertia'Range => Left (Last) (J) = Right (Last) (J)),
-       Post => (for all I in Left'First .. Last =>
-         (for all J in SK.Inertia'Range => Left (I) (J) = Right (I) (J)))
-   is
-   begin
-      null;
-   end Extend_Composite_Equality;
-
-   procedure Prove_Model_Step_Update
-     (Before : Composite_State; After : Composite_Array; B, P : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Before.Ok and then B <= Before.Last and then P < B
-         and then (for all X of Before.Values => SK.Bounded (X, 1.0e40))
-         and then After'First = 0 and then After'Last = Before.Last
-         and then (if P > 0 then SK.Bounded
-           (SK.Add (Before.Values (P), Before.Values (B)), 1.0e40))
-         and then (for all K in After'Range => (for all J in SK.Inertia'Range =>
-           After (K) (J) = (if P > 0 and then K = P
-             then SK.Add (Before.Values (P), Before.Values (B)) (J)
-             else Before.Values (K) (J)))),
-       Post => Model_Step (Before, B, P).Ok
-         and then After = Model_Step (Before, B, P).Values
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-   begin
-      Prove_Model_Step_Component (Before, B, P, After'First, SK.Inertia'First);
-      for K in After'Range loop
-         for J in SK.Inertia'Range loop
-            Prove_Model_Step_Component (Before, B, P, K, J);
-            pragma Loop_Invariant (for all I in After'First .. K - 1 =>
-              (for all H in SK.Inertia'Range =>
-                After (I) (H) = Model_Step (Before, B, P).Values (I) (H)));
-            pragma Loop_Invariant (for all H in SK.Inertia'First .. J =>
-              After (K) (H) = Model_Step (Before, B, P).Values (K) (H));
-         end loop;
-         Extend_Composite_Equality (After, Model_Step (Before, B, P).Values, K);
-         pragma Loop_Invariant (for all I in After'First .. K =>
-           (for all H in SK.Inertia'Range =>
-             After (I) (H) = Model_Step (Before, B, P).Values (I) (H)));
-      end loop;
-      Equal_Composites (After, Model_Step (Before, B, P).Values);
-   end Prove_Model_Step_Update;
-
-   procedure Prove_Composite_Row_Equal
-     (Left, Right : Composite_Array; I : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Left'First = Right'First and then Left'Last = Right'Last
-         and then I in Left'Range and then Left = Right,
-       Post => Left (I) = Right (I)
-   is
-   begin
-      null;
-   end Prove_Composite_Row_Equal;
-
-   procedure Prove_Inertia_Entry_Sum_Equal
-     (A, B, C, D : SK.Inertia; J : Natural)
-     with Ghost => Static, Global => null,
-       Pre => J in SK.Inertia'Range
-         and then A (J) = C (J) and then B (J) = D (J)
-         and then SK.Bounded (A, 1.0e40) and then SK.Bounded (B, 1.0e40)
-         and then SK.Bounded (C, 1.0e40) and then SK.Bounded (D, 1.0e40),
-       Post => SK.Add (A, B) (J) = SK.Add (C, D) (J)
-   is
-   begin
-      case J is
-         when 0 => null;
-         when 1 => null;
-         when 2 => null;
-         when 3 => null;
-         when 4 => null;
-         when 5 => null;
-         when 6 => null;
-         when 7 => null;
-         when 8 => null;
-         when 9 => null;
-         when others => null;
-      end case;
-   end Prove_Inertia_Entry_Sum_Equal;
-
-   procedure Prove_Inertia_Sums_Equal (A, B, C, D : SK.Inertia)
-     with Ghost => Static, Global => null,
-       Pre => A = C and then B = D
-         and then SK.Bounded (A, 1.0e40) and then SK.Bounded (B, 1.0e40)
-         and then SK.Bounded (C, 1.0e40) and then SK.Bounded (D, 1.0e40),
-       Post => SK.Add (A, B) = SK.Add (C, D)
-         and then SK.Bounded (SK.Add (A, B), 1.0e40) =
-           SK.Bounded (SK.Add (C, D), 1.0e40)
-   is
-   begin
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 0);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 1);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 2);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 3);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 4);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 5);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 6);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 7);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 8);
-      Prove_Inertia_Entry_Sum_Equal (A, B, C, D, 9);
-   end Prove_Inertia_Sums_Equal;
-
-   procedure Transfer_Inertia_Bound (Left, Right : SK.Inertia; Limit : Real)
-     with Ghost => Static, Global => null,
-       Pre => Limit >= 0.0 and then Left = Right and then SK.Bounded (Left, Limit),
-       Post => SK.Bounded (Right, Limit)
-   is
-   begin
-      null;
-   end Transfer_Inertia_Bound;
-
-   procedure Preserve_Weighted_Prefix
-     (Before, After : Composite_Array; Old_Weights, New_Weights : CW.Weight_Array;
-      B, P : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Before'First = 0 and then After'First = 0
-         and then After'Last = Before'Last
-         and then Old_Weights'First = 0 and then Old_Weights'Last = Before'Last
-         and then New_Weights'First = 0 and then New_Weights'Last = Before'Last
-         and then P < B and then B <= Before'Last
-         and then (for all K in 0 .. B => Old_Weights (K) > 0
-           and then SK.Bounded (Before (K), CB.Budget (Old_Weights (K))))
-         and then (if P > 0 then New_Weights (P) > 0
-           and then SK.Bounded (After (P), CB.Budget (New_Weights (P))))
-         and then (for all K in 0 .. B - 1 =>
-           (if P = 0 or else K /= P then
-              New_Weights (K) = Old_Weights (K) and then After (K) = Before (K))),
-       Post => (for all K in 0 .. B - 1 => New_Weights (K) > 0
-         and then SK.Bounded (After (K), CB.Budget (New_Weights (K))))
-   is
-   begin
-      for K in 0 .. B - 1 loop
-         if P = 0 or else K /= P then
-            Transfer_Inertia_Bound (Before (K), After (K), CB.Budget (Old_Weights (K)));
-         end if;
-         pragma Loop_Invariant (for all I in 0 .. K => New_Weights (I) > 0
-           and then SK.Bounded (After (I), CB.Budget (New_Weights (I))));
-      end loop;
-   end Preserve_Weighted_Prefix;
-
-   procedure Equal_Composite_Transitive (A, B, C : Composite_Array)
-     with Ghost => Static, Global => null,
-       Pre => A'First = B'First and then A'Last = B'Last
-         and then A'First = C'First and then A'Last = C'Last
-         and then A = B and then B = C,
-       Post => A = C
-   is
-   begin
-      null;
-   end Equal_Composite_Transitive;
-
-   procedure Reveal_Accumulation_Values
-     (Bodies : Body_Parameter_Array; Initial : Composite_Array; Steps : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Composite_Layout (Bodies, Initial) and then Steps in 1 .. Initial'Last
-         and then (for all X of Initial => SK.Bounded (X, 1.0e40)),
-       Post => Accumulation_Model (Bodies, Initial, Steps).Values =
-         Model_Step (Accumulation_Model (Bodies, Initial, Steps - 1),
-           Initial'Last - Steps + 1, Bodies (Initial'Last - Steps + 1).Parent).Values
-         and then Accumulation_Model (Bodies, Initial, Steps).Ok =
-         Model_Step (Accumulation_Model (Bodies, Initial, Steps - 1),
-           Initial'Last - Steps + 1, Bodies (Initial'Last - Steps + 1).Parent).Ok
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-   begin
-      null;
-   end Reveal_Accumulation_Values;
-
-   procedure Advance_Accumulation_Model
-     (Bodies : Body_Parameter_Array; Initial, After : Composite_Array; Steps : Natural)
-     with Ghost => Static, Global => null,
-       Pre => Composite_Layout (Bodies, Initial) and then Steps < Initial'Last
-         and then After'First = 0 and then After'Last = Initial'Last
-         and then (for all X of Initial => SK.Bounded (X, 1.0e40))
-         and then Model_Step (Accumulation_Model (Bodies, Initial, Steps),
-           Initial'Last - Steps, Bodies (Initial'Last - Steps).Parent).Ok
-         and then After = Model_Step (Accumulation_Model (Bodies, Initial, Steps),
-           Initial'Last - Steps, Bodies (Initial'Last - Steps).Parent).Values,
-       Post => Accumulation_Model (Bodies, Initial, Steps + 1).Ok
-         and then After = Accumulation_Model (Bodies, Initial, Steps + 1).Values
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Accumulation_Model);
-   begin
-      Reveal_Accumulation_Values (Bodies, Initial, Steps + 1);
-      Equal_Composite_Transitive
-        (After, Model_Step (Accumulation_Model (Bodies, Initial, Steps),
-           Initial'Last - Steps, Bodies (Initial'Last - Steps).Parent).Values,
-         Accumulation_Model (Bodies, Initial, Steps + 1).Values);
-   end Advance_Accumulation_Model;
-
-   procedure Retire_Weight (W : in out CW.Weight_Array; B, P : Natural)
-     with Ghost => Static, Global => null,
-       Pre => CW.Layout (W) and then P < B and then B in W'Range
-         and then CW.Prefix_Sum (W, W'Length) <= W'Length
-         and then (for all K in W'Range => (if K <= B then W (K) > 0 else W (K) = 0)),
-       Post => CW.Prefix_Sum (W, W'Length) <= W'Length
-         and then (for all K in W'Range => (if K < B then W (K) > 0 else W (K) = 0))
-         and then W (B) = 0
-         and then (if P > 0 then W (P) = W'Old (P) + W'Old (B))
-         and then (for all K in W'Range =>
-           (if K /= B and then (P = 0 or else K /= P) then W (K) = W'Old (K)))
-   is
-   begin
-      if P > 0 then CW.Transfer (W, B, P);
-      else CW.Discard (W, B); end if;
-   end Retire_Weight;
-
-   procedure Expose_Inertia_Equality (Left, Right : SK.Inertia)
-     with Ghost => Static, Global => null,
-       Pre => Left = Right,
-       Post => (for all J in SK.Inertia'Range => Left (J) = Right (J))
-   is
-   begin
-      null;
-   end Expose_Inertia_Equality;
-
-   procedure Describe_Model_Update
-     (Before : Composite_State; Old_Values, After : Composite_Array; B, P : Natural)
-     with Ghost => Static, Global => null,
-       Pre => B <= Before.Last and then P < B
-         and then Old_Values'First = 0 and then Old_Values'Last = Before.Last
-         and then After'First = 0 and then After'Last = Before.Last
-         and then Old_Values = Before.Values
-         and then (for all X of Before.Values => SK.Bounded (X, 1.0e40))
-         and then (if P > 0 then After (P) = SK.Add (Before.Values (P), Before.Values (B)))
-         and then (for all K in After'Range =>
-           (if P = 0 or else K /= P then After (K) = Old_Values (K))),
-       Post => (for all K in After'Range => (for all J in SK.Inertia'Range =>
-         After (K) (J) = (if P > 0 and then K = P
-           then SK.Add (Before.Values (P), Before.Values (B)) (J)
-           else Before.Values (K) (J))))
-   is
-   begin
-      for K in After'Range loop
-         if P > 0 and then K = P then
-            Expose_Inertia_Equality (After (K), SK.Add (Before.Values (P), Before.Values (B)));
-         else
-            Prove_Composite_Row_Equal (Old_Values, Before.Values, K);
-            Expose_Inertia_Equality (After (K), Before.Values (K));
-         end if;
-         pragma Loop_Invariant (for all I in After'First .. K =>
-           (for all J in SK.Inertia'Range => After (I) (J) =
-             (if P > 0 and then I = P then SK.Add (Before.Values (P), Before.Values (B)) (J)
-              else Before.Values (I) (J))));
-      end loop;
-   end Describe_Model_Update;
-
    procedure Accumulate_Composite (Bodies : Body_Parameter_Array; Composite : in out Composite_Array)
-     with Global => null,
-       Pre => Composite_Layout (Bodies, Composite)
-         and then (for all X of Composite => SK.Bounded (X, 1.0e36)),
-       Post => (Static => (for all X of Composite => SK.Bounded (X, 1.0e40))
-         and then Accumulation_Model (Bodies, Composite'Old, Composite'Last).Ok
-         and then Composite = Accumulation_Model (Bodies, Composite'Old, Composite'Last).Values)
-   is
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Accumulation_Model);
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
-      Weights : CW.Weight_Array (Composite'Range) with Ghost => Static;
-      Initial : constant Composite_Array := Composite with Ghost => Static;
-   begin
-      CW.Initialize (Weights);
-      CB.Budget_Bounds (1);
-      pragma Assert (Static => (for all X of Initial => SK.Bounded (X, 1.0e40)));
-      Initialize_Accumulation_Model (Bodies, Initial);
-      pragma Assert (Static => Composite = Initial);
-      pragma Assert (Static => Accumulation_Model (Bodies, Initial, 0).Values = Initial);
-      pragma Assert (Static => Composite = Accumulation_Model (Bodies, Initial, 0).Values);
-      for B in reverse 1 .. Composite'Last loop
-         pragma Loop_Invariant (for all X of Composite => SK.Bounded (X, 1.0e40));
-         pragma Loop_Invariant (Static => CW.Prefix_Sum (Weights, Weights'Length) <= Composite'Length);
-         pragma Loop_Invariant (Static => (for all K in Weights'Range =>
-           (if K <= B then Weights (K) > 0 else Weights (K) = 0)));
-         pragma Loop_Invariant (Static => (for all K in 0 .. B =>
-           Weights (K) > 0 and then SK.Bounded (Composite (K), CB.Budget (Weights (K)))));
-         pragma Loop_Invariant (Static => Accumulation_Model (Bodies, Initial, Composite'Last - B).Ok);
-         pragma Loop_Invariant (Static => Composite = Accumulation_Model (Bodies, Initial, Composite'Last - B).Values);
-         declare
-            P : constant Natural := Bodies (B).Parent;
-            Before : constant Composite_State :=
-              Accumulation_Model (Bodies, Initial, Composite'Last - B) with Ghost => Static;
-            Old_Values : constant Composite_Array := Composite with Ghost => Static;
-            Old_Weights : constant CW.Weight_Array := Weights with Ghost => Static;
-            Sum : SK.Inertia;
-         begin
-            if P > 0 then
-               Prove_Composite_Row_Equal (Composite, Before.Values, P);
-               Prove_Composite_Row_Equal (Composite, Before.Values, B);
-               Prove_Inertia_Sums_Equal
-                 (Composite (P), Composite (B), Before.Values (P), Before.Values (B));
-               CW.Pair_Bound (Weights, Weights'Length, P, B);
-               CB.Bound_Inertia_Sum (Composite (P), Composite (B), Weights (P), Weights (B));
-               CB.Budget_Bounds (Weights (P) + Weights (B));
-               Sum := SK.Add (Composite (P), Composite (B));
-               pragma Assert (Static => SK.Bounded (Sum, 1.0e40));
-               pragma Assert (Static => SK.Bounded
-                 (Sum, CB.Budget (Weights (P) + Weights (B))));
-               Composite (P) := Sum;
-            end if;
-            Describe_Model_Update (Before, Old_Values, Composite, B, P);
-            Prove_Model_Step_Update (Before, Composite, B, P);
-            Retire_Weight (Weights, B, P);
-            pragma Assert (Static => (if P > 0 then
-              SK.Bounded (Composite (P), CB.Budget (Weights (P)))));
-            Preserve_Weighted_Prefix (Old_Values, Composite, Old_Weights, Weights, B, P);
-            pragma Assert (Static => Model_Step (Before, B, P).Ok);
-            pragma Assert (Static => Composite = Model_Step (Before, B, P).Values);
-            Advance_Accumulation_Model (Bodies, Initial, Composite, Composite'Last - B);
-         end;
-      end loop;
-   end Accumulate_Composite;
-   pragma Inline_Always (Accumulate_Composite);
-
-   --  Copy the contiguous cinert slab without changing its component order.
+     renames CA.Accumulate_Composite;
    procedure Load_Composite (Source : Real_Array; Composite : out Composite_Array)
-     with Global => null, Relaxed_Initialization => Composite,
-       Pre => Composite'First = 0 and then Composite'Length in 1 .. Max_Bodies
-         and then Source'First = 0 and then Source'Last = 10 * Composite'Length - 1
-         and then (for all X of Source => X in -1.0e36 .. 1.0e36),
-       Post => Composite'Initialized and then (for all X of Composite => SK.Bounded (X, 1.0e36))
-         and then (for all B in Composite'Range =>
-           (for all K in SK.Inertia'Range => Composite (B) (K) = Source (10 * B + K)))
-   is
-   begin
-      for B in Composite'Range loop
-         Composite (B) := MJ.Spatial_Storage.Load_Inertia (Source, 10 * B);
-         pragma Loop_Invariant (for all I in Composite'First .. B => Composite (I)'Initialized);
-         pragma Loop_Invariant (for all I in Composite'First .. B =>
-           (for all K in SK.Inertia'Range => Composite (I) (K) = Source (10 * I + K)));
-      end loop;
-   end Load_Composite;
-   pragma Inline_Always (Load_Composite);
+     renames CA.Load_Composite;
+
 
    procedure Zero_CRB_Mass (Mass : out Real_Array; Nv : Natural)
      with Global => null,
@@ -530,8 +111,8 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Unit_Vector);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Bounded);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Joint_Bounded);
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Accumulation_Model);
-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Model_Step);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", CA.Accumulation_Model);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", CA.Model_Step);
       package SK renames MJ.Spatial_Kernels;
       package T renames MJ.Smooth_Topology;
       package CB renames MJ.Composite_Bounds;
@@ -861,6 +442,64 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    end Assemble_CRB_Path;
    pragma Inline_Always (Assemble_CRB_Path);
 
+   procedure Expose_Compact_Layout (D : Simulation)
+     with Ghost => Static, Global => null, Pre => Stable_Ready (D),
+       Post => MJ.Ancestor_Rows.Size (D.Ancestors) = D.Nv
+         and then MJ.Smooth_Topology.Dof_Count (D.Topology) = D.Nv
+         and then MJ.Smooth_Topology.Body_Count (D.Topology) = D.Nb
+         and then D.Dynamics.Compact_Mass /= null
+         and then D.Dynamics.Compact_Mass'First = 0
+         and then D.Dynamics.Compact_Mass'Last = MJ.Ancestor_Rows.Count (D.Ancestors) - 1
+         and then (if D.Tendons /= null then
+           MJ.Spatial_Tendon_Models.Mass_Ready (D.Tendons.all, MJ.Ancestor_Rows.Size (D.Ancestors)))
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+   begin
+      null;
+   end Expose_Compact_Layout;
+
+   procedure Assemble_Compact_Path (D : in out Simulation; Used_CRB : out Boolean)
+     with Global => null, Pre => Is_Ready (D) and then Positions_Current (D),
+       Post => (Static => Is_Ready (D) and then Stable_Ready (D)
+         and then Is_Empty (D) = Is_Empty (D)'Old and then Shape (D) = Shape (D)'Old
+         and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
+         and then Input_Values (D) = Input_Values (D)'Old
+         and then Positions_Current (D) = Positions_Current (D)'Old
+         and then Configuration (D) = Configuration (D)'Old
+         and then Position_Values (D) = Position_Values (D)'Old
+         and then Velocity_Values (D) = Velocity_Values (D)'Old
+         and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old
+         and then (if Used_CRB then Mass_Current (D) and then Symmetric_Mass (D)))
+   is
+      --  The independently proved layout lemma supplies this predicate;
+      --  retain it abstractly across writes to the disjoint mass buffer.
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Spatial_Tendon_Models.Mass_Ready);
+      Spatial_Ok : Boolean;
+   begin
+      Used_CRB := False;
+      --  Preserve the existing small-model algorithm and its rounded results.
+      if D.Nv < 3 then return; end if;
+      D.Cache.Mass_Valid := False;
+      D.Cache.Force_Valid := False;
+      Spatial.Prepare (D, Spatial_Ok);
+      if not Spatial_Ok then return; end if;
+      Expose_Compact_Layout (D);
+      MJ.Data.Compact_Assembly.Build
+        (D.Ancestors, D.Topology, D.Body_Config.all,
+         D.Kinematic.Spatial_Inertias.all, D.Kinematic.Spatial_Motions.all,
+         D.Dynamics.Compact_Mass.all, Used_CRB);
+      if not Used_CRB then return; end if;
+      if D.Tendons /= null and then D.Tendons.Nm > 0 then
+         MJ.Compact_Tendon_Mass.Accumulate
+           (D.Tendons.all, D.Ancestors, D.Dynamics.Compact_Mass.all, Used_CRB);
+         if not Used_CRB then return; end if;
+      end if;
+      Mass_Publication.Mark_Compact_Ready (D);
+   end Assemble_Compact_Path;
+   pragma Inline_Always (Assemble_Compact_Path);
+
    procedure Fill_Dense_Ready (D : in out Simulation; Result : out Status)
      with Global => null, Pre => Is_Ready (D) and then Positions_Current (D)
          and then D.Cache.Jacobian_Valid
@@ -1147,6 +786,17 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
          Before_Vel : constant Real_Array := Velocity_Values (D) with Ghost => Static;
          Before_Config : constant Configuration_Snapshot := Configuration (D) with Ghost => Static;
       begin
+         Assemble_Compact_Path (D, Used_CRB);
+         if Used_CRB then
+            MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
+            MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
+            MJ.Smooth_Kernels.Equal_Transitive (Position_Values (D), Before_Pos, Initial_Pos);
+            MJ.Smooth_Kernels.Equal_Transitive (Velocity_Values (D), Before_Vel, Initial_Vel);
+            Equal_Configurations (Configuration (D), Before_Config, Initial_Config);
+            Prove_Configuration_Equality (Configuration (D), Initial_Config);
+            Result := Success;
+            return;
+         end if;
          Assemble_CRB_Path (D, Used_CRB);
          MJ.Smooth_Kernels.Equal_Transitive (State_Values (D), Before_State, Initial_State);
          MJ.Smooth_Kernels.Equal_Transitive (Input_Values (D), Before_Inputs, Initial_Inputs);
@@ -1910,6 +1560,37 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    end Load_Ancestor_Buffers;
    pragma Inline_Always (Load_Ancestor_Buffers);
 
+   procedure Load_Compact_Buffers
+     (Rows : MJ.Ancestor_Rows.Pattern; Mass : Real_Array; Joints : Joint_Parameter_Array;
+      Factor : in out Real_Array; Damping_Step : Nonneg_Tier0; Result : out Status)
+     with Global => null,
+     Pre => Mass'First = 0 and then Mass'Last = MJ.Ancestor_Rows.Count (Rows) - 1
+       and then MJ.Smooth_Dynamics.Work_Array (Mass)
+       and then Factor'First = 0 and then Factor'Last = MJ.Ancestor_Rows.Count (Rows) - 1
+       and then Joints'First = 0 and then Joints'Last = MJ.Ancestor_Rows.Size (Rows) - 1,
+     Post => MJ.Smooth_Dynamics.Work_Array (Factor)
+   is
+      package AR renames MJ.Ancestor_Rows;
+      Value : Real;
+   begin
+      Result := Numeric_Limit;
+      Factor := Mass;
+      if Damping_Step > 0.0 then
+         for I in Joints'Range loop
+            pragma Loop_Invariant (MJ.Smooth_Dynamics.Work_Array (Factor));
+            declare
+               Last : constant Natural := AR.Start (Rows, I) + AR.Length (Rows, I) - 1;
+            begin
+               Value := Factor (Last) + Damping_Step * Joints (I).Damping;
+               if not Within_Work (Value) then return; end if;
+               Store_Work_Entry (Factor, Last, Value);
+            end;
+         end loop;
+      end if;
+      Result := Success;
+   end Load_Compact_Buffers;
+   pragma Inline_Always (Load_Compact_Buffers);
+
 
 
 
@@ -1981,11 +1662,40 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
    procedure Solve (D : in out Simulation; Damping_Step : Real; Result : out Status)
    is
    begin
+      if D.Cache.Mass_Compact then
+         if D.Solver_Policy = Compatible then
+            Load_Compact_Buffers
+              (D.Ancestors, D.Dynamics.Compact_Mass.all, D.Joint_Config.all,
+               D.Scratch.Ancestor_Factor.all, Damping_Step, Result);
+            if Result = Success then
+               Solve_Compatible_Buffers
+                 (D.Ancestors, D.Dynamics.Total.all, D.Scratch.Ancestor_Factor.all,
+                  D.Scratch.Solution.all, D.First_Clamped, Result);
+            end if;
+         else
+            declare
+               N : constant Natural := D.Nv;
+               Dense : Real_Array (0 .. N * N - 1);
+            begin
+               MJ.Compact_Inertia.Expand (D.Ancestors, D.Dynamics.Compact_Mass.all, Dense);
+               --  Expand proves that a bounded canonical cache gives bounded
+               --  dense output. No second runtime traversal is needed here.
+               pragma Assert (Static => MJ.Smooth_Dynamics.Work_Array (Dense));
+               Solve_Workspace
+                 (D.Nv, D.Ancestors, D.Joint_Config.all, Dense, D.Dynamics.Total.all,
+                  D.Solver_Policy, Damping_Step, D.Scratch.Factor.all,
+                  D.Scratch.Ancestor_Factor.all, D.Scratch.Rhs.all,
+                  D.Scratch.Solution.all, D.Scratch.Condition_Sums.all,
+                  D.First_Clamped, Result);
+            end;
+         end if;
+      else
       Solve_Workspace
         (D.Nv, D.Ancestors, D.Joint_Config.all, D.Dynamics.Mass.all, D.Dynamics.Total.all,
          D.Solver_Policy, Damping_Step, D.Scratch.Factor.all, D.Scratch.Ancestor_Factor.all,
          D.Scratch.Rhs.all, D.Scratch.Solution.all, D.Scratch.Condition_Sums.all,
          D.First_Clamped, Result);
+      end if;
    end Solve;
 
    procedure Total_Forces_Buffers

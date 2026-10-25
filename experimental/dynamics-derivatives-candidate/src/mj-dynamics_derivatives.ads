@@ -4,6 +4,7 @@ with MJ.Data;
 with MJ.Data.Constrained;
 with MJ.External_Forces;
 with MJ.Derivative_Kernels;
+with MJ.Data.Native_Mass;
 
 -- Owns scratch simulators; never perturbs an existing caller simulation.
 -- Integration proofs are pending; no whole-engine Gold claim is made here.
@@ -52,7 +53,7 @@ package MJ.Dynamics_Derivatives with SPARK_Mode is
        Derivative = Derivative'Old));
 
    -- C convention: input direction is the ROW, output force is the COLUMN.
-   -- DmDq uses MuJoCo 3.14.0 lower-triangular CSR order (m->M_rownnz/colind).
+   -- DmDq uses the owned native CSR storage image (m->nC and M_rowadr).
    -- Includes scalar, pyramidal and elliptic inverse-constraint response.
    -- Inverse-discrete correction remains unsupported.
    -- Forward finite differences, optionally subtracting actuator force.
@@ -74,11 +75,6 @@ private
       Low, High : Tier0_Real := 0.0;
    end record;
    type Controls is array (Natural range 0 .. MJ.Data.Max_Actuators - 1) of Control;
-   type Mass_Entry is record
-      Row, Column : Natural := 0;
-   end record;
-   type Mass_Layout is array (Natural range 0 ..
-     (MJ.Data.Max_Dofs * (MJ.Data.Max_Dofs + 1)) / 2 - 1) of Mass_Entry;
    type Workspace is limited record
       Initialized : Boolean := False;
       Mode : Backend := Smooth;
@@ -87,7 +83,7 @@ private
       Nj : Natural := 0;
       Joints : Joint_Array;
       Ctrl : Controls;
-      Mass : Mass_Layout;
+      Mass : MJ.Data.Native_Mass.Pattern;
       S : MJ.Data.Simulation;
       C : MJ.Data.Constrained.Engine;
       TA, TB, TQ, TV, TAcc, TM : Matrix_Access := null;

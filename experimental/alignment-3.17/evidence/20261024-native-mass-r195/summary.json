@@ -1,0 +1,171 @@
+{
+  "local_only": true,
+  "new_commits": false,
+  "pushes": false,
+  "head": "398c2dde5299ec46cfb00bffd91e7660a852907a",
+  "reference_pin": "800a109a4bdd02cb60404d565db4ae16fb04a53b",
+  "foundation_library_files_unchanged": 45,
+  "kernel_whole_unit": {
+    "checks": 47,
+    "proof_checks": 40,
+    "flow_checks": 7,
+    "warnings": [],
+    "open": [],
+    "complete_coverage": true,
+    "passed": true,
+    "properties": [
+      "Zero output",
+      "Assignment versus ordered addition; rejection preserves every slot",
+      "Per-row gather and preservation of every other slot"
+    ]
+  },
+  "gates": {
+    "3.17": {
+      "reference": "3.17.0",
+      "frozen_files": 334,
+      "sources_sha256": "e4fa308d2c5da572c86eb3aa2f58a388fd00b1f3dc7f5f16568b385350a711e2",
+      "profiles": {
+        "validation": {
+          "raw_mass_cases": 24,
+          "raw_mass_samples": 288,
+          "raw_mass_max_abs": 0.0,
+          "derivative_cases": 960,
+          "derivative_max_abs": {
+            "A": 1.229571999772361e-07,
+            "B": 9.825473767932635e-08,
+            "smooth": 3.552713678800501e-08,
+            "passive": 1.734723475976807e-12,
+            "Fq": 7.105427357601002e-08,
+            "Fv": 3.552713678800501e-08,
+            "Fa": 8.881784197001252e-09,
+            "Mq": 2.7755575615628914e-10
+          },
+          "reference_controls": [
+            {
+              "name": "original_nv2_duplicate_tendon",
+              "outcome": "C compiler rejected",
+              "error": "Error: Invalid model: ten_J_rownnz out of bounds.",
+              "scope": "Known C reference limitation, not an Ada rejection; nv=3 variant retains repeated-joint coverage."
+            }
+          ],
+          "reordered_derivative_cases": 960,
+          "reordered_oracle": "original C model plus bijective Mq column permutation",
+          "shared_derivative_admission": [
+            {
+              "case": "chain-shared",
+              "expected": "UNSUPPORTED_FEATURE",
+              "actual": "UNSUPPORTED_FEATURE",
+              "passed": true
+            },
+            {
+              "case": "chain_tendons-shared",
+              "expected": "UNSUPPORTED_FEATURE",
+              "actual": "UNSUPPORTED_FEATURE",
+              "passed": true
+            }
+          ]
+        },
+        "release": {
+          "raw_mass_cases": 24,
+          "raw_mass_samples": 288,
+          "raw_mass_max_abs": 0.0,
+          "derivative_cases": 960,
+          "derivative_max_abs": {
+            "A": 1.229571999772361e-07,
+            "B": 9.825473767932635e-08,
+            "smooth": 3.552713678800501e-08,
+            "passive": 1.734723475976807e-12,
+            "Fq": 7.105427357601002e-08,
+            "Fv": 3.552713678800501e-08,
+            "Fa": 8.881784197001252e-09,
+            "Mq": 2.7755575615628914e-10
+          },
+          "reference_controls": [
+            {
+              "name": "original_nv2_duplicate_tendon",
+              "outcome": "C compiler rejected",
+              "error": "Error: Invalid model: ten_J_rownnz out of bounds.",
+              "scope": "Known C reference limitation, not an Ada rejection; nv=3 variant retains repeated-joint coverage."
+            }
+          ],
+          "reordered_derivative_cases": 960,
+          "reordered_oracle": "original C model plus bijective Mq column permutation",
+          "shared_derivative_admission": [
+            {
+              "case": "chain-shared",
+              "expected": "UNSUPPORTED_FEATURE",
+              "actual": "UNSUPPORTED_FEATURE",
+              "passed": true
+            },
+            {
+              "case": "chain_tendons-shared",
+              "expected": "UNSUPPORTED_FEATURE",
+              "actual": "UNSUPPORTED_FEATURE",
+              "passed": true
+            }
+          ]
+        }
+      }
+    },
+    "3.14": {
+      "reference": "3.14.0",
+      "frozen_files": 329,
+      "sources_sha256": "eac41e90a62245081fee4b4df992f29f2b123a02cc4ab8481fe594e3f65a3837",
+      "profiles": {
+        "validation": {
+          "raw_mass_cases": 11,
+          "raw_mass_samples": 132,
+          "raw_mass_max_abs": 3.469446951953614e-18,
+          "derivative_cases": 960,
+          "derivative_max_abs": {
+            "A": 1.229571999772361e-07,
+            "B": 9.825473767932635e-08,
+            "smooth": 3.552713678800501e-08,
+            "passive": 1.734723475976807e-12,
+            "Fq": 7.105427357601002e-08,
+            "Fv": 3.552713678800501e-08,
+            "Fa": 8.881784197001252e-09,
+            "Mq": 2.7755575615628914e-10
+          },
+          "reference_controls": []
+        },
+        "release": {
+          "raw_mass_cases": 11,
+          "raw_mass_samples": 132,
+          "raw_mass_max_abs": 3.469446951953614e-18,
+          "derivative_cases": 960,
+          "derivative_max_abs": {
+            "A": 1.229571999772361e-07,
+            "B": 9.825473767932635e-08,
+            "smooth": 3.552713678800501e-08,
+            "passive": 1.734723475976807e-12,
+            "Fq": 7.105427357601002e-08,
+            "Fv": 3.552713678800501e-08,
+            "Fa": 8.881784197001252e-09,
+            "Mq": 2.7755575615628914e-10
+          },
+          "reference_controls": []
+        }
+      }
+    }
+  },
+  "C_reference_failure": {
+    "command": [
+      "python3",
+      "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+      "--cap-mb",
+      "1000",
+      "--timeout",
+      "45",
+      "--",
+      "/var/tmp/sparkling-movement317-env/bin/python",
+      "-X",
+      "faulthandler",
+      "/var/tmp/sparkling-native-mass-317-r190-20261024/derivatives-reverse-direct-c-failure/reproduce.py"
+    ],
+    "exit": 139,
+    "seconds": 1.1137279969989322,
+    "scope": "Unmodified official C wheel on a model accepted by its reference validator; no Ada called by the reproducer."
+  },
+  "scope": "Native mass storage and disjoint derivative workspace migration. No whole Capture/Evaluate/workspace proof, aliased-force/dynamics support, complete 3.17 engine migration, real-arithmetic derivative accuracy, new movement timings or performance-parity claim."
+}

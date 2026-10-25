@@ -1,36 +1,54 @@
 with MJ.Types; use MJ.Types;
 with MJ.Ancestor_Rows;
 
--- Read the existing dense publication through its immutable ancestor pattern.
+-- Read dense or canonical compact publication through its immutable ancestor pattern.
 -- No packing, matrix scan, factorization or allocation is performed here.
 package MJ.Inverse_Mass with SPARK_Mode is
    function Work (A : Real_Array) return Boolean is
      (for all X of A => X in -1.0e100 .. 1.0e100) with Global => null;
+   function Coefficient
+     (Pattern : MJ.Ancestor_Rows.Pattern; Mass : Real_Array;
+      Row, A : Natural; Is_Compact : Boolean) return Real with
+     Global => null,
+     Pre => Row < MJ.Ancestor_Rows.Size (Pattern)
+       and then A < MJ.Ancestor_Rows.Length (Pattern, Row)
+       and then Mass'First = 0
+       and then Int64 (Mass'Length) = Int64 (if Is_Compact then MJ.Ancestor_Rows.Count (Pattern)
+         else MJ.Ancestor_Rows.Size (Pattern) * MJ.Ancestor_Rows.Size (Pattern))
+       and then (for all X of Mass => X in -1.0e60 .. 1.0e60),
+     Post => Coefficient'Result in -1.0e60 .. 1.0e60
+       and then Coefficient'Result =
+         (if Is_Compact then Mass (MJ.Ancestor_Rows.Start (Pattern, Row) + A)
+          else Mass (Row * MJ.Ancestor_Rows.Size (Pattern) + MJ.Ancestor_Rows.Column (Pattern, Row, A)));
+   pragma Inline_Always (Coefficient);
    -- Ordered reference, including C's diagonal/reverse-lower/upper-scatter order.
    -- This functional relation remains a separate obligation from local safety.
-   function Model (Pattern : MJ.Ancestor_Rows.Pattern; Mass, Acceleration : Real_Array)
+   function Model (Pattern : MJ.Ancestor_Rows.Pattern; Mass, Acceleration : Real_Array;
+                   Is_Compact : Boolean := False)
      return Real_Array with Ghost => Static, Global => null,
        Pre => Acceleration'First = 0
          and then Acceleration'Length <= MJ.Ancestor_Rows.Max_Dofs
          and then Acceleration'Length = MJ.Ancestor_Rows.Size (Pattern)
          and then (for all X of Acceleration => X in -1.0e10 .. 1.0e10)
          and then Mass'First = 0
-         and then Mass'Length = Acceleration'Length * Acceleration'Length
+         and then Int64 (Mass'Length) = Int64 (if Is_Compact then MJ.Ancestor_Rows.Count (Pattern)
+           else Acceleration'Length * Acceleration'Length)
          and then (for all X of Mass => X in -1.0e60 .. 1.0e60),
        Post => Model'Result'First = Acceleration'First
          and then Model'Result'Length = Acceleration'Length and then Work (Model'Result);
    procedure Multiply
      (Pattern : MJ.Ancestor_Rows.Pattern; Mass, Acceleration : Real_Array;
-      Value : in out Real_Array; Accepted : out Boolean)
+      Value : in out Real_Array; Accepted : out Boolean; Is_Compact : Boolean := False)
      with Global => null,
        Pre => Acceleration'First = 0
          and then Acceleration'Length <= MJ.Ancestor_Rows.Max_Dofs
          and then Acceleration'Length = MJ.Ancestor_Rows.Size (Pattern)
          and then (for all X of Acceleration => X in -1.0e10 .. 1.0e10)
          and then Mass'First = 0
-         and then Mass'Length = Acceleration'Length * Acceleration'Length
+         and then Int64 (Mass'Length) = Int64 (if Is_Compact then MJ.Ancestor_Rows.Count (Pattern)
+           else Acceleration'Length * Acceleration'Length)
          and then (for all X of Mass => X in -1.0e60 .. 1.0e60)
          and then Value'First = 0 and then Value'Length = Acceleration'Length,
        Post => (if Accepted then Work (Value) else Value = Value'Old);
-   pragma Postcondition (Static => (if Accepted then Value = Model (Pattern, Mass, Acceleration)));
+   pragma Postcondition (Static => (if Accepted then Value = Model (Pattern, Mass, Acceleration, Is_Compact)));
 end MJ.Inverse_Mass;

@@ -38,12 +38,12 @@ package body MJ.Dynamics_Derivatives with SPARK_Mode is
                      Mode : Backend; Result : out Status) is
       Flags : constant Integer := M.Opt.Disableflags;
       Adhesion : constant Boolean := M.Flg_Adhesion;
-      Count : Natural := 0;
    begin
       if W.Initialized then Result := Already_Allocated; return; end if;
       Free (W);
       Result := Invalid_Model;
-      if not MJ.Models.Validity.Is_Valid (M) then return; end if;
+      if not MJ.Models.Valid_Layout (M)
+        or else not MJ.Models.Validity.Is_Valid (M) then return; end if;
       if M.S.Nv not in 1 .. Max_Dofs or else M.S.Njnt > Max_Dofs
         or else M.S.Nq > Max_Positions or else M.S.Nu > Max_Actuators
         or else M.S.Na > Max_Actuators then Result := Capacity_Exceeded; return; end if;
@@ -79,24 +79,14 @@ package body MJ.Dynamics_Derivatives with SPARK_Mode is
             Free (W); Result := Invalid_Model; return;
          end if;
       end loop;
-      -- Copy the compiler's actual pattern, including simple diagonal bodies.
-      -- Reconstructing it from dof_parentid would retain redundant free-body
-      -- ancestors and disagree with m->M and the public inverseFD layout.
-      for Row in 0 .. W.Dims.Nv - 1 loop
-         if M.Sparse.M_Rowadr (Row) /= Count or else M.Sparse.M_Rownnz (Row) < 1 then
-            Free (W); Result := Invalid_Model; return;
-         end if;
-         for K in 1 .. M.Sparse.M_Rownnz (Row) loop
-            if Count >= W.Mass'Length or else Count >= M.S.NC then
-               Free (W); Result := Capacity_Exceeded; return;
-            end if;
-            if M.Sparse.M_Colind (Count) not in 0 .. Integer (Row)
-              or else (K > 1 and then M.Sparse.M_Colind (Count) <= M.Sparse.M_Colind (Count - 1))
-            then Free (W); Result := Invalid_Model; return; end if;
-            W.Mass (Count) := (Row, M.Sparse.M_Colind (Count)); Count := Count + 1;
-         end loop;
-      end loop;
-      if Count /= W.Dims.Nmass then Free (W); Result := Unsupported_Feature; return; end if;
+      MJ.Data.Native_Mass.Capture_Validated (M, W.Mass, Result);
+      if Result /= Success then Free (W); return; end if;
+      -- Raw M aliases have C-ordered storage semantics, but the scratch
+      -- simulator still solves and multiplies its dense physical mass. Do not
+      -- publish derivatives of that different dynamics for an aliased model.
+      if MJ.Data.Native_Mass.Has_Shared_Slots (W.Mass) then
+         Free (W); Result := Unsupported_Feature; return;
+      end if;
       declare D : constant Dimensions := W.Dims; Nx : constant Natural := State_Dimension (W);
       begin
          W.TA := new Matrix'(0 .. Nx - 1 => [0 .. Nx - 1 => 0.0]);
@@ -393,7 +383,7 @@ package body MJ.Dynamics_Derivatives with SPARK_Mode is
             Force (I) := Value;
          end loop;
       end;
-      for K in Mass'Range loop Mass (K) := MJ.Data.Mass_Entry (W.S, W.Mass (K).Row, W.Mass (K).Column); end loop;
+      MJ.Data.Native_Mass.Evaluate (W.S, W.Mass, Mass, Result);
    end Inverse_Sample;
    procedure Inverse_FD
      (W : in out Workspace; Qpos, Qvel, Act, Ctrl, Acc : State_Vector;

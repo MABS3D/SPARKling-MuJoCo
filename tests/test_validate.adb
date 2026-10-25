@@ -135,9 +135,17 @@ begin
 
    --  sparse structures
    M.Sparse.M_Rowadr (1) := M.Sparse.M_Rowadr (1) + 1;
-   Expect (Invalid_CSR, M_Rowadr, 1, "inertia row start gap");
+   if Version_Header >= 3_017_000 then
+      Expect (Invalid_CSR, M_Colind, 1, "shifted inertia row reads invalid columns");
+   else
+      Expect (Invalid_CSR, M_Rowadr, 1, "inertia row start gap");
+   end if;
    M.Sparse.M_Colind (M.Sparse.M_Rowadr (1)) := M.S.Nv;
-   Expect (Invalid_CSR, M_Rowadr, -1, "inertia column out of range");
+   if Version_Header >= 3_017_000 then
+      Expect (Invalid_CSR, M_Colind, 1, "inertia column out of range");
+   else
+      Expect (Invalid_CSR, M_Rowadr, -1, "inertia column out of range");
+   end if;
    M.Sparse.M_Colind (M.Sparse.M_Rowadr (1) + M.Sparse.M_Rownnz (1) - 1) := 2;   --  still a valid CSR row
    Expect (Invalid_CSR, M_Colind, 1, "inertia row does not end with its own dof");
    M.Sparse.D_Diag (0) := M.Sparse.D_Rownnz (0);

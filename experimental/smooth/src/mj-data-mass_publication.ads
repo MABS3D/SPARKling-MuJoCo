@@ -43,4 +43,28 @@ private package MJ.Data.Mass_Publication with SPARK_Mode is
      and then Position_Values (D) = Position_Values (D)'Old
      and then Velocity_Values (D) = Velocity_Values (D)'Old
      and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
+   --  Publish the already built compact cache in place: no candidate copy,
+   --  dense expansion or runtime validation scan is performed here.
+   procedure Mark_Compact_Ready (D : in out Simulation)
+     with Global => null,
+     Pre => Is_Ready (D) and then D.Cache.Pose_Valid
+       and then D.Dynamics.Compact_Mass'First = 0
+       and then D.Dynamics.Compact_Mass'Last = MJ.Ancestor_Rows.Count (D.Ancestors) - 1
+       and then MJ.Smooth_Dynamics.Work_Array (D.Dynamics.Compact_Mass.all),
+     Post => Is_Ready (D) and then Mass_Current (D) and then Symmetric_Mass (D)
+       and then not Forces_Current (D)
+       and then Passive_Current (D) = Passive_Current (D)'Old
+       and then Actuation_Current (D) = Actuation_Current (D)'Old
+       and then Shape (D) = Shape (D)'Old
+       and then State_Values (D) = State_Values (D)'Old
+       and then Activation_Values (D) = Activation_Values (D)'Old
+       and then Input_Values (D) = Input_Values (D)'Old
+       and then Positions_Current (D) = Positions_Current (D)'Old
+       and then D.Dynamics.Mass.all = D.Dynamics.Mass.all'Old
+       and then D.Cache.Mass_Compact
+       and then D.Dynamics.Compact_Mass.all = D.Dynamics.Compact_Mass.all'Old;
+   pragma Postcondition (Static => Configuration (D) = Configuration (D)'Old
+     and then Position_Values (D) = Position_Values (D)'Old
+     and then Velocity_Values (D) = Velocity_Values (D)'Old
+     and then Time (D) = Time (D)'Old and then Step_Size (D) = Step_Size (D)'Old);
 end MJ.Data.Mass_Publication;

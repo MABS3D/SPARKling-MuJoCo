@@ -25,7 +25,9 @@ package body MJ.Data.Inverse with SPARK_Mode is
          Ok : Boolean;
       begin
          MJ.Inverse_Mass.Multiply
-           (D.Ancestors, D.Dynamics.Mass.all, Acceleration, Candidate, Ok);
+           (D.Ancestors,
+            (if D.Cache.Mass_Compact then D.Dynamics.Compact_Mass.all else D.Dynamics.Mass.all),
+            Acceleration, Candidate, Ok, Is_Compact => D.Cache.Mass_Compact);
          if not Ok then return; end if;
          for I in Candidate'Range loop
             declare

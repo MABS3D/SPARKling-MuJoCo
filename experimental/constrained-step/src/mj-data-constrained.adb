@@ -691,7 +691,7 @@ package body MJ.Data.Constrained with SPARK_Mode is
          A_Free (V) := E.D.Dynamics.Acceleration (V - 1);
          Original_Smooth (V) := E.D.Dynamics.Total (V - 1);
          A (V) := A_Free (V); E.T.A_Free (V) := A_Free (V);
-         for W in 1 .. Nv loop Mass (V, W) := E.D.Dynamics.Mass ((V - 1) * Nv + W - 1); end loop;
+         for W in 1 .. Nv loop Mass (V, W) := MJ.Data.Mass_Entry (E.D, V - 1, W - 1); end loop;
          if E.Settings.Sparse and then E.Settings.Algorithm = CS.Newton then
             for K in 0 .. MJ.Ancestor_Rows.Length (E.D.Ancestors, V-1)-1 loop
                Hessian_Pattern (MJ.Ancestor_Rows.Column (E.D.Ancestors, V-1, K)+1, V) := True;

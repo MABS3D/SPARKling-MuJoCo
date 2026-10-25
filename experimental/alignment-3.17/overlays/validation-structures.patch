@@ -14,13 +14,47 @@
  
     ----------------------------------------------------------------------------
     --  5.1 Sizes
-@@ -393,14 +395,74 @@
+@@ -344,25 +346,25 @@
+    --  (dof_simplenum > 0) keeps only its diagonal, every other dof keeps its
+    --  ancestors and itself, and the total is nC (nM is the legacy chain layout).
+    function Sparse_M_OK (M : Model) return Boolean is
+-     (CSR_OK (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
+-              M.S.Nv, M.S.Nc, M.S.Nv))
++     (Structure.Matrix_Valid (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
++              M.S.Nv, M.S.Nv, M.S.Nc))
+    with Pre => Valid_Layout (M);
+ 
+    function Sparse_B_OK (M : Model) return Boolean is
+-     (CSR_OK (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all, M.Sparse.B_Colind.all,
+-              M.S.Nbody, M.S.Nb, M.S.Nv))
++     (Structure.Matrix_Valid (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all, M.Sparse.B_Colind.all,
++              M.S.Nbody, M.S.Nv, M.S.Nb))
+    with Pre => Valid_Layout (M);
+ 
+    function Sparse_D_OK (M : Model) return Boolean is
+-     (CSR_OK (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all, M.Sparse.D_Colind.all,
+-              M.S.Nv, M.S.Nd, M.S.Nv))
++     (Structure.Matrix_Valid (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all, M.Sparse.D_Colind.all,
++              M.S.Nv, M.S.Nv, M.S.Nd))
+    with Pre => Valid_Layout (M);
+ 
+    --  MuJoCo retains duplicate fixed-tendon columns; later slots are zero.
+    --  Every other CSR structure retains strict column ordering.
+    function Sparse_Ten_J_OK (M : Model) return Boolean is
+-     (CSR_OK (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+-              M.S.Ntendon, M.S.Njten, M.S.Nv, Strict => False))
++     (Structure.Matrix_Valid (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
++              M.S.Ntendon, M.S.Nv, M.S.Njten, Strict => False))
+    with Pre => Valid_Layout (M);
+ 
+    --  Row I of the CSR inertia: one entry for a simple dof, else the length
+@@ -393,14 +395,70 @@
       (for all I in 0 .. M.S.Nv - 1 => M_Row_At (M, I))
     with Pre => Valid_Layout (M);
  
 +
 +   --  Per-row C CSR domain: padding, gaps and unused storage are admissible.
-+   --  The older M/B/D compact CSR clauses above remain a separate policy.
++   --  Native M/B/D/tendon and FLEX rows use this same per-row domain.
 +   function Sparse_Flexedge_J_OK (M : Model) return Boolean is
 +     (Structure.Matrix_Valid (M.Flexes.Flexedge_J_Rownnz.all, M.Flexes.Flexedge_J_Rowadr.all,
 +       M.Flexes.Flexedge_J_Colind.all, M.S.Nflexedge, M.S.Nv, M.S.NJfe))
@@ -48,9 +82,7 @@
 +     with Pre => Valid_Layout (M) and then M.S.Nbody >= 1;
 +   function B_Parent_Subset_At (M : Model; B : Integer) return Boolean is
 +     (declare P : constant Integer := M.Bodies.Body_Parentid (B); begin
-+       Structure.Row_Valid (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B), M.S.Nv)
-+       and then Structure.Row_Valid (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (P), M.Sparse.B_Rownnz (P), M.S.Nv)
-+       and then Structure.Sorted_Subset (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B),
++       Structure.Sorted_Subset (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B),
 +         M.Sparse.B_Rowadr (P), M.Sparse.B_Rownnz (P), M.S.Nv))
 +     with Pre => Valid_Layout (M) and then B_Inputs_OK (M) and then Sparse_B_OK (M)
 +       and then B in 1 .. M.S.Nbody-1;
@@ -68,9 +100,7 @@
 +   function D_B_Row_At (M : Model; D : Integer) return Boolean is
 +     (M.Dofs.Dof_Bodyid (D) in 0 .. M.S.Nbody-1 and then
 +       (declare B : constant Integer := M.Dofs.Dof_Bodyid (D); begin
-+         Structure.Span (M.Sparse.D_Colind.all, M.Sparse.D_Rowadr (D), M.Sparse.D_Rownnz (D))
-+         and then Structure.Span (M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B))
-+         and then Structure.Rows_Equal (M.Sparse.D_Colind.all, M.Sparse.D_Rowadr (D), M.Sparse.D_Rownnz (D),
++         Structure.Rows_Equal (M.Sparse.D_Colind.all, M.Sparse.D_Rowadr (D), M.Sparse.D_Rownnz (D),
 +           M.Sparse.B_Colind.all, M.Sparse.B_Rowadr (B), M.Sparse.B_Rownnz (B))))
 +     with Pre => Valid_Layout (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M) and then D in 0 .. M.S.Nv-1;
 +   function D_B_Rows_OK (M : Model) return Boolean is
@@ -92,7 +122,19 @@
  
     --  mapM2M: CSR entry (nC) -> legacy qM index; mapM2D: symmetric D entry (nD) ->
     --  CSR entry or -1; mapD2M: CSR entry (nC) -> D entry, inverse of mapM2D.
-@@ -464,9 +526,8 @@
+@@ -456,7 +514,10 @@
+    with Pre => Valid_Layout (M);
+ 
+    --  Face vertex, normal, and texcoord indexes are local to the mesh.
+-   function Mesh_Faces_At (M : Model; I : Integer) return Boolean is
++   procedure Reveal_Mesh_Layout (M : Model) with
++     Ghost => Static, Global => null, Pre => Valid_Layout (M),
++     Post => Sizes_In_Range (M.S) and then Mesh_Layout_OK (M.S, M.Meshes);
++   function Mesh_Faces_Core (M : Model; I : Integer) return Boolean is
+      (Ref_Mesh_Faceadr_At (M, I)
+       and then Ref_Mesh_Vertadr_At (M, I)
+       and then Ref_Mesh_Normaladr_At (M, I)
+@@ -464,11 +525,16 @@
        and then (for all F in M.Meshes.Mesh_Faceadr (I) .. (M.Meshes.Mesh_Faceadr (I) + M.Meshes.Mesh_Facenum (I)) - 1 =>
          (for all K in 0 .. 2 =>
             M.Meshes.Mesh_Face (3 * F + K) in 0 .. M.Meshes.Mesh_Vertnum (I) - 1
@@ -102,9 +144,18 @@
 +           and then M.Meshes.Mesh_Facenormal (3 * F + K) in 0 .. M.Meshes.Mesh_Normalnum (I) - 1
 +           and then (if M.Meshes.Mesh_Texcoordadr (I) >= 0 then
                         M.Meshes.Mesh_Facetexcoord (3 * F + K) in 0 .. M.Meshes.Mesh_Texcoordnum (I) - 1))))
-    with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
+-   with Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1;
++   with Pre => Sizes_In_Range (M.S) and then Mesh_Layout_OK (M.S, M.Meshes)
++       and then I in 0 .. M.S.Nmesh - 1;
++
++   function Mesh_Faces_At (M : Model; I : Integer) return Boolean with
++     Global => null, Pre => Valid_Layout (M) and then I in 0 .. M.S.Nmesh - 1,
++     Post => Sizes_In_Range (M.S) and then Mesh_Layout_OK (M.S, M.Meshes)
++       and then Mesh_Faces_At'Result = Mesh_Faces_Core (M, I);
  
-@@ -1085,6 +1146,7 @@
+    --  Polygon vertex lists index the mesh's vertices; the per-vertex polygon map
+    --  indexes the mesh's polygons.
+@@ -1085,6 +1151,7 @@
        and then Sparse_M_OK (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
        and then Sparse_Ten_J_OK (M) and then M_Rownnz_OK (M) and then M_Rows_OK (M)
        and then D_Diags_OK (M) and then Maps_OK (M)
@@ -122,7 +173,15 @@
  with Interfaces;            use type Interfaces.Unsigned_8;
  with MJ.Models.Gen_Clauses; use MJ.Models.Gen_Clauses;
  
-@@ -515,11 +516,12 @@
+@@ -89,6 +90,7 @@
+       Efc        : Int64;
+       NJ         : Size_Type;
+    begin
++      MJ.Model_Admission.Reveal_Joint_Count_Layout (M.S, M.Joints);
+       Adhesion := Has_Positive (M.Geoms.Geom_Adhesion.all)
+                   or else Has_Positive (M.Pairs.Pair_Adhesion.all);
+       Ne := Count_Equality_Rows (M.Equalities.Eq_Type.all);
+@@ -515,11 +517,12 @@
     end Diagnose_CSR;
  
     procedure Diagnose_Sparse (M : Model; Result : out Load_Result) with
@@ -137,11 +196,96 @@
     is
        pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
        pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_M_OK);
-@@ -632,7 +634,11 @@
-          Result := (Invalid_CSR, MapD2M, -1);
+@@ -530,6 +533,9 @@
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", M_Rows_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_Diags_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Maps_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Flex_Structures_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Structure_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_B_Rows_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madr_Range_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Parent_Ranges_OK);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madrs_OK);
+@@ -538,39 +544,19 @@
+    begin
+       Reveal_Layout (M);
+       if not Sparse_M_OK (M) then
+-         Diagnose_CSR (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all, M.Sparse.M_Colind.all,
+-                       M.S.Nv, M.S.Nc, M.S.Nv, M_Rowadr, Result);
+-         if Result.Status /= OK then
+-            return;
+-         end if;
+-         Result := (Invalid_CSR, M_Rowadr, -1);
++         MJ.Model_Admission.Check_M_CSR (M, Result);
           return;
        end if;
+       if not Sparse_B_OK (M) then
+-         Diagnose_CSR (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all, M.Sparse.B_Colind.all,
+-                       M.S.Nbody, M.S.Nb, M.S.Nv, B_Rowadr, Result);
+-         if Result.Status /= OK then
+-            return;
+-         end if;
+-         Result := (Invalid_CSR, B_Rowadr, -1);
++         MJ.Model_Admission.Check_B_CSR (M, Result);
+          return;
+       end if;
+       if not Sparse_D_OK (M) then
+-         Diagnose_CSR (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all, M.Sparse.D_Colind.all,
+-                       M.S.Nv, M.S.Nd, M.S.Nv, D_Rowadr, Result);
+-         if Result.Status /= OK then
+-            return;
+-         end if;
+-         Result := (Invalid_CSR, D_Rowadr, -1);
++         MJ.Model_Admission.Check_D_CSR (M, Result);
+          return;
+       end if;
+       if not Sparse_Ten_J_OK (M) then
+-         Diagnose_CSR (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all, M.Tendons.Ten_J_Colind.all,
+-                       M.S.Ntendon, M.S.Njten, M.S.Nv, Ten_J_Rowadr, Result);
+-         if Result.Status /= OK then
+-            return;
+-         end if;
+-         Result := (Invalid_CSR, Ten_J_Rowadr, -1);
++         MJ.Model_Admission.Check_Tendon_CSR (M, Result);
+          return;
+       end if;
+       if not M_Rownnz_OK (M) then
+@@ -603,36 +589,13 @@
+          Result := (Invalid_CSR, D_Diag, -1);
+          return;
+       end if;
+-      if not Maps_OK (M) then
+-         for K in 0 .. M.S.Nc - 1 loop
+-            if M.Sparse.MapM2M (K) not in 0 .. M.S.Nm - 1 then
+-               Result := (Invalid_CSR, MapM2M, K);
+-               return;
+-            end if;
+-         end loop;
+-         for K in 0 .. M.S.Nd - 1 loop
+-            if M.Sparse.MapM2D (K) not in -1 .. M.S.Nc - 1 then
+-               Result := (Invalid_CSR, MapM2D, K);
+-               return;
+-            end if;
+-         end loop;
+-         for K in 0 .. M.S.Nc - 1 loop
+-            if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1 then
+-               Result := (Invalid_CSR, MapD2M, K);
+-               return;
+-            end if;
+-         end loop;
+-         for K in 0 .. M.S.Nc - 1 loop
+-            if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1
+-              or else M.Sparse.MapM2D (M.Sparse.MapD2M (K)) /= K then
+-               Result := (Invalid_CSR, MapD2M, K);
+-               return;
+-            end if;
+-         end loop;
+-         Result := (Invalid_CSR, MapD2M, -1);
+-         return;
+-      end if;
 -      Result := OK_Result;
++      MJ.Model_Admission.Check_Maps (M, Result);
++      if Result.Status /= OK then return; end if;
 +      MJ.Model_Admission.Check_Flex (M, Result);
 +      if Result.Status /= OK then return; end if;
 +      MJ.Model_Admission.Check_Bodies (M, Result);
@@ -150,28 +294,133 @@
     end Diagnose_Sparse;
  
     procedure Diagnose_Assets (M : Model; Result : out Load_Result) with
+@@ -657,7 +620,7 @@
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Type_At);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Data_At);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Site_Data_At);
+-      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mesh_Faces_At);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mesh_Faces_Core);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mesh_Polys_At);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mesh_Graph_At);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Hfield_At);
+@@ -1152,6 +1115,75 @@
+    is
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
+       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Is_Valid);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Refs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bools_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Reals_In_Tier0);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Parents_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Roots_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Welds_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Joints_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Dofs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Geoms_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Trees_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tree_Dofs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Trees_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Types_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Adrs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Joints_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Parents_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Parent_Ranges_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madr_Range_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madrs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Simplenums_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_M_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_B_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_D_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Ten_J_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", M_Rownnz_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", M_Rows_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_Diags_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Maps_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Flex_Structures_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Structure_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_B_Rows_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Types_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Datas_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Site_Datas_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sameframes_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Meshes_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Hfields_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Textures_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Texids_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Bvhs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Octs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", EfmC_Permutation_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Pairs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Excludes_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Eq_Types_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Eq_Objs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Wraps_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tendons_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Types_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Trnids_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Acts_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Ranges_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Types_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Objs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Dims_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sensor_Adrs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tuples_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Names_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Paths_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Option_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Stat_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Body_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Jnt_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Geom_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Dof_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Tendon_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Actuator_Params_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Caps_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Adhesion_OK);
+    begin
+       if M.S.Nbody < 1 or else M.S.Nbody >= 2**16 then
+          Result := (Size_Out_Of_Range, Size_Table, Size_Nbody);
 --- /dev/null
 +++ b/src/mj-model_admission.adb
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,195 @@
 +with MJ.Model_Structures;
 +package body MJ.Model_Admission with SPARK_Mode is
 +   package S renames MJ.Model_Structures;
 +   use type S.CSR_Code;
-+   procedure Check_Flex (M : Model; Result : out Load_Result) is
++   procedure Reveal_Flex_Layout (M : Model) is
++   begin
++      null;
++   end Reveal_Flex_Layout;
++   procedure Check_Flexedge_J (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
 +      Item : S.CSR_Result;
 +   begin
++      Reveal_Flex_Layout (M);
 +      Item := S.Check_CSR (M.Flexes.Flexedge_J_Rownnz.all, M.Flexes.Flexedge_J_Rowadr.all,
 +        M.Flexes.Flexedge_J_Colind.all, M.S.Nflexedge, M.S.Nv, M.S.NJfe);
 +      Result := CSR_Error (Item, Flexedge_J_Rownnz, Flexedge_J_Rowadr, Flexedge_J_Colind);
-+      if Result.Status /= OK then return; end if;
++   end Check_Flexedge_J;
++   procedure Check_Flexvert_J (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Flex_Layout (M);
 +      Item := S.Check_CSR (M.Flexes.Flexvert_J_Rownnz.all, M.Flexes.Flexvert_J_Rowadr.all,
 +        M.Flexes.Flexvert_J_Colind.all, 2*M.S.Nflexvert, M.S.Nv, 2*M.S.NJfv);
 +      Result := CSR_Error (Item, Flexvert_J_Rownnz, Flexvert_J_Rowadr, Flexvert_J_Colind);
-+      if Result.Status /= OK then return; end if;
++   end Check_Flexvert_J;
++   procedure Check_Efm0_L (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Flex_Layout (M);
 +      Item := S.Check_CSR (M.Flexes.Efm0_L_Rownnz.all, M.Flexes.Efm0_L_Rowadr.all,
 +        M.Flexes.Efm0_L_Colind.all, M.S.Nefm0dof, M.S.Nefm0dof, M.S.Nefm0L);
 +      Result := CSR_Error (Item, Efm0_L_Rownnz, Efm0_L_Rowadr, Efm0_L_Colind);
-+      if Result.Status /= OK then return; end if;
++   end Check_Efm0_L;
++   procedure Check_Efm0_Dofs (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++   begin
++      Reveal_Flex_Layout (M);
 +      for K in 0 .. M.S.Nefm0dof-1 loop
 +         if M.Flexes.Efm0_Dofid (K) not in 0 .. M.S.Nv-1 then
 +            Result := (Invalid_Reference, Efm0_Dofid, K); return;
@@ -179,44 +428,158 @@
 +         pragma Loop_Invariant (for all J in 0 .. K => M.Flexes.Efm0_Dofid (J) in 0 .. M.S.Nv-1);
 +      end loop;
 +      Result := OK_Result;
++   end Check_Efm0_Dofs;
++   procedure Check_Flex (M : Model; Result : out Load_Result) is
++      --  Compose the independently proved clauses as abstract predicates.
++      --  Hiding their definitions changes only the proof context.
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Flexedge_J_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Flexvert_J_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_Efm0_L_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Efm0_Dofs_OK);
++   begin
++      Check_Flexedge_J (M, Result);
++      if Result.Status /= OK then return; end if;
++      Check_Flexvert_J (M, Result);
++      if Result.Status /= OK then return; end if;
++      Check_Efm0_L (M, Result);
++      if Result.Status /= OK then return; end if;
++      Check_Efm0_Dofs (M, Result);
 +   end Check_Flex;
 +   procedure Check_Bodies (M : Model; Result : out Load_Result) is
-+      Parent : Integer;
-+      Count : Int64;
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_B_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Inputs_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Root_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Parent_Subset_At);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", B_Ancestor_At);
 +   begin
 +      if not B_Inputs_OK (M) then Result := (Invalid_Tree, Body_Parentid, -1); return; end if;
 +      if not B_Root_OK (M) then Result := (Invalid_CSR, B_Rownnz, 0); return; end if;
 +      for B in 1 .. M.S.Nbody-1 loop
-+         Parent := M.Bodies.Body_Parentid (B);
 +         if not B_Parent_Subset_At (M, B) then Result := (Invalid_CSR, B_Colind, B); return; end if;
-+         Count := S.Ancestor_Count (M.Bodies.Body_Parentid.all, M.Bodies.Body_Weldid.all,
-+           M.Bodies.Body_Dofnum.all, M.S.Nv, M.Bodies.Body_Weldid (Parent));
-+         if Count > Int64 (M.Sparse.B_Rownnz (B)) or else Count > Int64 (M.Sparse.B_Rownnz (Parent)) then
-+            Result := (Invalid_CSR, B_Rownnz, B); return;
-+         end if;
++         if not B_Ancestor_At (M, B) then Result := (Invalid_CSR, B_Rownnz, B); return; end if;
 +         pragma Loop_Invariant (for all I in 1 .. B => B_Parent_Subset_At (M, I) and then B_Ancestor_At (M, I));
 +      end loop;
 +      Result := OK_Result;
 +   end Check_Bodies;
++   procedure Reveal_Dof_Layout (M : Model) is
++   begin
++      null;
++   end Reveal_Dof_Layout;
 +   procedure Check_Dofs (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_B_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Sparse_D_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Madr_Range_OK);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_Diag_At);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", D_B_Row_At);
 +      Body_Id : Integer;
 +   begin
++      Reveal_Dof_Layout (M);
 +      for D in 0 .. M.S.Nv-1 loop
 +         if not D_Diag_At (M, D) then Result := (Invalid_CSR, D_Diag, D); return; end if;
-+         Body_Id := M.Dofs.Dof_Bodyid (D);
-+         if Body_Id not in 0 .. M.S.Nbody-1 then Result := (Invalid_Reference, Dof_Bodyid, D); return; end if;
-+         if M.Sparse.D_Rownnz (D) /= M.Sparse.B_Rownnz (Body_Id) then
-+            Result := (Invalid_CSR, D_Rownnz, D); return;
++         if not D_B_Row_At (M, D) then
++            --  Classify only a rejected row; a successful row needs no second
++            --  body-ID or width check. The predicate guards its own accesses.
++            Body_Id := M.Dofs.Dof_Bodyid (D);
++            if Body_Id not in 0 .. M.S.Nbody-1 then
++               Result := (Invalid_Reference, Dof_Bodyid, D);
++            elsif M.Sparse.D_Rownnz (D) /= M.Sparse.B_Rownnz (Body_Id) then
++               Result := (Invalid_CSR, D_Rownnz, D);
++            else
++               Result := (Invalid_CSR, D_Colind, D);
++            end if;
++            return;
 +         end if;
-+         if not D_B_Row_At (M, D) then Result := (Invalid_CSR, D_Colind, D); return; end if;
 +         pragma Loop_Invariant (for all I in 0 .. D => D_Diag_At (M, I) and then D_B_Row_At (M, I));
 +      end loop;
 +      Result := OK_Result;
 +   end Check_Dofs;
++   procedure Check_Maps (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Maps_OK);
++   begin
++      Reveal_Dof_Layout (M);
++      if not Maps_OK (M) then
++         for K in 0 .. M.S.Nc - 1 loop
++            if M.Sparse.MapM2M (K) not in 0 .. M.S.Nm - 1 then
++               Result := (Invalid_CSR, MapM2M, K);
++               return;
++            end if;
++         end loop;
++         for K in 0 .. M.S.Nd - 1 loop
++            if M.Sparse.MapM2D (K) not in -1 .. M.S.Nc - 1 then
++               Result := (Invalid_CSR, MapM2D, K);
++               return;
++            end if;
++         end loop;
++         for K in 0 .. M.S.Nc - 1 loop
++            if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1 then
++               Result := (Invalid_CSR, MapD2M, K);
++               return;
++            end if;
++         end loop;
++         for K in 0 .. M.S.Nc - 1 loop
++            if M.Sparse.MapD2M (K) not in 0 .. M.S.Nd - 1
++              or else M.Sparse.MapM2D (M.Sparse.MapD2M (K)) /= K then
++               Result := (Invalid_CSR, MapD2M, K);
++               return;
++            end if;
++         end loop;
++         Result := (Invalid_CSR, MapD2M, -1);
++         return;
++      end if;
++      Result := OK_Result;
++   end Check_Maps;
++   procedure Reveal_Joint_Count_Layout (S : Sizes; Joints : Joint_Arrays) is
++   begin
++      null;
++   end Reveal_Joint_Count_Layout;
++   procedure Reveal_Tendon_Layout (M : Model) is
++   begin
++      null;
++   end Reveal_Tendon_Layout;
++   procedure Check_M_CSR (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Dof_Layout (M);
++      Item := S.Check_CSR (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all,
++                          M.Sparse.M_Colind.all, M.S.Nv, M.S.Nv, M.S.Nc, Strict => True);
++      Result := CSR_Error (Item, M_Rownnz, M_Rowadr, M_Colind);
++   end Check_M_CSR;
++   procedure Check_B_CSR (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Dof_Layout (M);
++      Item := S.Check_CSR (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all,
++                          M.Sparse.B_Colind.all, M.S.Nbody, M.S.Nv, M.S.Nb, Strict => True);
++      Result := CSR_Error (Item, B_Rownnz, B_Rowadr, B_Colind);
++   end Check_B_CSR;
++   procedure Check_D_CSR (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Dof_Layout (M);
++      Item := S.Check_CSR (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all,
++                          M.Sparse.D_Colind.all, M.S.Nv, M.S.Nv, M.S.Nd, Strict => True);
++      Result := CSR_Error (Item, D_Rownnz, D_Rowadr, D_Colind);
++   end Check_D_CSR;
++   procedure Check_Tendon_CSR (M : Model; Result : out Load_Result) is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      Item : S.CSR_Result;
++   begin
++      Reveal_Tendon_Layout (M);
++      Item := S.Check_CSR (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all,
++                          M.Tendons.Ten_J_Colind.all, M.S.Ntendon, M.S.Nv, M.S.Njten, Strict => False);
++      Result := CSR_Error (Item, Ten_J_Rownnz, Ten_J_Rowadr, Ten_J_Colind);
++   end Check_Tendon_CSR;
 +end MJ.Model_Admission;
 --- /dev/null
 +++ b/src/mj-model_admission.ads
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,99 @@
 +with MJ.Types; use MJ.Types;
 +with MJ.Fields; use MJ.Fields;
 +with MJ.Models; use MJ.Models;
@@ -233,7 +596,28 @@
 +       (Invalid_CSR,
 +        (case Item.Code is when MJ.Model_Structures.Width_Error => Width_Field,
 +         when MJ.Model_Structures.Column_Error => Column_Field, when others => Address_Field), Item.Row))
-+     with Global => null;
++     with Global => null,
++     Post => (if Item.Code = MJ.Model_Structures.Valid then CSR_Error'Result = OK_Result
++       else CSR_Error'Result.Status = Invalid_CSR
++         and then CSR_Error'Result.Field =
++           (case Item.Code is when MJ.Model_Structures.Width_Error => Width_Field,
++            when MJ.Model_Structures.Column_Error => Column_Field, when others => Address_Field)
++         and then CSR_Error'Result.Index = Item.Row);
++   procedure Reveal_Flex_Layout (M : Model) with
++     Ghost => Static, Global => null, Pre => Valid_Layout (M),
++     Post => Sizes_In_Range (M.S) and then Flex_Layout_OK (M.S, M.Flexes);
++   procedure Check_Flexedge_J (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_Flexedge_J_OK (M);
++   procedure Check_Flexvert_J (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_Flexvert_J_OK (M);
++   procedure Check_Efm0_L (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_Efm0_L_OK (M);
++   procedure Check_Efm0_Dofs (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Efm0_Dofs_OK (M);
 +   procedure Check_Flex (M : Model; Result : out Load_Result) with
 +     Global => null, Pre => Valid_Layout (M),
 +     Post => (Result.Status = OK) = Flex_Structures_OK (M);
@@ -241,11 +625,59 @@
 +     Global => null,
 +     Pre => Valid_Layout (M) and then M.S.Nbody >= 1 and then Sparse_B_OK (M),
 +     Post => (Result.Status = OK) = B_Structure_OK (M);
++   procedure Reveal_Dof_Layout (M : Model) with
++     Ghost => Static, Global => null, Pre => Valid_Layout (M),
++     Post => Sizes_In_Range (M.S) and then Dof_Layout_OK (M.S, M.Dofs)
++       and then Sparse_Layout_OK (M.S, M.Sparse);
 +   procedure Check_Dofs (M : Model; Result : out Load_Result) with
 +     Global => null,
 +     Pre => Valid_Layout (M) and then Sparse_B_OK (M) and then Sparse_D_OK (M)
 +       and then Madr_Range_OK (M),
 +     Post => (Result.Status = OK) = (D_Diags_OK (M) and then D_B_Rows_OK (M));
++   procedure Check_Maps (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Maps_OK (M);
++   procedure Reveal_Joint_Count_Layout (S : Sizes; Joints : Joint_Arrays) with
++     Ghost => Static, Global => null,
++     Pre => Sizes_In_Range (S) and then Joint_Layout_OK (S, Joints),
++     Post => Joints.Jnt_Limited /= null and then Joints.Jnt_Type /= null
++       and then Joints.Jnt_Limited'First = Joints.Jnt_Type'First
++       and then Joints.Jnt_Limited'Length = Joints.Jnt_Type'Length;
++   procedure Reveal_Tendon_Layout (M : Model) with
++     Ghost => Static, Global => null, Pre => Valid_Layout (M),
++     Post => Sizes_In_Range (M.S) and then Tendon_Layout_OK (M.S, M.Tendons);
++   procedure Check_M_CSR (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_M_OK (M)
++       and then Result = CSR_Error
++         (MJ.Model_Structures.Check_CSR
++           (M.Sparse.M_Rownnz.all, M.Sparse.M_Rowadr.all,
++            M.Sparse.M_Colind.all, M.S.Nv, M.S.Nv, M.S.Nc, Strict => True),
++          M_Rownnz, M_Rowadr, M_Colind);
++   procedure Check_B_CSR (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_B_OK (M)
++       and then Result = CSR_Error
++         (MJ.Model_Structures.Check_CSR
++           (M.Sparse.B_Rownnz.all, M.Sparse.B_Rowadr.all,
++            M.Sparse.B_Colind.all, M.S.Nbody, M.S.Nv, M.S.Nb, Strict => True),
++          B_Rownnz, B_Rowadr, B_Colind);
++   procedure Check_D_CSR (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_D_OK (M)
++       and then Result = CSR_Error
++         (MJ.Model_Structures.Check_CSR
++           (M.Sparse.D_Rownnz.all, M.Sparse.D_Rowadr.all,
++            M.Sparse.D_Colind.all, M.S.Nv, M.S.Nv, M.S.Nd, Strict => True),
++          D_Rownnz, D_Rowadr, D_Colind);
++   procedure Check_Tendon_CSR (M : Model; Result : out Load_Result) with
++     Global => null, Pre => Valid_Layout (M),
++     Post => (Result.Status = OK) = Sparse_Ten_J_OK (M)
++       and then Result = CSR_Error
++         (MJ.Model_Structures.Check_CSR
++           (M.Tendons.Ten_J_Rownnz.all, M.Tendons.Ten_J_Rowadr.all,
++            M.Tendons.Ten_J_Colind.all, M.S.Ntendon, M.S.Nv, M.S.Njten, Strict => False),
++          Ten_J_Rownnz, Ten_J_Rowadr, Ten_J_Colind);
 +end MJ.Model_Admission;
 --- /dev/null
 +++ b/src/mj-model_structures.adb
@@ -565,3 +997,20 @@
 +     Post => Rows_Equal'Result = (Left_Width = Right_Width and then
 +       (for all K in 0 .. Left_Width-1 => Left (Left_Address+K) = Right (Right_Address+K)));
 +end MJ.Model_Structures;
+--- /dev/null
++++ b/src/mj-models-validity.adb
+@@ -0,0 +1,14 @@
++package body MJ.Models.Validity with SPARK_Mode is
++   procedure Reveal_Mesh_Layout (M : Model) is
++   begin
++      null;
++   end Reveal_Mesh_Layout;
++
++   function Mesh_Faces_At (M : Model; I : Integer) return Boolean is
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Valid_Layout);
++      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Mesh_Faces_Core);
++   begin
++      Reveal_Mesh_Layout (M);
++      return Mesh_Faces_Core (M, I);
++   end Mesh_Faces_At;
++end MJ.Models.Validity;

@@ -6,6 +6,7 @@ with MJ.Fluid_Kernels;
 with MJ.Types;       use MJ.Types;
 with MJ.Bounds_Kernels;
 with MJ.Ancestor_Rows;
+with MJ.Compact_Inertia;
 with MJ.Smooth_Topology;
 with MJ.Models;
 with MJ.Smooth_Math;
@@ -431,7 +432,7 @@ private
       Linear_Jacobian, Angular_Jacobian : Real_Array_Access := null;
    end record;
    type Force_Buffers is record
-      Mass, Bias, Gravity, Passive, Actuator, Acceleration, Total : Real_Array_Access := null;
+      Mass, Compact_Mass, Bias, Gravity, Passive, Actuator, Acceleration, Total : Real_Array_Access := null;
    end record;
    type Actuator_Buffers is record
       Length, Velocity, Force : Real_Array_Access := null;
@@ -444,6 +445,7 @@ private
    type Cache_Flags is record
       Pose_Valid, Jacobian_Valid, Mass_Valid, Passive_Valid, Actuation_Valid, Force_Valid : Boolean := False;
       Spatial_Valid, Cartesian_Motion_Valid : Boolean := False;
+      Mass_Compact : Boolean := False;
    end record;
    subtype Activation_Rate_Array is MJ.Activation.Rate_Array;
    type Simulation is limited record
@@ -534,7 +536,7 @@ private
       and then D.Kinematic.Bodies = null and then D.Kinematic.Joints = null
       and then D.Kinematic.Spatial_Inertias = null and then D.Kinematic.Spatial_Motions = null
       and then D.Kinematic.Linear_Jacobian = null and then D.Kinematic.Angular_Jacobian = null
-      and then D.Dynamics.Mass = null and then D.Dynamics.Bias = null
+      and then D.Dynamics.Mass = null and then D.Dynamics.Compact_Mass = null and then D.Dynamics.Bias = null
       and then D.Dynamics.Gravity = null and then D.Dynamics.Passive = null
       and then D.Dynamics.Actuator = null and then D.Dynamics.Acceleration = null
       and then D.Dynamics.Total = null and then D.Actuators.Length = null
@@ -717,7 +719,9 @@ private
       and then (if D.Cache.Spatial_Valid then D.Cache.Pose_Valid and then Spatial_Bounded (D.Kinematic))
       and then (if D.Cache.Cartesian_Motion_Valid then D.Cache.Pose_Valid)
       and then (if D.Cache.Jacobian_Valid then D.Cache.Pose_Valid and then Jacobians_Bounded (D.Kinematic))
-      and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
+      and then (if D.Cache.Mass_Valid then
+        (if D.Cache.Mass_Compact then Array_Bounded (D.Dynamics.Compact_Mass)
+         else Array_Bounded (D.Dynamics.Mass)))
       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
         and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
         and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
@@ -730,7 +734,9 @@ private
    --  Historical cache predicate, retained only for the compatibility proof.
    function Prior_Caches_Bounded (D : Simulation) return Boolean is
      ((if D.Cache.Pose_Valid then Kinematic_Bounded (D.Kinematic))
-      and then (if D.Cache.Mass_Valid then Array_Bounded (D.Dynamics.Mass))
+      and then (if D.Cache.Mass_Valid then
+        (if D.Cache.Mass_Compact then Array_Bounded (D.Dynamics.Compact_Mass)
+         else Array_Bounded (D.Dynamics.Mass)))
       and then (if D.Cache.Passive_Valid then Array_Bounded (D.Dynamics.Gravity)
         and then Array_Bounded (D.Dynamics.Bias) and then Array_Bounded (D.Dynamics.Passive)
         and then (if D.Tendons /= null then Array_Bounded (D.Tendon_Outputs, 4.0e103)))
@@ -783,7 +789,8 @@ private
       and then MJ.Smooth_Topology.Dof_Count (T) = Nv);
    function Ancestor_Storage_Ready (D : Simulation) return Boolean is
      (Ancestor_Pattern_Ready (D.Ancestors, D.Nv)
-      and then Has_Real_Layout (D.Scratch.Ancestor_Factor, MJ.Ancestor_Rows.Count (D.Ancestors)));
+      and then Has_Real_Layout (D.Scratch.Ancestor_Factor, MJ.Ancestor_Rows.Count (D.Ancestors))
+      and then Has_Real_Layout (D.Dynamics.Compact_Mass, MJ.Ancestor_Rows.Count (D.Ancestors)));
    function Topology_Storage_Ready (D : Simulation) return Boolean is
      (Topology_Layout_Ready (D.Topology, D.Nb, D.Nv));
 
@@ -880,6 +887,7 @@ private
       and then Has_Real_Layout (D.Kinematic.Linear_Jacobian, 3 * D.Nb * D.Nv)
       and then Has_Real_Layout (D.Kinematic.Angular_Jacobian, 3 * D.Nb * D.Nv)
       and then Has_Real_Layout (D.Dynamics.Mass, D.Nv * D.Nv)
+      and then Has_Real_Layout (D.Dynamics.Compact_Mass, MJ.Ancestor_Rows.Count (D.Ancestors))
       and then Has_Real_Layout (D.Dynamics.Bias, D.Nv) and then Has_Real_Layout (D.Dynamics.Gravity, D.Nv)
       and then Has_Real_Layout (D.Dynamics.Passive, D.Nv) and then Has_Real_Layout (D.Dynamics.Actuator, D.Nv)
       and then Has_Real_Layout (D.Dynamics.Acceleration, D.Nv) and then Has_Real_Layout (D.Dynamics.Total, D.Nv)
@@ -933,7 +941,9 @@ private
 
    function Acceleration (D : Simulation; Index : Natural) return Real is (D.Dynamics.Acceleration (Index));
    function Mass_Entry (D : Simulation; Row, Column : Natural) return Real is
-     (D.Dynamics.Mass (MJ.Smooth_Kernels.Matrix_Offset (D.Nv, Row, Column)));
+     (if D.Cache.Mass_Compact then
+        MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Compact_Mass.all, Row, Column)
+      else D.Dynamics.Mass (MJ.Smooth_Kernels.Matrix_Offset (D.Nv, Row, Column)));
    function Force_Value (D : Simulation; Kind : Force_Kind; Index : Natural) return Real is
      (case Kind is
         when Gravity_Force => D.Dynamics.Gravity (Index),
@@ -985,9 +995,13 @@ private
           Read_Vector (D.State.Mocap_Pos.all, 3 * D.Body_Config (B).Mocap_Id) = D.Body_Config (B).Position
           and then Read_Quaternion (D.State.Mocap_Quat.all, 4 * D.Body_Config (B).Mocap_Id) = D.Body_Config (B).Mocap_Reference)));
    function Symmetric_Mass (D : Simulation) return Boolean is
-     (Is_Ready (D) and then (for all I in 0 .. D.Nv - 1 =>
-       (for all J in 0 .. D.Nv - 1 =>
-         D.Dynamics.Mass (I * D.Nv + J) = D.Dynamics.Mass (J * D.Nv + I))));
+     (Is_Ready (D) and then
+       (if D.Cache.Mass_Compact then
+          (for all I in 0 .. D.Nv - 1 => (for all J in 0 .. D.Nv - 1 =>
+            MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Compact_Mass.all, I, J) =
+              MJ.Compact_Inertia.Value_At (D.Ancestors, D.Dynamics.Compact_Mass.all, J, I)))
+        else (for all I in 0 .. D.Nv - 1 => (for all J in 0 .. D.Nv - 1 =>
+          D.Dynamics.Mass (I * D.Nv + J) = D.Dynamics.Mass (J * D.Nv + I)))));
    --  Limit the mutable formal to cache flags so state/configuration frames
    --  follow directly from the language's parameter and ownership rules.
    procedure Invalidate (Cache : in out Cache_Flags) with Global => null,

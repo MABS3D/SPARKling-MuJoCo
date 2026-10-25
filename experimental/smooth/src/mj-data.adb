@@ -93,6 +93,7 @@ package body MJ.Data with SPARK_Mode is
       Cache.Spatial_Valid := False;
       Cache.Cartesian_Motion_Valid := False;
       Cache.Mass_Valid := False;
+      Cache.Mass_Compact := False;
       Cache.Passive_Valid := False;
       Cache.Actuation_Valid := False;
       Cache.Force_Valid := False;
@@ -445,12 +446,15 @@ package body MJ.Data with SPARK_Mode is
       B.Angular_Jacobian := Zero_Array (3 * Nb * Nv);
    end Allocate_Kinematic;
 
-   procedure Allocate_Dynamics (B : in out Force_Buffers; Nv : Natural) with
-     Global => null, Pre => Nv <= Max_Dofs
-       and then B.Mass = null and then B.Bias = null and then B.Gravity = null and then B.Passive = null and then B.Actuator = null and then B.Acceleration = null and then B.Total = null,
-     Post => Has_Real_Layout (B.Mass, Nv * Nv) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
+   procedure Allocate_Dynamics (B : in out Force_Buffers; Nv, Nc : Natural) with
+     Global => null, Pre => Nv <= Max_Dofs and then Nc <= MJ.Ancestor_Rows.Max_Entries
+       and then B.Compact_Mass = null and then B.Mass = null and then B.Bias = null and then B.Gravity = null and then B.Passive = null and then B.Actuator = null and then B.Acceleration = null and then B.Total = null,
+     Post => Has_Real_Layout (B.Compact_Mass, Nc)
+       and then (for all X of B.Compact_Mass.all => X = 0.0)
+       and then Has_Real_Layout (B.Mass, Nv * Nv) and then (for all X of B.Mass.all => X = 0.0) and then Has_Real_Layout (B.Bias, Nv) and then (for all X of B.Bias.all => X = 0.0) and then Has_Real_Layout (B.Gravity, Nv) and then (for all X of B.Gravity.all => X = 0.0) and then Has_Real_Layout (B.Passive, Nv) and then (for all X of B.Passive.all => X = 0.0) and then Has_Real_Layout (B.Actuator, Nv) and then (for all X of B.Actuator.all => X = 0.0) and then Has_Real_Layout (B.Acceleration, Nv) and then (for all X of B.Acceleration.all => X = 0.0) and then Has_Real_Layout (B.Total, Nv) and then (for all X of B.Total.all => X = 0.0)
    is
    begin
+      B.Compact_Mass := Zero_Array (Nc);
       B.Mass := Zero_Array (Nv * Nv);
       B.Bias := Zero_Array (Nv);
       B.Gravity := Zero_Array (Nv);
@@ -1156,7 +1160,7 @@ package body MJ.Data with SPARK_Mode is
          Free (D); Result := Invalid_Model; return;
       end if;
       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
-      Allocate_Dynamics (D.Dynamics, D.Nv);
+      Allocate_Dynamics (D.Dynamics, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
       Allocate_Actuators (D.Actuators, D.No);
       Allocate_Scratch (D.Scratch, D.Nq, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
       if D.Tendons /= null then
@@ -1233,7 +1237,7 @@ package body MJ.Data with SPARK_Mode is
          Free (D); Result := Invalid_Model; return;
       end if;
       Allocate_Kinematic (D.Kinematic, D.Nb, D.Nj, D.Nv);
-      Allocate_Dynamics (D.Dynamics, D.Nv);
+      Allocate_Dynamics (D.Dynamics, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
       Allocate_Actuators (D.Actuators, 0);
       Allocate_Scratch (D.Scratch, D.Nq, D.Nv, MJ.Ancestor_Rows.Count (D.Ancestors));
       if D.Tendons /= null then
@@ -1270,7 +1274,7 @@ package body MJ.Data with SPARK_Mode is
       Free_Real (K.Linear_Jacobian); Free_Real (K.Angular_Jacobian);
    end Free_Kinematic;
    procedure Free_Forces (F : in out Force_Buffers) with
-     Global => null, Post => F.Mass = null
+     Global => null, Post => F.Compact_Mass = null and then F.Mass = null
        and then F.Bias = null
        and then F.Gravity = null
        and then F.Passive = null
@@ -1279,6 +1283,7 @@ package body MJ.Data with SPARK_Mode is
        and then F.Total = null
    is
    begin
+      Free_Real (F.Compact_Mass);
       Free_Real (F.Mass); Free_Real (F.Bias); Free_Real (F.Gravity);
       Free_Real (F.Passive); Free_Real (F.Actuator); Free_Real (F.Acceleration); Free_Real (F.Total);
    end Free_Forces;
@@ -1387,8 +1392,12 @@ package body MJ.Data with SPARK_Mode is
       K.Linear_Jacobian.all := [others => 0.0]; K.Angular_Jacobian.all := [others => 0.0];
    end Clear_Kinematic;
    procedure Clear_Forces (F : in out Force_Buffers) with
-     Global => null, Pre => F.Mass /= null and then F.Bias /= null and then F.Gravity /= null and then F.Passive /= null and then F.Actuator /= null and then F.Acceleration /= null and then F.Total /= null,
-     Post => F.Mass /= null and then F.Mass'First = F.Mass'First'Old
+     Global => null, Pre => F.Compact_Mass /= null and then F.Mass /= null and then F.Bias /= null and then F.Gravity /= null and then F.Passive /= null and then F.Actuator /= null and then F.Acceleration /= null and then F.Total /= null,
+     Post => F.Compact_Mass /= null
+       and then F.Compact_Mass'First = F.Compact_Mass'First'Old
+       and then F.Compact_Mass'Last = F.Compact_Mass'Last'Old
+       and then (for all X of F.Compact_Mass.all => X = 0.0)
+       and then F.Mass /= null and then F.Mass'First = F.Mass'First'Old
        and then F.Mass'Last = F.Mass'Last'Old
        and then (for all X of F.Mass.all => X = 0.0)
        and then F.Bias /= null and then F.Bias'First = F.Bias'First'Old
@@ -1411,6 +1420,7 @@ package body MJ.Data with SPARK_Mode is
        and then (for all X of F.Total.all => X = 0.0)
    is
    begin
+      F.Compact_Mass.all := [others => 0.0];
       F.Mass.all := [others => 0.0]; F.Bias.all := [others => 0.0];
       F.Gravity.all := [others => 0.0]; F.Passive.all := [others => 0.0];
       F.Actuator.all := [others => 0.0]; F.Acceleration.all := [others => 0.0];
@@ -1654,6 +1664,33 @@ package body MJ.Data with SPARK_Mode is
       end if;
    end Get_Acceleration;
 
+   --  Bridge compact expansion's row offsets to the public matrix reader.
+   --  This is static proof work, not a second traversal of exported values.
+   procedure Prove_Exported_Mass (D : Simulation; Dense : Real_Array)
+     with Ghost => Static, Global => null,
+       Pre => Is_Ready (D) and then Mass_Current (D)
+         and then Int64 (Dense'Length) = Int64 (D.Nv) * Int64 (D.Nv)
+         and then (if D.Cache.Mass_Compact then
+           (for all I in 0 .. MJ.Ancestor_Rows.Size (D.Ancestors) - 1 =>
+             (for all J in 0 .. MJ.Ancestor_Rows.Size (D.Ancestors) - 1 =>
+               Dense (Dense'First + MJ.Compact_Inertia.Offset
+                 (MJ.Ancestor_Rows.Size (D.Ancestors), I, J)) =
+                   MJ.Compact_Inertia.Value_At
+                     (D.Ancestors, D.Dynamics.Compact_Mass.all, I, J)))
+           else Dense = D.Dynamics.Mass.all),
+       Post => (for all I in 0 .. Velocity_Count (D) - 1 =>
+         (for all J in 0 .. Velocity_Count (D) - 1 =>
+           Dense (Dense'First + (I * Velocity_Count (D) + J)) =
+             Mass_Entry (D, I, J)))
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Inputs_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Caches_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Bounded);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Configuration_Valid);
+   begin
+      pragma Assert (Static => MJ.Ancestor_Rows.Size (D.Ancestors) = D.Nv);
+   end Prove_Exported_Mass;
+
    procedure Get_Mass_Matrix (D : Simulation; Dense : out Real_Array; Result : out Status) is
    begin
       Dense := [others => 0.0];
@@ -1664,7 +1701,12 @@ package body MJ.Data with SPARK_Mode is
       elsif Int64 (Dense'Length) /= Int64 (D.Nv) * Int64 (D.Nv) then
          Result := Invalid_Size;
       else
-         Dense := D.Dynamics.Mass.all;
+         if D.Cache.Mass_Compact then
+            MJ.Compact_Inertia.Expand (D.Ancestors, D.Dynamics.Compact_Mass.all, Dense);
+         else
+            Dense := D.Dynamics.Mass.all;
+         end if;
+         Prove_Exported_Mass (D, Dense);
          Result := Success;
       end if;
    end Get_Mass_Matrix;

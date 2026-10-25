@@ -23,7 +23,8 @@ contract alone is not a successful proof.
 The foundation runner has three explicit phases. Preparation copies and hashes
 sources from the pinned checkout. Generation compiles/runs the real header
 dumps, regenerates the Ada closure, applies the required 3.17 validation overlay
-and compiles corpus images with the actual official wheel. Verification runs
+and compiles corpus images with the actual official wheel. The current builder
+also applies the structural overlay and verifies its real admission cases. Verification runs
 all ten existing Ada suites, exact ABI comparisons, generation reproducibility
 and the existing Python tests. Each phase retains commands, logs and hashes;
 a failed command stops that phase. No corpus input or failed case is silently
@@ -148,7 +149,8 @@ and executable payloads; the complete original archive is preserved locally.
 ## Structural kernel checkpoint, 24 October 2026
 
 The isolated `MJ.Model_Structures` unit closes 315 complete-unit checks after
-29 minimal scopes; four recursive-model warnings remain explicit. Functional
+29 minimal scopes; four recursion and two operator-reassociation warnings
+remain explicit (six total). Functional
 contracts cover CSR rejection/first bad row, ordered subsets, row equality and
 ancestor/mass-row relations. Validation and release each pass 1230 cases: 1222
 against the exact C3.17 sparse-validation helper, seven owned-shape cases and
@@ -157,7 +159,316 @@ one documented duplicate-tendon correction.
 Proof diagnosis corrected a wide-length comparison in Shape without narrowing
 its public domain. All final proof and runtime kernel sources are identical.
 [Evidence and retained negative attempts](evidence/20261024-structural-kernels-r150/README.md)
-identify the scope precisely. The complete Model_Admission/validator overlay,
-malformed-model mutations and FLEX/engine migration remain open; this kernel
-closure does not promote the production pin. See
-[the remaining composition work](VALIDATION-STRUCTURES.md).
+identify the scope precisely. This kernel closure does not promote the
+production pin. See [the remaining composition work](VALIDATION-STRUCTURES.md).
+
+## Historical local admission checkpoint r158, 24 October 2026
+
+The isolated complete source-library overlay compiles in both profiles.
+`MJ.Model_Admission` closes 88 whole-unit checks after minimum-scope diagnosis;
+two recursion warnings and two operator-reassociation warnings remain visible
+(`obligations_closed=true`, strict `passed=false`). Its success contracts compose the FLEX/B/D predicates under
+the separately proved kernel contracts and stated preconditions. Small ghost
+layout lemmas and opaque predicate composition reduce proof context without
+narrowing the public domain. Ghost lemmas add no runtime checks; assertion-enabled
+builds still evaluate the executable contracts.
+
+Validation and release each pass 43 real C-produced MJB scenarios: 33 FLEX
+helper cases, seven B/D cases and three mesh cases. The unchanged official C3.17
+validator supplies the reference verdicts. Exact typed diagnostics are checked
+in Ada, including complete validation for B/D and mesh. Full FLEX admission
+still returns `Unsupported_Flex`; its new helper tests do not remove that limit.
+[Local source, proof, runtime and failure evidence](evidence/20261024-model-admission-r158/README.md)
+retains the final candidate and preceding attempts. Complete-validator caller
+proofs, renewed full foundation/corpus and historical gates with this overlay,
+engine migration and integrated performance parity remain open. These changes
+have not been committed or pushed.
+
+## Historical integrated foundation checkpoint r176, 24 October 2026
+
+The structural overlay is now part of the complete candidate builder.
+Its final library/project closure equals proof snapshot r174 byte for byte
+(46 files). Model_Admission closes 116 whole-unit checks, with two recursion
+and two operator-reassociation warnings visible. The mesh core/wrapper close
+36/6 checks; the affected Diagnose_Sparse, Diagnose_Assets, Compute_Caps,
+Diagnose and Validate contracts close 54/67/38/14/7 checks respectively, under
+their stated preconditions and callee contracts. The receipts audit reused
+unchanged subprograms separately from a fresh whole-unit claim.
+
+Both validation and release pass ten Ada suites, all 100 corpus inputs, twelve
+ABI scenarios, eight direct wide-reference cases, deterministic regeneration,
+77 Python tests and 49 real C-produced structural scenarios. Corpus loading
+still admits 49 models and explicitly rejects 36 FLEX/15 plugin models; this
+is not evidence of 100 supported simulations. Structural scenarios cover
+populated FLEX patterns, B/D consistency, map bounds and mesh zero-count cases.
+
+[Local proof, complete gate and failure evidence](evidence/20261024-caller-foundation-r176/README.md)
+retain exact sources, commands, oracle, reports and explicit regenerable
+omissions. The bounded count contracts do not yet specify exact counts;
+capacity sufficiency, complete generated/validator Gold, C row-span domain,
+FLEX/plugins/engine migration and integrated performance parity remain open.
+All changes remain local, without new commits or pushes.
+
+## Native sparse row-domain checkpoint r186, 24 October 2026
+
+Native M/B/D/tendon admission now follows the actual C3.17 row-span algorithm.
+Rows need not be stored in order or use every slot; shared/prefix spans and
+unused storage are accepted. Six real MJBs that C accepted but the previous
+Ada validator rejected now have explicit regression coverage. The legacy compact
+CSR_OK utility remains for older callers, independently of native admission.
+
+The new native adapters specify the exact mapper/kernel diagnostic result,
+including the first bad row and width/address/column field. Their four minima
+close twelve checks each. Removing the redundant parent/child row scans and
+D/B span guards retains proved preconditions (15/18 checks). Model_Admission
+closes 166 whole-unit checks; its existing two recursion/two reassociation
+warnings stay visible. The renewed sparse/diagnostic/public caller scopes close
+42/14/7 checks. No assumptions, proof skips or new trusted bodies were added.
+
+Both profiles pass the full ten Ada suites, 77 Python tests, 100 corpus inputs,
+twelve ABI cases, eight wide-bound cases, deterministic regeneration and 69
+admission regressions. Updated native diagnostic expectations agree with C;
+the same version-aware test passes on the unchanged historical 3.14 library.
+Four C disjoint-storage controls preserve 32 steps exactly; shared spans are
+admission-only controls. None of this is a movement performance comparison.
+
+[Local source, complete gate, historical and consumer evidence](evidence/20261024-row-domain-r186/README.md)
+record the remaining explicit compact-M restriction in the derivative adapter.
+Full consumer/engine migration, FLEX/plugins, global Gold and integrated C3.17
+performance parity remain open. Production stays on 3.14 and no changes have
+been committed or pushed.
+
+## Native mass / derivative checkpoint r195, 24 October 2026
+
+The derivative adapter's earlier compact-row restriction is removed for disjoint
+M spans. It preserves actual storage addresses and reuses the already published
+mass. Shared spans have a C-ordered raw-image reader, while their full dynamics
+remains explicitly unsupported by workspace creation. Full reader/workspace Gold
+is still open; the three elementary storage kernels close 47 checks with no
+warnings, assumptions or skips after minimum-subprogram proofs.
+
+Both profiles pass 288 raw mass states (zero difference) and 960 derivative
+samples on C 3.17, plus 960 samples with reordered storage against the original
+C model and a verified Mq column permutation. Direct C evaluation of the
+reordered Newton/sparse case crashes; its isolated reproducer is retained.
+Both profiles also pass the original C 3.14 derivative corpus and raw mass
+controls. These gates establish neither complete engine migration nor integrated
+performance parity. The 45 foundation library files remain byte-equal to r186;
+the derivative candidate has its own GPR project.
+
+[Local r195 evidence and remaining scope](evidence/20261024-native-mass-r195/README.md)
+retain the failed attempts, reference limitations and exact oracle definitions.
+All changes remain local and uncommitted; production stays on 3.14.
+
+## Owned native-pattern contracts r224, 24 October 2026
+
+The new Native_Mass_Patterns unit closes 149 checks with exact metadata copying,
+interval overlap and disjoint mass-image contracts. No assumptions, skips or
+warnings were introduced in this unit. Constructors reject unallocated or
+inconsistently sized model tables before invoking Is_Valid; the already validated
+path reuses its caller's validation. Both the constructor bridge and complete
+reader/workspace composition remain separate objectives: two model-to-pattern
+obligations are still open, with the inherited structural warnings retained.
+
+[Local r224 proof and runtime evidence](evidence/20261024-native-patterns-r224/README.md)
+records the exact gate scope and failed attempts. This does not establish whole
+3.17 migration, global Gold or C performance parity. No commits or pushes were
+made; production remains on 3.14.
+
+## Native-model constructor closure r245, 24 October 2026
+
+The r224 model-to-pattern obligations now close through pointwise row and table
+layout lemmas. The complete Native_Mass_Models unit closes 114 checks, specifying
+constructor status and exact owned row metadata. Its four existing structural
+warnings remain visible (two reassociation, two recursion/variant); there are no
+open obligations, skips or assumptions. The factored independent pattern unit
+closes 151 checks without warnings. These scope-specific counts are not added
+to minimum-scope counts or treated as a whole-engine result.
+
+[Local source, complete proof and regression evidence](evidence/20261024-native-model-closure-r245/README.md)
+record the aggregate time limit, earlier failed attempts and exact dependencies.
+Full reader/workspace composition, simulation binding, shared numeric-buffer
+dynamics, full stable-version migration and integrated C performance parity
+remain unfinished. No commits or pushes were made; production stays on 3.14.
+
+## Local public native-mass reader r278
+
+The derivative candidate now publishes and proves its disjoint current-mass
+projection at the public Evaluate boundary: 30 checks (27 proof, three flow),
+including caller preconditions, exact values, unused-slot zeros and size/error
+behavior. The shared CRB branch is isolated with its numeric operation order
+preserved; its complete proof remains open. Six helper scopes are independently
+closed on the same frozen source. All seven scopes retain two inherited
+structural recursion/variant warnings, so obligations_closed is true while
+strict passed is false. This is not a whole Data.Native_Mass or workspace proof.
+
+Both validation and release reconfirm 288 raw C3.17 mass states, 960 original
+and 960 reordered derivative samples; C3.14 reconfirms 132 raw states and 960
+samples. Each version/profile also passes four malformed-model and five output
+shape scenarios. The 45 foundation library files remain byte-identical to r186.
+Physical cache/model binding, shared-buffer dynamics, complete stable migration
+and integrated C performance parity remain pending. No commit or push was made.
+
+[Local source, all attempts, scoped proofs, gates and exact remaining scope](evidence/20261024-native-reader-disjoint-r278/README.md)
+
+## Local shared CRB component r315
+
+Composite_Assembly is reused by Inertia_Phase and the raw shared-mass reader.
+Its exact ordered floating-point model and bounds close **479 checks (450 proof,
+29 flow)** for the complete unit. Twelve operator/recursion/variant diagnostics
+remain; obligations_closed=true and strict passed=false. No new trusted bodies,
+assumptions or skips support this claim. The 329 Ada files of the final formal
+snapshot match the final C3.17 runtime closure.
+
+Both validation and release reconfirm the full C3.17/3.14 numerical suites, with
+new 4096-body boundary and cancellation cases. Full shared-reader/workspace proof,
+physical model/cache binding and stable engine/API migration remain open.
+
+The new paired smooth-movement harness includes ball/free, tendons, applied forces
+and body wrenches. It retains exact Ada-state comparison, C tolerances, all samples
+and dispersion. Default-code regression on free, alignment experiments, mixed-model
+outliers, and the remaining roughly 2x free / 3.9x chain gap to the C3.17 wheel are
+recorded rather than accepted as completed parity. Wheel C flags are unknown;
+matched-build performance acceptance remains pending. Global release flags are
+unchanged and no commit or push was made.
+
+[Local sources, complete proof, attempts, gates, timings and remaining scope](evidence/20261025-composite-assembly-r315/README.md)
+
+## Local movement row-update investigation r324
+
+[The r324 checkpoint](evidence/20261025-row-update-r324/README.md) records current
+full-process solver sampling, two functionally proved row-update candidates,
+strict boundary cases, C3.17/C3.14 numeric gates for the direct variant, and two
+integrated timing sessions per candidate. Both candidates remain experimental:
+chain gains coexist with repeatable small-model regressions. The active solver
+was restored to its pre-experiment bytes; all prior migration work is preserved.
+No commits, pushes, compiler-flag promotion, global Gold or C-parity claim.
+
+## Local integer-bit row update r329
+
+[The r329 checkpoint](evidence/20261025-bit-row-r329/README.md) retains the exact
+row update with integer-bit rejection and closed minimum/whole-unit obligations,
+including complete C3.17/C3.14 numerical gates. Integrated chain movement improves
+about 9–10%, while tendon regressions remain explicit pending work. There is no
+new SIMD in the updated loop and no final C performance acceptance.
+[The separate r334 slice-view experiment](evidence/20261025-view-row-r334/README.md)
+is not adopted: its two invariants remain open and its measured regressions are
+retained. No commits, pushes, global compiler-flag changes or full-port claim.
+
+## Local SIMD row and solver-caller closure r353
+
+[The r353 checkpoint](evidence/20261025-vector-row-r353/README.md) contains actual
+SIMD row code, its exact contract proofs, and the separately closed 86-obligation
+solver-caller scope. The retained helper passes both-version numerical gates and
+paired movement sessions, with residual small-model regressions explicit. Compiler
+width preferences are not adopted; global flags remain unchanged. No commit or
+push, whole-dynamics Gold, complete migration or C performance parity is claimed.
+
+## Local four-value experiment r365
+
+[The r365 checkpoint](evidence/20261025-four-row-r365/README.md) preserves the
+unadopted four-value prototype, three closed helper minima, open full-row
+invariants, strict numerical corpus and six integrated/control timing sessions.
+The retained r349 kernel is unchanged; explicit warmup/filter controls improve
+the diagnostic benchmark. No commit, push or performance-parity claim.
+
+## Local direct compact CRB rows r380
+
+[The r380 checkpoint](evidence/20261025-compact-row-r380/README.md) adds direct
+C-style compact row construction and closes the complete Compact_Inertia unit:
+367 obligations, with six existing warnings reported separately. Proved pure
+lemmas close the earlier projection/expansion invariants. The row constructors
+are not yet on the stepping path; canonical storage/cache, tendon/solver/inverse
+and reader integration remain open. No commit, push or performance-parity claim.
+
+## Local canonical compact mass r411
+
+[The r411 checkpoint](evidence/20261025-canonical-mass-r411/README.md) connects
+direct compact CRB construction, ordered tendon additions, cache publication,
+solver loading, inverse multiplication and native/public/constrained readers on
+the actual nv>=3 stepping path. Compatibility fallbacks and the strict diagnostic
+boundary remain explicit. Complete new units close 100 and 117 obligations;
+publication closes 20 without warnings. Five composed caller obligations and
+broader functional model/dynamics proofs remain open.
+
+Final-source C3.17/C3.14 gates pass in validation and release. Four integrated
+sessions show consistent multi-DOF improvement, with the hinge sign change and
+all earlier regressions retained. Chain24 remains roughly 3.2 times the C wheel
+time; matched-build parity is unfinished. All 87 prior evidence entries are
+preserved. No commits, staging or pushes; production remains pinned to 3.14.
+
+## Local compact export and release LTO r430
+
+[The r430 checkpoint](evidence/20261025-compact-callers-r430/README.md) closes the
+public dense-output relation, strengthens exact expansion with a proved bound
+and removes the strict boundary's second runtime traversal. Complete compact
+inertia closes 377 checks with unchanged diagnostics; four examined caller
+obligations and broader dynamics/model proofs remain open.
+
+Both references pass ordinary and LTO numeric gates; default builders are
+reconfirmed after release-only LTO adoption. Actual default integrated movement
+improves about 8–9% on chain24 and 13–15% on branches24 versus non-LTO Ada, with
+exact states. A pinned offline GCC16/AVX/LTO C3.17 build removes the wheel's
+unknown-build ambiguity for those separate measurements; C remains substantially
+faster. Eight new paired sessions and failed hypotheses remain auditable.
+Full engine/API migration, functional proof composition and performance parity
+are unfinished. Production remains C3.14; no commits, staging or pushes.
+
+## Local tendon caller proof r441
+
+[The r441 checkpoint](evidence/20261025-tendon-caller-r441/README.md) closes the
+actual compact tendon accumulation precondition through an existing proved
+layout predicate kept abstract across disjoint writes. The caller closes 21
+checks with unchanged diagnostics; two of its obligations and the Solve post
+remain open. Rejected private diagnostics and the corrected source-scope audit
+are retained. This is proof-context progress, with no runtime formula/domain,
+build policy or performance-acceptance change. No commits, staging or pushes.
+
+## Local rejected SIMD threshold r450
+
+[The r450 checkpoint](evidence/20261025-row-eight-r450/README.md) preserves the
+functionally proved eight-value dispatch experiment and its complete numeric
+row corpus. Integrated chain/branch regressions in two balanced sessions prevent
+adoption; the working threshold remains 16 with LTO. No new full-port, whole
+proof or C-parity claim, and no commits, staging or pushes.
+
+## Local release-only kernel width r455
+
+The derivative candidate now prefers 256-bit SIMD for Solver_Kernels in release,
+with unchanged checked Ada source/contracts, threshold 16 and validation profile.
+Two-reference numerical gates, exact row cases, cache/Euler and direct compact
+constructors pass; actual default GPR/builders and two full movement sessions
+are independently reconfirmed. Ball and fixed-tendon gains persist, chain24 has
+one inconclusive interval, and branches24 remains inconclusive. This is native
+target evidence, not full C3.17 migration, dynamics Gold or performance parity.
+Three examined caller obligations and wider port/proof gaps remain open.
+
+[Durable evidence, all raw timings, scope and preparation-script correction](evidence/20261025-width256-r455/README.md).
+All 107 previous inventory entries are preserved;112 are now verified. No
+commits, staging, pushes or remote writes; HEAD remains 398c2dde.
+
+## Local Cross bound diagnostics r467
+
+The actual LTO/256-bit build is profiled and two private Cross code-generation
+variants are evaluated. Replacing six redundant runtime subtype restrictions
+by proved Static facts closes all 86 Cross checks and all 796 Smooth_Math
+checks, with diagnostics kept separate. Both exact-bit profiles pass 5,972
+C-reference cases. Automatic inlining improves chain24 but regresses fixed
+tendons; No_Inline recovers fixed tendons while losing the multi-DOF benefit.
+Neither is adopted, so working Ada remains r455 and C parity remains pending.
+The archived full two-reference promotion script is explicitly unexecuted.
+
+[Proof scope, raw samples/intervals, exact-bit/runtime correction and sources](evidence/20261025-cross-bounds-r467/README.md).
+All 112 preceding inventory entries are preserved; 117 are verified now. No
+commits, staging, pushes or remote writes; HEAD remains 398c2dde.
+
+## Local commit packaging and exact archive storage
+
+The checked code and historical checkpoints above are grouped with a lossless
+store for the twenty new ZIP bundles. Original ZIP bytes and all 117 inventory
+hashes are preserved; payload files are at most 32 MiB and are verified offline.
+Historical sections retain the HEAD and local-only status recorded at capture
+time. Their scoped proof results and pending dynamics/performance limitations
+are unchanged by packaging. No remote push accompanies this local commit.
+
+[Storage audit, exact verification/restoration and append workflow](../../docs/storage-and-evidence.md).

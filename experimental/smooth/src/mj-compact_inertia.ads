@@ -31,6 +31,7 @@ package MJ.Compact_Inertia with SPARK_Mode is
                    Lower_Entry'Result = Mass (AR.Start (P, Row) + A)))
        and then (if (for all A in 0 .. AR.Length (P, Row) - 1 =>
                        AR.Column (P, Row, A) /= Col) then Lower_Entry'Result = 0.0);
+   pragma Postcondition (Static => (if Work_Array (Mass) then Lower_Entry'Result in Work_Real));
 
    --  Canonical indices make structural zeros and symmetry exact; this
    --  performs no floating-point arithmetic on stored mass entries.
@@ -40,6 +41,7 @@ package MJ.Compact_Inertia with SPARK_Mode is
      Global => null,
      Pre => Row < AR.Size (P) and then Col < AR.Size (P)
        and then Mass'First = 0 and then Mass'Last >= AR.Count (P) - 1;
+   pragma Postcondition (Static => (if Work_Array (Mass) then Value_At'Result in Work_Real));
 
    function Offset (N, Row, Col : Natural) return Natural
      renames MJ.Smooth_Kernels.Matrix_Offset;
@@ -57,6 +59,7 @@ package MJ.Compact_Inertia with SPARK_Mode is
        and then Int64 (Target'Length) = Int64 (AR.Size (P)),
      Post => (for all J in 0 .. AR.Size (P) - 1 =>
        Target (Target'First + J) = Value_At (P, Mass, Row, J));
+   pragma Postcondition (Static => (if Work_Array (Mass) then Work_Array (Target)));
 
    procedure Expand (P : AR.Pattern; Mass : Real_Array; Dense : out Real_Array) with
      Global => null,
@@ -69,6 +72,7 @@ package MJ.Compact_Inertia with SPARK_Mode is
          (for all J in 0 .. AR.Size (P) - 1 =>
            Dense (Dense'First + Offset (AR.Size (P), I, J)) =
              Dense (Dense'First + Offset (AR.Size (P), J, I))));
+   pragma Postcondition (Static => (if Work_Array (Mass) then Work_Array (Dense)));
 
    function Projected (Motion, Product : SK.Motion; Armature : Real;
                        Diagonal : Boolean) return Real with
@@ -119,4 +123,68 @@ package MJ.Compact_Inertia with SPARK_Mode is
            (SS.Load_Motion (Motions, 6 * AR.Column (P, Row, A)), Product,
             Armature, A = AR.Length (P, Row) - 1)));
    pragma Inline_Always (Project_Into_Row);
+
+   --  Build one C-style CRB row directly, without a dense intermediate.
+   --  Simple rows contain only the fixed diagonal; nonsimple rows project the
+   --  composite inertia times the row motion, in descending ancestor order.
+   --  Rejected scratch remains bounded; it must not be published or solved.
+   procedure Assemble_Row
+     (P : AR.Pattern; Row : Natural; Motions : Real_Array;
+      Composite : SK.Inertia; Armature, Fixed : Real; Simple : Boolean;
+      Target : in out Real_Array; Ok : out Boolean) with
+     Global => null,
+     Pre => Row < AR.Size (P) and then Motions'First = 0
+       and then Motions'Last = 6 * AR.Size (P) - 1
+       and then (for all X of Motions => X in -1.0e12 .. 1.0e12)
+       and then SK.Bounded (Composite, 1.0e40)
+       and then Armature in 0.0 .. 1.0e10 and then Fixed in 0.0 .. 2.0e10
+       and then Int64 (Target'Length) = Int64 (AR.Length (P, Row))
+       and then Work_Array (Target),
+     Post => Work_Array (Target)
+       and then (if Simple then Ok and then
+         (for all A in 0 .. AR.Length (P, Row) - 1 =>
+           Target (Target'First + A) =
+             (if A = AR.Length (P, Row) - 1 then Fixed else 0.0)))
+       and then (if not Simple then
+         (if not Ok then (for some A in 0 .. AR.Length (P, Row) - 1 =>
+           Projected (SS.Load_Motion (Motions, 6 * AR.Column (P, Row, A)),
+             SK.Multiply (Composite, SS.Load_Motion (Motions, 6 * Row)),
+             Armature, A = AR.Length (P, Row) - 1) not in Work_Real))
+         and then (if Ok then (for all A in 0 .. AR.Length (P, Row) - 1 =>
+           Target (Target'First + A) = Projected
+             (SS.Load_Motion (Motions, 6 * AR.Column (P, Row, A)),
+              SK.Multiply (Composite, SS.Load_Motion (Motions, 6 * Row)),
+              Armature, A = AR.Length (P, Row) - 1))));
+   pragma Inline_Always (Assemble_Row);
+   procedure Assemble_Into_Row
+     (P : AR.Pattern; Row : Natural; Motions : Real_Array;
+      Composite : SK.Inertia; Armature, Fixed : Real; Simple : Boolean;
+      Mass : in out Real_Array; Ok : out Boolean) with
+     Global => null,
+     Pre => Row < AR.Size (P) and then Motions'First = 0
+       and then Motions'Last = 6 * AR.Size (P) - 1
+       and then (for all X of Motions => X in -1.0e12 .. 1.0e12)
+       and then SK.Bounded (Composite, 1.0e40)
+       and then Armature in 0.0 .. 1.0e10 and then Fixed in 0.0 .. 2.0e10
+       and then Mass'First = 0 and then Mass'Last = AR.Count (P) - 1
+       and then Work_Array (Mass),
+     Post => Work_Array (Mass)
+       and then (for all K in Mass'Range =>
+         (if K < AR.Start (P, Row) or else K >= AR.Start (P, Row) + AR.Length (P, Row)
+          then Mass (K) = Mass'Old (K)))
+       and then (if Simple then Ok and then
+         (for all A in 0 .. AR.Length (P, Row) - 1 =>
+           Mass (AR.Start (P, Row) + A) =
+             (if A = AR.Length (P, Row) - 1 then Fixed else 0.0)))
+       and then (if not Simple then
+         (if not Ok then (for some A in 0 .. AR.Length (P, Row) - 1 =>
+           Projected (SS.Load_Motion (Motions, 6 * AR.Column (P, Row, A)),
+             SK.Multiply (Composite, SS.Load_Motion (Motions, 6 * Row)),
+             Armature, A = AR.Length (P, Row) - 1) not in Work_Real))
+         and then (if Ok then (for all A in 0 .. AR.Length (P, Row) - 1 =>
+           Mass (AR.Start (P, Row) + A) = Projected
+             (SS.Load_Motion (Motions, 6 * AR.Column (P, Row, A)),
+              SK.Multiply (Composite, SS.Load_Motion (Motions, 6 * Row)),
+              Armature, A = AR.Length (P, Row) - 1))));
+   pragma Inline_Always (Assemble_Into_Row);
 end MJ.Compact_Inertia;

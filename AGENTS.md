@@ -7,7 +7,7 @@ project priority. Prioritize this alignment when planning and implementing work;
 do not extend the translation against an outdated baseline without checking the
 corresponding upstream changes.
 
-- Last verified on 2026-10-24: [MuJoCo 3.17.0](https://github.com/google-deepmind/mujoco/releases/tag/3.17.0),
+- Last verified on 2026-10-25: [MuJoCo 3.17.0](https://github.com/google-deepmind/mujoco/releases/tag/3.17.0),
   released 2026-10-22, commit `800a109a4bdd02cb60404d565db4ae16fb04a53b`.
   The official tag and a fresh source checkout agree; the isolated reference
   wheel reports 3.17.0. These checks establish the reference, not port alignment.
@@ -37,6 +37,11 @@ corresponding upstream changes.
 - The reviewed dense matrix formulas and vector arithmetic were unchanged;
   vector AVX tail handling was reorganized. Preserve valid translated work while
   checking behavioral compatibility with the new reference.
+
+For 3.17 proof bundles, follow [exact evidence storage](docs/storage-and-evidence.md).
+Use `python3 tools/evidence_store.py verify` to check the inventory without
+materializing ZIPs, or `restore` when an archived input is required. New raw ZIPs
+are ignored by Git; pack their exact bytes into the store before committing.
 
 Continue to apply the project's [verification policy](docs/verification-policy.md).
 Existing proofs establish properties of their current contracts; they do not by

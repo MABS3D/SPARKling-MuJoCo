@@ -1,10 +1,13 @@
-"""Native MuJoCo 3.14.0 differential tests, including full-step derivatives."""
+"""Native pinned MuJoCo differential tests, including full-step derivatives."""
 import argparse, ctypes, hashlib, importlib.util, json, subprocess
 from pathlib import Path
 import mujoco
 import numpy as np
 
-LIBRARY = Path(mujoco.__file__).parent/'libmujoco.so.3.14.0'
+SUPPORTED_REFERENCES = {'3.14.0': 3_014_000, '3.17.0': 3_017_000}
+assert mujoco.__version__ in SUPPORTED_REFERENCES
+assert mujoco.mj_version() == SUPPORTED_REFERENCES[mujoco.__version__]
+LIBRARY = Path(mujoco.__file__).parent/('libmujoco.so.'+mujoco.__version__)
 LIB = ctypes.CDLL(str(LIBRARY))
 for name in ['mjd_smooth_velFD', 'mjd_passive_velFD']:
     f = getattr(LIB,name); f.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_double]
@@ -12,7 +15,7 @@ for name in ['mjd_smooth_velFD', 'mjd_passive_velFD']:
 
 ADHESION_PROVIDER = Path(__file__).resolve().parents[3]/'experimental/adhesion-contact-integration/tests/compare_adhesion.py'
 
-def fixtures(adhesion_path=ADHESION_PROVIDER):
+def fixtures(adhesion_path=ADHESION_PROVIDER, reference='3.14.0'):
     common = '<option timestep=".002"><flag constraint="disable" warmstart="disable" island="disable"/></option>'
     prefix = '<mujoco>'+common
     yield 'slide', prefix+'<worldbody><body><joint name="j" type="slide" axis="1 0 0" damping=".2" stiffness=".3"/><geom type="sphere" size=".1" mass="1"/></body></worldbody></mujoco>', 'smooth'
@@ -40,9 +43,15 @@ def fixtures(adhesion_path=ADHESION_PROVIDER):
         option = '<option timestep=".002" density=".5" viscosity=".015" wind=".1 -.2 .05"><flag constraint="disable" warmstart="disable" island="disable"/></option>'
         geom = '<geom type="box" size=".1 .2 .3" mass="1"/>' if kind=='box' else '<geom type="ellipsoid" size=".1 .2 .3" mass="1" fluidshape="ellipsoid" fluidcoef=".8 .4 .2 .3 .1"/>'
         yield 'fluid_'+kind, '<mujoco>'+option+'<worldbody><body pos="0 0 .2"><freejoint/>'+geom+'</body></worldbody></mujoco>', 'smooth'
-    yield 'fixed_tendon', prefix+'''<worldbody><body><joint name="j0" type="slide" axis="1 0 0"/><geom type="sphere" size=".1" mass="1"/>
+    fixed_tendon = prefix+'''<worldbody><body><joint name="j0" type="slide" axis="1 0 0"/><geom type="sphere" size=".1" mass="1"/>
       <body pos=".2 .1 0"><joint name="j1" damping=".1"/><geom type="box" size=".1 .2 .1" mass=".5"/></body></body></worldbody>
-      <tendon><fixed stiffness=".4" damping=".3" armature=".2"><joint joint="j0" coef=".7"/><joint joint="j1" coef="-.3"/><joint joint="j0" coef=".2"/></fixed></tendon></mujoco>''', 'smooth'
+      <tendon><fixed stiffness=".4" damping=".3" armature=".2"><joint joint="j0" coef=".7"/><joint joint="j1" coef="-.3"/><joint joint="j0" coef=".2"/></fixed></tendon></mujoco>'''
+    if reference == '3.17.0':
+        # C 3.17 rejects its own duplicate width=3 row when nv=2. Keep the
+        # repeated-joint coverage with an independent third DOF; the raw mass
+        # runner records the original compiler rejection separately.
+        fixed_tendon = fixed_tendon.replace('</worldbody>', '<body pos="1 0 0"><joint type="slide"/><geom type="sphere" size=".1" mass=".3"/></body></worldbody>')
+    yield 'fixed_tendon', fixed_tendon, 'smooth'
     yield 'spatial_ball', prefix+'''<worldbody><site name="a" pos=".5 .4 .3"/><body><joint name="j" type="ball" damping=".1"/>
       <geom type="box" size=".1 .2 .1" mass="1"/><site name="b" pos=".2 .1 0"/></body></worldbody>
       <tendon><spatial stiffness=".2" damping=".3"><site site="a"/><site site="b"/></spatial></tendon></mujoco>''', 'smooth'
@@ -130,13 +139,33 @@ def parse(text,m,mode):
 def main():
     p=argparse.ArgumentParser();p.add_argument('--binary',type=Path,required=True)
     p.add_argument('--out',type=Path,required=True);p.add_argument('--samples',type=int,default=12)
-    p.add_argument('--only');a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
-    assert mujoco.__version__=='3.14.0'
+    p.add_argument('--only');p.add_argument('--mass-layout', choices=['original','reverse'], default='original');p.add_argument('--reference', choices=sorted(SUPPORTED_REFERENCES), default='3.14.0');a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
+    assert mujoco.__version__==a.reference
     provider=a.out/'adhesion-fixtures.py';provider.write_bytes(ADHESION_PROVIDER.read_bytes())
+    mutation = None; mutation_hash = None
+    if a.mass_layout != 'original':
+        assert a.reference == '3.17.0'
+        original=Path(__file__).resolve().parents[3]/'experimental/alignment-3.17/tests/test_admission.py'
+        copied=a.out/'admission-fixtures.py';copied.write_bytes(original.read_bytes())
+        spec=importlib.util.spec_from_file_location('derivative_mass_mutations',copied)
+        mutation=importlib.util.module_from_spec(spec);spec.loader.exec_module(mutation)
+        mutation_hash=hashlib.sha256(copied.read_bytes()).hexdigest()
     records=[];failures=[];comparisons=0;maxima={}
-    for name,xml,mode in fixtures(provider):
+    for name,xml,mode in fixtures(provider, a.reference):
         if a.only and a.only not in name:continue
         m=mujoco.MjModel.from_xml_string(xml);f=a.out/(name+'.mjb')
+        reference_model=m;storage_order=None
+        if mutation:
+            reference_model=mujoco.MjModel.from_xml_string(xml)
+            mutation.rearrange_sparse(m,'M',a.mass_layout)
+            storage_order=np.full(m.nC,-1,dtype=np.int64)
+            for row in range(m.nv):
+                width=int(m.M_rownnz[row]);first=int(m.M_rowadr[row]);original=int(reference_model.M_rowadr[row])
+                assert width==reference_model.M_rownnz[row]
+                assert np.array_equal(m.M_colind[first:first+width],reference_model.M_colind[original:original+width])
+                storage_order[first:first+width]=np.arange(original,original+width)
+            assert np.array_equal(np.sort(storage_order),np.arange(m.nC)), 'Storage permutation must be bijective'
+            (a.out/(name+'-storage-permutation.json')).write_text(json.dumps(storage_order.tolist())+'\n')
         mujoco.mj_saveModel(m,str(f));(a.out/(name+'.xml')).write_text(xml)
         batch=list(samples(m,name,a.samples));inputs=serialized(batch)
         (a.out/(name+'.input')).write_text(inputs)
@@ -146,7 +175,8 @@ def main():
             failures.append(dict(model=name,error=run.stdout[-1800:]+run.stderr[-500:]));print('FAIL',name,failures[-1],flush=True);continue
         actual=parse(run.stdout,m,mode);assert len(actual)==len(batch)
         for i,(s,x) in enumerate(zip(batch,actual)):
-            ref=oracle(m,s,mode);errors={}
+            ref=oracle(reference_model,s,mode);errors={}
+            if storage_order is not None:ref['Mq']=ref['Mq'][:,storage_order]
             for key,y in ref.items():
                 delta=float(np.max(np.abs(x[key]-y))) if y.size else 0.
                 # FD magnifies rounding by 1/eps. This tolerance is fixed before
@@ -160,7 +190,10 @@ def main():
             records.append(record)
             if not passed:failures.append(record);print('FAIL',name,i,{k:v for k,v in errors.items() if not v['passed']},flush=True)
         print(name,'checked',flush=True)
-    result=dict(reference=mujoco.__version__,library_sha256=hashlib.sha256(LIBRARY.read_bytes()).hexdigest(),
+    assert records and comparisons > 0, 'Empty differential selection'
+    result=dict(reference=mujoco.__version__,mass_layout=a.mass_layout,
+      oracle_layout='original C model plus bijective Mq column permutation' if mutation else 'direct C model',
+      mutation_sha256=mutation_hash,library_sha256=hashlib.sha256(LIBRARY.read_bytes()).hexdigest(),
       driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
       adhesion_provider_sha256=hashlib.sha256(provider.read_bytes()).hexdigest(),
       binary_sha256=hashlib.sha256(a.binary.read_bytes()).hexdigest(),cases=len(records),
