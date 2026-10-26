@@ -863,3 +863,56 @@ gate recipes are not verification evidence.
 raw timing and exact scope](evidence/20261026-constructor-and-force-r967/README.md).
 The runtime remains row-domain893. Constructor changes stay private. Full port,
 whole dynamics Gold, coordinated migration and overall C parity remain open.
+
+
+## Private manifold minimum closure and caller recovery
+
+Copy_Manifold_Joints now closes all97 semantic checks on the exact private
+C3.17 and C3.14 closures. The previously unresolved remapper precondition and
+parent postcondition close with increased prover resources on unchanged source.
+The C3.14 wrapper closes8 and Model_Status21 on that same closure. Inherited
+warnings remain explicit; these minima are not whole Data/Initialize proof.
+The selected Initialize prefix1659..1680 then proves the manifold-call
+precondition and body-pointer safety, retaining one Fluid_Phase.Initialize
+precondition timeout. Counts of selected proof checks and unit flow information
+are recorded separately.
+
+Several minimal Data flow repairs pass both-reference/both-profile activation432
+and integration1152 numerical scenarios but remain unadopted after movement
+controls. Copied-record971 has repeated hinge regressions; aligned985 has no
+demonstrated benefit; cold1010 passes hinge triage but regresses other full-run
+workloads. Direct-owned-element1023 removes the invalid mutable rename without
+a temporary record; its first full30 run finds roughly1.1-1.3% hinge slowdown,
+while its independent repeat is inconclusive. Wider intervals do not demonstrate
+a win. No overall percentage-speedup or C-parity claim follows.
+
+The later1049 initialization candidate omits the explicit zero initializer
+and expresses partial initialization through an Initialized invariant/assertion.
+FLOW and C3.14/C3.17 numerical controls pass, but the frozen recovery checkpoint
+explicitly leaves the required initialization and consuming-read proofs pending:
+those initial runs were interrupted without final reports. Their partial Why3
+sessions are preserved. New proof work must close those properties before any
+adoption; FLOW alone does not suffice. No runtime source is adopted here.
+
+[First closed manifold minimum, rejected variants and exact raw controls](evidence/20261026-flowfix-and-manifold-r1035/README.md).
+[Same-source C3.14 closure, selected caller diagnosis and interrupted-proof recovery](evidence/20261026-manifold-caller-recovery-r1062/README.md).
+Full port, whole dynamics Gold, coordinated migration and overall C parity
+remain unfinished; the runtime remains the published893 solver implementation.
+
+
+Subsequent actual Build_Manifold_Topology minima1061/1064 on1049 close the five
+initialization properties on both references: initialized-prefix invariant
+initialization/preservation, final whole-array assertion and initialization at
+both actual consuming calls. The whole minimum remains unproved: configuration
+buffer index checks at964/972 and the subtree-mass precondition at967 remain.
+The array-initialization precision warning for the mass loop and inherited
+warnings stay explicit. The scoped review is preserved in1069; it does not turn
+these three open obligations into a whole-unit success or authorize a broader
+functional claim. Constructor1049 is still private and not performance-qualified.
+
+The force-window1076 experiment closes the sequence model, constrained loop,
+wrapper and buffer minima on both references, with numerical controls passing.
+Its targeted nine-case movement comparison finds no demonstrated reproducible
+multi-DOF gain, so it remains unadopted. The checkpoint preserves failed attempts,
+exact source bindings, proof reports and raw measurements separately.
+[Scoped initialization closure and force-window results](evidence/20261026-force-windows-and-init-r1102/README.md).
