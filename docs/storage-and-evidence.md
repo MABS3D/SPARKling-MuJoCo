@@ -99,3 +99,23 @@ archives and the exact store are untouched. New checkpoints may add archives;
 the store manifest records their current sizes.
 
 [Per-archive duplicate checks and exact restoration scope](../experimental/alignment-3.17/evidence/20261026-exact-zip-cleanup-r629/README.md).
+
+
+## Completed constructor and force-sum work caches
+
+2026-10-26: after all named proof/build/timing handles completed, the exact
+constructor/force-sum checkpoint was packed and all 39 stored archives plus the
+full inventory were verified. Twenty partial Why3 session XML reports from the
+two timed-out whole-math controls were copied before cleanup; they do not prove
+whole-unit completion. The successful full reports and baseline flow traces are
+also preserved outside generated caches.
+
+The follow-up removed only 45 generated obj/analysis directories outside frozen
+source trees in this task's completed r907-r965 workspaces: 2,361,757,271 apparent
+bytes (about 2.20 GiB, measured with du -b). Sources, toolchains, runtime binaries,
+other projects and active work were excluded. Linux free blocks do not establish
+equal physical Windows-byte recovery. WSL was not stopped; the VHDX was not
+compacted or trimmed.
+
+[Exact directory list, copied partial reports and removal receipt](../experimental/alignment-3.17/evidence/20261026-completed-cache-cleanup-r968/README.md).
+This cleanup changes no numerical algorithm or verification/performance claim.

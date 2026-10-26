@@ -789,5 +789,77 @@ C3.14 qualification remain required before adoption. This is not performance
 evidence or coordinated production migration.
 
 [Frozen repairs, failed attempts, explicit proof scopes and numerical controls](evidence/20261026-constructor-proof-r860/README.md).
-Constructor changes remain private. The working runtime is still the adopted
-row-window version; full port, whole dynamics Gold and overall C parity remain open.
+Constructor changes remain private. That checkpoint records the row-window
+baseline; the subsequent solver adoption is described below. Full port, whole
+dynamics Gold and overall C parity remain open.
+
+
+## Adopted equivalent solver row-domain predicate
+
+All four existing solver-row rejection reductions now use an abs-based test
+proved exactly equivalent to the previous symmetric interval membership. Full
+admitted domains, ordered floating arithmetic, rejection behavior and frames
+remain. Integer reductions and existing compiler policies are retained; the
+final version adds no forced-inlining directive. Constructor prototypes and the
+separate parent-Data predicate experiment are not included in this adoption.
+
+Fresh actual C3.14/C3.17 closures each close 225 complete-kernel checks and 86
+checks of the direct Solve_Compatible_Buffers minimum. Four kernel and twelve
+caller inherited warnings match their baselines. This does not establish the
+whole inertia-phase unit or the global factorization theorem. All 14 numerical
+groups pass, including 6,140 exact native-C scalar bit cases and 59,621 row cases
+per validation/release profile. Actual source manifests match verified inputs.
+
+Targeted nine-scenario, independent nine-scenario repeat and full 30-scenario supported movement scenarios use six
+identical replicas per role and normal native C3.17 SIMD/LTO. All chain24
+state/run intervals support about 4.3-5.0% less time than published c10895298.
+The full run takes about 4.6-4.7% less on chain24, 5.0-5.5% less on free_ball and
+2.3-2.9% less on branches24. No slowdown is statistically confirmed; two full-run
+intervals include no change. There is no aggregate percentage-speedup claim.
+Chain24 still takes about 1.93-1.94 times C, free_ball 1.64-1.66 and branches24 1.54.
+Applied body loads are present; body-load-free timing is not established.
+
+[Exact sources, both-reference proofs, numerical corpora and raw timing](evidence/20261026-row-domain-r894/README.md).
+This adoption follows c10895298. Full port, whole dynamics Gold,
+coordinated production migration and overall C parity remain unfinished.
+
+
+A subsequent private constructor minimum closes 91 semantic checks with seven
+obligations still open. Body-frame initialization and preservation are proved;
+reference/coefficient reads and contract checks remain explicit. Prepared length
+comparisons use Int64 to avoid implicit Natural conversions without changing
+admitted inputs. This constructor remains unadopted; the prepared source has no
+fresh proof or numerical qualification yet.
+[Exact completed report and prepared source](evidence/20261026-constructor-followup-r908/README.md).
+
+
+## Private constructor closure and inconclusive force-sum experiment
+
+A body-span leaf closes 36 checks on C3.17 and C3.14, proving the exact ordered
+first-rejection prefix map and preservation of every other body field. A static
+creation-input bridge closes two; Model_Status then closes 21 on each reference.
+The latest examined constructor minimum still has two open obligations: remapper
+precondition and parent postcondition. These are minimum scopes, not whole Data
+or Initialize verification, and inherited diagnostics remain explicit.
+
+Both actual baseline and constructor935/940 pass 432 activation plus 1,152
+joint/muscle/tendon/body-load scenarios per validation/release profile and per
+reference (C3.17/C3.14). Later static variants remain separate and require fresh
+exact-source qualification before adoption. The private whole-Data flow audit
+has no unresolved diagnostics versus three in the actual baseline, with the same
+five reviewed spec-only deallocators and unchanged warning multiset. This flow
+result does not establish runtime safety or functional Gold of the full unit.
+
+A private Total_Force change removes implicit subtype checks through equivalent
+explicit input/output contracts. The function and direct caller close 11/28
+checks; both roles/profiles match 6,540 exact native-C operation-sequence bit
+cases. Two independent nine-scenario, six-replica movement runs do not confirm a
+reproducible integrated gain, so the change is not adopted. Static instruction
+reductions alone do not justify a performance claim. Both whole math proof
+controls time out at 600 seconds without a complete report; broader unexecuted
+gate recipes are not verification evidence.
+
+[Frozen sources, successful and failed attempts, both-reference numerical controls,
+raw timing and exact scope](evidence/20261026-constructor-and-force-r967/README.md).
+The runtime remains row-domain893. Constructor changes stay private. Full port,
+whole dynamics Gold, coordinated migration and overall C parity remain open.

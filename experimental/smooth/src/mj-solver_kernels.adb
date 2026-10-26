@@ -1,4 +1,8 @@
 package body MJ.Solver_Kernels with SPARK_Mode is
+   function In_Work_Domain (Value : Real) return Boolean is
+     (abs Value <= Work_Real'Last)
+     with Global => null,
+     Post => In_Work_Domain'Result = (Value in Work_Real);
    function Clamp_Pivot (Value : Work_Real) return Positive_Pivot is
      (if Value < Min_Val then Min_Val else Value);
    function Reciprocal (Value : Positive_Pivot) return Inverse_Real is (1.0 / Value);
@@ -19,7 +23,7 @@ package body MJ.Solver_Kernels with SPARK_Mode is
          --  Count rejected entries: the fused Boolean reduction is miscompiled
          --  by this GNAT/GCC 16 toolchain at complete SIMD blocks. Integer
          --  accumulation retains SIMD and the exact rejection predicate.
-         Rejected := Rejected + Boolean'Pos (Target (I) not in Work_Real);
+         Rejected := Rejected + Boolean'Pos (not In_Work_Domain (Target (I)));
          pragma Loop_Invariant
            (Static => Rejected in 0 .. Int64 (I) - Int64 (Target'First) + 1);
          pragma Loop_Invariant
@@ -53,7 +57,7 @@ package body MJ.Solver_Kernels with SPARK_Mode is
    begin
       for I in Target'Range loop
          Target (I) := Target (I) * Inverse;
-         Flag_Rejection (Rejected, Target (I) not in Work_Real);
+         Flag_Rejection (Rejected, not In_Work_Domain (Target (I)));
          pragma Loop_Invariant (Static => Rejected in 0 .. 1);
          pragma Loop_Invariant
            (Static => (Rejected = 0) = (for all J in Target'First .. I => Target (J) in Work_Real));
@@ -119,7 +123,7 @@ package body MJ.Solver_Kernels with SPARK_Mode is
             pragma Assert (Static => Window (I - Shift) =
               Add_Product (Before (I - Shift), Before (I), Multiplier));
             pragma Assert (Static => Window (I - Shift) = Expected (I - Shift));
-            Flag_Rejection (Rejected, Window (I - Shift) not in Work_Real);
+            Flag_Rejection (Rejected, not In_Work_Domain (Window (I - Shift)));
             pragma Loop_Invariant (Static => Rejected in 0 .. 1);
             pragma Loop_Invariant
               (Static => (Rejected = 0) =
@@ -155,7 +159,7 @@ package body MJ.Solver_Kernels with SPARK_Mode is
          --  and the toolchain's previously observed Boolean SIMD reduction bug.
          Buffer (I) := Buffer (I)
            + Buffer (Source_First + (I - Target_First)) * Multiplier;
-         Flag_Rejection (Rejected, Buffer (I) not in Work_Real);
+         Flag_Rejection (Rejected, not In_Work_Domain (Buffer (I)));
          pragma Loop_Invariant (Static => Rejected in 0 .. 1);
          pragma Loop_Invariant
            (Static => (Rejected = 0) =
