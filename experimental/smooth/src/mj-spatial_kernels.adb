@@ -105,14 +105,21 @@ package body MJ.Spatial_Kernels with SPARK_Mode is
       return [X, Y, Z, U, W, T];
    end Multiply;
    function Dot (A, B : Motion) return Real is
-      subtype Product is Real range -2.0e66 .. 2.0e66;
-      P0 : constant Product := A (0) * B (0);
-      P1 : constant Product := A (1) * B (1);
-      P2 : constant Product := A (2) * B (2);
-      P3 : constant Product := A (3) * B (3);
-      P4 : constant Product := A (4) * B (4);
-      P5 : constant Product := A (5) * B (5);
+      P0 : constant Real := A (0) * B (0);
+      P1 : constant Real := A (1) * B (1);
+      P2 : constant Real := A (2) * B (2);
+      P3 : constant Real := A (3) * B (3);
+      P4 : constant Real := A (4) * B (4);
+      P5 : constant Real := A (5) * B (5);
    begin
+      --  The original Pre bounds each product. Keep these as proved
+      --  static facts rather than repeated executable subtype checks.
+      pragma Assert (Static => P0 in -2.0e66 .. 2.0e66);
+      pragma Assert (Static => P1 in -2.0e66 .. 2.0e66);
+      pragma Assert (Static => P2 in -2.0e66 .. 2.0e66);
+      pragma Assert (Static => P3 in -2.0e66 .. 2.0e66);
+      pragma Assert (Static => P4 in -2.0e66 .. 2.0e66);
+      pragma Assert (Static => P5 in -2.0e66 .. 2.0e66);
       return ((P0 + P2) + (P1 + P3))
         + (P4 + P5);
    end Dot;

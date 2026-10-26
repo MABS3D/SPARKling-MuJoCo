@@ -916,3 +916,52 @@ Its targeted nine-case movement comparison finds no demonstrated reproducible
 multi-DOF gain, so it remains unadopted. The checkpoint preserves failed attempts,
 exact source bindings, proof reports and raw measurements separately.
 [Scoped initialization closure and force-window results](evidence/20261026-force-windows-and-init-r1102/README.md).
+
+The later private1109 force-slice candidate closes scalar11, sequence20 and
+buffer65 semantic checks per reference, plus whole inertia FLOW. Its actual
+Fill_Total buffer call Pre is proved, while three broader frame/configuration/
+readiness obligations remain open. Numerical controls pass on both references
+and profiles; targeted nine-case movement finds no demonstrated reproducible
+integrated gain, so this candidate is also unadopted. A refreshed chain24 PC
+profile is descriptive and includes setup/output costs, not exact phase times.
+[Exact force-slice proof scopes, raw timing and refreshed profile](evidence/20261026-force-slices-profile-r1131/README.md).
+
+The private1127 Jacobian candidate proves that Angular bounds and slide-branch
+Linear bounds follow from the original direction Pre; the computed hinge Linear
+check remains. Both references close Column15, whole Jacobians115 and whole
+External_Loads42 independently, with two explicit unchanged-spec integer warnings.
+Both-profile numerical controls and6576 native-C boundary-bit cases pass. The
+targeted nine-case run and independent three-state chain24 repeat do not establish
+a reproducible integrated gain, so the candidate stays unadopted. Full topology
+functional refinement and complete dynamics Gold remain separate open work.
+[Exact Jacobian proof scopes, failed attempts and both movement runs](evidence/20261026-jacobian-bound-elision-r1149/README.md).
+
+## Latest local runtime: proved spatial Dot product bounds, 26 October 2026
+
+The1171 adoption changes only Spatial_Kernels.Dot intermediate products to base
+Real constants, retaining their former subtype limits as proved Static facts.
+Original API/Pre/Post, complete admitted domains and the C mji_dot6 FP tree remain.
+Both references close the full spatial math459 and compact inertia377 obligations,
+plus the Dot39, Projected9 and Assemble_Row37 minima independently. Six inherited
+compact warnings remain explicit. Counts are not additive. All13 broader numeric
+groups, both-profile activation/integration suites and6720 native-C bit cases per
+role/profile pass. No new inline policy, assumption or suppression is introduced.
+
+Targeted9, independent chain3 and full30 supported movement scenarios use six
+replicas and normal native C3.17. All nine chain24 state/run intervals are below
+parity with the previous runtime: about1.4-2.2% less time. Full-run chain24 still
+takes about1.90-1.91 times C's time. Other models retain their uncertainty; no
+aggregate speedup or absence-of-regressions guarantee follows from wide intervals.
+Fresh actual C14/C17 manifests exactly match all verified inputs. The893 solver
+stays in place; Jacobian and force-slice experiments remain unadopted. Complete
+port, dynamics Gold, migration and overall C parity are still open.
+[Exact adoption, all proof budgets, numerical controls and raw timings](evidence/20261026-spatial-dot-adoption-r1172/README.md).
+
+The subsequent private1173 component-contract candidate closes full math388 on
+both references and passes6864 native-C inertia-vector bit cases per role/profile.
+Its initial movement gains on free_ball/chain24 accompany hinge regressions, so
+it is unadopted. An ordinary No_Inline(Fill) control retains multi-DOF gains but
+does not establish elimination of the hinge slowdown. Its C17 Fill51 proof and
+source bridge are explicit; no fresh whole-unit source equality is inferred from
+an unchanged mathematical subunit. Neither control has a repeat or full30 run.
+[Mixed performance, exact proof scopes and corrected symbol-count diagnostic](evidence/20261026-inertia-component-controls-r1210/README.md).
