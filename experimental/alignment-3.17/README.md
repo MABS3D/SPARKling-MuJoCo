@@ -646,3 +646,58 @@ and storage slices are not adopted or presented as completed optimizations.
 [Boundary corpus, source bindings, raw profile and storage comparison](evidence/20261026-row-boundaries-and-profile/README.md).
 Full port, whole dynamics Gold, coordinated production migration and C parity
 remain unfinished.
+
+## Private compact-row proof closure and timing rejection
+
+A compact-metadata row prototype closes its 89-check helper minimum and
+44-check dispatcher. Its entire kernel unit closes 249 checks on the C3.17
+closure, with the five inherited diagnostics separate. Full original contracts,
+rounded arithmetic, rejection/frame properties and generic fallback remain.
+Both profiles pass 59,621 boundary cases. No production owner is changed.
+
+The nine-scenario six-copy movement comparison nevertheless shows a 7-8%
+chain24 regression, so this prototype is rejected. Its smaller SIMD helper
+uses scalar execution for lengths 8..15. A second dispatch variant retains the
+current backend for those lengths. The marked regression disappears, but all
+nine confidence intervals include no change: no accepted speedup or adoption.
+The second dispatcher is proved; a fresh whole-unit/C3.14 integration proof is
+not claimed for it. Earlier completed proof scopes remain explicitly distinct.
+
+Instruction windows from the accepted runtime's existing profile point to
+geometry and projection checks within external-force accumulation for the next
+investigation. These flat sample shares are not causal savings. The current
+compatible solve path has no dummy dense inverse construction.
+
+[Frozen variants, 249-check proof, full boundary corpora and both raw movement comparisons](evidence/20261026-compact-row-r722/README.md).
+At that checkpoint the runtime still matched `ef66b666a`; the subsequent
+external-load adoption below changes two files. Full port, whole dynamics Gold,
+coordinated migration and C parity remain unfinished.
+
+## Adopted explicit scalar domains for external loads
+
+The working external-force Contribution uses base Real scalars and equivalent
+explicit original input/output range contracts. Its exact ordered formula and
+the caller's final numeric rejection remain. Declarations change; fresh full
+callee and caller proofs close 58 and 42 checks independently on C3.14 and
+C3.17, without warnings. Fresh actual source manifests exactly match the
+verified builds/proof inputs. All 13 numerical groups and 6,680 exact bit cases
+per profile pass. There is no assumption, suppression or new trusted body.
+
+Nine targeted cases, an independent three-state chain24 repeat and all 30
+supported movement scenarios use six identical binary replicas per role with
+normal native C3.17 SIMD/LTO. Chain24 takes about 1.4-2.1% less time in all nine
+state/run estimates, each with its interval below one. Other workload uncertainty
+remains explicit; no slowdown is statistically confirmed, and many intervals
+include no change. No unweighted aggregate or every-case speedup is claimed.
+
+These measurements include body-applied external loads; they do not establish
+a benefit when Contribution is not called. Full-run chain24 remains about
+2.07-2.08 times C's time. The old row prototypes above remain unadopted; only
+the two external-force math files change the runtime in this checkpoint.
+
+[Actual bindings, both complete unit proofs, all numerical groups and raw timing](evidence/20261026-external-domain-r750/README.md).
+The adopted external-load code and these evidence checkpoints are published at
+the user's request. Statements of local-only status inside frozen receipts
+describe their creation time. Private solver-row experiments remain separate.
+Full port, whole dynamics Gold, coordinated production migration and C parity
+remain unfinished.

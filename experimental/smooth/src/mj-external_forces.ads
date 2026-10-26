@@ -23,9 +23,14 @@ package MJ.External_Forces with SPARK_Mode is
      Post => Dot_Load'Result =
        (Column (0) * Load (0) + Column (1) * Load (1)) + Column (2) * Load (2);
    function Contribution
-     (Previous : MJ.Smooth_Dynamics.Work_Real;
-      Linear, Angular : Vector; Load : Wrench) return Contribution_Real
-     with Global => null, Pre => Bounded (Linear) and then Bounded (Angular),
-     Post => Contribution'Result =
+     (Previous : Real;
+      Linear, Angular : Vector; Load : Wrench) return Real
+     with Global => null,
+     Pre => Previous in MJ.Smooth_Dynamics.Work_Real
+       and then Bounded (Linear) and then Bounded (Angular),
+     --  Preserve the former result-subtype bound as a proved postcondition.
+     --  The scalar representation remains Real; no dynamic return conversion.
+     Post => Contribution'Result in Contribution_Real
+       and then Contribution'Result =
        (Previous + Dot_Load (Linear, Load.Force)) + Dot_Load (Angular, Load.Torque);
 end MJ.External_Forces;
