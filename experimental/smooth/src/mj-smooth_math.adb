@@ -13,40 +13,48 @@ package body MJ.Smooth_Math with SPARK_Mode is
    function Dot (A, B : Vector) return Real is
      ((A (0) * B (0) + A (1) * B (1)) + A (2) * B (2));
    function Cross (A, B : Vector) return Vector is
-      --  Typed intermediate products give each subtraction a local bound;
-      --  they preserve the specified floating-point evaluation order.
-      subtype Product is Real range -2.0e300 .. 2.0e300;
-      P12 : constant Product := A (1) * B (2);
-      P21 : constant Product := A (2) * B (1);
-      P20 : constant Product := A (2) * B (0);
-      P02 : constant Product := A (0) * B (2);
-      P01 : constant Product := A (0) * B (1);
-      P10 : constant Product := A (1) * B (0);
-      Result : constant Vector := [P12 - P21, P20 - P02, P01 - P10];
+      --  Preserve the six rounded products and the three ordered differences.
+      --  Their local bounds are static consequences of the public precondition.
+      P12 : constant Real := A (1) * B (2);
+      P21 : constant Real := A (2) * B (1);
+      P20 : constant Real := A (2) * B (0);
+      P02 : constant Real := A (0) * B (2);
+      P01 : constant Real := A (0) * B (1);
+      P10 : constant Real := A (1) * B (0);
    begin
-      pragma Assert (Static => Bounded (Result, 8.0e300));
-      pragma Assert (Result (0) = A (1)*B (2) - A (2)*B (1));
-      pragma Assert (Result (1) = A (2)*B (0) - A (0)*B (2));
-      pragma Assert (Result (2) = A (0)*B (1) - A (1)*B (0));
-      pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
-        then Result (0) in -1.0e73 .. 1.0e73));
-      pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
-        then Result (1) in -1.0e73 .. 1.0e73));
-      pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
-        then Result (2) in -1.0e73 .. 1.0e73));
-      pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
-        then Result (0) in -1.0e115 .. 1.0e115));
-      pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
-        then Result (1) in -1.0e115 .. 1.0e115));
-      pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
-        then Result (2) in -1.0e115 .. 1.0e115));
-      pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
-        then Result (0) in -1.0e186 .. 1.0e186));
-      pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
-        then Result (1) in -1.0e186 .. 1.0e186));
-      pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
-        then Result (2) in -1.0e186 .. 1.0e186));
-      return Result;
+      pragma Assert (Static => P12 in -2.0e300 .. 2.0e300);
+      pragma Assert (Static => P21 in -2.0e300 .. 2.0e300);
+      pragma Assert (Static => P20 in -2.0e300 .. 2.0e300);
+      pragma Assert (Static => P02 in -2.0e300 .. 2.0e300);
+      pragma Assert (Static => P01 in -2.0e300 .. 2.0e300);
+      pragma Assert (Static => P10 in -2.0e300 .. 2.0e300);
+      declare
+         Result : constant Vector := [P12 - P21, P20 - P02, P01 - P10];
+      begin
+         pragma Assert (Static => Bounded (Result, 8.0e300));
+         pragma Assert (Result (0) = A (1)*B (2) - A (2)*B (1));
+         pragma Assert (Result (1) = A (2)*B (0) - A (0)*B (2));
+         pragma Assert (Result (2) = A (0)*B (1) - A (1)*B (0));
+         pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
+           then Result (0) in -1.0e73 .. 1.0e73));
+         pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
+           then Result (1) in -1.0e73 .. 1.0e73));
+         pragma Assert (Static => (if Bounded (A, 1.0e60) and then Bounded (B, 1.0e12)
+           then Result (2) in -1.0e73 .. 1.0e73));
+         pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
+           then Result (0) in -1.0e115 .. 1.0e115));
+         pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
+           then Result (1) in -1.0e115 .. 1.0e115));
+         pragma Assert (Static => (if Bounded (A, 1.0e90) and then Bounded (B, 1.0e24)
+           then Result (2) in -1.0e115 .. 1.0e115));
+         pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
+           then Result (0) in -1.0e186 .. 1.0e186));
+         pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
+           then Result (1) in -1.0e186 .. 1.0e186));
+         pragma Assert (Static => (if Bounded (A, 1.0e70) and then Bounded (B, 1.0e115)
+           then Result (2) in -1.0e186 .. 1.0e186));
+         return Result;
+      end;
    end Cross;
 
    function Apply (R : Matrix; V : Vector) return Vector is

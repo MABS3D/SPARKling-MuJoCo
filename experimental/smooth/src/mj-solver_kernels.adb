@@ -119,7 +119,7 @@ package body MJ.Solver_Kernels with SPARK_Mode is
       Rejected : Rejection_Flags := 0;
    begin
       --  Keep long-row vector setup out of the short scalar caller.
-      if Count >= 16 then
+      if Count >= 8 then
          Add_Long_Row (Buffer, Target_First, Source_First, Count, Multiplier, Ok);
          return;
       end if;

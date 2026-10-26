@@ -1,0 +1,15 @@
+{
+  "cause": "New inventory entries incorrectly used repository-relative instead of evidence-relative paths. The pack command had created exact immutable payloads, recipe and index, but rejected the inventory before committing its manifest.",
+  "correction": "Preserved the raw ZIP and all existing payloads. Verified the orphan index extends the old index without changes, recipe chunks exist, three newly created payloads satisfy size/hash checks and all159 previous inventory entries remain unchanged. Finalized that exact transaction and corrected the seven new inventory paths. Corrected the external packaging recipe; its original erroneous version remains inside the exact unchanged ZIP.",
+  "old_manifest_sha256": "617d46963e3e6291acc4ed6542f92479baf48e2c4b68bc0bd2f88f224717ef5a",
+  "new_manifest_sha256": "7379fe309b400db77e796b05b43b6f00c0add005e168cbf8d7a8e301f432f6ff",
+  "zip_sha256": "d7c8668ec5893ebeb0274a8ab953b5acf104cac424430ed44130c884772a84c6",
+  "new_packs": [
+    "payloads-0031.bin",
+    "payloads-0032.bin",
+    "payloads-0033.bin"
+  ],
+  "new_index": "objects-2c0f3cd28ab729299d881f98728790f07329d8b97ddcee601afc85a1d74e62e3.json.gz",
+  "archive_bytes_unchanged": true,
+  "full_store_verification_pending": true
+}

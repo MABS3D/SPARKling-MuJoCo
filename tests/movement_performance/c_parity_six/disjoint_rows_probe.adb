@@ -27,32 +27,53 @@ procedure Disjoint_Rows_Probe is
       Cases := Cases + 1;
    end Check;
 begin
-   for N in 1 .. 256 loop
-      for Gap in 0 .. 2 loop
-         declare
-            Target : constant Natural := 9;
-            Source : constant Natural := Target + N + Gap;
-            Buffer : Real_Array (7 .. Source + N + 1);
-         begin
-            for I in Buffer'Range loop Buffer (I) := Real (I) / 32.0; end loop;
-            Check (Buffer, Target, Source, N, -0.125);
-            for Negative in Boolean loop
-               Buffer := [others => (if Negative then -Work_Limit else Work_Limit)];
-               Check (Buffer, Target, Source, N, 0.0);
-               Buffer := [others => Work_Limit];
-               Check (Buffer, Target, Source, N, SK.Scale_Real'Last);
-            end loop;
-            if N <= 33 or else N in 63 .. 66 or else N in 127 .. 130 or else N in 255 .. 256 then
-               for A in 0 .. N - 1 loop
-                  for Negative in Boolean loop
-                     Buffer := [others => 0.0];
-                     Buffer (Source + A) := (if Negative then -Work_Limit else Work_Limit);
-                     Check (Buffer, Target, Source, N, 2.0);
-                  end loop;
+   --  Exercise the vector backend at high origins too: the historical
+   --  Natural'Last case below selected only the two-element scalar path.
+   for Origin_Class in 0 .. 3 loop
+      for N in 1 .. 256 loop
+         for Gap in 0 .. 2 loop
+            declare
+               Target : constant Natural :=
+                 (if Origin_Class = 0 then 9
+                  elsif Origin_Class = 1 then 65535 - N - Gap
+                  elsif Origin_Class = 2 then 65536 - N - Gap
+                  else Natural'Last - (2 * N + Gap - 1));
+               Source : constant Natural := Target + N + Gap;
+               Buffer : Real_Array
+                 ((if Origin_Class = 0 then 7 else Target - 1) ..
+                  (if Origin_Class = 3 then Natural'Last else Source + N + 1));
+            begin
+               for I in Buffer'Range loop Buffer (I) := Real (I) / 32.0; end loop;
+               Check (Buffer, Target, Source, N, -0.125);
+               for Negative in Boolean loop
+                  Buffer := [others => (if Negative then -Work_Limit else Work_Limit)];
+                  Check (Buffer, Target, Source, N, 0.0);
+                  Buffer := [others => Work_Limit];
+                  Check (Buffer, Target, Source, N, SK.Scale_Real'Last);
                end loop;
-            end if;
-         end;
+               if N <= 33 or else N in 63 .. 66 or else N in 127 .. 130 or else N in 255 .. 256 then
+                  for A in 0 .. N - 1 loop
+                     for Negative in Boolean loop
+                        Buffer := [others => 0.0];
+                        Buffer (Source + A) := (if Negative then -Work_Limit else Work_Limit);
+                        Check (Buffer, Target, Source, N, 2.0);
+                     end loop;
+                  end loop;
+               end if;
+            end;
+         end loop;
       end loop;
+   end loop;
+   --  Preserve the generic public domain across the compact metadata limit.
+   --  The compact branch must neither wrap origin 65535 nor count 65536.
+   for N in 65535 .. 65536 loop
+      declare
+         Buffer : Real_Array (0 .. 2 * N - 1) := [others => 0.125];
+      begin
+         Check (Buffer, 0, N, N, 0.5);
+         Buffer := [others => Work_Limit];
+         Check (Buffer, 0, N, N, 2.0);
+      end;
    end loop;
    --  Array upper bounds need not leave space for a one-past-end index.
    declare

@@ -49,7 +49,7 @@ python3 -m unittest discover -s tools -p test_evidence_store.py
 `verify` checks every stored ZIP without materializing it, then checks the full
 inventory using reconstructed ZIP digests and physical metadata files. `restore`
 materializes the exact ZIPs at the paths recorded by the original evidence,
-requiring about 1.03 GiB if all are absent. It skips matching files and refuses
+requiring space for the selected original bytes. It skips matching files and refuses
 to overwrite differing files or existing partial outputs. An optional
 repository-relative ZIP path selects only that bundle. Historical ZIP links
 inside the evidence refer to these restored local files.
@@ -65,3 +65,37 @@ Verification rejects an inventory ZIP that is neither stored nor a recorded
 Git-tracked historical bundle, preventing ignored new archives from being lost.
 Keep the bundle in the evidence inventory and preserve its original SHA-256.
 Verification and an actual restoration were performed before this commit.
+
+## Follow-up: completed caches and raw ZIP duplicates
+
+2026-10-26: a Cross timing run was explicitly interrupted after the Windows
+volume fell to about 65 MiB free. Its partial outputs are preserved and do not
+stand for a completed 30-scenario acceptance run. The replacement run uses the
+same executable hashes after cleanup, with no overlapping heavy task work.
+
+The follow-up removed 55 generated `obj` directories from this task's completed,
+archived runs: 763,409,976 bytes (about 728 MiB). Frozen sources, copied SPARK
+reports, logs, executables and raw measurements remain. Other projects,
+toolchains, active work and unmatched older directories were left intact.
+
+Full exact-store verification passed 27 archives and all 168 then-current
+inventory entries before deleting three ignored raw ZIP duplicates: r556,
+r605 and r620, totaling 379,618,821 bytes (about 362 MiB). Every original ZIP
+byte remains reconstructable with `restore`; existing recipes and payloads
+were preserved. The new audit receipts are additional inventory entries.
+
+After cleanup, Windows reported about 743 MiB free. Reusable Linux filesystem
+blocks do not establish equal physical Windows-byte recovery. WSL was not
+stopped and the VHDX was not compacted.
+
+[Exact removal lists, preserved inputs and scope](../experimental/alignment-3.17/evidence/20261025-cache-cleanup-r627/README.md).
+
+A subsequent pass, after all timing processes were terminal, removed the
+remaining 24 Git-ignored, untracked raw ZIP duplicates (1,337,333,642 bytes),
+checking each size, SHA-256 and stored recipe first. All 27 original stored ZIPs
+remain losslessly reconstructable; restoring those together would require about
+1.60 GiB. Windows reported 2,073,694,208 bytes free afterward. Historical tracked
+archives and the exact store are untouched. New checkpoints may add archives;
+the store manifest records their current sizes.
+
+[Per-archive duplicate checks and exact restoration scope](../experimental/alignment-3.17/evidence/20261026-exact-zip-cleanup-r629/README.md).

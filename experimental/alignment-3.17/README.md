@@ -545,7 +545,104 @@ A calibrated independent CPU-timer sampler replaces invalid gprofng measurements
 On chain24 state0, the largest flat Ada sample shares are compatible factor/solve
 (about 26%), acceleration preparation (16%) and compact mass construction (10%);
 the dot product is about 5%. Raw instruction PCs identify scalar short-row
-updates in the factorization. A fresh threshold-eight trial is private.
+updates in the factorization. The resulting threshold-eight trial is documented
+in the following checkpoint.
 
 [Completed proof/code/numeric bindings, qualified profiles and scope](evidence/20261025-reduction-closure-r605/README.md).
-Whole dynamics Gold, full port and overall C parity remain pending; no new push.
+Whole dynamics Gold, full port and overall C parity remain pending.
+
+## Adopted threshold-eight row updates
+
+The existing disjoint-row vector backend now starts at eight elements instead
+of sixteen. Both reference closures close all 156 kernel-unit checks, retaining
+five existing diagnostics each. The 14,905-case disjoint corpus per profile and
+all 13 broader numerical groups pass. Fresh working-source snapshots match the
+verified builds exactly; public contracts, arithmetic and domains are unchanged.
+
+The full 30-case movement run and independent chain24 repeat use six identical
+binary copies per role. Chain24 time falls by about 1.2-1.8%, with all six state/run
+confidence intervals below parity. Other workload intervals include no change;
+individual results and uncertainty remain available. Chain24 still takes about
+2.3 times normal native C3.17, so this does not establish overall C parity.
+The first timing attempt is explicitly disqualified because an earlier own Git
+scan was still active. Accepted runs have no overlapping own heavy jobs.
+
+The compiled text differs in exactly one byte: the dispatch threshold immediate.
+Read-only and writable data match. The C3.14 proof-launcher helper-path error and
+its correction are retained without rerunning completed numerical work.
+
+A further private Cross candidate closes 86 minimum and 796 whole-unit checks,
+with its existing diagnostics separate, and passes 5,972 bitwise C cases per
+profile. Its compiled movement comparison is prepared; integrated performance
+and broader integration acceptance remain pending. The working Cross is unchanged.
+
+[Verified source bindings, proofs, raw timings and private Cross inputs](evidence/20261025-row-threshold-r620/README.md).
+These changes remain local after commit `6e98c9bc4`; no new push is performed.
+
+## Private Cross: replicated movement improvement
+
+The minimum and complete C3.17 math proof close 86/796 checks, with existing
+diagnostics separate. All 5,972 bitwise C cases pass in each profile. A nine-case
+six-copy movement run and a complete 30-case six-copy run confirm improvements
+on chain24 and branches24. The full-run time ratios against the threshold-eight
+baseline are about 0.913-0.919 and 0.947-0.954 respectively. Chain24 remains about
+2.09-2.10 times normal native C3.17; branches24 about 1.59 times C.
+
+The initial full attempt is retained as incomplete: it was explicitly interrupted
+when the host volume reached about 65 MiB free. Accepted timing restarted only
+after cleanup, with unchanged executable hashes and no overlapping heavy task
+work. Sources, proof receipts and exact stored bytes remain intact; only backed
+generated caches and ignored raw ZIP duplicates were removed.
+
+The working Cross is unchanged. Two-reference validation/release integration and
+the independent complete C3.14 math proof are running in r625. This is performance
+evidence for a private candidate, not adoption, full dynamics Gold or overall C
+parity. The missing standalone Cross symbol reflects inlining, not absent work.
+
+[Full raw timing, source/proof dependencies and qualified scope](evidence/20261026-cross-performance-r630/README.md).
+[Exact cleanup and retained bytes](evidence/20261026-exact-zip-cleanup-r629/README.md).
+
+## Adopted Cross after complete integration
+
+The actual working Cross now matches the r630 candidate. Complete math-unit
+proofs close 796 checks independently on production C3.14 and candidate C3.17,
+with 66 existing diagnostics each. All 13 numerical groups pass, and fresh actual
+source manifests match both verified builds exactly. Six intermediate subtype
+checks become proved Static bounds; arithmetic, original public domain and full
+postconditions remain unchanged. No new assumption, suppression, trusted body,
+forced inline or deallocator change is introduced.
+
+The confirmed chain24/branches24 improvements remain workload-specific; normal
+C3.17 is still about 2.1/1.59 times faster respectively. Earlier kernel/reduction
+proofs keep their unchanged called contracts and are not rerun. Full dynamics
+Gold, coordinated production migration, full port and overall C parity remain open.
+
+A subsequent checked spatial-load slice candidate closes both 12-check minima
+and its entire 84-check unit without warnings. Its exact component/frame contracts
+are retained. Both profiles also pass 4,360 exact-bit boundary cases, including
+nonzero and near-NaturalLast origins. The normal movement build is ready and a
+six-copy multi-DOF comparison has completed in r639. Chain24 and branches24
+confidence intervals include no change, so this storage candidate remains
+private; working storage is unchanged.
+
+[Actual source bindings, two-reference proof/integration and private storage inputs](evidence/20261026-cross-adoption-r632/README.md).
+The earlier local-only statements above describe those checkpoints at creation.
+The user has now requested publication of the adopted changes and their evidence.
+
+## Expanded row boundaries and current diagnostic profile
+
+The actual adopted runtime passes 59,621 disjoint-row cases in each validation
+and release profile, including origins and lengths around 65,535/65,536 and
+origins near Natural'Last. Large validation snapshots require a 64 MiB stack
+in the test child only; the original stack failure and same-binary diagnosis
+are preserved. The executed runner and frozen source closure have explicit
+hash bindings. Public runtime domains and contracts are unchanged.
+
+A fresh qualified chain24 profile identifies acceleration preparation,
+factor/solve, row updates and compact mass as remaining diagnostic priorities.
+Flat sample shares do not establish causal savings. Private row-index variants
+and storage slices are not adopted or presented as completed optimizations.
+
+[Boundary corpus, source bindings, raw profile and storage comparison](evidence/20261026-row-boundaries-and-profile/README.md).
+Full port, whole dynamics Gold, coordinated production migration and C parity
+remain unfinished.

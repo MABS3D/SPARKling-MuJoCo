@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "sources_unchanged": true,
+  "sources_sha256": "969bfdab88d37b9d42fe953f8a72f1a16bcc5545ff58473bf1698d0cc1567e71",
+  "runner_sha256": "e1ca89dd8663df938a6509b5d5c4d0b90bb8e9e1490c9cb0997aee46f4217b59",
+  "records": [
+    {
+      "mode": "validation",
+      "flags": [
+        "-gnat2022",
+        "-ffp-contract=off",
+        "-O1",
+        "-g",
+        "-gnata",
+        "-gnato",
+        "-gnatVa"
+      ],
+      "passed": true,
+      "output": "passed 59621 disjoint row cases",
+      "binary_sha256": "7d4a5b89e8cd48395bb68c201b11653f18a65b1b37904d594dc3cd45be63e479",
+      "build_command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-row-origin-baseline-r689-20261026/validation/rows.gpr",
+        "-j1"
+      ],
+      "minimum_test_stack_bytes": 67108864
+    },
+    {
+      "mode": "release",
+      "flags": [
+        "-gnat2022",
+        "-ffp-contract=off",
+        "-O3",
+        "-gnatn",
+        "-march=native",
+        "-flto=1"
+      ],
+      "passed": true,
+      "output": "passed 59621 disjoint row cases",
+      "binary_sha256": "c26c7e1a6ad1c7e2e7ce329efd7ac609a5e168adf19f5982b8cae2ce3ac30f2f",
+      "build_command": [
+        "python3",
+        "/mnt/c/Users/Chello/Desktop/Sparkling Mujoco/tools/guarded.py",
+        "--cap-mb",
+        "3000",
+        "--timeout",
+        "600",
+        "--",
+        "gprbuild",
+        "-P",
+        "/var/tmp/sparkling-row-origin-baseline-r689-20261026/release/rows.gpr",
+        "-j1"
+      ],
+      "minimum_test_stack_bytes": 67108864
+    }
+  ],
+  "scope": "Exact row arithmetic, rejection predicate and frame differential corpus; separate from formal proof and full movement performance."
+}

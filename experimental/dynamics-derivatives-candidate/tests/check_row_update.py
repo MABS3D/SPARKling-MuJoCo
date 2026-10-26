@@ -4,13 +4,23 @@ Reuse the exhaustive disjoint-row corpus, including each rejected SIMD lane,
 nonzero array origins, untouched regions, maximum indices and numeric limits.
 Do not inherit the historical harness's suppressed-check or unsafe FP flags.
 """
-import argparse, hashlib, json, shutil, subprocess
+import argparse, hashlib, json, resource, shutil, subprocess
 from pathlib import Path
 from build import ROOT, environment, FOLDERS, compiler_flags, linker_flags, solver_kernel_switches
 
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def row_test_stack_limit():
+    """Allow large test arrays and validation contract snapshots, per child."""
+    soft, hard = resource.getrlimit(resource.RLIMIT_STACK)
+    requested = (soft if soft == resource.RLIM_INFINITY else
+                 max(soft, 64 * 1024 * 1024))
+    if hard != resource.RLIM_INFINITY and requested > hard:
+        raise RuntimeError('Row corpus needs at least 64 MiB of test stack')
+    resource.setrlimit(resource.RLIMIT_STACK, (requested, hard))
 
 
 def main():
@@ -52,16 +62,19 @@ def main():
         with (work/'build.log').open('w') as log:
             subprocess.run(command, env=environment(), stdout=log, stderr=subprocess.STDOUT, check=True)
         binary = work/'bin/disjoint_rows_probe'
-        run = subprocess.run([str(binary)], text=True, capture_output=True, timeout=60)
+        run = subprocess.run([str(binary)], text=True, capture_output=True, timeout=60,
+                             preexec_fn=row_test_stack_limit)
         (work/'output.txt').write_text(run.stdout+run.stderr)
         assert run.returncode == 0 and run.stdout.startswith('passed '), run.stdout+run.stderr
         results.append(dict(mode=mode, flags=flags, passed=True, output=run.stdout.strip(),
-                            binary_sha256=digest(binary), build_command=command))
+                            binary_sha256=digest(binary), build_command=command,
+                            minimum_test_stack_bytes=64 * 1024 * 1024))
         print(mode, run.stdout.strip(), flush=True)
     unchanged = all(digest(source/n) == h for n,h in hashes.items())
     assert unchanged
     (a.out/'results.json').write_text(json.dumps(dict(passed=True, sources_unchanged=True,
-        sources_sha256=digest(a.out/'sources.json'), records=results,
+        sources_sha256=digest(a.out/'sources.json'),
+        runner_sha256=digest(a.out/'runner.py'), records=results,
         scope='Exact row arithmetic, rejection predicate and frame differential corpus; separate from formal proof and full movement performance.'), indent=2)+'\n')
 
 
