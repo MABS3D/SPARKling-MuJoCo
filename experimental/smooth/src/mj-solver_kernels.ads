@@ -11,8 +11,9 @@ package MJ.Solver_Kernels with SPARK_Mode is
      Post => Clamp_Pivot'Result = (if Value < Min_Val then Min_Val else Value);
    function Reciprocal (Value : Positive_Pivot) return Inverse_Real
      with Global => null, Post => Reciprocal'Result = 1.0 / Value;
-   function Scale (Value : Work_Real; Inverse : Inverse_Real) return Scale_Real
-     with Global => null, Post => Scale'Result = Value * Inverse;
+   function Scale (Value : Real; Inverse : Inverse_Real) return Real
+     with Global => null, Pre => Value in Work_Real,
+     Post => Scale'Result in Scale_Real and then Scale'Result = Value * Inverse;
    function Add_Product (Previous, Value : Work_Real; Multiplier : Scale_Real)
      return Update_Real with Global => null,
      Post => Add_Product'Result = Previous + Value * Multiplier;
@@ -45,9 +46,10 @@ package MJ.Solver_Kernels with SPARK_Mode is
    procedure Add_Row_Disjoint
      (Buffer : in out Real_Array;
       Target_First, Source_First : Natural; Count : Positive;
-      Multiplier : Scale_Real; Ok : out Boolean)
+      Multiplier : Real; Ok : out Boolean)
      with Global => null,
-     Pre => Target_First in Buffer'Range and then Source_First in Buffer'Range
+     Pre => Multiplier in Scale_Real
+       and then Target_First in Buffer'Range and then Source_First in Buffer'Range
        and then Target_First < Source_First
        and then Count <= Source_First - Target_First
        and then Count - 1 <= Buffer'Last - Source_First

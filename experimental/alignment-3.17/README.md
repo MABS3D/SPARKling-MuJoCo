@@ -701,3 +701,93 @@ the user's request. Statements of local-only status inside frozen receipts
 describe their creation time. Private solver-row experiments remain separate.
 Full port, whole dynamics Gold, coordinated production migration and C parity
 remain unfinished.
+
+## Adopted checked zero-origin row windows
+
+The packed-row update now uses ordinary checked single-array parameter sliding
+to a zero-origin view. Full generic origins/counts, ordered floating arithmetic,
+numeric rejection and untouched frame remain. Equivalent explicit scalar ranges
+also cover the complete coefficient chain, including the solver's local value.
+No unchecked pointer, copy, suppression or assumption is introduced.
+
+Fresh actual C3.14/C3.17 source closures each close 222 checks of the complete
+kernel and 86 checks of the direct Solve_Compatible_Buffers minimum. The latter
+does not prove the entire inertia-phase unit or global factorization relation.
+Four kernel and twelve caller inherited warnings remain. The old fifth kernel
+warning disappears with its rewritten index expression; the exact diagnostic
+delta and an original gate's obsolete warning-count failure are preserved.
+All 14 numerical groups, 6,140 scalar bit cases and 59,621 row cases per profile
+pass. Actual working manifests exactly match the verified sources.
+
+Nine targeted scenarios, an independent three-state repeat and all 30 supported
+movement scenarios use six identical replicas per role and normal native C3.17
+SIMD/LTO. All nine chain24 state/run estimates take about 1.7-2.6% less time
+than the adopted external-load baseline, each interval below one. No slowdown
+is statistically confirmed; many other intervals include no change. Full-run
+chain24 remains about 2.01-2.04 times C's time. Applied body loads are present;
+there is no independently measured body-load-free or aggregate parity claim.
+The final timed helper retains YMM arithmetic and removes widened vector indices.
+
+[Exact source bindings, both proof scopes, all corpora and raw timing](evidence/20261026-row-window-r790/README.md).
+This adoption is included in the publication requested on 2026-10-26. Frozen
+receipts retain their original local-only status at creation time. Full port,
+whole dynamics Gold, coordinated production migration and overall C parity
+remain unfinished.
+
+A fresh qualified profile of the actual adopted binary places packed factor/solve
+(17.02%), acceleration preparation (16.70%) and long-row updates (11.38%) first.
+These are flat sample shares for chain24 state0, including setup/output and
+sampling overhead; they do not identify causal savings or replace acceptance
+timing. [Complete raw profile and collection scope](evidence/20261026-row-window-profile-r792/README.md).
+
+## Private predicate experiment and parent-data proof debt
+
+A private symmetric range predicate proves its exact equivalence to the old
+interval test in three minimum checks. Fresh C3.17 caller minima (12 and 86),
+the application minimum (30) and complete external-load unit (42) close. Its
+nine-scenario comparison is promising, with uncertainty in some cases; an
+independent repeat, full 30 scenarios, boundaries and both-reference gates remain
+pending. This predicate is not adopted.
+
+A full parent Data audit on the C3.17 closure reproduces three flow errors in
+both the adopted baseline and predicate candidate: two initialization reports
+for Arms and one mutable-owner rename in Initialize. They are unfinished proof
+engineering, not a Silver mathematical exception or a completed parent-unit proof.
+Separate constructor repairs remain private and are diagnosed at their minima.
+The original 2.5 GB Initialize attempt exhausted its memory cap without a proof.
+
+[Exact baseline controls, private inputs, proof scopes and raw timing](evidence/20261026-predicate-and-data-audit-r808/README.md).
+
+## Private constructor proof decomposition
+
+The manifold-topology builder now has a private array-based prototype with exact
+armature, fixed/simple inertia, parent/body/joint and effective-parent maps. Its
+86 semantic proof/flow checks close. Source/configuration arrays are read-only;
+only the two owned caches are mutable. Empty array lengths are supported without
+requiring a canonical null upper bound. Whole subtree-mass equivalence remains
+outside this claim.
+
+Private activation setup closes 93 checks for one actuator, including exact copied
+muscle fields, base-field preservation, scalar counter/flag behavior and rejected
+entry preservation. Its traversal closes 31 checks; its mapping predicate closes
+49. Layout and supported-kind ghost lemmas close 5 and 18 checks. Inherited
+diagnostics remain separate from proof closure. Counts exclude informational
+compiler unrolling messages, which inflated some earlier raw counters.
+
+A fresh baseline control reproduces an open Model_Status postcondition. A proved
+geometry-layout bridge now exports a conjunct of the existing full-layout check;
+Model_Status closes 19 checks. Creation-input decomposition is also proved.
+Existing activation/mocap capacity facts are propagated to private callers;
+no new public model filter or runtime validation scan is introduced. Complete
+Initialize and whole Data verification remain pending.
+
+Both the adopted baseline and a private C3.17 constructor candidate pass 432
+activation scenarios plus 1,152 combined joint/muscle/tendon/body-load scenarios
+under validation flags. Existing tolerances are unchanged. The exact tested
+snapshot is distinct from later proof-only changes; current-source, release and
+C3.14 qualification remain required before adoption. This is not performance
+evidence or coordinated production migration.
+
+[Frozen repairs, failed attempts, explicit proof scopes and numerical controls](evidence/20261026-constructor-proof-r860/README.md).
+Constructor changes remain private. The working runtime is still the adopted
+row-window version; full port, whole dynamics Gold and overall C parity remain open.

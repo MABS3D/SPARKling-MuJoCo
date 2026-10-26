@@ -1424,7 +1424,7 @@ package body MJ.Data.Inertia_Phase with SPARK_Mode is
       N : constant Natural := AR.Size (Rows);
       Inverses : array (0 .. N - 1) of SK.Inverse_Real := [others => 1.0];
       Pivot : SK.Positive_Pivot;
-      Multiplier : SK.Scale_Real;
+      Multiplier : Real;
       Value : Real;
       Accepted : Boolean;
    begin
