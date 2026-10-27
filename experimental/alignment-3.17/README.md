@@ -1095,3 +1095,81 @@ repeat/full30 acceptance, percentage average or causal call/width/layout cost
 claim follows. Actual runtime remains389ecb827. Whole dynamics/state Gold, global
 factorization equations, full port/latest migration and C parity remain open.
 [Compiler decisions, exact current-source proof scopes and all mixed timings](evidence/20261027-flat-row-compiler-controls-r1478/README.md).
+
+## External-load domain predicate: proved control, not adopted
+
+The isolated1464 candidate proves the final absolute-value comparison equivalent
+to the original range predicate, retaining its genuine rejection and all input
+domains. Both references close scalar13 and whole External_Loads43 without
+warnings. Both-reference/profile activation and integration plus all12 numerical
+groups pass; higher whole-state/dynamics proofs remain separate and open.
+
+Target9, independent repeat9, full30 and a dedicated hinge/free followup6 retain
+six identical executable replicas each and normal native C3.17 SIMD/LTO. Chain
+gains about0.8-1.3percent, with one repeat interval including1. Full30 hinge slows
+0.9-1.0percent and its followup2.8-3.1percent, all intervals above1. The full-run
+free slowdown is not reproduced in its followup; both results are retained.
+No sufficient compensating integrated benefit is established, so this predicate
+is not adopted. Static comparison counts do not establish causal time savings.
+The chain still takes about1.80 times C's time in this full run. Overall parity,
+full port/latest migration and global dynamics/factorization Gold remain open.
+[Exact source, complete proofs, all54 timing records and rejection decision](evidence/20261027-external-domain-control-r1480/README.md).
+
+## Rounded row envelope: math unit closed; runtime integration pending
+
+The1491 ghost-only successor decomposes the actual rounded update into product
+and sum envelopes. Both exact-reference complete Solver_Kernels reports close279
+checks, with the four inherited warnings matched to the published source
+statements. Original runtime row bodies remain byte-identical. Product monotonicity
+uses the existing verified SPARK Long_Float library instance: exact source,
+matching valid vendor Why3 session and supplied Coq proof are retained. This is an
+explicit previously verified mathematical dependency, not a freshly proved local
+vendor body or a fresh Coq replay. Counts are scoped and not additive.
+
+The separate certified packed-row prototype still has incomplete loop proofs;
+its successful posts under unresolved preconditions and timed-out successors do
+not establish closure. Producing and preserving runtime row certificates,
+proving consuming callers and measuring the resulting full movement remain work.
+No original rejection path or public input domain is removed, and no performance
+gain, whole dynamics/factorization Gold, full port or C parity is claimed.
+[Both-reference279 reports, vendor proof boundary and retained open prototypes](evidence/20261027-row-envelope-math-r1504/README.md).
+
+## Private certified row and fused copy/max units closed
+
+Final1524 separates the certified packed update into a new child unit, leaving
+all existing runtime owners unchanged. Its complete units close124 checks on
+both references without warnings: ordered FP values, full frame, Work domain
+and propagated rounded row bound under proven input certificates. A separate
+copy/max child closes26 on each reference: exact copying and exact max-abs in
+one traversal, including distinct origins and null rows. The existing verified
+Long_Float mathematical dependency remains explicit; no fresh Coq replay claim.
+
+Both standalone C17 profiles pass all7374 native exact-bit cases:5448 certified,
+1807 original fallback and119 empty, with sentinel/source frames and copied max
+bits checked. The original8MiB large checked-test stack failure is retained;
+the same binary/corpus/oracle passes with64MiB test stack. No production stack
+change, full-C14 numerical integration or universal C-equivalence claim follows.
+
+Release/LTO diagnostics show the new certified loop is still scalar, while the
+existing long-row fallback has SIMD. The later zero-origin window is a separate
+unfinished successor. Caller certificate production/propagation, full integration
+proofs/numerical gates and replicated movement timings remain required before
+runtime adoption. No gain, C parity or whole dynamics/full-port completion is
+claimed from these private modules.
+[Complete124/26 scopes, exact bits, stack control and scalar codegen](evidence/20261027-certified-rows-and-max-bounds-r1531/README.md).
+
+
+## Certified SIMD rows and private solver integration checkpoint
+
+The certified packed-row child closes169 checks on both references, with fresh
+7374 native exact-bit cases per profile. The private integrated solver passes
+all30 fixed100-step endpoint cases and both-reference/profile activation and
+integration. The complete row-bounds child closes264 checks on the recorded C17
+run, retaining its documented warnings. Proof counts describe separate scopes.
+
+The loader's functional prefix proof remains open; subsequent frame work and the
+12-group gate are outside this checkpoint. Integrated performance qualification,
+runtime adoption and whole dynamics/factorization Gold remain pending. Production
+runtime is unchanged. The archive preserves frozen sources, binaries, successful
+proofs and unsuccessful controls with their exact scopes.
+[Certified SIMD and private solver wiring evidence](evidence/20261027-certified-simd-and-solver-wiring-r1624/README.md).

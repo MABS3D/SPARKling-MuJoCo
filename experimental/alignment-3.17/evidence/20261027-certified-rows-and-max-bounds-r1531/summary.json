@@ -1,0 +1,164 @@
+{
+  "proofs": {
+    "sparkling-certified-final317-unit-r1529-20261027": {
+      "result_sha256": "a191611550d634a608ea4216d9a7729d9d87353d2799dd0e5253013c53cceb1b",
+      "checks": 124
+    },
+    "sparkling-certified-final314-unit-r1530-20261027": {
+      "result_sha256": "8ad4c0710e26afb77efcea1cacee3054964e4502eb954567d3bb431c09f9d4e3",
+      "checks": 124
+    },
+    "sparkling-copy-final317-unit-r1527-20261027": {
+      "result_sha256": "30d60d35deb38322bc3dbe1e0fc453d665bb9f6ef9d6e816da1db2bab0d2b54f",
+      "checks": 26
+    },
+    "sparkling-copy-final314-unit-r1528-20261027": {
+      "result_sha256": "b12f101f8d5f85e62c5c0fbf5c4a6d0def77ad47829acb7097e3a9af8baf83ba",
+      "checks": 26
+    }
+  },
+  "bits": {
+    "passed": true,
+    "source_manifest_sha256": "39edde3ba434ca31b8e7fa6dfc797412160693f4de4618f3e5f474527bb58ae9",
+    "original_cases_sha256": "e33b192fd7cd66226c87f2db2eb3529318a398929ca5b505021430008c64200c",
+    "expected_sha256": "da13c6f9d6427133ad99b367490ae836a6d60f7b0b4d1b78708ce17111d53f59",
+    "native_c_sha256": "ba2534973b31747f50bed8a49a1218b6b2d135762eab7685dc346004a3dd3f32",
+    "records": [
+      {
+        "mode": "validation",
+        "passed": true,
+        "cases": 7374,
+        "certified": 5448,
+        "fallback": 1807,
+        "empty": 119,
+        "flags": [
+          "-gnat2022",
+          "-ffp-contract=off",
+          "-O1",
+          "-g",
+          "-gnata",
+          "-gnato",
+          "-gnatVa"
+        ],
+        "binary_sha256": "fc0ca4e294a858e44e2838d7b660bf175a1c3622d534175383aefbeb23f7ca88"
+      },
+      {
+        "mode": "release",
+        "passed": true,
+        "cases": 7374,
+        "certified": 5448,
+        "fallback": 1807,
+        "empty": 119,
+        "flags": [
+          "-gnat2022",
+          "-ffp-contract=off",
+          "-O3",
+          "-gnatn",
+          "-march=native",
+          "-flto=1"
+        ],
+        "binary_sha256": "cd525bd7ae31284033b61fedb2793bc9f1352ef80144ed6236c74e6bc339887c"
+      }
+    ],
+    "test_process_stack_bytes": 67108864,
+    "stack_scope": "Test-only stack for large packed-array checked frame/ghost corpus; no production stack/flags/source change. Earlier8MiB failure retained in1532.",
+    "scope": "Unmodified7374-case input corpus applied to packed source/target subranges with gap/sentinels. Buffer origin is adjusted only when two packed rows need extra index space, recorded in harness; original numeric values, SIMD/tail lengths, signed zero/subnormal/extreme/cancellation/random cases unchanged. Native C mju_addToScl output bits, complete-row rejection predicate via unchanged fallback, all source/gap/sentinel bits, exact copied max-abs bits required in both profiles. Every nonempty row uses the certified path iff its computed bound fits; otherwise original kernel, no case dropped. Extra negative-origin empty Copy_Row case required. Test-only bit conversions outside production/proof trust. No elapsed-time/performance or universal C-equivalence claim; integrated caller propagation and acceptance remain open."
+  },
+  "codegen": {
+    "binary_sha256": "cd525bd7ae31284033b61fedb2793bc9f1352ef80144ed6236c74e6bc339887c",
+    "symbols": {
+      "_ada_certified_bits_probe": {
+        "instructions": 748,
+        "vaddpd": 0,
+        "vmulpd": 0,
+        "vaddsd": 4,
+        "vmulsd": 4,
+        "vmaxsd": 0,
+        "vmaxpd": 0,
+        "call_targets": [
+          "mj__solver_kernels__row_bounds__copy_row",
+          "ada__integer_text_io__aux_int__getXn",
+          "ada__integer_text_io__aux_int__getXn",
+          "ada__integer_text_io__aux_int__getXn",
+          "ada__integer_text_io__aux_int__getXn",
+          "ada__text_io__generic_aux__load_integer",
+          "system__val_llu__impl__scan_unsigned",
+          "ada__text_io__generic_aux__check_end_of_field",
+          "mj__solver_kernels__row_bounds__copy_row",
+          "mj__solver_kernels__row_bounds__copy_row",
+          "system__img_uns__impl__set_image_unsigned",
+          "ada__text_io__put__4",
+          "system__img_uns__impl__set_image_unsigned",
+          "ada__text_io__put__4",
+          "system__img_llu__impl__set_image_unsigned",
+          "ada__text_io__put__4",
+          "system__img_llu__impl__set_image_unsigned",
+          "ada__text_io__put__4",
+          "ada__text_io__new_line__2",
+          "ada__text_io__generic_aux__load_integer",
+          "system__val_llu__impl__scan_unsigned",
+          "ada__text_io__generic_aux__check_end_of_field",
+          "ada__text_io__generic_aux__load_integer",
+          "system__val_llu__impl__scan_unsigned",
+          "ada__text_io__generic_aux__check_end_of_field",
+          "system__img_llu__impl__set_image_unsigned",
+          "ada__text_io__put__4",
+          "mj__solver_kernels__add_long_row",
+          "__gnat_rcheck_CE_Index_Check",
+          "__gnat_rcheck_CE_Index_Check",
+          "__gnat_rcheck_CE_Index_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_PE_Explicit_Raise"
+        ]
+      },
+      "mj__solver_kernels__row_bounds__copy_row": {
+        "instructions": 53,
+        "vaddpd": 0,
+        "vmulpd": 0,
+        "vaddsd": 0,
+        "vmulsd": 0,
+        "vmaxsd": 1,
+        "vmaxpd": 0,
+        "call_targets": [
+          "__gnat_rcheck_CE_Index_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check"
+        ]
+      },
+      "mj__solver_kernels__add_long_row": {
+        "instructions": 349,
+        "vaddpd": 2,
+        "vmulpd": 2,
+        "vaddsd": 9,
+        "vmulsd": 9,
+        "vmaxsd": 0,
+        "vmaxpd": 0,
+        "call_targets": [
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Length_Check",
+          "__gnat_rcheck_CE_Index_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Overflow_Check",
+          "__gnat_rcheck_CE_Range_Check",
+          "__gnat_rcheck_CE_Overflow_Check"
+        ]
+      }
+    },
+    "scope": "Strict release/LTO standalone numeric harness only; final certified procedure is inlined in main. No integrated movement call path or elapsed-time claim. Compiler diagnostic to decide whether the new scalar-origin loop needs the already-proved zero-origin packed-window structure."
+  },
+  "scope": "Final1524 dedicated child certifies exact packed-row FP update, full frame, Work domain and propagated output bound. Copy_Row certifies exact copy and exact max-abs with one traversal, full array origins and null rows, no initial Target value restriction beyond existing initialized scratch. Both units close fully on both references without warnings; original production owners unchanged. Native C17 numeric corpus passes both profiles with original fallback and no case filtering. Not integrated into actual dynamics, no integrated performance claim."
+}
