@@ -1038,3 +1038,60 @@ global factorization functional correctness and overall C parity remain open.
 
 [Current PC profile, exact endpoint checks and opcode evidence](evidence/20261027-current-pc-profile-r1314/README.md).
 [Actual row adoption, all proof/numeric scopes and regression followup](evidence/20261027-row-input-bound-adoption-r1321/README.md).
+
+## Row reduction rejected; vectorized sliding remains private
+
+The1323 modular rejection-OR control closes both-reference Add_Row37, complete
+kernel231 and solver caller MINIMUM86, with all14 numerical groups passing. Its
+six-replica target9 movement comparison nevertheless makes hinge about3% slower
+and free_ball3.0-3.5% slower, with all six intervals above1. Chain establishes no
+compensating gain. The control is rejected; runtime remains commit389ecb827.
+
+A separate ordinary checked parameter-sliding helper preserves the public full
+array domains and original inline policy. Its1348 executable generates vector
+adds where baseline has none, and the1354 full-slice successor passes7374 native
+exact-bit cases per standard profile. The1348 nested scalar minimum closes30, but
+the original-origin acceptance/component bridge remains open. Available failed
+flow/build controls and unproved assertions are retained; neither SIMD codegen
+nor a post proved under unproved assertions establishes functional completion or
+speedup. Full-unit successor proofs and movement qualification remain pending.
+[Exact controls, regression decision and open origin-bridge proof scopes](evidence/20261027-row-reduction-and-sliding-controls-r1360/README.md).
+
+## Checked sliding proved; movement adoption deferred
+
+The1384 successor closes the original-origin bridge with a Static ghost expected
+row and a separately proved array-domain congruence lemma. Both references close
+public wrapper11, private sliding caller28, work lemma16 and the complete kernel282;
+the actual inertia solver caller MINIMUM86 closes too. Counts are not additive,
+and global factorization/state/dynamics proofs remain open. All14 numerical groups,
+both-reference/profile integration,66306 row cases/profile and7374 exact native
+row-bit cases per candidate profile pass. Original public domains, FP order,
+rejection/frame behavior and existing inline policy remain.
+
+Final code generation contains vector adds, but six-replica target9 measurements
+show hinge4.3-4.6% slower with intervals above1. Free_ball median gains0.9-1.3% have
+intervals including1; chain gains0.2-0.6% have two intervals below1 and one including1.
+This does not establish sufficient integrated benefit to adopt the regression.
+Runtime therefore remains389ecb827; no repeat/full30 acceptance or percentage
+average is claimed. A future row-envelope theorem remains open, and the checked
+local-view renaming probe is not writable Ada. Neither is trusted or adopted.
+[Complete proof scopes, raw mixed timings and retained unsuccessful controls](evidence/20261027-proved-sliding-controls-r1420/README.md).
+
+## Non-nested row compiler controls: no runtime adoption
+
+Ordinary inline hints alone retain the row call. A non-nested flat helper with
+ordinary checked subtype conversions in inout actuals and a proved equal-bound
+shape guard eliminates that call while retaining native caller SIMD. All final
+origin/acceptance assertions close: both references prove caller31, wrapper11,
+complete kernels284 and inertia solver CALLER MINIMUM86, with reviewed inherited
+warnings. All14 numerical groups, both-reference/profile integration,66306 row
+cases/profile and7374 native exact-bit cases/profile pass. Public domains, ordered
+FP arithmetic, complete-row rejection and existing forced-inline policy remain.
+
+Six-replica target9 nevertheless shows hinge2.6-2.9% slower with intervals above1;
+free_ball slowdown medians1.0-2.3% have intervals including1. Chain gains0.6-1.0%
+have two intervals below1 and one including1. The control is not adopted; no
+repeat/full30 acceptance, percentage average or causal call/width/layout cost
+claim follows. Actual runtime remains389ecb827. Whole dynamics/state Gold, global
+factorization equations, full port/latest migration and C parity remain open.
+[Compiler decisions, exact current-source proof scopes and all mixed timings](evidence/20261027-flat-row-compiler-controls-r1478/README.md).

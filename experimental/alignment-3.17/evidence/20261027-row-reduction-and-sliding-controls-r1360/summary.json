@@ -1,0 +1,630 @@
+{
+  "decision": {
+    "passed": true,
+    "adopted": false,
+    "decision": "reject measured performance regression",
+    "qualification_sha256": "a5aa8c598f8ca68e657f77be295743be60ec42516415047f6aa9fdc650c56661",
+    "timing_result_sha256": "bc7d49830e2de9223df68854876aa58f333405ba14ea77efbdef7907c8721208",
+    "records": [
+      {
+        "model": "hinge_motor",
+        "state": 0,
+        "current_over_baseline": {
+          "median": 1.0298067558562713,
+          "ci95": [
+            1.026513211569205,
+            1.0399175695456713
+          ]
+        },
+        "current_over_c": {
+          "median": 1.0392408518568437,
+          "ci95": [
+            1.0346828533055963,
+            1.0502422641955902
+          ]
+        }
+      },
+      {
+        "model": "hinge_motor",
+        "state": 1,
+        "current_over_baseline": {
+          "median": 1.0307071451982956,
+          "ci95": [
+            1.0278743506891899,
+            1.0390323498515395
+          ]
+        },
+        "current_over_c": {
+          "median": 1.0416429336013038,
+          "ci95": [
+            1.037831203881099,
+            1.0496499717487269
+          ]
+        }
+      },
+      {
+        "model": "hinge_motor",
+        "state": 2,
+        "current_over_baseline": {
+          "median": 1.029955072508264,
+          "ci95": [
+            1.0273085426220319,
+            1.0387574881587918
+          ]
+        },
+        "current_over_c": {
+          "median": 1.0411429543607367,
+          "ci95": [
+            1.038662233655254,
+            1.0490259830307218
+          ]
+        }
+      },
+      {
+        "model": "free_ball",
+        "state": 0,
+        "current_over_baseline": {
+          "median": 1.0353029490616623,
+          "ci95": [
+            1.0103408712359905,
+            1.0637914503626824
+          ]
+        },
+        "current_over_c": {
+          "median": 1.5652557420515498,
+          "ci95": [
+            1.523729329310416,
+            1.5988960799806602
+          ]
+        }
+      },
+      {
+        "model": "free_ball",
+        "state": 1,
+        "current_over_baseline": {
+          "median": 1.0298546489106202,
+          "ci95": [
+            1.0095703484826362,
+            1.055634503650401
+          ]
+        },
+        "current_over_c": {
+          "median": 1.559226020813011,
+          "ci95": [
+            1.5209661927327163,
+            1.6006071017465493
+          ]
+        }
+      },
+      {
+        "model": "free_ball",
+        "state": 2,
+        "current_over_baseline": {
+          "median": 1.0342113928931986,
+          "ci95": [
+            1.0139562440080574,
+            1.067496443851174
+          ]
+        },
+        "current_over_c": {
+          "median": 1.5569255328481517,
+          "ci95": [
+            1.5282735557989617,
+            1.6056240541959386
+          ]
+        }
+      },
+      {
+        "model": "chain_24",
+        "state": 0,
+        "current_over_baseline": {
+          "median": 1.01145351010755,
+          "ci95": [
+            0.9987141665697301,
+            1.0784591320260315
+          ]
+        },
+        "current_over_c": {
+          "median": 1.8398603981116,
+          "ci95": [
+            1.8203554494312706,
+            1.958067357038262
+          ]
+        }
+      },
+      {
+        "model": "chain_24",
+        "state": 1,
+        "current_over_baseline": {
+          "median": 1.0082817469841996,
+          "ci95": [
+            0.9959884679214194,
+            1.0853534292786373
+          ]
+        },
+        "current_over_c": {
+          "median": 1.8353261902909117,
+          "ci95": [
+            1.8170616479272785,
+            1.9730940582436225
+          ]
+        }
+      },
+      {
+        "model": "chain_24",
+        "state": 2,
+        "current_over_baseline": {
+          "median": 1.0060646001859972,
+          "ci95": [
+            1.000474665611694,
+            1.0866539398820065
+          ]
+        },
+        "current_over_c": {
+          "median": 1.8313317734743269,
+          "ci95": [
+            1.8230110350823334,
+            1.978045095601522
+          ]
+        }
+      }
+    ],
+    "scope": "Private1323 has both-reference minimum37/whole231/caller-minimum86 closure, three retained kernel warnings (deleted count invariant retires exactly one old warning), twelve unchanged caller warnings and full14 numerical gates. Six identical executable replicas per role, nine supported movement cases, normal C SIMD and strict unchanged flags. Hinge approximately3percent slower and free_ball3.0-3.5percent slower, each state interval above1. Chain medians0.6-1.1percent slower; two intervals include1 and one lower1.00047. No adoption, full30 or repeat acceptance: these representative integrated target cases show regressions and no compensating gain. Removing a static instruction/overflow branch does not establish runtime benefit or causal attribution. Actual repository runtime remains commit389ecb827. Vectorized checked-sliding successor remains private with origin-bridge proofs pending; no full port, dynamics Gold or C parity claim."
+  },
+  "qualification": {
+    "passed": true,
+    "adopted": false,
+    "proofs": {
+      "317/minimum": {
+        "semantic_checks": 37,
+        "inherited_warnings": 0,
+        "result": "/var/tmp/sparkling-row-rejection-min317-r1324-20261027/results.json",
+        "sha256": "b1455443a37d3461bd400d397837b950372e0d803cb625f38de13732f663331d"
+      },
+      "317/whole_kernel": {
+        "semantic_checks": 231,
+        "inherited_warnings": 3,
+        "result": "/var/tmp/sparkling-row-rejection-unit317-r1329-20261027/results.json",
+        "sha256": "ea269beec489e5ebc2e611867d04378ca7f0d72fc099fbbde01661355d895b2b"
+      },
+      "317/solver_caller_minimum": {
+        "semantic_checks": 86,
+        "inherited_warnings": 12,
+        "result": "/var/tmp/sparkling-row-rejection-caller317-r1331-20261027/results.json",
+        "sha256": "3999e0d5edefc626185c497f2dd9e9d0f3465a0b50acbe3b2fc710fe6a986769"
+      },
+      "314/minimum": {
+        "semantic_checks": 37,
+        "inherited_warnings": 0,
+        "result": "/var/tmp/sparkling-row-rejection-min314-r1328-20261027/results.json",
+        "sha256": "0d9ac5e71652e587ffc953d4b7251b63a5cbd80def795900fa7393ef0d92ef56"
+      },
+      "314/whole_kernel": {
+        "semantic_checks": 231,
+        "inherited_warnings": 3,
+        "result": "/var/tmp/sparkling-row-rejection-unit314-r1330-20261027/results.json",
+        "sha256": "a5fec2d068f56de2cfd679f448c579d11b89d11332fc346ecc051d457b754f66"
+      },
+      "314/solver_caller_minimum": {
+        "semantic_checks": 86,
+        "inherited_warnings": 12,
+        "result": "/var/tmp/sparkling-row-rejection-caller314-r1336-20261027/results.json",
+        "sha256": "a831527ffde966a65c4e5a2135b212f20c72f73c42bfbaf47d15258acb2ad69e"
+      }
+    },
+    "numerics": {
+      "317": {
+        "result": "/var/tmp/sparkling-row-rejection-numerical-r1332-20261027/results.json",
+        "sha256": "e5155a639d910cf2c52ed1a77b608e15a40d309139e6fe26b98e913cc60ec49f"
+      },
+      "314": {
+        "result": "/var/tmp/sparkling-row-rejection-numerical314-r1333-20261027/results.json",
+        "sha256": "dd2f9cddc5d017713743aa3123231fd64a05230028b1f3117ec40b1b287eb885"
+      }
+    },
+    "bits_result_sha256": "1e84039397be3bdbabebb2301f72b548100430162a22a1d9994db9c5246791a3",
+    "rows_result_sha256": "5c43f6a27243153b3f0a9ecd877d8368c45afb29b6c988b6bf9a039ec923473a",
+    "gates_result_sha256": "937295ee22a242e35e6719a8771dcae4e0cd58731372981ef39869e32049f4e9",
+    "build_sha256": "de8bd4a3d097b78ce7097be221b80ac775839404fe08a0ee2ef0b5b46fa3c26d",
+    "scope": "Private1323 Add_Row uses the existing modular integer rejection OR instead of a checked Int64 count. Original public API/Pre/Post, arbitrary/null-origin domains, FP expression, complete-row updates and rejected outputs unchanged. Both reference minimum, complete kernel and solver caller minimum checked with inherited warnings only. Both-profile/reference integration,14 numerical groups,66306 row cases/profile and7374 exact native bits/role/profile. This qualifies isolated six-replica movement measurements only: no speedup, adoption, full dynamics Gold, complete port or C parity claim."
+  },
+  "sliding_proofs": {
+    "initial_flow": {
+      "result": "/var/tmp/sparkling-row-zero-min317-r1343-20261027/results.json",
+      "sha256": "45d280243c6a698802f8cc1bef82b3afd2acd97465904f03164053920b0d0aa1",
+      "exit": 1,
+      "semantic_closed": false,
+      "checks": 2,
+      "open": [
+        {
+          "check_tree": {},
+          "col": 14,
+          "entity": 2,
+          "file": "mj-solver_kernels.adb",
+          "how_proved": "flow",
+          "line": 37,
+          "message": {
+            "text": "constant with variable input \"Last\" is referenced in Post but missing from the Global"
+          },
+          "msg_id": 2,
+          "rule": "EMPTY_TAG",
+          "severity": "error",
+          "unproved_status": {
+            "status": "unknown"
+          }
+        }
+      ]
+    },
+    "nested_minimum": {
+      "result": "/var/tmp/sparkling-row-zero-update317-r1345-20261027/results.json",
+      "sha256": "4c9faef760847acffc05ceeef786e14f5fd57735b3a82820f6720e9bcc12c449",
+      "exit": 0,
+      "semantic_closed": true,
+      "checks": 30,
+      "open": []
+    },
+    "initial_origin_post": {
+      "result": "/var/tmp/sparkling-row-zero-outer317-r1347-20261027/results.json",
+      "sha256": "4f63b796ebca0fc42ace47a29b2f62eb94e625e8e72b1f7e48223061d89fb561",
+      "exit": 1,
+      "semantic_closed": false,
+      "checks": 15,
+      "open": [
+        {
+          "check_col": 14,
+          "check_file": "mj-solver_kernels.ads",
+          "check_line": 31,
+          "check_tree": [
+            {
+              "proof_attempts": {
+                "CVC5": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "Z3": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "altergo": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                }
+              },
+              "transformations": {
+                "split_conj": [
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Valid",
+                        "steps": 1599,
+                        "time": 0.04743
+                      }
+                    },
+                    "transformations": {}
+                  },
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Unknown\n(unknown + incomplete)",
+                        "steps": 7935,
+                        "time": 1.0557
+                      },
+                      "Z3": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      },
+                      "altergo": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      }
+                    },
+                    "transformations": {}
+                  },
+                  {
+                    "proof_attempts": {},
+                    "transformations": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "col": 14,
+          "entity": 1,
+          "file": "mj-solver_kernels.ads",
+          "how_proved": "prover",
+          "line": 31,
+          "message": {
+            "text": "postcondition might fail"
+          },
+          "msg_id": 15,
+          "rule": "VC_POSTCONDITION",
+          "severity": "medium",
+          "unproved_status": {
+            "memory": false,
+            "status": "limit",
+            "steps": false,
+            "time": true
+          }
+        }
+      ]
+    },
+    "external_helper_minimum": {
+      "result": "/var/tmp/sparkling-row-zero-helper-min-r1350-20261027/results.json",
+      "sha256": "1efd87335fa9e3eb907994037b35f00f9aa39ae6a550d66d4cf3c15ec11cf130",
+      "exit": 0,
+      "semantic_closed": true,
+      "checks": 30,
+      "open": []
+    },
+    "split_bridge": {
+      "result": "/var/tmp/sparkling-row-zero-bridge-min-r1353-20261027/results.json",
+      "sha256": "8ae43307d546022ed3fe2aa975d3c8ce2b0cc6e1e6ec0559c4f4a9876fe0ba61",
+      "exit": 1,
+      "semantic_closed": false,
+      "checks": 23,
+      "open": [
+        {
+          "check_col": 32,
+          "check_file": "mj-solver_kernels.adb",
+          "check_line": 86,
+          "check_tree": [
+            {
+              "proof_attempts": {
+                "CVC5": {
+                  "result": "Unknown\n(unknown + incomplete)",
+                  "steps": 20061,
+                  "time": 1.76502
+                },
+                "Z3": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "altergo": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                }
+              },
+              "transformations": {
+                "split_conj": [
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Valid",
+                        "steps": 1638,
+                        "time": 0.049103
+                      }
+                    },
+                    "transformations": {}
+                  },
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Unknown\n(unknown + incomplete)",
+                        "steps": 7967,
+                        "time": 1.06281
+                      },
+                      "Z3": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      },
+                      "altergo": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      }
+                    },
+                    "transformations": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "col": 32,
+          "entity": 1,
+          "file": "mj-solver_kernels.adb",
+          "how_proved": "prover",
+          "line": 86,
+          "message": {
+            "text": "assertion might fail"
+          },
+          "msg_id": 8,
+          "rule": "VC_ASSERT",
+          "severity": "medium",
+          "unproved_status": {
+            "memory": false,
+            "status": "limit",
+            "steps": false,
+            "time": true
+          }
+        },
+        {
+          "check_col": 32,
+          "check_file": "mj-solver_kernels.adb",
+          "check_line": 87,
+          "check_tree": [
+            {
+              "proof_attempts": {
+                "CVC5": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "Z3": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "altergo": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                }
+              },
+              "transformations": {}
+            }
+          ],
+          "col": 9,
+          "entity": 1,
+          "file": "mj-solver_kernels.adb",
+          "how_proved": "prover",
+          "line": 88,
+          "message": {
+            "text": "assertion might fail, cannot prove Target (I) = Add_Product (Before (I), Source (Source'First + (I - Target'First)), Multiplier)"
+          },
+          "msg_id": 16,
+          "rule": "VC_ASSERT",
+          "severity": "medium",
+          "unproved_status": {
+            "memory": false,
+            "status": "limit",
+            "steps": false,
+            "time": true
+          }
+        }
+      ]
+    },
+    "full_slice_bridge": {
+      "result": "/var/tmp/sparkling-row-zero-slices-min-r1355-20261027/results.json",
+      "sha256": "8784c17022ca8cbeaf9853541e5651f8f5a378755a26c3143e724c1ef4a769bc",
+      "exit": 1,
+      "semantic_closed": false,
+      "checks": 17,
+      "open": [
+        {
+          "check_col": 14,
+          "check_file": "mj-solver_kernels.adb",
+          "check_line": 33,
+          "check_tree": [
+            {
+              "proof_attempts": {
+                "CVC5": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "Z3": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                },
+                "altergo": {
+                  "result": "Timeout",
+                  "steps": 1,
+                  "time": 30
+                }
+              },
+              "transformations": {
+                "split_conj": [
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Valid",
+                        "steps": 3581,
+                        "time": 0.087196
+                      }
+                    },
+                    "transformations": {}
+                  },
+                  {
+                    "proof_attempts": {
+                      "CVC5": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      },
+                      "Z3": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      },
+                      "altergo": {
+                        "result": "Timeout",
+                        "steps": 1,
+                        "time": 30
+                      }
+                    },
+                    "transformations": {}
+                  },
+                  {
+                    "proof_attempts": {},
+                    "transformations": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "col": 14,
+          "entity": 1,
+          "file": "mj-solver_kernels.adb",
+          "how_proved": "prover",
+          "line": 33,
+          "message": {
+            "text": "postcondition might fail"
+          },
+          "msg_id": 17,
+          "rule": "VC_POSTCONDITION",
+          "severity": "medium",
+          "unproved_status": {
+            "memory": false,
+            "status": "limit",
+            "steps": false,
+            "time": true
+          }
+        }
+      ]
+    }
+  },
+  "sliding_native_bits": {
+    "result": "/var/tmp/sparkling-row-zero-native-bits-r1356-20261027/results.json",
+    "sha256": "66940247cde224cfa199dcb800794d5e3f2e94e0d4782991686d94f511370561",
+    "cases_per_profile": 7374,
+    "unchanged_baseline_receipts_reused": true
+  },
+  "codegen": {
+    "records": {
+      "baseline": {
+        "binary_sha256": "ddad4bf451f092e089bc336bb774216270373cb72aef00f3c8c6391036bbbc62",
+        "symbols": [
+          "00000000000f5270 <mj__data__inertia_phase__solve_compatible_buffers>:"
+        ],
+        "vaddpd": 0,
+        "overflow_branches": 6
+      },
+      "current": {
+        "binary_sha256": "13d163d43a28f11fbb76d2e0871afa92a9914888d981b6ea520bc3a9bc3cfaeb",
+        "symbols": [
+          "000000000005fec0 <mj__solver_kernels__add_slid_row>:",
+          "00000000000f54b0 <mj__data__inertia_phase__solve_compatible_buffers>:"
+        ],
+        "vaddpd": 2,
+        "overflow_branches": 4
+      }
+    },
+    "scope": "Static call path diagnostics only. Nested Update minimum closes30, but original complete arbitrary-origin row postcondition remains unclosed in the predecessor1347. No functional qualification, speedup, universal C equivalence or adoption follows from SIMD code generation."
+  },
+  "next_work": {
+    "status": "private; original-origin functional bridge remains open",
+    "actual_runtime": "Git389ecb827, no adoption",
+    "first_candidate": "1323 rejected after target1337: hinge/free regressions, no compensating gain",
+    "current_sources": "/var/tmp/sparkling-row-zero-slices-r1354-20261027",
+    "minimum": "/var/tmp/sparkling-row-zero-slices-min-r1355-20261027/results.json",
+    "diagnosis": "Full-slice call still leaves original full Add_Slid_Row post open.1353 split assertions independently identify both acceptance Work_Array rebasing and exact component rebasing. Its final post is proved only under those two unproved assertions and is not completion. Nested Update30 closes on1348, whose unchanged helper runtime first demonstrates2 vaddpd versus baseline0; latest1354 passes7374 native bit cases in both profiles, with exact unchanged-baseline receipt reuse. No performance or full-unit proof for the vector successor.",
+    "next_steps": [
+      "Prove explicit array-origin translation lemmas / ghost prefix model for both rejection quantifier and component expression; preserve arbitrary/null origins and theoretical2**31 length. Do not narrow domains or introduce assumptions/suppression/new forced inline.",
+      "Keep original public Add_Row Inline_Always wrapper; ordinary sliding helper must remain outside it (1346 GNU compiler rejects nested non-forced-inline parent).",
+      "After scalar/origin minima close, fresh complete kernel and Solve_Compatible_Buffers caller-minimum proofs for both refs; verify remaining source-bound inherited warnings and exact numeric/row gates.",
+      "Build latest exact movement source; preserve normal native C3.17 SIMD/LTO, original strict FP flags and existing solver-file256 preference. Only isolated six-replica integrated comparisons, repeat/full on potential gain, determine adoption.",
+      "Complete port/latest-reference migration, whole-state/dynamics functional proof and global C parity remain open."
+    ],
+    "scope": "Next work record only; not a proof or completion claim."
+  },
+  "scope": "No runtime adoption. Rejected checked-count-to-modular-OR control is fully qualified but slower in representative integrated movement. Separate checked zero-origin sliding shows SIMD in predecessor1348 and exact-bit comparisons for1354; original-origin functional post remains open. No complete successor Gold, speedup, migration, full port or C parity claim."
+}
