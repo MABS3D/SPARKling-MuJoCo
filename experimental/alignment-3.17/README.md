@@ -965,3 +965,76 @@ does not establish elimination of the hinge slowdown. Its C17 Fill51 proof and
 source bridge are explicit; no fresh whole-unit source equality is inferred from
 an unchanged mathematical subunit. Neither control has a repeat or full30 run.
 [Mixed performance, exact proof scopes and corrected symbol-count diagnostic](evidence/20261026-inertia-component-controls-r1210/README.md).
+
+## Latest local runtime: Direct inertia products in compact mass and RNE, 27 October 2026
+
+The1294 adoption adds a Direct child with the exact parent Multiply as its
+functional model. Former scalar subtype bounds become proved Static facts. The
+existing compact row caller uses it, and RNE uses it for both inertia products in
+actual C3.17 mj_rne order. Parent math specifications/bodies, complete admitted
+input domains, rejection checks and zeros, dense small-model mass route and the
+existing Nv<3 selection remain. No new size threshold, forced inline, assumption
+or suppression is added. Only four runtime owners change.
+
+Both references close Multiply35, whole Direct122, whole Compact501 and final
+Try_Body_Force30/whole RNE163. Separate congruence minima15/78/16 explain the RNE
+composition; counts are not additive. Six inherited compact warnings are reviewed
+against matching rules, columns and source statements. A900s compact attempt is
+preserved as incomplete; incremental continuation on identical sources validates
+cached tasks and produces the complete501-check report. The unrelated final RNE
+body delta preserves all eight/eighteen source inputs of Direct/Compact dependency
+closures, explicitly recorded for proof reuse. This does not claim equal full
+project manifests across that delta. Fresh actual C14/C17 snapshots match final
+1274 completely, with entry-order normalization after every digest is checked.
+
+Both full13-group numerical qualifications, activation432/integration1152 per
+reference/profile, and native exact-bit controls6864 inertia-vector/6794 RNE body
+cases per role/profile pass. Both RNE rejection branches remain covered. C's test
+wrapper mirrors the Ada rejection policy for comparison; C itself has no such
+rejection. Numerical cases do not establish universal C equivalence or ideal-real
+accuracy, and these unit proofs do not close whole dynamics/state/memory Gold.
+
+Four six-replica runs retain all raw supported movement timings: compact target9,
+RNE target9, combined full30 and an independent combined target9. Compact alone
+has no demonstrated reproducible gain; RNE's chain target improves0.9-2.0% with
+all three intervals below1. Combined full-run chain medians improve1.4-1.9% but
+intervals include1. The independent repeat improves chain2.5-2.8% and free_ball
+3.2-3.6%, every interval below1. Other models retain their uncertainty; no average
+of percentages or absence-of-regressions guarantee is inferred. Median chain
+still takes1.85-1.88 times C and free_ball1.53-1.56; hinge remains about2.2-3.3%
+slower than C. Full port, migration, dynamics Gold and overall C parity remain open.
+
+[Earlier private controls, failed obligations and host-interrupted attempts](evidence/20261027-inertia-projection-controls-r1295/README.md).
+[Actual adoption, exact proof scopes/source bridges and all raw comparisons](evidence/20261027-compact-rne-adoption-r1296/README.md).
+
+## Latest local runtime: proved Add_Row operand bounds, 27 October 2026
+
+The1319 adoption changes only Solver_Kernels.Add_Row from actual1294. The runtime
+checked Add_Product call becomes the identical base-Real expression; former input
+and result subtype limits remain proved Static facts. Public API/Pre/Post, all
+admitted origins/null shapes, FP order, complete-row rejection and the existing
+integer reduction/compiler workaround remain. No threshold, forced inline,
+assumption, suppression or unchecked view is added.
+
+Both references close Add_Row37, complete solver kernels231 and the actual solver
+CALLER MINIMUM86; C17 Add_Prefix_Row14 also closes. Four/twelve inherited warnings
+match prior diagnostics and identical statements. Counts are not additive, and the
+caller scope does not prove global factorization equations or the full inertia
+phase. All14 numerical groups, both-profile/reference activation432/integration1152,
+66306 checked/release row cases per profile and7374 native exact-bit row cases per
+baseline/candidate/profile pass. Fresh actual C14/C17 source contents match all
+qualified inputs. Prior Direct122/Compact501/RNE163 proof reuse has explicit
+unchanged eight/eighteen/twelve-source dependency closures; full project manifests
+across the unrelated solver-body delta are not mislabeled identical.
+
+Target9, independent repeat9 and full30 use six replicas and normal native C3.17.
+All nine chain24 state/run intervals are below1:1.6-1.8% lower targeted/repeat time,
+1.3-1.5% lower full-run time. Full30 shows ball1.6-1.8% slower with intervals above1;
+a dedicated ball/spatial_ball followup6 has ball medians near unchanged and wide
+intervals including1. Both results are retained; no absence-of-regressions guarantee
+or percentage average follows. Full-run chain still takes about1.82 times C and
+ball remains about1.24-1.26 times C. Complete port/migration, full dynamics Gold,
+global factorization functional correctness and overall C parity remain open.
+
+[Current PC profile, exact endpoint checks and opcode evidence](evidence/20261027-current-pc-profile-r1314/README.md).
+[Actual row adoption, all proof/numeric scopes and regression followup](evidence/20261027-row-input-bound-adoption-r1321/README.md).

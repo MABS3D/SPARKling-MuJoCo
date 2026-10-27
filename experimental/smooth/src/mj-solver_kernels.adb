@@ -18,8 +18,23 @@ package body MJ.Solver_Kernels with SPARK_Mode is
       Rejected : Int64 := 0;
    begin
       for I in Target'Range loop
-         Target (I) := Add_Product
-           (Target (I), Source (Source'First + (I - Target'First)), Multiplier);
+         declare
+            Previous : constant Real := Target (I);
+            Operand : constant Real := Source (Source'First + (I - Target'First));
+         begin
+            --  The original Pre and unchanged tail imply these input bounds.
+            --  Keep them proved statically instead of reconverting every scalar.
+            pragma Assert (Static => Previous in Work_Real);
+            pragma Assert (Static => Operand in Work_Real);
+            declare
+               Expected : constant Update_Real :=
+                 Add_Product (Previous, Operand, Multiplier) with Ghost => Static;
+            begin
+               Target (I) := Previous + Operand * Multiplier;
+               pragma Assert (Static => Target (I) = Expected);
+               pragma Assert (Static => Target (I) in Update_Real);
+            end;
+         end;
          --  Count rejected entries: the fused Boolean reduction is miscompiled
          --  by this GNAT/GCC 16 toolchain at complete SIMD blocks. Integer
          --  accumulation retains SIMD and the exact rejection predicate.
