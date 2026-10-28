@@ -1245,3 +1245,64 @@ parity. Raw measurements and unsuccessful proof controls are preserved. The
 production code stays unchanged, and the actual caller's three state and
 configuration obligations, full-port work and C parity remain open.
 [Four-lane sources, complete proofs, numerical checks and raw full-30 results](evidence/20261028-four-lane-copy-proof-and-full30-r1764/README.md).
+
+
+## Static bounds adopted in four smooth math kernels
+
+Apply, Apply_Transpose, Multiply and Rotation now retain their original local
+bounds as proved Static assertions instead of performing 63 redundant subtype
+checks at runtime. All public contracts, required inputs, arithmetic expressions
+and evaluation order are unchanged. Both reference closures close the changed
+Apply68, Apply_Transpose68 and Multiply116 scopes; Rotation157 is reused only
+after checking its exact body, types and dependent contracts. Existing warnings
+remain visible. Full Smooth_Math attempts reach their240-second watchdog without
+a fresh complete report, so whole-unit Gold remains open.
+
+Fresh numerical checks pass both standard profiles/reference closures and all30
+movement endpoints. The three-operation bit corpus passes31,776 admitted cases
+per build in eight profile/reference/role builds; Rotation has its separate14,927
+case corpus. Full30 six-replica integrated diagnostics improve chain_24 by
+3.65–3.88 percent, branches_24 by5.29–5.65 percent and free_ball by2.38–2.91
+percent versus previous Ada, with per-state95-percent intervals below parity.
+Other lower medians whose intervals include parity remain inconclusive. Native
+C is still faster: about1.77x and1.40x Ada/C time on chain_24 and branches_24.
+The final combined change is adopted locally; no full-port parity is claimed.
+
+The same checkpoint preserves complete private Pose_Bounds146 proofs on both
+references and Pose_Rounding34 on3.17. These do not close the global pose producer
+or remove the Jacobian/external-force scans. Those pose prototypes are unadopted.
+Whole state/dynamics/factorization Gold, latest ABI migration, remaining feature
+coverage and C parity remain unfinished.
+[Exact sources, proof scope, numerical tests and raw integrated measurements](evidence/20261028-static-math-and-pose-bounds-r1859/README.md).
+
+
+## Static bounds adopted in dynamics primitives
+
+The next local change removes 29 redundant temporary subtype checks in ten
+Smooth_Dynamics bodies. Two private helper return bounds become equivalent
+proved explicit postconditions; all public signatures, return subtypes,
+contracts and required domains remain unchanged. Each of the ten scopes closes
+on both reference closures with zero warnings. Both complete-unit attempts time
+out at 240 seconds without fresh complete reports, so whole-unit closure and
+whole state/dynamics/factorization Gold remain open.
+
+Eight standard profile/reference/role builds pass 34,304 exact-input-bit cases.
+Both-reference/profile activation and supported integration suites and all 30
+movement endpoints pass. Six-replica full-30 timing compares against the already
+adopted 1838 math change: incremental time reductions are 0.91–1.26 percent on
+chain_24, 1.74–2.09 percent on branches_24 and 5.32–6.19 percent on free, with all
+per-state intervals below previous Ada. Ball and free_ball remain inconclusive.
+Direct Ada/C time ratios remain about 1.75, 1.38 and 1.21 respectively; full-port
+parity is not achieved. This incremental change is adopted locally.
+
+Fresh flat CPU sampling identifies Solve_Acceleration, the compatible solver
+and Add_Long_Row as candidate hot functions. Many timer overruns limit precision;
+fractions are not exact phase costs or causal slowdown percentages. All 10,000
+profiled endpoints per role equal the corresponding uninstrumented output.
+Disassembly places the two hottest current PCs in the final numerical range
+check of an external-force contribution; the enclosing function also includes
+other inlined work. Inspect projection guards and compact-row paths against C
+before selecting another primitive optimization. No force scan is removed by
+this profiling work. Full feature coverage and coordinated latest ABI migration
+also remain unfinished.
+[Exact sources, scoped proofs, numerical tests, raw timing and profile evidence](evidence/20261028-static-dynamics-primitives-r1893/README.md).

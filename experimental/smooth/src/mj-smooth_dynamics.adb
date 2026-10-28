@@ -1,65 +1,90 @@
 package body MJ.Smooth_Dynamics with SPARK_Mode is
    procedure Quaternion_Bounds (Q : Quaternion) is null;
    subtype Config_Result is Real range -1.0e12 .. 1.0e12;
-   function Config_Dot (A, B, C, X, Y, Z : Real) return Config_Result
+   function Config_Dot (A, B, C, X, Y, Z : Real) return Real'Base
      with Global => null,
      Pre => A in -16.0 .. 16.0 and then B in -16.0 .. 16.0 and then C in -16.0 .. 16.0
        and then X in -Max_Val .. Max_Val and then Y in -Max_Val .. Max_Val
        and then Z in -Max_Val .. Max_Val,
-     Post => Config_Dot'Result = (A * X + B * Y) + C * Z
+     Post => Config_Dot'Result in Config_Result and then Config_Dot'Result = (A * X + B * Y) + C * Z
    is
       subtype Product is Real range -2.0e11 .. 2.0e11;
       subtype Pair is Real range -4.0e11 .. 4.0e11;
-      AX : constant Product := A * X;
-      BY : constant Product := B * Y;
-      CZ : constant Product := C * Z;
-      XY : constant Pair := AX + BY;
+      AX : constant Real'Base := A * X;
+      BY : constant Real'Base := B * Y;
+      CZ : constant Real'Base := C * Z;
+      XY : constant Real'Base := AX + BY;
    begin
-      return XY + CZ;
+      pragma Assert (Static => AX in Product);
+      pragma Assert (Static => BY in Product);
+      pragma Assert (Static => CZ in Product);
+      pragma Assert (Static => XY in Pair);
+      declare
+         Result : constant Real'Base := XY + CZ;
+      begin
+         pragma Assert (Static => Result in Config_Result);
+         return Result;
+      end;
    end Config_Dot;
    function Apply_Config (R : Matrix; V : Vector) return Vector is
-      X : constant Config_Result := Config_Dot (R (0, 0), R (0, 1), R (0, 2), V (0), V (1), V (2));
-      Y : constant Config_Result := Config_Dot (R (1, 0), R (1, 1), R (1, 2), V (0), V (1), V (2));
-      Z : constant Config_Result := Config_Dot (R (2, 0), R (2, 1), R (2, 2), V (0), V (1), V (2));
+      X : constant Real'Base := Config_Dot (R (0, 0), R (0, 1), R (0, 2), V (0), V (1), V (2));
+      Y : constant Real'Base := Config_Dot (R (1, 0), R (1, 1), R (1, 2), V (0), V (1), V (2));
+      Z : constant Real'Base := Config_Dot (R (2, 0), R (2, 1), R (2, 2), V (0), V (1), V (2));
       Reference : constant Vector := Apply (R, V) with Ghost => Static;
    begin
+      pragma Assert (Static => X in Config_Result);
+      pragma Assert (Static => Y in Config_Result);
+      pragma Assert (Static => Z in Config_Result);
       pragma Assert (Static => Reference (0) = X);
       pragma Assert (Static => Reference (1) = Y);
       pragma Assert (Static => Reference (2) = Z);
       return [X, Y, Z];
    end Apply_Config;
    subtype Cross_Result is Real range -4.0e190 .. 4.0e190;
-   function Cross_Component (A, B, C, D : Real) return Cross_Result
+   function Cross_Component (A, B, C, D : Real) return Real'Base
      with Global => null,
      Pre => A in -Work_Limit .. Work_Limit and then C in -Work_Limit .. Work_Limit
        and then B in -1.0e130 .. 1.0e130 and then D in -1.0e130 .. 1.0e130,
-     Post => Cross_Component'Result = A * B - C * D
+     Post => Cross_Component'Result in Cross_Result and then Cross_Component'Result = A * B - C * D
        and then (if B in -Work_Limit .. Work_Limit and then D in -Work_Limit .. Work_Limit
          then Cross_Component'Result in -4.0e120 .. 4.0e120)
    is
       subtype Product is Real range -2.0e190 .. 2.0e190;
-      AB : constant Product := A * B;
-      CD : constant Product := C * D;
+      AB : constant Real'Base := A * B;
+      CD : constant Real'Base := C * D;
    begin
-      return AB - CD;
+      pragma Assert (Static => AB in Product);
+      pragma Assert (Static => CD in Product);
+      declare
+         Result : constant Real'Base := AB - CD;
+      begin
+         pragma Assert (Static => Result in Cross_Result);
+         return Result;
+      end;
    end Cross_Component;
    function Cross_Local (A, B : Vector) return Vector is
-      X : constant Cross_Result := Cross_Component (A (1), B (2), A (2), B (1));
-      Y : constant Cross_Result := Cross_Component (A (2), B (0), A (0), B (2));
-      Z : constant Cross_Result := Cross_Component (A (0), B (1), A (1), B (0));
+      X : constant Real'Base := Cross_Component (A (1), B (2), A (2), B (1));
+      Y : constant Real'Base := Cross_Component (A (2), B (0), A (0), B (2));
+      Z : constant Real'Base := Cross_Component (A (0), B (1), A (1), B (0));
       Reference : constant Vector := Cross (A, B) with Ghost => Static;
    begin
+      pragma Assert (Static => X in Cross_Result);
+      pragma Assert (Static => Y in Cross_Result);
+      pragma Assert (Static => Z in Cross_Result);
       pragma Assert (Static => Reference (0) = X);
       pragma Assert (Static => Reference (1) = Y);
       pragma Assert (Static => Reference (2) = Z);
       return [X, Y, Z];
    end Cross_Local;
    function Cross_Transport (A, B : Vector) return Vector is
-      X : constant Cross_Result := Cross_Component (A (1), B (2), A (2), B (1));
-      Y : constant Cross_Result := Cross_Component (A (2), B (0), A (0), B (2));
-      Z : constant Cross_Result := Cross_Component (A (0), B (1), A (1), B (0));
+      X : constant Real'Base := Cross_Component (A (1), B (2), A (2), B (1));
+      Y : constant Real'Base := Cross_Component (A (2), B (0), A (0), B (2));
+      Z : constant Real'Base := Cross_Component (A (0), B (1), A (1), B (0));
       Reference : constant Vector := Cross (A, B) with Ghost => Static;
    begin
+      pragma Assert (Static => X in Cross_Result);
+      pragma Assert (Static => Y in Cross_Result);
+      pragma Assert (Static => Z in Cross_Result);
       pragma Assert (Static => Reference (0) = X);
       pragma Assert (Static => Reference (1) = Y);
       pragma Assert (Static => Reference (2) = Z);
@@ -68,11 +93,15 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
    function Dot_Motion (A, B : Vector) return Dot_Real is
       subtype Product_Real is Real range -2.0e150 .. 2.0e150;
       subtype Pair_Real is Real range -4.0e150 .. 4.0e150;
-      X : constant Product_Real := A (0) * B (0);
-      Y : constant Product_Real := A (1) * B (1);
-      Z : constant Product_Real := A (2) * B (2);
-      XY : constant Pair_Real := X + Y;
+      X : constant Real'Base := A (0) * B (0);
+      Y : constant Real'Base := A (1) * B (1);
+      Z : constant Real'Base := A (2) * B (2);
+      XY : constant Real'Base := X + Y;
    begin
+      pragma Assert (Static => X in Product_Real);
+      pragma Assert (Static => Y in Product_Real);
+      pragma Assert (Static => Z in Product_Real);
+      pragma Assert (Static => XY in Pair_Real);
       return XY + Z;
    end Dot_Motion;
    function Transport_Velocity (Linear, Angular, Offset : Vector) return Vector is
@@ -86,10 +115,13 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
       Transport : constant Vector := Cross_Transport
         (Angular_Velocity, Cross_Local (Angular_Velocity, Offset));
       subtype Partial_Real is Real range -1.0e122 .. 1.0e122;
-      X : constant Partial_Real := Linear_Bias (0) + Local (0);
-      Y : constant Partial_Real := Linear_Bias (1) + Local (1);
-      Z : constant Partial_Real := Linear_Bias (2) + Local (2);
+      X : constant Real'Base := Linear_Bias (0) + Local (0);
+      Y : constant Real'Base := Linear_Bias (1) + Local (1);
+      Z : constant Real'Base := Linear_Bias (2) + Local (2);
    begin
+      pragma Assert (Static => X in Partial_Real);
+      pragma Assert (Static => Y in Partial_Real);
+      pragma Assert (Static => Z in Partial_Real);
       return [X + Transport (0), Y + Transport (1), Z + Transport (2)];
    end Center_Acceleration;
    function Mass_Force (Mass : Nonneg_Tier0; Acceleration : Vector) return Vector is
@@ -109,10 +141,13 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
       R : Matrix; Diagonal : Vector) return Contribution_Real is
       subtype Linear_Real is Real range -2.0e161 .. 2.0e161;
       subtype Partial_Real is Real range -3.0e161 .. 3.0e161;
-      Linear : constant Linear_Real := Mass * Dot_Motion (Li, Lj);
-      Partial : constant Partial_Real := Previous + Linear;
-      Angular : constant Dot_Real := Dot_Motion (Ai, MJ.Smooth_Kernels.Inertia_Times (R, Diagonal, Aj));
+      Linear : constant Real'Base := Mass * Dot_Motion (Li, Lj);
+      Partial : constant Real'Base := Previous + Linear;
+      Angular : constant Real'Base := Dot_Motion (Ai, MJ.Smooth_Kernels.Inertia_Times (R, Diagonal, Aj));
    begin
+      pragma Assert (Static => Linear in Linear_Real);
+      pragma Assert (Static => Partial in Partial_Real);
+      pragma Assert (Static => Angular in Dot_Real);
       return Partial + Angular;
    end Mass_Contribution;
    function Prepared_Mass_Contribution
@@ -120,10 +155,13 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
      return Contribution_Real is
       subtype Linear_Real is Real range -2.0e161 .. 2.0e161;
       subtype Partial_Real is Real range -3.0e161 .. 3.0e161;
-      Linear : constant Linear_Real := Mass * Dot_Motion (Li, Lj);
-      Partial : constant Partial_Real := Previous + Linear;
-      Angular : constant Dot_Real := Dot_Motion (Ai, Inertia_Aj);
+      Linear : constant Real'Base := Mass * Dot_Motion (Li, Lj);
+      Partial : constant Real'Base := Previous + Linear;
+      Angular : constant Real'Base := Dot_Motion (Ai, Inertia_Aj);
    begin
+      pragma Assert (Static => Linear in Linear_Real);
+      pragma Assert (Static => Partial in Partial_Real);
+      pragma Assert (Static => Angular in Dot_Real);
       return Partial + Angular;
    end Prepared_Mass_Contribution;
    function Gravity_Contribution (Previous : Work_Real; Linear, Gravity : Vector)
@@ -131,8 +169,9 @@ package body MJ.Smooth_Dynamics with SPARK_Mode is
    function Bias_Contribution (Previous : Work_Real; Linear, Force, Angular, Torque : Vector)
      return Contribution_Real is
       subtype Partial_Real is Real range -2.0e151 .. 2.0e151;
-      Partial : constant Partial_Real := Previous + Dot_Motion (Linear, Force);
+      Partial : constant Real'Base := Previous + Dot_Motion (Linear, Force);
    begin
+      pragma Assert (Static => Partial in Partial_Real);
       return Partial + Dot_Motion (Angular, Torque);
    end Bias_Contribution;
    function Total_Force (Gravity, Bias, Passive, Actuator : Work_Real; Applied : Tier0_Real)
