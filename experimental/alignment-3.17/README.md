@@ -1173,3 +1173,40 @@ runtime adoption and whole dynamics/factorization Gold remain pending. Productio
 runtime is unchanged. The archive preserves frozen sources, binaries, successful
 proofs and unsuccessful controls with their exact scopes.
 [Certified SIMD and private solver wiring evidence](evidence/20261027-certified-simd-and-solver-wiring-r1624/README.md).
+
+
+## Certified loader and both-reference child units closed; actual caller pending
+
+The1639 private checkpoint closes the exact ordered-FP compact loader66 on both
+references using a transparent row model and proved frame/join helpers. Complete
+certified children close169 without warnings; complete row-bounds children close264
+with documented warnings. The factor-row adapter38, compatible-buffer solver98
+and packed-layout minimum25 close too; counts describe separate scopes.
+
+Both-reference/profile activation/integration, all12 numerical groups,7374 native
+exact-bit rows/profile,66306 original rejection/frame cases/profile and all30
+actual integrated endpoints pass. Qualification has not passed: the actual Solve
+scope exposes SPARK E0007 on a variable-input local array constraint. Corrected
+1652+ constant/framing successors and their open caller proofs are outside this
+checkpoint. Production remains unchanged; no replicated timing, adoption, whole
+inertia/dynamics/state Gold, global factorization, full port or C parity claim.
+[Exact sources, scoped proofs, numerical results and failed controls](evidence/20261027-certified-loader-and-units-r1659/README.md).
+
+
+## Certified callers and replicated diagnostic regressions
+
+The1675 composition and size-exposure helpers close7 and2 checks on both reference
+closures. Actual Solve closes148 checks on each but retains three configuration/
+state frame obligations; this is not whole-caller or dynamics closure. Fresh
+source-bound numerical runs and all30 final endpoints pass, with explicit audits
+for unchanged lower proof scopes and Static ghost-only source differences.
+
+The six-replica target9 and independent repeat9 diagnostics show the private
+certificate prototype slower than published Ada, including about6.9-7.1percent
+on chain24 in the repeat. An isolated certified-child256-width control and an
+independent proved common-index copy control still show chain slowdowns of about
+4.8-5.2percent and4.6-5.1percent respectively. Neither is adopted; no causal cost
+percentage follows from comparing separate runs. All raw measurements, uncertainty,
+failed proofs and exact source/binary bindings are retained. Full state/dynamics
+Gold, full port/latest migration and C parity remain open.
+[Caller scopes, whole284 copy proofs, all diagnostic measurements and profiles](evidence/20261028-certified-callers-and-diagnostic-controls-r1715/README.md).
