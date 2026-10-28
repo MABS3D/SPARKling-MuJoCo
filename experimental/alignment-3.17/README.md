@@ -1210,3 +1210,38 @@ percentage follows from comparing separate runs. All raw measurements, uncertain
 failed proofs and exact source/binary bindings are retained. Full state/dynamics
 Gold, full port/latest migration and C parity remain open.
 [Caller scopes, whole284 copy proofs, all diagnostic measurements and profiles](evidence/20261028-certified-callers-and-diagnostic-controls-r1715/README.md).
+
+## Reproducible baseline and further state proof controls
+
+Rebuilding checkpoint 1319 with the current strict build recipe produces the
+same executable byte for byte, including its text section. All 30 fresh movement
+endpoints still match the published Ada baseline exactly and the original native
+C oracle within its unchanged tolerance. No additional timing comparison of
+those identical executables is needed. This checks build reproducibility for
+that source; it does not exclude compiler or code layout effects between
+different programs.
+
+A new static state-view lemma closes 5 checks on each reference. The normal
+caller experiment closes 153 checks but retains the same three configuration
+and state obligations. Short diagnostic controls and the cancelled preparation
+attempt are retained with their actual source bindings. Earlier separated-solver
+and outlined-helper controls also remain slower and unadopted. Production code,
+whole dynamics proof status and the pending C parity requirement are unchanged.
+[Exact rebuild, proof scopes, numerical checks and diagnostic controls](evidence/20261028-baseline-rebuild-and-state-proof-controls-r1747/README.md).
+
+## Four-lane copy proved; integrated measurements reject adoption
+
+The private packed-copy successor uses four independent maximum accumulators
+under unchanged contracts. Its minimum closes 77 checks and both complete
+Row_Bounds units close 341, with explicit initialization-precision warnings.
+Fresh bit checks pass 12,336 scenarios per standard profile/reference closure;
+activation/integration and all 30 actual movement endpoints pass too.
+
+Six-replica full-30 diagnostic timing does not justify adopting it: free_ball
+is 8.15–8.77 percent slower than published Ada, chain_24 is 6.24–6.90 percent
+slower, and branches_24 is 5.48–5.65 percent slower, with per-state intervals
+above parity. Lower medians on some smaller models have intervals including
+parity. Raw measurements and unsuccessful proof controls are preserved. The
+production code stays unchanged, and the actual caller's three state and
+configuration obligations, full-port work and C parity remain open.
+[Four-lane sources, complete proofs, numerical checks and raw full-30 results](evidence/20261028-four-lane-copy-proof-and-full30-r1764/README.md).
