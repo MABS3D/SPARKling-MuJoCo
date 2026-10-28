@@ -119,3 +119,17 @@ compacted or trimmed.
 
 [Exact directory list, copied partial reports and removal receipt](../experimental/alignment-3.17/evidence/20261026-completed-cache-cleanup-r968/README.md).
 This cleanup changes no numerical algorithm or verification/performance claim.
+
+## Follow-up: exact ZIP duplicates after rotation/group proof work
+
+2026-10-28: fresh full verification passed65 stored archives and all436
+then-current inventory entries before removing35 ignored, untracked raw ZIP
+copies. Every size, SHA-256, stored recipe and Git status was checked again
+immediately before deletion. Removed bytes total4,588,267,819 (about4.27GiB).
+All original ZIPs remain exactly reconstructable through the preserved store.
+Sources, unique proof evidence, active caches, other tasks and toolchains were
+left intact. Windows free bytes measured1,903,661,056 before and6,579,826,688
+after; these are observations alongside concurrent work, not a VHDX compaction
+claim. WSL was not stopped, trimmed or compacted.
+
+[Exact removal list and verification receipt](../experimental/alignment-3.17/evidence/20261028-tight-rotation-bounds-and-group-layout-r2198/README.md).

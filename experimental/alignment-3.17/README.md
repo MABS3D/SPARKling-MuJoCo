@@ -1306,3 +1306,54 @@ before selecting another primitive optimization. No force scan is removed by
 this profiling work. Full feature coverage and coordinated latest ABI migration
 also remain unfinished.
 [Exact sources, scoped proofs, numerical tests, raw timing and profile evidence](evidence/20261028-static-dynamics-primitives-r1893/README.md).
+
+## Private external-force bounds and pose producer proofs
+
+The bounded external-force leaves now have closed local functional/safety
+proofs and exact-bit unit comparisons on both reference closures. The private
+pose chain closes all113 Build_One_Body obligations on each reference, including
+position/center growth and joint-anchor propagation. Existing warnings remain
+visible. These prototypes are not adopted: whole-tree/manifold propagation,
+mocap/state lifecycle and the actual caller preconditions remain open. No new
+production scan is removed and no new performance result is claimed.
+[Exact sources, successful scopes, unsuccessful attempts and leaf bit tests](evidence/20261028-external-force-bounds-and-pose-producers-r2037/README.md).
+
+## Private scalar pose tree closure and manifold leaves
+
+The scalar Build_Bodies path closes all110 obligations on both reference
+closures, including absolute position/center/anchor bounds and preservation of
+previous body budgets. Store_Body_Pose32 and the Ghost anchor loop34 also close
+on both references. Mocap facts are explicit Static caller obligations; full
+manifold traversal, state lifecycle and external-force cache publication remain
+open. This does not close whole simulation dynamics or adopt the fast leaves.
+
+Fresh whole Pose_Bounds203, Pose_Rounding48 and the67-check Pose_Frames snapshot
+close on both references; the later free-position helper closes13 per reference
+separately. Existing warnings remain visible. Both standard profiles/references
+pass activation432 and integration1152 scenarios each. All30 integrated100-step
+movement endpoints equal adopted1860 Ada exactly and satisfy the unchanged C
+oracle. These are numerical checks, with no new timing or production adoption.
+[Exact source snapshots, successful scopes, failed controls, numerical tests and C/vendor provenance](evidence/20261028-pose-tree-budgets-and-manifold-leaves-r2100/README.md).
+
+## Tight rotation bounds and expanded-group metadata
+
+The independent private Rotation_Bounds unit closes all166 obligations on both
+reference closures, proving every original rotation component within1.00001
+under Unit_Quaternion. Rounding-error and standard big-number model boundaries
+remain explicit, with all19 warnings visible. Complete reports resume the exact
+unchanged proof context after initial watchdogs; partial sessions are retained.
+No circular strengthening of the original Rotation contract is introduced.
+
+MJ.Data.Group_Layout is adopted locally as Ghost Static code: whole69 closes on
+both references, and it compiles in the actual validation project. Native DOF
+widths, uniform expanded metadata and the next group start are specified and
+proved. This adds no runtime scan or state field. Private free/ball stores close
+48/30 checks on each reference. Factory preservation and complete manifold
+traversal remain open; runtime force guards remain and numerical code is unchanged.
+
+An isolated positive/negative control confirms Static type-invariant behavior.
+The unadopted mocap prototype closes63 setter checks, including invariant and
+configuration-frame preservation, while State_Values preservation and the full
+state lifecycle remain open. Failed variants and alternate norm attempts retain
+their actual outcomes. No new performance or complete-port claim follows.
+[Exact proofs, source snapshots, adopted Ghost module and cleanup receipts](evidence/20261028-tight-rotation-bounds-and-group-layout-r2198/README.md).
