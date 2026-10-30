@@ -78,3 +78,28 @@ modifies only actuator parameters; the remaining constructor diagnosis is the
 nonnull body-configuration precondition before topology construction. Full
 lifecycle proof and performance parity remain open.
 [Remapping proofs and caller-frame evidence](../alignment-3.17/evidence/20261030-actuator-remapping-and-caller-frame-r2649/README.md).
+
+The subsequent Static/Ghost frame checkpoint closes the selected manifold
+topology call from Initialize on both references, together with the copy-frame
+postcondition, loop invariants and DOF-value projection. Both constructor-to-copy
+calls and Create-to-Initialize preconditions close separately. Fresh builds pass
+528 cases per reference/profile; all 132 outputs equal previous production.
+Runtime source is unchanged after erasing the new Static/Ghost additions.
+Complete copy/constructor/lifecycle proofs and performance parity remain open.
+[Copy frames and caller preconditions](../alignment-3.17/evidence/20261030-manifold-copy-frames-and-caller-preconditions-r2714/README.md).
+
+The subsequent adopted body-layout/Qpos-prefix source has all 95 copy-routine
+VCs covered by seven disjoint successful regions on each reference. The audit
+checks the complete inventory and exact source/options; low-resource inventory
+successes are not credited. Monolithic watchdogs remain, and current-contract
+coverage does not establish every physical-field mapping or whole lifecycle
+correctness. The unchanged-source native results above remain applicable.
+[Complete current-contract copy coverage](../alignment-3.17/evidence/20261030-complete-manifold-copy-vc-coverage-r2777/README.md).
+
+
+The latest adopted constructor now proves preservation of all nine non-span
+body fields, including mocap ID/reference, while mapping both DOF-span fields
+on success. The body helper and coordinator close their stronger contracts on
+both references; all 62 joint-builder VCs have complete partitioned coverage.
+This does not close the complete lifecycle or establish performance parity.
+[Body field preservation and separated builder](../alignment-3.17/evidence/20261030-body-physical-frame-and-joint-builder-r2842/README.md).

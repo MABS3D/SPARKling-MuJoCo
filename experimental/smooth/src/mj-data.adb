@@ -345,7 +345,8 @@ package body MJ.Data with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Geom_Layout_OK);
       pragma Postcondition (Static => (if Model_Status'Result = Success then
         Actuator_Status (M.S, M.Actuators) = Success and then M.S.Na <= Max_Actuators
-        and then Joint_Status (M.S, M.Joints) = Success));
+        and then Joint_Status (M.S, M.Joints) = Success
+        and then Dof_Status (M.S, M.Dofs) = Success));
       Flags : constant Integer := M.Opt.Disableflags;
       Detail : Status;
    begin
@@ -921,32 +922,131 @@ package body MJ.Data with SPARK_Mode is
       return R;
    end Reset_Positions;
 
-   procedure Copy_Manifold_Joints (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean)
+   procedure Prove_Dof_Values (S : MJ.Models.Sizes; Fields : MJ.Models.Dof_Arrays)
+     with Ghost => Static, Global => null,
+       Pre => MJ.Models.Sizes_In_Range (S) and then S.Nv <= Max_Dofs
+         and then MJ.Models.Dof_Layout_OK (S, Fields) and then Dof_Status (S, Fields) = Success,
+       Post => (for all V in 0 .. S.Nv - 1 =>
+         Fields.Dof_Damping (V) in Nonneg_Tier0 and then Fields.Dof_Armature (V) in Nonneg_Tier0)
+   is
+   begin
+      for V in 0 .. S.Nv - 1 loop
+         pragma Assert (Static => Dof_Element (S, Fields, V) = Success);
+         pragma Assert (Static => Fields.Dof_Damping (V) in Nonneg_Tier0
+           and then Fields.Dof_Armature (V) in Nonneg_Tier0);
+         pragma Loop_Invariant (Static => (for all I in 0 .. V =>
+           Fields.Dof_Damping (I) in Nonneg_Tier0 and then Fields.Dof_Armature (I) in Nonneg_Tier0));
+      end loop;
+   end Prove_Dof_Values;
+
+   procedure Prove_Body_Dof_Layout (S : MJ.Models.Sizes; Fields : MJ.Models.Body_Arrays)
+     with Ghost => Static, Global => null,
+       Pre => MJ.Models.Sizes_In_Range (S) and then MJ.Models.Body_Layout_OK (S, Fields),
+       Post => Fields.Body_Dofadr /= null and then Fields.Body_Dofadr'First = 0
+         and then Int64 (Fields.Body_Dofadr'Length) = Int64 (S.Nbody)
+         and then Fields.Body_Dofnum /= null and then Fields.Body_Dofnum'First = 0
+         and then Int64 (Fields.Body_Dofnum'Length) = Int64 (S.Nbody)
+   is
+   begin
+      null;
+   end Prove_Body_Dof_Layout;
+
+   function Body_Physical_Frame (Initial, Current : Body_Parameters) return Boolean is
+     (Current.Parent = Initial.Parent and then Current.Mocap_Id = Initial.Mocap_Id
+      and then Current.Mocap_Reference = Initial.Mocap_Reference
+      and then Current.Position = Initial.Position
+      and then Current.Inertial_Position = Initial.Inertial_Position
+      and then Current.Orientation = Initial.Orientation
+      and then Current.Inertial_Orientation = Initial.Inertial_Orientation
+      and then Current.Mass = Initial.Mass and then Current.Inertia = Initial.Inertia)
+     with Ghost => Static, Global => null;
+
+   function Body_With_Dofs (Initial : Body_Parameters; First : Integer; Count : Natural)
+     return Body_Parameters is
+     ((Initial with delta First_Joint => First, Joint_Count => Count))
+     with Ghost => Static, Global => null,
+       Post => Body_With_Dofs'Result.First_Joint = First
+         and then Body_With_Dofs'Result.Joint_Count = Count
+         and then Body_Physical_Frame (Initial, Body_With_Dofs'Result);
+
+   procedure Prove_Body_Frame_Update
+     (Initial, Current : Body_Parameters; First : Integer; Count : Natural)
+     with Ghost => Static, Global => null,
+       Pre => Body_Physical_Frame (Initial, Current),
+       Post => Body_Physical_Frame (Initial, Body_With_Dofs (Current, First, Count))
+   is
+   begin
+      null;
+   end Prove_Body_Frame_Update;
+
+   procedure Copy_Body_Dof_Spans
+     (Source_First, Source_Count : Int_Array; Config : in out Body_Parameter_Array;
+      Nv : Natural; Ok : out Boolean)
      with Global => null,
-     Pre => Dynamics_Inputs (M) and then D.Nq = M.S.Nq and then D.Nv = M.S.Nv
-       and then D.Body_Config /= null and then D.Joint_Config = null,
-     Post => (if Ok then D.Joint_Config /= null
-       and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nv - 1
-       and then Position_Layout (D.Joint_Config.all, D.Nq))
+       Pre => (Static => Nv <= Max_Dofs and then Config'First = 0
+         and then Config'Length <= Max_Bodies
+         and then Source_First'First = 0 and then Source_Count'First = 0
+         and then Source_First'Length = Config'Length
+         and then Source_Count'Length = Config'Length)
+   is
+      pragma Postcondition (Static => (for all I in Config'Range =>
+        Body_Physical_Frame (Config'Old (I), Config (I))
+        and then (if Ok then Config (I).First_Joint = Source_First (I)
+          and then Config (I).Joint_Count = Source_Count (I))));
+      Initial : constant Body_Parameter_Array := Config with Ghost => Static;
+   begin
+      Ok := False;
+      for B in Config'Range loop
+         pragma Loop_Invariant (Static => (for all I in Config'Range =>
+           Body_Physical_Frame (Initial (I), Config (I))));
+         pragma Loop_Invariant (Static => (for all I in 0 .. B - 1 =>
+           Config (I).First_Joint = Source_First (I)
+           and then Config (I).Joint_Count = Source_Count (I)));
+         if Source_Count (B) not in 0 .. Nv
+           or else (Source_Count (B) > 0 and then
+             Source_First (B) not in 0 .. Nv - Source_Count (B)) then return; end if;
+         declare
+            Before_Body : constant Body_Parameters := Config (B) with Ghost => Static;
+         begin
+            Prove_Body_Frame_Update (Initial (B), Before_Body, Source_First (B), Source_Count (B));
+            Config (B).First_Joint := Source_First (B);
+            Config (B).Joint_Count := Source_Count (B);
+         end;
+      end loop;
+      Ok := True;
+   end Copy_Body_Dof_Spans;
+
+   procedure Copy_Manifold_Joint_Config
+     (M : MJ.Models.Model; Nq, Nv, Nb : Natural;
+      Config : in out Joint_Parameter_Access; Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => Dynamics_Inputs (M) and then Nq = M.S.Nq
+         and then Nv = M.S.Nv and then Nb = M.S.Nbody and then Config = null
+         and then Dof_Status (M.S, M.Dofs) = Success),
+       Post => (Static => Config /= null and then Config'First = 0
+         and then Config'Last = Nv - 1)
    is
       Q, V, Count, Kind, Body_Id : Integer;
       Base : Joint_Parameters;
       Accepted : Boolean;
    begin
+      Prove_Dof_Values (M.S, M.Dofs);
       Ok := False;
-      D.Joint_Config := new Joint_Parameter_Array (0 .. D.Nv - 1);
-      for Qpos_Id in 0 .. D.Nq - 1 loop
+      Config := new Joint_Parameter_Array (0 .. Nv - 1);
+      for Qpos_Id in 0 .. Nq - 1 loop
          if M.Qpos.Qpos0 (Qpos_Id) not in Tier0_Real
            or else M.Qpos.Qpos_Spring (Qpos_Id) not in Tier0_Real then return; end if;
+         pragma Loop_Invariant (Static => (for all I in 0 .. Qpos_Id =>
+           M.Qpos.Qpos0 (I) in Tier0_Real and then M.Qpos.Qpos_Spring (I) in Tier0_Real));
       end loop;
       for J in 0 .. M.S.Njnt - 1 loop
          Kind := M.Joints.Jnt_Type (J);
          Count := (if Kind = 0 then 6 elsif Kind = 1 then 3 else 1);
          Q := M.Joints.Jnt_Qposadr (J); V := M.Joints.Jnt_Dofadr (J);
          Body_Id := M.Joints.Jnt_Bodyid (J);
-         if Kind not in 0 .. 3 or else V < 0 or else V > D.Nv - Count
-           or else Q < 0 or else Q > D.Nq - (if Kind = 0 then 7 elsif Kind = 1 then 4 else 1)
-           or else Body_Id not in 1 .. D.Nb - 1 then return; end if;
+         if Kind not in 0 .. 3 or else V < 0 or else V > Nv - Count
+           or else Q < 0 or else Q > Nq - (if Kind = 0 then 7 elsif Kind = 1 then 4 else 1)
+           or else Body_Id not in 1 .. Nb - 1 then return; end if;
          Read_Joint_Config (M.S, M.Joints, M.Dofs, M.Qpos, J, Base, Accepted);
          if not Accepted then return; end if;
          if Kind in 0 .. 1 then
@@ -971,17 +1071,46 @@ package body MJ.Data with SPARK_Mode is
                end if;
                P.Damping := M.Dofs.Dof_Damping (V + C);
                P.Armature := M.Dofs.Dof_Armature (V + C);
-               D.Joint_Config (V + C) := P;
+               Config (V + C) := P;
             end;
          end loop;
       end loop;
-      for B in 0 .. D.Nb - 1 loop
-         if M.Bodies.Body_Dofnum (B) not in 0 .. D.Nv
-           or else (M.Bodies.Body_Dofnum (B) > 0 and then
-             M.Bodies.Body_Dofadr (B) not in 0 .. D.Nv - M.Bodies.Body_Dofnum (B)) then return; end if;
-         D.Body_Config (B).First_Joint := M.Bodies.Body_Dofadr (B);
-         D.Body_Config (B).Joint_Count := M.Bodies.Body_Dofnum (B);
-      end loop;
+      Ok := True;
+   end Copy_Manifold_Joint_Config;
+
+   procedure Copy_Manifold_Joints (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean)
+     with Global => null,
+     Pre => Dynamics_Inputs (M) and then D.Nq = M.S.Nq and then D.Nv = M.S.Nv
+       and then D.Body_Config /= null and then D.Joint_Config = null,
+     Post => (if Ok then D.Joint_Config /= null
+       and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nv - 1
+       and then Position_Layout (D.Joint_Config.all, D.Nq))
+   is
+      pragma Precondition (Static => Dof_Status (M.S, M.Dofs) = Success
+        and then D.Nb = M.S.Nbody and then D.Body_Config'First = 0
+        and then D.Body_Config'Last = D.Nb - 1);
+      pragma Postcondition (Static => D.Body_Config /= null
+        and then D.Body_Config'First = D.Body_Config'First'Old
+        and then D.Body_Config'Last = D.Body_Config'Last'Old
+        and then Shape (D) = Shape (D)'Old
+        and then D.Nmocap = D.Nmocap'Old and then D.Nj = D.Nj'Old
+        and then D.Na = D.Na'Old and then D.No = D.No'Old
+        and then D.Timestep = D.Timestep'Old and then D.Clamp_Control = D.Clamp_Control'Old
+        and then MJ.Smooth_Topology.Empty (D.Topology) = MJ.Smooth_Topology.Empty (D.Topology)'Old
+        and then MJ.Ancestor_Rows.Empty (D.Ancestors) = MJ.Ancestor_Rows.Empty (D.Ancestors)'Old
+        and then (for all I in D.Body_Config'Range =>
+          Body_Physical_Frame (D.Body_Config.all'Old (I), D.Body_Config (I))
+          and then (if Ok then D.Body_Config (I).First_Joint = M.Bodies.Body_Dofadr (I)
+            and then D.Body_Config (I).Joint_Count = M.Bodies.Body_Dofnum (I))));
+      Accepted : Boolean;
+   begin
+      Ok := False;
+      Copy_Manifold_Joint_Config (M, D.Nq, D.Nv, D.Nb, D.Joint_Config, Accepted);
+      if not Accepted then return; end if;
+      Prove_Body_Dof_Layout (M.S, M.Bodies);
+      Copy_Body_Dof_Spans (M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+        D.Body_Config.all, D.Nv, Accepted);
+      if not Accepted then return; end if;
       Ok := Position_Layout (D.Joint_Config.all, D.Nq);
    end Copy_Manifold_Joints;
 
@@ -1599,7 +1728,8 @@ package body MJ.Data with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Actuator_Layout_OK);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
       pragma Precondition (Static => Actuator_Status (M.S, M.Actuators) = Success
-        and then M.S.Na <= Max_Actuators and then Joint_Status (M.S, M.Joints) = Success);
+        and then M.S.Na <= Max_Actuators and then Joint_Status (M.S, M.Joints) = Success
+        and then Dof_Status (M.S, M.Dofs) = Success);
       Normal : Boolean;
    begin
       Set_Dimensions (D, M.S);
@@ -1629,6 +1759,7 @@ package body MJ.Data with SPARK_Mode is
          for I in 0 .. D.Na - 1 loop
             pragma Loop_Invariant (Static => D.Na = M.S.Nactuator
               and then Actuator_Status (M.S, M.Actuators) = Success);
+            pragma Loop_Invariant (Static => D.Body_Config /= null);
             Prove_Actuator_Dynamics (M.S, M.Actuators, I);
             Configure_Activation (M.S, M.Actuators, I, D.Nactivation,
               D.Timestep, D.Clamp_Control, D.Actuator_Config (I),

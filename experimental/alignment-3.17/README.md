@@ -1497,3 +1497,105 @@ runs retain their actual outcomes. Complete constructors/Reset/state/dynamics,
 private mocap invariant, full feature/ABI alignment and integrated performance
 parity remain unfinished. No new timing claim is made.
 [Exact scopes, sources, native C cases, caller diagnosis and adoption receipts](evidence/20261030-actuator-remapping-and-caller-frame-r2649/README.md).
+
+## Manifold-copy frames and constructor call preconditions
+
+The actual source now preserves body allocation/bounds, dimensions, selected
+option scalars and cache emptiness across Copy_Manifold_Joints. An activation
+loop invariant preserves body allocation. A proved Ghost projection exposes
+damping/armature ranges from the existing DOF validator. All additions are
+Static/Ghost: exact removal recovers the previous runtime source byte-for-byte,
+and a native validation-profile probe confirms their erasure. No new runtime
+scan, public input restriction, assumption or trusted body is introduced.
+
+Both pinned references close the combined copy postcondition (11 reported
+checks), all three copy-loop invariants (12 each), the activation invariant (9),
+DOF projection (20), Model_Status (15) and selected DOF assignments (21).
+The previously open Initialize-to-manifold-topology call now closes (8).
+Selected Create-to-Initialize and both constructor-to-copy calls also close.
+These selected scopes do not establish complete constructor or copy safety;
+existing reviewed warnings and deallocator models remain unchanged.
+
+Fresh validation/release builds pass 528 numerical cases per reference/profile
+with unchanged samples, steps and tolerances. All 132 outputs equal previous
+production byte-for-byte. Both whole MJ.Data flow reports have no open messages;
+their separate coverage audit retains exactly the existing five modeled
+deallocators and explains the initial overly strict classifier. Zero-VC filters
+and the broader body-metadata watchdog remain explicitly unsuccessful evidence.
+Whole lifecycle/dynamics proofs, full features/ABI alignment and integrated C
+performance parity remain open. No timing improvement is claimed.
+[Exact scopes, source-erasure audit, caller proofs and native comparisons](evidence/20261030-manifold-copy-frames-and-caller-preconditions-r2714/README.md).
+
+## Body layout and Qpos prefix: private proof candidate
+
+The next candidate makes the internal body-count/array-shape relation explicit,
+projects body DOF array allocation/bounds through a proved Ghost lemma and
+retains the existing Qpos validation result with a Static prefix invariant.
+Both references close the layout lemma (8 reported checks), body-update region
+(28), prefix invariant (11) and free-translation reference assignments (15).
+Stronger copy preconditions close in both constructors on both references;
+an exact interface/caller-text audit preserves those modular call scopes after
+the prefix-only change.
+
+Fresh native matrices pass 528 cases per reference/profile; all 132 outputs
+equal adopted production. New Ghost helpers are absent from native objects,
+and erasing the additions recovers adopted source exactly. Both whole MJ.Data
+flow runs have no open messages. Earlier syntax/shape failures and watchdogs
+retain their actual outcomes; cached Why3 XML predating a run is explicitly
+excluded as evidence of that run's progress.
+
+The complete copy attempts still reach their 600-second watchdogs on both
+references, including after the prefix fix. This candidate is not adopted.
+It does not establish complete copy, constructor or simulation correctness,
+and no performance gain is claimed. The existing adopted source remains the
+preceding frame checkpoint; further diagnosis must identify the remaining VCs.
+[Frozen candidates, exact scopes, failed whole attempts and cleanup receipts](evidence/20261030-body-layout-and-qpos-prefix-proofs-r2755/README.md).
+
+## Complete current-contract manifold-copy coverage, adopted
+
+The body-layout/Qpos-prefix candidate is now adopted locally. An independent
+audit checks that seven successful same-source region proofs partition all
+95 VCs of Copy_Manifold_Joints exactly once on each pinned reference: contracts
+11, setup/allocation 4, Qpos validation 10, joint metadata 13, quaternions 8,
+component updates 28 and body/final-access checks 21. Every loop invariant has
+both initialization and preservation covered. The low-resource inventory's
+successful entries are not used as proof; there are no missing, duplicate,
+foreign, skipped or assumed VCs in the partition.
+
+The audit checks source hashes, semantic proof options, the selected entity,
+fresh reports and complete representation. It also checks the existing build
+normalization explicitly: the two structural helper providers and the SPARK
+library source directories. Monolithic 600-second runs still time out; those
+results remain unchanged. This establishes current-contract VC coverage under
+callee contracts, including safety and the layout/frame postcondition. It does
+not establish exact copying of every physical field or whole-simulation Gold.
+
+The adopted bytes are the already tested candidate: 528 cases per pinned
+reference/profile, 132 outputs identical to prior production, clean whole
+MJ.Data flow and exact Static/Ghost erasure. No redundant numerical run or new
+performance claim is made. Existing warnings/deallocators remain; production
+ABI/version metadata is unchanged. Complete constructors/Reset/state/dynamics,
+full features/alignment and integrated C parity remain open. The next functional
+gap is an explicit value/frame model for the individual body fields.
+[Complete VC partition, source-normalization audit and adoption receipt](evidence/20261030-complete-manifold-copy-vc-coverage-r2777/README.md).
+
+
+## Body physical-field frame and separated joint builder, adopted
+
+The adopted constructor separates joint-array construction from body DOF-span
+copying. The body helper preserves all nine physical/mocap fields and maps the
+two span fields exactly on success. It closes 33 reported checks per reference;
+the coordinator closes 35. Five disjoint successful proof regions cover all
+62 joint-builder VCs on each reference. Whole-builder 600-second watchdogs are
+retained as unsuccessful attempts; the independent coverage audit checks the
+complete source-matched inventory. Existing callee contracts, reviewed warnings
+and modeled deallocators remain explicit proof boundaries.
+
+Fresh validation/release comparisons pass 528 cases per reference/profile;
+all 132 outputs equal the preceding adopted source at unchanged tolerances.
+Runtime checks and copy order are preserved without a new validation scan.
+The body helper is inlined in release; the larger joint builder adds a separate
+cold-constructor call. No timing improvement or integrated C parity is claimed.
+Whole constructors, Reset/state/dynamics, feature/ABI alignment and performance
+parity remain open.
+[Exact proofs, native comparisons, runtime audit and adoption receipt](evidence/20261030-body-physical-frame-and-joint-builder-r2842/README.md).
