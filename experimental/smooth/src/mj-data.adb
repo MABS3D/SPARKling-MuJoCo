@@ -1,3 +1,5 @@
+with MJ.Muscle_Kernels;
+with MJ.Muscle_Actuation;
 with Ada.Unchecked_Deallocation;
 with Interfaces;
 with MJ.Models.Validity;
@@ -274,6 +276,46 @@ package body MJ.Data with SPARK_Mode is
      (Dynamics_Inputs (M) and then M.S.Nactuator <= Max_Actuators
       and then M.S.Nu = M.S.Nactuator and then M.S.Nout = M.S.Nactuator);
 
+   procedure Prove_Model_Geom_Layout (M : MJ.Models.Model)
+     with Ghost => Static, Global => null,
+       Pre => MJ.Models.Valid_Layout (M),
+       Post => MJ.Models.Geom_Layout_OK (M.S, M.Geoms)
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Actuator_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Body_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Bvh_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Camera_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Dof_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Equality_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Exclude_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Flex_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Geom_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Hfield_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Joint_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Key_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Light_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Material_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Mesh_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Name_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Numeric_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Pair_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Plugin_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Sensor_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Site_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Skin_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Sparse_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Tendon_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Text_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Texture_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Tree_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Tuple_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Wrap_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Sizes_In_Range);
+   begin
+      pragma Assert (Static => MJ.Models.Geom_Layout_OK (M.S, M.Geoms));
+   end Prove_Model_Geom_Layout;
+
    function Model_Status (M : MJ.Models.Model) return Status with
      Global => null,
      Post => (if Model_Status'Result = Success then Creation_Inputs (M) and then MJ.Models.Valid_Layout (M)
@@ -300,12 +342,17 @@ package body MJ.Data with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Dof_Layout_OK);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Actuator_Layout_OK);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Geom_Layout_OK);
+      pragma Postcondition (Static => (if Model_Status'Result = Success then
+        Actuator_Status (M.S, M.Actuators) = Success and then M.S.Na <= Max_Actuators
+        and then Joint_Status (M.S, M.Joints) = Success));
       Flags : constant Integer := M.Opt.Disableflags;
       Detail : Status;
    begin
       if not MJ.Models.Valid_Layout (M) then
          return Invalid_Model;
       end if;
+      Prove_Model_Geom_Layout (M);
       if not MJ.Models.Sizes_In_Range (M.S)
         or else not MJ.Models.Body_Layout_OK (M.S, M.Bodies)
         or else not MJ.Models.Joint_Layout_OK (M.S, M.Joints)
@@ -938,88 +985,373 @@ package body MJ.Data with SPARK_Mode is
       Ok := Position_Layout (D.Joint_Config.all, D.Nq);
    end Copy_Manifold_Joints;
 
+   --  Fused DOF metadata pass: retain the compiled simple diagonal exactly as C.
+   --  Arms is consumed only after Ok; initialization is a proved postcondition.
+   procedure Prepare_Manifold_Dofs
+     (Config : Joint_Parameter_Array; Source_Simple : Int_Array; Source_M0 : Real_Array;
+      Arms : out Real_Array; Simple : in out Int_Array; Fixed : in out Real_Array;
+      Effective : in out Int_Array; Ok : out Boolean)
+     with Global => null, Relaxed_Initialization => Arms,
+       Pre => (Static => Arms'First = 0 and then Arms'Length <= Max_Dofs
+         and then Config'First = 0 and then Config'Length = Arms'Length
+         and then Source_Simple'First = 0 and then Source_Simple'Length = Arms'Length
+         and then Source_M0'First = 0 and then Source_M0'Length = Arms'Length
+         and then Simple'First = 0 and then Simple'Length = Arms'Length
+         and then Fixed'First = 0 and then Fixed'Length = Arms'Length
+         and then Effective'First = 0 and then Effective'Length = Arms'Length),
+       Post => (Static => Ok = (for all V in Arms'Range =>
+           (if Source_Simple (V) > 0 then Source_M0 (V) in 0.0 .. 2.0e10))
+         and then (if Ok then Arms'Initialized
+           and then (for all V in Arms'Range => Arms (V) = Config (V).Armature
+             and then Simple (V) = (if Source_Simple (V) > 0 then Source_Simple (V) else Simple'Old (V))
+             and then Fixed (V) = (if Source_Simple (V) > 0 then Source_M0 (V) else Fixed'Old (V))
+             and then Effective (V) = (if Source_Simple (V) > 0 then -1 else Effective'Old (V)))))
+   is
+   begin
+      Ok := False;
+      for V in Arms'Range loop
+         Arms (V) := Config (V).Armature;
+         if Source_Simple (V) > 0 then
+            if Source_M0 (V) not in 0.0 .. 2.0e10 then
+               pragma Assert (Static => not (for all I in Arms'Range =>
+                 (if Source_Simple (I) > 0 then Source_M0 (I) in 0.0 .. 2.0e10)));
+               return;
+            end if;
+            Simple (V) := Source_Simple (V);
+            Fixed (V) := Source_M0 (V);
+            Effective (V) := -1;
+         end if;
+         pragma Loop_Invariant (Static => (for all I in Arms'First .. V => Arms (I)'Initialized));
+         pragma Loop_Invariant (Static => (for all I in Arms'First .. V => Arms (I) = Config (I).Armature));
+         pragma Loop_Invariant (Static => (for all I in Arms'First .. V =>
+           (if Source_Simple (I) > 0 then Source_M0 (I) in 0.0 .. 2.0e10)));
+         pragma Loop_Invariant (Static => (for all I in Arms'Range =>
+           Simple (I) = (if I <= V and then Source_Simple (I) > 0 then Source_Simple (I) else Simple'Loop_Entry (I))
+           and then Fixed (I) = (if I <= V and then Source_Simple (I) > 0 then Source_M0 (I) else Fixed'Loop_Entry (I))
+           and then Effective (I) = (if I <= V and then Source_Simple (I) > 0 then -1 else Effective'Loop_Entry (I))));
+      end loop;
+      pragma Assert (Static => Arms'Initialized);
+      Ok := True;
+   end Prepare_Manifold_Dofs;
+
+   procedure Build_Manifold_Cache
+     (Config : Body_Parameter_Array; Joints : Joint_Parameter_Array;
+      Body_Parents, Body_First, Body_Counts, Dof_Parents, Dof_Bodies, Source_Simple : Int_Array;
+      Source_M0 : Real_Array; Topology : in out MJ.Smooth_Topology.Cache;
+      Ancestors : in out MJ.Ancestor_Rows.Pattern; Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => Config'First = 0 and then Config'Length in 1 .. Max_Bodies
+         and then Joints'First = 0 and then Joints'Length <= Max_Dofs
+         and then Body_Parents'First = 0 and then Body_Parents'Last = Config'Last
+         and then Body_First'First = 0 and then Body_First'Last = Config'Last
+         and then Body_Counts'First = 0 and then Body_Counts'Last = Config'Last
+         and then Dof_Parents'First = 0 and then Dof_Parents'Length = Joints'Length
+         and then Dof_Bodies'First = 0 and then Dof_Bodies'Length = Joints'Length
+         and then Source_Simple'First = 0 and then Source_Simple'Length = Joints'Length
+         and then Source_M0'First = 0 and then Source_M0'Length = Joints'Length
+         and then MJ.Smooth_Topology.Empty (Topology) and then MJ.Ancestor_Rows.Empty (Ancestors)),
+       Post => (Static => (if Ok then not MJ.Smooth_Topology.Empty (Topology)
+         and then MJ.Smooth_Topology.Body_Count (Topology) = Config'Length
+         and then MJ.Smooth_Topology.Dof_Count (Topology) = Joints'Length
+         and then not MJ.Ancestor_Rows.Empty (Ancestors)
+         and then MJ.Ancestor_Rows.Size (Ancestors) = Joints'Length
+         and then (for all V in Joints'Range =>
+           MJ.Smooth_Topology.Parent_Dof (Topology, V) = Dof_Parents (V)
+           and then MJ.Smooth_Topology.Dof_Body (Topology, V) = Dof_Bodies (V)
+           and then MJ.Smooth_Topology.Dof_Joint (Topology, V) = V
+           and then MJ.Smooth_Topology.Armature (Topology, V) = Joints (V).Armature
+           and then MJ.Smooth_Topology.Simple_Count (Topology, V) =
+             (if Source_Simple (V) > 0 then Source_Simple (V) else 0)
+           and then MJ.Smooth_Topology.Fixed_Inertia (Topology, V) =
+             (if Source_Simple (V) > 0 then Source_M0 (V) else 0.0)
+           and then MJ.Ancestor_Rows.Parent (Ancestors, V) =
+             (if Source_Simple (V) > 0 then -1 else Dof_Parents (V)))))
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Valid_Inputs);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Body_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Parent_Dof);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Body);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Joint);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Armature);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Simple_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Fixed_Inertia);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Size);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Parent);
+      Nb : constant Natural := Config'Length;
+      Nv : constant Natural := Joints'Length;
+      package T renames MJ.Smooth_Topology;
+      Roots, Last : Int_Array (0 .. Nb - 1);
+      Ids : constant Int_Array := [for V in 0 .. Nv - 1 => Integer (V)];
+      Simple : Int_Array (0 .. Nv - 1) := [others => 0];
+      Effective : Int_Array (0 .. Nv - 1) := Dof_Parents;
+      Masses : Real_Array (0 .. Nb - 1) := [others => 0.0];
+      Arms : Real_Array (0 .. Nv - 1) with Relaxed_Initialization;
+      Fixed : Real_Array (0 .. Nv - 1) := [others => 0.0];
+      Added : Boolean;
+   begin
+      Ok := False;
+      if not T.Valid_Body_Links (Body_Parents,
+        Body_First, Body_Counts, Nv) then return; end if;
+      T.Build_Body_Links (Body_Parents, Body_First,
+        Body_Counts, Nv, Roots, Last);
+      for B in 1 .. Nb - 1 loop
+         Masses (B) := Config (B).Mass;
+         pragma Loop_Invariant (Static => (for all X of Masses => X in 0.0 .. 1.0e14));
+      end loop;
+      for B in reverse 1 .. Nb - 1 loop
+         if Body_Parents (B) > 0 then
+            T.Add_Subtree (Masses, Body_Parents (B), B, Added);
+            if not Added then return; end if;
+         end if;
+         pragma Loop_Invariant (Static => (for all X of Masses => X in 0.0 .. 1.0e14));
+      end loop;
+      Prepare_Manifold_Dofs (Joints, Source_Simple,
+        Source_M0, Arms, Simple, Fixed, Effective, Added);
+      if not Added then return; end if;
+      pragma Assert (Static => Arms'Initialized);
+      if not T.Valid_Inputs (Roots, Last, Dof_Parents,
+        Dof_Bodies, Ids, Simple, Masses, Arms, Fixed)
+        or else not MJ.Ancestor_Rows.Valid_Parents (Effective)
+      then return; end if;
+      T.Build (Topology, Roots, Last, Dof_Parents,
+        Dof_Bodies, Ids, Simple, Masses, Arms, Fixed);
+      MJ.Ancestor_Rows.Build (Ancestors, Effective);
+      Ok := True;
+   end Build_Manifold_Cache;
+
    procedure Build_Manifold_Topology (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean)
      with Global => null, Pre => Dynamics_Inputs (M)
        and then D.Body_Config /= null and then D.Joint_Config /= null
        and then D.Nb = M.S.Nbody and then D.Nv = M.S.Nv
        and then MJ.Smooth_Topology.Empty (D.Topology) and then MJ.Ancestor_Rows.Empty (D.Ancestors)
    is
-      Nb : constant Natural := D.Nb;
-      Nv : constant Natural := D.Nv;
-      package T renames MJ.Smooth_Topology;
-      Roots, Last : Int_Array (0 .. Nb - 1);
-      Ids : constant Int_Array := [for V in 0 .. Nv - 1 => Integer (V)];
-      Simple : Int_Array (0 .. Nv - 1) := [others => 0];
-      Effective : Int_Array (0 .. Nv - 1) := M.Dofs.Dof_Parentid.all;
-      Masses : Real_Array (0 .. Nb - 1) := [others => 0.0];
-      Arms : Real_Array (0 .. Nv - 1);
-      Fixed : Real_Array (0 .. Nv - 1) := [others => 0.0];
-      Added : Boolean;
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Sizes_In_Range);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Geom_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Joint_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Actuator_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Valid_Inputs);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Body_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Parent_Dof);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Body);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Dof_Joint);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Armature);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Simple_Count);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Smooth_Topology.Fixed_Inertia);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Empty);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Size);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Ancestor_Rows.Parent);
+      pragma Precondition (Static => D.Body_Config'First = 0
+        and then D.Body_Config'Last = D.Nb - 1
+        and then D.Joint_Config'First = 0 and then D.Joint_Config'Last = D.Nv - 1);
+      pragma Postcondition (Static => D.Nb = D.Nb'Old and then D.Nv = D.Nv'Old
+        and then (if Ok then not MJ.Smooth_Topology.Empty (D.Topology)
+          and then MJ.Smooth_Topology.Body_Count (D.Topology) = D.Nb
+          and then MJ.Smooth_Topology.Dof_Count (D.Topology) = D.Nv
+          and then not MJ.Ancestor_Rows.Empty (D.Ancestors)
+          and then MJ.Ancestor_Rows.Size (D.Ancestors) = D.Nv
+          and then D.Joint_Config /= null and then D.Joint_Config'First = 0
+          and then D.Joint_Config'Last = D.Nv - 1
+          and then (for all V in 0 .. D.Nv - 1 =>
+            MJ.Smooth_Topology.Parent_Dof (D.Topology, V) = M.Dofs.Dof_Parentid (V)
+            and then MJ.Smooth_Topology.Dof_Body (D.Topology, V) = M.Dofs.Dof_Bodyid (V)
+            and then MJ.Smooth_Topology.Dof_Joint (D.Topology, V) = V
+            and then MJ.Smooth_Topology.Armature (D.Topology, V) = D.Joint_Config (V).Armature
+            and then MJ.Smooth_Topology.Simple_Count (D.Topology, V) =
+              (if M.Dofs.Dof_Simplenum (V) > 0 then M.Dofs.Dof_Simplenum (V) else 0)
+            and then MJ.Smooth_Topology.Fixed_Inertia (D.Topology, V) =
+              (if M.Dofs.Dof_Simplenum (V) > 0 then M.Dofs.Dof_M0 (V) else 0.0)
+            and then MJ.Ancestor_Rows.Parent (D.Ancestors, V) =
+              (if M.Dofs.Dof_Simplenum (V) > 0 then -1 else M.Dofs.Dof_Parentid (V)))));
    begin
-      Ok := False;
-      if not T.Valid_Body_Links (M.Bodies.Body_Parentid.all,
-        M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all, Nv) then return; end if;
-      T.Build_Body_Links (M.Bodies.Body_Parentid.all, M.Bodies.Body_Dofadr.all,
-        M.Bodies.Body_Dofnum.all, Nv, Roots, Last);
-      for B in 1 .. Nb - 1 loop Masses (B) := D.Body_Config (B).Mass; end loop;
-      for B in reverse 1 .. Nb - 1 loop
-         if M.Bodies.Body_Parentid (B) > 0 then
-            T.Add_Subtree (Masses, M.Bodies.Body_Parentid (B), B, Added);
-            if not Added then return; end if;
-         end if;
-      end loop;
-      for V in 0 .. Nv - 1 loop
-         Arms (V) := D.Joint_Config (V).Armature;
-         --  mj_crb copies dof_M0 for a compiled simple DOF, including
-         --  free and ball joints. Reconstructing that diagonal through world
-         --  rotations introduces roundoff and changes stiff CG stopping.
-         if M.Dofs.Dof_Simplenum (V) > 0 then
-            if M.Dofs.Dof_M0 (V) not in 0.0 .. 2.0e10 then return; end if;
-            Simple (V) := M.Dofs.Dof_Simplenum (V);
-            Fixed (V) := M.Dofs.Dof_M0 (V);
-            Effective (V) := -1;
-         end if;
-      end loop;
-      if not T.Valid_Inputs (Roots, Last, M.Dofs.Dof_Parentid.all,
-        M.Dofs.Dof_Bodyid.all, Ids, Simple, Masses, Arms, Fixed)
-        or else not MJ.Ancestor_Rows.Valid_Parents (Effective)
-      then return; end if;
-      T.Build (D.Topology, Roots, Last, M.Dofs.Dof_Parentid.all,
-        M.Dofs.Dof_Bodyid.all, Ids, Simple, Masses, Arms, Fixed);
-      MJ.Ancestor_Rows.Build (D.Ancestors, Effective);
-      Ok := True;
+      Build_Manifold_Cache (D.Body_Config.all, D.Joint_Config.all,
+        M.Bodies.Body_Parentid.all, M.Bodies.Body_Dofadr.all, M.Bodies.Body_Dofnum.all,
+        M.Dofs.Dof_Parentid.all, M.Dofs.Dof_Bodyid.all, M.Dofs.Dof_Simplenum.all,
+        M.Dofs.Dof_M0.all, D.Topology, D.Ancestors, Ok);
    end Build_Manifold_Topology;
 
-   procedure Remap_Actuators (M : MJ.Models.Model; D : in out Simulation; Ok : out Boolean) is
-      Id, V, Q, Kind : Integer;
+   function Remap_Input_Valid
+     (Body_Transmission : Boolean; Id : Integer; A, Nb, Nv, Nq : Natural;
+      Dofadr, Qposadr, Kinds : Int_Array; Gear : Real_Array) return Boolean is
+     (if Body_Transmission then Id in 0 .. Integer (Nb) - 1
+      else Id in Kinds'Range and then Dofadr (Id) in 0 .. Integer (Nv) - 1
+        and then Qposadr (Id) in 0 .. Integer (Nq) - 1
+        and then (for all K in 0 .. 5 => Gear (6 * A + K) in Tier0_Real))
+     with Ghost => Static, Global => null,
+       Pre => A < Max_Actuators and then Nb <= Max_Bodies
+         and then Nv <= Max_Dofs and then Nq <= Max_Positions
+         and then Kinds'First = 0 and then Dofadr'First = 0 and then Qposadr'First = 0
+         and then Dofadr'Length = Kinds'Length and then Qposadr'Length = Kinds'Length
+         and then Gear'First = 0 and then Int64 (Gear'Length) >= 6 * Int64 (A + 1);
+
+   function Remapped_Parameter
+     (C : Actuator_Parameters; Id, Transmission : Integer; A, Nb, Nv, Nq : Natural;
+      Dofadr, Qposadr, Kinds : Int_Array; Gear : Real_Array) return Actuator_Parameters is
+     (if C.Body_Transmission then (C with delta Joint_Id => 0, Position_Id => 0,
+         Joint_Type => 3, Wrench_Gear => [others => 0.0])
+      else (C with delta Joint_Id => Dofadr (Id), Position_Id => Qposadr (Id),
+         Joint_Type => Kinds (Id), Parent_Frame => Transmission = 1,
+         Wrench_Gear => [for K in 0 .. 5 => Gear (6 * A + K)]))
+     with Ghost => Static, Global => null,
+       Pre => A < Max_Actuators and then Nb <= Max_Bodies
+         and then Nv <= Max_Dofs and then Nq <= Max_Positions
+         and then Kinds'First = 0 and then Dofadr'First = 0 and then Qposadr'First = 0
+         and then Dofadr'Length = Kinds'Length and then Qposadr'Length = Kinds'Length
+         and then Gear'First = 0 and then Int64 (Gear'Length) >= 6 * Int64 (A + 1)
+         and then (for all K of Kinds => K in 0 .. 3)
+         and then Remap_Input_Valid (C.Body_Transmission, Id, A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear);
+
+   procedure Remap_One_Actuator
+     (C : in out Actuator_Parameters; Id, Transmission : Integer; A, Nb, Nv, Nq : Natural;
+      Dofadr, Qposadr, Kinds : Int_Array; Gear : Real_Array; Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => A < Max_Actuators and then Nb <= Max_Bodies
+         and then Nv <= Max_Dofs and then Nq <= Max_Positions
+         and then Kinds'First = 0 and then Dofadr'First = 0 and then Qposadr'First = 0
+         and then Dofadr'Length = Kinds'Length and then Qposadr'Length = Kinds'Length
+         and then Gear'First = 0 and then Int64 (Gear'Length) >= 6 * Int64 (A + 1)
+         and then (for all K of Kinds => K in 0 .. 3)),
+       Post => (Static => C = (C'Old with delta Joint_Id => C.Joint_Id,
+           Position_Id => C.Position_Id, Joint_Type => C.Joint_Type,
+           Parent_Frame => C.Parent_Frame, Wrench_Gear => C.Wrench_Gear)
+         and then Ok = Remap_Input_Valid (C'Old.Body_Transmission, Id, A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)
+         and then (if Ok then C = Remapped_Parameter (C'Old, Id, Transmission, A,
+           Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)))
+   is
+      V, Q, Kind : Integer;
    begin
       Ok := False;
-      for A in 0 .. D.Na - 1 loop
-         Id := M.Actuators.Actuator_Trnid (2 * A);
-         if D.Actuator_Config (A).Body_Transmission then
-            if Id not in 0 .. M.S.Nbody - 1 then return; end if;
-            -- A zero scalar smooth moment has a valid shape for any admitted
-            -- joint layout. Body_Id retains the actual contact producer.
-            D.Actuator_Config (A).Joint_Id := 0;
-            D.Actuator_Config (A).Position_Id := 0;
-            D.Actuator_Config (A).Joint_Type := 3;
-            D.Actuator_Config (A).Wrench_Gear := [others => 0.0];
-         else
-         if Id not in 0 .. M.S.Njnt - 1 then return; end if;
-         V := M.Joints.Jnt_Dofadr (Id); Q := M.Joints.Jnt_Qposadr (Id);
-         Kind := M.Joints.Jnt_Type (Id);
-         if V not in 0 .. D.Nv - 1 or else Q not in 0 .. D.Nq - 1 then return; end if;
-         D.Actuator_Config (A).Joint_Id := V;
-         D.Actuator_Config (A).Position_Id := Q;
-         D.Actuator_Config (A).Joint_Type := Kind;
-         D.Actuator_Config (A).Parent_Frame := M.Actuators.Actuator_Trntype (A) = 1;
+      if C.Body_Transmission then
+         if Id not in 0 .. Integer (Nb) - 1 then return; end if;
+         C.Joint_Id := 0;
+         C.Position_Id := 0;
+         C.Joint_Type := 3;
+         C.Wrench_Gear := [others => 0.0];
+      else
+         if Id not in Kinds'Range then return; end if;
+         V := Dofadr (Id); Q := Qposadr (Id); Kind := Kinds (Id);
+         if V not in 0 .. Integer (Nv) - 1 or else Q not in 0 .. Integer (Nq) - 1 then return; end if;
+         C.Joint_Id := V;
+         C.Position_Id := Q;
+         C.Joint_Type := Kind;
+         C.Parent_Frame := Transmission = 1;
          for K in 0 .. 5 loop
-            if M.Actuators.Actuator_Gear (6 * A + K) not in Tier0_Real then return; end if;
-            D.Actuator_Config (A).Wrench_Gear (K) := M.Actuators.Actuator_Gear (6 * A + K);
+            if Gear (6 * A + K) not in Tier0_Real then
+               pragma Assert (Static => not (for all J in 0 .. 5 => Gear (6 * A + J) in Tier0_Real));
+               return;
+            end if;
+            C.Wrench_Gear (K) := Gear (6 * A + K);
+            pragma Loop_Invariant (Static => (for all J in 0 .. K =>
+              C.Wrench_Gear (J) = Gear (6 * A + J)
+              and then Gear (6 * A + J) in Tier0_Real));
          end loop;
+      end if;
+      Ok := True;
+   end Remap_One_Actuator;
+
+   procedure Remap_Parameter_Array
+     (Config : in out Actuator_Parameter_Array; Nb, Nv, Nq : Natural;
+      Ids, Transmissions, Dofadr, Qposadr, Kinds : Int_Array; Gear : Real_Array;
+      Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => Config'First = 0 and then Config'Length <= Max_Actuators
+         and then Nb <= Max_Bodies and then Nv <= Max_Dofs and then Nq <= Max_Positions
+         and then Ids'First = 0 and then Int64 (Ids'Length) >= 2 * Int64 (Config'Length)
+         and then Transmissions'First = 0 and then Transmissions'Length = Config'Length
+         and then Kinds'First = 0 and then Dofadr'First = 0 and then Qposadr'First = 0
+         and then Dofadr'Length = Kinds'Length and then Qposadr'Length = Kinds'Length
+         and then Gear'First = 0 and then Int64 (Gear'Length) >= 6 * Int64 (Config'Length)
+         and then (for all K of Kinds => K in 0 .. 3)),
+       Post => (Static => Ok = (for all A in Config'Range =>
+           Remap_Input_Valid (Config'Old (A).Body_Transmission, Ids (2 * A), A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear))
+         and then (if Ok then (for all A in Config'Range =>
+           Config (A) = Remapped_Parameter (Config'Old (A), Ids (2 * A), Transmissions (A),
+             A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)))
+         and then (for all A in Config'Range =>
+           Config (A).Body_Transmission = Config'Old (A).Body_Transmission))
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Remap_Input_Valid);
+      Initial : constant Actuator_Parameter_Array := Config with Ghost => Static;
+   begin
+      for A in Config'Range loop
+         pragma Assert (Static => Config (A) = Initial (A));
+         pragma Assert (Static => Config (A).Body_Transmission = Initial (A).Body_Transmission);
+         Remap_One_Actuator (Config (A), Ids (2 * A), Transmissions (A), A,
+           Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear, Ok);
+         if not Ok then
+            pragma Assert (Static => not Remap_Input_Valid
+              (Initial (A).Body_Transmission, Ids (2 * A), A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear));
+            return;
          end if;
+         pragma Assert (Static => Remap_Input_Valid
+           (Initial (A).Body_Transmission, Ids (2 * A), A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear));
+         pragma Assert (Static => Config (A) = Remapped_Parameter
+           (Initial (A), Ids (2 * A), Transmissions (A), A, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear));
+         pragma Loop_Invariant (Static => (for all I in Config'Range =>
+           Config (I).Body_Transmission = Initial (I).Body_Transmission));
+         pragma Loop_Invariant (Static => (for all I in Config'First .. A =>
+           Remap_Input_Valid (Initial (I).Body_Transmission, Ids (2 * I), I,
+             Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)));
+         pragma Loop_Invariant (Static => (for all I in Config'Range =>
+           (if I <= A then Remap_Input_Valid
+              (Initial (I).Body_Transmission, Ids (2 * I), I, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)
+             and then Config (I) = Remapped_Parameter
+              (Initial (I), Ids (2 * I), Transmissions (I), I, Nb, Nv, Nq, Dofadr, Qposadr, Kinds, Gear)
+            else Config (I) = Initial (I))));
       end loop;
       Ok := True;
+   end Remap_Parameter_Array;
+
+   procedure Prove_Joint_Kinds (S : MJ.Models.Sizes; Fields : MJ.Models.Joint_Arrays)
+     with Ghost => Static, Global => null,
+       Pre => MJ.Models.Sizes_In_Range (S) and then S.Njnt <= Max_Dofs
+         and then MJ.Models.Joint_Layout_OK (S, Fields) and then Joint_Status (S, Fields) = Success,
+       Post => (for all J in 0 .. S.Njnt - 1 => Fields.Jnt_Type (J) in 0 .. 3)
+   is
+   begin
+      for J in 0 .. S.Njnt - 1 loop
+         pragma Assert (Static => Joint_Element (S, Fields, J) = Success);
+         pragma Assert (Static => Fields.Jnt_Type (J) in 0 .. 3);
+         pragma Loop_Invariant (Static => (for all I in 0 .. J => Fields.Jnt_Type (I) in 0 .. 3));
+      end loop;
+   end Prove_Joint_Kinds;
+
+   procedure Remap_Actuators
+     (M : MJ.Models.Model; Nv, Nq : Natural;
+      Config : in out Actuator_Parameter_Array; Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => Creation_Inputs (M)
+         and then Joint_Status (M.S, M.Joints) = Success
+         and then Nv <= Max_Dofs and then Nq <= Max_Positions
+         and then Config'First = 0 and then Int64 (Config'Length) = Int64 (M.S.Nactuator)),
+       Post => (Static => Ok = (for all A in Config'Range =>
+           Remap_Input_Valid (Config'Old (A).Body_Transmission, M.Actuators.Actuator_Trnid (2 * A), A,
+             M.S.Nbody, Nv, Nq, M.Joints.Jnt_Dofadr.all, M.Joints.Jnt_Qposadr.all,
+             M.Joints.Jnt_Type.all, M.Actuators.Actuator_Gear.all))
+         and then (if Ok then (for all A in Config'Range =>
+           Config (A) = Remapped_Parameter (Config'Old (A), M.Actuators.Actuator_Trnid (2 * A),
+             M.Actuators.Actuator_Trntype (A), A, M.S.Nbody, Nv, Nq,
+             M.Joints.Jnt_Dofadr.all, M.Joints.Jnt_Qposadr.all, M.Joints.Jnt_Type.all,
+             M.Actuators.Actuator_Gear.all))))
+   is
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Remap_Input_Valid);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", Remapped_Parameter);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Sizes_In_Range);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Geom_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Body_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Dof_Layout_OK);
+      pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
+   begin
+      Prove_Joint_Kinds (M.S, M.Joints);
+      Remap_Parameter_Array (Config, M.S.Nbody, Nv, Nq,
+        M.Actuators.Actuator_Trnid.all, M.Actuators.Actuator_Trntype.all,
+        M.Joints.Jnt_Dofadr.all, M.Joints.Jnt_Qposadr.all, M.Joints.Jnt_Type.all,
+        M.Actuators.Actuator_Gear.all, Ok);
    end Remap_Actuators;
 
    type Mocap_Seen_Array is array (Integer range <>) of Boolean;
@@ -1106,6 +1438,145 @@ package body MJ.Data with SPARK_Mode is
 
    end Mocap_Mapping_Valid;
 
+   procedure Prove_Actuator_Dynamics
+     (S : MJ.Models.Sizes; Fields : MJ.Models.Actuator_Arrays; I : Natural)
+     with Ghost => Static, Global => null,
+       Pre => MJ.Models.Sizes_In_Range (S)
+         and then MJ.Models.Actuator_Layout_OK (S, Fields)
+         and then I < S.Nactuator and then Actuator_Status (S, Fields) = Success,
+       Post => Fields.Actuator_Dyntype (I) in 0 .. 4
+   is
+   begin
+      pragma Assert (Static => Actuator_Element (S, Fields, I) = Success);
+      pragma Assert (Static => Fields.Actuator_Dyntype (I) in 0 .. 4);
+   end Prove_Actuator_Dynamics;
+
+   use type MJ.Muscle_Kernels.Length_Range;
+   use type MJ.Muscle_Actuation.Configuration;
+
+   --  Configure the owned element without borrowing its enclosing Simulation.
+   --  Error cleanup belongs to the caller, after this element borrow ends.
+   procedure Configure_Activation
+     (S : MJ.Models.Sizes; Fields : MJ.Models.Actuator_Arrays; I : Natural;
+      Nactivation : Natural; H : Nonneg_Tier0; Clamp_Control : Boolean;
+      C : in out Actuator_Parameters; Expected_Address : in out Natural;
+      Needs_Muscles, Ok : out Boolean)
+     with Global => null,
+       Pre => (Static => MJ.Models.Sizes_In_Range (S)
+         and then MJ.Models.Actuator_Layout_OK (S, Fields)
+         and then I < S.Nactuator and then I < S.Nout
+         and then Nactivation <= Max_Actuators
+         and then Fields.Actuator_Dyntype (I) in 0 .. 4),
+       Post => (Static =>
+         C = (C'Old with delta Kind => C.Kind, Muscle_Mode => C.Muscle_Mode,
+           Activation_Id => C.Activation_Id, Tau => C.Tau, Factor => C.Factor,
+           Early => C.Early, Activation_Limited => C.Activation_Limited,
+           Activation_Lower => C.Activation_Lower, Activation_Upper => C.Activation_Upper,
+           Muscle => C.Muscle)
+         and then (if Ok then
+           Expected_Address = Expected_Address'Old +
+             (if Fields.Actuator_Dyntype (I) = 0 then 0 else 1)
+           and then Needs_Muscles = (Fields.Actuator_Dyntype (I) = 4)
+           and then (if Fields.Actuator_Dyntype (I) = 0 then C = C'Old
+             else C.Activation_Id = Fields.Actuator_Actadr (I)
+               and then C.Kind = (if Fields.Actuator_Dyntype (I) = 4
+                 then MJ.Activation.Integrator
+                 else MJ.Activation.Dynamics'Val (Fields.Actuator_Dyntype (I)))
+               and then C.Muscle_Mode = Needs_Muscles
+               and then C.Tau = Real'Max (1.0e-15, Fields.Actuator_Dynprm (10 * I))
+               and then C.Early = (Fields.Actuator_Actearly (I) /= 0)
+               and then C.Activation_Limited = (Fields.Actuator_Actlimited (I) /= 0)
+               and then C.Activation_Lower = Fields.Actuator_Actrange (2 * I)
+               and then C.Activation_Upper = Fields.Actuator_Actrange (2 * I + 1)
+               and then (if C.Kind = MJ.Activation.Filter_Exact
+                 then C.Factor = MJ.Activation.Exact_Factor (H, C.Tau)
+                 else C.Factor = C.Factor'Old)
+               and then (if C.Activation_Limited then C.Activation_Lower <= C.Activation_Upper)
+               and then (if Needs_Muscles then
+                 (for all P in 0 .. 8 =>
+                   C.Muscle.Gain_Parameters (P) = Fields.Actuator_Gainprm (10 * I + P)
+                   and then C.Muscle.Bias_Parameters (P) = Fields.Actuator_Biasprm (10 * I + P))
+                 and then (for all P in 0 .. 2 =>
+                   C.Muscle.Dynamics (P) = Fields.Actuator_Dynprm (10 * I + P))
+                 and then (for all P in 0 .. 1 =>
+                   C.Muscle.Range_Of_Length (P) = Fields.Actuator_Lengthrange (2 * I + P))
+                 and then C.Muscle.Acc0 = Fields.Actuator_Acc0 (I)
+                 and then C.Muscle.Control_Limited = (C.Control_Limited and then Clamp_Control)
+                 and then C.Muscle.Control_Range = (C.Control_Lower, C.Control_Upper)
+                 and then C.Muscle.Activation_Limited = C.Activation_Limited
+                 and then C.Muscle.Activation_Range = (C.Activation_Lower, C.Activation_Upper)
+                 and then C.Muscle.Force_Limited = C.Force_Limited
+                 and then C.Muscle.Force_Range = (C.Force_Lower, C.Force_Upper)
+                 and then C.Muscle.Actearly = C.Early
+                 else C.Muscle = C.Muscle'Old))))
+   is
+      A : constant Integer := Fields.Actuator_Actadr (I);
+      K : constant Integer := Fields.Actuator_Dyntype (I);
+   begin
+      Ok := False;
+      Needs_Muscles := False;
+      if K /= 0 then
+         if A /= Expected_Address or else A not in 0 .. Integer (Nactivation) - 1
+           or else Fields.Actuator_Dynprm (10 * I) not in Tier0_Real
+           or else Fields.Actuator_Actrange (2 * I) not in Tier0_Real
+           or else Fields.Actuator_Actrange (2 * I + 1) not in Tier0_Real
+         then return; end if;
+         Expected_Address := Expected_Address + 1;
+         C.Kind := (if K = 4 then MJ.Activation.Integrator else MJ.Activation.Dynamics'Val (K));
+         C.Muscle_Mode := K = 4;
+         Needs_Muscles := C.Muscle_Mode;
+         C.Activation_Id := A;
+         C.Tau := Real'Max (1.0e-15, Fields.Actuator_Dynprm (10 * I));
+         if C.Kind = MJ.Activation.Filter_Exact then
+            C.Factor := MJ.Activation.Exact_Factor (H, C.Tau);
+         end if;
+         C.Early := Fields.Actuator_Actearly (I) /= 0;
+         C.Activation_Limited := Fields.Actuator_Actlimited (I) /= 0;
+         C.Activation_Lower := Fields.Actuator_Actrange (2 * I);
+         C.Activation_Upper := Fields.Actuator_Actrange (2 * I + 1);
+         if C.Activation_Limited and then C.Activation_Lower > C.Activation_Upper then
+            return;
+         end if;
+         if C.Muscle_Mode then
+            for P in 0 .. 8 loop
+               if Fields.Actuator_Gainprm (10 * I + P) not in Tier0_Real
+                 or else Fields.Actuator_Biasprm (10 * I + P) not in Tier0_Real
+               then return; end if;
+               C.Muscle.Gain_Parameters (P) := Fields.Actuator_Gainprm (10 * I + P);
+               C.Muscle.Bias_Parameters (P) := Fields.Actuator_Biasprm (10 * I + P);
+               pragma Loop_Invariant (Static => (for all J in 0 .. P =>
+                 C.Muscle.Gain_Parameters (J) = Fields.Actuator_Gainprm (10 * I + J)
+                 and then C.Muscle.Bias_Parameters (J) = Fields.Actuator_Biasprm (10 * I + J)));
+            end loop;
+            for P in 0 .. 2 loop
+               if Fields.Actuator_Dynprm (10 * I + P) not in Tier0_Real
+               then return; end if;
+               C.Muscle.Dynamics (P) := Fields.Actuator_Dynprm (10 * I + P);
+               pragma Loop_Invariant (Static => (for all J in 0 .. P =>
+                 C.Muscle.Dynamics (J) = Fields.Actuator_Dynprm (10 * I + J)));
+            end loop;
+            for P in 0 .. 1 loop
+               if Fields.Actuator_Lengthrange (2 * I + P) not in Tier0_Real
+               then return; end if;
+               C.Muscle.Range_Of_Length (P) := Fields.Actuator_Lengthrange (2 * I + P);
+               pragma Loop_Invariant (Static => (for all J in 0 .. P =>
+                 C.Muscle.Range_Of_Length (J) = Fields.Actuator_Lengthrange (2 * I + J)));
+            end loop;
+            if Fields.Actuator_Acc0 (I) not in Tier0_Real
+            then return; end if;
+            C.Muscle.Acc0 := Fields.Actuator_Acc0 (I);
+            C.Muscle.Control_Limited := C.Control_Limited and then Clamp_Control;
+            C.Muscle.Control_Range := (C.Control_Lower, C.Control_Upper);
+            C.Muscle.Activation_Limited := C.Activation_Limited;
+            C.Muscle.Activation_Range := (C.Activation_Lower, C.Activation_Upper);
+            C.Muscle.Force_Limited := C.Force_Limited;
+            C.Muscle.Force_Range := (C.Force_Lower, C.Force_Upper);
+            C.Muscle.Actearly := C.Early;
+         end if;
+      end if;
+      Ok := True;
+   end Configure_Activation;
+
    procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) with
      Global => null, Pre => Is_Empty (D) and then Creation_Inputs (M),
      Post => (if Result = Success then Is_Ready (D) and then At_Reset_State (D)
@@ -1127,6 +1598,8 @@ package body MJ.Data with SPARK_Mode is
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Dof_Layout_OK);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Actuator_Layout_OK);
       pragma Annotate (GNATprove, Hide_Info, "Expression_Function_Body", MJ.Models.Qpos_Layout_OK);
+      pragma Precondition (Static => Actuator_Status (M.S, M.Actuators) = Success
+        and then M.S.Na <= Max_Actuators and then Joint_Status (M.S, M.Joints) = Success);
       Normal : Boolean;
    begin
       Set_Dimensions (D, M.S);
@@ -1151,72 +1624,23 @@ package body MJ.Data with SPARK_Mode is
       D.Nactivation := M.S.Na;
       declare
          Expected_Address : Natural := 0;
+         Needs_Muscles : Boolean;
       begin
-      for I in 0 .. D.Na - 1 loop
-         declare
-            C : Actuator_Parameters renames D.Actuator_Config (I);
-            A : constant Integer := M.Actuators.Actuator_Actadr (I);
-            K : constant Integer := M.Actuators.Actuator_Dyntype (I);
-         begin
-            if K /= 0 then
-               if A /= Expected_Address or else A not in 0 .. Integer (D.Nactivation) - 1
-                 or else M.Actuators.Actuator_Dynprm (10 * I) not in Tier0_Real
-                 or else M.Actuators.Actuator_Actrange (2 * I) not in Tier0_Real
-                 or else M.Actuators.Actuator_Actrange (2 * I + 1) not in Tier0_Real
-               then Free (D); Result := Invalid_Model; return; end if;
-               Expected_Address := Expected_Address + 1;
-               C.Kind := (if K = 4 then MJ.Activation.Integrator else MJ.Activation.Dynamics'Val (K));
-               C.Muscle_Mode := K = 4;
-               D.Has_Muscles := D.Has_Muscles or else C.Muscle_Mode;
-               C.Activation_Id := A;
-               C.Tau := Real'Max (1.0e-15, M.Actuators.Actuator_Dynprm (10 * I));
-               if C.Kind = MJ.Activation.Filter_Exact then
-                  C.Factor := MJ.Activation.Exact_Factor (D.Timestep, C.Tau);
-               end if;
-               C.Early := M.Actuators.Actuator_Actearly (I) /= 0;
-               C.Activation_Limited := M.Actuators.Actuator_Actlimited (I) /= 0;
-               C.Activation_Lower := M.Actuators.Actuator_Actrange (2 * I);
-               C.Activation_Upper := M.Actuators.Actuator_Actrange (2 * I + 1);
-               if C.Activation_Limited and then C.Activation_Lower > C.Activation_Upper then
-                  Free (D); Result := Invalid_Model; return;
-               end if;
-               if C.Muscle_Mode then
-                  for P in 0 .. 8 loop
-                     if M.Actuators.Actuator_Gainprm (10 * I + P) not in Tier0_Real
-                       or else M.Actuators.Actuator_Biasprm (10 * I + P) not in Tier0_Real
-                     then Free (D); Result := Invalid_Model; return; end if;
-                     C.Muscle.Gain_Parameters (P) := M.Actuators.Actuator_Gainprm (10 * I + P);
-                     C.Muscle.Bias_Parameters (P) := M.Actuators.Actuator_Biasprm (10 * I + P);
-                  end loop;
-                  for P in 0 .. 2 loop
-                     if M.Actuators.Actuator_Dynprm (10 * I + P) not in Tier0_Real
-                     then Free (D); Result := Invalid_Model; return; end if;
-                     C.Muscle.Dynamics (P) := M.Actuators.Actuator_Dynprm (10 * I + P);
-                  end loop;
-                  for P in 0 .. 1 loop
-                     if M.Actuators.Actuator_Lengthrange (2 * I + P) not in Tier0_Real
-                     then Free (D); Result := Invalid_Model; return; end if;
-                     C.Muscle.Range_Of_Length (P) := M.Actuators.Actuator_Lengthrange (2 * I + P);
-                  end loop;
-                  if M.Actuators.Actuator_Acc0 (I) not in Tier0_Real
-                  then Free (D); Result := Invalid_Model; return; end if;
-                  C.Muscle.Acc0 := M.Actuators.Actuator_Acc0 (I);
-                  C.Muscle.Control_Limited := C.Control_Limited and then D.Clamp_Control;
-                  C.Muscle.Control_Range := (C.Control_Lower, C.Control_Upper);
-                  C.Muscle.Activation_Limited := C.Activation_Limited;
-                  C.Muscle.Activation_Range := (C.Activation_Lower, C.Activation_Upper);
-                  C.Muscle.Force_Limited := C.Force_Limited;
-                  C.Muscle.Force_Range := (C.Force_Lower, C.Force_Upper);
-                  C.Muscle.Actearly := C.Early;
-               end if;
-            end if;
-         end;
-      end loop;
-      if Expected_Address /= D.Nactivation then
-         Free (D); Result := Invalid_Model; return;
-      end if;
+         for I in 0 .. D.Na - 1 loop
+            pragma Loop_Invariant (Static => D.Na = M.S.Nactuator
+              and then Actuator_Status (M.S, M.Actuators) = Success);
+            Prove_Actuator_Dynamics (M.S, M.Actuators, I);
+            Configure_Activation (M.S, M.Actuators, I, D.Nactivation,
+              D.Timestep, D.Clamp_Control, D.Actuator_Config (I),
+              Expected_Address, Needs_Muscles, Normal);
+            if not Normal then Free (D); Result := Invalid_Model; return; end if;
+            D.Has_Muscles := D.Has_Muscles or else Needs_Muscles;
+         end loop;
+         if Expected_Address /= D.Nactivation then
+            Free (D); Result := Invalid_Model; return;
+         end if;
       end;
-      Remap_Actuators (M, D, Normal);
+      Remap_Actuators (M, D.Nv, D.Nq, D.Actuator_Config.all, Normal);
       if not Normal then Free (D); Result := Invalid_Model; return; end if;
       if M.S.Nq = M.S.Nv then Build_Topology (M, D, Normal);
       else Build_Manifold_Topology (M, D, Normal); end if;

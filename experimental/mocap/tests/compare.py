@@ -41,6 +41,60 @@ def fixtures():
             'actrange="-1 1"/></actuator></mujoco>')
 
 
+    muscle_model = (
+        '<mujoco><option timestep=".001" tolerance="1e-12">'
+        '<flag warmstart="disable" island="disable"/></option><worldbody>'
+        '<body mocap="true" pos=".2 .1 .5" quat=".7 .1 .2 .3">'
+        '<geom size=".02"/><body pos=".3 0 .2"><joint name="drive" '
+        'axis="0 1 0" damping=".1"/><geom type="capsule" size=".05 .15" '
+        'mass="1"/></body></body></worldbody><actuator>'
+        '<muscle joint="drive" lengthrange=".1 1.2" force="2"/>'
+        '</actuator></mujoco>')
+
+    yield 'actuated_muscle', muscle_model
+    # No-dynamics elements must not consume an activation address; all remaining
+    # modes then share a joint while retaining their own contiguous state slots.
+    yield 'actuated_mixed', muscle_model.replace(
+        '<muscle joint="drive" lengthrange=".1 1.2" force="2"/>',
+        ''.join('<general joint="drive" dyntype="' + kind +
+                '" dynprm=".04" gainprm="2"/>'
+                for kind in ['none', 'integrator', 'filter', 'filterexact']) +
+        '<muscle joint="drive" lengthrange=".1 1.2" force="2"/>')
+
+    yield 'mixed_dof_tree', (
+        '<mujoco><option timestep=".001" tolerance="1e-12">'
+        '<flag warmstart="disable" island="disable"/></option><worldbody>'
+        '<body pos="0 0 1"><joint type="free" damping=".03" armature=".02"/>'
+        '<geom type="box" size=".08 .09 .1" mass="1"/>'
+        '<body pos=".3 0 .2"><joint type="ball" damping=".02" armature=".03"/>'
+        '<geom type="box" size=".04 .05 .06" mass=".3"/></body>'
+        '<body pos="-.3 0 .2"><joint axis="0 1 0" damping=".01" armature=".04"/>'
+        '<geom type="capsule" size=".04 .1" mass=".4"/></body></body>'
+        '<body pos="1 0 1"><joint type="free" damping=".02" armature=".01"/>'
+        '<geom size=".08" mass=".7"/></body>'
+        '<body mocap="true" pos="3 0 1"><geom size=".02"/></body>'
+        '</worldbody></mujoco>')
+
+
+    yield 'actuated_ball_parent', (
+        '<mujoco><option timestep=".001" tolerance="1e-12">'
+        '<flag warmstart="disable" island="disable"/></option><worldbody>'
+        '<body mocap="true" pos=".2 .1 .5" quat=".7 .1 .2 .3">'
+        '<geom size=".02"/><body pos=".3 0 .2" quat=".8 .2 -.1 .3">'
+        '<joint name="drive" type="ball" damping=".02" armature=".03"/>'
+        '<geom type="box" size=".04 .05 .06" mass="1"/></body></body>'
+        '</worldbody><actuator><general jointinparent="drive" '
+        'gear=".8 -.4 .3 0 0 0" gainprm="2"/></actuator></mujoco>')
+    yield 'actuated_body', (
+        '<mujoco><option timestep=".001" tolerance="1e-12">'
+        '<flag warmstart="disable" island="disable"/></option><worldbody>'
+        '<body mocap="true" pos=".2 .1 .5" quat=".7 .1 .2 .3">'
+        '<geom size=".02"/><body name="driven_body" pos=".3 0 .2">'
+        '<joint axis="0 1 0" damping=".1"/><geom type="capsule" '
+        'size=".05 .15" mass="1"/></body></body></worldbody>'
+        '<actuator><general body="driven_body" gainprm="2"/></actuator></mujoco>')
+
+
 def oracle(m, q, v, activation, controls, applied, positions, quaternions, steps, constrained):
     d = mujoco.MjData(m)
     d.qpos[:] = q

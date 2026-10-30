@@ -51,3 +51,30 @@ matrices each pass1472 C comparisons;184 outputs equal baseline. Complete
 Reset/constructor proofs and invariant adoption remain open. The raw-reference
 projection now tolerates the legitimate joint-to-DOF metadata expansion.
 [Reset/frame proof and caller diagnostics](../alignment-3.17/evidence/20261030-reset-mocap-loop-and-state-frame-r2470/README.md).
+
+The activation-construction checkpoint adds muscle and mixed none/integrator/
+filter/filterexact/muscle fixtures. Its final candidate passes432 cases per
+reference/profile; all108 outputs equal baseline, with the same samples, steps
+and tolerances. Configure_Activation closes153 checks per reference and its
+validation projections close their separate scopes. Actual constructor cleanup
+now follows the end of the actuator borrow. Whole lifecycle proofs, the two
+Arms initialization findings and performance parity remain unfinished.
+[Activation and validation evidence](../alignment-3.17/evidence/20261030-activation-borrow-and-validation-proofs-r2545/README.md).
+
+The manifold initialization refactor closes the DOF preparation/cache/wrapper
+scopes with56/67/49 checks on both references. Both actual MJ.Data flow runs
+have no open messages; initialized armature use is separately proved. The added
+mixed_dof_tree exercises16 DOFs with nonzero armature and simple/general rows.
+Final source passes464 cases per reference/profile; all116 output files equal
+baseline, retaining16 samples,100 steps and2e-10 tolerances. Whole lifecycle
+proof and integrated performance parity remain open.
+[Manifold and armature initialization evidence](../alignment-3.17/evidence/20261030-manifold-topology-and-arms-initialization-r2588/README.md).
+
+The actuator-remapping checkpoint adds ball-parent-frame and body-transmission
+fixtures:528 cases pass per reference/profile, and132 outputs equal baseline.
+The body case checks a zero-contact path. Remapping's35/77/37-check scopes close
+on both references, with independent model/projection proofs. The interface
+modifies only actuator parameters; the remaining constructor diagnosis is the
+nonnull body-configuration precondition before topology construction. Full
+lifecycle proof and performance parity remain open.
+[Remapping proofs and caller-frame evidence](../alignment-3.17/evidence/20261030-actuator-remapping-and-caller-frame-r2649/README.md).

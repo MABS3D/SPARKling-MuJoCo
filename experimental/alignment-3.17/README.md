@@ -1426,3 +1426,74 @@ extra zeroing pass. An earlier filter generated0 proof checks and is retained
 as mis-scoped evidence. These are selected-line initialization results only;
 whole-builder runtime/functional proof and production adoption remain open.
 [Exact diagnostic scopes and stored source context](evidence/20261030-topology-initialization-diagnostics-r2477/README.md).
+
+## Activation borrow removed and validator contracts closed
+
+The actual constructor configures each actuator through an in-place helper,
+then handles cleanup after the element borrow ends. The helper preserves the
+original checks/copy order and avoids a whole-record copy. Fresh final scopes
+close153 checks per reference for its successful output/frame properties,10
+for supported-dynamics projection,3 for geometry-layout projection and13 for
+Model_Status. The last projection also closes the validator postcondition that
+remained open in the previous baseline. Added contracts and lemmas are Static;
+no runtime scan or new trusted body is introduced.
+
+The expanded suite adds muscle and mixed-mode fixtures, passing432 cases per
+reference/profile at16 samples,100 steps and unchanged2e-10 C tolerances.
+All108 final output files equal the earlier baseline byte-for-byte. Actual
+whole-unit flow no longer reports the actuator borrow, retaining only the two
+known Arms initialization messages. A selected constructor call closes8 checks
+under its intermediate facts; the broader activation-region proof reaches its
+240-second watchdog. Whole Initialize/Reset/state proof, private invariant
+adoption and integrated performance parity remain open. Existing warnings,
+failed contract placements, compiler failures and the stack retry are retained.
+[Exact sources, scoped proofs, baseline comparison and adoption receipts](evidence/20261030-activation-borrow-and-validation-proofs-r2545/README.md).
+
+## Proved manifold cache construction and Arms initialization
+
+The actual manifold path now uses a fused DOF preparation pass, a raw-array
+cache builder and a thin model/owned-state wrapper. Their complete scopes close
+56,67 and49 reported checks per reference, including exact metadata copies,
+success/rejection, frame properties and initialized armature reads. Mechanical
+comparison preserves the original traversals/check-copy order. Length-based
+internal shapes handle empty arrays without narrowing public inputs. No extra
+zeroing pass, runtime validation scan, assumption or trusted body is added.
+
+Both actual MJ.Data flow runs now have no open messages; this closes the prior
+Arms flow gap, with separate proofs of initialization in the producer and both
+consumers. Flow-only results do not establish whole-unit safety or Gold. The
+new16-DOF mixed tree has free/ball/hinge joints, general/simple DOFs and nonzero
+armatures. Final source passes464 cases per reference/profile with the same
+samples, steps and2e-10 tolerances; all116 outputs equal expanded baseline.
+
+Monolithic/hidden-predicate attempts and the earlier selected Initialize call
+retain their240-second watchdog results. Whole factory/Reset/state/dynamics
+proofs, private mocap invariant adoption, full features/ABI alignment and
+integrated C performance parity remain open. Existing warnings/deallocators
+are retained. No new performance measurement is claimed.
+[Exact source, six scoped proofs, both flow runs, failed attempts and native C comparisons](evidence/20261030-manifold-topology-and-arms-initialization-r2588/README.md).
+
+## Proved actuator remapping with an explicit caller-frame gap
+
+Remap_Actuators now receives only its owned actuator array and dimension values,
+so it cannot mutate the rest of Simulation through its interface. Complete
+final scopes close35 checks per reference for one element,77 for array
+composition and37 for the model adapter. The acceptance/record model definitions
+close9/14, and validated joint-kind projection and Model_Status each close14.
+These are scoped safety/functional properties under explicit inputs/callees,
+with existing warnings retained. Static models/lemmas are absent from native
+objects; no new record copy, input restriction or runtime scan is introduced.
+
+Parent-frame ball and body-transmission fixtures expand the suite to528 cases
+per reference/profile. Both baselines and final source pass; all132 final
+outputs equal baseline at the unchanged samples/steps/2e-10 tolerances. The body
+case has no active contact and does not validate contact-coupled body actuation.
+Both whole MJ.Data flow analyses have no open messages. The selected topology
+call in Initialize closes7 checks with Body_Config nonnull still open: body
+configuration preservation and activation-loop frames remain proof work.
+
+Failed shapes/prefix attempts,240-second watchdogs and the final600-second
+runs retain their actual outcomes. Complete constructors/Reset/state/dynamics,
+private mocap invariant, full feature/ABI alignment and integrated performance
+parity remain unfinished. No new timing claim is made.
+[Exact scopes, sources, native C cases, caller diagnosis and adoption receipts](evidence/20261030-actuator-remapping-and-caller-frame-r2649/README.md).
