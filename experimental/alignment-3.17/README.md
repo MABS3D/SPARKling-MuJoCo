@@ -1357,3 +1357,72 @@ configuration-frame preservation, while State_Values preservation and the full
 state lifecycle remain open. Failed variants and alternate norm attempts retain
 their actual outcomes. No new performance or complete-port claim follows.
 [Exact proofs, source snapshots, adopted Ghost module and cleanup receipts](evidence/20261028-tight-rotation-bounds-and-group-layout-r2198/README.md).
+
+## Mocap frames with nonzero actuator state
+
+The expanded mocap suite adds integrator/filter/filterexact models with nonzero
+activation, control and generalized applied force. All368 cases pass in each
+of eight frozen reference/profile/role runs (2944 total), and92 corresponding
+baseline/candidate output files are byte-identical. The existing fixtures,
+16 samples,100 steps and2e-10 C tolerances are retained. These are numerical
+checks, with no new timing or complete-port parity claim.
+
+The private setter state-frame prototype closes80 obligations with activation
+preservation open. Separate activation/input postcondition diagnostics each
+close3 checks under their intermediate cut assertions; they do not prove all
+setter checks. Full revised setters still hit600-second watchdogs. Existing
+Free/allocator/equality/query helper scopes and all failed attempts retain
+their precise results. The mocap invariant remains private and its complete
+constructor/reset/public-operation lifecycle is open.
+[Exact scoped proofs, diagnostic limits and baseline/candidate/C trajectories](evidence/20261028-mocap-frames-and-actuated-trajectories-r2253/README.md).
+
+## Proved mocap map and recovered state-proof work
+
+The actual private mapping validator now has an exact Boolean specification:
+valid ID range, uniqueness of nonnegative IDs and coverage of every slot. The
+complete validator closes45 checks per reference and its coverage lemma12 per
+reference. All added proof work is Static; fresh validation objects emit no
+Ghost helper/spec or prefix-proof scans. Constructor mapping still uses one
+seen-array pass and the existing final coverage check.
+
+Final actual source passes1472 new C comparisons (368 per reference/profile),
+with all92 output files identical to the adopted baseline. These checks retain
+16 samples,100-step trajectories and2e-10 tolerances. Code size is372 bytes
+versus382 for the prior validation mapping, with no timing claim.
+
+The private3.17 raw-reference proof chain now includes validity projection4,
+one-body projection6, owned-reference loop26 and caller wrapper10, with their
+separate callee scopes retained. Constructor/reset/state lifecycle integration
+and the mocap invariant remain unfinished. Interrupted I/O attempts, failed
+annotations, syntax errors and quantifier variants retain their actual status.
+[Exact sources, fresh proofs, recovered partial attempts, C provenance and final numerical/codegen evidence](evidence/20261030-mocap-mapping-gold-and-io-recovery-r2380/README.md).
+
+## Mocap reset loop and state-buffer frame
+
+The independent private reset-copy loop closes52 checks on each reference,
+including exact raw pose values and typed bounds under its explicit inputs.
+The actual Clear_State receives only Static value/nullity/index-range frame
+contracts and two Ghost queries: its original Pre/Post and four assignments
+are retained, with50 checks closed on both references. No runtime scan or
+field is introduced.
+
+Actual and private-lifecycle candidates each pass1472 fresh C comparisons;
+all184 output files equal baseline, with16 samples,100 steps and2e-10
+tolerances unchanged. Validation emits no Ghost state-image functions.
+Full Reset proofs still reach600-second watchdogs; the new helper call's
+seven checks close only in an explicitly limited diagnostic. Whole constructor
+flow reports an actuator borrow and Arms initialization gap, preserved as open.
+The private invariant is not adopted.
+
+A one-ball-joint/three-DOF fixture exposes why full Matches_Body becomes too
+strong after DOF expansion. Raw-reference proofs now require only the raw
+quaternion copy relation, closing28 and wrapper12 per reference. The broader
+postconditions remain unchanged.
+[Exact sources, successful scopes, failed attempts, caller/flow diagnostics and numerical evidence](evidence/20261030-reset-mocap-loop-and-state-frame-r2470/README.md).
+
+The separate3.17 Arms initialization diagnostic now proves loop-invariant
+initialization/preservation and the final Initialized assertion, without an
+extra zeroing pass. An earlier filter generated0 proof checks and is retained
+as mis-scoped evidence. These are selected-line initialization results only;
+whole-builder runtime/functional proof and production adoption remain open.
+[Exact diagnostic scopes and stored source context](evidence/20261030-topology-initialization-diagnostics-r2477/README.md).

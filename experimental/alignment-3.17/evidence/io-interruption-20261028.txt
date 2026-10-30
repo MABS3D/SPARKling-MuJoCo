@@ -1,0 +1,29 @@
+2026-10-28: local proof work interrupted by an environment I/O failure.
+
+The last confirmed successful new scopes were:
+- Prove_Raw_Mocap_Reference: 7 checks, both reference closures (r2267/r2269).
+- Prove_Raw_Mocap_References: 18 checks, 3.17 closure (r2287).
+- Mocap_Mapping_Valid: 45 checks, 3.17 closure (r2293).
+Warnings remain in the exact reports. No full setter/lifecycle proof is claimed.
+The complete setter attempt r2263 hit its 600-second watchdog.
+
+The 3.14 mapping proof r2301 and 3.14 raw-reference proof r2295 runners
+terminated with exit135 during source/result handling. Their results must be
+revalidated from saved files before acceptance; a terminal wrapper alone does
+not establish a successful proof. Repeated attempts to spawn /bin/true, bash
+and sh failed with "I/O error (os error 5)". No reset or cleanup was performed.
+
+Private source snapshots remain under /var/tmp/sparkling-...-20261028.
+r2297/r2298 prototype projection annotations used three incorrect qualified
+names (Bools_OK, Reals_In_Tier0, Refs_OK belong to MJ.Models.Gen_Clauses).
+The intended correction adds with MJ.Models.Gen_Clauses and qualifies those
+three annotation targets accordingly. The correction command failed to start;
+do not assume that r2305/r2306 trees or r2307/r2309 proofs were created.
+An attempt to save the corrected generator in /var/tmp also failed to create
+its parent directories. A copy could still be saved on the Windows volume as
+io-recovery-20261028.py beside this note. That generator has not been executed.
+
+No new mapping implementation or mocap invariant was adopted into production.
+Current turn r2261..r2304 work has not yet been packed into the exact evidence
+store. The preceding completed r2253 checkpoint was packed and fully verified:
+67 archives,448 inventory files. No additional commit or push was performed.

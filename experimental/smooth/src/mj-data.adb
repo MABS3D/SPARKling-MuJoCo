@@ -1022,20 +1022,88 @@ package body MJ.Data with SPARK_Mode is
       Ok := True;
    end Remap_Actuators;
 
+   type Mocap_Seen_Array is array (Integer range <>) of Boolean;
+
+   procedure Prove_Mocap_Coverage
+     (Config : Body_Parameter_Array; Seen : Mocap_Seen_Array; Count : Natural)
+     with Ghost => Static, Global => null,
+       Pre => Count <= Max_Bodies and then Seen'First = 0
+         and then Int64 (Seen'Length) = Int64 (Count)
+         and then (for all Present of Seen => Present)
+         and then (for all K in Seen'Range =>
+           Seen (K) = (for some J in Config'Range => Config (J).Mocap_Id = K)),
+       Post => (for all K in 0 .. Integer (Count) - 1 =>
+         (for some J in Config'Range => Config (J).Mocap_Id = K))
+   is
+   begin
+      for K in Seen'Range loop
+         pragma Assert (Static => Seen (K));
+         pragma Assert (Static =>
+           (for some J in Config'Range => Config (J).Mocap_Id = K));
+         pragma Loop_Invariant (Static =>
+           (for all H in Seen'First .. K =>
+             (for some J in Config'Range => Config (J).Mocap_Id = H)));
+      end loop;
+   end Prove_Mocap_Coverage;
+
    function Mocap_Mapping_Valid
      (Config : Body_Parameter_Array; Count : Natural) return Boolean
-     with Global => null, Pre => Count <= Max_Bodies
+     with Global => null, Pre => Count <= Max_Bodies,
+       Post => (Static => Mocap_Mapping_Valid'Result = Mocap_Mapping_Spec (Config, Count))
    is
-      Seen : array (0 .. Integer (Count) - 1) of Boolean := [others => False];
+      Seen : Mocap_Seen_Array (0 .. Integer (Count) - 1) := [others => False];
    begin
-      for C of Config loop
-         if C.Mocap_Id not in -1 .. Integer (Count) - 1 then return False; end if;
-         if C.Mocap_Id >= 0 then
-            if Seen (C.Mocap_Id) then return False; end if;
-            Seen (C.Mocap_Id) := True;
-         end if;
+      for I in Config'Range loop
+         declare
+            C : Body_Parameters renames Config (I);
+         begin
+            if C.Mocap_Id not in -1 .. Integer (Count) - 1 then
+               pragma Assert (Static => not Mocap_Mapping_Spec (Config, Count));
+               return False;
+            end if;
+            if C.Mocap_Id >= 0 then
+               if Seen (C.Mocap_Id) then
+                  pragma Assert (Static => (for some J in Config'First .. I - 1 =>
+                    Config (J).Mocap_Id = C.Mocap_Id));
+                  pragma Assert (Static => not Mocap_Mapping_Spec (Config, Count));
+                  return False;
+               end if;
+               Seen (C.Mocap_Id) := True;
+            end if;
+            pragma Loop_Invariant
+              (Static => (for all J in Config'First .. I =>
+                Config (J).Mocap_Id in -1 .. Integer (Count) - 1));
+            pragma Loop_Invariant
+              (Static => (for all A in Config'First .. I =>
+                (if Config (A).Mocap_Id >= 0 then
+                  (for all B in Config'First .. I =>
+                    (if Config (B).Mocap_Id = Config (A).Mocap_Id then A = B)))));
+            pragma Loop_Invariant
+              (Static => (for all K in Seen'Range =>
+                Seen (K) = (for some J in Config'First .. I => Config (J).Mocap_Id = K)));
+         end;
       end loop;
-      return (for all Present of Seen => Present);
+      pragma Assert (Static => (for all C of Config => C.Mocap_Id in -1 .. Integer (Count) - 1));
+      pragma Assert (Static => (for all A in Config'Range =>
+        (if Config (A).Mocap_Id >= 0 then (for all B in Config'Range =>
+          (if Config (B).Mocap_Id = Config (A).Mocap_Id then A = B)))));
+      pragma Assert (Static => (for all K in Seen'Range =>
+        Seen (K) = (for some J in Config'Range => Config (J).Mocap_Id = K)));
+      declare
+         Complete : constant Boolean := (for all Present of Seen => Present);
+      begin
+         if Complete then
+            Prove_Mocap_Coverage (Config, Seen, Count);
+            pragma Assert (Static => Mocap_Mapping_Spec (Config, Count));
+         else
+            pragma Assert (Static => (for some K in Seen'Range => not Seen (K)));
+            pragma Assert (Static => (for some K in Seen'Range =>
+              not (for some J in Config'Range => Config (J).Mocap_Id = K)));
+            pragma Assert (Static => not Mocap_Mapping_Spec (Config, Count));
+         end if;
+         return Complete;
+      end;
+
    end Mocap_Mapping_Valid;
 
    procedure Initialize (M : MJ.Models.Model; D : in out Simulation; Result : out Status) with
@@ -1342,6 +1410,13 @@ package body MJ.Data with SPARK_Mode is
       D.Drive := [others => 0.0];
    end Free;
 
+   function State_Mocap_Positions (S : State_Buffers) return Real_Array is
+     (if S.Mocap_Pos = null then [1 .. 0 => 0.0] else S.Mocap_Pos.all)
+     with Ghost => Static, Global => null;
+   function State_Mocap_Quaternions (S : State_Buffers) return Real_Array is
+     (if S.Mocap_Quat = null then [1 .. 0 => 0.0] else S.Mocap_Quat.all)
+     with Ghost => Static, Global => null;
+
    procedure Clear_State (S : in out State_Buffers) with
      Global => null, Pre => S.Qpos /= null and then S.Qvel /= null and then S.Ctrl /= null and then S.Applied /= null,
      Post => S.Qpos /= null and then S.Qpos'First = S.Qpos'First'Old
@@ -1355,7 +1430,16 @@ package body MJ.Data with SPARK_Mode is
        and then (for all X of S.Ctrl.all => X = 0.0)
        and then S.Applied /= null and then S.Applied'First = S.Applied'First'Old
        and then S.Applied'Last = S.Applied'Last'Old
-       and then (for all X of S.Applied.all => X = 0.0)
+       and then (for all X of S.Applied.all => X = 0.0);
+   pragma Postcondition (Static => (S.Mocap_Pos = null) = Boolean'(S.Mocap_Pos = null)'Old
+       and then (S.Mocap_Quat = null) = Boolean'(S.Mocap_Quat = null)'Old
+       and then State_Mocap_Positions (S) = State_Mocap_Positions (S)'Old
+       and then State_Mocap_Positions (S)'First = State_Mocap_Positions (S)'First'Old
+       and then State_Mocap_Positions (S)'Last = State_Mocap_Positions (S)'Last'Old
+       and then State_Mocap_Quaternions (S) = State_Mocap_Quaternions (S)'Old
+       and then State_Mocap_Quaternions (S)'First = State_Mocap_Quaternions (S)'First'Old
+       and then State_Mocap_Quaternions (S)'Last = State_Mocap_Quaternions (S)'Last'Old);
+   procedure Clear_State (S : in out State_Buffers)
    is
    begin
       S.Qpos.all := [others => 0.0]; S.Qvel.all := [others => 0.0];

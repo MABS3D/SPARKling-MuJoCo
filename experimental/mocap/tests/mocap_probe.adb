@@ -25,7 +25,7 @@ procedure Mocap_Probe is
    Constrained : constant Boolean := Ada.Command_Line.Argument (2) = "constrained";
    Load : MJ.Fields.Load_Result;
    Result : Status;
-   Nb, Nv, Nm, Nq : Natural;
+   Nb, Nv, Nm, Nq, Na, Nu : Natural;
    Samples, Steps : Integer;
    Benchmark : constant Boolean := Ada.Command_Line.Argument_Count > 2;
    procedure Check is
@@ -52,6 +52,7 @@ begin
    begin
       if Flags mod 2 = 0 then M.Opt.Disableflags := Flags + 1; end if;
       MJ.Data.Create (M, D, Result); Check;
+      Na := Activation_Count (D); Nu := Control_Count (D);
       declare
          Dynamics : Simulation;
          First_Mocap : Integer := -1;
@@ -92,32 +93,67 @@ begin
       declare
          Q : State_Vector (0 .. Integer (Nq) - 1);
          V : State_Vector (0 .. Integer (Nv) - 1);
+         A : State_Vector (4 .. Integer (Na) + 3);
+         Ctrl : State_Vector (7 .. Integer (Nu) + 6);
+         Applied : State_Vector (3 .. Integer (Nv) + 2);
          P : State_Vector (10 .. 12) := [others => 0.0];
          Quat : State_Vector (20 .. 23) := [1.0, 0.0, 0.0, 0.0];
       begin
-         Input (Q); Input (V);
+         Input (Q); Input (V); Input (A); Input (Ctrl); Input (Applied);
          Set_State (D, Q, V, 0.0, Result); Check;
          if Constrained then C.Set_State (E.all, Q, V, 0.0, Result); Check; end if;
+         Set_Activation (D, A, Result); Check;
+         if Constrained then C.Set_Activation (E.all, A, Result); Check; end if;
+         for I in 0 .. Integer (Nu) - 1 loop
+            Set_Control (D, I, Ctrl (Ctrl'First + I), Result); Check;
+            if Constrained then C.Set_Control (E.all, I, Ctrl (Ctrl'First + I), Result); Check; end if;
+         end loop;
+         for I in 0 .. Integer (Nv) - 1 loop
+            Set_Applied_Force (D, I, Applied (Applied'First + I), Result); Check;
+            if Constrained then C.Set_Applied_Force (E.all, I, Applied (Applied'First + I), Result); Check; end if;
+         end loop;
          for Id in 0 .. Integer (Nm) - 1 loop
             Input (P); Input (Quat);
-            Set_Mocap (D, Id, P, Quat, Result); Check;
-            if Constrained then C.Set_Mocap (E.all, Id, P, Quat, Result); Check; end if;
+            declare
+               Before_State : constant Real_Array := State_Values (D);
+               Before_Inputs : constant Real_Array := Input_Values (D);
+               Before_Activation : constant Real_Array := Activation_Values (D);
+               Before_Engine : constant Real_Array := (if Constrained then C.State (E.all) else []);
+               Before_Engine_Activation : constant Real_Array :=
+                 (if Constrained then C.Activation_Values (E.all) else []);
+            begin
+               Set_Mocap (D, Id, P, Quat, Result); Check;
+               if State_Values (D) /= Before_State or else Input_Values (D) /= Before_Inputs
+                 or else Activation_Values (D) /= Before_Activation
+               then raise Program_Error with "mocap state/input/activation frame"; end if;
+               if Constrained then
+                  C.Set_Mocap (E.all, Id, P, Quat, Result); Check;
+                  if C.State (E.all) /= Before_Engine
+                    or else C.Activation_Values (E.all) /= Before_Engine_Activation
+                  then raise Program_Error with "constrained mocap frame"; end if;
+               end if;
+            end;
          end loop;
          MJ.Data.Kinematics.Update (D, Result); Check;
          declare
             Before : constant Real_Array := Complete_State_Values (D);
+            Before_Inputs : constant Real_Array := Input_Values (D);
             Was_Current : constant Boolean := Positions_Current (D);
          begin
             Set_Mocap (D, Nm, P, Quat, Result);
             if Result /= Invalid_Index or else Complete_State_Values (D) /= Before
+              or else Input_Values (D) /= Before_Inputs
               or else Positions_Current (D) /= Was_Current then raise Program_Error with "index atomicity"; end if;
             if Nm > 0 then
                Set_Mocap (D, 0, P, State_Vector'(2 .. 4 => 0.0), Result);
                if Result /= Invalid_Size or else Complete_State_Values (D) /= Before
+                 or else Input_Values (D) /= Before_Inputs
                  or else Positions_Current (D) /= Was_Current then raise Program_Error with "size atomicity"; end if;
             end if;
          end;
          Values ("mocap", Mocap_Values (D));
+         Values ("inputs", Input_Values (D));
+         Values ("activation", Activation_Values (D));
          declare
             Poses : Real_Array (0 .. Integer (Nb) * 7 - 1);
          begin

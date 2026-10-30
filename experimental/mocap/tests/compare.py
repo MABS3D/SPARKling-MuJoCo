@@ -27,15 +27,32 @@ def fixtures():
         tendon = '<tendon><spatial stiffness="2" damping=".1" springlength=".2"><site site="a"/><site site="b"/></spatial></tendon>' if name == 'spatial_tendon' else ''
         yield name, '<mujoco><option timestep=".001" tolerance="1e-12"' + fluid + '><flag warmstart="disable" island="disable"/></option><worldbody>' + bodies + '</worldbody>' + tendon + '</mujoco>'
 
+    # Nonempty activation/control buffers make mocap frame preservation observable.
+    for dynamics in ['integrator', 'filter', 'filterexact']:
+        yield 'actuated_' + dynamics, (
+            '<mujoco><option timestep=".001" tolerance="1e-12">'
+            '<flag warmstart="disable" island="disable"/></option><worldbody>'
+            '<body mocap="true" pos=".2 .1 .5" quat=".7 .1 .2 .3">'
+            '<geom size=".02"/><body pos=".3 0 .2"><joint name="drive" '
+            'axis="0 1 0" damping=".1"/><geom type="capsule" size=".05 .15" '
+            'mass="1"/></body></body></worldbody><actuator><general joint="drive" '
+            'dyntype="' + dynamics + '" dynprm=".04" gainprm="2" '
+            'ctrllimited="true" ctrlrange="-1 1" actlimited="true" '
+            'actrange="-1 1"/></actuator></mujoco>')
 
-def oracle(m, q, v, positions, quaternions, steps, constrained):
+
+def oracle(m, q, v, activation, controls, applied, positions, quaternions, steps, constrained):
     d = mujoco.MjData(m)
     d.qpos[:] = q
     d.qvel[:] = v
+    d.act[:] = activation
+    d.ctrl[:] = controls
+    d.qfrc_applied[:] = applied
     d.mocap_pos[:] = positions
     d.mocap_quat[:] = quaternions
     mujoco.mj_forward(m, d)
     expected = dict(mocap=np.r_[positions.ravel(), quaternions.ravel()],
+                    activation=activation.copy(), inputs=np.r_[controls, applied],
                     poses=np.c_[d.xpos, d.xquat].ravel(), acc=d.qacc.copy(),
                     counts=np.array([d.ncon, d.nefc] if constrained else [0, 0]))
     for _ in range(steps):
@@ -84,12 +101,18 @@ def main():
                 if s and m.nv:
                     mujoco.mj_integratePos(m, q, rng.uniform(-1, 1, m.nv), .01)
                 v = rng.uniform(-.02, .02, m.nv)
+                activation = rng.uniform(-.4, .4, m.na)
+                controls = rng.uniform(-.6, .6, m.nu)
+                # Keep original fixtures unchanged; exercise all inputs together
+                # on the additional actuator fixtures.
+                applied = rng.uniform(-.1, .1, m.nv) if m.nu else np.zeros(m.nv)
                 pos, quat = poses(m, s, rng)
                 data.extend(q)
                 data.extend(v)
+                data.extend(activation); data.extend(controls); data.extend(applied)
                 for i in range(m.nmocap):
                     data.extend(pos[i]); data.extend(quat[i])
-                refs.append(oracle(m, q, v, pos, quat, a.steps, mode == 'constrained'))
+                refs.append(oracle(m, q, v, activation, controls, applied, pos, quat, a.steps, mode == 'constrained'))
             text = f'{a.samples} {a.steps}\n' + ' '.join(format(x, '.17g') for x in data) + '\n'
             r = subprocess.run([str(a.binary), str(file), mode], input=text, text=True, capture_output=True, timeout=180)
             (a.out / (name + '-' + mode + '.output')).write_text(r.stdout + r.stderr)

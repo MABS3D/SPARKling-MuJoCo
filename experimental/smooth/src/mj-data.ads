@@ -368,6 +368,16 @@ private
    end record;
    subtype Actuator_Parameters is MJ.Smooth_Actuation.Parameters;
    type Body_Parameter_Array is array (Natural range <>) of Body_Parameters;
+   function Mocap_Mapping_Spec (Config : Body_Parameter_Array; Count : Natural)
+     return Boolean is
+     ((for all C of Config => C.Mocap_Id in -1 .. Integer (Count) - 1)
+      and then (for all I in Config'Range =>
+        (if Config (I).Mocap_Id >= 0 then
+          (for all J in Config'Range =>
+            (if Config (J).Mocap_Id = Config (I).Mocap_Id then I = J))))
+      and then (for all K in 0 .. Integer (Count) - 1 =>
+        (for some I in Config'Range => Config (I).Mocap_Id = K)))
+     with Ghost => Static, Global => null, Pre => Count <= Max_Bodies;
    type Joint_Parameter_Array is array (Natural range <>) of Joint_Parameters;
    subtype Actuator_Parameter_Array is MJ.Smooth_Actuation.Parameter_Array;
    use type MJ.Spatial_Tendon_Models.Description_Access;
